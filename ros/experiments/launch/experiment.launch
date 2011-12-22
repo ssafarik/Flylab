@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find stage_action_server)/launch/stage_action_server.launch" />
-  <node pkg="plate_tf" type="PublishSystemState.py" name="PublishSystemState" />
+  <node pkg="track_image_contours" type="PublishSystemState.py" name="PublishSystemState" />
   <!-- <node name="ArenaStatePublisher" pkg="plate_tf" type="ArenaStatePublisher.py"/> -->
   <include file="$(find image_gui)/launch/DisplayDraw.launch" />
   <node pkg="save_data" type="SaveBag.py" name="SaveBag" />

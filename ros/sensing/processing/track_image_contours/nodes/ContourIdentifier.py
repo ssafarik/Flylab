@@ -8,13 +8,14 @@ import tf
 import numpy as N
 from track_image_contours.msg import *
 from plate_tf.srv import *
-from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion
+from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
+from std_msgs.msg import Header, ColorRGBA
+from visualization_msgs.msg import Marker
 from flystage.msg import *
 import copy
 import filters
-import stop_walk as sw
 from pythonmodules import CircleFunctions
-import MatchIdentities
+import MatchHungarian
 
 #class Contour:
 #    #None
@@ -383,10 +384,11 @@ class ContourIdentifier:
         self.posearrayFly = PoseArray()
         
         # Points
-        self.magnet_magnetframe = PointStamped()
-        self.magnet_magnetframe.header.frame_id = "Magnet"
-        self.magnet_magnetframe.point.x = 0
-        self.magnet_magnetframe.point.y = 0
+        self.endeffector_endeffectorframe = PointStamped()
+        self.endeffector_endeffectorframe.header.frame_id = "EndEffector"
+        self.endeffector_endeffectorframe.point.x = 0
+        self.endeffector_endeffectorframe.point.y = 0
+        self.endeffector_endeffectorframe.point.z = 0
         
         # Robot Info
         self.robot_min_ecc = 0.9 #rospy.get_param("robot_min_ecc", 0.5)
@@ -412,6 +414,26 @@ class ContourIdentifier:
         self.ySave = []
         self.iSave = 0
 
+        self.pubMarker = rospy.Publisher('visualization_marker', Marker)
+        self.markerArena = Marker(header=Header(stamp = rospy.Time.now(),
+                                                frame_id='Plate'),
+                                  ns='arena',
+                                  id=2,
+                                  type=3, #CYLINDER,
+                                  action=0,
+                                  pose=Pose(position=Point(x=0, 
+                                                           y=0, 
+                                                           z=0)),
+                                  scale=Vector3(x=self.radiusInBounds*2.0,
+                                                y=self.radiusInBounds*2.0,
+                                                z=0.01),
+                                  color=ColorRGBA(a=0.05,
+                                                  r=1.0,
+                                                  g=1.0,
+                                                  b=1.0),
+                                  lifetime=rospy.Duration(0.1))
+
+
         rospy.wait_for_service('camera_to_plate')
         try:
             self.camera_to_plate = rospy.ServiceProxy('camera_to_plate', PlateCameraConversion)
@@ -420,7 +442,7 @@ class ContourIdentifier:
 
         # Open a file for saving raw data.
         self.fidRobot = open("/home/ssafarik/robot.csv", 'w')
-        self.fidRobot.write("xmagnet, ymagnet, xfiltered, yfiltered, xcontour, ycontour\n")
+        self.fidRobot.write("xendeffector, yendeffector, xfiltered, yfiltered, xcontour, ycontour\n")
 
         self.fidFly = open("/home/ssafarik/fly.csv", 'w')
         self.fidFly.write("xraw, yraw, xfiltered, yfiltered\n")
@@ -707,7 +729,7 @@ class ContourIdentifier:
         #d = self.DistanceMatrix(xyObjects, xyContours, iPriorities)
         d = self.DistanceMatrixContours(xyObjects, self.contours, contoursMin, contoursMax)
         (mapFliesStableMarriage, mapContours) = self.GetStableMatching(d)
-        (mapFliesHungarian,unmapped) = MatchIdentities.MatchIdentities(d.transpose())
+        (mapFliesHungarian,unmapped) = MatchHungarian.MatchIdentities(d.transpose())
         #rospy.logwarn ('CI mapFliesStableMarriage=%s' % (mapFliesStableMarriage))
         #rospy.logwarn ('CI mapFliesHungarian=%s, unmapped=%s' % (mapFliesHungarian,unmapped))
 
@@ -836,6 +858,9 @@ class ContourIdentifier:
             ptOffset = self.objects[0].positionOffset
             self.pub_EndEffectorOffset.publish(ptOffset)
             
+            # Publish a disc to indicate the arena extent.
+            self.pubMarker.publish(self.markerArena)
+                    
 
 
 if __name__ == '__main__':

@@ -16,8 +16,6 @@
 
 #include "flystage/MsgFrameState.h"
 #include "flystage/MsgFrameState.h"
-#include "track_image_contours/Stopped.h"
-#include "track_image_contours/Stopped.h"
 
 namespace track_image_contours
 {
@@ -28,16 +26,12 @@ struct ArenaState_ {
   ArenaState_()
   : robot()
   , flies()
-  , robot_stopped()
-  , fly_stopped()
   {
   }
 
   ArenaState_(const ContainerAllocator& _alloc)
   : robot(_alloc)
   , flies(_alloc)
-  , robot_stopped(_alloc)
-  , fly_stopped(_alloc)
   {
   }
 
@@ -46,12 +40,6 @@ struct ArenaState_ {
 
   typedef std::vector< ::flystage::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flystage::MsgFrameState_<ContainerAllocator> >::other >  _flies_type;
   std::vector< ::flystage::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flystage::MsgFrameState_<ContainerAllocator> >::other >  flies;
-
-  typedef  ::track_image_contours::Stopped_<ContainerAllocator>  _robot_stopped_type;
-   ::track_image_contours::Stopped_<ContainerAllocator>  robot_stopped;
-
-  typedef  ::track_image_contours::Stopped_<ContainerAllocator>  _fly_stopped_type;
-   ::track_image_contours::Stopped_<ContainerAllocator>  fly_stopped;
 
 
   ROS_DEPRECATED uint32_t get_flies_size() const { return (uint32_t)flies.size(); }
@@ -66,7 +54,7 @@ public:
   ROS_DEPRECATED const std::string __getDataType() const { return __s_getDataType_(); }
 
 private:
-  static const char* __s_getMD5Sum_() { return "bd846af7c93b07705a6eca8d496d7107"; }
+  static const char* __s_getMD5Sum_() { return "9f7ee9ebaa8f8ddbe0d1e79f64216360"; }
 public:
   ROS_DEPRECATED static const std::string __s_getMD5Sum() { return __s_getMD5Sum_(); }
 
@@ -75,8 +63,7 @@ public:
 private:
   static const char* __s_getMessageDefinition_() { return "flystage/MsgFrameState robot\n\
 flystage/MsgFrameState[] flies\n\
-Stopped robot_stopped\n\
-Stopped fly_stopped\n\
+\n\
 \n\
 ================================================================================\n\
 MSG: flystage/MsgFrameState\n\
@@ -138,9 +125,6 @@ MSG: geometry_msgs/Vector3\n\
 float64 x\n\
 float64 y\n\
 float64 z\n\
-================================================================================\n\
-MSG: track_image_contours/Stopped\n\
-bool stopped\n\
 "; }
 public:
   ROS_DEPRECATED static const std::string __s_getMessageDefinition() { return __s_getMessageDefinition_(); }
@@ -152,8 +136,6 @@ public:
     ros::serialization::OStream stream(write_ptr, 1000000000);
     ros::serialization::serialize(stream, robot);
     ros::serialization::serialize(stream, flies);
-    ros::serialization::serialize(stream, robot_stopped);
-    ros::serialization::serialize(stream, fly_stopped);
     return stream.getData();
   }
 
@@ -162,8 +144,6 @@ public:
     ros::serialization::IStream stream(read_ptr, 1000000000);
     ros::serialization::deserialize(stream, robot);
     ros::serialization::deserialize(stream, flies);
-    ros::serialization::deserialize(stream, robot_stopped);
-    ros::serialization::deserialize(stream, fly_stopped);
     return stream.getData();
   }
 
@@ -172,8 +152,6 @@ public:
     uint32_t size = 0;
     size += ros::serialization::serializationLength(robot);
     size += ros::serialization::serializationLength(flies);
-    size += ros::serialization::serializationLength(robot_stopped);
-    size += ros::serialization::serializationLength(fly_stopped);
     return size;
   }
 
@@ -205,12 +183,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::track_image_contours::ArenaState_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "bd846af7c93b07705a6eca8d496d7107";
+    return "9f7ee9ebaa8f8ddbe0d1e79f64216360";
   }
 
   static const char* value(const  ::track_image_contours::ArenaState_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0xbd846af7c93b0770ULL;
-  static const uint64_t static_value2 = 0x5a6eca8d496d7107ULL;
+  static const uint64_t static_value1 = 0x9f7ee9ebaa8f8ddbULL;
+  static const uint64_t static_value2 = 0xe0d1e79f64216360ULL;
 };
 
 template<class ContainerAllocator>
@@ -229,8 +207,7 @@ struct Definition< ::track_image_contours::ArenaState_<ContainerAllocator> > {
   {
     return "flystage/MsgFrameState robot\n\
 flystage/MsgFrameState[] flies\n\
-Stopped robot_stopped\n\
-Stopped fly_stopped\n\
+\n\
 \n\
 ================================================================================\n\
 MSG: flystage/MsgFrameState\n\
@@ -292,9 +269,6 @@ MSG: geometry_msgs/Vector3\n\
 float64 x\n\
 float64 y\n\
 float64 z\n\
-================================================================================\n\
-MSG: track_image_contours/Stopped\n\
-bool stopped\n\
 ";
   }
 
@@ -315,8 +289,6 @@ template<class ContainerAllocator> struct Serializer< ::track_image_contours::Ar
   {
     stream.next(m.robot);
     stream.next(m.flies);
-    stream.next(m.robot_stopped);
-    stream.next(m.fly_stopped);
   }
 
   ROS_DECLARE_ALLINONE_SERIALIZER;
@@ -345,12 +317,6 @@ s << std::endl;
       s << indent;
       Printer< ::flystage::MsgFrameState_<ContainerAllocator> >::stream(s, indent + "    ", v.flies[i]);
     }
-    s << indent << "robot_stopped: ";
-s << std::endl;
-    Printer< ::track_image_contours::Stopped_<ContainerAllocator> >::stream(s, indent + "  ", v.robot_stopped);
-    s << indent << "fly_stopped: ";
-s << std::endl;
-    Printer< ::track_image_contours::Stopped_<ContainerAllocator> >::stream(s, indent + "  ", v.fly_stopped);
   }
 };
 

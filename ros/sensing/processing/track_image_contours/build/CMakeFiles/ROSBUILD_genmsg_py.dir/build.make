@@ -41,101 +41,12 @@ CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_imag
 
 CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 
-../src/track_image_contours/msg/__init__.py: ../src/track_image_contours/msg/_Stopped.py
 ../src/track_image_contours/msg/__init__.py: ../src/track_image_contours/msg/_ContourInfo.py
 ../src/track_image_contours/msg/__init__.py: ../src/track_image_contours/msg/_Contour.py
-../src/track_image_contours/msg/__init__.py: ../src/track_image_contours/msg/_ImagePose.py
 ../src/track_image_contours/msg/__init__.py: ../src/track_image_contours/msg/_ArenaState.py
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/track_image_contours/msg/__init__.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --initpy /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/Stopped.msg /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/ContourInfo.msg /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/Contour.msg /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/ImagePose.msg /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/ArenaState.msg
-
-../src/track_image_contours/msg/_Stopped.py: ../msg/Stopped.msg
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/ros/core/roslib/scripts/gendeps
-../src/track_image_contours/msg/_Stopped.py: ../manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/ros/tools/rospack/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/ros/core/roslib/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/ros/core/rosbuild/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/ros/core/roslang/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/utilities/cpp_common/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp_traits/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/utilities/rostime/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp_serialization/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/utilities/xmlrpcpp/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosconsole/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/ros/tools/rosclean/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosgraph/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosparam/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosmaster/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosout/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/roslaunch/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/ros/tools/rosunit/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rostest/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/topic_tools/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosbag/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosbagmigration/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/bullet/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/geometry/angles/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosnode/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosmsg/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rostopic/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/rosservice/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/pluginlib/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/image_common/image_transport/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/common_rosdeps/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/image_common/camera_calibration_parsers/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/image_common/camera_info_manager/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/diagnostics/diagnostic_updater/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/diagnostics/self_test/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/driver_common/driver_base/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/vision_opencv/image_geometry/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/bond_core/bond/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/bond_core/smclib/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/bond_core/bondcpp/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/srv_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/ros_comm/tools/topic_tools/srv_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/srv_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
-../src/track_image_contours/msg/_Stopped.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/build/CMakeFiles $(CMAKE_PROGRESS_2)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/track_image_contours/msg/_Stopped.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/Stopped.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --initpy /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/ContourInfo.msg /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/Contour.msg /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/ArenaState.msg
 
 ../src/track_image_contours/msg/_ContourInfo.py: ../msg/ContourInfo.msg
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -178,6 +89,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
+../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/common_msgs/visualization_msgs/manifest.xml
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/pluginlib/manifest.xml
@@ -198,8 +110,8 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
 ../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
-../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -210,6 +122,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
+../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/common_msgs/visualization_msgs/msg_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -217,11 +130,11 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
+../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
+../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
 ../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
-../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
-../src/track_image_contours/msg/_ContourInfo.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/build/CMakeFiles $(CMAKE_PROGRESS_3)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/track_image_contours/msg/_ContourInfo.py"
 	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/ContourInfo.msg
 
@@ -266,6 +179,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
+../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/common_msgs/visualization_msgs/manifest.xml
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/pluginlib/manifest.xml
@@ -286,8 +200,8 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
 ../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
-../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -298,6 +212,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
+../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/common_msgs/visualization_msgs/msg_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -305,116 +220,24 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
+../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
+../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
 ../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
-../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
-../src/track_image_contours/msg/_Contour.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/build/CMakeFiles $(CMAKE_PROGRESS_4)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/track_image_contours/msg/_Contour.py"
 	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/Contour.msg
-
-../src/track_image_contours/msg/_ImagePose.py: ../msg/ImagePose.msg
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/ros/core/roslib/scripts/gendeps
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg/Pose.msg
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg/Header.msg
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg/Quaternion.msg
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg/Point.msg
-../src/track_image_contours/msg/_ImagePose.py: ../manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/ros/tools/rospack/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/ros/core/roslib/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/ros/core/rosbuild/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/ros/core/roslang/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/utilities/cpp_common/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp_traits/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/utilities/rostime/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp_serialization/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/utilities/xmlrpcpp/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosconsole/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/ros/tools/rosclean/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosgraph/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosparam/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosmaster/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosout/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/roslaunch/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/ros/tools/rosunit/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rostest/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/topic_tools/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosbag/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosbagmigration/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/bullet/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/geometry/angles/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosnode/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosmsg/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rostopic/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/rosservice/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/pluginlib/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/image_common/image_transport/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_rosdeps/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/image_common/camera_calibration_parsers/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/image_common/camera_info_manager/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/diagnostics/diagnostic_updater/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/diagnostics/self_test/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/driver_common/driver_base/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/vision_opencv/image_geometry/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/bond_core/bond/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/bond_core/smclib/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/bond_core/bondcpp/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/srv_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/ros_comm/tools/topic_tools/srv_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/srv_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
-../src/track_image_contours/msg/_ImagePose.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/build/CMakeFiles $(CMAKE_PROGRESS_5)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/track_image_contours/msg/_ImagePose.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/ImagePose.msg
 
 ../src/track_image_contours/msg/_ArenaState.py: ../msg/ArenaState.msg
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/ros/core/roslib/scripts/gendeps
-../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg/Point.msg
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg/Quaternion.msg
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg/Twist.msg
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg/Header.msg
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg/Vector3.msg
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg/Pose.msg
 ../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg/MsgFrameState.msg
-../src/track_image_contours/msg/_ArenaState.py: ../msg/Stopped.msg
+../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/geometry_msgs/msg/Point.msg
 ../src/track_image_contours/msg/_ArenaState.py: ../manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/ros/tools/rospack/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/ros/core/roslib/manifest.xml
@@ -452,6 +275,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
+../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/visualization_msgs/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/pluginlib/manifest.xml
@@ -472,8 +296,8 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
-../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -484,6 +308,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
+../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/visualization_msgs/msg_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -491,20 +316,18 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
+../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
+../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
 ../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
-../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
-../src/track_image_contours/msg/_ArenaState.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/build/CMakeFiles $(CMAKE_PROGRESS_6)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/track_image_contours/msg/_ArenaState.py"
 	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg/ArenaState.msg
 
 ROSBUILD_genmsg_py: CMakeFiles/ROSBUILD_genmsg_py
 ROSBUILD_genmsg_py: ../src/track_image_contours/msg/__init__.py
-ROSBUILD_genmsg_py: ../src/track_image_contours/msg/_Stopped.py
 ROSBUILD_genmsg_py: ../src/track_image_contours/msg/_ContourInfo.py
 ROSBUILD_genmsg_py: ../src/track_image_contours/msg/_Contour.py
-ROSBUILD_genmsg_py: ../src/track_image_contours/msg/_ImagePose.py
 ROSBUILD_genmsg_py: ../src/track_image_contours/msg/_ArenaState.py
 ROSBUILD_genmsg_py: CMakeFiles/ROSBUILD_genmsg_py.dir/build.make
 .PHONY : ROSBUILD_genmsg_py

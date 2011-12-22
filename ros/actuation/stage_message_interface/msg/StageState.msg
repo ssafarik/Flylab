@@ -1,2 +1,0 @@
-bool bAllJointsInPosition
-bool bMoveInProgress

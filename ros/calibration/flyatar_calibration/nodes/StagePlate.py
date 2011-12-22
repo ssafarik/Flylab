@@ -221,10 +221,10 @@ class Calibration():
         
         if self.initialized_pose:
             try:
-                (trans,rot_quat) = self.tf_listener.lookupTransform('Stage', 'Magnet', rospy.Time(0))
-                magnet_stage_x = trans[0]
-                magnet_stage_y = trans[1]
-                magnet_stage_z = trans[2]
+                (trans,rot_quat) = self.tf_listener.lookupTransform('Stage', 'EndEffector', rospy.Time(0))
+                endeffector_stage_x = trans[0]
+                endeffector_stage_y = trans[1]
+                endeffector_stage_z = trans[2]
                 
                 if self.initialized_arrays:
                     image_point_num = self.image_point_array.shape[1]
@@ -248,7 +248,7 @@ class Calibration():
                 # cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                 #y = y+20
                 
-                display_text = "Magnet Pose with Respect to Stage = [%0.3f, %0.3f]" % (magnet_stage_x, magnet_stage_y)
+                display_text = "EndEffector Pose with Respect to Stage = [%0.3f, %0.3f]" % (endeffector_stage_x, endeffector_stage_y)
                 cv.PutText(self.im_display, display_text, (25,y), self.font, self.font_color)
                 y = y+20
                 
@@ -261,7 +261,7 @@ class Calibration():
                 
                 image_point_new = numpy.array([[self.poseRobot_rect.pose.position.x], [self.poseRobot_rect.pose.position.y]])
                 plate_point_new = numpy.array([[self.poseRobot_plate.pose.position.x], [self.poseRobot_plate.pose.position.y],[0]])
-                stage_point_new = numpy.array([[magnet_stage_x], [magnet_stage_y], [magnet_stage_z]])
+                stage_point_new = numpy.array([[endeffector_stage_x], [endeffector_stage_y], [endeffector_stage_z]])
                 # rospy.logwarn("plate_point_new = \n%s", str(plate_point_new))
                 # rospy.logwarn("stage_point_new = \n%s", str(stage_point_new))
                 

@@ -7,8 +7,8 @@ import numpy as N
 import smach
 import smach_ros
 import tf
-from geometry_msgs.msg import Pose, Point, Quaternion
 
+from geometry_msgs.msg import Pose, Point, Quaternion
 from stage_action_server.msg import *
 from flystage.msg import *
 from flystage.srv import *
@@ -22,7 +22,7 @@ def GetNearestFly (arenastate):
     iBest = None
     if len(arenastate.flies)>0:
         # Find the nearest fly.
-        rBest = 999.9
+        rBest = N.inf
         vFlyBest = None
         for iFly in range(len(arenastate.flies)):
             vRobot = N.array([arenastate.robot.pose.position.x, 
@@ -44,9 +44,7 @@ def GetNearestFly (arenastate):
 
 def GetOrientationRobot (arenastate):
     q = arenastate.robot.pose.orientation
-    #rospy.loginfo ('EL q=%s' % q)
     rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-    #rospy.loginfo ('EL rpy=%s' % str(rpy))
     angle = rpy[2] % (2.0 * N.pi)
         
     return angle
@@ -54,7 +52,6 @@ def GetOrientationRobot (arenastate):
 
 def GetOrientationFly (arenastate, iFly):
     angle = None
-    #rospy.loginfo ('EL GetAngle %s, %s, %s' % (len(arenastate.flies), iFly, len(arenastate.flies)-1 >= iFly))
     if len(arenastate.flies)-1 >= iFly:
         q = arenastate.flies[iFly].pose.orientation
         rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
@@ -65,7 +62,6 @@ def GetOrientationFly (arenastate, iFly):
 
 def GetAngleToRobotInFlyView (arenastate, iFly):
     angle = None
-    #rospy.loginfo ('EL GetAngle %s, %s, %s' % (len(arenastate.flies), iFly, len(arenastate.flies)-1 >= iFly))
     if len(arenastate.flies)-1 >= iFly:
         dx = arenastate.robot.pose.position.x - arenastate.flies[iFly].pose.position.x
         dy = arenastate.robot.pose.position.y - arenastate.flies[iFly].pose.position.y
@@ -76,21 +72,18 @@ def GetAngleToRobotInFlyView (arenastate, iFly):
         angleOfFly = rpy[2]
         angle = (angleToRobot - angleOfFly) % (2.0 * N.pi)
         
-        #rospy.logwarn('EL GetAngleToRobotInFlyView()=%s' % angle)
-        
+    rospy.logwarn('EL GetAngleToRobotInFlyView()=%s' % angle)
     return angle
 
 
 def GetSpeedFly (arenastate, iFly):
     speed = None
-    #rospy.loginfo ('EL GetAngle %s, %s, %s' % (len(arenastate.flies), iFly, len(arenastate.flies)-1 >= iFly))
     if len(arenastate.flies)-1 >= iFly:
         speed = N.linalg.norm(N.array([arenastate.flies[iFly].velocity.linear.x,
                                        arenastate.flies[iFly].velocity.linear.y,
                                        arenastate.flies[iFly].velocity.linear.z]))
         
-        #rospy.logwarn ('EL GetSpeedFly()=%s' % speed)
-        
+    rospy.logwarn ('EL GetSpeedFly()=%s' % speed)
     return speed
 
 
@@ -101,8 +94,7 @@ def GetDistanceFlyToRobot (arenastate, iFly):
         dy = arenastate.robot.pose.position.y - arenastate.flies[iFly].pose.position.y
         distance = N.linalg.norm([dx,dy])
         
-        #rospy.logwarn('EL GetDistanceFlyToRobot()=%s' % distance)
-        
+    rospy.logwarn('EL GetDistanceFlyToRobot()=%s' % distance)
     return distance
 
 
@@ -119,7 +111,7 @@ def ClipXyToRadius(x, y, rmax):
     return [xOut,yOut]
 
 
-def TriggerAttach():
+def TriggerServiceAttach():
     trigger = None
     stSrv = "trigger"
     rospy.wait_for_service(stSrv)
@@ -131,7 +123,7 @@ def TriggerAttach():
     return trigger
 
 
-def NewTrialAttach():
+def NewTrialServiceAttach():
     NewTrial = None    
     rospy.wait_for_service('new_trial')
     try:
@@ -155,7 +147,7 @@ class TemplateState (smach.State):
         self.rosrate = rospy.Rate(100)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback)
 
-        self.triggerNotify = TriggerAttach()
+        self.TriggerNotify = TriggerServiceAttach()
         
     
     def OnShutdown_callback(self):
@@ -172,7 +164,7 @@ class TemplateState (smach.State):
     
         while self.arenastate is None:
             if self.preempt_requested():
-                self.triggerNotify(False)
+                self.TriggerNotify(False)
                 return 'preempted'
             rospy.sleep(1.0)
 
@@ -202,9 +194,9 @@ class TemplateState (smach.State):
 
          # Send trigger status.
         if rv=='succeeded' and self.type=='entry':
-            self.triggerNotify(True)
+            self.TriggerNotify(True)
         else:
-            self.triggerNotify(False)
+            self.TriggerNotify(False)
 
         
                  
@@ -241,8 +233,8 @@ class NewTrial (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         #self.pub_experimentparams = rospy.Publisher('ExperimentParams', ExperimentParams)
-        self.TriggerNotify = TriggerAttach()
-        self.NewTrial = NewTrialAttach()
+        self.TriggerNotify = TriggerServiceAttach()
+        self.NewTrial = NewTrialServiceAttach()
 
         
     def execute(self, userdata):
@@ -284,7 +276,7 @@ class TriggerOnStates (smach.State):
         self.rosrate = rospy.Rate(100)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback)
 
-        self.triggerNotify = TriggerAttach()
+        self.TriggerNotify = TriggerServiceAttach()
     
     
     def OnShutdown_callback(self):
@@ -312,7 +304,7 @@ class TriggerOnStates (smach.State):
             
             while self.arenastate is None:
                 if self.preempt_requested():
-                    self.triggerNotify(False)
+                    self.TriggerNotify(False)
                     return 'preempted'
                 rospy.sleep(1.0)
     
@@ -421,9 +413,9 @@ class TriggerOnStates (smach.State):
                 self.rosrate.sleep()
 
         if rv=='succeeded' and self.type=='entry':
-            self.triggerNotify(True)
+            self.TriggerNotify(True)
         else:
-            self.triggerNotify(False)
+            self.TriggerNotify(False)
         
         #rospy.logwarn ('EL Exiting TriggerOnStates()')
         return rv
@@ -440,7 +432,7 @@ class TriggerOnTime (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
 
-        self.triggerNotify = TriggerAttach()
+        self.TriggerNotify = TriggerServiceAttach()
         
 
     def execute(self, userdata):
@@ -450,9 +442,9 @@ class TriggerOnTime (smach.State):
 
     
         if rv=='succeeded' and self.type=='entry':
-            self.triggerNotify(True)
+            self.TriggerNotify(True)
         else:
-            self.triggerNotify(False)
+            self.TriggerNotify(False)
 
         #rospy.logwarn ('EL Exiting TriggerOnTime()')
         return rv

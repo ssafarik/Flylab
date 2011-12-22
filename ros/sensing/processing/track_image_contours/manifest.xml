@@ -1,7 +1,7 @@
 <package>
   <description brief="track_image_contours">
 
-     track_image_points
+     track_image_contours
 
   </description>
   <author>Peter Polidoro, Steve Safarik</author>
@@ -14,6 +14,7 @@
   <depend package="std_msgs"/>
   <depend package="geometry_msgs"/>
   <depend package="sensor_msgs"/>
+  <depend package="visualization_msgs"/>
   <depend package="opencv2"/>
   <depend package="cv_bridge"/>
   <depend package="camera1394v2"/>

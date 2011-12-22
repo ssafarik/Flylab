@@ -4,10 +4,8 @@ FILE(REMOVE_RECURSE
   "../msg_gen"
   "CMakeFiles/ROSBUILD_genmsg_py"
   "../src/track_image_contours/msg/__init__.py"
-  "../src/track_image_contours/msg/_Stopped.py"
   "../src/track_image_contours/msg/_ContourInfo.py"
   "../src/track_image_contours/msg/_Contour.py"
-  "../src/track_image_contours/msg/_ImagePose.py"
   "../src/track_image_contours/msg/_ArenaState.py"
 )
 

@@ -3,10 +3,8 @@ FILE(REMOVE_RECURSE
   "../src/track_image_contours/msg"
   "../msg_gen"
   "CMakeFiles/ROSBUILD_genmsg_cpp"
-  "../msg_gen/cpp/include/track_image_contours/Stopped.h"
   "../msg_gen/cpp/include/track_image_contours/ContourInfo.h"
   "../msg_gen/cpp/include/track_image_contours/Contour.h"
-  "../msg_gen/cpp/include/track_image_contours/ImagePose.h"
   "../msg_gen/cpp/include/track_image_contours/ArenaState.h"
 )
 
