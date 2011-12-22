@@ -1,0 +1,40 @@
+FILE(REMOVE_RECURSE
+  "../msg_gen"
+  "../src/stage_action_server/msg"
+  "../msg_gen"
+  "CMakeFiles/ROSBUILD_genmsg_py"
+  "../src/stage_action_server/msg/__init__.py"
+  "../src/stage_action_server/msg/_ActionStageStateAction.py"
+  "../src/stage_action_server/msg/_ActionStageStateGoal.py"
+  "../src/stage_action_server/msg/_ActionStageStateActionGoal.py"
+  "../src/stage_action_server/msg/_ActionStageStateResult.py"
+  "../src/stage_action_server/msg/_ActionStageStateActionResult.py"
+  "../src/stage_action_server/msg/_ActionStageStateFeedback.py"
+  "../src/stage_action_server/msg/_ActionStageStateActionFeedback.py"
+  "../src/stage_action_server/msg/_UpdateStagePositionAction.py"
+  "../src/stage_action_server/msg/_UpdateStagePositionGoal.py"
+  "../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py"
+  "../src/stage_action_server/msg/_UpdateStagePositionResult.py"
+  "../src/stage_action_server/msg/_UpdateStagePositionActionResult.py"
+  "../src/stage_action_server/msg/_UpdateStagePositionFeedback.py"
+  "../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py"
+  "../msg/ActionStageStateAction.msg"
+  "../msg/ActionStageStateGoal.msg"
+  "../msg/ActionStageStateActionGoal.msg"
+  "../msg/ActionStageStateResult.msg"
+  "../msg/ActionStageStateActionResult.msg"
+  "../msg/ActionStageStateFeedback.msg"
+  "../msg/ActionStageStateActionFeedback.msg"
+  "../msg/UpdateStagePositionAction.msg"
+  "../msg/UpdateStagePositionGoal.msg"
+  "../msg/UpdateStagePositionActionGoal.msg"
+  "../msg/UpdateStagePositionResult.msg"
+  "../msg/UpdateStagePositionActionResult.msg"
+  "../msg/UpdateStagePositionFeedback.msg"
+  "../msg/UpdateStagePositionActionFeedback.msg"
+)
+
+# Per-language clean rules from dependency scanning.
+FOREACH(lang)
+  INCLUDE(CMakeFiles/ROSBUILD_genmsg_py.dir/cmake_clean_${lang}.cmake OPTIONAL)
+ENDFOREACH(lang)

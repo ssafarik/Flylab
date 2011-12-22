@@ -1,0 +1,318 @@
+#!/usr/bin/env python
+
+"""
+usage: rosinstall [OPTIONS] INSTALL_PATH [URI]
+
+Options:
+-u or --update (URI is optional only when using --update on an existing install)
+-s SETUP_FILE or --setup=SETUP_FILE (use another setup.sh file to create env)
+-o or --overlay (push current environment into setup.sh)
+-n or --nobuild (don't perform a 'make core_cools' on the ros stack)
+
+Common invocations:
+
+initial checkout:   rosinstall ~/ros http://ros.org/rosconfigs/all.rosconfig
+subsequent update:  rosinstall -u ~/ros
+
+"""
+
+from __future__ import with_statement
+
+import os
+import subprocess
+import sys
+import xml.dom.minidom #import parse
+import yaml
+from urlparse import urlparse
+import urllib, urllib2
+from optparse import OptionParser
+
+def usage():
+  print __doc__ % vars()
+  exit(1)
+
+class ROSInstallException(Exception): pass
+
+def conditional_abspath(uri):
+  """
+  @param uri: The uri to check
+  @return: abspath(uri) if local path otherwise pass through uri
+  """
+  u = urlparse(uri)
+  if u.scheme == '': # maybe it's a local file?
+    return os.path.abspath(uri)
+  else:
+    return uri
+
+def is_path_stack(path):
+  """
+
+  @return: True if the path provided is the root of a stack.
+  """
+  stack_path = os.path.join(path,'stack.xml')
+  if os.path.isfile(stack_path):
+    return True
+  return False
+
+def is_path_ros(path):
+  """
+  warning: exits with code 1 if stack document is invalid
+  @param path: path of directory to check
+  @type  path: str
+  @return: True if path points to the ROS stack
+  @rtype: bool
+  """
+  stack_path = os.path.join(path,'stack.xml')
+  if os.path.isfile(stack_path):
+    return 'ros' == os.path.basename(path)
+  return False
+
+
+class Config:
+  def __init__(self, y, install_path):
+    self.source = y
+    self.trees = [ ]
+    self.base_path = install_path
+    for t in y:
+      for k, v in t.iteritems():
+        try:
+          local_name = v['local-name']
+        except KeyError:
+          print >> sys.stderr, "local-name is required on all code trees"
+          exit(1)
+        if k == 'svn':
+          if not 'uri' in v:
+            print >> sys.stderr, "woah! no uri for svn tree %s" % local_name
+            exit(1)
+          tree = { }
+          tree['name'] = local_name
+          tree['version'] = ver = v.get('version', None)
+          vsw = '' # vsw = version switch
+          if ver and ver == 'r' and ver[1:].isdigit():
+            vsw = '-r ' + ver[1:]
+          tree['uri'] = svn_uri = v['uri']
+          co_path = os.path.join(install_path, local_name)
+          if not os.path.isdir(co_path):
+            tree['cmd'] = "svn co %s %s %s"%(vsw, svn_uri, co_path)
+          else:
+            tree['cmd'] = "svn up %s %s"%(vsw, co_path)
+          self.trees.append(tree)
+        elif k == 'git':
+          if not 'uri' in v:
+            print >> sys.stderr, "woah! no uri for git tree %s" % local_name
+            exit(1)
+          tree = { }
+          tree['name'] = local_name
+          #tree['version'] = ver = v.get('version', None)
+          #vsw = '' # vsw = version switch
+          #if ver and ver == 'r' and ver[1:].isdigit():
+          #  vsw = '-r ' + ver[1:]
+          tree['uri'] = git_uri = v['uri']
+          co_path = os.path.join(install_path, local_name)
+          if not os.path.isdir(co_path):
+            if not os.path.isdir(git_uri):
+              tree['cmd'] = "git clone %s %s"%(git_uri, co_path)
+            else:
+              tree['cmd'] = "git clone -vl --no-hardlinks %s %s"%(git_uri, co_path)
+          else:
+            tree['cmd'] = "cd %s && git pull"%(co_path)
+          self.trees.append(tree)
+        elif k == 'bzr':
+          if not 'uri' in v:
+            print >> sys.stderr, "woah! no uri for bzr tree %s" % local_name
+            exit(1)
+          tree = { }
+          tree['name'] = local_name
+          #tree['version'] = ver = v.get('version', None)
+          #vsw = '' # vsw = version switch
+          #if ver and ver == 'r' and ver[1:].isdigit():
+          #  vsw = '-r ' + ver[1:]
+          tree['uri'] = bzr_uri = v['uri']
+          co_path = os.path.join(install_path, local_name)
+          if not os.path.isdir(co_path):
+            tree['cmd'] = "bzr checkout %s %s"%(bzr_uri, co_path)
+          else:
+            tree['cmd'] = "cd %s && bzr up"%(co_path)
+          self.trees.append(tree)
+        else:
+          raise Exception("woah, unknown installation method %s" % k)
+  def ros_path(self):
+    for t in self.trees:
+      if t['name'] == 'ros':
+        return os.path.join(self.base_path, t['name'])
+    return None
+
+  def write_source(self):
+    """
+    Write this.rosinstall into the root of the checkout
+    """
+    f = open(os.path.join(self.base_path, "this.rosinstall"), "w+b")
+    f.write(yaml.safe_dump(self.source))
+    f.close()
+
+  def install_yaml(self):
+    if not os.path.exists(self.base_path):
+      os.mkdir(self.base_path)
+    for t in self.trees:
+      try:
+        print "rosinstall is updating %s" % t['name']
+        subprocess.check_call(t['cmd'], shell=True)
+        print ""
+      except:
+        raise ROSInstallException("Failed to install tree '%s' using command:\n\t%s\nPerhaps there is another installation in the way, or there are permissions issues."%(t['name'], t['cmd']))
+
+    # TODO go back and make sure that everything in options.path is described
+    # in the yaml, and offer to delete otherwise? not sure, but it could go here
+
+
+def generate_setup(options, config):
+  # simplest case first
+  setup_path = os.path.join(options.path, 'setup.sh')
+  f = open(setup_path, 'w')
+  ros_root = config.ros_path()
+  code_trees = []
+  for t in config.trees:
+    if t['name'] != 'ros':
+      # take only the first element of the local_name so that we just point to the subdir
+      if t['name'].startswith(os.sep):
+        code_trees.append(os.path.join(options.path, os.sep + t['name'].split(os.sep)[1]))
+      else:
+        code_trees.append(os.path.join(options.path, t['name'].split(os.sep)[0]))
+  rpp = ':'.join(set(code_trees))
+  if options.setup_file:
+    if ros_root:
+      print >> sys.stderr, "woah. you gave a setup file %s, but your config %s also includes a ROS stack" % (options.setup_file, options.config_uri)
+      exit(1)
+    # source the file and see if we can grep it, to handle chaining / whatever
+    options.fresh_install = False
+    ros_root = subprocess.Popen("source %s && env | grep ROS_ROOT" % options.setup_file, stdout=subprocess.PIPE, shell=True, executable="/bin/bash").communicate()[0].split('=')[-1] # oh yeah
+    if len(ros_root) == 0:
+      print >> sys.stderr, "woah. you gave a setup file %s, but that file did not set ROS_ROOT" % options.setup_file
+      exit(1)
+    f.write("source %s\n" % options.setup_file)
+    f.write("export ROS_PACKAGE_PATH=%s:$ROS_PACKAGE_PATH\n" % rpp)
+  elif options.overlay:
+    if ros_root:
+      print >> sys.stderr, "woah. you asked to overlay %s (which contains ROS) on your environment, but your environment already defines ROS_ROOT" % (config.config_uri)
+      exit(1)
+    if not 'ROS_ROOT' in os.environ:
+      print >> sys.stderr, "woah. you asked to overlay %s on your environment, but your environment doesn't have ROS_ROOT set." % (config.config_uri)
+      exit(1)
+    ros_root = os.environ['ROS_ROOT']
+    existing_rpp = subprocess.Popen("env | grep ROS_PACKAGE_PATH", stdout=subprocess.PIPE, shell=True, executable="/bin/bash").communicate()[0].split('=')[-1]
+    if len(existing_rpp) > 0:
+      rpp = rpp + ':' + existing_rpp
+  if not options.setup_file: # it's a vanilla install or an overlay
+    f.write("export ROS_ROOT=%s\n" % ros_root)
+    f.write("export PATH=$ROS_ROOT/bin:$PATH\n") # might include it twice
+    f.write("export PYTHONPATH=$ROS_ROOT/core/roslib/src:$PYTHONPATH\n")
+    f.write("if [ ! \"$ROS_MASTER_URI\" ] ; then export ROS_MASTER_URI=http://localhost:11311 ; fi\n")
+    f.write("export ROS_PACKAGE_PATH=%s\n" % rpp)
+    f.write("source $ROS_ROOT/tools/rosbash/rosbash\n")
+
+
+
+
+def installed_uri(path):
+  try:
+    f = open(os.path.join(path, '.rosinstall_source_uri'),'r')
+  except IOError, e:
+    pass
+    return None
+  return conditional_abspath(f.readline())  # abspath here for backwards compatability with change to abspath in breadcrumb
+
+def rosinstall_main(argv):
+  if len(argv) < 2:
+    usage()
+  args = argv[1:]
+  parser = OptionParser()
+  parser.add_option("-u", "--update", dest="update", default=False,
+                    help="update an existing installation (URI not needed)",
+                    action="store_true")
+  parser.add_option("-s", "--setup_file", dest="setup_file",
+                    metavar="SETUP_FILE",
+                    help="create environment using an existing setup file")
+  parser.add_option("-o", "--overlay", dest="overlay", default=False,
+                    help="use current environment to build setup file",
+                    action="store_true")
+  parser.add_option("-n", "--nobuild", dest="nobuild", default=False,
+                    help="skip the build step for the ROS stack",
+                    action="store_true")
+  parser.add_option("--rosdep-yes", dest="rosdep_yes", default=False,
+                    help="Pass through --rosdep-yes to rosmake",
+                    action="store_true")
+  (options, args) = parser.parse_args(args)
+  # check for illegal combinations
+  if options.overlay and options.setup_file:
+    print "\ncan't init from both an overlay and setup file\n\n"
+    exit(1)
+  if options.update and (options.setup_file or options.overlay):
+    print "\ncan't do an update along with init via overlay/setup file\n\n"
+    exit(1)
+  if len(args) == 0 or (len(args) == 1 and not options.update):
+    print "\nneed to specify a URI, unless you're doing an update.\n\n"
+    exit(1)
+  options.path = os.path.abspath(args[0])
+  if len(args) > 1:
+    options.config_uri = conditional_abspath(args[1])
+    if options.update and installed_uri(options.path) != args[1]:
+      print >> sys.stderr, "%s is not what was saved in %s/.rosinstall_source_uri   (%s). please make them agree." % (args[1], options.path, installed_uri(options.path))
+      exit(1)
+  else:
+    # try to read the source uri from the breadcrumb mmmm delicious
+    options.config_uri = installed_uri(options.path)
+    if not options.config_uri or len(options.config_uri) == 0:
+      print "update is not possible, since %s was empty or non-existent" % os.path.join(options.path, '.rosinstall_source_uri')
+  # now that we've got a config uri and a path, let's move out.
+  u = urlparse(options.config_uri)
+  f = 0
+  if u.scheme == '': # maybe it's a local file?
+    try:
+      f = open(options.config_uri, 'r')
+    except IOError, e:
+      print >> sys.stderr, "ahhhh error opening file: %s" % e
+  else:
+    try:
+      f = urllib2.urlopen(options.config_uri)
+    except IOError, e:
+      print >> sys.stderr, "ahhhhh got an error from the interwebs: %s" % e
+  if not f:
+    print >> sys.stderr, "couldn't load config uri %s" % options.config_uri
+    exit(1)
+  try:
+    y = yaml.load(f);
+  except yaml.YAMLError, e:
+    print >> sys.stderr, "ahhhhhhhh, yaml parse error: %s" % e # long ahh
+    exit(1)
+  # check for breadcrumb
+  breadcrumb_path = os.path.join(options.path, '.rosinstall_source_uri')
+  if os.path.exists(breadcrumb_path):
+    options.fresh_install = False
+  else:
+    # #2411
+    if not os.path.exists(options.path):
+      os.makedirs(options.path)
+    with open(os.path.join(options.path, '.rosinstall_source_uri'),'w') as breadcrumb:
+      breadcrumb.write(options.config_uri)
+    options.fresh_install = True
+  config = Config(y, options.path)
+  config.write_source()
+  config.install_yaml()
+  if options.fresh_install:
+    generate_setup(options, config)
+    if not (options.overlay or options.setup_file or options.nobuild):
+      if options.rosdep_yes:
+        subprocess.check_call("source %s && rosmake rostest --rosdep-install --rosdep-yes" % (os.path.join(options.path, 'setup.sh')), shell=True, executable='/bin/bash')
+      else:
+        subprocess.check_call("source %s && rosmake rostest --rosdep-install" % (os.path.join(options.path, 'setup.sh')), shell=True, executable='/bin/bash')
+    print "\ndone. Now, type 'source %s/setup.sh' to set up your environment.\nAdd that to the bottom of your ~/.bashrc to set it up every time.\n\n" % options.path
+  else:
+    print "\ndone.\n"
+
+if __name__ == "__main__":
+  try:
+    sys.exit(rosinstall_main(sys.argv) or 0)
+  except ROSInstallException, e:
+    print >> sys.stderr, "ERROR: %s"%str(e)
+    sys.exit(1)
+

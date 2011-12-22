@@ -1,0 +1,11 @@
+<launch>
+  <include file="$(find camera_firewire)/launch/camera_firewire.launch" />
+  <!-- <include file="$(find track_image_contours)/launch/track_image_contours.launch" /> -->
+  <!-- <include file="$(find plate_tf)/launch/plate_tf.launch" /> -->
+  <param name="save_image_format" type="string" value="flv"/>
+  <node pkg="save_data" type="SaveImages.py" name="SaveImages" />
+
+  <!-- <param name="diff_threshold" type="double" value="65"/> -->
+  <!-- <param name="contour_count_max" type="double" value="2"/> -->
+  <!-- <param name="image_processor_display_images" type="boolean" value="false"/> -->
+</launch>

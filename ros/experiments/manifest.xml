@@ -1,0 +1,23 @@
+<package>
+  <description brief="experiments">
+
+     experiments
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/experiments</url>
+  <depend package="rospy"/>
+  <depend package="smach"/>
+  <depend package="smach_ros"/>
+  <depend package="stage_action_server"/>
+  <depend package="flystage"/>
+  <depend package="image_gui"/>
+  <depend package="plate_tf"/>
+  <depend package="actionlib"/>
+  <depend package="geometry_msgs"/>
+ 
+</package>
+
+

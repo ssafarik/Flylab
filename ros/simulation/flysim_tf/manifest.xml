@@ -1,0 +1,19 @@
+<package>
+  <description brief="flysim_tf">
+
+     flysim_tf demonstrates how to write a tf broadcaster and listener with the flysim. The tutle_tf_listener commands robot to follow fly around as you drive fly using the keyboard.
+
+  </description>
+  <author>James Bowman / Peter Polidoro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/turtlesim_tf</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="flysim_teleop"/>
+  <depend package="flysim"/>
+  <depend package="tf"/>
+
+</package>
+
+

@@ -1,0 +1,10 @@
+<launch>
+  <include file="$(find track_image_contours)/launch/track_image_contours_tf.launch" />
+  <!-- <include file="$(find plate_tf)/launch/plate_tf.launch" /> -->
+  <node pkg="image_gui" type="DisplayTF.py" name="ImageDisplay" />
+
+  <!-- <param name="mask_radius" type="double" value="225"/> -->
+  <!-- <param name="diff_threshold" type="double" value="65"/> -->
+  <!-- <param name="contour_count_max" type="double" value="2"/> -->
+  <!-- <param name="image_processor_display_images" type="boolean" value="false"/> -->
+</launch>

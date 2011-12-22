@@ -1,0 +1,3 @@
+- git:
+    uri: http://github.com/peterpolidoro/Flyatar.git
+    local-name: Flyatar

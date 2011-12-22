@@ -1,0 +1,3 @@
+<launch>
+        <node pkg="flysim" name="sim" type="flysim_node" launch-prefix="xterm -e gdb --args"/>
+</launch>

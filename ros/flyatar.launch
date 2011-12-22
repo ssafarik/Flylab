@@ -1,0 +1,9 @@
+<launch>
+  <!-- set namespace to parameter file name -->
+  <node ns="$(optenv CAMERA basler_a622f)" pkg="camera1394" type="camera1394_node" name="camera1394_node" >
+    <rosparam file="$(find flyatar_calibration)/calibration_data/$(optenv CAMERA basler_a622f).yaml" /> 
+  </node>
+
+  <!-- <include file="$(find track_image_contours)/launch/track_image_contours.launch" /> -->
+  <!-- <include file="$(find stage_teleop)/launch/stage_joy.launch" /> -->
+</launch>

@@ -1,0 +1,21 @@
+<package>
+  <description brief="flysim_teleop">
+
+     flysim_teleop is a simple package to demonstrate how to write a teleoperation node in ROS using the flysim.
+
+  </description>
+  <author>Melonee Wise / Peter Polidoro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/turtlesim_teleop</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="flysim"/>
+  <depend package="joystick_commands"/>
+  <!-- <depend package="ps3joy"/> -->
+  <!-- <depend package="joy"/> -->
+  <!-- <depend package="wiimote"/> -->
+  <!-- <depend package="spacenav_node"/> -->
+</package>
+
+

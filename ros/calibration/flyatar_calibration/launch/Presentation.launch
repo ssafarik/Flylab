@@ -1,0 +1,6 @@
+<launch>
+  <include file="$(find camera1394v2)/launch/flyatar_camera.launch" />
+  <node name="camera_plate_calibration" pkg="flyatar_calibration" type="Presentation.py">
+  </node>
+  <include file="$(find joystick_commands)/launch/joystick_commands.launch" />
+</launch>

@@ -1,0 +1,29 @@
+
+<launch>
+  <param name="KK_fx_raw" type="double" value="1851.40726200246"/>
+  <param name="KK_fy_raw" type="double" value="1853.26815549102"/>
+  <param name="KK_cx_raw" type="double" value="633.939419239925"/>
+  <param name="KK_cy_raw" type="double" value="549.473189270876"/>
+
+  <param name="kc_k1_raw" type="double" value="-0.353330302030103"/>
+  <param name="kc_k2_raw" type="double" value="-0.0768270774379841"/>
+  <param name="kc_p1_raw" type="double" value="-3.75428086006032e-05"/>
+  <param name="kc_p2_raw" type="double" value="0.00142266579790835"/>
+  
+  <param name="KK_fx_rect" type="double" value="1751.43324265041"/>
+  <param name="KK_fy_rect" type="double" value="1787.03208219886"/>
+  <param name="KK_cx_rect" type="double" value="607.133669326578"/>
+  <param name="KK_cy_rect" type="double" value="551.245952238629"/>
+
+  <param name="kc_k1_rect" type="double" value="0.0137657741775776"/>
+  <param name="kc_k2_rect" type="double" value="-0.0442297827593345"/>
+  <param name="kc_p1_rect" type="double" value="-0.000511519112922575"/>
+  <param name="kc_p2_rect" type="double" value="-0.00667711000011168"/>
+
+  <!-- tf broadcasters -->
+  <!-- Camera frame origin is at center of camera image -->
+  <node pkg="tf" type="static_transform_publisher" name="statictf_Camera_ImageRaw_publisher" args="-633.939 -549.473 0 0 0 0 Camera ImageRaw 10" />
+  <node pkg="tf" type="static_transform_publisher" name="statictf_Camera_ImageRect_publisher" args="-607.133 -551.245 0 0 0 0 Camera ImageRect 10" />
+
+</launch>
+

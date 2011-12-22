@@ -1,0 +1,6 @@
+<launch>
+  <include file="$(find camera_firewire)/launch/camera_firewire.launch" />
+  <param name="save_image_frame" type="string" value="UndistortedImage"/>
+  <param name="save_image_format" type="string" value="flv"/>
+  <node pkg="save_data" type="SaveImages.py" name="SaveImages" />
+</launch>

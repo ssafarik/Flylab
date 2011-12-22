@@ -1,0 +1,7 @@
+# Example camera parameters (for Jack O'Quin's Unibrain Fire-i BCL 1.2)
+
+guid: 08144361026320a0          # (defaults to first camera on bus)
+video_mode: 640x480_yuv411
+frame_id: unibrain
+camera_info_url: file:///cameras/unibrain_calibration.yaml
+

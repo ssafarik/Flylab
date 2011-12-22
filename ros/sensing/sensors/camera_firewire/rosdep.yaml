@@ -1,0 +1,6 @@
+# need to collect install info for all supported OS versions
+
+# Note: Ubuntu Hardy needs special code to install libdc1394 version 2
+
+libdc1394:
+  ubuntu: libdc1394-22-dev

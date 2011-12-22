@@ -1,0 +1,20 @@
+<package>
+  <description brief="flyatar_calibration">
+
+     flyatar_calibration
+
+  </description>
+  <author>Peter Polidoro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url></url>
+  <depend package="rospy"/>
+  <!--<depend package="joystick_commands"/>-->
+  <depend package="camera1394v2"/>
+  <depend package="pythonmodules"/>
+  <depend package="track_image_contours"/>
+  <depend package="plate_tf"/>
+
+</package>
+
+

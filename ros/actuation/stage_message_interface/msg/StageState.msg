@@ -1,0 +1,2 @@
+bool bAllJointsInPosition
+bool bMoveInProgress

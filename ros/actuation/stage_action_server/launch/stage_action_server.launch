@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- Stage Node-->
+  <!-- node pkg="flystage" type="StageCommunicator.py" name="StageCommunicator"/ -->
+  <include file="$(find rosFivebar)/rosFivebar.launch" />
+
+  <param name="Stage_Update_dt" type="double" value="0.010"/>
+
+  <include file="$(find plate_tf)/launch/plate_stage_transforms.launch" />
+
+  <node pkg="stage_action_server" type="StageActionServer.py" name="StageActionServer"/>
+</launch>

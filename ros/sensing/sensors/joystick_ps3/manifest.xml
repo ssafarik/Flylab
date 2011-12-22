@@ -1,0 +1,18 @@
+<package>
+  <description brief="joystick_ps3">
+
+     joystick_ps3
+
+  </description>
+  <author>Peter Polidoro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url></url>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+  <!-- <depend package="ps3joy"/> -->
+  <!--<depend package="joy"/>-->
+
+</package>
+
+

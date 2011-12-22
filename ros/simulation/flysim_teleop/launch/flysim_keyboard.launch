@@ -1,0 +1,11 @@
+<launch>
+
+ <!-- Flysim Node-->
+  <node pkg="flysim" type="flysim_node" name="sim"/>
+
+ <!-- Axes -->
+  <param name="scale_linear" value="10" type="double"/>
+  <param name="scale_angular" value="4" type="double"/>
+
+  <node pkg="flysim_teleop" type="flysim_teleop_key" name="teleop" output="screen"/>
+</launch>

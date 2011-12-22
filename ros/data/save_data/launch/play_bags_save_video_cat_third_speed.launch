@@ -1,0 +1,6 @@
+<launch>
+  <param name="video_cat" type="boolean" value="true"/>
+  <param name="video_image_repeat_count" type="double" value="3"/>
+  <param name="black_image_count" type="double" value="0"/>
+  <include file="$(find save_data)/launch/play_bags_save_video.launch" />
+</launch>

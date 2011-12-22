@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find plate_tf)/launch/plate_camera_transforms.launch" />
+  <include file="$(find plate_tf)/launch/plate_stage_transforms.launch" />
+  <node name="robot_fly_plate_tf_publisher" pkg="plate_tf" type="robot_fly_plate_tf_publisher.py"/>
+</launch>

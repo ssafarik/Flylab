@@ -1,0 +1,10 @@
+ExperimentSettings experiment
+HomeSettings home
+float64 waitEntry
+TriggerSettings triggerEntry
+MoveSettings move
+TriggerSettings triggerExit
+SaveSettings save
+---
+bool succeeded
+

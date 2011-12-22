@@ -1,0 +1,13 @@
+<launch>
+
+ <!-- Flysim Node-->
+  <node pkg="flysim" type="flysim_node" name="sim"/>
+
+  <include file="$(find joystick_commands)/launch/joystick_commands.launch" />
+  
+ <!-- Axes -->
+  <param name="scale_linear" value="10" type="double"/>
+  <param name="scale_angular" value="4" type="double"/>
+
+  <node pkg="flysim_teleop" type="FlysimTeleopJoystick.py" name="FlyCommands" output="screen"/>
+</launch>

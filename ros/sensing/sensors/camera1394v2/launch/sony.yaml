@@ -1,0 +1,13 @@
+# Example camera parameters (Sony XCD-SX90CR)
+
+guid: 0800461000821fa2
+video_mode: 1280x960_mono8
+frame_id: sony
+camera_info_url: file:///cameras/sony_calibration.yaml
+bayer_pattern: gbrg
+
+# set some feature values:
+auto_gamma: 3           # Manual
+gamma: 2
+auto_shutter: 2         # Auto
+auto_white_balance: 2   # Auto

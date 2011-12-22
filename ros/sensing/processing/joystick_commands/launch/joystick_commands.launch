@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find joystick_ps3)/launch/joystick_ps3.launch" />
+  <param name="Joystick_Update_dt" type="double" value="0.010"/>
+  <node pkg="joystick_commands" type="JoystickCommands.py" name="JoystickCommands"/>
+</launch>

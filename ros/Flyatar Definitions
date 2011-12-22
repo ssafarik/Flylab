@@ -1,0 +1,424 @@
+Task:							Command:
+------------------------------------------------------------------
+View the camera					rosrun image_view image_view image:=camera/image_raw
+Adjust the camera				rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node
+Calibrate the camera			roslaunch camera1394v2 flyatar_camera_cal_a.launch
+Calibrate the camera			roslaunch camera1394v2 flyatar_camera_cal_b.launch
+Calibrate the camera			rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_raw camera:=/camera
+Calibrate the camera			roslaunch camera1394v2 flyatar_camera_cal_b.launch
+Calibrate the camera			rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_rect camera:=/camera
+Calibrate camera to plate		roslaunch flyatar_calibration CameraPlate.launch
+Track image contours			roslaunch track_image_contours track_image_contours_view_images.launch
+Operate via joystick			roslaunch flyatar_manual joystick_control.launch
+Calibrate stage to plate		roslaunch flyatar_calibration StagePlate.launch
+
+
+Messages:
+------------------------------------------------------------------
+Position						PoseStamped()
+Velocity						TwistStamped() 
+
+
+Services:
+------------------------------------------------------------------
+SetPosition						StageState()
+GetPosition						StageState()
+SetVelocity						StageState()
+GetVelocity						StageState()
+
+
+Actions:
+------------------------------------------------------------------
+
+
+
+Frame definitions:
+------------------------------------------------------------------
+Stage
+Plate
+Magnet
+Robot
+Camera
+ImageRaw
+ImageRect
+PlateImage
+ROIPlateImage
+
+
+The various transforms, and where they are defined:
+Parent          Child           Comes from
+------------------------------------------------------------------
+Plate           'Stage'         stage_plate_calibration_data.launch         as node "PlateStageStaticTFBroadcaster"
+Plate           'Stage'         stage_plate_tf_broadcaster.py
+Plate           frame_name      robot_fly_plate_tf_broadcaster.py
+Plate           frame_name      ArenaStateBroadcaster.py
+
+Stage           'Magnet'        StageUpdate.py
+Stage           'Magnet'        StageActionServer.py
+
+Camera          'ImageRaw'      camera_calibration_data.launch              as node "image_raw_broadcaster"
+Camera          'ImageRect'     camera_calibration_data.launch              as node "image_rect_broadcaster"
+Camera          'PlateImage'    camera_plateimage_calibration_data.launch   as node "PlateImage_broadcaster"
+Camera          image_frame_name robot_fly_plate_tf_broadcaster.py
+Camera          image_frame_name ArenaStateBroadcaster.py
+
+ImageRect       'ROIPlateImage' camera_plateimage_calibration_data.launch   as node "ROIPlateImage_broadcaster"
+Image           'Checkerboard'  CameraPlate_Test.py
+
+Checkerboard    'Plate'         CameraPlate_Test.py
+Image           'Checkerboard'  CameraInfoSave.py
+Checkerboard    'Plate'         CameraInfoSave.py
+Image           'Checkerboard'  CameraPlate.py
+Checkerboard    'Plate'         CameraPlate.py
+Image           'Checkerboard'  Presentation.py
+Checkerboard    'Plate'         Presentation.py
+
+fly             'carrot'        dynamic_tf_broadcaster.py
+world           flyname         flysim_tf_broadcaster.py
+
+
+Parameter Definitions:
+------------------------------------------------------------------
+actuation/stage_message_interface/launch/stage_message_interface.launch:                <param name="Stage_Update_dt" type="double" value="0.010"/>
+actuation/stage_action_server/launch/stage_action_server.launch:                        <param name="Stage_Update_dt" type="double" value="0.010"/>
+control/flyatar_avatar/launch/avatar.launch:                                            <param name="Control_Update_dt" type="double" value="0.010"/>
+gui/image_gui/launch/DisplayDraw.launch:                                                <param name="Draw_Update_dt" type="double" value="0.010"/>
+sensing/processing/joystick_commands/launch/joystick_commands.launch:                   <param name="Joystick_Update_dt" type="double" value="0.010"/>
+
+calibration/flyatar_calibration/calibration_data/camera_plate_calibration_data.launch:  <param name="camera_plate_rvec_0" type="double" value="-3.113"/>
+calibration/flyatar_calibration/calibration_data/camera_plate_calibration_data.launch:  <param name="camera_plate_rvec_1" type="double" value="-0.002"/>
+calibration/flyatar_calibration/calibration_data/camera_plate_calibration_data.launch:  <param name="camera_plate_rvec_2" type="double" value="-0.010"/>
+calibration/flyatar_calibration/calibration_data/camera_plate_calibration_data.launch:  <param name="camera_plate_tvec_0" type="double" value="-4.00"/>
+calibration/flyatar_calibration/calibration_data/camera_plate_calibration_data.launch:  <param name="camera_plate_tvec_1" type="double" value="-3.90"/>
+calibration/flyatar_calibration/calibration_data/camera_plate_calibration_data.launch:  <param name="camera_plate_tvec_2" type="double" value="283.0"/>
+
+calibration/flyatar_calibration/calibration_data/stage_plate_calibration_data.launch:   <param name="stage_plate_offset_x" type="double" value="0.0"/>
+calibration/flyatar_calibration/calibration_data/stage_plate_calibration_data.launch:   <param name="stage_plate_offset_y" type="double" value="0.0"/>
+calibration/flyatar_calibration/calibration_data/stage_plate_calibration_data.launch:   <!-- <param name="stage_plate_quat_z" type="double" value="0.713"/> -->
+calibration/flyatar_calibration/calibration_data/stage_plate_calibration_data.launch:   <!-- <param name="stage_plate_quat_w" type="double" value="0.701"/> -->
+
+calibration/flyatar_calibration/calibration_data/stage_plate_calibration_data.launch:   <!-- <param name="in_bounds_radius" type="double" value="100"/> -->
+
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="KK_fx_raw" type="double" value="1789.33"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="KK_fy_raw" type="double" value="1791.64"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="KK_cx_raw" type="double" value="620.283"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="KK_cy_raw" type="double" value="523.97"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="kc_k1_raw" type="double" value="-0.405934"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="kc_k2_raw" type="double" value="0.261629"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="kc_p1_raw" type="double" value="0.00346592"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="kc_p2_raw" type="double" value="0.00387791"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="KK_fx_rect" type="double" value="1811.99"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="KK_fy_rect" type="double" value="1817.19"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="KK_cx_rect" type="double" value="681.254"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="KK_cy_rect" type="double" value="545.342"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="kc_k1_rect" type="double" value="-0.133096"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="kc_k2_rect" type="double" value="0.108883"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="kc_p1_rect" type="double" value="0.00102102"/>
+calibration/flyatar_calibration/calibration_data/camera_calibration_data.launch:        <param name="kc_p2_rect" type="double" value="-0.00402816"/>
+
+calibration/flyatar_calibration/calibration_data/robotimage_calibration_data.launch:    <param name="robot_min_ecc" type="double" value="0.837"/>
+calibration/flyatar_calibration/calibration_data/robotimage_calibration_data.launch:    <param name="robot_max_ecc" type="double" value="1.647"/>
+calibration/flyatar_calibration/calibration_data/robotimage_calibration_data.launch:    <param name="robot_min_area" type="double" value="2274"/>
+calibration/flyatar_calibration/calibration_data/robotimage_calibration_data.launch:    <param name="robot_max_area" type="double" value="3763"/>
+
+control/flyatar_manual/launch/joystick_control.launch:                                  <param name="robot_visible" type="boolean" value="true"/>
+control/flyatar_manual/launch/joystick_control_display.launch:                          <param name="robot_visible" type="boolean" value="true"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="robot_visible" type="boolean" value="true"/>
+
+calibration/flyatar_calibration/launch/StagePlate.launch:                               <param name="robot_velocity_max" type="double" value="10"/>
+control/flyatar_manual/launch/joystick_control.launch:                                  <param name="robot_velocity_max" type="double" value="60"/>
+control/flyatar_manual/launch/joystick_control_display.launch:                          <param name="robot_velocity_max" type="double" value="60"/>
+control/flyatar_avatar/launch/avatar.launch:                                            <param name="robot_velocity_max" type="double" value="80"/>
+
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="robot_width"       type="double"   value="1.5875"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="robot_height"      type="double"   value="1.5875"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="robot_paint"       type="str"      value="Sharpie"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="robot_pheromone"   type="str"      value="None"/>
+
+control/flyatar_avatar/launch/avatar.launch:                                            <param name="gain_radius" type="double" value="3"/>
+control/flyatar_avatar/launch/avatar.launch:                                            <param name="gain_theta" type="double" value="3"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="in_bounds_radius" type="double" value="60"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="move_distance" type="double" value="65"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="experiment_linear_velocity_min" type="double" value="5"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="experiment_linear_velocity_max" type="double" value="100"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="experiment_angular_velocity_max_negative" type="double" value="-1.3963"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="experiment_angular_velocity_max_positive" type="double" value="2.0944"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="experiment_angular_velocity_bin_count" type="double" value="11"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="experiment_angular_velocity_vector_negative_repetition" type="double" value="1"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="experiment_angular_velocity_vector_positive_repetition" type="double" value="2"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="experiment_angular_velocity_vector_zero_repetition" type="double" value="2"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="trigger_angle" type="double" value="1.5708"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="start_position_x" type="double" value="0"/>
+control/flyatar_experiments/launch/wait_experiment.launch:                              <param name="start_position_y" type="double" value="0"/>
+
+data/save_data/launch/play_bags_save_video.launch:                                      <param name="save_image_frame" type="string" value="/camera/image_display"/>
+data/save_data/launch/save_camera_images.launch:                                        <param name="save_image_frame" type="string" value="UndistortedImage"/>
+data/save_data/launch/save_display_images.launch:                                       <param name="save_image_frame" type="string" value="/camera/image_display"/>
+
+data/save_data/launch/play_bags_save_video.launch:                                      <param name="save_video_format" type="string" value="mpeg1"/>
+data/save_data/launch/save_display_images.launch:                                       <param name="save_video_format" type="string" value="mpeg1"/>
+
+data/save_data/launch/save_camera_images.launch:                                        <param name="save_image_format" type="string" value="flv"/>
+data/save_data/launch/save_images.launch:                                               <param name="save_image_format" type="string" value="flv"/>
+
+data/save_data/launch/play_bags_save_video_nocat_third_speed.launch:                    <param name="video_cat" type="boolean" value="false"/>
+data/save_data/launch/play_bags_save_video_cat.launch:                                  <param name="video_cat" type="boolean" value="true"/>
+data/save_data/launch/play_bags_save_video_cat_third_speed.launch:                      <param name="video_cat" type="boolean" value="true"/>
+data/save_data/launch/play_bags_save_video_cat_half_speed.launch:                       <param name="video_cat" type="boolean" value="true"/>
+data/save_data/launch/play_bags_save_video_nocat.launch:                                <param name="video_cat" type="boolean" value="false"/>
+
+data/save_data/launch/play_bags_save_video_nocat_third_speed.launch:                    <param name="video_image_repeat_count" type="double" value="3"/>
+data/save_data/launch/play_bags_save_video_cat.launch:                                  <param name="video_image_repeat_count" type="double" value="1"/>
+data/save_data/launch/play_bags_save_video_cat_third_speed.launch:                      <param name="video_image_repeat_count" type="double" value="3"/>
+data/save_data/launch/play_bags_save_video_cat_half_speed.launch:                       <param name="video_image_repeat_count" type="double" value="2"/>
+data/save_data/launch/play_bags_save_video_nocat.launch:                                <param name="video_image_repeat_count" type="double" value="1"/>
+
+data/save_data/launch/play_bags_save_video_nocat_third_speed.launch:                    <param name="black_image_count" type="double" value="0"/>
+data/save_data/launch/play_bags_save_video_cat.launch:                                  <param name="black_image_count" type="double" value="0"/>
+data/save_data/launch/play_bags_save_video_cat_third_speed.launch:                      <param name="black_image_count" type="double" value="0"/>
+data/save_data/launch/play_bags_save_video_cat_half_speed.launch:                       <param name="black_image_count" type="double" value="0"/>
+data/save_data/launch/play_bags_save_video_nocat.launch:                                <param name="black_image_count" type="double" value="0"/>
+
+sensing/sensors/camera_firewire/launch/camera_firewire.launch:                          <param name="display"       type="int"      value="0"/>
+sensing/sensors/camera_firewire/launch/camera_firewire.launch:                          <param name="framerate"     type="double"   value="25"/>
+sensing/sensors/camera_firewire/launch/camera_firewire.launch:                          <param name="mode"                          value="MODE_FORMAT7_0"/>
+sensing/sensors/camera_firewire/launch/camera_firewire.launch:                          <param name="square_roi"    type="int"      value="1"/>
+sensing/sensors/camera_firewire/launch/camera_firewire.launch:                          <param name="compression"   type="str"      value="none"/>
+sensing/sensors/camera_firewire/launch/camera_firewire.launch:                          <param name="brightness"    type="double"   value="168"/>
+sensing/sensors/camera_firewire/launch/camera_firewire.launch:                          <param name="shutter"       type="double"   value="631"/>
+sensing/sensors/camera_firewire/launch/camera_firewire.launch:                          <param name="gain"          type="double"   value="140"/>
+sensing/sensors/camera1394v2/launch/multicamera_example_1.launch:                       <param name="guid"                          value="08144361026320a0" />
+sensing/sensors/camera1394v2/launch/multicamera_example_1.launch:                       <param name="guid"                          value="0800461000821fa2" />
+sensing/sensors/camera1394v2/launch/multicamera_example_1.launch:                       <param name="video_mode"                    value="640x480_yuv411" />
+sensing/sensors/camera1394v2/launch/multicamera_example_1.launch:                       <param name="video_mode"                    value="1280x960_mono8" />
+sensing/sensors/camera1394v2/launch/multicamera_example_1.launch:                       <param name="frame_id"                      value="unibrain" />
+sensing/sensors/camera1394v2/launch/multicamera_example_1.launch:                       <param name="frame_id"                      value="sony" />
+sensing/sensors/camera1394v2/launch/multicamera_example_1.launch:                       <param name="bayer_pattern"                 value="gbrg" />
+sensing/sensors/camera1394v2/launch/multicamera_example_1.launch:                       <param name="camera_info_url"
+sensing/sensors/camera1394v2/launch/multicamera_example_1.launch:                       <param name="camera_info_url"
+
+
+gui/image_gui/launch/image_gui.launch:                                                  <!-- <param name="mask_radius" type="double" value="225"/> -->
+calibration/flyatar_calibration/calibration_data/camera_plateimage_calibration_data.launch:  <param name="mask_radius" type="double" value="395"/>
+calibration/flyatar_calibration/calibration_data/camera_plateimage_calibration_data.launch:  <param name="ROIPlateImage_width" type="double" value="1280"/>
+calibration/flyatar_calibration/calibration_data/camera_plateimage_calibration_data.launch:  <param name="ROIPlateImage_height" type="double" value="1024"/>
+
+sensing/processing/track_image_contours/launch/track_image_contours_tf_view_images.launch: <param name="diff_threshold" type="double" value="65"/>
+sensing/processing/track_image_contours/launch/track_image_contours_tf.launch:          <param name="diff_threshold" type="double" value="65"/>
+sensing/processing/track_image_contours/launch/track_image_contours_view_images.launch: <param name="diff_threshold" type="double" value="65"/>
+sensing/processing/track_image_contours/launch/track_image_contours.launch:             <param name="diff_threshold" type="double" value="65"/>
+
+sensing/processing/track_image_contours/launch/track_image_contours_tf_view_images.launch: <param name="contour_count_max" type="double" value="2"/>
+sensing/processing/track_image_contours/launch/track_image_contours_view_images.launch: <param name="contour_count_max" type="double" value="2"/>
+sensing/processing/track_image_contours/launch/track_image_contours_tf.launch:          <param name="contour_count_max" type="double" value="11"/>
+sensing/processing/track_image_contours/launch/track_image_contours.launch:             <param name="contour_count_max" type="double" value="2"/>
+
+sensing/processing/track_image_contours/launch/track_image_contours_tf_view_images.launch: <param name="image_processor_display_images" type="boolean" value="true"/>
+sensing/processing/track_image_contours/launch/track_image_contours_view_images.launch: <param name="image_processor_display_images" type="boolean" value="true"/>
+sensing/processing/track_image_contours/launch/track_image_contours_tf.launch:          <param name="image_processor_display_images" type="boolean" value="false"/>
+sensing/processing/track_image_contours/launch/track_image_contours.launch:             <param name="image_processor_display_images" type="boolean" value="false"/>
+
+sensing/processing/track_image_contours/launch/track_image_contours_tf_view_images.launch: <param name="ImageProcessor_OutputCoordinates" type="string" value="Camera"/>
+sensing/processing/track_image_contours/launch/track_image_contours_view_images.launch: <param name="ImageProcessor_OutputCoordinates" type="string" value="Camera"/>
+sensing/processing/track_image_contours/launch/track_image_contours_tf.launch:          <param name="ImageProcessor_OutputCoordinates" type="string" value="Camera"/>
+sensing/processing/track_image_contours/launch/track_image_contours.launch:             <param name="ImageProcessor_OutputCoordinates" type="string" value="Camera"/>
+
+simulation/flysim_tf/launch/flysim_tf_demo.launch:                                      <param name="flyname" type="string" value="robot" />
+simulation/flysim_tf/launch/flysim_tf_demo.launch:                                      <param name="flyname" type="string" value="fly" />
+
+simulation/flysim_teleop/launch/flysim_joystick_ps3.launch:                             <param name="scale_linear" value="10" type="double"/>
+simulation/flysim_teleop/launch/flysim_wii.launch:                                      <param name="scale_linear" value="2" type="double"/>
+simulation/flysim_teleop/launch/flysim_keyboard.launch:                                 <param name="scale_linear" value="10" type="double"/>
+simulation/flysim_teleop/launch/flysim_joy.launch:                                      <param name="scale_linear" value="2" type="double"/>
+simulation/flysim_teleop/launch/flysim_spacenav.launch:                                 <param name="scale_linear" value="2" type="double"/>
+simulation/flysim_teleop/launch/flysim_ps3joy.launch:                                   <param name="scale_linear" value="2" type="double"/>
+
+simulation/flysim_teleop/launch/flysim_joystick_ps3.launch:                             <param name="scale_angular" value="4" type="double"/>
+simulation/flysim_teleop/launch/flysim_wii.launch:                                      <param name="scale_angular" value="2" type="double"/>
+simulation/flysim_teleop/launch/flysim_keyboard.launch:                                 <param name="scale_angular" value="4" type="double"/>
+simulation/flysim_teleop/launch/flysim_joy.launch:                                      <param name="scale_angular" value="2" type="double"/>
+simulation/flysim_teleop/launch/flysim_spacenav.launch:                                 <param name="scale_angular" value="2" type="double"/>
+simulation/flysim_teleop/launch/flysim_ps3joy.launch:                                   <param name="scale_angular" value="2" type="double"/>
+
+simulation/flysim_teleop/launch/flysim_wii.launch:                                      <param name="axis_linear" value="1" type="int"/>
+simulation/flysim_teleop/launch/flysim_joy.launch:                                      <param name="axis_linear" value="1" type="int"/>
+simulation/flysim_teleop/launch/flysim_spacenav.launch:                                 <param name="axis_linear" value="1" type="int"/>
+simulation/flysim_teleop/launch/flysim_ps3joy.launch:                                   <param name="axis_linear" value="1" type="int"/>
+
+simulation/flysim_teleop/launch/flysim_wii.launch:                                      <param name="axis_angular" value="0" type="int"/>
+simulation/flysim_teleop/launch/flysim_joy.launch:                                      <param name="axis_angular" value="0" type="int"/>
+simulation/flysim_teleop/launch/flysim_spacenav.launch:                                 <param name="axis_angular" value="0" type="int"/>
+simulation/flysim_teleop/launch/flysim_ps3joy.launch:                                   <param name="axis_angular" value="0" type="int"/>
+
+simulation/flysim_teleop/launch/flysim_joy.launch:                                      <param name="dev" type="string" value="/dev/input/js0" />
+simulation/flysim_teleop/launch/flysim_ps3joy.launch:                                   <param name="dev" type="string" value="/dev/input/js0" />
+sensing/sensors/joystick_ps3/launch/joystick_ps3.launch:                                <param name="dev" type="string" value="/dev/input/js0" />
+
+simulation/flysim_teleop/launch/flysim_joy.launch:                                      <param name="deadzone" value="0.12" />
+simulation/flysim_teleop/launch/flysim_ps3joy.launch:                                   <param name="deadzone" value="0.12" />
+sensing/sensors/joystick_ps3/launch/joystick_ps3.launch:                                <param name="deadzone" value="0.12" />
+
+
+Topics / Messages:
+--------------------------------------------------------------------------------------------------
+actuation/stage_message_interface/nodes/StageUpdate.py:    self.sc_sub = rospy.Subscriber("Stage/Commands", StageCommands, self.stage_commands_callback)
+calibration/flyatar_calibration/nodes/StagePlate.py:    self.image_sub = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
+calibration/flyatar_calibration/nodes/StagePlate.py:    self.contour_info_sub = rospy.Subscriber("ContourInfo",ContourInfo,self.contour_callback)
+calibration/flyatar_calibration/nodes/StagePlate.py:    # self.pose_sub = rospy.Subscriber("RobotImagePose", PoseStamped, self.pose_callback)
+calibration/flyatar_calibration/nodes/CameraPlate_Test.py:    # self.image_sub = rospy.Subscriber("UndistortedImage", Image, self.image_callback)
+calibration/flyatar_calibration/nodes/CameraPlate_Test.py:    # self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joy_callback)
+calibration/flyatar_calibration/nodes/CameraInfoSave.py:    self.image_sub = rospy.Subscriber("UndistortedImage", Image, self.image_callback)
+calibration/flyatar_calibration/nodes/CameraInfoSave.py:    self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joy_callback)
+calibration/flyatar_calibration/nodes/CameraPlate.py:    self.image_sub = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
+calibration/flyatar_calibration/nodes/CameraPlate.py:    self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joy_callback)
+calibration/flyatar_calibration/nodes/Presentation.py:    self.image_undistorted_sub = rospy.Subscriber("UndistortedImage", Image, self.image_undistorted_callback)
+calibration/flyatar_calibration/nodes/Presentation.py:    self.image_undistorted_sub = rospy.Subscriber("OriginalImage", Image, self.image_distorted_callback)
+calibration/flyatar_calibration/nodes/Presentation.py:    self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joy_callback)
+control/flyatar_manual/nodes/JoystickControl.py:        self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.commands_callback)
+control/flyatar_avatar/nodes/SetpointPositionControl.py:        self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joystick_commands_callback)
+control/flyatar_avatar/nodes/PositionControl.py:        self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.commands_callback)
+control/flyatar_avatar/nodes/SetpointVelocityControl.py:        self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joystick_commands_callback)
+control/flyatar_avatar/nodes/SetpointVelocityControl.py:        self.ss_sub = rospy.Subscriber("Stage/State", StageState, self.stage_state_callback)
+control/flyatar_avatar/nodes/SetpointVelocityControl.py:        self.fly_in_bounds_sub = rospy.Subscriber("InBoundsState/Fly",InBoundsState, self.fly_in_bounds_callback)
+control/flyatar_avatar/nodes/SetpointVelocityControl.py:        self.robot_in_bounds_sub = rospy.Subscriber("InBoundsState/Robot",InBoundsState, self.robot_in_bounds_callback)
+control/flyatar_avatar/nodes/VelocityControl.py:        self.joy_sub = rospy.Subscriber("magnet/commands", Commands, self.commands_callback)
+control/flyatar_experiments/nodes/ExperimentWait.py:IN_BOUNDS_SUB = MonitorSystemState.InBoundsSubscriber()
+control/flyatar_experiments/nodes/MonitorSystemState.py:class InBoundsSubscriber:
+control/flyatar_experiments/nodes/MonitorSystemState.py:        self.in_bounds_sub = rospy.Subscriber('InBounds',InBounds,self.in_bounds_callback)
+control/flyatar_experiments/nodes/MonitorSystemState.py:class FlyViewSubscriber:
+control/flyatar_experiments/nodes/MonitorSystemState.py:        self.fly_view_sub = rospy.Subscriber("FlyView",FlyView,self.fly_view_callback)
+control/flyatar_experiments/nodes/MonitorSystemState.py:class KinematicsSubscriber:
+control/flyatar_experiments/nodes/MonitorSystemState.py:        self.robot_fly_kinematics_sub = rospy.Subscriber("RobotFlyKinematics",RobotFlyKinematics,self.kinematics_callback)
+control/flyatar_experiments/nodes/Trial.py:        self.in_bounds_sub = MonitorSystemState.InBoundsSubscriber()
+control/flyatar_experiments/nodes/RobotMotionProfiles.py:FLY_VIEW_SUB = MonitorSystemState.FlyViewSubscriber()
+control/flyatar_experiments/nodes/RobotMotionProfiles.py:KINEMATICS_SUB = MonitorSystemState.KinematicsSubscriber()
+control/flyatar_experiments/nodes/RobotMotionProfiles.py:        self.in_bounds_sub = MonitorSystemState.InBoundsSubscriber()
+data/save_data/nodes/SaveBagJoystick.py:        self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joystick_commands_callback)
+data/save_data/nodes/SaveBagJoystick.py:        # self.image_sub = rospy.Subscriber(self.image_frame, Image, self.image_callback)
+data/save_data/nodes/SaveKinematics.py:        self.kinematics_sub = rospy.Subscriber("RobotFlyKinematics", RobotFlyKinematics, self.kinematics_callback)
+data/save_data/nodes/SaveKinematics.py:        self.save_data_controls_sub = rospy.Subscriber("SaveDataControls", SaveDataControls, self.save_data_controls_callback)
+data/save_data/nodes/SaveKinematics.py:        self.experiment_conditions_sub = rospy.Subscriber("ExperimentConditions", ExperimentConditions, self.experiment_conditions_callback)
+data/save_data/nodes/SaveDesktop.py:        self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joystick_commands_callback)
+data/save_data/nodes/PlayBags.py:        self.video_info_sub = rospy.Subscriber("video_info",VideoInfo,self.video_info_callback)
+data/save_data/nodes/SaveImages.py:        self.image_sub = rospy.Subscriber(self.image_frame, Image, self.image_callback)
+data/save_data/nodes/SaveBag.py:        self.save_data_controls_sub = rospy.Subscriber("SaveDataControls", SaveDataControls, self.save_data_controls_callback)
+data/save_data/nodes/SaveVideo.py:        self.bag_info_sub = rospy.Subscriber("bag_info",BagInfo,self.bag_info_callback)
+data/save_data/nodes/SaveVideo.py:        self.image_sub = rospy.Subscriber(self.image_frame, Image, self.image_callback)
+gui/image_gui/nodes/DisplayMinimal.py:        self.image_sub = rospy.Subscriber("camera/image_rect", sensor_msgs.msg.Image, self.image_callback)
+gui/image_gui/nodes/DisplayDraw.py:        self.image_sub = rospy.Subscriber("camera/image_rect", sensor_msgs.msg.Image, self.image_callback)
+gui/image_gui/nodes/DisplayDraw.py:        self.draw_objects_sub = rospy.Subscriber("DrawObjects/image_rect", image_gui.msg.DrawObjects, self.draw_objects_callback)
+gui/image_gui/nodes/DisplayTF.py:        self.image_sub = rospy.Subscriber(self.image_name, Image, self.image_callback)
+gui/image_gui/nodes/DisplayTF.py:        self.setpoint_sub = rospy.Subscriber("setpoint",Setpoint, self.setpoint_callback)
+gui/image_gui/nodes/DisplayTF.py:        self.fly_in_bounds_sub = rospy.Subscriber("InBoundsState/Fly",InBoundsState, self.fly_in_bounds_callback)
+gui/image_gui/nodes/DisplayTF.py:        self.robot_in_bounds_sub = rospy.Subscriber("InBoundsState/Robot",InBoundsState, self.robot_in_bounds_callback)
+sensing/sensors/camera_firewire/src/imagescaler.cpp:  image_transport::Subscriber _sub;
+sensing/sensors/camera_firewire/src/imagescaler.cpp:  Subscriber _subInfo;
+sensing/sensors/camera_firewire/src/camera_firewire.cpp:    bool bImagePublish = _pubUndistortedImage.getNumSubscribers()>0;
+sensing/sensors/camera_firewire/src/camera_firewire.cpp:    bool bOriginalImagePublish = _pubOriginalImage.getNumSubscribers()>0;
+sensing/sensors/joystick_ps3/src/joystick_publisher.cpp:  ros::Subscriber joy_sub_;
+sensing/processing/track_image_contours/nodes/ContourIdentifier.py:    # Listener/Subscribers
+sensing/processing/track_image_contours/nodes/ContourIdentifier.py:    self.contour_info_sub = rospy.Subscriber("ContourInfo",ContourInfo,self.contour_callback)
+sensing/processing/track_image_contours/nodes/ContourIdentifierTF.py:    # Listener/Subscribers
+sensing/processing/track_image_contours/nodes/ContourIdentifierTF.py:    self.contour_info_sub = rospy.Subscriber("ContourInfo",ContourInfo,self.contour_callback)
+sensing/processing/track_image_contours/nodes/ImageProcessor.py:    # Listener/Subscribers
+sensing/processing/track_image_contours/nodes/ImageProcessor.py:    self.image_sub = rospy.Subscriber("camera/image_rect",Image,self.image_callback)
+sensing/processing/joystick_commands/nodes/JoystickCommands.py:    self.joy_sub = rospy.Subscriber("Joystick/Values", JoystickValues, self.joy_callback)
+simulation/flysim_tf/nodes/flysim_tf_broadcaster.py:    rospy.Subscriber('/%s/pose' % flyname,
+simulation/flysim_tf/src/flysim_tf_broadcaster.cpp:  ros::Subscriber sub = node.subscribe(flysim_name+"/pose", 10, &poseCallback);
+simulation/flysim_teleop/nodes/FlysimTeleopJoystick.py:    self.command_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joy_callback)
+simulation/flysim_teleop/nodes/FlysimTeleopJoystick.py:    self.pose_sub = rospy.Subscriber("fly/pose",Pose,self.pose_callback)
+simulation/flysim_teleop/scripts/flysim_teleop_joy.py:  sub = rospy.Subscriber("joy", joy.msg.Joy, joy_cb)
+simulation/flysim_teleop/src/teleop_flysim_joy.cpp:  ros::Subscriber joy_sub_;
+simulation/flysim/tutorials/draw_square.cpp:  ros::Subscriber pose_sub = nh.subscribe("fly1/pose", 1, poseCallback);
+simulation/flysim/tutorials/mimic.cpp:  ros::Subscriber pose_sub_;
+simulation/flysim/include/flysim/fly.h:    ros::Subscriber velocity_sub_;
+tf/plate_tf/nodes/stage_plate_tf_broadcaster.py:        self.robot_stop_state_sub = rospy.Subscriber('StopState/Robot', StopState, self.cbRobotStopState)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.robot_image_pose_sub = rospy.Subscriber('ImagePose/Robot',PoseStamped,self.handle_robot_image_pose)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.fly_image_pose_sub = rospy.Subscriber('ImagePose/Fly',PoseArray,self.handle_fly_image_pose)
+tf/plate_tf/nodes/PublishSystemState.py:        self.robot_fly_kinematics_sub = rospy.Subscriber("RobotFlyKinematics",RobotFlyKinematics,self.kinematics_callback)
+tf/plate_tf/nodes/ArenaStateBroadcaster.py:        self.robot_image_pose_sub = rospy.Subscriber('ImagePose',ImagePose,self.handle_image_pose)
+tf/plate_tf/nodes/TransformsTest.py:        # Listener/Subscribers
+ssafarik@flappy:~/git/Flyatar/ros$ grep -r Publisher *
+actuation/stage_message_interface/nodes/StageUpdate.py:    self.ss_pub = rospy.Publisher("Stage/State",StageState)
+control/flyatar_manual/nodes/JoystickControl.py:        self.sc_pub = rospy.Publisher("Stage/Commands",StageCommands)
+control/flyatar_avatar/nodes/SetpointPositionControl.py:        self.sc_pub = rospy.Publisher("StageCommands",StageCommands)
+control/flyatar_avatar/nodes/SetpointPositionControl.py:        self.setpoint_pub = rospy.Publisher("setpoint",Setpoint)
+control/flyatar_avatar/nodes/PositionControl.py:        self.sc_pub = rospy.Publisher("StageCommands",StageCommands)
+control/flyatar_avatar/nodes/PositionControl.py:        self.setpoint_pub = rospy.Publisher("setpoint",Setpoint)
+control/flyatar_avatar/nodes/SetpointVelocityControl.py:        self.sc_pub = rospy.Publisher("Stage/Commands",StageCommands)
+control/flyatar_avatar/nodes/SetpointVelocityControl.py:        self.setpoint_pub = rospy.Publisher("setpoint",Setpoint)
+control/flyatar_avatar/nodes/VelocityControl.py:        self.vel_pub = rospy.Publisher("stage/command_velocity",Velocity)
+control/flyatar_experiments/nodes/Trial.py:class SaveDataControlsPublisher:
+control/flyatar_experiments/nodes/Trial.py:        self.save_data_controls_pub = rospy.Publisher("SaveDataControls",SaveDataControls)
+control/flyatar_experiments/nodes/Trial.py:SAVE_DATA_CONTROLS_PUB = SaveDataControlsPublisher()
+control/flyatar_experiments/nodes/RobotMotionProfiles.py:        self.experiment_conditions_pub = rospy.Publisher("ExperimentConditions",ExperimentConditions)
+data/save_data/nodes/PlayBags.py:        self.bag_info_pub = rospy.Publisher("bag_info",BagInfo)
+data/save_data/nodes/SaveVideo.py:        self.video_info_pub = rospy.Publisher("video_info",VideoInfo)
+gui/image_gui/nodes/DisplayDraw.py:        self.image_pub = rospy.Publisher("/camera/image_display",sensor_msgs.msg.Image)
+gui/image_gui/nodes/DisplayTF.py:        self.image_pub = rospy.Publisher("/camera/image_display",Image)
+gui/image_gui/nodes/DrawObjects.py:        self.draw_objects_pub = rospy.Publisher("DrawObjects/image_rect", image_gui.msg.DrawObjects)
+sensing/sensors/camera_firewire/src/imagescaler.cpp:    Publisher _pubInfo;
+sensing/sensors/camera_firewire/src/imagescaler.cpp:    image_transport::Publisher _pubImage;
+sensing/sensors/camera_firewire/src/camera_firewire.cpp:  image_transport::Publisher _pubUndistortedImage, _pubOriginalImage;
+sensing/sensors/camera_firewire/src/camera_firewire.cpp:  Publisher _pubUndistortedInfo, _pubOriginalInfo;
+sensing/sensors/camera1394v2/src/nodes/camera1394v2.cpp:  image_transport::CameraPublisher image_pub_;
+sensing/sensors/joystick_ps3/launch/joystick_ps3.launch:  <node pkg="joystick_ps3" type="joystick_publisher" name="JoystickPublisher"/>
+sensing/sensors/joystick_ps3/src/joystick_publisher.cpp:class JoystickValuePublisher
+sensing/sensors/joystick_ps3/src/joystick_publisher.cpp:  JoystickValuePublisher();
+sensing/sensors/joystick_ps3/src/joystick_publisher.cpp:  ros::Publisher joy_values_pub_;
+sensing/sensors/joystick_ps3/src/joystick_publisher.cpp:JoystickValuePublisher::JoystickValuePublisher()
+sensing/sensors/joystick_ps3/src/joystick_publisher.cpp:  joy_sub_ = nh_.subscribe<joy::Joy>("joy", 10, &JoystickValuePublisher::joyCallback, this);
+sensing/sensors/joystick_ps3/src/joystick_publisher.cpp:void JoystickValuePublisher::joyCallback(const joy::Joy::ConstPtr& joy)
+sensing/sensors/joystick_ps3/src/joystick_publisher.cpp:  ros::init(argc, argv, "JoystickPublisher");
+sensing/sensors/joystick_ps3/src/joystick_publisher.cpp:  JoystickValuePublisher joystick_value_publisher;
+sensing/processing/track_image_contours/nodes/ContourIdentifier.py:    # Broadcaster/Publishers
+sensing/processing/track_image_contours/nodes/ContourIdentifier.py:    self.robot_image_pose_pub = rospy.Publisher("ImagePose/Robot",PoseStamped)
+sensing/processing/track_image_contours/nodes/ContourIdentifier.py:    self.fly_image_pose_pub = rospy.Publisher("ImagePose/Fly",PoseStamped)
+sensing/processing/track_image_contours/nodes/ContourIdentifierTF.py:    # Broadcaster/Publishers
+sensing/processing/track_image_contours/nodes/ContourIdentifierTF.py:    self.image_pose_pub = rospy.Publisher("ImagePose",ImagePose)
+sensing/processing/track_image_contours/nodes/ImageProcessor.py:    # Broadcaster/Publishers
+sensing/processing/track_image_contours/nodes/ImageProcessor.py:    self.image_processed_pub = rospy.Publisher("camera/image_processed",Image)
+sensing/processing/track_image_contours/nodes/ImageProcessor.py:    self.image_diff_pub = rospy.Publisher("camera/image_diff",Image)
+sensing/processing/track_image_contours/nodes/ImageProcessor.py:    self.image_foreground_pub = rospy.Publisher("camera/image_foreground",Image)
+sensing/processing/track_image_contours/nodes/ImageProcessor.py:    self.contour_info_pub = rospy.Publisher("ContourInfo",ContourInfo)
+sensing/processing/joystick_commands/nodes/JoystickCommands.py:class JoystickCommandPublisher:
+sensing/processing/joystick_commands/nodes/JoystickCommands.py:    self.command_pub = rospy.Publisher("Joystick/Commands",JoystickCommands)
+sensing/processing/joystick_commands/nodes/JoystickCommands.py:  jc = JoystickCommandPublisher()
+simulation/flysim_tf/nodes/fixed_tf_broadcaster.py:        self.pub_tf = rospy.Publisher("/tf", tf.msg.tfMessage)
+simulation/flysim_tf/nodes/flysim_tf_listener_wait.py:    flysim_vel = rospy.Publisher('robot/command_velocity', flysim.msg.Velocity)
+simulation/flysim_tf/nodes/flysim_tf_listener.py:    robot_vel = rospy.Publisher('robot/command_velocity', flysim.msg.Velocity)
+simulation/flysim_tf/src/flysim_tf_listener.cpp:  ros::Publisher flysim_vel =
+simulation/flysim_teleop/nodes/FlysimTeleopJoystick.py:class FlyCommandPublisher:
+simulation/flysim_teleop/nodes/FlysimTeleopJoystick.py:    self.command_pub = rospy.Publisher("fly/command_velocity",Velocity)
+simulation/flysim_teleop/nodes/FlysimTeleopJoystick.py:  fc = FlyCommandPublisher()
+simulation/flysim_teleop/scripts/flysim_teleop_joy.py:  pub = rospy.Publisher("fly/command_velocity", flysim.msg.Velocity)
+simulation/flysim_teleop/src/teleop_flysim_key.cpp:  ros::Publisher vel_pub_;
+simulation/flysim_teleop/src/teleop_flysim_joy.cpp:  ros::Publisher vel_pub_;
+simulation/flysim/tutorials/draw_square.cpp:void commandFly(ros::Publisher vel_pub, float linear, float angular)
+simulation/flysim/tutorials/draw_square.cpp:void stopForward(ros::Publisher vel_pub)
+simulation/flysim/tutorials/draw_square.cpp:void stopTurn(ros::Publisher vel_pub)
+simulation/flysim/tutorials/draw_square.cpp:void forward(ros::Publisher vel_pub)
+simulation/flysim/tutorials/draw_square.cpp:void turn(ros::Publisher vel_pub)
+simulation/flysim/tutorials/draw_square.cpp:void timerCallback(const ros::TimerEvent&, ros::Publisher vel_pub)
+simulation/flysim/tutorials/draw_square.cpp:  ros::Publisher vel_pub = nh.advertise<flysim::Velocity>("fly1/command_velocity", 1);
+simulation/flysim/tutorials/mimic.cpp:  ros::Publisher vel_pub_;
+simulation/flysim/include/flysim/fly.h:    ros::Publisher pose_pub_;
+simulation/flysim/include/flysim/fly.h:    ros::Publisher color_pub_;
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.fly_stop_pub = rospy.Publisher('StopState/Fly',StopState)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.fly_in_bounds_pub = rospy.Publisher('InBoundsState/Fly',InBoundsState)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.robot_stop_pub = rospy.Publisher('StopState/Robot',StopState)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.robot_in_bounds_pub = rospy.Publisher('InBoundsState/Robot',InBoundsState)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.robot_x_filtered_data_pub = rospy.Publisher('FilteredData/RobotX',FilteredData)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.robot_y_filtered_data_pub = rospy.Publisher('FilteredData/RobotY',FilteredData)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.robot_vx_filtered_data_pub = rospy.Publisher('FilteredData/RobotVX',FilteredData)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.robot_vy_filtered_data_pub = rospy.Publisher('FilteredData/RobotVY',FilteredData)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.robot_a_filtered_data_pub = rospy.Publisher('FilteredData/RobotAngle',FilteredData)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.fly_x_filtered_data_pub = rospy.Publisher('FilteredData/FlyX',FilteredData)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.fly_y_filtered_data_pub = rospy.Publisher('FilteredData/FlyY',FilteredData)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.fly_vx_filtered_data_pub = rospy.Publisher('FilteredData/FlyVX',FilteredData)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.fly_vy_filtered_data_pub = rospy.Publisher('FilteredData/FlyVY',FilteredData)
+tf/plate_tf/nodes/robot_fly_plate_tf_broadcaster.py:        self.fly_a_filtered_data_pub = rospy.Publisher('FilteredData/FlyAngle',FilteredData)
+tf/plate_tf/nodes/PublishSystemState.py:        self.in_bounds_pub = rospy.Publisher("InBounds",InBounds)
+tf/plate_tf/nodes/PublishSystemState.py:        self.fly_view_pub = rospy.Publisher("FlyView",FlyView)
+tf/plate_tf/nodes/ArenaStateBroadcaster.py:        self.robot_fly_kinematics_pub = rospy.Publisher('RobotFlyKinematics', RobotFlyKinematics)
+

@@ -1,0 +1,15 @@
+<package>
+  <description brief="pythonmodules">
+
+     pythonmodules
+
+  </description>
+  <author>XYFly</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pythonmodules</url>
+  <depend package="rospy"/>
+
+</package>
+
+

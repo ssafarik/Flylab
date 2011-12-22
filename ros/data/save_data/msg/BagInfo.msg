@@ -1,0 +1,4 @@
+string bag_name
+bool ready_to_play
+bool finished_playing
+bool end_of_bag_files

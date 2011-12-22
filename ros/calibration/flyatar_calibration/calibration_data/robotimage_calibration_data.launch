@@ -1,0 +1,13 @@
+<launch>
+  <!-- 1/16" Diameter Magnet -->
+  <param name="robot_min_ecc" type="double" value="0.4"/>
+  <param name="robot_max_ecc" type="double" value="1.8"/>
+  <param name="robot_min_area" type="double" value="30"/>
+  <param name="robot_max_area" type="double" value="50"/>
+
+  <!-- 1/8" Diameter Magnet -->
+  <!-- <param name="robot_min_ecc" type="double" value="0.940"/> -->
+  <!-- <param name="robot_max_ecc" type="double" value="1.362"/> -->
+  <!-- <param name="robot_min_area" type="double" value="12312"/> -->
+  <!-- <param name="robot_max_area" type="double" value="17890"/> -->
+</launch>

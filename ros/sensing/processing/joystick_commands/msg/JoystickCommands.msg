@@ -1,0 +1,13 @@
+Header header
+float64 x_velocity
+float64 y_velocity
+float64 radius_velocity
+float64 tangent_velocity
+float64 radius_inc
+float64 theta_inc
+bool tracking
+bool goto_start
+bool start
+bool stop
+bool yes
+bool no

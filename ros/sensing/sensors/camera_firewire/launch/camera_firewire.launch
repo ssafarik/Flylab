@@ -1,0 +1,15 @@
+<!-- starts the camera used for localization -->
+<launch>
+  <param name="display" type="int" value="0"/>
+  <param name="framerate" type="double" value="25"/>
+  <param name="mode" value="MODE_FORMAT7_0"/>
+  <param name="square_roi" type="int" value="1"/>
+  <param name="compression" type="str" value="none"/>
+  <param name="brightness" type="double" value="168"/>
+  <param name="shutter" type="double" value="631"/>
+  <param name="gain" type="double" value="140"/>
+
+  <include file="$(find flyatar_calibration)/calibration_data/camera_calibration_data.launch" />
+
+  <node name="CameraFirewire" pkg="camera_firewire" type="camera_firewire"/>
+</launch>

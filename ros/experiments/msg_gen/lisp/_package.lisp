@@ -1,0 +1,15 @@
+(cl:defpackage experiments-msg
+  (:use )
+  (:export
+   "<TRIGGERSETTINGS>"
+   "TRIGGERSETTINGS"
+   "<SAVESETTINGS>"
+   "SAVESETTINGS"
+   "<MOVESETTINGS>"
+   "MOVESETTINGS"
+   "<HOMESETTINGS>"
+   "HOMESETTINGS"
+   "<EXPERIMENTSETTINGS>"
+   "EXPERIMENTSETTINGS"
+  ))
+

@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find track_image_contours)/launch/track_image_contours.launch" />
+  <include file="$(find plate_tf)/launch/plate_tf.launch" />
+</launch>

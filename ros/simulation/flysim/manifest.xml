@@ -1,0 +1,24 @@
+<package>
+  <description brief="flysim">
+
+     flysim is a tool made from turtlesim... 
+
+  </description>
+  <author>Josh Faust / Peter Polidoro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url></url>
+  <depend package="roscpp"/>
+  <depend package="roslib"/>
+  <depend package="rosconsole"/>
+  <depend package="std_srvs"/>
+  
+  <rosdep name="wxwidgets"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/msg/cpp -I${prefix}/srv/cpp"/>
+  </export>
+
+</package>
+
+

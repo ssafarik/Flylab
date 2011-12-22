@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find stage_action_server)/launch/stage_action_server.launch" />
+
+  <node pkg="flyatar_action_client" type="FlyatarActionClient.py" name="FlyatarActionClient"/>
+</launch>

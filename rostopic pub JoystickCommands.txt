@@ -1,0 +1,2 @@
+rostopic pub -r 5 Joystick/Commands joystick_commands/JoystickCommands "{'header': {'stamp': now, 'frame_id': 'Plate'}, x_velocity: -1.0, y_velocity: 0.0, radius_velocity: 0.0, tangent_velocity: 0.0, radius_inc: 0.0, theta_inc: 0.0, 'tracking': False, 'goto_start': False, 'start': False, 'stop': False, 'yes': False, 'no': False}"
+

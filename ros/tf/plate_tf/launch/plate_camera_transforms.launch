@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find flyatar_calibration)/calibration_data/camera_plate_calibration_data.launch" />
+  <node name="plate_camera_transforms" pkg="plate_tf" type="PlateCameraTransforms.py"/>
+</launch>

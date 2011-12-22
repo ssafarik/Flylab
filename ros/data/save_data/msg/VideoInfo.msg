@@ -1,0 +1,3 @@
+bool ready_for_bag_info
+bool ready_to_record
+bool saved_video

@@ -1,0 +1,31 @@
+<!-- -*- mode: XML -*- -->
+
+<!-- Example launch file for multiple cameras.
+
+     Assumes /cameras directory contains calibration and parameter files.
+-->
+
+<launch>
+
+  <!-- first camera and associated image pipeline -->
+  <group ns="unibrain" >
+    <node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
+      <rosparam file="/cameras/unibrain.yaml" /> 
+    </node>
+    <include file="/cameras/image_pipeline.launch" />
+  </group>
+
+  <!-- second camera and associated image pipeline -->
+  <group ns="sony" >
+    <node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
+      <rosparam file="/cameras/sony.yaml" /> 
+    </node>
+    <include file="/cameras/image_pipeline.launch" />
+  </group>
+
+  <!-- monitoring and configuration tools -->
+  <node pkg="rxtools" type="rxconsole" name="rxconsole" />
+  <node pkg="dynamic_reconfigure" type="reconfigure_gui"
+        name="reconfigure_gui" />
+
+</launch>

@@ -1,0 +1,17 @@
+<package>
+  <description brief="flyatar_manual">
+
+     flyatar_manual
+
+  </description>
+  <author>Peter Polidoro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/manual</url>
+  <depend package="rospy"/>
+  <depend package="joystick_commands"/>
+  <depend package="stage_message_interface"/>
+
+</package>
+
+

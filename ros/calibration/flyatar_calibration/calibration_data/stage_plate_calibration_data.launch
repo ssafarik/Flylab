@@ -1,0 +1,16 @@
+<launch>
+  <!-- Plate to Stage coordinate transform. -->
+  <!-- This is where you align the computed end-effector position with the magnet position as seen on camera. -->
+  <node pkg="tf" type="static_transform_publisher" name="statictf_Plate_Stage_publisher" args="0 0 0 0.000 0.000 0.000 1.000 Plate Stage 10" /> 
+  
+  <param name="calibration/factor" type="string" value="1.29"/>
+  <param name="calibration/origin" type="string" value="[14.0, -13.0]"/>
+  <param name="calibration/direction" type="string" value="None"/>
+<!-- T_stage_plate
+1.280  -0.110 0     -5.44
+0.110   1.280 0      1.95
+0       0     1.285  0
+0       0     0      1
+-->
+
+</launch>

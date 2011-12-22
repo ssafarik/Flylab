@@ -1,0 +1,10 @@
+(cl:defpackage flystage-srv
+  (:use )
+  (:export
+   "SRVSTAGESTATE"
+   "<SRVSTAGESTATE-REQUEST>"
+   "SRVSTAGESTATE-REQUEST"
+   "<SRVSTAGESTATE-RESPONSE>"
+   "SRVSTAGESTATE-RESPONSE"
+  ))
+

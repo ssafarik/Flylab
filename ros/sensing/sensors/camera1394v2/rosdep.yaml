@@ -1,0 +1,16 @@
+# need to collect install info for all supported OS versions
+
+# Note: Ubuntu Hardy needs special code to install libdc1394 version 2
+
+libdc1394:
+  ubuntu: libdc1394-22-dev
+
+libraw1394-dev:
+  ubuntu: libraw1394-dev
+  fedora: libraw1394-devel
+
+libdc1394-dev:
+  ubuntu: libdc1394-22-dev
+  arch: libdc1394
+  fedora: libdc1394-devel
+  macports: libdc1394

@@ -1,0 +1,8 @@
+<launch>
+	<group ns="flysim1">
+	       <node pkg="flysim" name="sim" type="flysim_node"/>
+	</group>
+	<group ns="flysim2">
+	       <node pkg="flysim" name="sim" type="flysim_node"/>
+	</group>
+</launch>

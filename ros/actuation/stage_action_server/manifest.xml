@@ -1,0 +1,23 @@
+<package>
+  <description brief="stage_action_server">
+
+     stage_action_server
+
+  </description>
+  <author>Peter Polidoro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/stage_action_server</url>
+  <depend package="rospy"/>
+  <depend package="roslib"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="tf"/>
+  <depend package="flystage"/>
+  <depend package="plate_tf"/>
+
+</package>
+
+

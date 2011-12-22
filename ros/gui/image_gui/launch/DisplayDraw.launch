@@ -1,0 +1,7 @@
+<launch>
+  <include file="$(find track_image_contours)/launch/track_image_contours_tf.launch" />
+  <!--node name="ArenaStatePublisher" pkg="plate_tf" type="ArenaStatePublisher.py"/-->
+  <node pkg="image_gui" type="DrawObjects.py" name="DrawObjects" />
+  <param name="Draw_Update_dt" type="double" value="0.010"/>
+  <node pkg="image_gui" type="DisplayDraw.py" name="ImageDisplayDraw" />
+</launch>

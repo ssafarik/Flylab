@@ -1,0 +1,11 @@
+<launch>
+
+  <!-- Stage Node-->
+  <node pkg="flystage" type="StageCommunicator.py" name="StageCommunicator"/>
+
+  <param name="Stage_Update_dt" type="double" value="0.010"/>
+
+  <include file="$(find flyatar_calibration)/calibration_data/stage_plate_calibration_data.launch" />
+
+  <node pkg="stage_message_interface" type="StageUpdate.py" name="StageUpdate"/>
+</launch>

@@ -1,0 +1,15 @@
+<package>
+  <description brief="stage_teleop">
+
+     stage_teleop is... 
+
+  </description>
+  <author>Peter Polidoro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url></url>
+  <depend package="rospy"/>
+  <depend package="joystick_ps3"/>
+</package>
+
+

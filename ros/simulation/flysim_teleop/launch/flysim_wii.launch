@@ -1,0 +1,17 @@
+<launch>
+
+ <!-- Flysim Node-->
+  <node pkg="flysim" type="flysim_node" name="sim"/>
+
+
+ <!-- joy node -->
+   <node respawn="true" pkg="wiimote"  type="wiimote_node.py" name="flysim_wii" output="screen"/>
+
+ <!-- Axes -->
+  <param name="axis_linear" value="1" type="int"/>
+  <param name="axis_angular" value="0" type="int"/>
+  <param name="scale_linear" value="2" type="double"/>
+  <param name="scale_angular" value="2" type="double"/>
+
+  <node pkg="flysim_teleop" type="flysim_teleop_joy" name="teleop"/>
+</launch>

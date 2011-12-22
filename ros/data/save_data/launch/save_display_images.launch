@@ -1,0 +1,5 @@
+<launch>
+  <param name="save_image_frame" type="string" value="/camera/image_display"/>
+  <param name="save_video_format" type="string" value="mpeg1"/>
+  <node pkg="save_data" type="SaveImages.py" name="SaveImages" />
+</launch>
