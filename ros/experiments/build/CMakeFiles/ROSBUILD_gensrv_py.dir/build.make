@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar/ros/experiments
+CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar2/ros/experiments
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar/ros/experiments/build
+CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar2/ros/experiments/build
 
 # Utility rule file for ROSBUILD_gensrv_py.
 
@@ -43,9 +43,9 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
 
 ../src/experiments/srv/__init__.py: ../src/experiments/srv/_Trigger.py
 ../src/experiments/srv/__init__.py: ../src/experiments/srv/_ExperimentParams.py
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/experiments/srv/__init__.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/gensrv_py.py --initpy /home/ssafarik/git/Flyatar/ros/experiments/srv/Trigger.srv /home/ssafarik/git/Flyatar/ros/experiments/srv/ExperimentParams.srv
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/gensrv_py.py --initpy /home/ssafarik/git/Flyatar2/ros/experiments/srv/Trigger.srv /home/ssafarik/git/Flyatar2/ros/experiments/srv/ExperimentParams.srv
 
 ../src/experiments/srv/_Trigger.py: ../srv/Trigger.srv
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/gensrv_py.py
@@ -92,11 +92,11 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/manifest.xml
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/manifest.xml
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/pluginlib/manifest.xml
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/image_common/image_transport/manifest.xml
@@ -114,9 +114,9 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/bond_core/bondcpp/manifest.xml
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/manifest.xml
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/manifest.xml
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/gui/image_gui/manifest.xml
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/manifest.xml
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -130,11 +130,11 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg_gen/generated
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg_gen/generated
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -142,11 +142,11 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/experiments/srv/_Trigger.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/msg_gen/generated
-../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar/ros/gui/image_gui/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_2)
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../src/experiments/srv/_Trigger.py: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/experiments/srv/_Trigger.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/gensrv_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/experiments/srv/Trigger.srv
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/gensrv_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/experiments/srv/Trigger.srv
 
 ../src/experiments/srv/_ExperimentParams.py: ../srv/ExperimentParams.srv
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/gensrv_py.py
@@ -198,11 +198,11 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/manifest.xml
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/manifest.xml
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/pluginlib/manifest.xml
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/image_common/image_transport/manifest.xml
@@ -220,9 +220,9 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/bond_core/bondcpp/manifest.xml
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/manifest.xml
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/manifest.xml
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/gui/image_gui/manifest.xml
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/manifest.xml
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -236,11 +236,11 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg_gen/generated
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg_gen/generated
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -248,11 +248,11 @@ CMakeFiles/ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/experiments/srv/_ExperimentParams.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/msg_gen/generated
-../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar/ros/gui/image_gui/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_3)
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../src/experiments/srv/_ExperimentParams.py: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/experiments/srv/_ExperimentParams.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/gensrv_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/experiments/srv/ExperimentParams.srv
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/gensrv_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/experiments/srv/ExperimentParams.srv
 
 ROSBUILD_gensrv_py: CMakeFiles/ROSBUILD_gensrv_py
 ROSBUILD_gensrv_py: ../src/experiments/srv/__init__.py
@@ -270,6 +270,6 @@ CMakeFiles/ROSBUILD_gensrv_py.dir/clean:
 .PHONY : CMakeFiles/ROSBUILD_gensrv_py.dir/clean
 
 CMakeFiles/ROSBUILD_gensrv_py.dir/depend:
-	cd /home/ssafarik/git/Flyatar/ros/experiments/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar/ros/experiments /home/ssafarik/git/Flyatar/ros/experiments /home/ssafarik/git/Flyatar/ros/experiments/build /home/ssafarik/git/Flyatar/ros/experiments/build /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles/ROSBUILD_gensrv_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ssafarik/git/Flyatar2/ros/experiments/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar2/ros/experiments /home/ssafarik/git/Flyatar2/ros/experiments /home/ssafarik/git/Flyatar2/ros/experiments/build /home/ssafarik/git/Flyatar2/ros/experiments/build /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles/ROSBUILD_gensrv_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ROSBUILD_gensrv_py.dir/depend
 

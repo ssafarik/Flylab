@@ -1,4 +1,4 @@
-# Install script for directory: /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes
+# Install script for directory: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)

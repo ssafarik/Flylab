@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server
+CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build
+CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build
 
 # Utility rule file for ROSBUILD_genmsg_py.
 
@@ -55,9 +55,9 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/__init__.py: ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py
 ../src/stage_action_server/msg/__init__.py: ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py
 ../src/stage_action_server/msg/__init__.py: ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/__init__.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --initpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateAction.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateGoal.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateActionGoal.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateResult.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateActionResult.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateFeedback.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateActionFeedback.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionAction.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionGoal.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionActionGoal.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionResult.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionActionResult.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionFeedback.msg /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionActionFeedback.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --initpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateAction.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateGoal.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateActionGoal.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateResult.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateActionResult.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateFeedback.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateActionFeedback.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionAction.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionGoal.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionActionGoal.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionResult.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionActionResult.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionFeedback.msg /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionActionFeedback.msg
 
 ../src/stage_action_server/msg/_ActionStageStateAction.py: ../msg/ActionStageStateAction.msg
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -101,10 +101,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -117,13 +117,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateAction.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_2)
+../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateAction.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_ActionStageStateAction.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateAction.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateAction.msg
 
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: ../msg/ActionStageStateGoal.msg
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -167,10 +167,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -183,13 +183,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateGoal.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_3)
+../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_ActionStageStateGoal.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateGoal.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateGoal.msg
 
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: ../msg/ActionStageStateActionGoal.msg
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -233,10 +233,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -249,13 +249,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_4)
+../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateActionGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_ActionStageStateActionGoal.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateActionGoal.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateActionGoal.msg
 
 ../src/stage_action_server/msg/_ActionStageStateResult.py: ../msg/ActionStageStateResult.msg
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -299,10 +299,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -315,13 +315,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateResult.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_5)
+../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_ActionStageStateResult.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateResult.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateResult.msg
 
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: ../msg/ActionStageStateActionResult.msg
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -365,10 +365,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -381,13 +381,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionResult.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_6)
+../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateActionResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_6)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_ActionStageStateActionResult.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateActionResult.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateActionResult.msg
 
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: ../msg/ActionStageStateFeedback.msg
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -431,10 +431,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -447,13 +447,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateFeedback.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_7)
+../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_7)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_ActionStageStateFeedback.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateFeedback.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateFeedback.msg
 
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: ../msg/ActionStageStateActionFeedback.msg
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -497,10 +497,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -513,13 +513,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_8)
+../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_ActionStageStateActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_8)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_ActionStageStateActionFeedback.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateActionFeedback.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateActionFeedback.msg
 
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: ../msg/UpdateStagePositionAction.msg
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -563,10 +563,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -579,13 +579,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionAction.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_9)
+../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionAction.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_9)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_UpdateStagePositionAction.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionAction.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionAction.msg
 
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: ../msg/UpdateStagePositionGoal.msg
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -629,10 +629,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -645,13 +645,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_10)
+../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_10)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_UpdateStagePositionGoal.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionGoal.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionGoal.msg
 
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: ../msg/UpdateStagePositionActionGoal.msg
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -695,10 +695,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -711,13 +711,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_11)
+../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_11)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_UpdateStagePositionActionGoal.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionActionGoal.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionActionGoal.msg
 
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: ../msg/UpdateStagePositionResult.msg
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -761,10 +761,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -777,13 +777,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionResult.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_12)
+../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_12)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_UpdateStagePositionResult.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionResult.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionResult.msg
 
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: ../msg/UpdateStagePositionActionResult.msg
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -827,10 +827,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -843,13 +843,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_13)
+../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionActionResult.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_13)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_UpdateStagePositionActionResult.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionActionResult.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionActionResult.msg
 
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: ../msg/UpdateStagePositionFeedback.msg
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -893,10 +893,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -909,13 +909,13 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_14)
+../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_14)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionFeedback.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionFeedback.msg
 
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: ../msg/UpdateStagePositionActionFeedback.msg
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -959,10 +959,10 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -975,19 +975,19 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_15)
+../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_15)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/stage_action_server/msg/_UpdateStagePositionActionFeedback.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionActionFeedback.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionActionFeedback.msg
 
 ../msg/ActionStageStateAction.msg: ../action/ActionStageState.action
 ../msg/ActionStageStateAction.msg: /opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_16)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_16)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg/ActionStageStateAction.msg, ../msg/ActionStageStateGoal.msg, ../msg/ActionStageStateActionGoal.msg, ../msg/ActionStageStateResult.msg, ../msg/ActionStageStateActionResult.msg, ../msg/ActionStageStateFeedback.msg, ../msg/ActionStageStateActionFeedback.msg"
-	/opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server ActionStageState.action
+	/opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server ActionStageState.action
 
 ../msg/ActionStageStateGoal.msg: ../msg/ActionStageStateAction.msg
 
@@ -1003,9 +1003,9 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/stage_action_server/msg/__init__.py
 
 ../msg/UpdateStagePositionAction.msg: ../action/UpdateStagePosition.action
 ../msg/UpdateStagePositionAction.msg: /opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_17)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_17)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg/UpdateStagePositionAction.msg, ../msg/UpdateStagePositionGoal.msg, ../msg/UpdateStagePositionActionGoal.msg, ../msg/UpdateStagePositionResult.msg, ../msg/UpdateStagePositionActionResult.msg, ../msg/UpdateStagePositionFeedback.msg, ../msg/UpdateStagePositionActionFeedback.msg"
-	/opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server UpdateStagePosition.action
+	/opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server UpdateStagePosition.action
 
 ../msg/UpdateStagePositionGoal.msg: ../msg/UpdateStagePositionAction.msg
 
@@ -1061,6 +1061,6 @@ CMakeFiles/ROSBUILD_genmsg_py.dir/clean:
 .PHONY : CMakeFiles/ROSBUILD_genmsg_py.dir/clean
 
 CMakeFiles/ROSBUILD_genmsg_py.dir/depend:
-	cd /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles/ROSBUILD_genmsg_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles/ROSBUILD_genmsg_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ROSBUILD_genmsg_py.dir/depend
 

@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar/ros/experiments
+CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar2/ros/experiments
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar/ros/experiments/build
+CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar2/ros/experiments/build
 
 # Utility rule file for ROSBUILD_genmsg_lisp.
 
@@ -100,11 +100,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/manifest.xml
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/manifest.xml
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/pluginlib/manifest.xml
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/image_common/image_transport/manifest.xml
@@ -122,9 +122,9 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/bond_core/bondcpp/manifest.xml
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/manifest.xml
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/manifest.xml
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/manifest.xml
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/manifest.xml
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -138,11 +138,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg_gen/generated
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg_gen/generated
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -150,11 +150,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../msg_gen/lisp/TriggerSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/msg_gen/generated
-../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_1)
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../msg_gen/lisp/TriggerSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/TriggerSettings.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_TriggerSettings.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/experiments/msg/TriggerSettings.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/experiments/msg/TriggerSettings.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/TriggerSettings.lisp
 
@@ -205,11 +205,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/manifest.xml
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/manifest.xml
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/pluginlib/manifest.xml
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/image_common/image_transport/manifest.xml
@@ -227,9 +227,9 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/bond_core/bondcpp/manifest.xml
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/manifest.xml
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/manifest.xml
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/manifest.xml
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/manifest.xml
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -243,11 +243,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg_gen/generated
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg_gen/generated
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -255,11 +255,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../msg_gen/lisp/SaveSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/msg_gen/generated
-../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_2)
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../msg_gen/lisp/SaveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/SaveSettings.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_SaveSettings.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/experiments/msg/SaveSettings.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/experiments/msg/SaveSettings.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/SaveSettings.lisp
 
@@ -310,11 +310,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/manifest.xml
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/manifest.xml
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/pluginlib/manifest.xml
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/image_common/image_transport/manifest.xml
@@ -332,9 +332,9 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/bond_core/bondcpp/manifest.xml
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/manifest.xml
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/manifest.xml
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/manifest.xml
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/manifest.xml
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -348,11 +348,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg_gen/generated
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg_gen/generated
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -360,11 +360,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../msg_gen/lisp/MoveSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/msg_gen/generated
-../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_3)
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../msg_gen/lisp/MoveSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/MoveSettings.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_MoveSettings.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/experiments/msg/MoveSettings.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/experiments/msg/MoveSettings.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/MoveSettings.lisp
 
@@ -415,11 +415,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/manifest.xml
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/manifest.xml
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/pluginlib/manifest.xml
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/image_common/image_transport/manifest.xml
@@ -437,9 +437,9 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/bond_core/bondcpp/manifest.xml
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/manifest.xml
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/manifest.xml
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/manifest.xml
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/manifest.xml
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -453,11 +453,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg_gen/generated
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg_gen/generated
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -465,11 +465,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../msg_gen/lisp/HomeSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/msg_gen/generated
-../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_4)
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../msg_gen/lisp/HomeSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/HomeSettings.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_HomeSettings.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/experiments/msg/HomeSettings.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/experiments/msg/HomeSettings.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/HomeSettings.lisp
 
@@ -520,11 +520,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/manifest.xml
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/manifest.xml
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/vision_opencv/cv_bridge/manifest.xml
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/pluginlib/manifest.xml
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/image_common/image_transport/manifest.xml
@@ -542,9 +542,9 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/bond_core/bondcpp/manifest.xml
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/manifest.xml
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/manifest.xml
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/manifest.xml
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/manifest.xml
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -558,11 +558,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg_gen/generated
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg_gen/generated
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/msg_gen/generated
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/driver_common/dynamic_reconfigure/srv_gen/generated
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/generated
@@ -570,11 +570,11 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_ExperimentSettings.lis
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../msg_gen/lisp/ExperimentSettings.lisp: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/sensing/processing/track_image_contours/msg_gen/generated
-../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar/ros/gui/image_gui/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_5)
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../msg_gen/lisp/ExperimentSettings.lisp: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/ExperimentSettings.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_ExperimentSettings.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/experiments/msg/ExperimentSettings.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/experiments/msg/ExperimentSettings.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/ExperimentSettings.lisp
 
@@ -608,6 +608,6 @@ CMakeFiles/ROSBUILD_genmsg_lisp.dir/clean:
 .PHONY : CMakeFiles/ROSBUILD_genmsg_lisp.dir/clean
 
 CMakeFiles/ROSBUILD_genmsg_lisp.dir/depend:
-	cd /home/ssafarik/git/Flyatar/ros/experiments/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar/ros/experiments /home/ssafarik/git/Flyatar/ros/experiments /home/ssafarik/git/Flyatar/ros/experiments/build /home/ssafarik/git/Flyatar/ros/experiments/build /home/ssafarik/git/Flyatar/ros/experiments/build/CMakeFiles/ROSBUILD_genmsg_lisp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ssafarik/git/Flyatar2/ros/experiments/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar2/ros/experiments /home/ssafarik/git/Flyatar2/ros/experiments /home/ssafarik/git/Flyatar2/ros/experiments/build /home/ssafarik/git/Flyatar2/ros/experiments/build /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles/ROSBUILD_genmsg_lisp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ROSBUILD_genmsg_lisp.dir/depend
 

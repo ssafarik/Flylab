@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server
+CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build
+CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build
 
 # Utility rule file for ROSBUILD_genmsg_lisp.
 
@@ -124,10 +124,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -140,13 +140,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateAction.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_1)
+../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/ActionStageStateAction.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/ActionStageStateAction.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_ActionStageStateAction.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateAction.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateAction.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/ActionStageStateAction.lisp
 
@@ -194,10 +194,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -210,13 +210,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateGoal.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_2)
+../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/ActionStageStateGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/ActionStageStateGoal.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_ActionStageStateGoal.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateGoal.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateGoal.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/ActionStageStateGoal.lisp
 
@@ -264,10 +264,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -280,13 +280,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateActionGoal.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_3)
+../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/ActionStageStateActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/ActionStageStateActionGoal.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_ActionStageStateActionGoal.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateActionGoal.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateActionGoal.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/ActionStageStateActionGoal.lisp
 
@@ -334,10 +334,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -350,13 +350,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateResult.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_4)
+../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/ActionStageStateResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/ActionStageStateResult.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_ActionStageStateResult.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateResult.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateResult.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/ActionStageStateResult.lisp
 
@@ -404,10 +404,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -420,13 +420,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateActionResult.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_5)
+../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/ActionStageStateActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/ActionStageStateActionResult.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_ActionStageStateActionResult.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateActionResult.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateActionResult.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/ActionStageStateActionResult.lisp
 
@@ -474,10 +474,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -490,13 +490,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_6)
+../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/ActionStageStateFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_6)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/ActionStageStateFeedback.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_ActionStageStateFeedback.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateFeedback.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateFeedback.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/ActionStageStateFeedback.lisp
 
@@ -544,10 +544,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -560,13 +560,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_7)
+../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/ActionStageStateActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_7)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/ActionStageStateActionFeedback.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_ActionStageStateActionFeedback.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/ActionStageStateActionFeedback.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/ActionStageStateActionFeedback.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/ActionStageStateActionFeedback.lisp
 
@@ -614,10 +614,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -630,13 +630,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionAction.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_8)
+../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionAction.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_8)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/UpdateStagePositionAction.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_UpdateStagePositionAction.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionAction.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionAction.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/UpdateStagePositionAction.lisp
 
@@ -684,10 +684,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -700,13 +700,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionGoal.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_9)
+../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_9)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/UpdateStagePositionGoal.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_UpdateStagePositionGoal.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionGoal.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionGoal.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/UpdateStagePositionGoal.lisp
 
@@ -754,10 +754,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -770,13 +770,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_10)
+../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionActionGoal.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_10)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_UpdateStagePositionActionGoal.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionActionGoal.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionActionGoal.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/UpdateStagePositionActionGoal.lisp
 
@@ -824,10 +824,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -840,13 +840,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionResult.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_11)
+../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_11)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/UpdateStagePositionResult.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_UpdateStagePositionResult.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionResult.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionResult.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/UpdateStagePositionResult.lisp
 
@@ -894,10 +894,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -910,13 +910,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_12)
+../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionActionResult.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_12)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/UpdateStagePositionActionResult.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_UpdateStagePositionActionResult.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionActionResult.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionActionResult.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/UpdateStagePositionActionResult.lisp
 
@@ -964,10 +964,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -980,13 +980,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_13)
+../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_13)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/UpdateStagePositionFeedback.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_UpdateStagePositionFeedback.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionFeedback.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionFeedback.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/UpdateStagePositionFeedback.lisp
 
@@ -1034,10 +1034,10 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/utilities/roswtf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/manifest.xml
-../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/pythonmodules/manifest.xml
-../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/manifest.xml
+../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
+../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/vision_opencv/opencv2/manifest.xml
-../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/manifest.xml
+../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/manifest.xml
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -1050,13 +1050,13 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/actuation/flystage/srv_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/msg_gen/generated
-../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar/ros/tf/plate_tf/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_14)
+../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/msg_gen/generated
+../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp: /home/ssafarik/git/Flyatar2/ros/tf/plate_tf/srv_gen/generated
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_14)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp, ../msg_gen/lisp/_package.lisp, ../msg_gen/lisp/_package_UpdateStagePositionActionFeedback.lisp"
-	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/msg/UpdateStagePositionActionFeedback.msg
+	/opt/ros/electric/stacks/ros_comm/clients/roslisp/scripts/genmsg_lisp.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg/UpdateStagePositionActionFeedback.msg
 
 ../msg_gen/lisp/_package.lisp: ../msg_gen/lisp/UpdateStagePositionActionFeedback.lisp
 
@@ -1064,9 +1064,9 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 
 ../msg/ActionStageStateAction.msg: ../action/ActionStageState.action
 ../msg/ActionStageStateAction.msg: /opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_15)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_15)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg/ActionStageStateAction.msg, ../msg/ActionStageStateGoal.msg, ../msg/ActionStageStateActionGoal.msg, ../msg/ActionStageStateResult.msg, ../msg/ActionStageStateActionResult.msg, ../msg/ActionStageStateFeedback.msg, ../msg/ActionStageStateActionFeedback.msg"
-	/opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server ActionStageState.action
+	/opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server ActionStageState.action
 
 ../msg/ActionStageStateGoal.msg: ../msg/ActionStageStateAction.msg
 
@@ -1082,9 +1082,9 @@ CMakeFiles/ROSBUILD_genmsg_lisp: ../msg_gen/lisp/_package_UpdateStagePositionAct
 
 ../msg/UpdateStagePositionAction.msg: ../action/UpdateStagePosition.action
 ../msg/UpdateStagePositionAction.msg: /opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_16)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles $(CMAKE_PROGRESS_16)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg/UpdateStagePositionAction.msg, ../msg/UpdateStagePositionGoal.msg, ../msg/UpdateStagePositionActionGoal.msg, ../msg/UpdateStagePositionResult.msg, ../msg/UpdateStagePositionActionResult.msg, ../msg/UpdateStagePositionFeedback.msg, ../msg/UpdateStagePositionActionFeedback.msg"
-	/opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server UpdateStagePosition.action
+	/opt/ros/electric/stacks/common_msgs/actionlib_msgs/genaction.py /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server UpdateStagePosition.action
 
 ../msg/UpdateStagePositionGoal.msg: ../msg/UpdateStagePositionAction.msg
 
@@ -1167,6 +1167,6 @@ CMakeFiles/ROSBUILD_genmsg_lisp.dir/clean:
 .PHONY : CMakeFiles/ROSBUILD_genmsg_lisp.dir/clean
 
 CMakeFiles/ROSBUILD_genmsg_lisp.dir/depend:
-	cd /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build /home/ssafarik/git/Flyatar/ros/actuation/stage_action_server/build/CMakeFiles/ROSBUILD_genmsg_lisp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/build/CMakeFiles/ROSBUILD_genmsg_lisp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ROSBUILD_genmsg_lisp.dir/depend
 
