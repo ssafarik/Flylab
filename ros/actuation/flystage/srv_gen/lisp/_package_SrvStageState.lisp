@@ -1,8 +1,8 @@
 (cl:in-package flystage-srv)
 (cl:export '(STATE-VAL
           STATE
-          VELOCITY-VAL
-          VELOCITY
+          SPEED-VAL
+          SPEED
           STATE-VAL
           STATE
 ))

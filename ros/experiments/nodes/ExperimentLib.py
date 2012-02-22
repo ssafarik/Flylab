@@ -125,9 +125,10 @@ def TriggerServiceAttach():
 
 def NewTrialServiceAttach():
     NewTrial = None    
-    rospy.wait_for_service('new_trial')
+    stSrv = "new_trial"
+    rospy.wait_for_service(stSrv)
     try:
-        NewTrial = rospy.ServiceProxy('new_trial', ExperimentParams)
+        NewTrial = rospy.ServiceProxy(stSrv, ExperimentParams)
     except rospy.ServiceException, e:
         rospy.logwarn ("FAILED %s: %s"%(stSrv,e))
         
@@ -226,6 +227,9 @@ class NewExperiment (smach.State):
 
 #######################################################################################################
 #######################################################################################################
+# NewTrial() - Increments the trial number, untriggers, and calls the 
+#              new_trial service (which begins recording).
+#
 class NewTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
@@ -508,9 +512,9 @@ class GotoHome (smach.State):
             self.goal.state.pose.position.y = userdata.experimentparamsIn.home.y
             self.set_stage_state(SrvStageStateRequest(state=MsgFrameState(header=self.goal.state.header, 
                                                                           pose=self.goal.state.pose),
-                                                      velocity = userdata.experimentparamsIn.move.velocity))
+                                                      speed = userdata.experimentparamsIn.move.speed))
 
-
+            rv = 'aborted'
             while True:
                 # Are we there yet?
                 
@@ -520,14 +524,18 @@ class GotoHome (smach.State):
                                     self.goal.state.pose.position.y])                
                 r = N.linalg.norm(ptRobot-ptTarget)
                 rospy.logwarn ('EL GotoHome() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
+                
+                
                 if (r <= userdata.experimentparamsIn.home.tolerance):
+                    rospy.sleep(0.5) # Allow some settling time.
                     rv = 'succeeded'
                     break
-    
+                
                 
                 if self.preempt_requested():
                     rv = 'preempted'
                     break
+                
                 
                 if userdata.experimentparamsIn.home.timeout != -1:
                     if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.home.timeout:
@@ -581,7 +589,7 @@ class MoveRobot (smach.State):
 
 
     def execute(self, userdata):
-        rospy.logwarn("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.distance, userdata.experimentparamsIn.move.angle, userdata.experimentparamsIn.move.velocity])
+        rospy.logwarn("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.distance, userdata.experimentparamsIn.move.angle, userdata.experimentparamsIn.move.speed])
 
         rv = 'succeeded'
         if userdata.experimentparamsIn.move.enabled:
@@ -606,18 +614,18 @@ class MoveRobot (smach.State):
 
                 
                 # Get a random velocity once per move, non-random velocity always.
-                if (userdata.experimentparamsIn.move.velocityType=='random'):
+                if (userdata.experimentparamsIn.move.speedType=='random'):
                     if (self.ptTarget is None):
                         # Choose a random velocity forward or backward.                        
-                        velTarget = userdata.experimentparamsIn.move.velocity * (2.0*N.random.random() - 1.0) # Choose a random vel, plus or minus.
+                        speedTarget = userdata.experimentparamsIn.move.speed * (2.0*N.random.random() - 1.0) # Choose a random vel, plus or minus.
                         # Choose a random velocity forward or backward.                        
-                        if velTarget < 0:
-                            velTarget = -velTarget
+                        if speedTarget < 0:
+                            speedTarget = -speedTarget
                             angleDirection = N.pi
                         else:
                             angleDirection = 0.0
                 else:
-                    velTarget = userdata.experimentparamsIn.move.velocity
+                    speedTarget = userdata.experimentparamsIn.move.speed
                     angleDirection = 0.0
 
                 
@@ -670,7 +678,7 @@ class MoveRobot (smach.State):
                     #rospy.logwarn('EL calling set_stage_state(%s) pre' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
                     self.set_stage_state(SrvStageStateRequest(state=MsgFrameState(header=self.goal.state.header, 
                                                                                   pose=self.goal.state.pose),
-                                                              velocity = velTarget))
+                                                              speed = speedTarget))
                     #rospy.logwarn('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
     
     
@@ -729,25 +737,25 @@ class Experiment():
             # Add states.
             smach.StateMachine.add('NEW_EXPERIMENT',
                                    NewExperiment(),
-                                   transitions={'succeeded':'NEW_TRIAL',
+                                   transitions={'succeeded':'GOTO_HOME_PRE',
                                                 'aborted':'aborted',
                                                 'preempted':'NEW_EXPERIMENT'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
-            smach.StateMachine.add('NEW_TRIAL',
-                                   NewTrial(),
-                                   transitions={'succeeded':'GOTO_HOME',
-                                                'aborted':'aborted',
-                                                'preempted':'NEW_TRIAL'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
-
-            smach.StateMachine.add('GOTO_HOME',
+            smach.StateMachine.add('GOTO_HOME_PRE',
                                    GotoHome(),
                                    #smach_ros.SimpleActionState('StageActionServer',
                                    #                            ActionStageStateAction,
                                    #                            goal=self.goalStart),
+                                   transitions={'succeeded':'NEW_TRIAL',
+                                                'aborted':'aborted',
+                                                'preempted':'GOTO_HOME_PRE'},
+                                   remapping={'experimentparamsIn':'experimentparams',
+                                              'experimentparamsOut':'experimentparams'})
+
+            smach.StateMachine.add('NEW_TRIAL',
+                                   NewTrial(),
                                    transitions={'succeeded':'ENTRYWAIT',
                                                 'aborted':'aborted',
                                                 'preempted':'NEW_TRIAL'},
@@ -780,6 +788,17 @@ class Experiment():
 
             smach.StateMachine.add('EXITTRIGGER', 
                                    TriggerOnStates(type='exit'),
+                                   transitions={'succeeded':'GOTO_HOME_POST',
+                                                'aborted':'aborted',
+                                                'preempted':'GOTO_HOME_POST'},
+                                   remapping={'experimentparamsIn':'experimentparams',
+                                              'experimentparamsOut':'experimentparams'})
+
+            smach.StateMachine.add('GOTO_HOME_POST',
+                                   GotoHome(),
+                                   #smach_ros.SimpleActionState('StageActionServer',
+                                   #                            ActionStageStateAction,
+                                   #                            goal=self.goalStart),
                                    transitions={'succeeded':'NEW_TRIAL',
                                                 'aborted':'aborted',
                                                 'preempted':'NEW_TRIAL'},

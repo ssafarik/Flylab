@@ -83,14 +83,14 @@ public:
   ROS_DEPRECATED const std::string __getDataType() const { return __s_getDataType_(); }
 
 private:
-  static const char* __s_getMD5Sum_() { return "31569e4c8168e21efe317bee2181e2ed"; }
+  static const char* __s_getMD5Sum_() { return "88d290268c3a4162a2f4f46c955fc6bb"; }
 public:
   ROS_DEPRECATED static const std::string __s_getMD5Sum() { return __s_getMD5Sum_(); }
 
   ROS_DEPRECATED const std::string __getMD5Sum() const { return __s_getMD5Sum_(); }
 
 private:
-  static const char* __s_getServerMD5Sum_() { return "25e42622ae742baa21e0c291fb4e302e"; }
+  static const char* __s_getServerMD5Sum_() { return "9a3ed8f74b7b0897436660f47751e051"; }
 public:
   ROS_DEPRECATED static const std::string __s_getServerMD5Sum() { return __s_getServerMD5Sum_(); }
 
@@ -147,8 +147,8 @@ string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'\n\
 float64 distance\n\
 float64 angle\n\
 string angleType # 'random' or 'constant'\n\
-float64 velocity\n\
-string velocityType # 'random' or 'constant'\n\
+float64 speed\n\
+string speedType # 'random' or 'constant'\n\
 float64 tolerance\n\
 float64 timeout\n\
 \n\
@@ -250,7 +250,7 @@ public:
   ROS_DEPRECATED const std::string __getMD5Sum() const { return __s_getMD5Sum_(); }
 
 private:
-  static const char* __s_getServerMD5Sum_() { return "25e42622ae742baa21e0c291fb4e302e"; }
+  static const char* __s_getServerMD5Sum_() { return "9a3ed8f74b7b0897436660f47751e051"; }
 public:
   ROS_DEPRECATED static const std::string __s_getServerMD5Sum() { return __s_getServerMD5Sum_(); }
 
@@ -320,12 +320,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::experiments::ExperimentParamsRequest_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "31569e4c8168e21efe317bee2181e2ed";
+    return "88d290268c3a4162a2f4f46c955fc6bb";
   }
 
   static const char* value(const  ::experiments::ExperimentParamsRequest_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0x31569e4c8168e21eULL;
-  static const uint64_t static_value2 = 0xfe317bee2181e2edULL;
+  static const uint64_t static_value1 = 0x88d290268c3a4162ULL;
+  static const uint64_t static_value2 = 0xa2f4f46c955fc6bbULL;
 };
 
 template<class ContainerAllocator>
@@ -392,8 +392,8 @@ string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'\n\
 float64 distance\n\
 float64 angle\n\
 string angleType # 'random' or 'constant'\n\
-float64 velocity\n\
-string velocityType # 'random' or 'constant'\n\
+float64 speed\n\
+string speedType # 'random' or 'constant'\n\
 float64 tolerance\n\
 float64 timeout\n\
 \n\
@@ -512,7 +512,7 @@ template<>
 struct MD5Sum<experiments::ExperimentParams> {
   static const char* value() 
   {
-    return "25e42622ae742baa21e0c291fb4e302e";
+    return "9a3ed8f74b7b0897436660f47751e051";
   }
 
   static const char* value(const experiments::ExperimentParams&) { return value(); } 
@@ -532,7 +532,7 @@ template<class ContainerAllocator>
 struct MD5Sum<experiments::ExperimentParamsRequest_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "25e42622ae742baa21e0c291fb4e302e";
+    return "9a3ed8f74b7b0897436660f47751e051";
   }
 
   static const char* value(const experiments::ExperimentParamsRequest_<ContainerAllocator> &) { return value(); } 
@@ -552,7 +552,7 @@ template<class ContainerAllocator>
 struct MD5Sum<experiments::ExperimentParamsResponse_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "25e42622ae742baa21e0c291fb4e302e";
+    return "9a3ed8f74b7b0897436660f47751e051";
   }
 
   static const char* value(const experiments::ExperimentParamsResponse_<ContainerAllocator> &) { return value(); } 

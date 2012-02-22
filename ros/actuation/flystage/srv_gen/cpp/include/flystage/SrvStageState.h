@@ -29,21 +29,21 @@ struct SrvStageStateRequest_ {
 
   SrvStageStateRequest_()
   : state()
-  , velocity(0.0)
+  , speed(0.0)
   {
   }
 
   SrvStageStateRequest_(const ContainerAllocator& _alloc)
   : state(_alloc)
-  , velocity(0.0)
+  , speed(0.0)
   {
   }
 
   typedef  ::flystage::MsgFrameState_<ContainerAllocator>  _state_type;
    ::flystage::MsgFrameState_<ContainerAllocator>  state;
 
-  typedef double _velocity_type;
-  double velocity;
+  typedef double _speed_type;
+  double speed;
 
 
 private:
@@ -54,14 +54,14 @@ public:
   ROS_DEPRECATED const std::string __getDataType() const { return __s_getDataType_(); }
 
 private:
-  static const char* __s_getMD5Sum_() { return "7454f4e3be461aad262545ddd62f41ff"; }
+  static const char* __s_getMD5Sum_() { return "7a56fa867b82f14dad61e4fac002dbaf"; }
 public:
   ROS_DEPRECATED static const std::string __s_getMD5Sum() { return __s_getMD5Sum_(); }
 
   ROS_DEPRECATED const std::string __getMD5Sum() const { return __s_getMD5Sum_(); }
 
 private:
-  static const char* __s_getServerMD5Sum_() { return "5ceca4cecd48a67d8d224ba74f927fbe"; }
+  static const char* __s_getServerMD5Sum_() { return "a77943b8f87f5da957e62998e6d39b03"; }
 public:
   ROS_DEPRECATED static const std::string __s_getServerMD5Sum() { return __s_getServerMD5Sum_(); }
 
@@ -69,7 +69,7 @@ public:
 
 private:
   static const char* __s_getMessageDefinition_() { return "MsgFrameState state\n\
-float64 velocity\n\
+float64 speed\n\
 \n\
 ================================================================================\n\
 MSG: flystage/MsgFrameState\n\
@@ -141,7 +141,7 @@ public:
   {
     ros::serialization::OStream stream(write_ptr, 1000000000);
     ros::serialization::serialize(stream, state);
-    ros::serialization::serialize(stream, velocity);
+    ros::serialization::serialize(stream, speed);
     return stream.getData();
   }
 
@@ -149,7 +149,7 @@ public:
   {
     ros::serialization::IStream stream(read_ptr, 1000000000);
     ros::serialization::deserialize(stream, state);
-    ros::serialization::deserialize(stream, velocity);
+    ros::serialization::deserialize(stream, speed);
     return stream.getData();
   }
 
@@ -157,7 +157,7 @@ public:
   {
     uint32_t size = 0;
     size += ros::serialization::serializationLength(state);
-    size += ros::serialization::serializationLength(velocity);
+    size += ros::serialization::serializationLength(speed);
     return size;
   }
 
@@ -204,7 +204,7 @@ public:
   ROS_DEPRECATED const std::string __getMD5Sum() const { return __s_getMD5Sum_(); }
 
 private:
-  static const char* __s_getServerMD5Sum_() { return "5ceca4cecd48a67d8d224ba74f927fbe"; }
+  static const char* __s_getServerMD5Sum_() { return "a77943b8f87f5da957e62998e6d39b03"; }
 public:
   ROS_DEPRECATED static const std::string __s_getServerMD5Sum() { return __s_getServerMD5Sum_(); }
 
@@ -334,12 +334,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::flystage::SrvStageStateRequest_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "7454f4e3be461aad262545ddd62f41ff";
+    return "7a56fa867b82f14dad61e4fac002dbaf";
   }
 
   static const char* value(const  ::flystage::SrvStageStateRequest_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0x7454f4e3be461aadULL;
-  static const uint64_t static_value2 = 0x262545ddd62f41ffULL;
+  static const uint64_t static_value1 = 0x7a56fa867b82f14dULL;
+  static const uint64_t static_value2 = 0xad61e4fac002dbafULL;
 };
 
 template<class ContainerAllocator>
@@ -357,7 +357,7 @@ struct Definition< ::flystage::SrvStageStateRequest_<ContainerAllocator> > {
   static const char* value() 
   {
     return "MsgFrameState state\n\
-float64 velocity\n\
+float64 speed\n\
 \n\
 ================================================================================\n\
 MSG: flystage/MsgFrameState\n\
@@ -544,7 +544,7 @@ template<class ContainerAllocator> struct Serializer< ::flystage::SrvStageStateR
   template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
   {
     stream.next(m.state);
-    stream.next(m.velocity);
+    stream.next(m.speed);
   }
 
   ROS_DECLARE_ALLINONE_SERIALIZER;
@@ -578,7 +578,7 @@ template<>
 struct MD5Sum<flystage::SrvStageState> {
   static const char* value() 
   {
-    return "5ceca4cecd48a67d8d224ba74f927fbe";
+    return "a77943b8f87f5da957e62998e6d39b03";
   }
 
   static const char* value(const flystage::SrvStageState&) { return value(); } 
@@ -598,7 +598,7 @@ template<class ContainerAllocator>
 struct MD5Sum<flystage::SrvStageStateRequest_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "5ceca4cecd48a67d8d224ba74f927fbe";
+    return "a77943b8f87f5da957e62998e6d39b03";
   }
 
   static const char* value(const flystage::SrvStageStateRequest_<ContainerAllocator> &) { return value(); } 
@@ -618,7 +618,7 @@ template<class ContainerAllocator>
 struct MD5Sum<flystage::SrvStageStateResponse_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "5ceca4cecd48a67d8d224ba74f927fbe";
+    return "a77943b8f87f5da957e62998e6d39b03";
   }
 
   static const char* value(const flystage::SrvStageStateResponse_<ContainerAllocator> &) { return value(); } 

@@ -5,7 +5,7 @@ import struct
 import experiments.msg
 
 class ExperimentParamsRequest(roslib.message.Message):
-  _md5sum = "31569e4c8168e21efe317bee2181e2ed"
+  _md5sum = "88d290268c3a4162a2f4f46c955fc6bb"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings experiment
@@ -58,8 +58,8 @@ string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
 float64 distance
 float64 angle
 string angleType # 'random' or 'constant'
-float64 velocity
-string velocityType # 'random' or 'constant'
+float64 speed
+string speedType # 'random' or 'constant'
 float64 tolerance
 float64 timeout
 
@@ -151,8 +151,8 @@ bool onlyWhileTriggered
       _x = self.move.angleType
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.move.velocity))
-      _x = self.move.velocityType
+      buff.write(_struct_d.pack(self.move.speed))
+      _x = self.move.speedType
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
@@ -239,13 +239,13 @@ bool onlyWhileTriggered
       self.move.angleType = str[start:end]
       start = end
       end += 8
-      (self.move.velocity,) = _struct_d.unpack(str[start:end])
+      (self.move.speed,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.velocityType = str[start:end]
+      self.move.speedType = str[start:end]
       _x = self
       start = end
       end += 65
@@ -311,8 +311,8 @@ bool onlyWhileTriggered
       _x = self.move.angleType
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.move.velocity))
-      _x = self.move.velocityType
+      buff.write(_struct_d.pack(self.move.speed))
+      _x = self.move.speedType
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
@@ -401,13 +401,13 @@ bool onlyWhileTriggered
       self.move.angleType = str[start:end]
       start = end
       end += 8
-      (self.move.velocity,) = _struct_d.unpack(str[start:end])
+      (self.move.speed,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.velocityType = str[start:end]
+      self.move.speedType = str[start:end]
       _x = self
       start = end
       end += 65
@@ -558,6 +558,6 @@ _struct_I = roslib.message.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(roslib.message.ServiceDefinition):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '25e42622ae742baa21e0c291fb4e302e'
+  _md5sum = '9a3ed8f74b7b0897436660f47751e051'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

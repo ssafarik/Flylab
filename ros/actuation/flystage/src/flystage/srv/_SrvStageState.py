@@ -7,11 +7,11 @@ import flystage.msg
 import std_msgs.msg
 
 class SrvStageStateRequest(roslib.message.Message):
-  _md5sum = "7454f4e3be461aad262545ddd62f41ff"
+  _md5sum = "7a56fa867b82f14dad61e4fac002dbaf"
   _type = "flystage/SrvStageStateRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """MsgFrameState state
-float64 velocity
+float64 speed
 
 ================================================================================
 MSG: flystage/MsgFrameState
@@ -74,7 +74,7 @@ float64 x
 float64 y
 float64 z
 """
-  __slots__ = ['state','velocity']
+  __slots__ = ['state','speed']
   _slot_types = ['flystage/MsgFrameState','float64']
 
   def __init__(self, *args, **kwds):
@@ -85,7 +85,7 @@ float64 z
     changes.  You cannot mix in-order arguments and keyword arguments.
     
     The available fields are:
-       state,velocity
+       state,speed
     
     @param args: complete set of field values, in .msg order
     @param kwds: use keyword arguments corresponding to message field names
@@ -96,11 +96,11 @@ float64 z
       #message fields cannot be None, assign default values for those that are
       if self.state is None:
         self.state = flystage.msg.MsgFrameState()
-      if self.velocity is None:
-        self.velocity = 0.
+      if self.speed is None:
+        self.speed = 0.
     else:
       self.state = flystage.msg.MsgFrameState()
-      self.velocity = 0.
+      self.speed = 0.
 
   def _get_types(self):
     """
@@ -121,7 +121,7 @@ float64 z
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.velocity))
+      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -148,7 +148,7 @@ float64 z
       _x = self
       start = end
       end += 112
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.velocity,) = _struct_14d.unpack(str[start:end])
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.speed,) = _struct_14d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
@@ -169,7 +169,7 @@ float64 z
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.velocity))
+      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -198,7 +198,7 @@ float64 z
       _x = self
       start = end
       end += 112
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.velocity,) = _struct_14d.unpack(str[start:end])
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.speed,) = _struct_14d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
@@ -414,6 +414,6 @@ _struct_3I = struct.Struct("<3I")
 _struct_13d = struct.Struct("<13d")
 class SrvStageState(roslib.message.ServiceDefinition):
   _type          = 'flystage/SrvStageState'
-  _md5sum = '5ceca4cecd48a67d8d224ba74f927fbe'
+  _md5sum = 'a77943b8f87f5da957e62998e6d39b03'
   _request_class  = SrvStageStateRequest
   _response_class = SrvStageStateResponse

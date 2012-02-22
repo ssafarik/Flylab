@@ -73,11 +73,14 @@ class SaveArenaState:
     def OnShutdown_callback(self):
         if (self.fid is not None) and (not self.fid.closed):
             self.fid.close()
+            rospy.logwarn('SA close()')
+            
         
 
     # Trigger_callback() 
     #    This gets called when the triggering state changes, either a trigger state has succeeded,
     #     or a trial run has concluded.
+    #    Closes the log file if triggering state goes from True->False.
     #
     def Trigger_callback(self, reqTrigger):
         if self.triggered != reqTrigger.triggered:
@@ -87,6 +90,7 @@ class SaveArenaState:
             if (self.saveOnlyWhileTriggered) and (not self.triggered):
                 if self.fid is not None and not self.fid.closed:
                     self.fid.close()
+                    rospy.logwarn('SA close()')
             
         return self.triggered
         
@@ -100,14 +104,16 @@ class SaveArenaState:
                 if self.fid is not None:
                     if not self.fid.closed:
                         self.fid.close()
+                        rospy.logwarn('SA close()')
 
                 self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
                 self.fid = open(self.filename, 'w')
+                rospy.logwarn('SA open(%s)' % self.filename)
                 self.fid.write(self.headingsExperiment)
-                header_row = self.templateExperiment.format(date_time                 = str(rospy.Time.now().to_sec()),
-                                                            description               = experimentparamsReq.experiment.description,
-                                                            maxTrials                 = experimentparamsReq.experiment.maxTrials,
-                                                            trial                     = experimentparamsReq.experiment.trial,
+                header_row = self.templateExperiment.format(date_time                  = str(rospy.Time.now().to_sec()),
+                                                            description                = experimentparamsReq.experiment.description,
+                                                            maxTrials                  = experimentparamsReq.experiment.maxTrials,
+                                                            trial                      = experimentparamsReq.experiment.trial,
                                                             waitEntry                  = experimentparamsReq.waitEntry,
                                                             trigger1DistanceMin        = experimentparamsReq.triggerEntry.distanceMin,
                                                             trigger1DistanceMax        = experimentparamsReq.triggerEntry.distanceMax,
@@ -127,12 +133,13 @@ class SaveArenaState:
                                                             trigger2AngleTest          = experimentparamsReq.triggerExit.angleTest,
                                                             trigger2AngleTestBilateral = experimentparamsReq.triggerExit.angleTestBilateral,
                                                             trigger2TimeHold           = experimentparamsReq.triggerExit.timeHold,
-                                                            robot_width               = self.robot_width,
-                                                            robot_height              = self.robot_height,
-                                                            robot_visible             = self.robot_visible,
-                                                            robot_paint               = str(self.robot_paint),
-                                                            robot_scent               = str(self.robot_scent)
+                                                            robot_width                = self.robot_width,
+                                                            robot_height               = self.robot_height,
+                                                            robot_visible              = self.robot_visible,
+                                                            robot_paint                = str(self.robot_paint),
+                                                            robot_scent                = str(self.robot_scent)
                                                             )
+
                 self.fid.write(header_row)
                 self.fid.write(self.headingsAbsolute)
 
@@ -150,6 +157,7 @@ class SaveArenaState:
             if bSave:                    
                 if self.fid.closed:
                     self.fid = open(self.filename, 'wa')
+                    rospy.logwarn('SA open2(%s)' % self.filename)
                     
                 # Get the state of the robot.
                 stateRobot = arenastate.robot

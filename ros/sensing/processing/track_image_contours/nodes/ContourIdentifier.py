@@ -277,7 +277,7 @@ class Fly:
                 #self.lpOffsetY.Update(None,t)
                 #self.lpFlip.Update(0.0, t)
                 angleContour = 0.0
-                rospy.logwarn('CI FILTER READ on contour==None')
+                #rospy.logwarn('CI FILTER READ on contour==None')
                 
                 
             if self.isVisible:

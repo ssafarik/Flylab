@@ -42,14 +42,14 @@
     :initarg :angleType
     :type cl:string
     :initform "")
-   (velocity
-    :reader velocity
-    :initarg :velocity
+   (speed
+    :reader speed
+    :initarg :speed
     :type cl:float
     :initform 0.0)
-   (velocityType
-    :reader velocityType
-    :initarg :velocityType
+   (speedType
+    :reader speedType
+    :initarg :speedType
     :type cl:string
     :initform "")
    (tolerance
@@ -107,15 +107,15 @@
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader experiments-msg:angleType-val is deprecated.  Use experiments-msg:angleType instead.")
   (angleType m))
 
-(cl:ensure-generic-function 'velocity-val :lambda-list '(m))
-(cl:defmethod velocity-val ((m <MoveSettings>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader experiments-msg:velocity-val is deprecated.  Use experiments-msg:velocity instead.")
-  (velocity m))
+(cl:ensure-generic-function 'speed-val :lambda-list '(m))
+(cl:defmethod speed-val ((m <MoveSettings>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader experiments-msg:speed-val is deprecated.  Use experiments-msg:speed instead.")
+  (speed m))
 
-(cl:ensure-generic-function 'velocityType-val :lambda-list '(m))
-(cl:defmethod velocityType-val ((m <MoveSettings>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader experiments-msg:velocityType-val is deprecated.  Use experiments-msg:velocityType instead.")
-  (velocityType m))
+(cl:ensure-generic-function 'speedType-val :lambda-list '(m))
+(cl:defmethod speedType-val ((m <MoveSettings>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader experiments-msg:speedType-val is deprecated.  Use experiments-msg:speedType instead.")
+  (speedType m))
 
 (cl:ensure-generic-function 'tolerance-val :lambda-list '(m))
 (cl:defmethod tolerance-val ((m <MoveSettings>))
@@ -166,7 +166,7 @@
     (cl:write-byte (cl:ldb (cl:byte 8 16) __ros_str_len) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) __ros_str_len) ostream))
   (cl:map cl:nil #'(cl:lambda (c) (cl:write-byte (cl:char-code c) ostream)) (cl:slot-value msg 'angleType))
-  (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'velocity))))
+  (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'speed))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
@@ -175,12 +175,12 @@
     (cl:write-byte (cl:ldb (cl:byte 8 40) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 48) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 56) bits) ostream))
-  (cl:let ((__ros_str_len (cl:length (cl:slot-value msg 'velocityType))))
+  (cl:let ((__ros_str_len (cl:length (cl:slot-value msg 'speedType))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) __ros_str_len) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) __ros_str_len) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) __ros_str_len) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) __ros_str_len) ostream))
-  (cl:map cl:nil #'(cl:lambda (c) (cl:write-byte (cl:char-code c) ostream)) (cl:slot-value msg 'velocityType))
+  (cl:map cl:nil #'(cl:lambda (c) (cl:write-byte (cl:char-code c) ostream)) (cl:slot-value msg 'speedType))
   (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'tolerance))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
@@ -257,15 +257,15 @@
       (cl:setf (cl:ldb (cl:byte 8 40) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 48) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 56) bits) (cl:read-byte istream))
-    (cl:setf (cl:slot-value msg 'velocity) (roslisp-utils:decode-double-float-bits bits)))
+    (cl:setf (cl:slot-value msg 'speed) (roslisp-utils:decode-double-float-bits bits)))
     (cl:let ((__ros_str_len 0))
       (cl:setf (cl:ldb (cl:byte 8 0) __ros_str_len) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 8) __ros_str_len) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 16) __ros_str_len) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 24) __ros_str_len) (cl:read-byte istream))
-      (cl:setf (cl:slot-value msg 'velocityType) (cl:make-string __ros_str_len))
+      (cl:setf (cl:slot-value msg 'speedType) (cl:make-string __ros_str_len))
       (cl:dotimes (__ros_str_idx __ros_str_len msg)
-        (cl:setf (cl:char (cl:slot-value msg 'velocityType) __ros_str_idx) (cl:code-char (cl:read-byte istream)))))
+        (cl:setf (cl:char (cl:slot-value msg 'speedType) __ros_str_idx) (cl:code-char (cl:read-byte istream)))))
     (cl:let ((bits 0))
       (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
@@ -296,16 +296,16 @@
   "experiments/MoveSettings")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<MoveSettings>)))
   "Returns md5sum for a message object of type '<MoveSettings>"
-  "8a3c810f3c1f2cb5fb317a984814d92e")
+  "47116853e5153e6d4a5bb554108d2128")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'MoveSettings)))
   "Returns md5sum for a message object of type 'MoveSettings"
-  "8a3c810f3c1f2cb5fb317a984814d92e")
+  "47116853e5153e6d4a5bb554108d2128")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<MoveSettings>)))
   "Returns full string definition for message of type '<MoveSettings>"
-  (cl:format cl:nil "bool enabled~%bool tracking~%string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'~%string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'~%float64 distance~%float64 angle~%string angleType # 'random' or 'constant'~%float64 velocity~%string velocityType # 'random' or 'constant'~%float64 tolerance~%float64 timeout~%~%~%~%"))
+  (cl:format cl:nil "bool enabled~%bool tracking~%string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'~%string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'~%float64 distance~%float64 angle~%string angleType # 'random' or 'constant'~%float64 speed~%string speedType # 'random' or 'constant'~%float64 tolerance~%float64 timeout~%~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'MoveSettings)))
   "Returns full string definition for message of type 'MoveSettings"
-  (cl:format cl:nil "bool enabled~%bool tracking~%string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'~%string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'~%float64 distance~%float64 angle~%string angleType # 'random' or 'constant'~%float64 velocity~%string velocityType # 'random' or 'constant'~%float64 tolerance~%float64 timeout~%~%~%~%"))
+  (cl:format cl:nil "bool enabled~%bool tracking~%string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'~%string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'~%float64 distance~%float64 angle~%string angleType # 'random' or 'constant'~%float64 speed~%string speedType # 'random' or 'constant'~%float64 tolerance~%float64 timeout~%~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <MoveSettings>))
   (cl:+ 0
      1
@@ -316,7 +316,7 @@
      8
      4 (cl:length (cl:slot-value msg 'angleType))
      8
-     4 (cl:length (cl:slot-value msg 'velocityType))
+     4 (cl:length (cl:slot-value msg 'speedType))
      8
      8
 ))
@@ -330,8 +330,8 @@
     (cl:cons ':distance (distance msg))
     (cl:cons ':angle (angle msg))
     (cl:cons ':angleType (angleType msg))
-    (cl:cons ':velocity (velocity msg))
-    (cl:cons ':velocityType (velocityType msg))
+    (cl:cons ':speed (speed msg))
+    (cl:cons ':speedType (speedType msg))
     (cl:cons ':tolerance (tolerance msg))
     (cl:cons ':timeout (timeout msg))
 ))

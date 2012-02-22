@@ -20,8 +20,8 @@ class PublishSystemState:
         self.pub_in_bounds = rospy.Publisher("InBounds", InBounds)
         self.pub_fly_view = rospy.Publisher("FlyView", FlyView)
 
-        self.start_position_x = rospy.get_param("start_position_x")
-        self.start_position_y = rospy.get_param("start_position_y")
+        self.start_position_x = 0 #rospy.get_param("start_position_x")
+        self.start_position_y = 0 #rospy.get_param("start_position_y")
 
         self.in_bounds = InBounds()
         self.fly_view = FlyView()

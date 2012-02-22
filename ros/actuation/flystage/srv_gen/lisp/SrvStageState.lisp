@@ -12,9 +12,9 @@
     :initarg :state
     :type flystage-msg:MsgFrameState
     :initform (cl:make-instance 'flystage-msg:MsgFrameState))
-   (velocity
-    :reader velocity
-    :initarg :velocity
+   (speed
+    :reader speed
+    :initarg :speed
     :type cl:float
     :initform 0.0))
 )
@@ -32,14 +32,14 @@
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader flystage-srv:state-val is deprecated.  Use flystage-srv:state instead.")
   (state m))
 
-(cl:ensure-generic-function 'velocity-val :lambda-list '(m))
-(cl:defmethod velocity-val ((m <SrvStageState-request>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader flystage-srv:velocity-val is deprecated.  Use flystage-srv:velocity instead.")
-  (velocity m))
+(cl:ensure-generic-function 'speed-val :lambda-list '(m))
+(cl:defmethod speed-val ((m <SrvStageState-request>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader flystage-srv:speed-val is deprecated.  Use flystage-srv:speed instead.")
+  (speed m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <SrvStageState-request>) ostream)
   "Serializes a message object of type '<SrvStageState-request>"
   (roslisp-msg-protocol:serialize (cl:slot-value msg 'state) ostream)
-  (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'velocity))))
+  (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'speed))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
@@ -61,7 +61,7 @@
       (cl:setf (cl:ldb (cl:byte 8 40) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 48) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 56) bits) (cl:read-byte istream))
-    (cl:setf (cl:slot-value msg 'velocity) (roslisp-utils:decode-double-float-bits bits)))
+    (cl:setf (cl:slot-value msg 'speed) (roslisp-utils:decode-double-float-bits bits)))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<SrvStageState-request>)))
@@ -72,16 +72,16 @@
   "flystage/SrvStageStateRequest")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<SrvStageState-request>)))
   "Returns md5sum for a message object of type '<SrvStageState-request>"
-  "5ceca4cecd48a67d8d224ba74f927fbe")
+  "a77943b8f87f5da957e62998e6d39b03")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'SrvStageState-request)))
   "Returns md5sum for a message object of type 'SrvStageState-request"
-  "5ceca4cecd48a67d8d224ba74f927fbe")
+  "a77943b8f87f5da957e62998e6d39b03")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<SrvStageState-request>)))
   "Returns full string definition for message of type '<SrvStageState-request>"
-  (cl:format cl:nil "MsgFrameState state~%float64 velocity~%~%================================================================================~%MSG: flystage/MsgFrameState~%Header header~%geometry_msgs/Pose pose~%geometry_msgs/Twist velocity~%~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.secs: seconds (stamp_secs) since epoch~%# * stamp.nsecs: nanoseconds since stamp_secs~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: geometry_msgs/Pose~%# A representation of pose in free space, composed of postion and orientation. ~%Point position~%Quaternion orientation~%~%================================================================================~%MSG: geometry_msgs/Point~%# This contains the position of a point in free space~%float64 x~%float64 y~%float64 z~%~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%================================================================================~%MSG: geometry_msgs/Twist~%# This expresses velocity in free space broken into it's linear and angular parts. ~%Vector3  linear~%Vector3  angular~%~%================================================================================~%MSG: geometry_msgs/Vector3~%# This represents a vector in free space. ~%~%float64 x~%float64 y~%float64 z~%~%"))
+  (cl:format cl:nil "MsgFrameState state~%float64 speed~%~%================================================================================~%MSG: flystage/MsgFrameState~%Header header~%geometry_msgs/Pose pose~%geometry_msgs/Twist velocity~%~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.secs: seconds (stamp_secs) since epoch~%# * stamp.nsecs: nanoseconds since stamp_secs~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: geometry_msgs/Pose~%# A representation of pose in free space, composed of postion and orientation. ~%Point position~%Quaternion orientation~%~%================================================================================~%MSG: geometry_msgs/Point~%# This contains the position of a point in free space~%float64 x~%float64 y~%float64 z~%~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%================================================================================~%MSG: geometry_msgs/Twist~%# This expresses velocity in free space broken into it's linear and angular parts. ~%Vector3  linear~%Vector3  angular~%~%================================================================================~%MSG: geometry_msgs/Vector3~%# This represents a vector in free space. ~%~%float64 x~%float64 y~%float64 z~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'SrvStageState-request)))
   "Returns full string definition for message of type 'SrvStageState-request"
-  (cl:format cl:nil "MsgFrameState state~%float64 velocity~%~%================================================================================~%MSG: flystage/MsgFrameState~%Header header~%geometry_msgs/Pose pose~%geometry_msgs/Twist velocity~%~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.secs: seconds (stamp_secs) since epoch~%# * stamp.nsecs: nanoseconds since stamp_secs~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: geometry_msgs/Pose~%# A representation of pose in free space, composed of postion and orientation. ~%Point position~%Quaternion orientation~%~%================================================================================~%MSG: geometry_msgs/Point~%# This contains the position of a point in free space~%float64 x~%float64 y~%float64 z~%~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%================================================================================~%MSG: geometry_msgs/Twist~%# This expresses velocity in free space broken into it's linear and angular parts. ~%Vector3  linear~%Vector3  angular~%~%================================================================================~%MSG: geometry_msgs/Vector3~%# This represents a vector in free space. ~%~%float64 x~%float64 y~%float64 z~%~%"))
+  (cl:format cl:nil "MsgFrameState state~%float64 speed~%~%================================================================================~%MSG: flystage/MsgFrameState~%Header header~%geometry_msgs/Pose pose~%geometry_msgs/Twist velocity~%~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.secs: seconds (stamp_secs) since epoch~%# * stamp.nsecs: nanoseconds since stamp_secs~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: geometry_msgs/Pose~%# A representation of pose in free space, composed of postion and orientation. ~%Point position~%Quaternion orientation~%~%================================================================================~%MSG: geometry_msgs/Point~%# This contains the position of a point in free space~%float64 x~%float64 y~%float64 z~%~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%================================================================================~%MSG: geometry_msgs/Twist~%# This expresses velocity in free space broken into it's linear and angular parts. ~%Vector3  linear~%Vector3  angular~%~%================================================================================~%MSG: geometry_msgs/Vector3~%# This represents a vector in free space. ~%~%float64 x~%float64 y~%float64 z~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <SrvStageState-request>))
   (cl:+ 0
      (roslisp-msg-protocol:serialization-length (cl:slot-value msg 'state))
@@ -91,7 +91,7 @@
   "Converts a ROS message object to a list"
   (cl:list 'SrvStageState-request
     (cl:cons ':state (state msg))
-    (cl:cons ':velocity (velocity msg))
+    (cl:cons ':speed (speed msg))
 ))
 ;//! \htmlinclude SrvStageState-response.msg.html
 
@@ -132,10 +132,10 @@
   "flystage/SrvStageStateResponse")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<SrvStageState-response>)))
   "Returns md5sum for a message object of type '<SrvStageState-response>"
-  "5ceca4cecd48a67d8d224ba74f927fbe")
+  "a77943b8f87f5da957e62998e6d39b03")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'SrvStageState-response)))
   "Returns md5sum for a message object of type 'SrvStageState-response"
-  "5ceca4cecd48a67d8d224ba74f927fbe")
+  "a77943b8f87f5da957e62998e6d39b03")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<SrvStageState-response>)))
   "Returns full string definition for message of type '<SrvStageState-response>"
   (cl:format cl:nil "MsgFrameState state~%~%~%~%================================================================================~%MSG: flystage/MsgFrameState~%Header header~%geometry_msgs/Pose pose~%geometry_msgs/Twist velocity~%~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.secs: seconds (stamp_secs) since epoch~%# * stamp.nsecs: nanoseconds since stamp_secs~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%# 0: no frame~%# 1: global frame~%string frame_id~%~%================================================================================~%MSG: geometry_msgs/Pose~%# A representation of pose in free space, composed of postion and orientation. ~%Point position~%Quaternion orientation~%~%================================================================================~%MSG: geometry_msgs/Point~%# This contains the position of a point in free space~%float64 x~%float64 y~%float64 z~%~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%================================================================================~%MSG: geometry_msgs/Twist~%# This expresses velocity in free space broken into it's linear and angular parts. ~%Vector3  linear~%Vector3  angular~%~%================================================================================~%MSG: geometry_msgs/Vector3~%# This represents a vector in free space. ~%~%float64 x~%float64 y~%float64 z~%~%"))
