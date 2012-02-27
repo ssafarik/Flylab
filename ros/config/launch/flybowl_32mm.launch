@@ -1,0 +1,5 @@
+<launch>
+    <!-- Don't launch this file directly.  Launch arena.launch, and point to us from there. -->
+
+	<param name="arena/radius" type="double" value="32"/>
+</launch>

@@ -1,0 +1,3 @@
+<launch>
+	<include file="$(find Fivebar)/launch/Fivebar.launch" />
+</launch>

@@ -87,7 +87,7 @@ class Fly:
         self.timePrevious = None
         
         self.state = MsgFrameState()
-        self.state.header.frame_id = 'Plate'
+        self.state.header.frame_id = '/Plate'
         self.state.pose.position.x = 0.0
         self.state.pose.position.y = 0.0
         self.state.pose.position.z = 0.0
@@ -416,7 +416,7 @@ class ContourIdentifier:
 
         self.pubMarker = rospy.Publisher('visualization_marker', Marker)
         self.markerArena = Marker(header=Header(stamp = rospy.Time.now(),
-                                                frame_id='Plate'),
+                                                frame_id='/Plate'),
                                   ns='arena',
                                   id=2,
                                   type=3, #CYLINDER,
