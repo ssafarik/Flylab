@@ -492,10 +492,10 @@ if __name__ == '__main__':
         #experiment = ExperimentRunAway()
         #experiment = ExperimentOpenTrigger()
         #experiment = ExperimentRecord10MinTrials()
-        experiment = ExperimentRecord10SecTrialsWithMove()
+        #experiment = ExperimentRecord10SecTrialsWithMove()
         #experiment = ExperimentMoveAbsolute()
         #experiment = ExperimentSSOOF()
-        #experiment = ExperimentRegressiveMotion()
+        experiment = ExperimentRegressiveMotion()
         experiment.Run()
         
     except KeyboardInterrupt:

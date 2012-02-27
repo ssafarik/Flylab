@@ -2,7 +2,7 @@
 
   <!-- Stage Node-->
   <!-- node pkg="flystage" type="StageCommunicator.py" name="StageCommunicator"/ -->
-  <include file="$(find rosFivebar)/rosFivebar.launch" />
+  <include file="$(find Fivebar)/rosFivebar.launch" />
 
   <param name="Stage_Update_dt" type="double" value="0.010"/>
 

@@ -3,10 +3,10 @@
   <include file="$(find camera1394v2)/launch/flyatar_camera.launch" />
 
   <!-- <param name="contour_count_max" type="double" value="11"/> -->
-  <param name="diff_threshold" type="double" value="52"/>  <!-- Adjust this based on light brightness, etc, to get good contours. -->
+  <param name="diff_threshold" type="double" value="70"/>  <!-- Adjust this based on light brightness, etc, to get good contours. -->
 
   <param name="display_unprocessedimage" type="boolean" value="false"/>
-  <param name="display_processedimage" type="boolean" value="false"/>
+  <param name="display_processedimage" type="boolean" value="true"/>
   <param name="display_contours" type="boolean" value="false"/>
   <param name="display_diff" type="boolean" value="false"/>
   <param name="display_foreground" type="boolean" value="false"/>

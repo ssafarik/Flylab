@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2
+CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build
+CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build
 
 # Include any dependencies generated for this target.
 include src/nodes/CMakeFiles/camera1394v2_node.dir/depend.make
@@ -120,17 +120,17 @@ src/nodes/CMakeFiles/camera1394v2_node.dir/camera1394v2.o: /opt/ros/electric/sta
 src/nodes/CMakeFiles/camera1394v2_node.dir/camera1394v2.o: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 src/nodes/CMakeFiles/camera1394v2_node.dir/camera1394v2.o: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 src/nodes/CMakeFiles/camera1394v2_node.dir/camera1394v2.o: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/nodes/CMakeFiles/camera1394v2_node.dir/camera1394v2.o"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/camera1394v2_node.dir/camera1394v2.o -c /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes/camera1394v2.cpp
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/camera1394v2_node.dir/camera1394v2.o -c /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes/camera1394v2.cpp
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/camera1394v2.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/camera1394v2_node.dir/camera1394v2.i"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes/camera1394v2.cpp > CMakeFiles/camera1394v2_node.dir/camera1394v2.i
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes/camera1394v2.cpp > CMakeFiles/camera1394v2_node.dir/camera1394v2.i
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/camera1394v2.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/camera1394v2_node.dir/camera1394v2.s"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes/camera1394v2.cpp -o CMakeFiles/camera1394v2_node.dir/camera1394v2.s
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes/camera1394v2.cpp -o CMakeFiles/camera1394v2_node.dir/camera1394v2.s
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/camera1394v2.o.requires:
 .PHONY : src/nodes/CMakeFiles/camera1394v2_node.dir/camera1394v2.o.requires
@@ -216,17 +216,17 @@ src/nodes/CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.o: /opt/ros/electric
 src/nodes/CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.o: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 src/nodes/CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.o: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 src/nodes/CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.o: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/CMakeFiles $(CMAKE_PROGRESS_2)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/nodes/CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.o"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.o -c /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes/dev_camera1394v2.cpp
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.o -c /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes/dev_camera1394v2.cpp
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.i"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes/dev_camera1394v2.cpp > CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.i
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes/dev_camera1394v2.cpp > CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.i
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.s"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes/dev_camera1394v2.cpp -o CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.s
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes/dev_camera1394v2.cpp -o CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.s
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.o.requires:
 .PHONY : src/nodes/CMakeFiles/camera1394v2_node.dir/dev_camera1394v2.o.requires
@@ -312,17 +312,17 @@ src/nodes/CMakeFiles/camera1394v2_node.dir/features.o: /opt/ros/electric/stacks/
 src/nodes/CMakeFiles/camera1394v2_node.dir/features.o: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 src/nodes/CMakeFiles/camera1394v2_node.dir/features.o: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 src/nodes/CMakeFiles/camera1394v2_node.dir/features.o: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/CMakeFiles $(CMAKE_PROGRESS_3)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object src/nodes/CMakeFiles/camera1394v2_node.dir/features.o"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/camera1394v2_node.dir/features.o -c /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes/features.cpp
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/camera1394v2_node.dir/features.o -c /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes/features.cpp
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/features.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/camera1394v2_node.dir/features.i"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes/features.cpp > CMakeFiles/camera1394v2_node.dir/features.i
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes/features.cpp > CMakeFiles/camera1394v2_node.dir/features.i
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/features.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/camera1394v2_node.dir/features.s"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes/features.cpp -o CMakeFiles/camera1394v2_node.dir/features.s
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -DBT_USE_DOUBLE_PRECISION -DBT_EULER_DEFAULT_ZYX -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes/features.cpp -o CMakeFiles/camera1394v2_node.dir/features.s
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/features.o.requires:
 .PHONY : src/nodes/CMakeFiles/camera1394v2_node.dir/features.o.requires
@@ -360,7 +360,7 @@ camera1394v2_node_EXTERNAL_OBJECTS =
 ../bin/camera1394v2_node: src/nodes/CMakeFiles/camera1394v2_node.dir/build.make
 ../bin/camera1394v2_node: src/nodes/CMakeFiles/camera1394v2_node.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --red --bold "Linking CXX executable ../../../bin/camera1394v2_node"
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/camera1394v2_node.dir/link.txt --verbose=$(VERBOSE)
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/camera1394v2_node.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 src/nodes/CMakeFiles/camera1394v2_node.dir/build: ../bin/camera1394v2_node
@@ -372,10 +372,10 @@ src/nodes/CMakeFiles/camera1394v2_node.dir/requires: src/nodes/CMakeFiles/camera
 .PHONY : src/nodes/CMakeFiles/camera1394v2_node.dir/requires
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/clean:
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes && $(CMAKE_COMMAND) -P CMakeFiles/camera1394v2_node.dir/cmake_clean.cmake
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes && $(CMAKE_COMMAND) -P CMakeFiles/camera1394v2_node.dir/cmake_clean.cmake
 .PHONY : src/nodes/CMakeFiles/camera1394v2_node.dir/clean
 
 src/nodes/CMakeFiles/camera1394v2_node.dir/depend:
-	cd /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2 /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/src/nodes /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes /home/ssafarik/git/Flyatar/ros/sensing/sensors/camera1394v2/build/src/nodes/CMakeFiles/camera1394v2_node.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2 /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/src/nodes /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/build/src/nodes/CMakeFiles/camera1394v2_node.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : src/nodes/CMakeFiles/camera1394v2_node.dir/depend
 
