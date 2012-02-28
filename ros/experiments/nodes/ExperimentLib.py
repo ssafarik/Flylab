@@ -574,7 +574,7 @@ class MoveRobot (smach.State):
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
-        self.radiusInBounds = float(rospy.get_param("in_bounds_radius","85"))
+        self.radiusInBounds = float(rospy.get_param("arena/radius","25.4"))
         
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -663,6 +663,7 @@ class MoveRobot (smach.State):
                     ptRelative = d * N.array([N.cos(angle), N.sin(angle)])
                     ptTarget = ptOrigin + ptRelative
                     self.ptTarget = ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusInBounds)
+                    #self.ptTarget = ptTarget
     
                     #rospy.logwarn ('EL self.ptTarget=%s, ptOrigin=%s, ptRelative=%s, angle=%s, frameAngle=%s' % (self.ptTarget, ptOrigin, ptRelative, angle,userdata.experimentparamsIn.move.frameidOriginAngle))
                     #rospy.logwarn('EL Robot/Fly frame_id=%s' % [self.arenastate.robot.header.frame_id,self.arenastate.flies[iFly].header.frame_id])

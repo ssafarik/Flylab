@@ -14,7 +14,7 @@ class ExperimentChase():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Chase Experiment"
+        self.experimentparams.experiment.description = "Chase the Fly"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
@@ -51,7 +51,7 @@ class ExperimentChase():
         self.experimentparams.move.distance = 5
         self.experimentparams.move.angle = 180.0 * N.pi / 180.0
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.speed = 20
+        self.experimentparams.move.speed = 200
         self.experimentparams.move.speedType = 'constant'
         self.experimentparams.move.tolerance = 0.1
         self.experimentparams.move.timeout = -1
@@ -252,8 +252,8 @@ class ExperimentRecord10SecTrialsWithMove():
         self.experimentparams.move.frameidOriginAngle = "Plate"
         self.experimentparams.move.distance = 50
         self.experimentparams.move.angle =  0.0 * N.pi / 180.0
-        self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.speed = 20
+        self.experimentparams.move.angleType = 'random'
+        self.experimentparams.move.speed = 100
         self.experimentparams.move.speedType = 'constant'
         #self.experimentparams.move.trajectoryType = 'linearparabolic' #'cubic' 'quintic' 
         self.experimentparams.move.tolerance = 2
@@ -455,7 +455,7 @@ class ExperimentRegressiveMotion():
         self.experimentparams.move.distance = 60
         self.experimentparams.move.angle = 0
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.speed = 3
+        self.experimentparams.move.speed = 30
         self.experimentparams.move.speedType = 'random'
         self.experimentparams.move.tolerance = 2
         self.experimentparams.move.timeout = 3
@@ -482,14 +482,14 @@ class ExperimentRegressiveMotion():
 if __name__ == '__main__':
     rospy.init_node('Experiment')
     try:
-        #experiment = ExperimentChase()
+        experiment = ExperimentChase()
         #experiment = ExperimentRunAway()
         #experiment = ExperimentOpenTrigger()
         #experiment = ExperimentRecord10MinTrials()
         #experiment = ExperimentRecord10SecTrialsWithMove()
         #experiment = ExperimentMoveAbsolute()
         #experiment = ExperimentSSOOF()
-        experiment = ExperimentRegressiveMotion()
+        #experiment = ExperimentRegressiveMotion()
         experiment.Run()
         
     except KeyboardInterrupt:
