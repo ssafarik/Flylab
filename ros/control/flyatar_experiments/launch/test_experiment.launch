@@ -1,4 +1,0 @@
-<launch>
-  <include file="$(find flyatar_experiments)/launch/experiment.launch" />
-  <node pkg="flyatar_experiments" type="ExperimentTest.py" name="ExperimentTest" />
-</launch>
