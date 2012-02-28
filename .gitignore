@@ -3,4 +3,6 @@ bin/*
 build/*
 src/*
 *.pyc
+*.cmake
+*.make
 
