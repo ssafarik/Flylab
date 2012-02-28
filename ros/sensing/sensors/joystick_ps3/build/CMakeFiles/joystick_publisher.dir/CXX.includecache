@@ -28,7 +28,7 @@ ros/macros.h
 ros/assert.h
 ../msg_gen/cpp/include/joystick_ps3/ros/assert.h
 
-/home/ssafarik/git/Flyatar/ros/sensing/sensors/joystick_ps3/src/joystick_publisher.cpp
+/home/ssafarik/git/Flyatar2/ros/sensing/sensors/joystick_ps3/src/joystick_publisher.cpp
 ros/ros.h
 -
 joystick_ps3/JoystickValues.h

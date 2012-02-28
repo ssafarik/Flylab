@@ -1,7 +1,7 @@
 <launch>
   <param name="Stage_Update_dt" type="double" value="0.010"/>
 
-  <include file="$(find config)/stage.launch" />
+  <include file="$(find config)/launch/stage.launch" />
   <include file="$(find plate_tf)/launch/plate_stage_transforms.launch" />
 
   <node pkg="stage_action_server" type="StageActionServer.py" name="StageActionServer"/>

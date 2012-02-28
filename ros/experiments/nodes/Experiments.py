@@ -455,7 +455,7 @@ class ExperimentRegressiveMotion():
         self.experimentparams.move.distance = 60
         self.experimentparams.move.angle = 0
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.speed = 30
+        self.experimentparams.move.speed = 3
         self.experimentparams.move.speedType = 'random'
         self.experimentparams.move.tolerance = 2
         self.experimentparams.move.timeout = 3
@@ -486,10 +486,10 @@ if __name__ == '__main__':
         #experiment = ExperimentRunAway()
         #experiment = ExperimentOpenTrigger()
         #experiment = ExperimentRecord10MinTrials()
-        experiment = ExperimentRecord10SecTrialsWithMove()
+        #experiment = ExperimentRecord10SecTrialsWithMove()
         #experiment = ExperimentMoveAbsolute()
         #experiment = ExperimentSSOOF()
-        #experiment = ExperimentRegressiveMotion()
+        experiment = ExperimentRegressiveMotion()
         experiment.Run()
         
     except KeyboardInterrupt:

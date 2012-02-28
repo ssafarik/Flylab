@@ -64,8 +64,8 @@ bool end_of_bag_files
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_struct_3B.pack(_x.ready_to_play, _x.finished_playing, _x.end_of_bag_files))
-    except struct.error, se: self._check_types(se)
-    except TypeError, te: self._check_types(te)
+    except struct.error as se: self._check_types(se)
+    except TypeError as te: self._check_types(te)
 
   def deserialize(self, str):
     """
@@ -89,7 +89,7 @@ bool end_of_bag_files
       self.finished_playing = bool(self.finished_playing)
       self.end_of_bag_files = bool(self.end_of_bag_files)
       return self
-    except struct.error, e:
+    except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
 
 
@@ -107,8 +107,8 @@ bool end_of_bag_files
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_struct_3B.pack(_x.ready_to_play, _x.finished_playing, _x.end_of_bag_files))
-    except struct.error, se: self._check_types(se)
-    except TypeError, te: self._check_types(te)
+    except struct.error as se: self._check_types(se)
+    except TypeError as te: self._check_types(te)
 
   def deserialize_numpy(self, str, numpy):
     """
@@ -134,7 +134,7 @@ bool end_of_bag_files
       self.finished_playing = bool(self.finished_playing)
       self.end_of_bag_files = bool(self.end_of_bag_files)
       return self
-    except struct.error, e:
+    except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = roslib.message.struct_I

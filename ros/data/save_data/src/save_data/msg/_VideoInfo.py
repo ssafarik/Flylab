@@ -57,8 +57,8 @@ bool saved_video
     try:
       _x = self
       buff.write(_struct_3B.pack(_x.ready_for_bag_info, _x.ready_to_record, _x.saved_video))
-    except struct.error, se: self._check_types(se)
-    except TypeError, te: self._check_types(te)
+    except struct.error as se: self._check_types(se)
+    except TypeError as te: self._check_types(te)
 
   def deserialize(self, str):
     """
@@ -76,7 +76,7 @@ bool saved_video
       self.ready_to_record = bool(self.ready_to_record)
       self.saved_video = bool(self.saved_video)
       return self
-    except struct.error, e:
+    except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
 
 
@@ -91,8 +91,8 @@ bool saved_video
     try:
       _x = self
       buff.write(_struct_3B.pack(_x.ready_for_bag_info, _x.ready_to_record, _x.saved_video))
-    except struct.error, se: self._check_types(se)
-    except TypeError, te: self._check_types(te)
+    except struct.error as se: self._check_types(se)
+    except TypeError as te: self._check_types(te)
 
   def deserialize_numpy(self, str, numpy):
     """
@@ -112,7 +112,7 @@ bool saved_video
       self.ready_to_record = bool(self.ready_to_record)
       self.saved_video = bool(self.saved_video)
       return self
-    except struct.error, e:
+    except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = roslib.message.struct_I

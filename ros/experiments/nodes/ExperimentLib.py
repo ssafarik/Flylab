@@ -729,10 +729,10 @@ class Experiment():
         
         
         with self.sm:
-            self.goalStart = stage_action_server.msg.ActionStageStateGoal()
-            self.goalStart.state.header.frame_id = 'Plate'
-            self.goalStart.state.pose.position.x = self.xHome
-            self.goalStart.state.pose.position.y = self.yHome
+            #self.goalStart = stage_action_server.msg.ActionStageStateGoal()
+            #self.goalStart.state.header.frame_id = 'Plate'
+            #self.goalStart.state.pose.position.x = self.xHome
+            #self.goalStart.state.pose.position.y = self.yHome
 
             # Add states.
             smach.StateMachine.add('NEW_EXPERIMENT',

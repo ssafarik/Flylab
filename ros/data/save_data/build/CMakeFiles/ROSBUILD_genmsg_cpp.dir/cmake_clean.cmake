@@ -5,7 +5,6 @@ FILE(REMOVE_RECURSE
   "CMakeFiles/ROSBUILD_genmsg_cpp"
   "../msg_gen/cpp/include/save_data/BagInfo.h"
   "../msg_gen/cpp/include/save_data/VideoInfo.h"
-  "../msg_gen/cpp/include/save_data/SaveSettings.h"
   "../msg_gen/cpp/include/save_data/CommandSavedata.h"
 )
 

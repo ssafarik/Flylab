@@ -6,7 +6,6 @@ FILE(REMOVE_RECURSE
   "../src/save_data/msg/__init__.py"
   "../src/save_data/msg/_BagInfo.py"
   "../src/save_data/msg/_VideoInfo.py"
-  "../src/save_data/msg/_SaveSettings.py"
   "../src/save_data/msg/_CommandSavedata.py"
 )
 

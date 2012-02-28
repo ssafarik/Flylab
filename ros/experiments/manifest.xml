@@ -18,6 +18,7 @@
   <depend package="image_gui"/>
   <depend package="plate_tf"/>
   <depend package="actionlib"/>
+  <depend package="save_data"/>
  
 </package>
 

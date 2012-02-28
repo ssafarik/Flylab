@@ -10,7 +10,6 @@
   <url></url>
   <depend package="rospy"/>
   <depend package="flystage"/>
-  <depend package="joystick_commands"/>
   <depend package="track_image_contours"/>
   <depend package="experiments"/>
 
