@@ -3,4 +3,6 @@ bin/*
 build/*
 *.pyc
 .metadata
+.project
+.cproject
 
