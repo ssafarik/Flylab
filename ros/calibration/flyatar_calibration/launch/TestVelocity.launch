@@ -1,0 +1,9 @@
+<launch>
+    <include file="$(find stage_action_server)/launch/stage_action_server.launch" />
+	<node name="PatternGenXY" pkg="Fivebar" type="PatternGenXY.py" args="--pattern='circle' --sizemm=60"/>
+    <node pkg="track_image_contours" type="PublishSystemState.py" name="PublishSystemState" />
+    <include file="$(find image_gui)/launch/DisplayDraw.launch" />
+    <!--<node pkg="save_data" type="SaveBag.py" name="SaveBag" />-->
+    <node pkg="save_data" type="SaveArenaState.py" name="SaveArenaState" />
+</launch>
+

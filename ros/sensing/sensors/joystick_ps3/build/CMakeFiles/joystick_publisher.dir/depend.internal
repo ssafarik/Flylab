@@ -3,7 +3,7 @@
 
 CMakeFiles/joystick_publisher.dir/src/joystick_publisher.o
  ../msg_gen/cpp/include/joystick_ps3/JoystickValues.h
- /home/ssafarik/git/Flyatar/ros/sensing/sensors/joystick_ps3/src/joystick_publisher.cpp
+ /home/ssafarik/git/Flyatar2/ros/sensing/sensors/joystick_ps3/src/joystick_publisher.cpp
  /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/include/ros/advertise_options.h
  /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/include/ros/advertise_service_options.h
  /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/include/ros/common.h

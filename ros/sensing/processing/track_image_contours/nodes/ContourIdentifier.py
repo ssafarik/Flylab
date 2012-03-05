@@ -8,13 +8,14 @@ import tf
 import numpy as N
 from track_image_contours.msg import *
 from plate_tf.srv import *
-from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion
+from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
+from std_msgs.msg import Header, ColorRGBA
+from visualization_msgs.msg import Marker
 from flystage.msg import *
 import copy
 import filters
-import stop_walk as sw
 from pythonmodules import CircleFunctions
-import MatchIdentities
+import MatchHungarian
 
 #class Contour:
 #    #None
@@ -80,13 +81,13 @@ class Fly:
         self.tfbx = tf.TransformBroadcaster()
 
         self.kfState = filters.KalmanFilter()
-        self.lpAngleF = filters.LowPassAngleFilter(RC=0.01)
+        self.lpAngleF = filters.LowPassAngleFilter(RC=0.001)
         
         self.isVisible = False
         self.timePrevious = None
         
         self.state = MsgFrameState()
-        self.state.header.frame_id = 'Plate'
+        self.state.header.frame_id = '/Plate'
         self.state.pose.position.x = 0.0
         self.state.pose.position.y = 0.0
         self.state.pose.position.z = 0.0
@@ -114,7 +115,7 @@ class Fly:
         
         self.lpOffsetX = filters.LowPassFilter(RC=0.01)
         self.lpOffsetY = filters.LowPassFilter(RC=0.01)
-        self.positionOffset = Point(x=0, y=0, z=0)  # Difference between contour position and (for robots) computed position.
+        self.ptOffset = Point(x=0, y=0, z=0)  # Difference between contour position and (for robots) computed position.
         self.name = name
         self.isDead = False # To do.
         self.initialized = True
@@ -276,7 +277,7 @@ class Fly:
                 #self.lpOffsetY.Update(None,t)
                 #self.lpFlip.Update(0.0, t)
                 angleContour = 0.0
-                rospy.logwarn('CI FILTER READ on contour==None')
+                #rospy.logwarn('CI FILTER READ on contour==None')
                 
                 
             if self.isVisible:
@@ -310,11 +311,11 @@ class Fly:
                 
                 # Update the tool offset.
                 if posComputed is not None:
-                    self.positionOffset = Point(x = self.lpOffsetX.Update(x-posComputed.x, t),
-                                                y = self.lpOffsetY.Update(y-posComputed.y, t),
-                                                z = 0) # Filtered(posContour)-posComputed
+                    self.ptOffset = Point(x = self.lpOffsetX.Update(x-posComputed.x, t),
+                                          y = self.lpOffsetY.Update(y-posComputed.y, t),
+                                          z = 0) # Filtered(posContour)-posComputed
                 else:
-                    self.positionOffset = Point(x=0, y=0, z=0)
+                    self.ptOffset = Point(x=0, y=0, z=0)
             
 
                 #rospy.logwarn ('x=%s,y=%s,orientation=%s,name=%s,frame_id=%s' % (self.state.pose.position.x, 
@@ -383,10 +384,11 @@ class ContourIdentifier:
         self.posearrayFly = PoseArray()
         
         # Points
-        self.magnet_magnetframe = PointStamped()
-        self.magnet_magnetframe.header.frame_id = "Magnet"
-        self.magnet_magnetframe.point.x = 0
-        self.magnet_magnetframe.point.y = 0
+        self.endeffector_endeffectorframe = PointStamped()
+        self.endeffector_endeffectorframe.header.frame_id = "EndEffector"
+        self.endeffector_endeffectorframe.point.x = 0
+        self.endeffector_endeffectorframe.point.y = 0
+        self.endeffector_endeffectorframe.point.z = 0
         
         # Robot Info
         self.robot_min_ecc = 0.9 #rospy.get_param("robot_min_ecc", 0.5)
@@ -412,6 +414,26 @@ class ContourIdentifier:
         self.ySave = []
         self.iSave = 0
 
+        self.pubMarker = rospy.Publisher('visualization_marker', Marker)
+        self.markerArena = Marker(header=Header(stamp = rospy.Time.now(),
+                                                frame_id='/Plate'),
+                                  ns='arena',
+                                  id=2,
+                                  type=3, #CYLINDER,
+                                  action=0,
+                                  pose=Pose(position=Point(x=0, 
+                                                           y=0, 
+                                                           z=0)),
+                                  scale=Vector3(x=self.radiusInBounds*2.0,
+                                                y=self.radiusInBounds*2.0,
+                                                z=0.01),
+                                  color=ColorRGBA(a=0.05,
+                                                  r=1.0,
+                                                  g=1.0,
+                                                  b=1.0),
+                                  lifetime=rospy.Duration(0.1))
+
+
         rospy.wait_for_service('camera_to_plate')
         try:
             self.camera_to_plate = rospy.ServiceProxy('camera_to_plate', PlateCameraConversion)
@@ -420,7 +442,7 @@ class ContourIdentifier:
 
         # Open a file for saving raw data.
         self.fidRobot = open("/home/ssafarik/robot.csv", 'w')
-        self.fidRobot.write("xmagnet, ymagnet, xfiltered, yfiltered, xcontour, ycontour\n")
+        self.fidRobot.write("xendeffector, yendeffector, xfiltered, yfiltered, xcontour, ycontour\n")
 
         self.fidFly = open("/home/ssafarik/fly.csv", 'w')
         self.fidFly.write("xraw, yraw, xfiltered, yfiltered\n")
@@ -651,13 +673,13 @@ class ContourIdentifier:
         xyObjects = []
         # Robots.
         for i in range(self.maxRobots): 
-            xyObjects.append([posEndEffector.x + self.objects[i].positionOffset.x,
-                              posEndEffector.y + self.objects[i].positionOffset.y])
+            xyObjects.append([posEndEffector.x + self.objects[i].ptOffset.x,
+                              posEndEffector.y + self.objects[i].ptOffset.y])
             #xyObjects.append([self.objects[i].state.pose.position.x,
             #                  self.objects[i].state.pose.position.y])
             
-            #rospy.logwarn ('CI   posEndEffector+Offset at %s' % ([posEndEffector.x + self.objects[i].positionOffset.x,
-            #                                          posEndEffector.y + self.objects[i].positionOffset.y]))
+            #rospy.logwarn ('CI   posEndEffector+Offset at %s' % ([posEndEffector.x + self.objects[i].ptOffset.x,
+            #                                          posEndEffector.y + self.objects[i].ptOffset.y]))
             #rospy.logwarn ('CI Robot image at %s' % ([self.objects[i].state.pose.position.x,
             #                                          self.objects[i].state.pose.position.y]))
             
@@ -707,7 +729,7 @@ class ContourIdentifier:
         #d = self.DistanceMatrix(xyObjects, xyContours, iPriorities)
         d = self.DistanceMatrixContours(xyObjects, self.contours, contoursMin, contoursMax)
         (mapFliesStableMarriage, mapContours) = self.GetStableMatching(d)
-        (mapFliesHungarian,unmapped) = MatchIdentities.MatchIdentities(d.transpose())
+        (mapFliesHungarian,unmapped) = MatchHungarian.MatchIdentities(d.transpose())
         #rospy.logwarn ('CI mapFliesStableMarriage=%s' % (mapFliesStableMarriage))
         #rospy.logwarn ('CI mapFliesHungarian=%s, unmapped=%s' % (mapFliesHungarian,unmapped))
 
@@ -818,10 +840,10 @@ class ContourIdentifier:
                 arenastate.robot.header.frame_id = self.objects[0].state.header.frame_id
                 arenastate.robot.pose            = self.objects[0].state.pose
                 arenastate.robot.velocity        = self.objects[0].state.velocity
-                #rospy.logwarn ('CI robot.position=%s, positionOffset=%s' % ([self.objects[0].state.pose.position.x,
+                #rospy.logwarn ('CI robot.position=%s, ptOffset=%s' % ([self.objects[0].state.pose.position.x,
                 #                                                            self.objects[0].state.pose.position.y],
-                #                                                           [self.objects[0].positionOffset.x,
-                #                                                            self.objects[0].positionOffset.y]))
+                #                                                           [self.objects[0].ptOffset.x,
+                #                                                            self.objects[0].ptOffset.y]))
             nFlies = len(self.objects)
             for iFly in range(nFlies-1):
                 if (self.map[iFly+1] is not None) and (self.objects[iFly+1].state.pose.position.x is not None):
@@ -833,9 +855,12 @@ class ContourIdentifier:
             self.pub_arenastate.publish(arenastate)
             
             # Publish the EndEffectorOffset.
-            ptOffset = self.objects[0].positionOffset
+            ptOffset = self.objects[0].ptOffset
             self.pub_EndEffectorOffset.publish(ptOffset)
             
+            # Publish a disc to indicate the arena extent.
+            self.pubMarker.publish(self.markerArena)
+                    
 
 
 if __name__ == '__main__':

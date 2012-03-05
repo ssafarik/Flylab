@@ -9,13 +9,12 @@ from experiments.srv import *
 
 
 #######################################################################################################
-#######################################################################################################
 class ExperimentChase():
     def __init__(self):
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Chase Experiment"
+        self.experimentparams.experiment.description = "Chase the Fly"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
@@ -52,8 +51,8 @@ class ExperimentChase():
         self.experimentparams.move.distance = 5
         self.experimentparams.move.angle = 180.0 * N.pi / 180.0
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.velocity = 20
-        self.experimentparams.move.velocityType = 'constant'
+        self.experimentparams.move.speed = 200
+        self.experimentparams.move.speedType = 'constant'
         self.experimentparams.move.tolerance = 0.1
         self.experimentparams.move.timeout = -1
         
@@ -77,7 +76,6 @@ class ExperimentChase():
 
 
 
-#######################################################################################################
 #######################################################################################################
 class ExperimentOpenTrigger():
     def __init__(self):
@@ -121,8 +119,8 @@ class ExperimentOpenTrigger():
         self.experimentparams.move.distance = 40
         self.experimentparams.move.angle =  90.0 * N.pi / 180.0
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.velocity = 20
-        self.experimentparams.move.velocityType = 'constant'
+        self.experimentparams.move.speed = 20
+        self.experimentparams.move.speedType = 'constant'
         self.experimentparams.move.tolerance = 2
         self.experimentparams.move.timeout = -1
         
@@ -145,7 +143,6 @@ class ExperimentOpenTrigger():
         self.experiment.Run()
 
 
-#######################################################################################################
 #######################################################################################################
 class ExperimentRecord10MinTrials():
     def __init__(self):
@@ -186,11 +183,11 @@ class ExperimentRecord10MinTrials():
         self.experimentparams.move.tracking = True
         self.experimentparams.move.frameidOriginPosition = "Plate"
         self.experimentparams.move.frameidOriginAngle = "Plate"
-        self.experimentparams.move.distance = 40
+        self.experimentparams.move.distance = 50
         self.experimentparams.move.angle =  90.0 * N.pi / 180.0
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.velocity = 20
-        self.experimentparams.move.velocityType = 'constant'
+        self.experimentparams.move.speed = 50
+        self.experimentparams.move.speedType = 'constant'
         self.experimentparams.move.tolerance = 2
         self.experimentparams.move.timeout = -1
         
@@ -213,7 +210,6 @@ class ExperimentRecord10MinTrials():
         self.experiment.Run()
 
 
-#######################################################################################################
 #######################################################################################################
 class ExperimentRecord10SecTrialsWithMove():
     def __init__(self):
@@ -256,9 +252,10 @@ class ExperimentRecord10SecTrialsWithMove():
         self.experimentparams.move.frameidOriginAngle = "Plate"
         self.experimentparams.move.distance = 50
         self.experimentparams.move.angle =  0.0 * N.pi / 180.0
-        self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.velocity = 20
-        self.experimentparams.move.velocityType = 'random'
+        self.experimentparams.move.angleType = 'random'
+        self.experimentparams.move.speed = 100
+        self.experimentparams.move.speedType = 'constant'
+        #self.experimentparams.move.trajectoryType = 'linearparabolic' #'cubic' 'quintic' 
         self.experimentparams.move.tolerance = 2
         self.experimentparams.move.timeout = -1
         
@@ -281,7 +278,6 @@ class ExperimentRecord10SecTrialsWithMove():
         self.experiment.Run()
 
 
-#######################################################################################################
 #######################################################################################################
 class ExperimentMoveAbsolute():
     def __init__(self):
@@ -325,8 +321,8 @@ class ExperimentMoveAbsolute():
         self.experimentparams.move.distance = 70.7
         self.experimentparams.move.angle = -3*N.pi/4
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.velocity = 20
-        self.experimentparams.move.velocityType = 'constant'
+        self.experimentparams.move.speed = 20
+        self.experimentparams.move.speedType = 'constant'
         self.experimentparams.move.tolerance = 2
         self.experimentparams.move.timeout = -1
         
@@ -349,7 +345,6 @@ class ExperimentMoveAbsolute():
         self.experiment.Run()
 
 
-#######################################################################################################
 #######################################################################################################
 class ExperimentSSOOF():
     def __init__(self):
@@ -393,8 +388,8 @@ class ExperimentSSOOF():
         self.experimentparams.move.distance = 1
         self.experimentparams.move.angle = 0
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.velocity = 20
-        self.experimentparams.move.velocityType = 'constant'
+        self.experimentparams.move.speed = 20
+        self.experimentparams.move.speedType = 'constant'
         self.experimentparams.move.tolerance = 2
         self.experimentparams.move.timeout = 4
         
@@ -417,7 +412,6 @@ class ExperimentSSOOF():
         self.experiment.Run()
 
 
-#######################################################################################################
 #######################################################################################################
 class ExperimentRegressiveMotion():
     def __init__(self):
@@ -461,8 +455,8 @@ class ExperimentRegressiveMotion():
         self.experimentparams.move.distance = 60
         self.experimentparams.move.angle = 0
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.velocity = 30
-        self.experimentparams.move.velocityType = 'random'
+        self.experimentparams.move.speed = 30
+        self.experimentparams.move.speedType = 'random'
         self.experimentparams.move.tolerance = 2
         self.experimentparams.move.timeout = 3
         
@@ -488,7 +482,7 @@ class ExperimentRegressiveMotion():
 if __name__ == '__main__':
     rospy.init_node('Experiment')
     try:
-        #experiment = ExperimentChase()
+        experiment = ExperimentChase()
         #experiment = ExperimentRunAway()
         #experiment = ExperimentOpenTrigger()
         #experiment = ExperimentRecord10MinTrials()

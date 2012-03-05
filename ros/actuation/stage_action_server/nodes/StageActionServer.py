@@ -25,7 +25,7 @@ class StageActionServer(object):
         self._action_name = name
         rospy.loginfo ('%s' % name)
         self._tfrx = tf.TransformListener() 
-        self._as = actionlib.SimpleActionServer(self._action_name, ActionStageStateAction, execute_cb=self.execute_cb, auto_start=False)
+        self._as = actionlib.SimpleActionServer(self._action_name, ActionStageStateAction, execute_cb=self.Goal_callback, auto_start=False)
         self._as.start()
         
         # create messages that are used to publish feedback/result.
@@ -63,7 +63,7 @@ class StageActionServer(object):
     
     
     
-    def execute_cb(self, goal):
+    def Goal_callback(self, goal):
         while not self.initialized:
             rospy.sleep(0.1)
         
@@ -139,7 +139,7 @@ class StageActionServer(object):
             self.rate.sleep()
                                      
         
-    def mainloop(self):
+    def MainLoop(self):
         try:
             rospy.spin()
             
@@ -150,6 +150,6 @@ class StageActionServer(object):
 if __name__ == '__main__':
     rospy.init_node('StageActionServer') #, anonymous=True)
     node = StageActionServer(rospy.get_name())
-    node.mainloop()
+    node.MainLoop()
       
 

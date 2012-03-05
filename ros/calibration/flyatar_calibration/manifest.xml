@@ -14,6 +14,7 @@
   <depend package="pythonmodules"/>
   <depend package="track_image_contours"/>
   <depend package="plate_tf"/>
+  <depend package="PatternGen"/>
 
 </package>
 

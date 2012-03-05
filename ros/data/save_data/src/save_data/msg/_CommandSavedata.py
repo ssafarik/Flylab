@@ -70,8 +70,8 @@ bool save_bag
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_struct_3B.pack(_x.save_arenastate, _x.save_video, _x.save_bag))
-    except struct.error, se: self._check_types(se)
-    except TypeError, te: self._check_types(te)
+    except struct.error as se: self._check_types(se)
+    except TypeError as te: self._check_types(te)
 
   def deserialize(self, str):
     """
@@ -95,7 +95,7 @@ bool save_bag
       self.save_video = bool(self.save_video)
       self.save_bag = bool(self.save_bag)
       return self
-    except struct.error, e:
+    except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
 
 
@@ -113,8 +113,8 @@ bool save_bag
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_struct_3B.pack(_x.save_arenastate, _x.save_video, _x.save_bag))
-    except struct.error, se: self._check_types(se)
-    except TypeError, te: self._check_types(te)
+    except struct.error as se: self._check_types(se)
+    except TypeError as te: self._check_types(te)
 
   def deserialize_numpy(self, str, numpy):
     """
@@ -140,7 +140,7 @@ bool save_bag
       self.save_video = bool(self.save_video)
       self.save_bag = bool(self.save_bag)
       return self
-    except struct.error, e:
+    except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = roslib.message.struct_I

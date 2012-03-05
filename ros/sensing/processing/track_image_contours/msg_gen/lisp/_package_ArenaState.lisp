@@ -3,8 +3,4 @@
           ROBOT
           FLIES-VAL
           FLIES
-          ROBOT_STOPPED-VAL
-          ROBOT_STOPPED
-          FLY_STOPPED-VAL
-          FLY_STOPPED
 ))

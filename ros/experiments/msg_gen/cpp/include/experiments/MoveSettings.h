@@ -29,8 +29,8 @@ struct MoveSettings_ {
   , distance(0.0)
   , angle(0.0)
   , angleType()
-  , velocity(0.0)
-  , velocityType()
+  , speed(0.0)
+  , speedType()
   , tolerance(0.0)
   , timeout(0.0)
   {
@@ -44,8 +44,8 @@ struct MoveSettings_ {
   , distance(0.0)
   , angle(0.0)
   , angleType(_alloc)
-  , velocity(0.0)
-  , velocityType(_alloc)
+  , speed(0.0)
+  , speedType(_alloc)
   , tolerance(0.0)
   , timeout(0.0)
   {
@@ -72,11 +72,11 @@ struct MoveSettings_ {
   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _angleType_type;
   std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  angleType;
 
-  typedef double _velocity_type;
-  double velocity;
+  typedef double _speed_type;
+  double speed;
 
-  typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _velocityType_type;
-  std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  velocityType;
+  typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _speedType_type;
+  std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  speedType;
 
   typedef double _tolerance_type;
   double tolerance;
@@ -93,7 +93,7 @@ public:
   ROS_DEPRECATED const std::string __getDataType() const { return __s_getDataType_(); }
 
 private:
-  static const char* __s_getMD5Sum_() { return "8a3c810f3c1f2cb5fb317a984814d92e"; }
+  static const char* __s_getMD5Sum_() { return "47116853e5153e6d4a5bb554108d2128"; }
 public:
   ROS_DEPRECATED static const std::string __s_getMD5Sum() { return __s_getMD5Sum_(); }
 
@@ -107,8 +107,8 @@ string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'\n\
 float64 distance\n\
 float64 angle\n\
 string angleType # 'random' or 'constant'\n\
-float64 velocity\n\
-string velocityType # 'random' or 'constant'\n\
+float64 speed\n\
+string speedType # 'random' or 'constant'\n\
 float64 tolerance\n\
 float64 timeout\n\
 \n\
@@ -129,8 +129,8 @@ public:
     ros::serialization::serialize(stream, distance);
     ros::serialization::serialize(stream, angle);
     ros::serialization::serialize(stream, angleType);
-    ros::serialization::serialize(stream, velocity);
-    ros::serialization::serialize(stream, velocityType);
+    ros::serialization::serialize(stream, speed);
+    ros::serialization::serialize(stream, speedType);
     ros::serialization::serialize(stream, tolerance);
     ros::serialization::serialize(stream, timeout);
     return stream.getData();
@@ -146,8 +146,8 @@ public:
     ros::serialization::deserialize(stream, distance);
     ros::serialization::deserialize(stream, angle);
     ros::serialization::deserialize(stream, angleType);
-    ros::serialization::deserialize(stream, velocity);
-    ros::serialization::deserialize(stream, velocityType);
+    ros::serialization::deserialize(stream, speed);
+    ros::serialization::deserialize(stream, speedType);
     ros::serialization::deserialize(stream, tolerance);
     ros::serialization::deserialize(stream, timeout);
     return stream.getData();
@@ -163,8 +163,8 @@ public:
     size += ros::serialization::serializationLength(distance);
     size += ros::serialization::serializationLength(angle);
     size += ros::serialization::serializationLength(angleType);
-    size += ros::serialization::serializationLength(velocity);
-    size += ros::serialization::serializationLength(velocityType);
+    size += ros::serialization::serializationLength(speed);
+    size += ros::serialization::serializationLength(speedType);
     size += ros::serialization::serializationLength(tolerance);
     size += ros::serialization::serializationLength(timeout);
     return size;
@@ -198,12 +198,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::experiments::MoveSettings_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "8a3c810f3c1f2cb5fb317a984814d92e";
+    return "47116853e5153e6d4a5bb554108d2128";
   }
 
   static const char* value(const  ::experiments::MoveSettings_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0x8a3c810f3c1f2cb5ULL;
-  static const uint64_t static_value2 = 0xfb317a984814d92eULL;
+  static const uint64_t static_value1 = 0x47116853e5153e6dULL;
+  static const uint64_t static_value2 = 0x4a5bb554108d2128ULL;
 };
 
 template<class ContainerAllocator>
@@ -227,8 +227,8 @@ string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'\n\
 float64 distance\n\
 float64 angle\n\
 string angleType # 'random' or 'constant'\n\
-float64 velocity\n\
-string velocityType # 'random' or 'constant'\n\
+float64 speed\n\
+string speedType # 'random' or 'constant'\n\
 float64 tolerance\n\
 float64 timeout\n\
 \n\
@@ -258,8 +258,8 @@ template<class ContainerAllocator> struct Serializer< ::experiments::MoveSetting
     stream.next(m.distance);
     stream.next(m.angle);
     stream.next(m.angleType);
-    stream.next(m.velocity);
-    stream.next(m.velocityType);
+    stream.next(m.speed);
+    stream.next(m.speedType);
     stream.next(m.tolerance);
     stream.next(m.timeout);
   }
@@ -293,10 +293,10 @@ struct Printer< ::experiments::MoveSettings_<ContainerAllocator> >
     Printer<double>::stream(s, indent + "  ", v.angle);
     s << indent << "angleType: ";
     Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.angleType);
-    s << indent << "velocity: ";
-    Printer<double>::stream(s, indent + "  ", v.velocity);
-    s << indent << "velocityType: ";
-    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.velocityType);
+    s << indent << "speed: ";
+    Printer<double>::stream(s, indent + "  ", v.speed);
+    s << indent << "speedType: ";
+    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.speedType);
     s << indent << "tolerance: ";
     Printer<double>::stream(s, indent + "  ", v.tolerance);
     s << indent << "timeout: ";

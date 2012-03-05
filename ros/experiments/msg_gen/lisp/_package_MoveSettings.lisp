@@ -13,10 +13,10 @@
           ANGLE
           ANGLETYPE-VAL
           ANGLETYPE
-          VELOCITY-VAL
-          VELOCITY
-          VELOCITYTYPE-VAL
-          VELOCITYTYPE
+          SPEED-VAL
+          SPEED
+          SPEEDTYPE-VAL
+          SPEEDTYPE
           TOLERANCE-VAL
           TOLERANCE
           TIMEOUT-VAL

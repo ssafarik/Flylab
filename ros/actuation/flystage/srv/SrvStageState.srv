@@ -1,5 +1,5 @@
 MsgFrameState state
-float64 velocity
+float64 speed
 ---
 MsgFrameState state
 

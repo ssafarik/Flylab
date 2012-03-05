@@ -1,9 +1,10 @@
 <launch>
-  <param name="robot_velocity_max" type="double" value="10"/>
-  <!-- include file="$(find flyatar_manual)/launch/joystick_control.launch" / -->
-  <include file="$(find xyPatternGen)/xyPatternGen.launch" />
+	
+	<include file="$(find config)/launch/arena.launch" />
+	<include file="$(find config)/launch/stage.launch" />
+	<include file="$(find PatternGen)/launch/PatternGenXY.launch" />
+	<include file="$(find track_image_contours)/launch/track_image_contours.launch" />
+	<!--<include file="$(find plate_tf)/launch/plate_camera_transforms.launch" />-->
 
-  <include file="$(find track_image_contours)/launch/track_image_contours_tf.launch" />
-  <!--<include file="$(find plate_tf)/launch/plate_camera_transforms.launch" />-->
-  <node pkg="flyatar_calibration" type="StagePlate.py" name="StagePlate" />
+	<node pkg="flyatar_calibration" type="StagePlate.py" name="StagePlate" />
 </launch>

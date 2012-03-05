@@ -2,19 +2,17 @@
 import roslib.message
 import struct
 
-import track_image_contours.msg
 import geometry_msgs.msg
 import flystage.msg
 import std_msgs.msg
 
 class ArenaState(roslib.message.Message):
-  _md5sum = "bd846af7c93b07705a6eca8d496d7107"
+  _md5sum = "9f7ee9ebaa8f8ddbe0d1e79f64216360"
   _type = "track_image_contours/ArenaState"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """flystage/MsgFrameState robot
 flystage/MsgFrameState[] flies
-Stopped robot_stopped
-Stopped fly_stopped
+
 
 ================================================================================
 MSG: flystage/MsgFrameState
@@ -76,12 +74,9 @@ MSG: geometry_msgs/Vector3
 float64 x
 float64 y
 float64 z
-================================================================================
-MSG: track_image_contours/Stopped
-bool stopped
 """
-  __slots__ = ['robot','flies','robot_stopped','fly_stopped']
-  _slot_types = ['flystage/MsgFrameState','flystage/MsgFrameState[]','track_image_contours/Stopped','track_image_contours/Stopped']
+  __slots__ = ['robot','flies']
+  _slot_types = ['flystage/MsgFrameState','flystage/MsgFrameState[]']
 
   def __init__(self, *args, **kwds):
     """
@@ -91,7 +86,7 @@ bool stopped
     changes.  You cannot mix in-order arguments and keyword arguments.
     
     The available fields are:
-       robot,flies,robot_stopped,fly_stopped
+       robot,flies
     
     @param args: complete set of field values, in .msg order
     @param kwds: use keyword arguments corresponding to message field names
@@ -104,15 +99,9 @@ bool stopped
         self.robot = flystage.msg.MsgFrameState()
       if self.flies is None:
         self.flies = []
-      if self.robot_stopped is None:
-        self.robot_stopped = track_image_contours.msg.Stopped()
-      if self.fly_stopped is None:
-        self.fly_stopped = track_image_contours.msg.Stopped()
     else:
       self.robot = flystage.msg.MsgFrameState()
       self.flies = []
-      self.robot_stopped = track_image_contours.msg.Stopped()
-      self.fly_stopped = track_image_contours.msg.Stopped()
 
   def _get_types(self):
     """
@@ -159,8 +148,6 @@ bool stopped
         _v8 = _v6.angular
         _x = _v8
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
-      _x = self
-      buff.write(_struct_2B.pack(_x.robot_stopped.stopped, _x.fly_stopped.stopped))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -173,10 +160,6 @@ bool stopped
     try:
       if self.robot is None:
         self.robot = flystage.msg.MsgFrameState()
-      if self.robot_stopped is None:
-        self.robot_stopped = track_image_contours.msg.Stopped()
-      if self.fly_stopped is None:
-        self.fly_stopped = track_image_contours.msg.Stopped()
       end = 0
       _x = self
       start = end
@@ -236,12 +219,6 @@ bool stopped
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         self.flies.append(val1)
-      _x = self
-      start = end
-      end += 2
-      (_x.robot_stopped.stopped, _x.fly_stopped.stopped,) = _struct_2B.unpack(str[start:end])
-      self.robot_stopped.stopped = bool(self.robot_stopped.stopped)
-      self.fly_stopped.stopped = bool(self.fly_stopped.stopped)
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
@@ -288,8 +265,6 @@ bool stopped
         _v24 = _v22.angular
         _x = _v24
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
-      _x = self
-      buff.write(_struct_2B.pack(_x.robot_stopped.stopped, _x.fly_stopped.stopped))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -304,10 +279,6 @@ bool stopped
     try:
       if self.robot is None:
         self.robot = flystage.msg.MsgFrameState()
-      if self.robot_stopped is None:
-        self.robot_stopped = track_image_contours.msg.Stopped()
-      if self.fly_stopped is None:
-        self.fly_stopped = track_image_contours.msg.Stopped()
       end = 0
       _x = self
       start = end
@@ -367,12 +338,6 @@ bool stopped
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         self.flies.append(val1)
-      _x = self
-      start = end
-      end += 2
-      (_x.robot_stopped.stopped, _x.fly_stopped.stopped,) = _struct_2B.unpack(str[start:end])
-      self.robot_stopped.stopped = bool(self.robot_stopped.stopped)
-      self.fly_stopped.stopped = bool(self.fly_stopped.stopped)
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
@@ -380,7 +345,6 @@ bool stopped
 _struct_I = roslib.message.struct_I
 _struct_13d = struct.Struct("<13d")
 _struct_3I = struct.Struct("<3I")
-_struct_2B = struct.Struct("<2B")
 _struct_4d = struct.Struct("<4d")
 _struct_2I = struct.Struct("<2I")
 _struct_3d = struct.Struct("<3d")
