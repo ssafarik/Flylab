@@ -10,7 +10,6 @@ import numpy
 from pythonmodules import cvNumpy,CameraParameters
 from geometry_msgs.msg import Point, PointStamped
 from sensor_msgs.msg import Image
-#from joystick_commands.msg import JoystickCommands
 from cv_bridge import CvBridge, CvBridgeError
 
 
@@ -24,7 +23,6 @@ class Calibration:
     self.tfbx = tf.TransformBroadcaster()
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
-    #self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joy_callback)
     self.point_sub = rospy.Subscriber("Joystick/Commands", Point, self.point_callback)
     self.color_max = 255
     self.font = cv.InitFont(cv.CV_FONT_HERSHEY_TRIPLEX,0.5,0.5)
@@ -44,6 +42,10 @@ class Calibration:
     (self.intrinsic_matrix,self.distortion_coeffs) = CameraParameters.intrinsic("rect")
     self.KK_cx = self.intrinsic_matrix[0,2]
     self.KK_cy = self.intrinsic_matrix[1,2]
+
+    rospy.logwarn ('CP: intrinsic_matrix=%s' % self.intrinsic_matrix)
+    rospy.logwarn ('CP: distortion_coeffs=%s' % self.distortion_coeffs)
+
 
     self.M = cvNumpy.mat_to_array(self.intrinsic_matrix)
     # Makes with respect to Camera coordinate system instead of ImageRect

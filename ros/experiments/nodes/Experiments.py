@@ -489,7 +489,7 @@ if __name__ == '__main__':
         #experiment = ExperimentRecord10SecTrialsWithMove()
         #experiment = ExperimentMoveAbsolute()
         #experiment = ExperimentSSOOF()
-        experiment = ExperimentRegressiveMotion()
+        #experiment = ExperimentRegressiveMotion()
         experiment.Run()
         
     except KeyboardInterrupt:

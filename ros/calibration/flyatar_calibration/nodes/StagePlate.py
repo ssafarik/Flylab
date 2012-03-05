@@ -56,6 +56,12 @@ class Calibration():
         # self.stage_point_array = N.zeros((1,3))
         (self.intrinsic_matrix,self.distortion_coeffs) = CameraParameters.intrinsic("rect")
         (self.rvec,self.tvec) = CameraParameters.extrinsic("plate")
+        
+        rospy.logwarn ('SP: intrinsic_matrix=%s' % self.intrinsic_matrix)
+        rospy.logwarn ('SP: distortion_coeffs=%s' % self.distortion_coeffs)
+        rospy.logwarn ('SP: rvec=%s' % self.rvec)
+        rospy.logwarn ('SP: tvec=%s' % self.tvec)
+        
         self.origin_points = cv.CreateMat(4,3,cv.CV_32FC1)
         self.origin_points_projected = cv.CreateMat(4,2,cv.CV_32FC1)
         self.checker_size = 15
