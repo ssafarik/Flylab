@@ -7,7 +7,7 @@ import numpy as N
 import tf
 from cv_bridge import CvBridge, CvBridgeError
 from pythonmodules import cvNumpy,CameraParameters
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import PoseStamped
 from plate_tf.srv import *
 from track_image_contours.msg import ContourInfo
@@ -21,10 +21,11 @@ class Calibration():
         self.initialized_pose = False
         self.initialized_arrays = False
         
-        self.pubPatternGen = rospy.Publisher('PatternGen', MsgPatternGen)
+        self.camerainfo = None
+        self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.camerainfo_callback)
         self.sub_image = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
         self.sub_contourinfo = rospy.Subscriber("ContourInfo", ContourInfo, self.contourinfo_callback)
-        # self.sub_pose = rospy.Subscriber("RobotImagePose", PoseStamped, self.cbPose)
+        self.pubPatternGen = rospy.Publisher('PatternGen', MsgPatternGen)
         
         cv.NamedWindow("Stage Plate Calibration", 1)
         
@@ -54,7 +55,7 @@ class Calibration():
         
         # self.plate_point_array = N.zeros((1,3))
         # self.stage_point_array = N.zeros((1,3))
-        (self.intrinsic_matrix,self.distortion_coeffs) = CameraParameters.intrinsic("rect")
+        #(self.intrinsic_matrix,self.distortion_coeffs) = CameraParameters.intrinsic("rect")
         (self.rvec,self.tvec) = CameraParameters.extrinsic("plate")
         self.origin_points = cv.CreateMat(4,3,cv.CV_32FC1)
         self.origin_points_projected = cv.CreateMat(4,2,cv.CV_32FC1)
@@ -83,6 +84,13 @@ class Calibration():
     
     
     
+    def CameraInfo_callback (self, msgCameraInfo):
+        self.camerainfo = msgCameraInfo
+        self.M = cvNumpy.mat_to_array(self.camerainfo.K) #self.intrinsic_matrix)
+        # Makes with respect to Camera coordinate system instead of ImageRect
+        self.M[:-1,-1] = 0
+      
+        
     def initialize_images(self,cv_image):
         self.im_size = cv.GetSize(cv_image)
         (self.im_width, self.im_height) = cv.GetSize(cv_image)
@@ -102,8 +110,8 @@ class Calibration():
         cv.ProjectPoints2(self.origin_points,
                           self.rvec,
                           self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
+                          self.camerainfo.K, #self.intrinsic_matrix,
+                          self.camerainfo.D, #self.distortion_coeffs,
                           self.origin_points_projected)
         
         try:
@@ -172,14 +180,14 @@ class Calibration():
         cv.ProjectPoints2(x_start_points,
                           self.rvec,
                           self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
+                          self.camerainfo.K, #self.intrinsic_matrix,
+                          self.camerainfo.D, #self.distortion_coeffs,
                           self.start_points_projected)
         cv.ProjectPoints2(x_end_points,
                           self.rvec,
                           self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
+                          self.camerainfo.K, #self.intrinsic_matrix,
+                          self.camerainfo.D, #self.distortion_coeffs,
                           self.end_points_projected)
         
         start_points = cvNumpy.mat_to_array(self.start_points_projected)
@@ -191,14 +199,14 @@ class Calibration():
         cv.ProjectPoints2(y_start_points,
                           self.rvec,
                           self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
+                          self.camerainfo.K, #self.intrinsic_matrix,
+                          self.camerainfo.D, #self.distortion_coeffs,
                           self.start_points_projected)
         cv.ProjectPoints2(y_end_points,
                           self.rvec,
                           self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
+                          self.camerainfo.K, #self.intrinsic_matrix,
+                          self.camerainfo.D, #self.distortion_coeffs,
                           self.end_points_projected)
         
         start_points = cvNumpy.mat_to_array(self.start_points_projected)
