@@ -1,7 +1,4 @@
 <launch>
-  <!-- The camera_firewire package and associated parameters -->
-  <include file="$(find camera1394v2)/launch/flyatar_camera.launch" />
-
   <!-- <param name="contour_count_max" type="double" value="11"/> -->
   <param name="diff_threshold" type="double" value="55"/>  <!-- Adjust this based on light brightness, etc, to get good contours. -->
 
@@ -12,14 +9,9 @@
   <param name="display_foreground" type="boolean" value="false"/>
   <param name="display_background" type="boolean" value="false"/>
 
-  <!-- Coordinate Systems parameters -->
   <param name="frameid_contours" type="string" value="Camera"/>
-
-
-  <include file="$(find plate_tf)/launch/plate_camera_transforms.launch" />
-  <include file="$(find flyatar_calibration)/calibration_data/camera_plateimage_calibration_data.launch" />
-  <include file="$(find flyatar_calibration)/calibration_data/robotimage_calibration_data.launch" />
 
   <node pkg="track_image_contours" type="ImageProcessor.py" name="ImageProcessor" />
   <node pkg="track_image_contours" type="ContourIdentifier.py" name="ContourIdentifier" />
+  <node pkg="track_image_contours" type="PublishFlyView.py" name="PublishFlyView" />
 </launch>

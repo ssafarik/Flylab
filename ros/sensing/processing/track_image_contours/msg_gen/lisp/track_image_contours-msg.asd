@@ -2,7 +2,7 @@
 (cl:in-package :asdf)
 
 (defsystem "track_image_contours-msg"
-  :depends-on (:roslisp-msg-protocol :roslisp-utils :flystage-msg
+  :depends-on (:roslisp-msg-protocol :roslisp-utils :flycore-msg
                :std_msgs-msg
 )
   :components ((:file "_package")

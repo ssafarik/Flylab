@@ -9,7 +9,7 @@ import math
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import PointStamped
-from flystage.msg import Setpoint
+from flycore.msg import Setpoint
 from plate_tf.srv import *
 from plate_tf.msg import StopState, InBoundsState
 

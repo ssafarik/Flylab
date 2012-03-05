@@ -6,8 +6,8 @@ import actionlib
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Header
 from stage_action_server.msg import *
-from flystage.msg import *
-from flystage.srv import *
+from flycore.msg import *
+from flycore.srv import *
 import tf
 import plate_tf.srv
 import numpy as N
@@ -36,24 +36,24 @@ class StageActionServer(object):
         self.feedback_stage = ActionStageStateFeedback()
         self.feedback_plate = ActionStageStateFeedback()
         
-        self.requestStageState = SrvStageStateRequest()
+        self.requestStageState = SrvFrameStateRequest()
             
 
         rospy.wait_for_service('get_stage_state')
         try:
-            self.get_stage_state = rospy.ServiceProxy('get_stage_state', SrvStageState)
+            self.get_stage_state = rospy.ServiceProxy('get_stage_state', SrvFrameState)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
         
         rospy.wait_for_service('set_stage_state')
         try:
-            self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvStageState)
+            self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
         
         rospy.wait_for_service('home_stage')
         try:
-            self.home_stage = rospy.ServiceProxy('home_stage', SrvStageState)
+            self.home_stage = rospy.ServiceProxy('home_stage', SrvFrameState)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
         
@@ -121,7 +121,7 @@ class StageActionServer(object):
                     self.isRunning = False
                 else:
                     if not self.isRunning:
-                        self.set_stage_state(SrvStageStateRequest(state=MsgFrameState(header=poseStage.header, pose=poseStage.pose)))
+                        self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=poseStage.header, pose=poseStage.pose)))
                         self.isRunning = True
                     else:
                         # We can eliminate this section, as we are just transforming Plate to Plate.

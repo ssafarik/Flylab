@@ -1,3 +1,9 @@
 <launch>
-	<include file="$(find config)/launch/flybowl_80mm.launch" />
+    <!-- This file points to the .launch file of the arena you are using.
+         Please put all the params, nodes, etc, in the specific launch file. -->
+    
+    
+	<!-- <include file="$(find config)/launch/flybowl_32mm.launch" /> -->
+	     <include file="$(find config)/launch/flybowl_65mm.launch" />
+	<!-- <include file="$(find config)/launch/flybowl_80mm.launch" /> -->
 </launch>

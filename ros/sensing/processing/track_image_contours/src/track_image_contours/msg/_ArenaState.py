@@ -2,20 +2,20 @@
 import roslib.message
 import struct
 
+import flycore.msg
 import geometry_msgs.msg
-import flystage.msg
 import std_msgs.msg
 
 class ArenaState(roslib.message.Message):
   _md5sum = "9f7ee9ebaa8f8ddbe0d1e79f64216360"
   _type = "track_image_contours/ArenaState"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """flystage/MsgFrameState robot
-flystage/MsgFrameState[] flies
+  _full_text = """flycore/MsgFrameState robot
+flycore/MsgFrameState[] flies
 
 
 ================================================================================
-MSG: flystage/MsgFrameState
+MSG: flycore/MsgFrameState
 Header header
 geometry_msgs/Pose pose
 geometry_msgs/Twist velocity
@@ -76,7 +76,7 @@ float64 y
 float64 z
 """
   __slots__ = ['robot','flies']
-  _slot_types = ['flystage/MsgFrameState','flystage/MsgFrameState[]']
+  _slot_types = ['flycore/MsgFrameState','flycore/MsgFrameState[]']
 
   def __init__(self, *args, **kwds):
     """
@@ -96,11 +96,11 @@ float64 z
       super(ArenaState, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
       if self.robot is None:
-        self.robot = flystage.msg.MsgFrameState()
+        self.robot = flycore.msg.MsgFrameState()
       if self.flies is None:
         self.flies = []
     else:
-      self.robot = flystage.msg.MsgFrameState()
+      self.robot = flycore.msg.MsgFrameState()
       self.flies = []
 
   def _get_types(self):
@@ -159,7 +159,7 @@ float64 z
     """
     try:
       if self.robot is None:
-        self.robot = flystage.msg.MsgFrameState()
+        self.robot = flycore.msg.MsgFrameState()
       end = 0
       _x = self
       start = end
@@ -180,7 +180,7 @@ float64 z
       (length,) = _struct_I.unpack(str[start:end])
       self.flies = []
       for i in range(0, length):
-        val1 = flystage.msg.MsgFrameState()
+        val1 = flycore.msg.MsgFrameState()
         _v9 = val1.header
         start = end
         end += 4
@@ -278,7 +278,7 @@ float64 z
     """
     try:
       if self.robot is None:
-        self.robot = flystage.msg.MsgFrameState()
+        self.robot = flycore.msg.MsgFrameState()
       end = 0
       _x = self
       start = end
@@ -299,7 +299,7 @@ float64 z
       (length,) = _struct_I.unpack(str[start:end])
       self.flies = []
       for i in range(0, length):
-        val1 = flystage.msg.MsgFrameState()
+        val1 = flycore.msg.MsgFrameState()
         _v25 = val1.header
         start = end
         end += 4

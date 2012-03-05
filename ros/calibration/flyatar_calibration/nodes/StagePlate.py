@@ -459,7 +459,7 @@ class Calibration():
                 msgPattern.points = []
                 msgPattern.hz = 0.01
                 msgPattern.count = -1
-                msgPattern.radius = rospy.get_param('arena/radius', 25.4)
+                msgPattern.radius = rospy.get_param('arena/radius_movement', 25.4)
                 msgPattern.preempt = False
                 self.pubPatternGen.publish (msgPattern)
                 rosrate.sleep()
@@ -471,7 +471,7 @@ class Calibration():
             msgPattern.points = []
             msgPattern.hz = 0.01
             msgPattern.count = 0
-            msgPattern.radius = rospy.get_param('arena/radius', 25.4)
+            msgPattern.radius = rospy.get_param('arena/radius_movement', 25.4)
             msgPattern.preempt = True
             self.pubPatternGen.publish (msgPattern)
     

@@ -1,0 +1,10 @@
+(cl:defpackage flycore-srv
+  (:use )
+  (:export
+   "SRVFRAMESTATE"
+   "<SRVFRAMESTATE-REQUEST>"
+   "SRVFRAMESTATE-REQUEST"
+   "<SRVFRAMESTATE-RESPONSE>"
+   "SRVFRAMESTATE-RESPONSE"
+  ))
+

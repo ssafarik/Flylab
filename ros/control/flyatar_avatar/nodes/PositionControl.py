@@ -8,8 +8,8 @@ import math
 import tf
 import cv
 import numpy
-from flystage.srv import *
-from flystage.msg import StageCommands,Setpoint
+from flycore.srv import *
+from flycore.msg import StageCommands,Setpoint
 from joystick_commands.msg import JoystickCommands
 from geometry_msgs.msg import PointStamped
 

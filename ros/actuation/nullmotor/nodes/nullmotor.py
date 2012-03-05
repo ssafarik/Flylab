@@ -3,8 +3,8 @@ from __future__ import division
 import roslib; roslib.load_manifest('nullmotor')
 import rospy
 from sensor_msgs.msg import JointState
-from flystage.msg import *
-from flystage.srv import *
+from flycore.msg import *
+from flycore.srv import *
 from PatternGen.srv import SrvSignal, SrvSignalResponse
 
 

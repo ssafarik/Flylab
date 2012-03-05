@@ -1,0 +1,8 @@
+<launch>
+    <!-- This file points to the .launch file of the camera you are using.
+         Please put all the params, nodes, etc, in the specific launch file. -->
+    
+    
+	     <include file="$(find camera1394v2)/launch/flyatar_camera.launch" />
+	     
+</launch>

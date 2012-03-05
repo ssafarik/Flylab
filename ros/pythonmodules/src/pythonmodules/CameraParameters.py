@@ -5,7 +5,7 @@ import rospy
 
 
 # Find camera intrinsic paramters
-# Could also subscribe to appropriate ImageInfo
+# Could also subscribe to appropriate camera_info topic.
 def intrinsic(image_frame):
     image_frame.lower()
 

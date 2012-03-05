@@ -1,0 +1,14 @@
+<launch>
+    <!-- Don't launch this file directly.  Launch robot.launch, and point to this from there. -->
+
+
+	<param name="robot_width" type="double" value="1.5875"/>
+	<param name="robot_height" type="double" value="1.5875"/>
+	<param name="robot_visible" type="boolean" value="true"/>
+	<param name="robot_paint" type="str" value="blackoxide"/>
+	<param name="robot_scent" type="str" value="unscented"/>
+  
+	<include file="$(find flyatar_calibration)/calibration_data/calibration_robotimage_0625inch.launch" />
+  
+</launch>
+  

@@ -89,7 +89,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/geometry/tf/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
-../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/common_msgs/visualization_msgs/manifest.xml
@@ -113,7 +113,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
-../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/manifest.xml
+../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/image_gui/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -127,8 +127,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg_gen/generated
@@ -141,7 +141,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg_gen/generated
+../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/image_gui/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/experiments/Trigger.h"
 	/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/scripts/gensrv_cpp.py /home/ssafarik/git/Flyatar2/ros/experiments/srv/Trigger.srv
@@ -198,7 +198,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/ros_comm/utilities/message_filters/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/geometry/tf/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
-../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/common_msgs/visualization_msgs/manifest.xml
@@ -222,7 +222,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
-../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/manifest.xml
+../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/image_gui/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/generated
@@ -236,8 +236,8 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/geometry/tf/msg_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/geometry/tf/srv_gen/generated
-../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/actuation/stage_action_server/msg_gen/generated
@@ -250,7 +250,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg_gen/generated
+../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/image_gui/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/experiments/ExperimentParams.h"
 	/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/scripts/gensrv_cpp.py /home/ssafarik/git/Flyatar2/ros/experiments/srv/ExperimentParams.srv

@@ -19,7 +19,7 @@
   <depend package="cv_bridge"/>
   <depend package="camera1394v2"/>
   <depend package="plate_tf"/>
-  <depend package="flystage"/>
+  <depend package="flycore"/>
   <depend package="pythonmodules"/>
 
 </package>

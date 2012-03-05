@@ -10,8 +10,8 @@ import tf
 
 from geometry_msgs.msg import Pose, Point, Quaternion
 from stage_action_server.msg import *
-from flystage.msg import *
-from flystage.srv import *
+from flycore.msg import *
+from flycore.srv import *
 from track_image_contours.msg import ArenaState
 from experiments.srv import Trigger, ExperimentParams
 
@@ -475,7 +475,7 @@ class GotoHome (smach.State):
 
         rospy.wait_for_service('set_stage_state')
         try:
-            self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvStageState)
+            self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
         
@@ -510,7 +510,7 @@ class GotoHome (smach.State):
             self.goal.state.header.stamp = rospy.Time.now()
             self.goal.state.pose.position.x = userdata.experimentparamsIn.home.x
             self.goal.state.pose.position.y = userdata.experimentparamsIn.home.y
-            self.set_stage_state(SrvStageStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+            self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
                                                                           pose=self.goal.state.pose),
                                                       speed = userdata.experimentparamsIn.move.speed))
 
@@ -570,11 +570,11 @@ class MoveRobot (smach.State):
 
         rospy.wait_for_service('set_stage_state')
         try:
-            self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvStageState)
+            self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
-        self.radiusInBounds = float(rospy.get_param("arena/radius","25.4"))
+        self.radiusInBounds = float(rospy.get_param("arena/radius_movement","25.4"))
         
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -677,7 +677,7 @@ class MoveRobot (smach.State):
                     
                     
                     #rospy.logwarn('EL calling set_stage_state(%s) pre' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
-                    self.set_stage_state(SrvStageStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+                    self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
                                                                                   pose=self.goal.state.pose),
                                                               speed = speedTarget))
                     #rospy.logwarn('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])

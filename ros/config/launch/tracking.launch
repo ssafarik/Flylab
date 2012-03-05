@@ -1,0 +1,8 @@
+<launch>
+    <!-- This file points to the .launch file of the tracking system you are using.
+         Please put all the params, nodes, etc, in the specific launch file. -->
+    
+    
+	<include file="$(find track_image_contours)/launch/track_image_contours.launch" />
+	     
+</launch>

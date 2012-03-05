@@ -32,15 +32,15 @@ class DrawObjects:
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
-        self.in_bounds_radius_plate = rospy.get_param('in_bounds_radius',1)
+        self.radiusArena = rospy.get_param('arena/radius_movement', 25.4)
         self.axis_length_plate = 4
-        self.mask_radius_camera = rospy.get_param("mask_radius")
+        self.radiusCamera = rospy.get_param('arena/radius_camera', 25.4)
 
         self.plate_origin_camera = PointStamped()
         self.plate_origin_camera.header.frame_id = "Camera"
         self.plate_point_camera = PointStamped()
         self.plate_point_camera.header.frame_id = "Camera"
-        Xsrc = [0,self.in_bounds_radius_plate,self.axis_length_plate]
+        Xsrc = [0,self.radiusArena,self.axis_length_plate]
         Ysrc = [0,0,0]
         response = self.plate_to_camera(Xsrc,Ysrc)
         x0 = self.plate_origin_camera.point.x = response.Xdst[0]
@@ -49,7 +49,7 @@ class DrawObjects:
         y1 = self.plate_point_camera.point.y = response.Ydst[1]
         x2 = response.Xdst[2]
         y2 = response.Ydst[2]
-        self.in_bounds_radius_camera = N.sqrt((x1-x0)**2 + (y1-y0)**2)
+        self.radiusCamera = N.sqrt((x1-x0)**2 + (y1-y0)**2)
         self.axis_length_camera = N.sqrt((x2-x0)**2 + (y2-y0)**2)
 
         self.plate_image_origin = PointStamped()
@@ -90,8 +90,8 @@ class DrawObjects:
         self.markerPlateOrigin = DrawPrimitives.Axes(self.plate_origin_primitives.point)
         self.markerRobot       = DrawPrimitives.CenteredCircle(self.origin.point, 4, self.colors.blue, 2)
         self.markerFly         = DrawPrimitives.CenteredCircle(self.origin.point, 4, self.colors.red, 2)
-        self.markerInBounds    = DrawPrimitives.CenteredCircle(self.plate_origin_primitives.point, self.in_bounds_radius_camera, self.colors.yellow, 2)
-        self.markerMask        = DrawPrimitives.CenteredCircle(self.plate_origin_primitives.point, self.mask_radius_camera, self.colors.yellow, 1)
+        self.markerInBounds    = DrawPrimitives.CenteredCircle(self.plate_origin_primitives.point, self.radiusCamera, self.colors.yellow, 2)
+        self.markerMask        = DrawPrimitives.CenteredCircle(self.plate_origin_primitives.point, self.radiusCamera, self.colors.yellow, 1)
 
         #self.draw_objects.draw_object_list = [self.markerPlateOrigin.draw_object,
         #                                      self.markerRobot.draw_object,

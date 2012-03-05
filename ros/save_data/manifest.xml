@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url></url>
   <depend package="rospy"/>
-  <depend package="flystage"/>
+  <depend package="flycore"/>
   <depend package="track_image_contours"/>
   <depend package="experiments"/>
 

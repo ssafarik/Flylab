@@ -14,8 +14,8 @@
 
 #include "ros/assert.h"
 
-#include "flystage/MsgFrameState.h"
-#include "flystage/MsgFrameState.h"
+#include "flycore/MsgFrameState.h"
+#include "flycore/MsgFrameState.h"
 
 namespace track_image_contours
 {
@@ -35,17 +35,17 @@ struct ArenaState_ {
   {
   }
 
-  typedef  ::flystage::MsgFrameState_<ContainerAllocator>  _robot_type;
-   ::flystage::MsgFrameState_<ContainerAllocator>  robot;
+  typedef  ::flycore::MsgFrameState_<ContainerAllocator>  _robot_type;
+   ::flycore::MsgFrameState_<ContainerAllocator>  robot;
 
-  typedef std::vector< ::flystage::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flystage::MsgFrameState_<ContainerAllocator> >::other >  _flies_type;
-  std::vector< ::flystage::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flystage::MsgFrameState_<ContainerAllocator> >::other >  flies;
+  typedef std::vector< ::flycore::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flycore::MsgFrameState_<ContainerAllocator> >::other >  _flies_type;
+  std::vector< ::flycore::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flycore::MsgFrameState_<ContainerAllocator> >::other >  flies;
 
 
   ROS_DEPRECATED uint32_t get_flies_size() const { return (uint32_t)flies.size(); }
   ROS_DEPRECATED void set_flies_size(uint32_t size) { flies.resize((size_t)size); }
-  ROS_DEPRECATED void get_flies_vec(std::vector< ::flystage::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flystage::MsgFrameState_<ContainerAllocator> >::other > & vec) const { vec = this->flies; }
-  ROS_DEPRECATED void set_flies_vec(const std::vector< ::flystage::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flystage::MsgFrameState_<ContainerAllocator> >::other > & vec) { this->flies = vec; }
+  ROS_DEPRECATED void get_flies_vec(std::vector< ::flycore::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flycore::MsgFrameState_<ContainerAllocator> >::other > & vec) const { vec = this->flies; }
+  ROS_DEPRECATED void set_flies_vec(const std::vector< ::flycore::MsgFrameState_<ContainerAllocator> , typename ContainerAllocator::template rebind< ::flycore::MsgFrameState_<ContainerAllocator> >::other > & vec) { this->flies = vec; }
 private:
   static const char* __s_getDataType_() { return "track_image_contours/ArenaState"; }
 public:
@@ -61,12 +61,12 @@ public:
   ROS_DEPRECATED const std::string __getMD5Sum() const { return __s_getMD5Sum_(); }
 
 private:
-  static const char* __s_getMessageDefinition_() { return "flystage/MsgFrameState robot\n\
-flystage/MsgFrameState[] flies\n\
+  static const char* __s_getMessageDefinition_() { return "flycore/MsgFrameState robot\n\
+flycore/MsgFrameState[] flies\n\
 \n\
 \n\
 ================================================================================\n\
-MSG: flystage/MsgFrameState\n\
+MSG: flycore/MsgFrameState\n\
 Header header\n\
 geometry_msgs/Pose pose\n\
 geometry_msgs/Twist velocity\n\
@@ -205,12 +205,12 @@ template<class ContainerAllocator>
 struct Definition< ::track_image_contours::ArenaState_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "flystage/MsgFrameState robot\n\
-flystage/MsgFrameState[] flies\n\
+    return "flycore/MsgFrameState robot\n\
+flycore/MsgFrameState[] flies\n\
 \n\
 \n\
 ================================================================================\n\
-MSG: flystage/MsgFrameState\n\
+MSG: flycore/MsgFrameState\n\
 Header header\n\
 geometry_msgs/Pose pose\n\
 geometry_msgs/Twist velocity\n\
@@ -308,14 +308,14 @@ struct Printer< ::track_image_contours::ArenaState_<ContainerAllocator> >
   {
     s << indent << "robot: ";
 s << std::endl;
-    Printer< ::flystage::MsgFrameState_<ContainerAllocator> >::stream(s, indent + "  ", v.robot);
+    Printer< ::flycore::MsgFrameState_<ContainerAllocator> >::stream(s, indent + "  ", v.robot);
     s << indent << "flies[]" << std::endl;
     for (size_t i = 0; i < v.flies.size(); ++i)
     {
       s << indent << "  flies[" << i << "]: ";
       s << std::endl;
       s << indent;
-      Printer< ::flystage::MsgFrameState_<ContainerAllocator> >::stream(s, indent + "    ", v.flies[i]);
+      Printer< ::flycore::MsgFrameState_<ContainerAllocator> >::stream(s, indent + "    ", v.flies[i]);
     }
   }
 };

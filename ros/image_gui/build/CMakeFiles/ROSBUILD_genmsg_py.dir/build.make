@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar2/ros/gui/image_gui
+CMAKE_SOURCE_DIR = /home/ssafarik/git/Flyatar2/ros/image_gui
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build
+CMAKE_BINARY_DIR = /home/ssafarik/git/Flyatar2/ros/image_gui/build
 
 # Utility rule file for ROSBUILD_genmsg_py.
 
@@ -49,9 +49,9 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/__init__.py: ../src/image_gui/msg/_CvScalar.py
 ../src/image_gui/msg/__init__.py: ../src/image_gui/msg/_DrawObjects.py
 ../src/image_gui/msg/__init__.py: ../src/image_gui/msg/_CvPoint.py
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/image_gui/msg/__init__.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --initpy /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/DrawObject.msg /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvLine.msg /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvSize.msg /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvColor.msg /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvCircle.msg /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvScalar.msg /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/DrawObjects.msg /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvPoint.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --initpy /home/ssafarik/git/Flyatar2/ros/image_gui/msg/DrawObject.msg /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvLine.msg /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvSize.msg /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvColor.msg /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvCircle.msg /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvScalar.msg /home/ssafarik/git/Flyatar2/ros/image_gui/msg/DrawObjects.msg /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvPoint.msg
 
 ../src/image_gui/msg/_DrawObject.py: ../msg/DrawObject.msg
 ../src/image_gui/msg/_DrawObject.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -119,7 +119,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
 ../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
-../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
 ../src/image_gui/msg/_DrawObject.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/image_gui/msg/_DrawObject.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -141,12 +141,12 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_DrawObject.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
-../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../src/image_gui/msg/_DrawObject.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_2)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/image_gui/msg/_DrawObject.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/DrawObject.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/image_gui/msg/DrawObject.msg
 
 ../src/image_gui/msg/_CvLine.py: ../msg/CvLine.msg
 ../src/image_gui/msg/_CvLine.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -212,7 +212,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
 ../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
-../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
 ../src/image_gui/msg/_CvLine.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/image_gui/msg/_CvLine.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -234,12 +234,12 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvLine.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
-../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../src/image_gui/msg/_CvLine.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_3)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/image_gui/msg/_CvLine.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvLine.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvLine.msg
 
 ../src/image_gui/msg/_CvSize.py: ../msg/CvSize.msg
 ../src/image_gui/msg/_CvSize.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -303,7 +303,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
 ../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
-../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
 ../src/image_gui/msg/_CvSize.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/image_gui/msg/_CvSize.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -325,12 +325,12 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvSize.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
-../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../src/image_gui/msg/_CvSize.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_4)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/image_gui/msg/_CvSize.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvSize.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvSize.msg
 
 ../src/image_gui/msg/_CvColor.py: ../msg/CvColor.msg
 ../src/image_gui/msg/_CvColor.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -394,7 +394,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
 ../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
-../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
 ../src/image_gui/msg/_CvColor.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/image_gui/msg/_CvColor.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -416,12 +416,12 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvColor.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
-../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../src/image_gui/msg/_CvColor.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_5)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/image_gui/msg/_CvColor.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvColor.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvColor.msg
 
 ../src/image_gui/msg/_CvCircle.py: ../msg/CvCircle.msg
 ../src/image_gui/msg/_CvCircle.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -487,7 +487,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
 ../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
-../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
 ../src/image_gui/msg/_CvCircle.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/image_gui/msg/_CvCircle.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -509,12 +509,12 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvCircle.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
-../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../src/image_gui/msg/_CvCircle.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_6)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_6)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/image_gui/msg/_CvCircle.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvCircle.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvCircle.msg
 
 ../src/image_gui/msg/_CvScalar.py: ../msg/CvScalar.msg
 ../src/image_gui/msg/_CvScalar.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -578,7 +578,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
 ../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
-../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
 ../src/image_gui/msg/_CvScalar.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/image_gui/msg/_CvScalar.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -600,12 +600,12 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvScalar.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
-../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../src/image_gui/msg/_CvScalar.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_7)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_7)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/image_gui/msg/_CvScalar.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvScalar.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvScalar.msg
 
 ../src/image_gui/msg/_DrawObjects.py: ../msg/DrawObjects.msg
 ../src/image_gui/msg/_DrawObjects.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -674,7 +674,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
 ../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
-../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
 ../src/image_gui/msg/_DrawObjects.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/image_gui/msg/_DrawObjects.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -696,12 +696,12 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_DrawObjects.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
-../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../src/image_gui/msg/_DrawObjects.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_8)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_8)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/image_gui/msg/_DrawObjects.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/DrawObjects.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/image_gui/msg/DrawObjects.msg
 
 ../src/image_gui/msg/_CvPoint.py: ../msg/CvPoint.msg
 ../src/image_gui/msg/_CvPoint.py: /opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py
@@ -765,7 +765,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
 ../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/pythonmodules/manifest.xml
 ../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/manifest.xml
-../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/manifest.xml
+../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/flycore/manifest.xml
 ../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
 ../src/image_gui/msg/_CvPoint.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/image_gui/msg/_CvPoint.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -787,12 +787,12 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
 ../src/image_gui/msg/_CvPoint.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
 ../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/msg_gen/generated
 ../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/plate_tf/srv_gen/generated
-../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/msg_gen/generated
-../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/actuation/flystage/srv_gen/generated
+../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/generated
+../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/generated
 ../src/image_gui/msg/_CvPoint.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_9)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles $(CMAKE_PROGRESS_9)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/image_gui/msg/_CvPoint.py"
-	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/gui/image_gui/msg/CvPoint.msg
+	/opt/ros/electric/stacks/ros_comm/clients/rospy/scripts/genmsg_py.py --noinitpy /home/ssafarik/git/Flyatar2/ros/image_gui/msg/CvPoint.msg
 
 ROSBUILD_genmsg_py: CMakeFiles/ROSBUILD_genmsg_py
 ROSBUILD_genmsg_py: ../src/image_gui/msg/__init__.py
@@ -816,6 +816,6 @@ CMakeFiles/ROSBUILD_genmsg_py.dir/clean:
 .PHONY : CMakeFiles/ROSBUILD_genmsg_py.dir/clean
 
 CMakeFiles/ROSBUILD_genmsg_py.dir/depend:
-	cd /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar2/ros/gui/image_gui /home/ssafarik/git/Flyatar2/ros/gui/image_gui /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build /home/ssafarik/git/Flyatar2/ros/gui/image_gui/build/CMakeFiles/ROSBUILD_genmsg_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ssafarik/git/Flyatar2/ros/image_gui/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ssafarik/git/Flyatar2/ros/image_gui /home/ssafarik/git/Flyatar2/ros/image_gui /home/ssafarik/git/Flyatar2/ros/image_gui/build /home/ssafarik/git/Flyatar2/ros/image_gui/build /home/ssafarik/git/Flyatar2/ros/image_gui/build/CMakeFiles/ROSBUILD_genmsg_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ROSBUILD_genmsg_py.dir/depend
 

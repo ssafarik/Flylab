@@ -11,7 +11,7 @@ from plate_tf.srv import *
 from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
-from flystage.msg import *
+from flycore.msg import *
 import copy
 import filters
 from pythonmodules import CircleFunctions
@@ -408,7 +408,7 @@ class ContourIdentifier:
 
         self.t = rospy.get_time()
         #self.mask_radius = int(rospy.get_param("mask_radius","225"))
-        self.radiusInBounds = float(rospy.get_param("in_bounds_radius","85"))
+        self.radiusArena = rospy.get_param("arena/radius_camera",25.4)
 
         self.xSave = []
         self.ySave = []
@@ -424,8 +424,8 @@ class ContourIdentifier:
                                   pose=Pose(position=Point(x=0, 
                                                            y=0, 
                                                            z=0)),
-                                  scale=Vector3(x=self.radiusInBounds*2.0,
-                                                y=self.radiusInBounds*2.0,
+                                  scale=Vector3(x=self.radiusArena*2.0,
+                                                y=self.radiusArena*2.0,
                                                 z=0.01),
                                   color=ColorRGBA(a=0.05,
                                                   r=1.0,
@@ -434,8 +434,8 @@ class ContourIdentifier:
                                   lifetime=rospy.Duration(0.1))
 
 
-        rospy.wait_for_service('camera_to_plate')
         try:
+            rospy.wait_for_service('camera_to_plate') #, timeout=10.0)
             self.camera_to_plate = rospy.ServiceProxy('camera_to_plate', PlateCameraConversion)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
@@ -762,7 +762,7 @@ class ContourIdentifier:
             #rospy.loginfo ('CI contourinfo0 %s' % contourinfo)
             contourinfo = self.ContourinfoPlateFromCamera(contourinfo)
             #rospy.loginfo ('CI contourinfo1 %s' % contourinfo)
-            contourinfo = self.ContourinfoWithinRadius(contourinfo, self.radiusInBounds)
+            contourinfo = self.ContourinfoWithinRadius(contourinfo, self.radiusArena)
             #rospy.loginfo ('CI contourinfo2 %s' % contourinfo)
 
             # Repackage the contourinfo into a list of contours

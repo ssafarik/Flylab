@@ -7,7 +7,7 @@ import tf
 import sys
 import time, os, subprocess
 import numpy as N
-from flystage.msg import MsgFrameState
+from flycore.msg import MsgFrameState
 from experiments.srv import Trigger, ExperimentParams
 from track_image_contours.msg import ArenaState
 

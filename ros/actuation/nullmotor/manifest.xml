@@ -11,7 +11,7 @@
   <depend package="rospy"/>
   <depend package="sensor_msgs"/>
   <depend package="roslib"/>
-  <depend package="flystage"/>
+  <depend package="flycore"/>
   <depend package="PatternGen"/>
 
 </package>

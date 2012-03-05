@@ -5,12 +5,13 @@ import sys
 import rospy
 import cv
 import tf
+import numpy as N
+from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import PointStamped
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from track_image_contours.msg import ContourInfo
-from cv_bridge import CvBridge, CvBridgeError
-import numpy as N
+from plate_tf.srv import PlateCameraConversion
 
 
 class ImageProcessor:
@@ -83,6 +84,18 @@ class ImageProcessor:
         
         self.tfrx.waitForTransform("ImageRect", self.ROIPlateImage_origin.header.frame_id, rospy.Time(), rospy.Duration(5.0))
         self.tfrx.waitForTransform("ROIPlateImage", self.PlateImage_origin.header.frame_id, rospy.Time(), rospy.Duration(5.0))
+
+#        rospy.wait_for_service('plate_to_camera', timeout=10.0)
+#        try:
+#            self.plate_to_camera = rospy.ServiceProxy('plate_to_camera', PlateCameraConversion)
+#        except rospy.ServiceException, e:
+#            print "Service call failed: %s"%e
+#        rospy.wait_for_service('camera_to_plate', timeout=10.0)
+#        try:
+#            self.camera_to_plate = rospy.ServiceProxy('camera_to_plate', PlateCameraConversion)
+#        except rospy.ServiceException, e:
+#            print "Service call failed: %s"%e
+
         
         while (not self.initialized_coords):
             try:
@@ -95,11 +108,30 @@ class ImageProcessor:
         
         
         # Mask Info
-        self.mask_radius = int(rospy.get_param("mask_radius","225"))
+        self.radiusMask = int(rospy.get_param("arena/radius_camera","25.4")) #int(rospy.get_param("radiusMask","225"))
+#        rospy.logwarn('100 ImageRect = %s Plate' % self.MmFromPixels(100))
+#        rospy.logwarn('100 Plate = %s ImageRect' % self.PixelsFromMm(100))
         
         self.initialized = True
         
 
+    def MmFromPixels (self, xIn):
+        response = self.plate_to_camera(xIn, xIn)
+        return (response.Xdst, response.Ydst)
+        
+        
+    def PixelsFromMm (self, xIn):
+        ptIn = PointStamped()
+        ptIn.header.frame_id = "Plate"
+        ptIn.point.x = 0.0
+        ptIn.point.y = 0.0
+        ptOrigin = self.tfrx.transformPoint("ImageRect", ptIn)        
+        ptIn.point.x = xIn
+        ptIn.point.y = xIn
+        ptOut = self.tfrx.transformPoint("ImageRect", ptIn)        
+        return (ptOut.point.x - ptOrigin.point.x)
+        
+        
     def InitializeImages(self,cv_image):
         self.undistorted_size = cv.GetSize(cv_image)
         (self.undistorted_width,self.undistorted_height) = cv.GetSize(cv_image)
@@ -133,7 +165,7 @@ class ImageProcessor:
         cv.Zero(self.im_mask)
         cv.Circle(self.im_mask,
                   (int(self.ROIPlateImage_PlateImage_origin.point.x),int(self.ROIPlateImage_PlateImage_origin.point.y)),
-                  int(self.mask_radius), 
+                  int(self.radiusMask), 
                   self.color_max, 
                   cv.CV_FILLED)
         # Create Background image

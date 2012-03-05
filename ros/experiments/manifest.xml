@@ -14,7 +14,7 @@
   <depend package="smach"/>
   <depend package="smach_ros"/>
   <depend package="stage_action_server"/>
-  <depend package="flystage"/>
+  <depend package="flycore"/>
   <depend package="image_gui"/>
   <depend package="plate_tf"/>
   <depend package="actionlib"/>

@@ -10,7 +10,7 @@
   <url>http://ros.org/wiki/plate_tf</url>
   <depend package="rospy"/>
   <depend package="tf"/>
-  <!--depend package="flystage"/-->
+  <!--depend package="flycore"/-->
   <depend package="geometry_msgs"/>
   <depend package="pythonmodules"/>
   <!--depend package="opencv2"/-->

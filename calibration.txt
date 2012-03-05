@@ -1,33 +1,43 @@
 # Calibration:
 # Todo: Simplify calibration, change calibration data location, save all data automatically
 
-# Create directory, and start the camera node.
-sudo mkdir /cameras
-sudo chgrp disk cameras/
-sudo chmod g+rwx cameras/
-roslaunch camera1394v2 flyatar_camera_cal_a.launch
 
-# Start the camera viewer.
-# Open new terminal
-rosmake image_view
-rosrun image_view image_view image:=camera/image_raw
+# Create calibration directory.
+sudo mkdir /cameras
+sudo chgrp video cameras/
+sudo chmod g+rwx cameras/
+groups   # (If "video" isn't listed, then "sudo usermod -a -G video username").
+
+
+# Start the camera node.
+roslaunch camera1394v2 flyatar_camera.launch &
+
+
+# Start the camera viewer.  (Might need to "rosmake image_view" first).
+rosrun image_view image_view image:=camera/image_raw &   
+
 
 # Open the camera properties window.
-# Open new terminal
-rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node
+rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node &
 
-# Adjust camera and brightness, exposure, gain, and shutter values
-# Record in Flyatar/ros/calibration/flyatar_calibration/calibration_data/basler_a622f_cal_b.yaml
-# Record in Flyatar/ros/calibration/flyatar_calibration/calibration_data/basler_a622f_cal_c.yaml
 
-# Restart camera with adjusted settings.
-# Ctrl-c to shutdown flyatar_camera_cal_a.launch
-roslaunch camera1394v2 flyatar_camera_cal_b.launch
+# Adjust brightness, exposure, gain, and shutter.
+# Record settings in Flyatar/ros/calibration/flyatar_calibration/calibration_data/settings_basler_a622f.yaml
+# Close the Dynamic Reconfigure window.
+
+
+# Kill the camera node.
+kill `ps a -o pid,args --no-headers | grep camera1394 | grep flyatar | cut -d ' ' -f 1`
+
+
+# Relaunch the camera node with adjusted settings.
+roslaunch camera1394v2 flyatar_camera.launch &
+
 
 # Calibrate the camera for distortion (using image_raw).
-# Open new terminal
 rosdep install camera_calibration
 rosmake camera_calibration
+rosmake image_proc
 # Print out ~/git/Flyatar/ros/calibration/flyatar_calibration/patterns/camera_calibration_pattern_30mm.pdf in 1:1 scale
 # Measure each checker to make sure it is 30mm, then tape pattern to something flat
 # Unmount camera from rig if necessary to give calibration pattern plenty of room to move
@@ -37,31 +47,30 @@ rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/
 # Click <commit> button (writes data to /cameras/basler_a622f_calibration.yaml)
 cp /cameras/basler_a622f_calibration.yaml /cameras/basler_a622f_rect_calibration.yaml
 
-# Calibrate the camera for distortion (using image_rect).
+# Fine-tune the calibration for distortion (using image_rect).
 # Ctrl-c to shutdown flyatar_camera_cal_b.launch
-rosmake image_proc
 roslaunch camera1394v2 flyatar_camera_cal_c.launch
 # open new terminal
 rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_rect camera:=/camera
 # wave 30 mm checkerboard in front of camera until calibrate button activates
 # Click <calibrate> button (will take several minutes)
-# Click <commit> button (writes data to /cameras/basler_a622f_rect_calibration.yaml)
+# Click <commit> button (writes data to /cameras/basler_a622f_calibration.yaml)
 # Ctrl-c to shutdown flyatar_camera_cal_c.launch
 # Transfer camera calibration info by hand
 #  from /cameras/basler_a622f_calibration.yaml 
 #  and /cameras/basler_a622f_rect_calibration.yaml
-#  into $(find flyatar_calibration)/calibration_data/camera_calibration_data.launch
+#  into $(find flyatar_calibration)/calibration_data/camera_calibration.launch
 
 
 # Mount camera on flyatar rig, positioned so that the arena is roughly centered in image.
 roslaunch flyatar_calibration CameraPlate.launch
 # Use the following command to move the center and radius of the circle to correspond to the arena.
 rostopic pub -1 Joystick/Commands geometry_msgs/Point -- dx dy dr (where dx,dy,dr are replaced with numbers)
-# Record mask radius and camera_plate_origin info into camera_plateimage_calibration_data.launch
+# Record mask radius and camera_plate_origin info into calibration_camera_plateimage.launch
 # Print ~/git/Flyatar/ros/calibration/flyatar_calibration/patterns/camera_plate_calibration_pattern.pdf in 1:1 scale
 # Measure each checker to make sure it is 15mm, then use scissors to cut along circular line surrounding pattern
 # Place cicular paper containing the checkerboard pattern on plate
-# Record rvec and tvec info into camera_plate_calibration_data.launch, the values appear on the image if the calibration is successful
+# Record rvec and tvec info into calibration_camera_plate.launch, the values appear on the image if the calibration is successful
 # ctrl-c to shutdown CameraPlate.launch
 
 # Acquire a background image.
@@ -73,16 +82,13 @@ roslaunch track_image_contours track_image_contours_tf.launch
 # place magnet on plate, check to see if contour is found properly
 # ctrl-c to shutdown track_image_contours_view_images.launch
 # reset power on Atmel motorcontroller, wait for motors to home
-##rosmake flyatar_manual
-##roslaunch flyatar_manual joystick_control.launch
-### test to make sure joystick moves stage
-### ctrl-c to shutdown joystick_control.launch
 roslaunch flyatar_calibration StagePlate.launch
+
 # The magnet will drive in a spiral pattern to cover the plate.  After a number of cycles, the calibration values should converge.
 # Record robot_min_ecc, robot_max_ecc, robot_min_area, robot_max_area 
-#   in robotimage_calibration_data.launch
+#   in calibration_robotimage.launch
 # Record translation vector and quaternion info 
-#   in stage_plate_calibration_data.launch
+#   in calibration_stage_plate.launch
 # Ctrl-c to shutdown StagePlate.launch
 
 

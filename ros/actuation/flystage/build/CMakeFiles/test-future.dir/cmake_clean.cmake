@@ -1,10 +1,4 @@
 FILE(REMOVE_RECURSE
-  "../msg_gen"
-  "../srv_gen"
-  "../src/flystage/msg"
-  "../src/flystage/srv"
-  "../msg_gen"
-  "../srv_gen"
   "CMakeFiles/test-future"
 )
 
