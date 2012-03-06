@@ -22,7 +22,9 @@ class Calibration():
         self.initialized_arrays = False
         
         self.camerainfo = None
-        self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.camerainfo_callback)
+        self.rvec = None
+        self.tvec = None
+        self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
         self.sub_image = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
         self.sub_contourinfo = rospy.Subscriber("ContourInfo", ContourInfo, self.contourinfo_callback)
         self.pubPatternGen = rospy.Publisher('PatternGen', MsgPatternGen)
@@ -56,8 +58,7 @@ class Calibration():
         # self.plate_point_array = N.zeros((1,3))
         # self.stage_point_array = N.zeros((1,3))
         #(self.intrinsic_matrix,self.distortion_coeffs) = CameraParameters.intrinsic("rect")
-        (self.rvec,self.tvec) = CameraParameters.extrinsic("plate")
-        self.origin_points = cv.CreateMat(4,3,cv.CV_32FC1)
+        self.origin_points = cv.CreateMat(4, 3, cv.CV_32FC1)
         self.origin_points_projected = cv.CreateMat(4,2,cv.CV_32FC1)
         self.checker_size = 15
         self.num_grid_lines = 9
@@ -85,10 +86,14 @@ class Calibration():
     
     
     def CameraInfo_callback (self, msgCameraInfo):
-        self.camerainfo = msgCameraInfo
-        self.M = cvNumpy.mat_to_array(self.camerainfo.K) #self.intrinsic_matrix)
-        # Makes with respect to Camera coordinate system instead of ImageRect
-        self.M[:-1,-1] = 0
+        if self.camerainfo is None:
+            self.camerainfo = msgCameraInfo
+            self.M = cvNumpy.mat_to_array(self.camerainfo.K) #self.intrinsic_matrix)
+            # Makes with respect to Camera coordinate system instead of ImageRect
+            self.M[:-1,-1] = 0
+
+            (self.rvec, self.tvec) = CameraParameters.extrinsic("plate") # Change this to come from self.camerainfo
+      
       
         
     def initialize_images(self,cv_image):
@@ -101,48 +106,49 @@ class Calibration():
     
     
     def draw_origin(self,im_color):
-        cv.SetZero(self.origin_points)
-        cv.SetReal2D(self.origin_points,1,0,self.checker_size) # x-direction
-        cv.SetReal2D(self.origin_points,2,1,self.checker_size) # y-direction
-        cv.SetReal2D(self.origin_points,3,2,self.checker_size) # z-direction
-        axis_line_width = 3
-        rect_line_width = 2
-        cv.ProjectPoints2(self.origin_points,
-                          self.rvec,
-                          self.tvec,
-                          self.camerainfo.K, #self.intrinsic_matrix,
-                          self.camerainfo.D, #self.distortion_coeffs,
-                          self.origin_points_projected)
-        
-        try:
-            a = cvNumpy.mat_to_array(self.origin_points_projected)
+        if self.camerainfo is not None:
+            cv.SetZero(self.origin_points)
+            cv.SetReal2D(self.origin_points,1,0,self.checker_size) # x-direction
+            cv.SetReal2D(self.origin_points,2,1,self.checker_size) # y-direction
+            cv.SetReal2D(self.origin_points,3,2,self.checker_size) # z-direction
+            axis_line_width = 3
+            rect_line_width = 2
+            cv.ProjectPoints2(self.origin_points,
+                              self.rvec,
+                              self.tvec,
+                              self.camerainfo.K, #self.intrinsic_matrix,
+                              self.camerainfo.D, #self.distortion_coeffs,
+                              self.origin_points_projected)
             
-            # origin point
-            pt1 = tuple(a[0])
+            try:
+                a = cvNumpy.mat_to_array(self.origin_points_projected)
+                
+                # origin point
+                pt1 = tuple(a[0])
+                
+                # draw x-axis
+                pt2 = tuple(a[1])
+                cv.Line(im_color,pt1,pt2,cv.CV_RGB(self.color_max,0,0),axis_line_width)
+                
+                # draw y-axis
+                pt2 = tuple(a[2])
+                cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,self.color_max,0),axis_line_width)
+                
+                # draw z-axis
+                pt2 = tuple(a[3])
+                cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,0,self.color_max),axis_line_width)
+                
+                # if self.image_plate_origin_found:
+                #   self.image_plate_origin = pt1
+                #   self.image_plate_origin_found = False
+                
+                # display_text = "image_plate_origin = " + str(self.image_plate_origin)
+                # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
+                # display_text = "image_plate_origin = (%0.0f, %0.0f)" % (self.image_plate_origin[0],self.image_plate_origin[1])
+                # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
+            except:
+                pass
             
-            # draw x-axis
-            pt2 = tuple(a[1])
-            cv.Line(im_color,pt1,pt2,cv.CV_RGB(self.color_max,0,0),axis_line_width)
-            
-            # draw y-axis
-            pt2 = tuple(a[2])
-            cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,self.color_max,0),axis_line_width)
-            
-            # draw z-axis
-            pt2 = tuple(a[3])
-            cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,0,self.color_max),axis_line_width)
-            
-            # if self.image_plate_origin_found:
-            #   self.image_plate_origin = pt1
-            #   self.image_plate_origin_found = False
-            
-            # display_text = "image_plate_origin = " + str(self.image_plate_origin)
-            # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
-            # display_text = "image_plate_origin = (%0.0f, %0.0f)" % (self.image_plate_origin[0],self.image_plate_origin[1])
-            # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
-        except:
-            pass
-        
 
     def to_homo(self,array):
         array = N.append(array, N.ones((1, array.shape[1])), axis=0)
@@ -154,67 +160,68 @@ class Calibration():
     
     
     def draw_grid(self,im_color):
-        points_range = (N.array(range(self.num_grid_lines)) - (self.num_grid_lines-1)/2) * self.checker_size
-        points_zeros = N.zeros(points_range.shape)
-        points_ones = N.ones(points_range.shape) * self.checker_size * (self.num_grid_lines - 1)/2
-        
-        x_start_points_array = N.array([-points_ones,points_range,points_zeros]).astype('float32')
-        x_end_points_array = N.array([points_ones,points_range,points_zeros]).astype('float32')
-        y_start_points_array = N.array([points_range,-points_ones,points_zeros]).astype('float32')
-        y_end_points_array = N.array([points_range,points_ones,points_zeros]).astype('float32')
-        
-        if self.rotate_grid:
-            x_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_start_points_array)))
-            x_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_end_points_array)))
-            y_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_start_points_array)))
-            y_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_end_points_array)))
-            self.rotate_grid = False
-        
-        x_start_points = cvNumpy.array_to_mat(x_start_points_array.transpose())
-        x_end_points = cvNumpy.array_to_mat(x_end_points_array.transpose())
-        y_start_points = cvNumpy.array_to_mat(y_start_points_array.transpose())
-        y_end_points = cvNumpy.array_to_mat(y_end_points_array.transpose())
-        
-        axis_line_width = 1
-        
-        cv.ProjectPoints2(x_start_points,
-                          self.rvec,
-                          self.tvec,
-                          self.camerainfo.K, #self.intrinsic_matrix,
-                          self.camerainfo.D, #self.distortion_coeffs,
-                          self.start_points_projected)
-        cv.ProjectPoints2(x_end_points,
-                          self.rvec,
-                          self.tvec,
-                          self.camerainfo.K, #self.intrinsic_matrix,
-                          self.camerainfo.D, #self.distortion_coeffs,
-                          self.end_points_projected)
-        
-        start_points = cvNumpy.mat_to_array(self.start_points_projected)
-        end_points = cvNumpy.mat_to_array(self.end_points_projected)
-        
-        for line_n in range(self.num_grid_lines):
-            cv.Line(im_color,tuple(start_points[line_n,:]),tuple(end_points[line_n,:]),cv.CV_RGB(self.color_max,0,0),axis_line_width)
-        
-        cv.ProjectPoints2(y_start_points,
-                          self.rvec,
-                          self.tvec,
-                          self.camerainfo.K, #self.intrinsic_matrix,
-                          self.camerainfo.D, #self.distortion_coeffs,
-                          self.start_points_projected)
-        cv.ProjectPoints2(y_end_points,
-                          self.rvec,
-                          self.tvec,
-                          self.camerainfo.K, #self.intrinsic_matrix,
-                          self.camerainfo.D, #self.distortion_coeffs,
-                          self.end_points_projected)
-        
-        start_points = cvNumpy.mat_to_array(self.start_points_projected)
-        end_points = cvNumpy.mat_to_array(self.end_points_projected)
-        
-        for line_n in range(self.num_grid_lines):
-            cv.Line(im_color,tuple(start_points[line_n,:]),tuple(end_points[line_n,:]),cv.CV_RGB(0,self.color_max,0),axis_line_width)
-        
+        if self.camerainfo is not None:
+            points_range = (N.array(range(self.num_grid_lines)) - (self.num_grid_lines-1)/2) * self.checker_size
+            points_zeros = N.zeros(points_range.shape)
+            points_ones = N.ones(points_range.shape) * self.checker_size * (self.num_grid_lines - 1)/2
+            
+            x_start_points_array = N.array([-points_ones,points_range,points_zeros]).astype('float32')
+            x_end_points_array = N.array([points_ones,points_range,points_zeros]).astype('float32')
+            y_start_points_array = N.array([points_range,-points_ones,points_zeros]).astype('float32')
+            y_end_points_array = N.array([points_range,points_ones,points_zeros]).astype('float32')
+            
+            if self.rotate_grid:
+                x_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_start_points_array)))
+                x_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_end_points_array)))
+                y_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_start_points_array)))
+                y_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_end_points_array)))
+                self.rotate_grid = False
+            
+            x_start_points = cvNumpy.array_to_mat(x_start_points_array.transpose())
+            x_end_points = cvNumpy.array_to_mat(x_end_points_array.transpose())
+            y_start_points = cvNumpy.array_to_mat(y_start_points_array.transpose())
+            y_end_points = cvNumpy.array_to_mat(y_end_points_array.transpose())
+            
+            axis_line_width = 1
+            
+            cv.ProjectPoints2(x_start_points,
+                              self.rvec,
+                              self.tvec,
+                              self.camerainfo.K, #self.intrinsic_matrix,
+                              self.camerainfo.D, #self.distortion_coeffs,
+                              self.start_points_projected)
+            cv.ProjectPoints2(x_end_points,
+                              self.rvec,
+                              self.tvec,
+                              self.camerainfo.K, #self.intrinsic_matrix,
+                              self.camerainfo.D, #self.distortion_coeffs,
+                              self.end_points_projected)
+            
+            start_points = cvNumpy.mat_to_array(self.start_points_projected)
+            end_points = cvNumpy.mat_to_array(self.end_points_projected)
+            
+            for line_n in range(self.num_grid_lines):
+                cv.Line(im_color,tuple(start_points[line_n,:]),tuple(end_points[line_n,:]),cv.CV_RGB(self.color_max,0,0),axis_line_width)
+            
+            cv.ProjectPoints2(y_start_points,
+                              self.rvec,
+                              self.tvec,
+                              self.camerainfo.K, #self.intrinsic_matrix,
+                              self.camerainfo.D, #self.distortion_coeffs,
+                              self.start_points_projected)
+            cv.ProjectPoints2(y_end_points,
+                              self.rvec,
+                              self.tvec,
+                              self.camerainfo.K, #self.intrinsic_matrix,
+                              self.camerainfo.D, #self.distortion_coeffs,
+                              self.end_points_projected)
+            
+            start_points = cvNumpy.mat_to_array(self.start_points_projected)
+            end_points = cvNumpy.mat_to_array(self.end_points_projected)
+            
+            for line_n in range(self.num_grid_lines):
+                cv.Line(im_color,tuple(start_points[line_n,:]),tuple(end_points[line_n,:]),cv.CV_RGB(0,self.color_max,0),axis_line_width)
+            
 
     def image_callback(self, image):
         if self.initialized:

@@ -1,6 +1,6 @@
 <launch>
     <!-- Don't launch this file directly.  Launch arena.launch, and point to this from there. -->
 
-	<param name="arena/radius_camera" type="double" value="100.0"/>
-	<param name="arena/radius_movement" type="double" value="80.0"/>
+	<param name="arena/radius_camera" type="double" value="470.0"/>  <!-- pixels -->
+	<param name="arena/radius_movement" type="double" value="80.0"/>  <!-- millimeters -->
 </launch>

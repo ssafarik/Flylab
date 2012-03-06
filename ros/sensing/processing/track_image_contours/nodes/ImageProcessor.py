@@ -9,7 +9,7 @@ import numpy as N
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import PointStamped
 from std_msgs.msg import String
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 from track_image_contours.msg import ContourInfo
 from plate_tf.srv import PlateCameraConversion
 
@@ -24,6 +24,8 @@ class ImageProcessor:
         self.initialized_coords = False
         
         # Messages
+        self.camerainfo = None
+        self.subCameraInfo        = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
         self.sub_image            = rospy.Subscriber("camera/image_rect", Image, self.Image_callback)
         self.pub_image_processed  = rospy.Publisher("camera/image_processed", Image)
         self.pub_image_diff       = rospy.Publisher("camera/image_diff", Image)
@@ -39,7 +41,7 @@ class ImageProcessor:
         self.area_list = []
         self.ecc_list = []
         self.nContours = 0
-        self.nContours_max = 20 #int(rospy.get_param("nContours_max", "2"))
+        self.nContours_max = 20 #int(rospy.get_param("nContours_max", 2))
         self.min_ecc = 1.75
         self.minSumImage = 100
         
@@ -103,18 +105,22 @@ class ImageProcessor:
                 self.ROIPlateImage_PlateImage_origin = self.tfrx.transformPoint("ROIPlateImage", self.PlateImage_origin)
                 self.initialized_coords = True
         
-            except (tf.LookupException, tf.ConnectivityException):
+            except (tf.Exception):
                 rospy.sleep(1.0)
         
         
         # Mask Info
-        self.radiusMask = int(rospy.get_param("arena/radius_camera","25.4")) #int(rospy.get_param("radiusMask","225"))
+        self.radiusMask = None
 #        rospy.logwarn('100 ImageRect = %s Plate' % self.MmFromPixels(100))
 #        rospy.logwarn('100 Plate = %s ImageRect' % self.PixelsFromMm(100))
         
         self.initialized = True
         
 
+    def CameraInfo_callback (self, msgCameraInfo):
+            self.camerainfo = msgCameraInfo
+
+    
     def MmFromPixels (self, xIn):
         response = self.plate_to_camera(xIn, xIn)
         return (response.Xdst, response.Ydst)
@@ -132,53 +138,53 @@ class ImageProcessor:
         return (ptOut.point.x - ptOrigin.point.x)
         
         
-    def InitializeImages(self,cv_image):
-        self.undistorted_size = cv.GetSize(cv_image)
-        (self.undistorted_width,self.undistorted_height) = cv.GetSize(cv_image)
-        
-        # ROI Setup
-        self.ROIPlateImage_width = int(rospy.get_param("ROIPlateImage_width", "640"))
-        self.ROIPlateImage_height = int(rospy.get_param("ROIPlateImage_height", "480"))
-        self.ROIPlateImage_size = (self.ROIPlateImage_width, self.ROIPlateImage_height)
-        self.ROIPlateImage_cvrect = (int(self.undistorted_ROIPlateImage_origin.point.x),
-                                     int(self.undistorted_ROIPlateImage_origin.point.y),
-                                     int(self.ROIPlateImage_width),
-                                     int(self.ROIPlateImage_height))
-        
-        
-        self.im                   = cv.CreateImage(self.undistorted_size,cv.IPL_DEPTH_8U,1)
-        self.im_processed         = cv.CreateImage(self.undistorted_size,cv.IPL_DEPTH_8U,3)
-        cv.SetImageROI(self.im_processed,self.ROIPlateImage_cvrect)
-        self.im_processed2        = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,3)
-        self.im_mask              = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
-        self.im_background        = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
-        self.im_foreground        = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
-        self.im_foreground_binary = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
-        self.im_dilate            = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
-        self.im_erode             = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
-        self.im_zeros             = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
-        self.im_contour           = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
-        self.im_contour_display   = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,3)
-        cv.Zero(self.im_zeros)
-        # self.center_ROIx = self.ROIwidth//2
-        # self.center_ROIy = self.ROIheight//2
-        cv.Zero(self.im_mask)
-        cv.Circle(self.im_mask,
-                  (int(self.ROIPlateImage_PlateImage_origin.point.x),int(self.ROIPlateImage_PlateImage_origin.point.y)),
-                  int(self.radiusMask), 
-                  self.color_max, 
-                  cv.CV_FILLED)
-        # Create Background image
-        # First image is background unless one can be loaded
-        cv.SetImageROI(cv_image,self.ROIPlateImage_cvrect)
-        try:
-            self.im_background = cv.LoadImage("/cameras/background.png",cv.CV_LOAD_IMAGE_GRAYSCALE)
-        except:
-            cv.And(cv_image,self.im_mask,self.im_background)
-            cv.SaveImage("/cameras/background.png",self.im_background)
-          
-        self.initialized_images = True
-        
+    def InitializeImages(self, cv_image):
+        if self.camerainfo is not None:
+            self.undistorted_size = cv.GetSize(cv_image)
+            
+            # ROI Setup
+            self.ROIPlateImage_width = self.camerainfo.width #int(rospy.get_param("ROIPlateImage_width", 640))
+            self.ROIPlateImage_height = self.camerainfo.height #int(rospy.get_param("ROIPlateImage_height", 480))
+            self.ROIPlateImage_size = (self.ROIPlateImage_width, self.ROIPlateImage_height)
+            self.ROIPlateImage_cvrect = (int(self.undistorted_ROIPlateImage_origin.point.x),
+                                         int(self.undistorted_ROIPlateImage_origin.point.y),
+                                         int(self.ROIPlateImage_width),
+                                         int(self.ROIPlateImage_height))
+            
+            
+            self.im                   = cv.CreateImage(self.undistorted_size,cv.IPL_DEPTH_8U,1)
+            self.im_processed         = cv.CreateImage(self.undistorted_size,cv.IPL_DEPTH_8U,3)
+            cv.SetImageROI(self.im_processed,self.ROIPlateImage_cvrect)
+            self.im_processed2        = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,3)
+            self.im_mask              = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
+            self.im_background        = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
+            self.im_foreground        = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
+            self.im_foreground_binary = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
+            self.im_dilate            = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
+            self.im_erode             = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
+            self.im_zeros             = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
+            self.im_contour           = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,1)
+            self.im_contour_display   = cv.CreateImage(self.ROIPlateImage_size,cv.IPL_DEPTH_8U,3)
+            cv.Zero(self.im_zeros)
+            # self.center_ROIx = self.ROIwidth//2
+            # self.center_ROIy = self.ROIheight//2
+            cv.Zero(self.im_mask)
+    #        cv.Circle(self.im_mask,
+    #                  (int(self.ROIPlateImage_PlateImage_origin.point.x),int(self.ROIPlateImage_PlateImage_origin.point.y)),
+    #                  int(self.radiusMask), 
+    #                  self.color_max, 
+    #                  cv.CV_FILLED)
+            # Create Background image
+            # First image is background unless one can be loaded
+            cv.SetImageROI(cv_image,self.ROIPlateImage_cvrect)
+            try:
+                self.im_background = cv.LoadImage("/cameras/background.png",cv.CV_LOAD_IMAGE_GRAYSCALE)
+            except:
+                cv.And(cv_image, self.im_mask, self.im_background)
+                cv.SaveImage("/cameras/background.png", self.im_background)
+              
+            self.initialized_images = True
+            
 
     def FindAngleEcc(self, A, B, C, D):
         angle = float('NaN')
@@ -293,7 +299,11 @@ class ImageProcessor:
             ptContourROIPlateImage.header.frame_id = "ROIPlateImage"
             ptContourROIPlateImage.point.x = xROI
             ptContourROIPlateImage.point.y = yROI
-            self.ptOutput = self.tfrx.transformPoint(self.frameidOutput, ptContourROIPlateImage)
+            try:
+                self.ptOutput = self.tfrx.transformPoint(self.frameidOutput, ptContourROIPlateImage)
+            except tf.Exception:
+                rospy.logwarn ('Cannot transform point to frame=%s from frame=%s' % (self.frameidOutput,ptContourROIPlateImage.header.frame_id))
+                self.ptOutput = PointStamped()
         
             self.x0_list.append(self.ptOutput.point.x)
             self.y0_list.append(self.ptOutput.point.y)
@@ -429,7 +439,7 @@ class ImageProcessor:
     def Image_callback(self, image):
         if not self.initialized:
             return
-        
+
         # Convert ROS image to OpenCV image
         try:
             cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(image, "passthrough"))
@@ -442,11 +452,21 @@ class ImageProcessor:
             else:
                 return
         
+        radiusMask = int(rospy.get_param("arena/radius_camera",25.4)) #int(rospy.get_param("radiusMask","225"))
+        if radiusMask != self.radiusMask:
+            self.radiusMask = radiusMask 
+            cv.Circle(self.im_mask,
+                      (int(self.ROIPlateImage_PlateImage_origin.point.x),int(self.ROIPlateImage_PlateImage_origin.point.y)),
+                      int(self.radiusMask), 
+                      self.color_max, 
+                      cv.CV_FILLED)
+        
         self.im = cv_image
-        cv.SetImageROI(self.im,self.ROIPlateImage_cvrect)
+        cv.SetImageROI(self.im, self.ROIPlateImage_cvrect)
+
         
         # Look for new diff_threshold value
-        self.diff_threshold = int(rospy.get_param("diff_threshold","30"))
+        self.diff_threshold = int(rospy.get_param("diff_threshold",30))
         
         # Apply mask and Subtract background
         cv.And(self.im, self.im_mask, self.im)

@@ -302,7 +302,7 @@ class ExperimentMoveAbsolute():
         
         self.experimentparams.waitEntry = 0.0
         
-        self.experimentparams.triggerEntry.enabled = True
+        self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.distanceMin = 0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
         self.experimentparams.triggerEntry.speedMin =  0.0
@@ -318,8 +318,8 @@ class ExperimentMoveAbsolute():
         self.experimentparams.move.tracking = True
         self.experimentparams.move.frameidOriginPosition = "Plate"
         self.experimentparams.move.frameidOriginAngle = "Plate"
-        self.experimentparams.move.distance = 70.7
-        self.experimentparams.move.angle = -3*N.pi/4
+        self.experimentparams.move.distance = 0.0
+        self.experimentparams.move.angle = 0.0
         self.experimentparams.move.angleType = 'constant'
         self.experimentparams.move.speed = 20
         self.experimentparams.move.speedType = 'constant'
@@ -482,12 +482,12 @@ class ExperimentRegressiveMotion():
 if __name__ == '__main__':
     rospy.init_node('Experiment')
     try:
-        experiment = ExperimentChase()
+        #experiment = ExperimentChase()
         #experiment = ExperimentRunAway()
         #experiment = ExperimentOpenTrigger()
         #experiment = ExperimentRecord10MinTrials()
         #experiment = ExperimentRecord10SecTrialsWithMove()
-        #experiment = ExperimentMoveAbsolute()
+        experiment = ExperimentMoveAbsolute()
         #experiment = ExperimentSSOOF()
         #experiment = ExperimentRegressiveMotion()
         experiment.Run()

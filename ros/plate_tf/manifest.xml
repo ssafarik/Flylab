@@ -12,8 +12,8 @@
   <depend package="tf"/>
   <!--depend package="flycore"/-->
   <depend package="geometry_msgs"/>
+  <depend package="sensor_msgs"/>
   <depend package="pythonmodules"/>
-  <!--depend package="opencv2"/-->
 
 </package>
 

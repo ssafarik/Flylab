@@ -24,7 +24,7 @@ class Calibration:
         self.tfbx = tf.TransformBroadcaster()
         self.bridge = CvBridge()
         self.camerainfo = None
-        self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.camerainfo_callback)
+        self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
         self.image_sub = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
         #self.joy_sub = rospy.Subscriber("Joystick/Commands", JoystickCommands, self.joy_callback)
         self.point_sub = rospy.Subscriber("Joystick/Commands", Point, self.point_callback)

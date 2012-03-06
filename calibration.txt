@@ -56,10 +56,10 @@ rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/
 # Click <calibrate> button (will take several minutes)
 # Click <commit> button (writes data to /cameras/basler_a622f_calibration.yaml)
 # Ctrl-c to shutdown flyatar_camera_cal_c.launch
-# Transfer camera calibration info by hand
-#  from /cameras/basler_a622f_calibration.yaml 
-#  and /cameras/basler_a622f_rect_calibration.yaml
-#  into $(find flyatar_calibration)/calibration_data/camera_calibration.launch
+# OLD Transfer camera calibration info by hand
+# OLD  from /cameras/basler_a622f_calibration.yaml 
+# OLD  and /cameras/basler_a622f_rect_calibration.yaml
+# OLD  into $(find flyatar_calibration)/calibration_data/camera_calibration.launch
 
 
 # Mount camera on flyatar rig, positioned so that the arena is roughly centered in image.

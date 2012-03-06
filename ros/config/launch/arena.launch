@@ -4,6 +4,6 @@
     
     
 	<!-- <include file="$(find config)/launch/flybowl_32mm.launch" /> -->
-	     <include file="$(find config)/launch/flybowl_65mm.launch" />
-	<!-- <include file="$(find config)/launch/flybowl_80mm.launch" /> -->
+	<!-- <include file="$(find config)/launch/flybowl_65mm.launch" /> -->
+	     <include file="$(find config)/launch/flybowl_80mm.launch" /> 
 </launch>

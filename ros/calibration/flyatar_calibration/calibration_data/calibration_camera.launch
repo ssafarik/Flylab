@@ -1,25 +1,26 @@
 
 <launch>
-  <param name="KK_fx_raw" type="double" value="1.0"/>
-  <param name="KK_fy_raw" type="double" value="1.0"/>
-  <param name="KK_cx_raw" type="double" value="640.0"/>
-  <param name="KK_cy_raw" type="double" value="512.0"/>
+  <!-- 
+  <param name="KK_fx_raw" type="double" value="1685.3"/>
+  <param name="KK_fy_raw" type="double" value="1729.5"/>
+  <param name="KK_cx_raw" type="double" value="624.4"/>
+  <param name="KK_cy_raw" type="double" value="510.4"/>
 
-  <param name="kc_k1_raw" type="double" value="0.0"/>
-  <param name="kc_k2_raw" type="double" value="0.0"/>
-  <param name="kc_p1_raw" type="double" value="0.0"/>
-  <param name="kc_p2_raw" type="double" value="0.0"/>
+  <param name="kc_k1_raw" type="double" value="-0.011689715880217"/>
+  <param name="kc_k2_raw" type="double" value="0.176372403112629"/>
+  <param name="kc_p1_raw" type="double" value="0.00110565786839175"/>
+  <param name="kc_p2_raw" type="double" value="0.00274255868338994"/>
   
   <param name="KK_fx_rect" type="double" value="1751.43324265041"/>
   <param name="KK_fy_rect" type="double" value="1787.03208219886"/>
-  <param name="KK_cx_rect" type="double" value="607.133669326578"/>
+  <param name="KK_cx_rect" type="double" value="999.133669326578"/>
   <param name="KK_cy_rect" type="double" value="551.245952238629"/>
 
   <param name="kc_k1_rect" type="double" value="0.0137657741775776"/>
   <param name="kc_k2_rect" type="double" value="-0.0442297827593345"/>
   <param name="kc_p1_rect" type="double" value="-0.000511519112922575"/>
   <param name="kc_p2_rect" type="double" value="-0.00667711000011168"/>
-  
+  -->
 
 </launch>
 

@@ -1,14 +1,9 @@
 <launch>
   <!-- Coordinate Systems -->
-  <node pkg="tf" type="static_transform_publisher" name="statictf_Camera_PlateImage_publisher"  args="50 -22 0 0 0 0 Camera   PlateImage 10" />
-  <node pkg="tf" type="static_transform_publisher" name="statictf_PlateImage_Plate_publisher"   args="0 0 0 0 0 0 PlateImage   Plate      10" />
-  <node pkg="tf" type="static_transform_publisher" name="statictf_baslera622f_Camera_publisher" args="0 0 0 0 0 0 basler_a622f Camera     10" />
-
-  <!-- ROI Coordinate Systems -->
-  <node pkg="tf" type="static_transform_publisher" name="statictf_ImageRect_ROIPlateImage_publisher" args="0 0 0 0 0 0 ImageRect ROIPlateImage 10" />
+  <node pkg="tf" type="static_transform_publisher" name="statictf_baslera622f_Camera_publisher"    args="0 0 0 0 0 0 basler_a622f Camera     10" />
 
   <!-- ROI parameters -->
-  <param name="ROIPlateImage_width" type="double" value="1280"/>
-  <param name="ROIPlateImage_height" type="double" value="1024"/>
+  <!-- <param name="ROIPlateImage_width" type="double" value="1280"/> -->
+  <!-- <param name="ROIPlateImage_height" type="double" value="1024"/> -->
 
 </launch>
