@@ -46,18 +46,18 @@ class Transforms:
 
     def SendTransforms(self):      
         if self.camerainfo is not None:
-            self.tfbx.sendTransform((0, 0, 0), 
+            self.tfbx.sendTransform((-self.camerainfo.K[2],-self.camerainfo.K[5],0), #(-608, -581, 0), 
                                     (0,0,0,1), 
                                     rospy.Time.now(), 
                                     "ImageRaw", "Camera")
-            self.tfbx.sendTransform((0, 0, 0), 
+            self.tfbx.sendTransform((-self.camerainfo.P[2],-self.camerainfo.P[6],0), #(-607, -551, 0), 
                                     (0,0,0,1), 
                                     rospy.Time.now(), 
-                                    "ImageRect", "ImageRaw")
-            self.tfbx.sendTransform((self.camerainfo.width/2, self.camerainfo.height/2, 0.0), 
+                                    "ImageRect", "Camera")
+            self.tfbx.sendTransform((48,-55,0),#(19, -10, 0.0), 
                                     (0,0,0,1), 
                                     rospy.Time.now(), 
-                                    "PlateImage", "ImageRect")
+                                    "PlateImage", "Camera")
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
                                     rospy.Time.now(), 
@@ -96,7 +96,7 @@ class Transforms:
     def Main(self):
         rate = rospy.Rate(10)
         try:
-            while (not rospy.is_shutdown()):
+            while not rospy.is_shutdown():
                 self.SendTransforms()
                 rate.sleep()
         except KeyboardInterrupt:
