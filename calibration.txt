@@ -35,7 +35,7 @@ rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/
 # Wave 30mm checkerboard pattern in front of camera until calibrate button activates
 # Click <calibrate> button (will take several minutes)
 # Click <commit> button (writes data to /cameras/basler_a622f_calibration.yaml)
-cp /cameras/basler_a622f_calibration.yaml /cameras/basler_a622f_rect_calibration.yaml
+mv /cameras/basler_a622f_calibration.yaml /cameras/basler_a622f_rect_calibration.yaml
 
 # Calibrate the camera for distortion (using image_rect).
 # Ctrl-c to shutdown flyatar_camera_cal_b.launch
@@ -45,7 +45,7 @@ roslaunch camera1394v2 flyatar_camera_cal_c.launch
 rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_rect camera:=/camera
 # wave 30 mm checkerboard in front of camera until calibrate button activates
 # Click <calibrate> button (will take several minutes)
-# Click <commit> button (writes data to /cameras/basler_a622f_rect_calibration.yaml)
+# Click <commit> button (writes data to /cameras/basler_a622f_calibration.yaml)
 # Ctrl-c to shutdown flyatar_camera_cal_c.launch
 
 # Transfer camera calibration info by hand
@@ -68,22 +68,23 @@ rostopic pub -1 Joystick/Commands geometry_msgs/Point -- dx dy dr (where dx,dy,d
 # Acquire a background image.
 rm /cameras/background.png
 # remove all objects from plate, next step acquires a background image
-roslaunch track_image_contours track_image_contours_tf.launch
+roslaunch track_image_contours track_image_contours.launch
 
-# Calibrate the Stage/Plate transform, and get robot image values.
-# place magnet on plate, check to see if contour is found properly
-# ctrl-c to shutdown track_image_contours_view_images.launch
-# reset power on Atmel motorcontroller, wait for motors to home
+# Calibrate the Stage/Plate transform.
+# Place magnet on plate, check to see if contour is found properly
+# Ctrl-c to shutdown track_image_contours_view_images.launch
 ##rosmake flyatar_manual
 ##roslaunch flyatar_manual joystick_control.launch
 ### test to make sure joystick moves stage
 ### ctrl-c to shutdown joystick_control.launch
 roslaunch flyatar_calibration StagePlate.launch
 # The magnet will drive in a spiral pattern to cover the plate.  After a number of cycles, the calibration values should converge.
-# Record robot_min_ecc, robot_max_ecc, robot_min_area, robot_max_area 
-#   in robotimage_calibration_data.launch
 # Record translation vector and quaternion info 
 #   in stage_plate_calibration_data.launch
+
+# Get robot image values.
+# Record robot_min_ecc, robot_max_ecc, robot_min_area, robot_max_area 
+#   in robotimage_calibration_data.launch
 # Ctrl-c to shutdown StagePlate.launch
 
 

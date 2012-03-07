@@ -106,7 +106,7 @@ def ClipXyToRadius(x, y, rmax):
         angle = N.arctan2(y, x)
         xOut = (rmax*0.8) * N.cos(angle)
         yOut = (rmax*0.8) * N.sin(angle)
-        #rospy.logwarn('5B CLIPPING x,y=%s to %s' % ([x,y],[xOut,yOut]))
+        rospy.logwarn('EL CLIPPING x,y=%s to %s' % ([x,y],[xOut,yOut]))
         
     return [xOut,yOut]
 

@@ -456,14 +456,14 @@ class Calibration():
     def MainLoop(self):
         msgPattern = MsgPatternGen()
 
-        rosrate = rospy.Rate(10)
+        rosrate = rospy.Rate(0.005)
         try:
             while not rospy.is_shutdown():
                 # Publish the spiral pattern message.
                 msgPattern.mode = 'byshape'
                 msgPattern.shape = 'spiral'
                 msgPattern.points = []
-                msgPattern.hz = 0.01
+                msgPattern.hz = 0.005
                 msgPattern.count = -1
                 msgPattern.radius = rospy.get_param('arena/radius', 25.4)
                 msgPattern.preempt = False
@@ -475,7 +475,7 @@ class Calibration():
             msgPattern.mode = 'byshape'
             msgPattern.shape = 'spiral'
             msgPattern.points = []
-            msgPattern.hz = 0.01
+            msgPattern.hz = 0.005
             msgPattern.count = 0
             msgPattern.radius = rospy.get_param('arena/radius', 25.4)
             msgPattern.preempt = True
