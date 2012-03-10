@@ -72,7 +72,7 @@ def GetAngleToRobotInFlyView (arenastate, iFly):
         angleOfFly = rpy[2]
         angle = (angleToRobot - angleOfFly) % (2.0 * N.pi)
         
-    rospy.logwarn('EL GetAngleToRobotInFlyView()=%s' % angle)
+    #rospy.logwarn('EL GetAngleToRobotInFlyView()=%s' % angle)
     return angle
 
 
@@ -83,7 +83,7 @@ def GetSpeedFly (arenastate, iFly):
                                        arenastate.flies[iFly].velocity.linear.y,
                                        arenastate.flies[iFly].velocity.linear.z]))
         
-    rospy.logwarn ('EL GetSpeedFly()=%s' % speed)
+    #rospy.logwarn ('EL GetSpeedFly()=%s' % speed)
     return speed
 
 
@@ -94,7 +94,7 @@ def GetDistanceFlyToRobot (arenastate, iFly):
         dy = arenastate.robot.pose.position.y - arenastate.flies[iFly].pose.position.y
         distance = N.linalg.norm([dx,dy])
         
-    rospy.logwarn('EL GetDistanceFlyToRobot()=%s' % distance)
+    #rospy.logwarn('EL GetDistanceFlyToRobot()=%s' % distance)
     return distance
 
 

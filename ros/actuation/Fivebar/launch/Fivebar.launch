@@ -1,0 +1,30 @@
+<launch>
+    <!-- Don't launch this file directly.  Launch stage.launch, and point to this from there. -->
+    
+	<param name="robot_description" textfile="$(find Fivebar)/Fivebar_urdf_mm.xml" />
+	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />
+	<param name="fivebar/speed_max" type="double" value="200.0"/>
+	
+	<param name="fivebar/kP"      type="double" value="0.2"/>
+	<param name="fivebar/kI"      type="double" value="0.001"/>
+	<param name="fivebar/kD"      type="double" value="-0.1"/>
+	<param name="fivebar/maxI"    type="double" value="40.0"/>
+	<param name="fivebar/maxPID"  type="double" value="9999.0"/>
+	<param name="fivebar/kWindup" type="double" value="0.0"/>
+	
+
+	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A' units='radians'"/>
+	<node name="joint2" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint2' --id='0.0.B' units='radians'"/>
+	<node name="Fivebar" pkg="Fivebar" type="Fivebar.py" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find Fivebar)/Fivebar.vcg" />
+
+	<!-- "Stage" frame is at idealized center of workspace (see CENTERX,CENTERY in Fivebar.py). -->
+	<node pkg="tf" type="static_transform_publisher" name="statictf_Stage_link0_publisher" args="-133.35 -246.31423 0 0 0 0 Stage link0 10" />
+	
+	<!-- link5 frame is at end of link3. -->
+	<node pkg="tf" type="static_transform_publisher" name="statictf_link3_link5_publisher" args="266.7 0 0 0 0 0 link3 link5 10" />
+	
+	<include file="$(find stage_action_server)/launch/stage_action_server.launch" />
+
+</launch>
+

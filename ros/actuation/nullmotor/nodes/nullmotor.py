@@ -5,7 +5,7 @@ import rospy
 from sensor_msgs.msg import JointState
 from flycore.msg import *
 from flycore.srv import *
-from PatternGen.srv import SrvSignal, SrvSignalResponse
+from patterngen.srv import SrvSignal, SrvSignalResponse
 
 
 
@@ -19,17 +19,17 @@ class NullMotor:
 
         
         # Publish & Subscribe
-        rospy.Service('set_stage_state',    SrvStageState, self.SetStageState_callback)
-        rospy.Service('set_stage_velocity', SrvStageState, self.SetStageVelocity_callback)
-        rospy.Service('get_stage_state',    SrvStageState, self.GetStageState_callback)
-        rospy.Service('home_stage',         SrvStageState, self.HomeStage_callback)
-        rospy.Service('calibrate_stage',    SrvStageState, self.Calibrate_callback)
+        rospy.Service('set_stage_state',    SrvFrameState, self.SetStageState_callback)
+        rospy.Service('set_stage_velocity', SrvFrameState, self.SetStageVelocity_callback)
+        rospy.Service('get_stage_state',    SrvFrameState, self.GetStageState_callback)
+        rospy.Service('home_stage',         SrvFrameState, self.HomeStage_callback)
+        rospy.Service('calibrate_stage',    SrvFrameState, self.Calibrate_callback)
         rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
         self.pubJointState        = rospy.Publisher('joint_states', JointState)
         self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         
-        self.rvStageState = SrvStageStateResponse()
+        self.rvStageState = SrvFrameStateResponse()
         self.rvStageState.state.header.stamp = rospy.Time.now()
         self.rvStageState.state.header.frame_id = '/Stage'
         self.rvStageState.state.pose.position.x = 0.0 
@@ -50,7 +50,7 @@ class NullMotor:
         self.js.velocity = [0.0]
         
         
-        self.request = SrvStageStateRequest()
+        self.request = SrvFrameStateRequest()
         #self.request.state.header.stamp = rospy.Time.now()
         self.request.state.header.frame_id = '/Stage'
         self.request.state.pose.position.x = 0.0

@@ -11,6 +11,8 @@ from experiments.srv import *
 #######################################################################################################
 class ExperimentChase():
     def __init__(self):
+        rospy.init_node('Experiment')
+        
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
@@ -79,6 +81,8 @@ class ExperimentChase():
 #######################################################################################################
 class ExperimentOpenTrigger():
     def __init__(self):
+        rospy.init_node('Experiment')
+        
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
@@ -146,6 +150,8 @@ class ExperimentOpenTrigger():
 #######################################################################################################
 class ExperimentRecord10MinTrials():
     def __init__(self):
+        rospy.init_node('Experiment')
+        
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
@@ -213,6 +219,8 @@ class ExperimentRecord10MinTrials():
 #######################################################################################################
 class ExperimentRecord10SecTrialsWithMove():
     def __init__(self):
+        rospy.init_node('Experiment')
+        
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
@@ -281,6 +289,8 @@ class ExperimentRecord10SecTrialsWithMove():
 #######################################################################################################
 class ExperimentMoveAbsolute():
     def __init__(self):
+        rospy.init_node('Experiment')
+        
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
@@ -321,7 +331,7 @@ class ExperimentMoveAbsolute():
         self.experimentparams.move.distance = 0.0
         self.experimentparams.move.angle = 0.0
         self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.speed = 20
+        self.experimentparams.move.speed = 200
         self.experimentparams.move.speedType = 'constant'
         self.experimentparams.move.tolerance = 2
         self.experimentparams.move.timeout = -1
@@ -348,6 +358,8 @@ class ExperimentMoveAbsolute():
 #######################################################################################################
 class ExperimentSSOOF():
     def __init__(self):
+        rospy.init_node('Experiment')
+        
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
@@ -415,6 +427,8 @@ class ExperimentSSOOF():
 #######################################################################################################
 class ExperimentRegressiveMotion():
     def __init__(self):
+        rospy.init_node('Experiment')
+        
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
@@ -480,14 +494,13 @@ class ExperimentRegressiveMotion():
 
 
 if __name__ == '__main__':
-    rospy.init_node('Experiment')
     try:
-        #experiment = ExperimentChase()
+        experiment = ExperimentChase()
         #experiment = ExperimentRunAway()
         #experiment = ExperimentOpenTrigger()
         #experiment = ExperimentRecord10MinTrials()
         #experiment = ExperimentRecord10SecTrialsWithMove()
-        experiment = ExperimentMoveAbsolute()
+        #experiment = ExperimentMoveAbsolute()
         #experiment = ExperimentSSOOF()
         #experiment = ExperimentRegressiveMotion()
         experiment.Run()

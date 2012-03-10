@@ -87,7 +87,7 @@ class Fly:
         self.timePrevious = None
         
         self.state = MsgFrameState()
-        self.state.header.frame_id = '/Plate'
+        self.state.header.frame_id = 'Plate'
         self.state.pose.position.x = 0.0
         self.state.pose.position.y = 0.0
         self.state.pose.position.z = 0.0
@@ -113,9 +113,10 @@ class Fly:
         self.minArea = 999
         self.maxArea = 0
         
-        self.lpOffsetX = filters.LowPassFilter(RC=0.01)
-        self.lpOffsetY = filters.LowPassFilter(RC=0.01)
+        self.lpOffsetX = filters.LowPassFilter(RC=0.001)
+        self.lpOffsetY = filters.LowPassFilter(RC=0.001)
         self.ptOffset = Point(x=0, y=0, z=0)  # Difference between contour position and (for robots) computed position.
+        self.ptPPrev = Point(x=0, y=0, z=0)
         self.name = name
         self.isDead = False # To do.
         self.initialized = True
@@ -311,9 +312,29 @@ class Fly:
                 
                 # Update the tool offset.
                 if posComputed is not None:
-                    self.ptOffset = Point(x = self.lpOffsetX.Update(x-posComputed.x, t),
-                                          y = self.lpOffsetY.Update(y-posComputed.y, t),
-                                          z = 0) # Filtered(posContour)-posComputed
+
+                    # PID control of the offset.
+                    ptP = Point()
+                    ptI = Point()
+                    ptD = Point()
+                    ptP.x = x-posComputed.x
+                    ptP.y = y-posComputed.y
+                    ptI.x = ptI.x + ptP.x
+                    ptI.y = ptI.y + ptP.y
+                    ptD.x = ptP.x - self.ptPPrev.x
+                    ptD.y = ptP.y - self.ptPPrev.y
+                    kP = rospy.get_param('tooloffset/kP', 1.0)
+                    kI = rospy.get_param('tooloffset/kI', 0.0)
+                    kD = rospy.get_param('tooloffset/kD', 0.0)
+                    xPID = kP*ptP.x + kI*ptI.x + kD*ptD.x
+                    yPID = kP*ptP.y + kI*ptI.y + kD*ptD.y
+                    
+                    # Filtered offset.
+                    self.ptOffset = Point(x = self.lpOffsetX.Update(xPID, t),
+                                          y = self.lpOffsetY.Update(yPID, t),
+                                          z = 0)
+                    self.ptPPrev.x = ptP.x
+                    self.ptPPrev.y = ptP.y
                 else:
                     self.ptOffset = Point(x=0, y=0, z=0)
             
@@ -370,10 +391,10 @@ class ContourIdentifier:
             
         
         # Messages
-        self.sub_contourinfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback)
-        self.sub_EndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback)
-        self.pub_arenastate = rospy.Publisher('ArenaState', ArenaState)
-        self.pub_EndEffectorOffset = rospy.Publisher('EndEffectorOffset', Point)
+        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback)
+        self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback)
+        self.pubArenaState = rospy.Publisher('ArenaState', ArenaState)
+        self.pubEndEffectorOffset = rospy.Publisher('EndEffectorOffset', Point)
 
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
@@ -424,8 +445,8 @@ class ContourIdentifier:
                                   pose=Pose(position=Point(x=0, 
                                                            y=0, 
                                                            z=0)),
-                                  scale=Vector3(x=self.radiusArena*2.0,
-                                                y=self.radiusArena*2.0,
+                                  scale=Vector3(x=self.radiusArena*2.0 * 80/470, #BUG: Need to properly convert from pixels to mm.
+                                                y=self.radiusArena*2.0 * 80/470,
                                                 z=0.01),
                                   color=ColorRGBA(a=0.05,
                                                   r=1.0,
@@ -459,8 +480,17 @@ class ContourIdentifier:
         
 
     def EndEffector_callback(self, state):
-        self.stateEndEffector = copy.deepcopy(state)
-        self.stateEndEffector.header.frame_id = "Plate" # Interpret it as the Plate frame. 
+        #self.stateEndEffector.header.frame_id = "Plate" # Interpret it as the Plate frame.
+        posesStage = PoseStamped(header=Header(frame_id=state.header.frame_id),
+                                 pose=state.pose)
+        try:
+            posesPlate = self.tfrx.transformPose('Plate',posesStage)
+            self.stateEndEffector = state
+            self.stateEndEffector.header = posesPlate.header
+            self.stateEndEffector.pose = posesPlate.pose
+        except tf.Exception:
+            pass
+        
         #rospy.loginfo ('CI received state=%s' % state)
         
 
@@ -546,9 +576,9 @@ class ContourIdentifier:
         if self.initialized:
             response = self.camera_to_plate(contourinfoIn.x, contourinfoIn.y)
             contourinfoOut = contourinfoIn
+            contourinfoOut.header.frame_id = "Plate"
             contourinfoOut.x = response.Xdst
             contourinfoOut.y = response.Ydst
-            contourinfoOut.header.frame_id = "Plate"
     
         return contourinfoOut
       
@@ -784,7 +814,7 @@ class ContourIdentifier:
                                         tf.transformations.quaternion_about_axis(contour.angle, (0,0,1)),
                                         contour.header.stamp,
                                         "contour"+str(i),
-                                        "Camera")
+                                        "ImageRect")
                 
                 
 
@@ -852,11 +882,11 @@ class ContourIdentifier:
                                                           velocity = self.objects[iFly+1].state.velocity))
             
             # Publish the ArenaState.
-            self.pub_arenastate.publish(arenastate)
+            self.pubArenaState.publish(arenastate)
             
             # Publish the EndEffectorOffset.
             ptOffset = self.objects[0].ptOffset
-            self.pub_EndEffectorOffset.publish(ptOffset)
+            self.pubEndEffectorOffset.publish(ptOffset)
             
             # Publish a disc to indicate the arena extent.
             self.pubMarker.publish(self.markerArena)

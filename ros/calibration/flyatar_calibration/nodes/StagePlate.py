@@ -11,7 +11,7 @@ from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import PoseStamped
 from plate_tf.srv import *
 from track_image_contours.msg import ContourInfo
-from PatternGen.msg import MsgPatternGen
+from patterngen.msg import MsgPatternGen
 
 
 class Calibration():

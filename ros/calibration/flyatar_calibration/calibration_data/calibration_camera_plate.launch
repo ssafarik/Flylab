@@ -1,10 +1,16 @@
 <launch>
 
-  <param name="camera_plate_rvec_0" type="double" value="-3.120"/>
-  <param name="camera_plate_rvec_1" type="double" value="-0.005"/>
-  <param name="camera_plate_rvec_2" type="double" value="-0.040"/>
-  <param name="camera_plate_tvec_0" type="double" value="3.6"/>
-  <param name="camera_plate_tvec_1" type="double" value="-1.6"/>
-  <param name="camera_plate_tvec_2" type="double" value="312.7"/>
+  <!-- These values come from CameraPlate.launch, from the origin of the mask circle. -->
+  <param name="camera/originPlateX" type="double" value="661"/>
+  <param name="camera/originPlateY" type="double" value="517"/>
+  <!-- Radius parameter value goes into the .launch file pointed to by Arena.launch -->
+
+  <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
+  <param name="camera_plate_rvec_0" type="double" value="-3.092"/>
+  <param name="camera_plate_rvec_1" type="double" value="-0.004"/>
+  <param name="camera_plate_rvec_2" type="double" value="0.030"/>
+  <param name="camera_plate_tvec_0" type="double" value="117.6"/> <!-- adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_1" type="double" value="90.3"/> <!-- adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_2" type="double" value="296.9"/>
   
 </launch>

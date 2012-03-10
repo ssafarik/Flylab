@@ -35,11 +35,6 @@ class ImageDisplay:
         self.color_max = 255
         self.font = cv.InitFont(cv.CV_FONT_HERSHEY_TRIPLEX,0.5,0.5)
 
-        self.plate_image_origin = PointStamped()
-        self.plate_image_origin.header.frame_id = "PlateImage"
-        self.plate_image_origin.point.x = 0
-        self.plate_image_origin.point.y = 0
-        self.plate_image_origin.point.z = 0
 
         self.bounds_center_plate = PointStamped()
         self.bounds_center_plate.header.frame_id = "Plate"
@@ -412,12 +407,12 @@ class ImageDisplay:
         #           int(self.bounds_radius), cv.CV_RGB(self.color_max,self.color_max,0), 2)
 
         try:
-            plate_image_o = self.tf_listener.transformPoint(self.image_frame,self.plate_image_origin)
+            plate_o = self.tf_listener.transformPoint(self.image_frame,self.plate_origin)
             fly_image_o = self.tf_listener.transformPoint(self.image_frame,self.fly_image_origin)
             robot_image_o = self.tf_listener.transformPoint(self.image_frame,self.robot_image_origin)
 
             if self.setpoint.header.frame_id in "Plate":
-                self.setpoint_image_origin = plate_image_o
+                self.setpoint_image_origin = plate_o
                 self.draw_setpoint()
             else:
                 self.setpoint_image_origin = fly_image_o

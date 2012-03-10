@@ -15,53 +15,77 @@ class Transforms:
         self.camerainfo = None
         self.tfbx = tf.TransformBroadcaster()
         self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
-
+        
+        self.originPlateX = rospy.get_param('camera/originPlateX', 0.0) 
+        self.originPlateY = rospy.get_param('camera/originPlateY', 0.0) 
+        self.originPlateZ = rospy.get_param('camera/originPlateZ', 0.0) 
         
 
 
     def CameraInfo_callback (self, msgCameraInfo):
         if self.camerainfo is None:
-            #(intrinsic_matrix, distortion_coeffs) = CameraParameters.intrinsic("rect")
             self.camerainfo = msgCameraInfo
-            self.M = N.ma.reshape(N.array(self.camerainfo.K),[3,3]) #cvNumpy.mat_to_array(N.array(self.camerainfo.K))
-            self.M[:-1,-1] = 0
-    
+            M = N.reshape(N.array(self.camerainfo.K),[3,3]) #cvNumpy.mat_to_array(N.array(self.camerainfo.K))
+            #M = N.reshape(N.array(self.camerainfo.P),[3,4])[0:3,0:3]
+            #M = N.reshape(N.array([1690.6893719741, 0, 632.966049657568, 0, 1724.60733564515, 540.153219137248, 0, 0, 1]),[3,3])
+            #M = N.reshape(N.array([1699.89142716178, 0, 637.374529813928, 0, 0, 1734.32501822431, 533.670067729561, 0, 0, 0, 1, 0]),[3,4])[0:3,0:3]
+            M[:-1,-1] = 0  # Zero the translation entries (1,3) and (2,3).
     
             (rvec, tvec) = CameraParameters.extrinsic("plate")
             rvec = cvNumpy.mat_to_array(rvec).squeeze()
             tvec = cvNumpy.mat_to_array(tvec).squeeze()
     
-            rvec_angle = N.linalg.norm(rvec)
-            R = tf.transformations.rotation_matrix(rvec_angle, rvec)
+            angleRvec = N.linalg.norm(rvec)
+            R = tf.transformations.rotation_matrix(angleRvec, rvec)
             T = tf.transformations.translation_matrix(tvec)
     
             self.Wsub = N.zeros((3,3))
             self.Wsub[:,:-1] = R[:-1,:-2]
             self.Wsub[:,-1] = T[:-1,-1]
     
-            self.Hinv = N.dot(self.M, self.Wsub)
+            self.Hinv = N.dot(M, self.Wsub)
+            #rospy.logwarn ('Hinv scalar %f' % self.Hinv[-1,-1])
             self.Hinv = self.Hinv / self.Hinv[-1,-1]
             self.H = N.linalg.inv(self.Hinv)
-
+            
 
     def SendTransforms(self):      
         if self.camerainfo is not None:
-            self.tfbx.sendTransform((-self.camerainfo.K[2],-self.camerainfo.K[5],0), #(-608, -581, 0), 
+#            self.tfbx.sendTransform((-self.camerainfo.K[2], -self.camerainfo.K[5],0), #(-608, -581, 0), 
+#                                    (0,0,0,1), 
+#                                    rospy.Time.now(), 
+#                                    "ImageRaw", "Camera")
+#            self.tfbx.sendTransform((-self.camerainfo.P[2], -self.camerainfo.P[6],0), #(-607, -551, 0), 
+#                                    (0,0,0,1), 
+#                                    rospy.Time.now(), 
+#                                    "ImageRect", "Camera")
+#            self.tfbx.sendTransform((45,-56,0),#(19, -10, 0.0), # Comes from running CameraPlate.py
+#                                    (0,0,0,1), 
+#                                    rospy.Time.now(), 
+#                                    "PlateImage", "Camera")
+#            self.tfbx.sendTransform((0, 0, 0), 
+#                                    (0,0,0,1), 
+#                                    rospy.Time.now(), 
+#                                    "Plate", "PlateImage")
+#            self.tfbx.sendTransform((0, 0, 0), 
+#                                    (0,0,0,1), 
+#                                    rospy.Time.now(), 
+#                                    "ROIPlateImage", "ImageRect")
+
+            self.tfbx.sendTransform((0,0,0),#(-self.camerainfo.K[2], -self.camerainfo.K[5],0), #(-608, -581, 0), 
                                     (0,0,0,1), 
                                     rospy.Time.now(), 
                                     "ImageRaw", "Camera")
-            self.tfbx.sendTransform((-self.camerainfo.P[2],-self.camerainfo.P[6],0), #(-607, -551, 0), 
+            self.tfbx.sendTransform((0,0,0),#(self.camerainfo.K[2], self.camerainfo.K[5],0), #(-607, -551, 0), 
                                     (0,0,0,1), 
                                     rospy.Time.now(), 
-                                    "ImageRect", "Camera")
-            self.tfbx.sendTransform((48,-55,0),#(19, -10, 0.0), 
+                                    "ImageRect", "ImageRaw")
+            self.tfbx.sendTransform((self.originPlateX,
+                                     -self.originPlateY,
+                                     self.originPlateZ),#(19, -10, 0.0), # Comes from running CameraPlate.launch
                                     (0,0,0,1), 
                                     rospy.Time.now(), 
-                                    "PlateImage", "Camera")
-            self.tfbx.sendTransform((0, 0, 0), 
-                                    (0,0,0,1), 
-                                    rospy.Time.now(), 
-                                    "Plate", "PlateImage")
+                                    "Plate", "ImageRect")
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
                                     rospy.Time.now(), 

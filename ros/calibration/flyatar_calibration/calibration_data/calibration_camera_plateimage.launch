@@ -1,9 +1,0 @@
-<launch>
-  <!-- Coordinate Systems -->
-  <node pkg="tf" type="static_transform_publisher" name="statictf_baslera622f_Camera_publisher"    args="0 0 0 0 0 0 basler_a622f Camera     10" />
-
-  <!-- ROI parameters -->
-  <!-- <param name="ROIPlateImage_width" type="double" value="1280"/> -->
-  <!-- <param name="ROIPlateImage_height" type="double" value="1024"/> -->
-
-</launch>

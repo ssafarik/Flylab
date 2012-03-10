@@ -52,11 +52,11 @@ class DrawObjects:
         self.radiusCamera = N.sqrt((x1-x0)**2 + (y1-y0)**2)
         self.axis_length_camera = N.sqrt((x2-x0)**2 + (y2-y0)**2)
 
-        self.plate_image_origin = PointStamped()
-        self.plate_image_origin.header.frame_id = "PlateImage"
-        self.plate_image_origin.point.x = 0
-        self.plate_image_origin.point.y = 0
-        self.plate_image_origin.point.z = 0
+        self.plate_origin = PointStamped()
+        self.plate_origin.header.frame_id = "Plate"
+        self.plate_origin.point.x = 0
+        self.plate_origin.point.y = 0
+        self.plate_origin.point.z = 0
         
         self.robot_image_origin = PointStamped()
         self.robot_image_origin.header.frame_id = "RobotContour"
@@ -79,13 +79,13 @@ class DrawObjects:
         rospy.logwarn('DO waitForTransform(%s, %s, %s)' % (self.display_frame, self.robot_image_origin.header.frame_id, rospy.Time()))
         #self.tfrx.waitForTransform(self.display_frame, self.robot_image_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
         #self.tfrx.waitForTransform(self.display_frame, self.fly_image_origin.header.frame_id,   rospy.Time(), rospy.Duration(15.0))
-        self.tfrx.waitForTransform(self.display_frame, self.plate_image_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
+        self.tfrx.waitForTransform(self.display_frame, self.plate_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
             
 
-        self.plate_image_origin_display_frame = self.tfrx.transformPoint(self.display_frame, self.plate_image_origin)
+        self.plate_origin_display_frame = self.tfrx.transformPoint(self.display_frame, self.plate_origin)
 
-        self.plate_origin_primitives = CvPrimitives.Point(self.plate_image_origin_display_frame.point.x,
-                                                          self.plate_image_origin_display_frame.point.y)
+        self.plate_origin_primitives = CvPrimitives.Point(self.plate_origin_display_frame.point.x,
+                                                          self.plate_origin_display_frame.point.y)
 
         self.markerPlateOrigin = DrawPrimitives.Axes(self.plate_origin_primitives.point)
         self.markerRobot       = DrawPrimitives.CenteredCircle(self.origin.point, 4, self.colors.blue, 2)

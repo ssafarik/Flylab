@@ -43,7 +43,7 @@ b165aeabd28a12cc2f52662f5ecdd11b ../src/stage_action_server/msg/_UpdateStagePosi
 85328822e8315f6a5c9dfb0f37e7436e ../src/stage_action_server/msg/_UpdateStagePositionFeedback.py
 b65aafcb5474e8b8297135850a24417a ../src/stage_action_server/msg/_UpdateStagePositionGoal.py
 ba4512365c3429599498bed0ad9d14c8 ../src/stage_action_server/msg/_UpdateStagePositionResult.py
-4ff214f77d84b8ab2c74261474a24b12 ../src/stage_action_server/msg/__init__.py
+81394e46b6b45f355e1027794cff7b6c ../src/stage_action_server/msg/__init__.py
 e1de3544ba8500baa451ddb5d8979a3b CMakeFiles/ROSBUILD_genaction_msgs
 e1de3544ba8500baa451ddb5d8979a3b CMakeFiles/ROSBUILD_genmsg_cpp
 e1de3544ba8500baa451ddb5d8979a3b CMakeFiles/ROSBUILD_genmsg_lisp
