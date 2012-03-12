@@ -11,7 +11,7 @@ import tf
 from geometry_msgs.msg import PointStamped
 import plate_tf.srv
 import numpy as N
-from track_image_contours.msg import ArenaState
+from tracking.msg import ArenaState
 
 
 class DrawObjects:

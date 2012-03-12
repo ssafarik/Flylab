@@ -119,7 +119,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_TriggerSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../src/experiments/msg/_TriggerSettings.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../src/experiments/msg/_TriggerSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
-../src/experiments/msg/_TriggerSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../src/experiments/msg/_TriggerSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/manifest.xml
 ../src/experiments/msg/_TriggerSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/manifest.xml
 ../src/experiments/msg/_TriggerSettings.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/experiments/msg/_TriggerSettings.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -147,7 +147,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_TriggerSettings.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/experiments/msg/_TriggerSettings.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/experiments/msg/_TriggerSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../src/experiments/msg/_TriggerSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../src/experiments/msg/_TriggerSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/msg_gen/generated
 ../src/experiments/msg/_TriggerSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/experiments/msg/_TriggerSettings.py"
@@ -222,7 +222,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_SaveSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../src/experiments/msg/_SaveSettings.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../src/experiments/msg/_SaveSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
-../src/experiments/msg/_SaveSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../src/experiments/msg/_SaveSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/manifest.xml
 ../src/experiments/msg/_SaveSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/manifest.xml
 ../src/experiments/msg/_SaveSettings.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/experiments/msg/_SaveSettings.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -250,7 +250,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_SaveSettings.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/experiments/msg/_SaveSettings.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/experiments/msg/_SaveSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../src/experiments/msg/_SaveSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../src/experiments/msg/_SaveSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/msg_gen/generated
 ../src/experiments/msg/_SaveSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/experiments/msg/_SaveSettings.py"
@@ -325,7 +325,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_MoveSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../src/experiments/msg/_MoveSettings.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../src/experiments/msg/_MoveSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
-../src/experiments/msg/_MoveSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../src/experiments/msg/_MoveSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/manifest.xml
 ../src/experiments/msg/_MoveSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/manifest.xml
 ../src/experiments/msg/_MoveSettings.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/experiments/msg/_MoveSettings.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -353,7 +353,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_MoveSettings.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/experiments/msg/_MoveSettings.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/experiments/msg/_MoveSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../src/experiments/msg/_MoveSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../src/experiments/msg/_MoveSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/msg_gen/generated
 ../src/experiments/msg/_MoveSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/experiments/msg/_MoveSettings.py"
@@ -428,7 +428,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_HomeSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../src/experiments/msg/_HomeSettings.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../src/experiments/msg/_HomeSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
-../src/experiments/msg/_HomeSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../src/experiments/msg/_HomeSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/manifest.xml
 ../src/experiments/msg/_HomeSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/manifest.xml
 ../src/experiments/msg/_HomeSettings.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/experiments/msg/_HomeSettings.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -456,7 +456,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_HomeSettings.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/experiments/msg/_HomeSettings.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/experiments/msg/_HomeSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../src/experiments/msg/_HomeSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../src/experiments/msg/_HomeSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/msg_gen/generated
 ../src/experiments/msg/_HomeSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/experiments/msg/_HomeSettings.py"
@@ -531,7 +531,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_ExperimentSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../src/experiments/msg/_ExperimentSettings.py: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../src/experiments/msg/_ExperimentSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
-../src/experiments/msg/_ExperimentSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../src/experiments/msg/_ExperimentSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/manifest.xml
 ../src/experiments/msg/_ExperimentSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/manifest.xml
 ../src/experiments/msg/_ExperimentSettings.py: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../src/experiments/msg/_ExperimentSettings.py: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -559,7 +559,7 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/experiments/msg/__init__.py
 ../src/experiments/msg/_ExperimentSettings.py: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../src/experiments/msg/_ExperimentSettings.py: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../src/experiments/msg/_ExperimentSettings.py: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../src/experiments/msg/_ExperimentSettings.py: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../src/experiments/msg/_ExperimentSettings.py: /home/ssafarik/git/Flyatar2/ros/tracking/msg_gen/generated
 ../src/experiments/msg/_ExperimentSettings.py: /home/ssafarik/git/Flyatar2/ros/image_gui/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_6)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/experiments/msg/_ExperimentSettings.py"

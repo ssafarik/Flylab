@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/image_gui</url>
   <depend package="rospy"/>
-  <depend package="track_image_contours"/>
+  <depend package="tracking"/>
   <depend package="flycore"/>
   <depend package="tf"/>
   <depend package="plate_tf"/>

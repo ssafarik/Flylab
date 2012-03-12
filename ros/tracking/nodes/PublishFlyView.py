@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 from __future__ import division
-import roslib; roslib.load_manifest('track_image_contours')
+import roslib; roslib.load_manifest('tracking')
 import rospy
 import numpy as N
 import tf
-from track_image_contours.msg import ArenaState
+from tracking.msg import ArenaState
 from plate_tf.msg import InBounds, FlyView
 from geometry_msgs.msg import PointStamped
 from pythonmodules import CircleFunctions

@@ -11,7 +11,7 @@ SET(CMAKE_FORCE_UNIX_PATHS 1)
 # The C and CXX include file search paths:
 SET(CMAKE_C_INCLUDE_PATH
   "../include"
-  "/home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/cpp/include"
+  "/home/ssafarik/git/Flyatar2/ros/tracking/msg_gen/cpp/include"
   "/opt/ros/electric/stacks/common_msgs/visualization_msgs/msg_gen/cpp/include"
   "/opt/ros/electric/stacks/image_common/camera_info_manager/include"
   "/opt/ros/electric/stacks/driver_common/driver_base/include"

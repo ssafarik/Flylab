@@ -9,7 +9,7 @@ import time, os, subprocess
 import numpy as N
 from flycore.msg import MsgFrameState
 from experiments.srv import Trigger, ExperimentParams
-from track_image_contours.msg import ArenaState
+from tracking.msg import ArenaState
 
 
 def chdir(dir):

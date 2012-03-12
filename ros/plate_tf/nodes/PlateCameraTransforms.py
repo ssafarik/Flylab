@@ -51,27 +51,6 @@ class Transforms:
 
     def SendTransforms(self):      
         if self.camerainfo is not None:
-#            self.tfbx.sendTransform((-self.camerainfo.K[2], -self.camerainfo.K[5],0), #(-608, -581, 0), 
-#                                    (0,0,0,1), 
-#                                    rospy.Time.now(), 
-#                                    "ImageRaw", "Camera")
-#            self.tfbx.sendTransform((-self.camerainfo.P[2], -self.camerainfo.P[6],0), #(-607, -551, 0), 
-#                                    (0,0,0,1), 
-#                                    rospy.Time.now(), 
-#                                    "ImageRect", "Camera")
-#            self.tfbx.sendTransform((45,-56,0),#(19, -10, 0.0), # Comes from running CameraPlate.py
-#                                    (0,0,0,1), 
-#                                    rospy.Time.now(), 
-#                                    "PlateImage", "Camera")
-#            self.tfbx.sendTransform((0, 0, 0), 
-#                                    (0,0,0,1), 
-#                                    rospy.Time.now(), 
-#                                    "Plate", "PlateImage")
-#            self.tfbx.sendTransform((0, 0, 0), 
-#                                    (0,0,0,1), 
-#                                    rospy.Time.now(), 
-#                                    "ROIPlateImage", "ImageRect")
-
             self.tfbx.sendTransform((0,0,0),#(-self.camerainfo.K[2], -self.camerainfo.K[5],0), #(-608, -581, 0), 
                                     (0,0,0,1), 
                                     rospy.Time.now(), 

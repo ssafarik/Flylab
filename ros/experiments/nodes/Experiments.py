@@ -50,12 +50,12 @@ class ExperimentChase():
         self.experimentparams.move.tracking = True
         self.experimentparams.move.frameidOriginPosition = "Fly"
         self.experimentparams.move.frameidOriginAngle = "Fly"
-        self.experimentparams.move.distance = 5
+        self.experimentparams.move.distance = 10
         self.experimentparams.move.angle = 180.0 * N.pi / 180.0
         self.experimentparams.move.angleType = 'constant'
         self.experimentparams.move.speed = 200
         self.experimentparams.move.speedType = 'constant'
-        self.experimentparams.move.tolerance = 0.1
+        self.experimentparams.move.tolerance = 0.5
         self.experimentparams.move.timeout = -1
         
         self.experimentparams.triggerExit.enabled = True

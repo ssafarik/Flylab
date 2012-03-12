@@ -10,7 +10,7 @@
   <url></url>
   <depend package="rospy"/>
   <depend package="flycore"/>
-  <depend package="track_image_contours"/>
+  <depend package="tracking"/>
   <depend package="experiments"/>
 
 </package>

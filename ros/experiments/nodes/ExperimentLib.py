@@ -12,7 +12,7 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 from stage_action_server.msg import *
 from flycore.msg import *
 from flycore.srv import *
-from track_image_contours.msg import ArenaState
+from tracking.msg import ArenaState
 from experiments.srv import Trigger, ExperimentParams
 
 

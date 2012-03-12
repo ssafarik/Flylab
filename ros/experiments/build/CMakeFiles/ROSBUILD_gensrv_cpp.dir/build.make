@@ -112,7 +112,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
-../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/tracking/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/image_gui/manifest.xml
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -140,7 +140,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/tracking/msg_gen/generated
 ../srv_gen/cpp/include/experiments/Trigger.h: /home/ssafarik/git/Flyatar2/ros/image_gui/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/experiments/Trigger.h"
@@ -221,7 +221,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/nodelet_core/nodelet/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/image_pipeline/image_proc/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/sensing/sensors/camera1394v2/manifest.xml
-../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/manifest.xml
+../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/tracking/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/image_gui/manifest.xml
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/generated
@@ -249,7 +249,7 @@ CMakeFiles/ROSBUILD_gensrv_cpp: ../srv_gen/cpp/include/experiments/ExperimentPar
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/driver_common/driver_base/msg_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/bond_core/bond/msg_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /opt/ros/electric/stacks/nodelet_core/nodelet/srv_gen/generated
-../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/sensing/processing/track_image_contours/msg_gen/generated
+../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/tracking/msg_gen/generated
 ../srv_gen/cpp/include/experiments/ExperimentParams.h: /home/ssafarik/git/Flyatar2/ros/image_gui/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ssafarik/git/Flyatar2/ros/experiments/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../srv_gen/cpp/include/experiments/ExperimentParams.h"

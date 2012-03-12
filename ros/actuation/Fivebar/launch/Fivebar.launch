@@ -5,12 +5,22 @@
 	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />
 	<param name="fivebar/speed_max" type="double" value="200.0"/>
 	
-	<param name="fivebar/kP"      type="double" value="0.2"/>
-	<param name="fivebar/kI"      type="double" value="0.001"/>
-	<param name="fivebar/kD"      type="double" value="-0.1"/>
+	<!-- Good PID gains for step response. -->
+	<!--
+		<param name="fivebar/kP"      type="double" value="0.2"/>
+		<param name="fivebar/kI"      type="double" value="0.0"/>
+		<param name="fivebar/kD"      type="double" value="0.15"/>
+	-->
+	
+	<!-- Good PID gains follow a walking fly. -->
+	<param name="fivebar/kP"      type="double" value="0.4"/>
+	<param name="fivebar/kI"      type="double" value="0.02"/>
+	<param name="fivebar/kD"      type="double" value="0.15"/>
+	
+	
 	<param name="fivebar/maxI"    type="double" value="40.0"/>
 	<param name="fivebar/maxPID"  type="double" value="9999.0"/>
-	<param name="fivebar/kWindup" type="double" value="0.0"/>
+	<param name="fivebar/kWindup" type="double" value="0.0"/>  <!-- Antiwindup gain -->
 	
 
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A' units='radians'"/>

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 from __future__ import division
-import roslib; roslib.load_manifest('track_image_contours')
+import roslib; roslib.load_manifest('tracking')
 
 import sys
 import rospy
 import tf
 import numpy as N
-from track_image_contours.msg import *
+from tracking.msg import *
 from plate_tf.srv import *
 from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
 from std_msgs.msg import Header, ColorRGBA

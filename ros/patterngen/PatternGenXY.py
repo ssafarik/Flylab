@@ -73,12 +73,12 @@ class PatternGenXY:
     
         
     def GetPointsSquare(self):
-        nPoints = 100 # Points per side.
+        nPoints = 1 # Points per side.
         xmin = -self.pattern.radius / N.sqrt(2)
         xmax =  self.pattern.radius / N.sqrt(2)
         ymin = -self.pattern.radius / N.sqrt(2)
         ymax =  self.pattern.radius / N.sqrt(2)
-        step = (xmax-xmin)/(nPoints-1)
+        step = (xmax-xmin)/((nPoints+1)-1)
 
         points = []        
         x = xmin
@@ -176,8 +176,9 @@ class PatternGenXY:
             self.pattern.points = msgPatternGen.points
             
         self.UpdatePatternPoints()
-        if msgPatternGen.preempt:
+        if msgPatternGen.preempt or self.iPoint >= len(self.pattern.points):
             self.iPoint = 0
+            
             
 
     def UpdatePatternPoints (self):        

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import division
-import roslib; roslib.load_manifest('track_image_contours')
+import roslib; roslib.load_manifest('tracking')
 import sys
 import rospy
 import cv
@@ -10,13 +10,13 @@ from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import PointStamped
 from std_msgs.msg import String
 from sensor_msgs.msg import Image, CameraInfo
-from track_image_contours.msg import ContourInfo
+from tracking.msg import ContourInfo
 from plate_tf.srv import PlateCameraConversion
 
 FILENAME_BACKGROUND="/cameras/background.png"
 
 
-class ImageProcessor:
+class ContourGenerator:
 
     def __init__(self):
         
@@ -569,8 +569,8 @@ class ImageProcessor:
       
 
 def main(args):
-    rospy.init_node('ImageProcessor') #, anonymous=True)
-    ip = ImageProcessor()
+    rospy.init_node('ContourGenerator') #, anonymous=True)
+    ip = ContourGenerator()
     try:
         ip.Main()
     except KeyboardInterrupt:
