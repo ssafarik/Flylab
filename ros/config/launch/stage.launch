@@ -3,6 +3,11 @@
          Please put all the params, nodes, etc, in the specific launch file. -->
     
     
-	     <include file="$(find Fivebar)/launch/Fivebar.launch" />
-	<!-- <include file="$(find nullmotor)/launch/nullmotor.launch" /> -->
+	<!-- <include file="$(find Fivebar)/launch/Fivebar.launch" /> -->
+	<include file="$(find nullmotor)/launch/nullmotor.launch" />
+	
+	<!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find nullmotor)/nullmotor.vcg" /> -->
+	<!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find Fivebar)/Fivebar.vcg" /> -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find Fivebar)/Multifly.vcg" />
+	
 </launch>

@@ -68,7 +68,7 @@ class Transforms:
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
                                     rospy.Time.now(), 
-                                    "ROIPlateImage", "ImageRect")
+                                    "ROI", "ImageRect")
       
         
     def plate_to_camera(self, req):

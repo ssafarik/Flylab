@@ -35,6 +35,7 @@ class ContourGenerator:
         self.pubImageBackground = rospy.Publisher("camera/image_background", Image)
         self.pubImageForeground = rospy.Publisher("camera/image_foreground", Image)
         self.pubContourInfo      = rospy.Publisher("ContourInfo", ContourInfo)
+        
         self.tfrx = tf.TransformListener()
         
         # Contour Info
@@ -50,8 +51,9 @@ class ContourGenerator:
         self.minSumImage = 100
         
         # Robot Info
-        self.robot_visible = bool(rospy.get_param("robot_visible", "true"))
-        if (not self.robot_visible) and (1 < self.nContours_max):
+        #self.robot_visible = bool(rospy.get_param("robot_visible", "true"))
+        #if (not self.robot_visible) and (1 < self.nContours_max):
+        if (1 < self.nContours_max):
             self.nContours_max -= 1
         
         # Image Windows
@@ -81,7 +83,7 @@ class ContourGenerator:
         self.frameidOutput = rospy.get_param("frameid_contours","ImageRect")
         
         self.ptsOriginROI = PointStamped()
-        self.ptsOriginROI.header.frame_id = "ROIPlateImage"
+        self.ptsOriginROI.header.frame_id = "ROI"
         self.ptsOriginROI.point.x = 0
         self.ptsOriginROI.point.y = 0
         
@@ -91,7 +93,7 @@ class ContourGenerator:
         self.ptsOriginPlate.point.y = 0
         
         self.tfrx.waitForTransform("ImageRect", self.ptsOriginROI.header.frame_id, rospy.Time(), rospy.Duration(5.0))
-        self.tfrx.waitForTransform("ROIPlateImage", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(5.0))
+        self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(5.0))
 
 #        rospy.wait_for_service('plate_to_camera', timeout=10.0)
 #        try:
@@ -108,7 +110,7 @@ class ContourGenerator:
         while (not self.initialized_coords):
             try:
                 self.ptsOriginROI_ImageRect = self.tfrx.transformPoint("ImageRect", self.ptsOriginROI)
-                self.ptsOriginPlate_ROIPlateImage = self.tfrx.transformPoint("ROIPlateImage", self.ptsOriginPlate)
+                self.ptsOriginPlate_ROI = self.tfrx.transformPoint("ROI", self.ptsOriginPlate)
                 self.initialized_coords = True
         
             except (tf.Exception):
@@ -153,8 +155,8 @@ class ContourGenerator:
             self.sizeImageRect = cv.GetSize(imagecvRect)
             
             # ROI Setup
-            self.widthROI = self.camerainfo.width #int(rospy.get_param("ROIPlateImage_width", 640))
-            self.heightROI = self.camerainfo.height #int(rospy.get_param("ROIPlateImage_height", 480))
+            self.widthROI = self.camerainfo.width
+            self.heightROI = self.camerainfo.height
             self.sizeROI = (self.widthROI, self.heightROI)
             self.rectROI = (int(self.ptsOriginROI_ImageRect.point.x),
                             int(self.ptsOriginROI_ImageRect.point.y),
@@ -178,11 +180,11 @@ class ContourGenerator:
             cv.Zero(self.imageZeros)
             cv.Zero(self.imageMask)
             cv.Circle(self.imageMask,
-                      (int(self.ptsOriginPlate_ROIPlateImage.point.x),-int(self.ptsOriginPlate_ROIPlateImage.point.y)),
+                      (int(self.ptsOriginPlate_ROI.point.x),-int(self.ptsOriginPlate_ROI.point.y)),
                       int(self.radiusMask), 
                       self.color_max, 
                       cv.CV_FILLED)
-            #rospy.logwarn('ROI=%s' % [int(self.ptsOriginPlate_ROIPlateImage.point.x),int(self.ptsOriginPlate_ROIPlateImage.point.y), int(self.radiusMask)])
+            #rospy.logwarn('ROI=%s' % [int(self.ptsOriginPlate_ROI.point.x),int(self.ptsOriginPlate_ROI.point.y), int(self.radiusMask)])
             
             # Create Background image
             # First image is background unless one can be loaded
@@ -249,8 +251,8 @@ class ContourGenerator:
             y = Mu01/Mu00
         
         else:
-            x = 0
-            y = 0
+            x = None
+            y = None
           
         Uu11 = cv.GetCentralMoment(moments,1,1)
         Uu20 = cv.GetCentralMoment(moments,2,0)
@@ -311,24 +313,27 @@ class ContourGenerator:
         # Save contour info
         #rospy.loginfo ('IP area=%5.5f' % area)
         if True: #area>0.0:
-            self.nContours += 1
-            
-            # Convert from ROIPlateImage coordinates to Camera coordinates
-            ptContourROIPlateImage = PointStamped()
-            ptContourROIPlateImage.header.frame_id = "ROIPlateImage"
-            ptContourROIPlateImage.point.x = xROI
-            ptContourROIPlateImage.point.y = yROI
+            # Convert from ROI coordinates to Camera coordinates
+            ptContourROI = PointStamped()
+            ptContourROI.header.frame_id = "ROI"
+            ptContourROI.point.x = xROI
+            ptContourROI.point.y = yROI
             try:
-                self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptContourROIPlateImage)
+                self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptContourROI)
+                self.x0_list.append(self.ptsOutput.point.x)
+                self.y0_list.append(self.ptsOutput.point.y)
+                self.theta_list.append(theta)
+                self.area_list.append(area)
+                self.ecc_list.append(ecc)
+                self.nContours += 1
+
             except tf.Exception:
-                rospy.logwarn ('Cannot transform point to frame=%s from frame=%s' % (self.frameidOutput,ptContourROIPlateImage.header.frame_id))
+                rospy.logwarn ('Cannot transform point to frame=%s from frame=%s' % (self.frameidOutput,ptContourROI.header.frame_id))
                 self.ptsOutput = PointStamped()
+            except TypeError:
+                pass
+
         
-            self.x0_list.append(self.ptsOutput.point.x)
-            self.y0_list.append(self.ptsOutput.point.y)
-            self.theta_list.append(theta)
-            self.area_list.append(area)
-            self.ecc_list.append(ecc)
 
 
     def ShowContourWindow(self, iContour):            
@@ -458,6 +463,7 @@ class ContourGenerator:
     def Image_callback(self, image):
         if not self.initialized:
             return
+        #rospy.logwarn ('image callback, stamp=%s' % image.header.stamp)
 
         # Convert ROS image to OpenCV image
         try:
@@ -476,7 +482,7 @@ class ContourGenerator:
             self.radiusMask = radiusMask 
             cv.Zero(self.imageMask)
             cv.Circle(self.imageMask,
-                      (int(self.ptsOriginPlate_ROIPlateImage.point.x),-int(self.ptsOriginPlate_ROIPlateImage.point.y)),
+                      (int(self.ptsOriginPlate_ROI.point.x),-int(self.ptsOriginPlate_ROI.point.y)),
                       int(self.radiusMask), 
                       self.color_max, 
                       cv.CV_FILLED)
@@ -541,25 +547,33 @@ class ContourGenerator:
         # Publish processed image
         try:
             cv.Copy(self.imageProcessed, self.imageProcessed2)
-            self.pubImageProcessed.publish(self.cvbridge.cv_to_imgmsg(self.imageProcessed2, "passthrough"))
+            image2 = self.cvbridge.cv_to_imgmsg(self.imageProcessed2, "passthrough")
+            image2.header.stamp = image.header.stamp
+            self.pubImageProcessed.publish(image2)
         except CvBridgeError, e:
             rospy.logwarn ('Exception %s' % e)
         
         # Publish background image
         try:
-            self.pubImageBackground.publish(self.cvbridge.cv_to_imgmsg(self.imageBackground, "passthrough"))
+            image2 = self.cvbridge.cv_to_imgmsg(self.imageBackground, "passthrough")
+            image2.header.stamp = image.header.stamp
+            self.pubImageBackground.publish(image2)
         except CvBridgeError, e:
             rospy.logwarn ('Exception %s' % e)
           
         # Publish foreground image
         try:
-            self.pubImageForeground.publish(self.cvbridge.cv_to_imgmsg(self.imageForeground, "passthrough"))
+            image2 = self.cvbridge.cv_to_imgmsg(self.imageForeground, "passthrough")
+            image2.header.stamp = image.header.stamp
+            self.pubImageForeground.publish(image2)
         except CvBridgeError, e:
             rospy.logwarn ('Exception %s' % e)
           
         # Publish diff image
         try:
-            self.pubImageDiff.publish(self.cvbridge.cv_to_imgmsg(self.imageForeground, "passthrough"))
+            image2 = self.cvbridge.cv_to_imgmsg(self.imageForeground, "passthrough")
+            image2.header.stamp = image.header.stamp
+            self.pubImageDiff.publish(image2)
         except CvBridgeError, e:
             rospy.logwarn ('Exception %s' % e)
 

@@ -25,10 +25,12 @@
 	<param name="frameid_contours" type="string" value="ImageRect"/>
 
 	<param name="tooloffset/kP"      type="double" value="1.0"/>
-	<param name="tooloffset/kI"      type="double" value="-0.1"/>
-	<param name="tooloffset/kD"      type="double" value="-1.0"/>
+	<param name="tooloffset/kI"      type="double" value="0.0"/>
+	<param name="tooloffset/kD"      type="double" value="0.0"/>
 
 	<node pkg="tracking" type="ContourGenerator.py" name="ContourGenerator" />
 	<node pkg="tracking" type="ContourIdentifier.py" name="ContourIdentifier" />
-	<node pkg="tracking" type="PublishFlyView.py" name="PublishFlyView" />
+	
+	<!-- Causes ContourIdentifier to hang when run w/ no Stage:  -->
+	<!-- <node pkg="tracking" type="PublishFlyView.py" name="PublishFlyView" /> --> 
 </launch>

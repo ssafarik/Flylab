@@ -258,6 +258,11 @@ class KalmanFilter:
                 y = None
                 vx = None
                 vy = None
+                #x = state_pre[0,0]
+                #y = state_pre[1,0]
+                #vx = state_pre[2,0]
+                #vy = state_pre[3,0]
+                
                 
             
 

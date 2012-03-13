@@ -11,9 +11,15 @@ SET(CMAKE_FORCE_UNIX_PATHS 1)
 # The C and CXX include file search paths:
 SET(CMAKE_C_INCLUDE_PATH
   "../include"
+  "/opt/ros/electric/stacks/geometry/tf/include"
+  "/opt/ros/electric/stacks/geometry/tf/msg_gen/cpp/include"
+  "/opt/ros/electric/stacks/geometry/tf/srv_gen/cpp/include"
   "/opt/ros/electric/stacks/common_msgs/sensor_msgs/include"
   "/opt/ros/electric/stacks/common_msgs/sensor_msgs/msg_gen/cpp/include"
   "/opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/cpp/include"
+  "/opt/ros/electric/stacks/bullet/include"
+  "/opt/ros/electric/stacks/geometry/angles/include"
+  "/opt/ros/electric/stacks/ros_comm/utilities/message_filters/include"
   "/home/ssafarik/git/Flyatar2/ros/flycore/msg_gen/cpp/include"
   "/home/ssafarik/git/Flyatar2/ros/flycore/srv_gen/cpp/include"
   "/opt/ros/electric/ros/core/roslib/msg_gen/cpp/include"

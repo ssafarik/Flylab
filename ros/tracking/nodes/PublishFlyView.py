@@ -65,8 +65,8 @@ class PublishFlyView:
 
             # Get & publish the FlyView.
             try:
-                self.tfrx.waitForTransform("Fly", self.robot_origin.header.frame_id, rospy.Time(), rospy.Duration(5.0))
-                self.robot_origin_fly_frame = self.tfrx.transformPoint("Fly", self.robot_origin)
+                self.tfrx.waitForTransform("Fly1", self.robot_origin.header.frame_id, rospy.Time(), rospy.Duration(5.0))
+                self.robot_origin_fly_frame = self.tfrx.transformPoint("Fly1", self.robot_origin)
                 self.fly_view.robot_position_x = rx = self.robot_origin_fly_frame.point.x
                 self.fly_view.robot_position_y = ry = self.robot_origin_fly_frame.point.y
                 self.fly_view.robot_angle = CircleFunctions.mod_angle(N.arctan2(ry,rx))

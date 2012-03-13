@@ -787,7 +787,7 @@ class RosFivebar:
         return rvStageState
     
 
-    def BroadcastTf(self):  
+    def SendTransforms(self):  
         if self.initialized:
             with self.lock:
                 try:
@@ -837,21 +837,20 @@ class RosFivebar:
         
                 # Publish the link transforms.
                 
-                # Frame 0
-                #self.tfbx.sendTransform((0.0, 0.0, 0.0), tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
-                #                 rospy.Time.now(),
-                #                 "link0",     # child
-                #                 "Stage"      # parent
-                #                 )
         
-                # Frame 1
+                self.tfbx.sendTransform((-133.35, 246.31423, 0.0), 
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
+                                        rospy.Time.now(),
+                                        "link0",     # child
+                                        "Stage"      # parent
+                                        )
+
                 self.tfbx.sendTransform((0.0, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, t1+Q1CENTERe),
                                         rospy.Time.now(),
                                         "link1",     # child
                                         "link0"      # parent
                                         )
-                # Frame 3
                 self.tfbx.sendTransform((L1, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, t3),
                                         rospy.Time.now(),
@@ -859,20 +858,27 @@ class RosFivebar:
                                         "link1"      # parent
                                         )
         
-                # Frame 2
+                self.tfbx.sendTransform((266.70, 0.0, 0.0), 
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
+                                        rospy.Time.now(),
+                                        "link5",     # child
+                                        "link3"      # parent
+                                        )
+
                 self.tfbx.sendTransform((L0, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, t2+Q2CENTERe),
                                         rospy.Time.now(),
                                         "link2",     # child
                                         "link0"      # parent
                                         )
-                # Frame 4
                 self.tfbx.sendTransform((L2, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, t4),
                                         rospy.Time.now(),
                                         "link4",     # child
                                         "link2"      # parent
                                         )
+                
+                
                 # Frame EndEffector
                 self.tfbx.sendTransform((state.pose.position.x, state.pose.position.y, state.pose.position.z), 
                                         qEE,
@@ -959,7 +965,7 @@ class RosFivebar:
         rosrate = rospy.Rate(20)
         try:
             while not rospy.is_shutdown():
-                self.BroadcastTf()
+                self.SendTransforms()
                 self.SendTargetCommand()
                 rosrate.sleep()
                 

@@ -5,4 +5,7 @@ src/*
 *.pyc
 *.make
 *.cmake
+*.internal
+*.lisp
+
 

@@ -1,27 +1,12 @@
 digraph G {
-"/basler_a622f" -> "/Camera"[label="Broadcaster: /statictf_baslera622f_Camera_publisher\nAverage rate: 99.014 Hz\nMost recent transform: -0.001 sec old \nBuffer length: 4.949 sec\n"];
-"/link3" -> "/link5"[label="Broadcaster: /statictf_link3_link5_publisher\nAverage rate: 99.036 Hz\nMost recent transform: -0.008 sec old \nBuffer length: 4.958 sec\n"];
-"/link1" -> "/link3"[label="Broadcaster: /Fivebar\nAverage rate: 20.247 Hz\nMost recent transform: 0.009 sec old \nBuffer length: 4.939 sec\n"];
-"/Plate" -> "/Stage"[label="Broadcaster: /statictf_Plate_Stage_publisher\nAverage rate: 99.220 Hz\nMost recent transform: -0.009 sec old \nBuffer length: 4.949 sec\n"];
-"/PlateImage" -> "/Plate"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.204 Hz\nMost recent transform: 0.034 sec old \nBuffer length: 4.900 sec\n"];
-"/Stage" -> "/link0"[label="Broadcaster: /statictf_Stage_link0_publisher\nAverage rate: 99.004 Hz\nMost recent transform: -0.001 sec old \nBuffer length: 4.939 sec\n"];
-"/link0" -> "/link1"[label="Broadcaster: /Fivebar\nAverage rate: 20.247 Hz\nMost recent transform: 0.009 sec old \nBuffer length: 4.939 sec\n"];
-"/link0" -> "/link2"[label="Broadcaster: /Fivebar\nAverage rate: 20.247 Hz\nMost recent transform: 0.009 sec old \nBuffer length: 4.939 sec\n"];
-"/link2" -> "/link4"[label="Broadcaster: /Fivebar\nAverage rate: 20.247 Hz\nMost recent transform: 0.009 sec old \nBuffer length: 4.939 sec\n"];
-"/Stage" -> "/EndEffector"[label="Broadcaster: /Fivebar\nAverage rate: 20.247 Hz\nMost recent transform: 0.008 sec old \nBuffer length: 4.939 sec\n"];
-"/Camera" -> "/ImageRaw"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.204 Hz\nMost recent transform: 0.034 sec old \nBuffer length: 4.900 sec\n"];
-"/ImageRaw" -> "/ImageRect"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.204 Hz\nMost recent transform: 0.034 sec old \nBuffer length: 4.900 sec\n"];
-"/ImageRect" -> "/PlateImage"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.204 Hz\nMost recent transform: 0.034 sec old \nBuffer length: 4.900 sec\n"];
-"/ImageRect" -> "/ROIPlateImage"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.204 Hz\nMost recent transform: 0.033 sec old \nBuffer length: 4.900 sec\n"];
-"/Camera" -> "/contour0"[label="Broadcaster: /ContourIdentifier\nAverage rate: 21.106 Hz\nMost recent transform: 0.005 sec old \nBuffer length: 4.928 sec\n"];
-"/Camera" -> "/contour1"[label="Broadcaster: /ContourIdentifier\nAverage rate: 21.106 Hz\nMost recent transform: 0.005 sec old \nBuffer length: 4.928 sec\n"];
-"/Plate" -> "/RobotContour"[label="Broadcaster: /ContourIdentifier\nAverage rate: 21.106 Hz\nMost recent transform: 0.005 sec old \nBuffer length: 4.928 sec\n"];
-"/Plate" -> "/Robot"[label="Broadcaster: /ContourIdentifier\nAverage rate: 21.107 Hz\nMost recent transform: 0.003 sec old \nBuffer length: 4.927 sec\n"];
-"/Plate" -> "/FlyContour"[label="Broadcaster: /ContourIdentifier\nAverage rate: 21.106 Hz\nMost recent transform: 0.005 sec old \nBuffer length: 4.928 sec\n"];
-"/Plate" -> "/Fly"[label="Broadcaster: /ContourIdentifier\nAverage rate: 21.107 Hz\nMost recent transform: 0.002 sec old \nBuffer length: 4.927 sec\n"];
-"/Camera" -> "/contour2"[label="Broadcaster: /ContourIdentifier\nAverage rate: 3.331 Hz\nMost recent transform: 1.582 sec old \nBuffer length: 2.102 sec\n"];
+"/basler_a622f" -> "/Camera"[label="Broadcaster: /statictf_baslera622f_Camera_publisher\nAverage rate: 99.186 Hz\nMost recent transform: -0.009 sec old \nBuffer length: 4.950 sec\n"];
+"/Camera" -> "/ImageRaw"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.204 Hz\nMost recent transform: 0.017 sec old \nBuffer length: 4.900 sec\n"];
+"/ImageRaw" -> "/ImageRect"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.204 Hz\nMost recent transform: 0.017 sec old \nBuffer length: 4.900 sec\n"];
+"/ImageRect" -> "/Plate"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.204 Hz\nMost recent transform: 0.017 sec old \nBuffer length: 4.900 sec\n"];
+"/ImageRect" -> "/ROI"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.204 Hz\nMost recent transform: 0.017 sec old \nBuffer length: 4.900 sec\n"];
+"/Plate" -> "/Stage"[label="Broadcaster: /statictf_Plate_Stage_publisher\nAverage rate: 10.198 Hz\nMost recent transform: -0.009 sec old \nBuffer length: 4.805 sec\n"];
 edge [style=invis];
  subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
-"Recorded at time: 1331229249.929"[ shape=plaintext ] ;
+"Recorded at time: 1331666607.845"[ shape=plaintext ] ;
  }->"/basler_a622f";
 }
