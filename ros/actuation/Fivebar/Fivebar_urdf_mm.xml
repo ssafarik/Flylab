@@ -1,0 +1,82 @@
+<robot name="Fivebar">
+  <link name="link0" />
+
+  <link name="link1">
+   <visual>
+     <origin xyz="44.45 0.0 -3.175" rpy="0 0 0" />
+     <geometry>
+       <box size="114.3 25.4 3.175" />
+     </geometry>
+     <material name="one">
+       <color rgba="255 0 0 1.0"/>
+     </material>
+   </visual>
+  </link>
+
+  <link name="link3">
+   <visual>
+     <origin xyz="133.35 0.0 -8.0645" rpy="0 0 0" />
+     <geometry>
+       <box size="292.1 25.4 3.175" />
+     </geometry>
+     <material name="two">
+       <color rgba="0 255 255 1.0"/>
+     </material>
+   </visual>
+  </link>
+ 
+  <link name="link2">
+   <visual>
+     <origin xyz="44.45 0.0 -8.0645" rpy="0 0 0" />
+     <geometry>
+       <box size="114.3 25.4 3.175" />
+     </geometry>
+     <material name="three">
+       <color rgba="255 0 255 1.0"/>
+     </material>
+   </visual>
+  </link>
+
+  <link name="link4">
+   <visual>
+     <origin xyz="133.35 0.0 -3.175" rpy="0 0 0" />
+     <geometry>
+       <box size="292.1 25.4 3.175" />
+     </geometry>
+     <material name="four">
+       <color rgba="0 255 0 1.0"/>
+     </material>
+   </visual>
+  </link>
+ 
+ 
+  <joint name="joint1" type="continuous">
+    <parent link="link0"/>
+    <child link="link1"/>
+    <origin xyz="0 0 0" rpy="0 0 2.33465060589" />
+    <axis xyz="0 0 1" />
+  </joint>
+
+  <joint name="joint3" type="continuous">
+    <parent link="link1"/>
+    <child link="link3"/>
+    <origin xyz="88.9 0 0" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+  </joint>
+
+  <joint name="joint2" type="continuous">
+    <parent link="link0"/>
+    <child link="link2"/>
+    <origin xyz="266.7 0 0" rpy="0 0 0.806942047702" />
+    <axis xyz="0 0 1" />
+  </joint>
+
+  <joint name="joint4" type="continuous">
+    <parent link="link2"/>
+    <child link="link4"/>
+    <origin xyz="88.9 0 0" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+  </joint>
+ 
+</robot>
+

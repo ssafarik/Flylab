@@ -7,8 +7,8 @@ import rospy
 import tf
 #import cv
 import numpy
-from flystage.srv import *
-from flystage.msg import Commands,Velocity
+from flycore.srv import *
+from flycore.msg import Commands,Velocity
 #from sensor_msgs.msg import Image
 #from cv_bridge import CvBridge, CvBridgeError
 #from geometry_msgs.msg import PointStamped

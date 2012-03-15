@@ -1,0 +1,21 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the SSOOF experiment.                     -->
+    <!--                                                            -->
+    <!-- Edit this file to contain the elements of the particular   -->
+    <!-- experiment.                                                -->
+    <!--                                                            -->
+    <!-- Launch this file to run the experiment.                    -->
+	<!-- ========================================================== -->
+
+	<!-- *** Core stuff *** -->
+	<include file="$(find image_gui)/launch/DisplayDraw.launch" />
+	<include file="$(find save_data)/launch/save_data.launch" />
+	<include file="$(find config)/launch/hardware.launch" />
+	<include file="$(find config)/launch/ui.launch" />
+	
+	<!-- *** The Experiment *** -->
+	<include file="$(find config)/launch/flies.launch" />
+	<node pkg="experiments" type="SSOOF.py" name="ExperimentSSOOF" />
+  
+</launch>

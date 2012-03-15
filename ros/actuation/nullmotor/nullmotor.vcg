@@ -1,7 +1,7 @@
 Background\ ColorR=0
 Background\ ColorG=0
 Background\ ColorB=0
-Fixed\ Frame=/Stage
+Fixed\ Frame=/Plate
 Target\ Frame=<Fixed Frame>
 Camera.Enabled=1
 Camera.Image\ Rendering=background & overlay
@@ -63,8 +63,8 @@ contour1.Reference\ Frame=/contour1
 Tool\ 2D\ Nav\ GoalTopic=goal
 Tool\ 2D\ Pose\ EstimateTopic=initialpose
 Camera\ Type=rviz::OrbitViewController
-Camera\ Config=0.031 6.27086 551.012 0.0422995 -0.779881 0.0192841
-Property\ Grid\ State=selection=TF.Enabled;expanded=.Global Options,TF./Camera/Camera,TF./ImageRect/ImageRect,TF./Plate/Plate,TF./PlateImage/PlateImage,TF./Stage/Stage,TF./link0/link0,TF./link3/link3,TF./link5/link5,TF./ROIPlateImage/ROIPlateImage,TF./basler_a622f/basler_a622f,TF./ImageRaw/ImageRaw,TF./Fly/Fly,TF./FlyContour/FlyContour,TF./contour0/contour0,TF./contour1/contour1,TF./EndEffector/EndEffector,TF./link1/link1,TF./link2/link2,TF./link4/link4,TF./Robot/Robot,TF./RobotContour/RobotContour,TF./contour2/contour2,TF./contour3/contour3,TF./contour4/contour4,TF./contour5/contour5,TF./contour6/contour6,TF.Enabled.TF.Tree,TF./CameraTree/Camera,TF./ImageRectTree/ImageRect,TF./ROIPlateImageTree/ROIPlateImage,TF./PlateImageTree/PlateImage,TF./PlateTree/Plate,TF./StageTree/Stage,TF./link0Tree/link0,TF./link1Tree/link1,TF./link3Tree/link3,TF./link5Tree/link5,TF./link2Tree/link2,TF./link4Tree/link4,TF./EndEffectorTree/EndEffector,TF./FlyTree/Fly,TF./FlyContourTree/FlyContour,TF./RobotTree/Robot,TF./RobotContourTree/RobotContour,TF./ImageRawTree/ImageRaw,TF./contour0Tree/contour0,TF./contour1Tree/contour1,TF./contour2Tree/contour2,TF./contour3Tree/contour3,TF./contour4Tree/contour4,TF./contour5Tree/contour5,TF./contour6Tree/contour6,TF./basler_a622fTree/basler_a622f,Camera.Enabled,FlyImage.Enabled.FlyImage.StatusTopStatus,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour0.Enabled.contour0.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus;scrollpos=0,0;splitterpos=246,492;ispageselected=1
+Camera\ Config=0.031 6.27086 278.672 -0.441841 -0.764773 0.268978
+Property\ Grid\ State=selection=Fixed Frame;expanded=.Global Options,TF./Camera/Camera,TF./basler_a622f/basler_a622f,TF./Plate/Plate,TF./Stage/Stage,TF./ImageRaw/ImageRaw,TF./ImageRect/ImageRect,TF./ROIPlateImage/ROIPlateImage,TF./Fly/Fly,TF./FlyContour/FlyContour,TF./Robot/Robot,TF./RobotContour/RobotContour,TF./contour0/contour0,TF./contour1/contour1,TF./contour2/contour2,TF./contour3/contour3,TF./contour4/contour4,TF./contour5/contour5,TF./contour6/contour6,TF./contour7/contour7,TF./contour8/contour8,TF.Enabled.TF.Tree,TF./basler_a622fTree/basler_a622f,TF./CameraTree/Camera,TF./ImageRawTree/ImageRaw,TF./ImageRectTree/ImageRect,TF./PlateTree/Plate,TF./StageTree/Stage,TF./FlyTree/Fly,TF./FlyContourTree/FlyContour,TF./RobotTree/Robot,TF./RobotContourTree/RobotContour,TF./ROIPlateImageTree/ROIPlateImage,TF./contour0Tree/contour0,TF./contour1Tree/contour1,TF./contour2Tree/contour2,TF./contour3Tree/contour3,TF./contour4Tree/contour4,TF./contour5Tree/contour5,TF./contour6Tree/contour6,TF./contour7Tree/contour7,TF./contour8Tree/contour8,Camera.Enabled,Stage.Enabled.Stage.StatusTopStatus,FlyImage.Enabled.FlyImage.StatusTopStatus,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus;scrollpos=0,0;splitterpos=304,608;ispageselected=1
 [Display0]
 Name=Grid
 Package=rviz
@@ -107,13 +107,11 @@ Package=rviz
 ClassName=rviz::AxesDisplay
 [TF.]
 CameraEnabled=1
-EndEffectorEnabled=1
 FlyEnabled=1
 FlyContourEnabled=1
 ImageRawEnabled=1
 ImageRectEnabled=1
 PlateEnabled=1
-PlateImageEnabled=1
 ROIPlateImageEnabled=1
 RobotEnabled=1
 RobotContourEnabled=1
@@ -126,9 +124,5 @@ contour3Enabled=1
 contour4Enabled=1
 contour5Enabled=1
 contour6Enabled=1
-link0Enabled=0
-link1Enabled=0
-link2Enabled=0
-link3Enabled=0
-link4Enabled=0
-link5Enabled=1
+contour7Enabled=1
+contour8Enabled=1

@@ -199,6 +199,7 @@ public:
     // get current CameraInfo data
     cam_info_ = cinfo_->getCameraInfo();
 
+    //ROS_INFO_STREAM ("cam: " << cam_info_.width << " x " << cam_info_.height << ", image: " << image_.width << " x " << image_.height);
     if (cam_info_.height != image_.height || cam_info_.width != image_.width)
       {
         // image size does not match: publish a matching uncalibrated

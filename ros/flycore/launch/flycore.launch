@@ -1,0 +1,8 @@
+<launch>
+  <!-- ***  Required Nodes for Flyatar2.  In addition, you'll want 
+            to launch {arena,stage,robot,camera,tracking}.launch files.                *** -->
+  
+  <include file="$(find image_gui)/launch/DisplayDraw.launch" />
+  <include file="$(find save_data)/launch/save_data.launch" />
+  
+</launch>

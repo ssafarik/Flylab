@@ -1,0 +1,4 @@
+<launch>
+	<node name="PatternGenXY" pkg="patterngen" type="PatternGenXY.py" /> 
+</launch>
+

@@ -3,7 +3,7 @@
 
 (defsystem "stage_action_server-msg"
   :depends-on (:roslisp-msg-protocol :roslisp-utils :actionlib_msgs-msg
-               :flystage-msg
+               :flycore-msg
                :geometry_msgs-msg
                :std_msgs-msg
 )

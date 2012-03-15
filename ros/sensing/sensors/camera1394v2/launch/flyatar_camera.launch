@@ -1,10 +1,16 @@
 <launch>
-  <node pkg="camera1394v2" name="camera1394v2_node" type="camera1394v2_node" >
-  <!--<node pkg="camera1394" name="camera1394v2_node" type="camera1394_node" >-->
-    <rosparam file="$(find flyatar_calibration)/calibration_data/$(optenv CAMERA basler_a622f).yaml" />-
-  </node>
-  <node ns="camera" name="image_proc" pkg="image_proc" type="image_proc"/>
-  <!-- <node name="imageviewer" pkg="image_view" type="image_view" args="image:=camera/image_raw" /> -->
 
-  <include file="$(find flyatar_calibration)/calibration_data/camera_calibration_data.launch" />
+	<!-- ========================================================== -->
+	<!-- Configuration of the CAMERA.                               -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch camera.launch, and point here from there.           -->
+	<!-- ========================================================== -->
+
+	<include file="$(find plate_tf)/launch/plate_tf.launch" />
+	
+	<node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
+		<rosparam file="$(find flyatar_calibration)/calibration_data/$(optenv CAMERA settings_basler_a622f).yaml" />
+	</node>
+	<node ns="camera" name="image_proc" pkg="image_proc" type="image_proc" />
+  
 </launch>

@@ -1,0 +1,273 @@
+#!/usr/bin/env python
+from __future__ import division
+import roslib; roslib.load_manifest('plate_tf')
+import rospy
+import numpy as N
+# from pythonmodules import CircleFunctions
+
+import cv
+from geometry_msgs.msg import PoseStamped
+
+class ButterworthFilter:
+    def __init__(self, a=[1,0,0,0,0], b=[1,0,0,0,0]):
+        self.a = a
+        self.b = b
+        self.z = [0,0,0,0] # 4th order
+        
+        
+    def GetValue(self):
+        return self.z[0]
+
+    def Update(self, x, t):
+        a = self.a
+        b = self.b
+        z = self.z
+        if (t is not None) and (self.tminus1 is not None):
+            dt = t - self.tminus1 # TODO: use dt.
+            #alpha = dt/(self.RC + dt)
+            y    = b[0]*x + z[0]
+            z[0] = b[1]*x + z[1] - a[1]*y
+            z[1] = b[2]*x + z[2] - a[2]*y
+            z[2] = b[3]*x + z[3] - a[3]*y
+            z[3] = b[4]*x        - a[4]*y
+            self.z = z
+                
+                
+        self.tminus1 = t
+
+        return y
+
+
+
+class LowPassAngleFilter:
+    def __init__(self, RC=1.0):
+        self.RC = RC
+        self.t_previous = None
+        self.zf_previous = None
+
+        
+    def GetValue(self):
+        return self.zf_previous
+
+
+    def SetValue(self, z):
+        self.zf_previous = z
+
+
+    def Update(self, z, t):
+        if (self.zf_previous is not None) and (self.t_previous is not None): 
+            if (z is not None) and (t is not None):
+                
+                # Unwrap big jumps
+                if (z - self.zf_previous) > N.pi:
+                    self.zf_previous += (2.0*N.pi)
+                if (z - self.zf_previous) < -N.pi:
+                    self.zf_previous -= (2.0*N.pi)
+                    
+                dt = t - self.t_previous
+                alpha = dt/(self.RC + dt)
+                zf = alpha*z + (1 - alpha)*self.zf_previous
+            else: # Initialized, but no measurement.
+                zf = self.zf_previous
+        else: # Not initialized, but have a measurement.
+            zf = z
+
+
+        self.t_previous = t
+        self.zf_previous = zf
+
+        return zf
+
+
+class LowPassFilter:
+    def __init__(self, RC=1.0):
+        self.RC = RC
+        self.t_previous = None
+        self.zf_previous = None
+
+        
+    def GetValue(self):
+        return self.zf_previous
+
+
+    def SetValue(self, z):
+        self.zf_previous = z
+
+
+    def Update(self, z, t):
+        if (self.zf_previous is not None) and (self.t_previous is not None): 
+            if (z is not None) and (t is not None):
+                dt = t - self.t_previous
+                alpha = dt/(self.RC + dt)
+                zf = alpha*z + (1 - alpha)*self.zf_previous
+            else: # Initialized, but no measurement.
+                zf = self.zf_previous
+        else: # Not initialized, but have a measurement.
+            zf = z
+
+
+        self.t_previous = t
+        self.zf_previous = zf
+
+        return zf
+
+
+class KalmanFilter:
+# Covariance of the magnet contour, with magnet at rest, and after subtracting the mean.
+#   5.0514e-05   7.6803e-06
+#   7.6803e-06   8.5906e-06
+#
+# Covariance of the magnet contour, moving in a spiral, and after subtracting the commanded position & mean.
+#   15.3408    2.3540
+#    2.3540   20.0380
+
+# Covariance of [x,y,vx,vy] of magnet contour, moving in a spiral, and after subtracting the commanded position & mean,
+# and using the 1st order position difference as velocity.
+#   15.341     2.3540    -1.4330    -0.10971
+#   2.3540    20.038     -0.097233  -1.6238
+#  -1.4330    -0.097233   0.22291    0.0055711
+#  -0.10971   -1.6238     0.0055711  0.21742
+
+    
+    def __init__(self):
+        self.initialized = False
+        
+        # self.kal = cv.CreateKalman(4,2,0)
+        self.kal = cv.CreateKalman(4,4,0)
+        # self.kal = cv.CreateKalman(6,6,0)
+        cv.SetIdentity(self.kal.transition_matrix)
+        cv.SetIdentity(self.kal.measurement_matrix)
+        
+        #cv.SetIdentity(self.kal.process_noise_cov, 1.0)
+        #self.kal.process_noise_cov[2,2] = 0.5
+        #self.kal.process_noise_cov[3,3] = 0.5
+        cv.SetIdentity(self.kal.process_noise_cov, 1.0)
+        self.kal.process_noise_cov[2,2] = 0.5
+        self.kal.process_noise_cov[3,3] = 0.5
+        
+        #cv.SetIdentity(self.kal.measurement_noise_cov, 0.1)
+        cv.SetIdentity(self.kal.measurement_noise_cov, 80.0)
+        self.kal.measurement_noise_cov[2,2] = 40.0
+        self.kal.measurement_noise_cov[3,3] = 40.0
+        
+        self.kal.measurement_noise_cov[0,0] = 5E-5 #15.341
+        self.kal.measurement_noise_cov[0,1] = 8E-6 # 2.354
+#        self.kal.measurement_noise_cov[0,2] = -1.433
+#        self.kal.measurement_noise_cov[0,3] = -0.10971
+#        
+        self.kal.measurement_noise_cov[1,0] = 1E-2 # 2.354
+        self.kal.measurement_noise_cov[1,1] = 1E-2 #20.038
+#        self.kal.measurement_noise_cov[1,2] = -0.097233
+#        self.kal.measurement_noise_cov[1,3] = -1.6238
+#        
+#        self.kal.measurement_noise_cov[2,0] = -1.433
+#        self.kal.measurement_noise_cov[2,1] = -0.097233
+        self.kal.measurement_noise_cov[2,2] =  0.22291
+#        self.kal.measurement_noise_cov[2,3] =  0.0055711
+#        
+#        self.kal.measurement_noise_cov[3,0] = -0.10971
+#        self.kal.measurement_noise_cov[3,1] = -1.6238
+#        self.kal.measurement_noise_cov[3,2] =  0.0055711
+        self.kal.measurement_noise_cov[3,3] =  0.21742
+        
+        
+        # self.measurement = cv.CreateMat(2,1,cv.GetElemType(self.kal.state_pre))
+        self.measurement = cv.CreateMat(4,1,cv.GetElemType(self.kal.state_pre))
+        # self.measurement = cv.CreateMat(6,1,cv.GetElemType(self.kal.state_pre))
+        self.t_previous = None
+        self.x_previous = None
+        self.y_previous = None
+        # self.a_previous = None
+
+
+    def Update(self, z, t=None):
+        if t is not None:
+            t_current = t
+        else:
+            t_current = rospy.Time.now()
+            
+        if z is not None:
+            x_current = z[0]
+            y_current = z[1]
+        #else:
+        #    x_current = 0.0
+        #    y_current = 0.0
+            
+
+
+        if self.initialized:
+            # Update the state transition matrix for dt.
+            self.dt = t_current - self.t_previous
+            self.kal.transition_matrix[0,2] = self.dt
+            self.kal.transition_matrix[1,3] = self.dt
+                
+
+            # Kalman Filtering                
+            state_pre = cv.KalmanPredict(self.kal)
+            # Q = self.kal.process_noise_cov[0,0]
+            # R = self.kal.measurement_noise_cov[0,0]
+            # rospy.logwarn("Q = %s, R = %s" % (str(Q),str(R)))
+            if z is not None:
+                self.measurement[0,0] = x_current
+                self.measurement[1,0] = y_current
+                self.measurement[2,0] = (x_current - self.x_previous) / self.dt
+                self.measurement[3,0] = (y_current - self.y_previous) / self.dt
+                # self.measurement[5,0] = CircleFunctions.circle_dist(self.a_previous,z[2])/self.dt
+                # rospy.logwarn("x_velocity = %s, y_velocity = %s" % (str(self.measurement[2,0]),str(self.measurement[3,0])))
+    
+                # rospy.logwarn("measurement[0,0] = %s" % str(self.measurement[0,0]))
+                # rospy.logwarn("measurement[1,0] = %s" % str(self.measurement[1,0]))
+    
+                state_post = cv.KalmanCorrect(self.kal, self.measurement)
+                x = state_post[0,0]
+                y = state_post[1,0]
+                vx = state_post[2,0]
+                vy = state_post[3,0]
+                # a = state_post[2,0]
+                # va = state_post[5,0]
+            else:
+                x = state_pre[0,0]
+                y = state_pre[1,0]
+                vx = state_pre[2,0]
+                vy = state_pre[3,0]
+                rospy.logwarn('KF z==None -> x,y,vx,vy=%s' % [x,y,vx,vy])
+                
+            self.t_previous = t_current
+            self.x_previous = x
+            self.y_previous = y
+        else:
+            if (z is not None):
+                # Set initial conditions
+                x = x_current
+                y = y_current
+                vx = 0.0
+                vy = 0.0
+                cv.Set2D(self.kal.state_post, 0, 0, x_current)
+                cv.Set2D(self.kal.state_post, 1, 0, y_current)
+                cv.Set2D(self.kal.state_post, 2, 0, vx)
+                cv.Set2D(self.kal.state_post, 3, 0, vy)
+                rospy.logwarn ('FLT initialized kalman filter to %s' % [x_current, y_current, vx, vy])
+
+                self.t_previous = t_current
+                self.x_previous = x_current
+                self.y_previous = y_current
+                
+                self.initialized = True
+            else:
+                x = None
+                y = None
+                vx = None
+                vy = None
+                #x = state_pre[0,0]
+                #y = state_pre[1,0]
+                #vx = state_pre[2,0]
+                #vy = state_pre[3,0]
+                
+                
+            
+
+        
+        # return (x,y,a,vx,vy,va)
+        return (x, y, vx, vy)
+
+

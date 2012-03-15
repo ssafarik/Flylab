@@ -1,0 +1,13 @@
+digraph G {
+"/basler_a622f" -> "/Camera"[label="Broadcaster: /statictf_baslera622f_Camera_publisher\nAverage rate: 99.323 Hz\nMost recent transform: -0.005 sec old \nBuffer length: 4.943 sec\n"];
+"/Plate" -> "/Stage"[label="Broadcaster: /statictf_Plate_Stage_publisher\nAverage rate: 99.321 Hz\nMost recent transform: -0.005 sec old \nBuffer length: 4.944 sec\n"];
+"/PlateImage" -> "/Plate"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.208 Hz\nMost recent transform: 0.082 sec old \nBuffer length: 4.800 sec\n"];
+"/Camera" -> "/ImageRaw"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.208 Hz\nMost recent transform: 0.083 sec old \nBuffer length: 4.800 sec\n"];
+"/ImageRaw" -> "/ImageRect"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.208 Hz\nMost recent transform: 0.083 sec old \nBuffer length: 4.800 sec\n"];
+"/ImageRect" -> "/PlateImage"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.208 Hz\nMost recent transform: 0.082 sec old \nBuffer length: 4.800 sec\n"];
+"/Plate" -> "/ROIPlateImage"[label="Broadcaster: /plate_camera_transforms\nAverage rate: 10.208 Hz\nMost recent transform: 0.082 sec old \nBuffer length: 4.800 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1331068416.732"[ shape=plaintext ] ;
+ }->"/basler_a622f";
+}

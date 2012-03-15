@@ -1,10 +1,7 @@
 <launch>
 	
-	<include file="$(find config)/launch/arena.launch" />
-	<include file="$(find config)/launch/stage.launch" />
-	<include file="$(find PatternGen)/launch/PatternGenXY.launch" />
-	<include file="$(find track_image_contours)/launch/track_image_contours.launch" />
-	<!--<include file="$(find plate_tf)/launch/plate_camera_transforms.launch" />-->
+	<include file="$(find config)/launch/hardware.launch" />
+	<include file="$(find patterngen)/launch/PatternGenXY.launch" />
 
 	<node pkg="flyatar_calibration" type="StagePlate.py" name="StagePlate" />
 </launch>

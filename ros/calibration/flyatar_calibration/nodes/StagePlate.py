@@ -7,11 +7,12 @@ import numpy as N
 import tf
 from cv_bridge import CvBridge, CvBridgeError
 from pythonmodules import cvNumpy,CameraParameters
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import PoseStamped
 from plate_tf.srv import *
-from track_image_contours.msg import ContourInfo
-from PatternGen.msg import MsgPatternGen
+from tracking.msg import ContourInfo
+from patterngen.msg import MsgPatternGen
+from flycore.msg import MsgFrameState
 
 
 class Calibration():
@@ -20,19 +21,26 @@ class Calibration():
         self.initialized_images = False
         self.initialized_pose = False
         self.initialized_arrays = False
+        self.initialized_endeffector = False
         
-        self.pubPatternGen = rospy.Publisher('PatternGen', MsgPatternGen)
-        self.sub_image = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
-        self.sub_contourinfo = rospy.Subscriber("ContourInfo", ContourInfo, self.contourinfo_callback)
-        # self.sub_pose = rospy.Subscriber("RobotImagePose", PoseStamped, self.cbPose)
+        self.camerainfo = None
+        self.rvec = None
+        self.tvec = None
+        self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
+        self.subImage = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
+        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.contourinfo_callback)
+        self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback)
+        self.pubPatternGen = rospy.Publisher('PatternGen', MsgPatternGen, latch=True)
         
+        self.tf_listener = tf.TransformListener()
+
         cv.NamedWindow("Stage Plate Calibration", 1)
         
         self.poseRobot_camera = PoseStamped()
         self.poseRobot_rect = PoseStamped()
         self.poseRobot_plate = PoseStamped()
         
-        self.bridge = CvBridge()
+        self.cvbridge = CvBridge()
         self.color_max = 255
         self.font = cv.InitFont(cv.CV_FONT_HERSHEY_TRIPLEX,0.5,0.5)
         self.font_color = cv.CV_RGB(self.color_max,0,0)
@@ -43,26 +51,19 @@ class Calibration():
         self.dist_min = 10
         
         self.error_text = ""
-        self.robot_ecc = 0
-        self.robot_area = 0
-        self.robot_ecc_array = N.array([])
-        self.robot_area_array = N.array([])
-        self.robot_min_ecc = 1000000000
-        self.robot_max_ecc = 0
-        self.robot_min_area = 1000000000
-        self.robot_max_area = 0
+        self.eccRobot = 0
+        self.areaRobot = 0
+        self.eccRobot_array = N.array([])
+        self.areaRobot_array = N.array([])
+        self.eccRobotMin = 1000000000
+        self.eccRobotMax = 0
+        self.areaRobotMin = 1000000000
+        self.areaRobotMax = 0
         
         # self.plate_point_array = N.zeros((1,3))
         # self.stage_point_array = N.zeros((1,3))
-        (self.intrinsic_matrix,self.distortion_coeffs) = CameraParameters.intrinsic("rect")
-        (self.rvec,self.tvec) = CameraParameters.extrinsic("plate")
-        
-        rospy.logwarn ('SP: intrinsic_matrix=%s' % self.intrinsic_matrix)
-        rospy.logwarn ('SP: distortion_coeffs=%s' % self.distortion_coeffs)
-        rospy.logwarn ('SP: rvec=%s' % self.rvec)
-        rospy.logwarn ('SP: tvec=%s' % self.tvec)
-        
-        self.origin_points = cv.CreateMat(4,3,cv.CV_32FC1)
+        #(self.intrinsic_matrix,self.distortion_coeffs) = CameraParameters.intrinsic("rect")
+        self.origin_points = cv.CreateMat(4, 3, cv.CV_32FC1)
         self.origin_points_projected = cv.CreateMat(4,2,cv.CV_32FC1)
         self.checker_size = 15
         self.num_grid_lines = 9
@@ -70,7 +71,6 @@ class Calibration():
         self.end_points_projected = cv.CreateMat(self.num_grid_lines,2,cv.CV_32FC1)
         self.rotate_grid = False
         
-        self.tf_listener = tf.TransformListener()
         got_trans = False
         while not got_trans:
             try:
@@ -85,10 +85,22 @@ class Calibration():
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
         
-        self.initialized = True
     
+    def EndEffector_callback (self, state):
+        self.initialized_endeffector = True
+        
     
-    
+    def CameraInfo_callback (self, msgCameraInfo):
+        if self.camerainfo is None:
+            self.camerainfo = msgCameraInfo
+            self.M = N.reshape(N.array(self.camerainfo.K),[3,3])
+            # Makes with respect to Camera coordinate system instead of ImageRect
+            self.M[:-1,-1] = 0
+
+            (self.rvec, self.tvec) = CameraParameters.extrinsic("plate")
+      
+      
+        
     def initialize_images(self,cv_image):
         self.im_size = cv.GetSize(cv_image)
         (self.im_width, self.im_height) = cv.GetSize(cv_image)
@@ -99,48 +111,51 @@ class Calibration():
     
     
     def draw_origin(self,im_color):
-        cv.SetZero(self.origin_points)
-        cv.SetReal2D(self.origin_points,1,0,self.checker_size) # x-direction
-        cv.SetReal2D(self.origin_points,2,1,self.checker_size) # y-direction
-        cv.SetReal2D(self.origin_points,3,2,self.checker_size) # z-direction
-        axis_line_width = 3
-        rect_line_width = 2
-        cv.ProjectPoints2(self.origin_points,
-                          self.rvec,
-                          self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
-                          self.origin_points_projected)
-        
-        try:
-            a = cvNumpy.mat_to_array(self.origin_points_projected)
+        if self.camerainfo is not None:
+            cv.SetZero(self.origin_points)
+            cv.SetReal2D(self.origin_points,1,0,self.checker_size) # x-direction
+            cv.SetReal2D(self.origin_points,2,1,self.checker_size) # y-direction
+            cv.SetReal2D(self.origin_points,3,2,self.checker_size) # z-direction
+            axis_line_width = 3
+            rect_line_width = 2
+            cvmatK = cv.fromarray(N.reshape(self.camerainfo.K,[3,3]))
+            cvmatD = cv.fromarray(N.reshape(self.camerainfo.D,[5,1]))
+            cv.ProjectPoints2(self.origin_points,
+                              self.rvec,
+                              self.tvec,
+                              cvmatK,
+                              cvmatD,
+                              self.origin_points_projected)
             
-            # origin point
-            pt1 = tuple(a[0])
+            try:
+                a = cvNumpy.mat_to_array(self.origin_points_projected)
+                
+                # origin point
+                pt1 = tuple(a[0])
+                
+                # draw x-axis
+                pt2 = tuple(a[1])
+                cv.Line(im_color,pt1,pt2,cv.CV_RGB(self.color_max,0,0),axis_line_width)
+                
+                # draw y-axis
+                pt2 = tuple(a[2])
+                cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,self.color_max,0),axis_line_width)
+                
+                # draw z-axis
+                pt2 = tuple(a[3])
+                cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,0,self.color_max),axis_line_width)
+                
+                # if self.image_plate_origin_found:
+                #   self.image_plate_origin = pt1
+                #   self.image_plate_origin_found = False
+                
+                # display_text = "image_plate_origin = " + str(self.image_plate_origin)
+                # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
+                # display_text = "image_plate_origin = (%0.0f, %0.0f)" % (self.image_plate_origin[0],self.image_plate_origin[1])
+                # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
+            except:
+                pass
             
-            # draw x-axis
-            pt2 = tuple(a[1])
-            cv.Line(im_color,pt1,pt2,cv.CV_RGB(self.color_max,0,0),axis_line_width)
-            
-            # draw y-axis
-            pt2 = tuple(a[2])
-            cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,self.color_max,0),axis_line_width)
-            
-            # draw z-axis
-            pt2 = tuple(a[3])
-            cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,0,self.color_max),axis_line_width)
-            
-            # if self.image_plate_origin_found:
-            #   self.image_plate_origin = pt1
-            #   self.image_plate_origin_found = False
-            
-            # display_text = "image_plate_origin = " + str(self.image_plate_origin)
-            # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
-            # display_text = "image_plate_origin = (%0.0f, %0.0f)" % (self.image_plate_origin[0],self.image_plate_origin[1])
-            # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
-        except:
-            pass
-        
 
     def to_homo(self,array):
         array = N.append(array, N.ones((1, array.shape[1])), axis=0)
@@ -151,73 +166,78 @@ class Calibration():
         return array[:-1,:]
     
     
-    def draw_grid(self,im_color):
-        points_range = (N.array(range(self.num_grid_lines)) - (self.num_grid_lines-1)/2) * self.checker_size
-        points_zeros = N.zeros(points_range.shape)
-        points_ones = N.ones(points_range.shape) * self.checker_size * (self.num_grid_lines - 1)/2
-        
-        x_start_points_array = N.array([-points_ones,points_range,points_zeros]).astype('float32')
-        x_end_points_array = N.array([points_ones,points_range,points_zeros]).astype('float32')
-        y_start_points_array = N.array([points_range,-points_ones,points_zeros]).astype('float32')
-        y_end_points_array = N.array([points_range,points_ones,points_zeros]).astype('float32')
-        
-        if self.rotate_grid:
-            x_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_start_points_array)))
-            x_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_end_points_array)))
-            y_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_start_points_array)))
-            y_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_end_points_array)))
-            self.rotate_grid = False
-        
-        x_start_points = cvNumpy.array_to_mat(x_start_points_array.transpose())
-        x_end_points = cvNumpy.array_to_mat(x_end_points_array.transpose())
-        y_start_points = cvNumpy.array_to_mat(y_start_points_array.transpose())
-        y_end_points = cvNumpy.array_to_mat(y_end_points_array.transpose())
-        
-        axis_line_width = 1
-        
-        cv.ProjectPoints2(x_start_points,
-                          self.rvec,
-                          self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
-                          self.start_points_projected)
-        cv.ProjectPoints2(x_end_points,
-                          self.rvec,
-                          self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
-                          self.end_points_projected)
-        
-        start_points = cvNumpy.mat_to_array(self.start_points_projected)
-        end_points = cvNumpy.mat_to_array(self.end_points_projected)
-        
-        for line_n in range(self.num_grid_lines):
-            cv.Line(im_color,tuple(start_points[line_n,:]),tuple(end_points[line_n,:]),cv.CV_RGB(self.color_max,0,0),axis_line_width)
-        
-        cv.ProjectPoints2(y_start_points,
-                          self.rvec,
-                          self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
-                          self.start_points_projected)
-        cv.ProjectPoints2(y_end_points,
-                          self.rvec,
-                          self.tvec,
-                          self.intrinsic_matrix,
-                          self.distortion_coeffs,
-                          self.end_points_projected)
-        
-        start_points = cvNumpy.mat_to_array(self.start_points_projected)
-        end_points = cvNumpy.mat_to_array(self.end_points_projected)
-        
-        for line_n in range(self.num_grid_lines):
-            cv.Line(im_color,tuple(start_points[line_n,:]),tuple(end_points[line_n,:]),cv.CV_RGB(0,self.color_max,0),axis_line_width)
-        
+    def draw_grid(self, im_color):
+        if self.camerainfo is not None:
+            points_range = (N.array(range(self.num_grid_lines)) - (self.num_grid_lines-1)/2) * self.checker_size
+            points_zeros = N.zeros(points_range.shape)
+            points_ones = N.ones(points_range.shape) * self.checker_size * (self.num_grid_lines - 1)/2
+            
+            x_start_points_array = N.array([-points_ones, points_range, points_zeros]).astype('float32')
+            x_end_points_array = N.array([points_ones, points_range, points_zeros]).astype('float32')
+            
+            y_start_points_array = N.array([points_range, -points_ones, points_zeros]).astype('float32')
+            y_end_points_array = N.array([points_range, points_ones, points_zeros]).astype('float32')
+            
+            
+            if self.rotate_grid:
+                x_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_start_points_array)))
+                x_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_end_points_array)))
+                y_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_start_points_array)))
+                y_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_end_points_array)))
+                self.rotate_grid = False
+            
+            x_start_points = cvNumpy.array_to_mat(x_start_points_array.transpose())
+            x_end_points = cvNumpy.array_to_mat(x_end_points_array.transpose())
+            y_start_points = cvNumpy.array_to_mat(y_start_points_array.transpose())
+            y_end_points = cvNumpy.array_to_mat(y_end_points_array.transpose())
+            
+            axis_line_width = 1
+            
+            cvmatK = cv.fromarray(N.reshape(self.camerainfo.K,[3,3]))
+            cvmatD = cv.fromarray(N.reshape(self.camerainfo.D,[5,1]))
+            cv.ProjectPoints2(x_start_points,
+                              self.rvec,
+                              self.tvec,
+                              cvmatK,
+                              cvmatD,
+                              self.start_points_projected)
+            cv.ProjectPoints2(x_end_points,
+                              self.rvec,
+                              self.tvec,
+                              cvmatK,
+                              cvmatD,
+                              self.end_points_projected)
+            
+            start_points = cvNumpy.mat_to_array(self.start_points_projected)
+            end_points = cvNumpy.mat_to_array(self.end_points_projected)
+            
+            for line_n in range(self.num_grid_lines):
+                cv.Line(im_color, tuple(start_points[line_n,:]), tuple(end_points[line_n,:]), cv.CV_RGB(self.color_max,0,0), axis_line_width)
+            
+            cv.ProjectPoints2(y_start_points,
+                              self.rvec,
+                              self.tvec,
+                              cvmatK,
+                              cvmatD,
+                              self.start_points_projected)
+            cv.ProjectPoints2(y_end_points,
+                              self.rvec,
+                              self.tvec,
+                              cvmatK,
+                              cvmatD,
+                              self.end_points_projected)
+            
+            start_points = cvNumpy.mat_to_array(self.start_points_projected)
+            end_points = cvNumpy.mat_to_array(self.end_points_projected)
+            
+            for line_n in range(self.num_grid_lines):
+                cv.Line(im_color, tuple(start_points[line_n,:]), tuple(end_points[line_n,:]), cv.CV_RGB(0,self.color_max,0), axis_line_width)
+            
 
     def image_callback(self, image):
         if self.initialized:
             try:
-                cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(image, "passthrough"))
+                cv_image = cv.GetImage(self.cvbridge.imgmsg_to_cv(image, "passthrough"))
             except CvBridgeError, e:
                 print e
             
@@ -231,9 +251,9 @@ class Calibration():
             if self.initialized_pose:
                 try:
                     (trans,rot_quat) = self.tf_listener.lookupTransform('Stage', 'EndEffector', rospy.Time(0))
-                    endeffector_stage_x = trans[0]
-                    endeffector_stage_y = trans[1]
-                    endeffector_stage_z = trans[2]
+                    xEndEffector = trans[0]
+                    yEndEffector = trans[1]
+                    zEndEffector = trans[2]
                     
                     if self.initialized_arrays:
                         image_point_num = self.image_point_array.shape[1]
@@ -257,7 +277,7 @@ class Calibration():
                     # cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                     #y = y+20
                     
-                    display_text = "EndEffector Pose with Respect to Stage = [%0.3f, %0.3f]" % (endeffector_stage_x, endeffector_stage_y)
+                    display_text = "EndEffector Pose with Respect to Stage = [%0.3f, %0.3f]" % (xEndEffector, yEndEffector)
                     cv.PutText(self.im_display, display_text, (25,y), self.font, self.font_color)
                     y = y+20
                     
@@ -270,7 +290,7 @@ class Calibration():
                     
                     image_point_new = N.array([[self.poseRobot_rect.pose.position.x], [self.poseRobot_rect.pose.position.y]])
                     plate_point_new = N.array([[self.poseRobot_plate.pose.position.x], [self.poseRobot_plate.pose.position.y],[0]])
-                    stage_point_new = N.array([[endeffector_stage_x], [endeffector_stage_y], [endeffector_stage_z]])
+                    stage_point_new = N.array([[xEndEffector], [yEndEffector], [zEndEffector]])
                     # rospy.logwarn("plate_point_new = \n%s", str(plate_point_new))
                     # rospy.logwarn("stage_point_new = \n%s", str(stage_point_new))
                     
@@ -283,8 +303,8 @@ class Calibration():
                             # rospy.logwarn("plate_point_array = \n%s", str(self.plate_point_array))
                             self.stage_point_array = N.append(self.stage_point_array,stage_point_new,axis=1)
                             # rospy.logwarn("stage_point_array = \n%s", str(self.stage_point_array))
-                            self.robot_ecc_array = N.append(self.robot_ecc_array,self.robot_ecc)
-                            self.robot_area_array = N.append(self.robot_area_array,self.robot_area)
+                            self.eccRobot_array = N.append(self.eccRobot_array,self.eccRobot)
+                            self.areaRobot_array = N.append(self.areaRobot_array,self.areaRobot)
                     else:
                         self.image_point_array = image_point_new
                         self.plate_point_array = plate_point_new
@@ -314,24 +334,24 @@ class Calibration():
                         #y = y+20
                         # rospy.logwarn("euler = \n%s",str(euler))
                         
-                        ecc_mean = N.mean(self.robot_ecc_array)
-                        ecc_std = N.std(self.robot_ecc_array)
-                        # rospy.logwarn("ecc_mean = %s, ecc_std = %s\n" % (ecc_mean, ecc_std))
-                        self.robot_min_ecc = ecc_mean - ecc_std*3
-                        if self.robot_min_ecc < 0:
-                            self.robot_min_ecc = 0
-                        self.robot_max_ecc = ecc_mean + ecc_std*3
-                        area_mean = N.mean(self.robot_area_array)
-                        area_std = N.std(self.robot_area_array)
-                        # rospy.logwarn("area_mean = %s, area_std = %s\n" % (area_mean, area_std))
-                        self.robot_min_area = area_mean - area_std*3
-                        if self.robot_min_area < 0:
-                            self.robot_min_area = 0
-                        self.robot_max_area = area_mean + area_std*3
-                        display_text = "robot_min_ecc = %0.3f, robot_max_ecc = %0.3f" % (self.robot_min_ecc, self.robot_max_ecc)
+                        eccMean = N.mean(self.eccRobot_array)
+                        eccStd = N.std(self.eccRobot_array)
+                        # rospy.logwarn("eccMean = %s, eccStd = %s\n" % (eccMean, eccStd))
+                        self.eccRobotMin = eccMean - eccStd*3
+                        if self.eccRobotMin < 0:
+                            self.eccRobotMin = 0
+                        self.eccRobotMax = eccMean + eccStd*3
+                        areaMean = N.mean(self.areaRobot_array)
+                        areaStd = N.std(self.areaRobot_array)
+                        # rospy.logwarn("areaMean = %s, areaStd = %s\n" % (areaMean, areaStd))
+                        self.areaRobotMin = areaMean - areaStd*3
+                        if self.areaRobotMin < 0:
+                            self.areaRobotMin = 0
+                        self.areaRobotMax = areaMean + areaStd*3
+                        display_text = "eccRobotMin = %0.3f, eccRobotMax = %0.3f" % (self.eccRobotMin, self.eccRobotMax)
                         cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                         y = y+20
-                        display_text = "robot_min_area = %0.0f, robot_max_area = %0.0f" % (self.robot_min_area, self.robot_max_area)
+                        display_text = "areaRobotMin = %0.0f, areaRobotMax = %0.0f" % (self.areaRobotMin, self.areaRobotMax)
                         cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                         y = y+20
                         
@@ -402,8 +422,8 @@ class Calibration():
                 self.poseRobot_camera.pose.position.y = y_list[0]
                 self.poseRobot_rect = self.camera_to_rect_pose(self.poseRobot_camera)
                 self.poseRobot_plate = self.camera_to_plate_pose(self.poseRobot_camera)
-                self.robot_area = area_list[0]
-                self.robot_ecc = ecc_list[0]
+                self.areaRobot = area_list[0]
+                self.eccRobot = ecc_list[0]
             else:
                 rospy.logwarn("Error! More than one object detected!")
                 self.error_text = "Error! More than one object detected!"
@@ -415,7 +435,7 @@ class Calibration():
             #   area = area_list[contour]
             #   ecc = ecc_list[contour]
             #   # Identify robot
-            #   if ((self.robot_min_area < area) and (area < self.robot_max_area)) and ((self.robot_min_ecc < ecc) and (ecc < self.robot_max_ecc)):
+            #   if ((self.areaRobotMin < area) and (area < self.areaRobotMax)) and ((self.eccRobotMin < ecc) and (ecc < self.eccRobotMax)):
             #     self.poseRobot.header = header
             #     self.poseRobot.pose.position.x = x
             #     self.poseRobot.pose.position.y = y
@@ -456,28 +476,41 @@ class Calibration():
     def MainLoop(self):
         msgPattern = MsgPatternGen()
 
-        rosrate = rospy.Rate(0.005)
+        # Publish a goto(0,0) pattern message, and wait for the end effector to initialize.
+        msgPattern.mode = 'byshape'
+        msgPattern.shape = 'constant'
+        msgPattern.points = []
+        msgPattern.hz = 1.0
+        msgPattern.count = 1
+        msgPattern.radius = 0.0
+        msgPattern.preempt = True
+        self.pubPatternGen.publish (msgPattern)
+        while not self.initialized_endeffector:
+            rospy.sleep(0.5)
+        rospy.sleep(2)
+        self.initialized = True
+
+        # Publish the spiral pattern message.
+        msgPattern.mode = 'byshape'
+        msgPattern.shape = 'spiral'
+        msgPattern.points = []
+        msgPattern.hz = 0.01
+        msgPattern.count = -1
+        msgPattern.radius = 0.8 * rospy.get_param('arena/radius_movement', 25.4)
+        msgPattern.preempt = False
+        self.pubPatternGen.publish (msgPattern)
+
         try:
-            while not rospy.is_shutdown():
-                # Publish the spiral pattern message.
-                msgPattern.mode = 'byshape'
-                msgPattern.shape = 'spiral'
-                msgPattern.points = []
-                msgPattern.hz = 0.005
-                msgPattern.count = -1
-                msgPattern.radius = rospy.get_param('arena/radius', 25.4)
-                msgPattern.preempt = False
-                self.pubPatternGen.publish (msgPattern)
-                rosrate.sleep()
-                
+            rospy.spin()
         except KeyboardInterrupt:
             print "Shutting down"
+            # Publish a goto(0,0) pattern message.
             msgPattern.mode = 'byshape'
-            msgPattern.shape = 'spiral'
+            msgPattern.shape = 'constant'
             msgPattern.points = []
-            msgPattern.hz = 0.005
-            msgPattern.count = 0
-            msgPattern.radius = rospy.get_param('arena/radius', 25.4)
+            msgPattern.hz = 1.0
+            msgPattern.count = 1
+            msgPattern.radius = 0.0
             msgPattern.preempt = True
             self.pubPatternGen.publish (msgPattern)
     

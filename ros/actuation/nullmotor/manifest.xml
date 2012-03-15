@@ -9,10 +9,12 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/nullmotor</url>
   <depend package="rospy"/>
+  <depend package="geometry_msgs"/>
   <depend package="sensor_msgs"/>
+  <depend package="tf"/>
   <depend package="roslib"/>
-  <depend package="flystage"/>
-  <depend package="PatternGen"/>
+  <depend package="flycore"/>
+  <depend package="patterngen"/>
 
 </package>
 

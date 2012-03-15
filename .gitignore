@@ -2,7 +2,11 @@ msg_gen/*
 bin/*
 build/*
 *.pyc
-.metadata
-.project
-.cproject
+*.metadata
+*.project
+*.cproject
+*.make
+*.cmake
+*.internal
+*.lisp
 

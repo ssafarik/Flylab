@@ -1,3 +1,0 @@
-<launch>
-	<include file="$(find config)/launch/flybowl_80mm.launch" />
-</launch>

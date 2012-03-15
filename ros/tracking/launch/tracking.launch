@@ -1,0 +1,36 @@
+<launch>
+	<!-- Adjust this based on light brightness, etc, to get good contours. -->
+	<param name="diff_threshold" type="double" value="40"/>  
+	
+	<!-- 
+	You can use the ROS image viewer to look at the live video:
+	e.g. rosrun image_view image_view image:=camera/image_processed
+
+	camera/image_raw
+	camera/image_rect
+	camera/image_raw
+	camera/image_diff
+	camera/image_foreground
+	camera/image_processed
+	-->
+	  
+	<!-- Turn on/off various windows. No longer needed, see above.  -->
+	<param name="display_unprocessedimage" type="boolean" value="false"/>
+	<param name="display_processedimage"   type="boolean" value="false"/>
+	<param name="display_contours"         type="boolean" value="false"/>
+	<param name="display_diff"             type="boolean" value="false"/>
+	<param name="display_foreground"       type="boolean" value="false"/>
+	<param name="display_background"       type="boolean" value="false"/>
+
+	<param name="frameid_contours" type="string" value="ImageRect"/>
+
+	<param name="tooloffset/kP"      type="double" value="1.0"/>
+	<param name="tooloffset/kI"      type="double" value="0.0"/>
+	<param name="tooloffset/kD"      type="double" value="0.0"/>
+
+	<node pkg="tracking" type="ContourGenerator.py" name="ContourGenerator" />
+	<node pkg="tracking" type="ContourIdentifier.py" name="ContourIdentifier" />
+	
+	<!-- Causes ContourIdentifier to hang when run w/ no Stage:  -->
+	<!-- <node pkg="tracking" type="PublishFlyView.py" name="PublishFlyView" /> --> 
+</launch>

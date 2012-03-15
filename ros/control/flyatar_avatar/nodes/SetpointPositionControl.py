@@ -10,8 +10,8 @@ import cv
 import numpy
 import copy
 from plate_tf.srv import *
-from flystage.srv import *
-from flystage.msg import StageCommands,Setpoint
+from flycore.srv import *
+from flycore.msg import StageCommands,Setpoint
 from joystick_commands.msg import JoystickCommands
 from geometry_msgs.msg import PointStamped
 from pythonmodules import CircleFunctions

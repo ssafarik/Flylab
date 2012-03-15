@@ -1,0 +1,6 @@
+<launch>
+  <param name="Draw_Update_dt" type="double" value="0.010"/>
+
+  <node pkg="image_gui" type="DrawObjects.py" name="DrawObjects" />
+  <node pkg="image_gui" type="DisplayDraw.py" name="DisplayDraw" />
+</launch>

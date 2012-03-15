@@ -15,7 +15,7 @@
   <depend package="geometry_msgs"/>
   <depend package="std_msgs"/>
   <depend package="tf"/>
-  <depend package="flystage"/>
+  <depend package="flycore"/>
   <depend package="plate_tf"/>
 
 </package>

@@ -1,4 +1,0 @@
-<launch>
-	<include file="$(find Fivebar)/launch/Fivebar.launch" />
-	<!-- <include file="$(find nullmotor)/launch/nullmotor.launch" /> -->
-</launch>

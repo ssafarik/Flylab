@@ -1,0 +1,31 @@
+<package>
+  <description brief="Fivebar">
+
+     Fivebar
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/Fivebar</url>
+  <depend package="rospy"/>
+  <depend package="sensor_msgs"/>
+  <depend package="actuator_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="visualization_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="roslib"/>
+  <depend package="urdf"/>
+  <depend package="kdl_parser"/>
+  <depend package="python_orocos_kdl"/>
+  <depend package="tf"/>
+  
+  <depend package="flycore"/>
+  <depend package="experiments"/>
+  <depend package="patterngen"/>
+  
+  
+
+</package>
+
+

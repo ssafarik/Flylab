@@ -1,0 +1,19 @@
+<package>
+  <description brief="PatternGen">
+
+     PatternGen
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/PatternGen</url>
+  <depend package="roslib"/>
+  <depend package="rospy"/>
+  <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="flystage"/>
+  
+</package>
+
+

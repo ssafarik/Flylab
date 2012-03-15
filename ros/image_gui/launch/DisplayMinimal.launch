@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find tracking)/launch/tracking" />
+  <node pkg="image_gui" type="DisplayMinimal.py" name="ImageDisplay" />
+</launch>
