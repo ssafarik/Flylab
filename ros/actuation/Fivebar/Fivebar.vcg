@@ -13,18 +13,54 @@ CameraAxes.Enabled=0
 CameraAxes.Length=30
 CameraAxes.Radius=0.2
 CameraAxes.Reference\ Frame=/Camera
-EndEffector.Enabled=1
+EndEffector.Enabled=0
 EndEffector.Length=13
 EndEffector.Radius=0.2
 EndEffector.Reference\ Frame=/EndEffector
-Fly.Enabled=1
-Fly.Length=5
-Fly.Radius=1
-Fly.Reference\ Frame=/Fly
-FlyImage.Enabled=0
-FlyImage.Length=7
-FlyImage.Radius=0.5
-FlyImage.Reference\ Frame=/FlyContour
+Fly1.Enabled=1
+Fly1.Length=5
+Fly1.Radius=2
+Fly1.Reference\ Frame=/Fly1
+Fly10.Enabled=0
+Fly10.Length=1
+Fly10.Radius=0.1
+Fly10.Reference\ Frame=<Fixed Frame>
+Fly1Contour.Enabled=0
+Fly1Contour.Length=7
+Fly1Contour.Radius=0.5
+Fly1Contour.Reference\ Frame=/Fly1Contour
+Fly2.Enabled=1
+Fly2.Length=5
+Fly2.Radius=1
+Fly2.Reference\ Frame=/Fly2
+Fly3.Enabled=1
+Fly3.Length=5
+Fly3.Radius=1
+Fly3.Reference\ Frame=/Fly3
+Fly4.Enabled=1
+Fly4.Length=5
+Fly4.Radius=1
+Fly4.Reference\ Frame=/Fly4
+Fly5.Enabled=0
+Fly5.Length=5
+Fly5.Radius=1
+Fly5.Reference\ Frame=/Fly5
+Fly6.Enabled=0
+Fly6.Length=5
+Fly6.Radius=1
+Fly6.Reference\ Frame=/Fly6
+Fly7.Enabled=0
+Fly7.Length=5
+Fly7.Radius=1
+Fly7.Reference\ Frame=/Fly7
+Fly8.Enabled=0
+Fly8.Length=5
+Fly8.Radius=1
+Fly8.Reference\ Frame=/Fly8
+Fly9.Enabled=0
+Fly9.Length=5
+Fly9.Radius=1
+Fly9.Reference\ Frame=/Fly9
 Grid.Alpha=0.5
 Grid.Cell\ Size=10
 Grid.ColorR=0.5
@@ -52,8 +88,8 @@ Robot\ Model.TF\ Prefix=
 Robot\ Model.Update\ Interval=0.02
 Robot\ Model.Visual\ Enabled=1
 Robot.Enabled=1
-Robot.Length=5
-Robot.Radius=1
+Robot.Length=0.75
+Robot.Radius=0.2
 Robot.Reference\ Frame=/Robot
 Robot\:\ Robot\ Model\ Link\ link1Show\ Axes=0
 Robot\:\ Robot\ Model\ Link\ link1Show\ Trail=0
@@ -63,18 +99,18 @@ Robot\:\ Robot\ Model\ Link\ link3Show\ Axes=0
 Robot\:\ Robot\ Model\ Link\ link3Show\ Trail=0
 Robot\:\ Robot\ Model\ Link\ link4Show\ Axes=0
 Robot\:\ Robot\ Model\ Link\ link4Show\ Trail=0
-RobotImage.Enabled=0
-RobotImage.Length=7
-RobotImage.Radius=0.5
-RobotImage.Reference\ Frame=/RobotContour
+RobotContour.Enabled=0
+RobotContour.Length=7
+RobotContour.Radius=0.5
+RobotContour.Reference\ Frame=/RobotContour
 Stage.Enabled=0
 Stage.Length=30
 Stage.Radius=0.22
 Stage.Reference\ Frame=/Stage
-TF.All\ Enabled=0
-TF.Enabled=1
+TF.All\ Enabled=1
+TF.Enabled=0
 TF.Frame\ Timeout=15
-TF.Marker\ Scale=1
+TF.Marker\ Scale=10
 TF.Show\ Arrows=1
 TF.Show\ Axes=1
 TF.Show\ Names=1
@@ -83,6 +119,7 @@ Target.Enabled=1
 Target.Marker\ Topic=visualization_marker
 Target.arena=1
 Target.command=1
+Target.robot=1
 Target.target=1
 Target.tooloffset=1
 contour0.Enabled=0
@@ -100,8 +137,8 @@ link5.Reference\ Frame=/link5
 Tool\ 2D\ Nav\ GoalTopic=goal
 Tool\ 2D\ Pose\ EstimateTopic=initialpose
 Camera\ Type=rviz::OrbitViewController
-Camera\ Config=0.036 6.28085 212.696 -0.755419 0.332924 -2.00273
-Property\ Grid\ State=selection=Fly.Enabled;expanded=TF./Camera/Camera,TF./Stage/Stage,TF./basler_a622f/basler_a622f,TF./link0/link0,TF./link3/link3,TF./link5/link5,TF./Plate/Plate,TF./ImageRaw/ImageRaw,TF./ImageRect/ImageRect,TF./ROIPlateImage/ROIPlateImage,TF./Fly/Fly,TF./FlyContour/FlyContour,TF./contour0/contour0,TF./contour1/contour1,TF./EndEffector/EndEffector,TF./link1/link1,TF./link2/link2,TF./link4/link4,TF./Robot/Robot,TF./RobotContour/RobotContour,TF./contour2/contour2,TF.Enabled.TF.Tree,TF./basler_a622fTree/basler_a622f,TF./CameraTree/Camera,TF./ImageRawTree/ImageRaw,TF./ImageRectTree/ImageRect,TF./PlateTree/Plate,TF./StageTree/Stage,TF./link0Tree/link0,TF./link1Tree/link1,TF./link3Tree/link3,TF./link5Tree/link5,TF./link2Tree/link2,TF./link4Tree/link4,TF./EndEffectorTree/EndEffector,TF./FlyTree/Fly,TF./FlyContourTree/FlyContour,TF./RobotTree/Robot,TF./RobotContourTree/RobotContour,TF./ROIPlateImageTree/ROIPlateImage,TF./contour0Tree/contour0,TF./contour1Tree/contour1,TF./contour2Tree/contour2,FlyImage.Enabled.FlyImage.StatusTopStatus,RobotImage.Enabled.RobotImage.StatusTopStatus,Target.Enabled.Target.Namespaces,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour0.Enabled.contour0.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus,link5.Enabled.link5.StatusTopStatus;scrollpos=0,0;splitterpos=271,543;ispageselected=1
+Camera\ Config=0.001 0.00266457 204.6 -1.86973 0.30399 7.0279
+Property\ Grid\ State=selection=Fly5.Enabled;expanded=.Global Options,TF.Enabled.TF.StatusTopStatus,TF.Enabled.TF.Tree,RobotContour.Enabled.RobotContour.StatusTopStatus,Target.Enabled.Target.Namespaces,contour1.Enabled.contour1.StatusTopStatus,link5.Enabled.link5.StatusTopStatus,Fly6.Enabled.Fly6.StatusTopStatus,Fly7.Enabled.Fly7.StatusTopStatus,Fly8.Enabled.Fly8.StatusTopStatus,Fly9.Enabled.Fly9.StatusTopStatus,Fly10.Enabled.Fly10.StatusTopStatus;scrollpos=0,0;splitterpos=375,750;ispageselected=1
 [Display0]
 Name=Grid
 Package=rviz
@@ -123,68 +160,82 @@ Name=Stage
 Package=rviz
 ClassName=rviz::AxesDisplay
 [Display5]
-Name=Fly
-Package=rviz
-ClassName=rviz::AxesDisplay
-[Display6]
 Name=Plate
 Package=rviz
 ClassName=rviz::AxesDisplay
-[Display7]
+[Display6]
 Name=Robot
 Package=rviz
 ClassName=rviz::AxesDisplay
+[Display7]
+Name=Fly1Contour
+Package=rviz
+ClassName=rviz::AxesDisplay
 [Display8]
-Name=FlyImage
+Name=RobotContour
 Package=rviz
 ClassName=rviz::AxesDisplay
 [Display9]
-Name=RobotImage
-Package=rviz
-ClassName=rviz::AxesDisplay
-[Display10]
 Name=EndEffector
 Package=rviz
 ClassName=rviz::AxesDisplay
-[Display11]
+[Display10]
 Name=Target
 Package=rviz
 ClassName=rviz::MarkerDisplay
-[Display12]
+[Display11]
 Name=CameraAxes
 Package=rviz
 ClassName=rviz::AxesDisplay
-[Display13]
+[Display12]
 Name=contour0
 Package=rviz
 ClassName=rviz::AxesDisplay
-[Display14]
+[Display13]
 Name=contour1
 Package=rviz
 ClassName=rviz::AxesDisplay
-[Display15]
+[Display14]
 Name=link5
 Package=rviz
 ClassName=rviz::AxesDisplay
-[TF.]
-CameraEnabled=1
-EndEffectorEnabled=1
-FlyEnabled=1
-FlyContourEnabled=1
-ImageRawEnabled=1
-ImageRectEnabled=1
-PlateEnabled=1
-ROIPlateImageEnabled=1
-RobotEnabled=1
-RobotContourEnabled=1
-StageEnabled=1
-basler_a622fEnabled=1
-contour0Enabled=1
-contour1Enabled=1
-contour2Enabled=1
-link0Enabled=0
-link1Enabled=0
-link2Enabled=0
-link3Enabled=0
-link4Enabled=0
-link5Enabled=1
+[Display15]
+Name=Fly1
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display16]
+Name=Fly2
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display17]
+Name=Fly3
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display18]
+Name=Fly4
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display19]
+Name=Fly5
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display20]
+Name=Fly6
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display21]
+Name=Fly7
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display22]
+Name=Fly8
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display23]
+Name=Fly9
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display24]
+Name=Fly10
+Package=rviz
+ClassName=rviz::AxesDisplay

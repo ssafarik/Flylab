@@ -1,0 +1,18 @@
+<launch>
+	<!-- *** Hardware Configuration *** -->
+	<include file="$(find config)/launch/camera.launch" />
+	<include file="$(find config)/launch/tracking.launch" />
+	<include file="$(find config)/launch/robot.launch" />
+	<include file="$(find config)/launch/arena.launch" />
+	<include file="$(find config)/launch/stage.launch" />
+	
+
+	<!-- *** Core stuff *** -->
+	<include file="$(find image_gui)/launch/DisplayDraw.launch" />
+	<include file="$(find save_data)/launch/save_data.launch" />
+	
+	
+	<!-- *** The Experiment *** -->
+	<node pkg="experiments" type="OpenTrigger.py" name="ExperimentOpenTrigger" />
+  
+</launch>

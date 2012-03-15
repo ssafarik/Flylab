@@ -15,12 +15,11 @@
 	<!-- Good PID gains follow a walking fly. -->
 	<param name="fivebar/kP"      type="double" value="0.4"/>
 	<param name="fivebar/kI"      type="double" value="0.02"/>
-	<param name="fivebar/kD"      type="double" value="0.15"/>
+	<param name="fivebar/kD"      type="double" value="-0.3"/>
 	
 	
-	<param name="fivebar/maxI"    type="double" value="40.0"/>
-	<param name="fivebar/maxPID"  type="double" value="9999.0"/>
-	<param name="fivebar/kWindup" type="double" value="0.0"/>  <!-- Antiwindup gain -->
+	<param name="fivebar/maxI"    type="double" value="1.0"/>
+	<param name="fivebar/kWindup" type="double" value="0.5"/>  <!-- Antiwindup gain -->
 	
 
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A' units='radians'"/>

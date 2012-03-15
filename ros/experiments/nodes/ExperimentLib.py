@@ -39,7 +39,7 @@ def GetNearestFly (arenastate):
 
         #rospy.loginfo ('EL vRobot=%s, vFlyBest=%s, rBest=%s, iBest=%s' % (vRobot, vFlyBest, rBest, iBest))
                 
-    return iBest
+    return 0 #iBest
                     
 
 def GetOrientationRobot (arenastate):
@@ -314,7 +314,7 @@ class TriggerOnStates (smach.State):
     
     
             rv = 'aborted'
-            while True:
+            while not rospy.is_shutdown():
                 if len(self.arenastate.flies)>0:
                     iFly = GetNearestFly(self.arenastate)
                     if iFly is None:
@@ -391,8 +391,8 @@ class TriggerOnStates (smach.State):
                         self.isTriggered = False
                         self.timeTriggered = None
     
-                    if (distance is not None) and (angle is not None) and (speed is not None):
-                        rospy.logwarn ('EL triggers=distance=%0.3f, speed=%0.3f, angle=%0.3f, bools=%s' % (distance, speed, angle, [isDistanceInRange, isSpeedInRange, isAngleInRange]))
+                    #if (distance is not None) and (angle is not None) and (speed is not None):
+                    #    rospy.logwarn ('EL triggers=distance=%0.3f, speed=%0.3f, angle=%0.3f, bools=%s' % (distance, speed, angle, [isDistanceInRange, isSpeedInRange, isAngleInRange]))
     
                     # If pending trigger has lasted longer than requested duration, then set trigger.
                     if (self.isTriggered):
@@ -603,7 +603,7 @@ class MoveRobot (smach.State):
             
             self.ptTarget = None
 
-            while True:
+            while not rospy.is_shutdown():
                 posRobot = self.arenastate.robot.pose.position # Assumed in the "Plate" frame.
                 ptRobot = N.array([posRobot.x, posRobot.y])
                 
@@ -635,7 +635,7 @@ class MoveRobot (smach.State):
                         angle = 2.0*N.pi*N.random.random()
                 else:
                     # Move at an angle relative to whose orientation?
-                    if (userdata.experimentparamsIn.move.frameidOriginAngle=="Fly") and (len(self.arenastate.flies)>0):
+                    if (userdata.experimentparamsIn.move.frameidOriginAngle=="Fly1") and (len(self.arenastate.flies)>0):
                         angle = GetOrientationFly(self.arenastate, iFly) + userdata.experimentparamsIn.move.angle
                     elif userdata.experimentparamsIn.move.frameidOriginAngle=="Robot":
                         angle = GetOrientationRobot(self.arenastate) + userdata.experimentparamsIn.move.angle
@@ -647,7 +647,7 @@ class MoveRobot (smach.State):
                     
                                                        
                 # Move a distance relative to whose position?
-                if userdata.experimentparamsIn.move.frameidOriginPosition=="Fly" and (len(self.arenastate.flies)>0):
+                if userdata.experimentparamsIn.move.frameidOriginPosition=="Fly1" and (len(self.arenastate.flies)>0):
                     posOrigin = posFly
                 elif userdata.experimentparamsIn.move.frameidOriginPosition=="Robot":
                     posOrigin = posRobot
@@ -677,9 +677,12 @@ class MoveRobot (smach.State):
                     
                     
                     #rospy.logwarn('EL calling set_stage_state(%s) pre' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
-                    self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                                  pose=self.goal.state.pose),
-                                                              speed = speedTarget))
+                    try:
+                        self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+                                                                                      pose=self.goal.state.pose),
+                                                                  speed = speedTarget))
+                    except rospy.ServiceException:
+                        self.ptTarget = None
                     #rospy.logwarn('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
     
     

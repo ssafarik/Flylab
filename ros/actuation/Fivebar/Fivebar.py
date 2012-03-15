@@ -100,7 +100,6 @@ TMPx        = N.cos(N.pi - Q1CENTERe) * L1 + L0/2.0
 TMPy        = N.sin(N.pi - Q1CENTERe) * L1
 CENTERY     = N.sqrt(L3**2.0 - TMPx**2.0) + TMPy + FUDGEY
 REACHABLERADIUS = 0.98*(L1+L3-r)/2.0 # Really it's about 90.5.  Limits in xy are at roughly (64,64), (-64,64), (-64,-64), (64,-64).
-INVERSION   = 1.0 # -1.0
 
 
 class RosFivebar:
@@ -154,13 +153,14 @@ class RosFivebar:
         self.ptEeErrorPrev = Point(0,0,0)
         self.ptEeDerror = Point(0,0,0)
         self.ptEeIerror = Point(0,0,0)
+        self.ptEeIerrorClipped = Point(0,0,0)
         self.ptEeSense = Point(0,0,0)
         self.ptEeCommand = Point(0,0,0) # Where to command the end-effector.
         self.ptAntiwindup = Point(0,0,0)
         
         self.speedCommandTool = None 
         self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
-        self.radiusArena = rospy.get_param('arena/radius', 25.4)
+        self.radiusMovement = rospy.get_param('arena/radius_movement', 25.4)
         
         self.request = SrvFrameStateRequest()
         #self.request.state.header.stamp = rospy.Time.now()
@@ -247,36 +247,19 @@ class RosFivebar:
         self.initializedServices = True
         
 
-    # Clip the end effector to the reachable workspace.
-    def ClipPtToReachable(self, pt):
-        (pt.x,pt.y) = self.ClipXyToReachable(pt.x,pt.y)
+    # Clip the tool to the min of hardware & software radius limits.
+    def ClipPtToRadius(self, pt):
+        (pt.x,pt.y) = self.ClipXyToRadius(pt.x,pt.y)
         return pt
     
-    def ClipXyToReachable(self, x, y):
+    def ClipXyToRadius(self, x, y):
         r = N.sqrt(x*x+y*y)
-        #rospy.logwarn ('5B x,y=%s, r=%s, reachabler=%s, arena=%s' % ([x,y], r, REACHABLERADIUS, self.radiusArena))
+        rLimit = N.min(self.radiusMovement, REACHABLERADIUS)
         
-        if REACHABLERADIUS < r:
+        if rLimit < r:
             angle = N.arctan2(y,x)
-            x = REACHABLERADIUS * N.cos(angle)
-            y = REACHABLERADIUS * N.sin(angle)
-            rospy.logwarn('5B CLIPPING x,y to %s' % [x,y])
-
-        return x,y
-
-    
-    # Clip the tool to the arena workspace.
-    def ClipPtToArena(self, pt):
-        (pt.x,pt.y) = self.ClipXyToArena(pt.x,pt.y)
-        return pt
-    
-    def ClipXyToArena(self, x, y):
-        r = N.sqrt(x*x+y*y)
-        
-        if self.radiusArena < r:
-            angle = N.arctan2(y,x)
-            x = self.radiusArena * N.cos(angle)
-            y = self.radiusArena * N.sin(angle)
+            x = rLimit * N.cos(angle)
+            y = rLimit * N.sin(angle)
             rospy.logwarn('5B CLIPPING x,y to %s' % [x,y])
 
         return x,y
@@ -375,7 +358,7 @@ class RosFivebar:
         t1 = t1 - Q1CENTERe
         t2 = t2 - Q2CENTERe
         
-        return (t1, t2, t3, t4, INVERSION*x, INVERSION*y)
+        return (t1, t2, t3, t4, x, y)
     
     
     # Get1234FromXY()
@@ -384,11 +367,11 @@ class RosFivebar:
     # and (t1,t2)==(0,0) maps to (x,y)==(0,0).
     #
     def Get1234FromXY (self, x0, y0):
-        x0,y0 = self.ClipXyToReachable(x0, y0)
+        x0,y0 = self.ClipXyToRadius(x0, y0)
         
         # Flip the axes if necessary.
-        x = INVERSION*x0
-        y = INVERSION*y0
+        x = x0
+        y = y0
         
         # Translate to frame at joint1.
         x = x + CENTERX
@@ -507,8 +490,8 @@ class RosFivebar:
         
     def GetXyFrom12 (self, t1, t2):
         (t1, t2, t3, t4, x, y) = self.Get1234xyFrom12(t1, t2)
-        return (INVERSION*x, 
-                INVERSION*y)
+        return (x, 
+                y)
     
     
     def GetStageState_callback(self, reqStageState):
@@ -543,7 +526,7 @@ class RosFivebar:
             pt.x = self.ptEeSense.x + self.ptOffsetSense.x 
             pt.y = self.ptEeSense.y + self.ptOffsetSense.y 
             pt.z = self.ptEeSense.z + self.ptOffsetSense.z 
-            pt.point = self.ClipPtToArena(pt.point)
+            pt.point = self.ClipPtToRadius(pt.point)
             
             #rvStageState.state.header.stamp = rospy.Time.now()
             rvStageState.state.header.frame_id = 'Stage' # Always return Stage frame coordinates.
@@ -611,7 +594,7 @@ class RosFivebar:
         #rospy.loginfo ('5B ptToolRef=%s' % self.ptToolRef)
         if self.ptsToolRef is not None:
             self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
-            self.radiusArena = rospy.get_param('arena/radius_movement', 25.4)
+            self.radiusMovement = rospy.get_param('arena/radius_movement', 25.4)
             
             # Transform the target point to Stage coordinates.
             try:
@@ -619,42 +602,47 @@ class RosFivebar:
                 self.ptsToolRefStage = self.tfrx.transformPoint('Stage', self.ptsToolRef)
                 
                 # Clip the target point to the arena bounds.
-                self.ptToolRefClipped = self.ClipPtToArena(self.ptsToolRef.point)
+                self.ptToolRefClipped = self.ClipPtToRadius(self.ptsToolRef.point)
     
                 # Get the end-effector ref coordinates.
                 self.ptEeRef.x = self.ptsToolRefStage.point.x - self.ptOffsetSense.x
                 self.ptEeRef.y = self.ptsToolRefStage.point.y - self.ptOffsetSense.y
                 
-                # PID control of the end-effector error.
-                self.ptEeError.x = self.ptEeRef.x - self.ptEeSense.x
-                self.ptEeError.y = self.ptEeRef.y - self.ptEeSense.y
-                self.ptEeIerror.x = self.ptEeIerror.x + self.ptEeError.x - self.ptAntiwindup.x
-                self.ptEeIerror.y = self.ptEeIerror.y + self.ptEeError.y - self.ptAntiwindup.y
-                self.ptEeDerror.x = self.ptEeError.x - self.ptEeErrorPrev.x
-                self.ptEeDerror.y = self.ptEeError.y - self.ptEeErrorPrev.y
+                
+                # PID Gains & Parameters.
                 kP = rospy.get_param('fivebar/kP', 0.1)
                 kI = rospy.get_param('fivebar/kI', 0.05)
                 kD = rospy.get_param('fivebar/kD', -1.0)
                 maxPID = rospy.get_param('fivebar/maxPID', 9999.0)
                 maxI = rospy.get_param('fivebar/maxI', 40.0)
                 kWindup = rospy.get_param('fivebar/kWindup', 0.0)
-                ptPIDRaw = Point(kP*self.ptEeError.x + kI*self.ptEeIerror.x + kD*self.ptEeDerror.x,
-                                 kP*self.ptEeError.y + kI*self.ptEeIerror.y + kD*self.ptEeDerror.y,
-                                 0.0)
+
+                # PID control of the end-effector error.
+                #self.ptEeError.x = self.ptEeRef.x - self.ptEeSense.x
+                #self.ptEeError.y = self.ptEeRef.y - self.ptEeSense.y
+                self.ptEeError.x = self.ptsToolRefStage.point.x - self.ptEeSense.x - self.ptOffsetSense.x
+                self.ptEeError.y = self.ptsToolRefStage.point.y - self.ptEeSense.y - self.ptOffsetSense.y
+                self.ptEeIerror.x = self.ptEeIerror.x + self.ptEeError.x
+                self.ptEeIerror.y = self.ptEeIerror.y + self.ptEeError.y
+                self.ptEeDerror.x = self.ptEeError.x - self.ptEeErrorPrev.x
+                self.ptEeDerror.y = self.ptEeError.y - self.ptEeErrorPrev.y
+                ptPID = Point(kP*self.ptEeError.x + kI*self.ptEeIerror.x + kD*self.ptEeDerror.x,
+                              kP*self.ptEeError.y + kI*self.ptEeIerror.y + kD*self.ptEeDerror.y,
+                              0.0)
                 
                 # Anti-windup
-                self.ptEeIerror = self.ClipPtMag (self.ptEeIerror, maxI)
-                ptPID = self.ClipPtMag (ptPIDRaw, maxPID)
-                self.ptAntiwindup = Point(kWindup * (ptPIDRaw.x - ptPID.x),
-                                          kWindup * (ptPIDRaw.y - ptPID.y),
-                                          kWindup * (ptPIDRaw.z - ptPID.z))
+                self.ptEeIerrorClipped = self.ClipPtMag (self.ptEeIerror, maxI)
+                self.ptAntiwindup = Point(kWindup * (self.ptEeIerror.x - self.ptEeIerrorClipped.x),
+                                          kWindup * (self.ptEeIerror.y - self.ptEeIerrorClipped.y),
+                                          kWindup * (self.ptEeIerror.z - self.ptEeIerrorClipped.z))
                 magP = N.linalg.norm([self.ptEeError.x, self.ptEeError.y])
                 magI = N.linalg.norm([self.ptEeIerror.x, self.ptEeIerror.y])
                 magD = N.linalg.norm([self.ptEeDerror.x, self.ptEeDerror.y])
                 magPID = N.linalg.norm([ptPID.x, ptPID.y])
-                magPIDRaw = N.linalg.norm([ptPIDRaw.x, ptPIDRaw.y])
-                #rospy.logwarn('[P,I,D]=[%f,%f,%f], PID=%f' % (magP,magI,magD, magPID))
-    
+                #magPIDRaw = N.linalg.norm([ptPIDRaw.x, ptPIDRaw.y])
+                #rospy.logwarn('[P,I,D]=[%0.2f,%0.2f,%0.2f], PID=%0.4f' % (magP,magI,magD, magPID))
+                self.ptEeIerror.x -= self.ptAntiwindup.x
+                self.ptEeIerror.y -= self.ptAntiwindup.y
     
                 # Get the command for the hardware.            
                 self.ptEeCommand.x = ptPID.x + self.ptEeSense.x
@@ -672,20 +660,20 @@ class RosFivebar:
                                       id=1,
                                       type=0, #ARROW,
                                       action=0,
-                                      scale=Vector3(x=0.2, # Shaft diameter
-                                                    y=0.4, # Head diameter
+                                      scale=Vector3(x=0.1, # Shaft diameter
+                                                    y=0.2, # Head diameter
                                                     z=0.0),
                                       color=ColorRGBA(a=0.9,
                                                       r=0.5,
                                                       g=1.0,
                                                       b=0.5),
                                       lifetime=rospy.Duration(0.1),
-                                      points=[Point(x=self.ptEeSense.x, 
-                                                    y=self.ptEeSense.y, 
-                                                    z=self.ptEeSense.z),
-                                              Point(x=self.ptEeCommand.x, 
-                                                    y=self.ptEeCommand.y, 
-                                                    z=self.ptEeCommand.z)])
+                                      points=[Point(x=self.ptEeSense.x +self.ptsToolRefStage.point.x-self.ptEeSense.x-self.ptEeError.x-self.ptOffsetSense.x, 
+                                                    y=self.ptEeSense.y +self.ptsToolRefStage.point.y-self.ptEeSense.y-self.ptEeError.y-self.ptOffsetSense.y, 
+                                                    z=self.ptEeSense.z +self.ptsToolRefStage.point.z-self.ptEeSense.z-self.ptEeError.z-self.ptOffsetSense.z),
+                                              Point(x=self.ptEeCommand.x +self.ptsToolRefStage.point.x-self.ptEeSense.x-self.ptEeError.x-self.ptOffsetSense.x, 
+                                                    y=self.ptEeCommand.y +self.ptsToolRefStage.point.y-self.ptEeSense.y-self.ptEeError.y-self.ptOffsetSense.y, 
+                                                    z=self.ptEeCommand.z +self.ptsToolRefStage.point.z-self.ptEeSense.z-self.ptEeError.z-self.ptOffsetSense.z)])
                 self.pubMarker.publish(markerCommand)
 
                 
@@ -838,7 +826,7 @@ class RosFivebar:
                 # Publish the link transforms.
                 
         
-                self.tfbx.sendTransform((-133.35, 246.31423, 0.0), 
+                self.tfbx.sendTransform((-L3/2, -246.31423, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
                                         rospy.Time.now(),
                                         "link0",     # child
@@ -858,7 +846,7 @@ class RosFivebar:
                                         "link1"      # parent
                                         )
         
-                self.tfbx.sendTransform((266.70, 0.0, 0.0), 
+                self.tfbx.sendTransform((L3, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
                                         rospy.Time.now(),
                                         "link5",     # child
@@ -900,14 +888,14 @@ class RosFivebar:
                                           scale=Vector3(x=3.0,
                                                         y=3.0,
                                                         z=3.0),
-                                          color=ColorRGBA(a=1.0,
-                                                          r=0.5,
-                                                          g=0.5,
-                                                          b=0.5),
+                                          color=ColorRGBA(a=0.5,
+                                                          r=1.0,
+                                                          g=0.1,
+                                                          b=0.1),
                                           lifetime=rospy.Duration(0.1))
                     self.pubMarker.publish(markerTarget)
 
-#                    markerTool   = Marker(header=Header(stamp = rospy.Time.now(),
+#                    markerToolOffset   = Marker(header=Header(stamp = rospy.Time.now(),
 #                                                        frame_id='Stage'),
 #                                          ns='markers',
 #                                          id=1,
@@ -924,16 +912,16 @@ class RosFivebar:
 #                                                          g=0.5,
 #                                                          b=0.5),
 #                                          lifetime=rospy.Duration(0.1))
-                    markerTool   = Marker(header=Header(stamp = rospy.Time.now(),
+                    markerToolOffset   = Marker(header=Header(stamp = rospy.Time.now(),
                                                         frame_id='Stage'),
                                           ns='tooloffset',
                                           id=1,
                                           type=0, #ARROW,
                                           action=0,
-                                          scale=Vector3(x=1.0, # Shaft diameter
-                                                        y=2.0, # Head diameter
+                                          scale=Vector3(x=0.1, # Shaft diameter
+                                                        y=0.2, # Head diameter
                                                         z=0.0),
-                                          color=ColorRGBA(a=0.9,
+                                          color=ColorRGBA(a=0.8,
                                                           r=1.0,
                                                           g=1.0,
                                                           b=1.0),
@@ -944,7 +932,7 @@ class RosFivebar:
                                                   Point(x=state.pose.position.x+self.ptOffsetSense.x, 
                                                         y=state.pose.position.y+self.ptOffsetSense.y, 
                                                         z=state.pose.position.z+self.ptOffsetSense.z)])
-                    self.pubMarker.publish(markerTool)
+                    self.pubMarker.publish(markerToolOffset)
 
 
 

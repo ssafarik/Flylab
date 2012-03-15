@@ -84,12 +84,28 @@ def Unwrap(self, angle):
 class Fly:
     def __init__(self, name=None):
         self.initialized = False
+        self.name = name
+
         self.tfbx = tf.TransformBroadcaster()
+        self.pubMarker = rospy.Publisher('visualization_marker', Marker)
+        
 
         self.kfState = filters.KalmanFilter()
         self.lpAngleF = filters.LowPassAngleFilter(RC=0.001)
+        self.lpOffsetX = filters.LowPassFilter(RC=0.1)
+        self.lpOffsetY = filters.LowPassFilter(RC=0.1)
+        self.ptOffset = Point(x=0, y=0, z=0)  # Difference between contour position and (for robots) computed position.
+        self.ptPPrev = Point(x=0, y=0, z=0)
+        
+        # Orientation detection stuff.
+        self.angleOfTravelRecent = None
+        self.flip = False
+        self.lpFlip = filters.LowPassFilter(RC=3.0)
+        self.contour = None
         
         self.isVisible = False
+        self.isDead = False # To do: dead fly detection.
+
         self.timePrevious = None
         
         self.state = MsgFrameState()
@@ -109,22 +125,17 @@ class Fly:
         self.state.velocity.angular.y = 0.0
         self.state.velocity.angular.z = 0.0
         
-        self.angleOfTravelRecent = None
-        self.flip = False
-        self.lpFlip = filters.LowPassFilter(RC=3.0)
-        self.contour = None
+        self.eccMin = 999
+        self.eccMax = 0
+        self.eccSum = 0
+        self.eccCount = 1
+        self.areaMin = 999
+        self.areaMax = 0
+        self.areaSum = 0
+        self.areaCount = 1
+        self.robot_width = rospy.get_param ('robot_width', 1.0)
+        self.robot_height = rospy.get_param ('robot_height', 1.0)
         
-        self.minEcc = 999
-        self.maxEcc = 0
-        self.minArea = 999
-        self.maxArea = 0
-        
-        self.lpOffsetX = filters.LowPassFilter(RC=0.001)
-        self.lpOffsetY = filters.LowPassFilter(RC=0.001)
-        self.ptOffset = Point(x=0, y=0, z=0)  # Difference between contour position and (for robots) computed position.
-        self.ptPPrev = Point(x=0, y=0, z=0)
-        self.name = name
-        self.isDead = False # To do: dead fly detection.
         self.initialized = True
 
 
@@ -206,7 +217,7 @@ class Fly:
 
     # Update()
     # Update the current state using the visual position and the computed position (if applicable)
-    def Update(self, contour, posComputed):
+    def Update(self, contour, ptComputed):
         #rospy.loginfo ('CI contour=%s' % (contour))
         if self.initialized:
             t = rospy.Time.now().to_sec()
@@ -219,14 +230,18 @@ class Fly:
             self.isVisible = False            
             if (self.contour is not None):
                 # Update min/max ecc & area.
-                if contour.ecc < self.minEcc:
-                    self.minEcc = contour.ecc
-                if self.maxEcc < contour.ecc:
-                    self.maxEcc = contour.ecc
-                if contour.area < self.minArea:
-                    self.minArea = contour.area
-                if self.maxArea < contour.area:
-                    self.maxArea = contour.area
+                if contour.ecc < self.eccMin:
+                    self.eccMin = contour.ecc
+                if self.eccMax < contour.ecc:
+                    self.eccMax = contour.ecc
+                if contour.area < self.areaMin:
+                    self.areaMin = contour.area
+                if self.areaMax < contour.area:
+                    self.areaMax = contour.area
+                self.eccSum += contour.ecc
+                self.eccCount += 1
+                self.areaSum += contour.area
+                self.areaCount += 1
                 
                 if (self.contour.x is not None) and (self.contour.y is not None) and (self.contour.angle is not None):
                     self.isVisible = True
@@ -269,7 +284,7 @@ class Fly:
                 #self.lpOffsetY.Update(None,t)
                 #self.lpFlip.Update(0.0, t)
                 angleContour = 0.0
-                rospy.logwarn('CI FILTER READ for %s w/ contour==None' % self.name)
+                #rospy.logwarn('CI FILTER READ for %s w/ contour==None' % self.name)
                 
                 
             if self.isVisible:
@@ -300,17 +315,17 @@ class Fly:
                 
                 self.ResolveOrientation()
                 
-                #rospy.logwarn ('CI %s ecc=%s,%s, area=%s,%s, speed=%0.3f' % (self.name, contour.ecc,[self.minEcc,self.maxEcc], contour.area,[self.minArea,self.maxArea], speed))
+                #rospy.logwarn ('CI %s ecc=%s,%s, area=%s,%s, speed=%0.3f' % (self.name, contour.ecc,[self.eccMin,self.eccMax], contour.area,[self.areaMin,self.areaMax], speed))
                 
                 # Update the tool offset.
-                if posComputed is not None:
+                if ptComputed is not None:
 
                     # PID control of the offset.
                     ptP = Point()
                     ptI = Point()
                     ptD = Point()
-                    ptP.x = x-posComputed.x
-                    ptP.y = y-posComputed.y
+                    ptP.x = x-ptComputed.x
+                    ptP.y = y-ptComputed.y
                     ptI.x = ptI.x + ptP.x
                     ptI.y = ptI.y + ptP.y
                     ptD.x = ptP.x - self.ptPPrev.x
@@ -356,6 +371,26 @@ class Fly:
                                         self.name,
                                         self.state.header.frame_id)
 
+                if 'Robot' in self.name:
+                    markerTarget = Marker(header=Header(stamp = rospy.Time.now(),
+                                                        frame_id='Plate'),
+                                          ns='robot',
+                                          id=0,
+                                          type=3, #cylinder,
+                                          action=0,
+                                          pose=Pose(position=Point(x=self.state.pose.position.x, 
+                                                                   y=self.state.pose.position.y, 
+                                                                   z=self.state.pose.position.z)),
+                                          scale=Vector3(x=self.robot_width,
+                                                        y=self.robot_width,
+                                                        z=self.robot_height),
+                                          color=ColorRGBA(a=0.7,
+                                                          r=0.5,
+                                                          g=0.5,
+                                                          b=0.5),
+                                          lifetime=rospy.Duration(0.1))
+                    self.pubMarker.publish(markerTarget)
+
         #rospy.loginfo ('CI %s contour=%s, self.isVisible=%s' % (self.name, contour, self.isVisible))
             
         
@@ -365,21 +400,16 @@ class Fly:
 ###############################################################################
 class ContourIdentifier:
 
-    def __init__(self, maxFlies=10):
+    def __init__(self):
         self.initialized = False
-        self.maxFlies = maxFlies
+        self.maxFlies = rospy.get_param('maxFlies', 1)
         
         self.contours = []
         self.map = []
         self.iContours = []
         
-        self.objects = []
-        for i in range(1+self.maxFlies):
-            self.objects.append(Fly())
-            self.objects[i].name = "Fly%s" % i
+        self.CreateFlyObjects()
         
-        self.objects[0].name = "Robot"
-
         #if self.maxFlies>0:
         #    self.objects[1].name = "Fly"
             
@@ -407,21 +437,20 @@ class ContourIdentifier:
         self.endeffector_endeffectorframe.point.z = 0
         
         # Robot Info
-        self.robot_min_ecc = 0.9 #rospy.get_param("robot_min_ecc", 0.5)
-        self.robot_max_ecc = 1.50 #rospy.get_param("robot_max_ecc", 3.0)
-        self.robot_min_area = 45 #rospy.get_param("robot_min_area", 10)
-        self.robot_max_area = 75 #rospy.get_param("robot_max_area", 1000)
+        self.eccMinRobot = 0.9 #rospy.get_param("robot_min_ecc", 0.5)
+        self.eccMaxRobot = 1.50 #rospy.get_param("robot_max_ecc", 3.0)
+        self.areaMinRobot = 45 #rospy.get_param("robot_min_area", 10)
+        self.areaMaxRobot = 75 #rospy.get_param("robot_max_area", 1000)
         #self.found_robot = False
 
-        self.fly_min_ecc = 1.51 #rospy.get_param("robot_min_ecc", 0.5)
-        self.fly_max_ecc = 10.0 #rospy.get_param("robot_max_ecc", 3.0)
-        self.fly_min_area = 35 #rospy.get_param("robot_min_area", 10)
-        self.fly_max_area = 100 #rospy.get_param("robot_max_area", 1000)
+        self.eccMinFly = 1.51 #rospy.get_param("robot_min_ecc", 0.5)
+        self.eccMaxFly = 10.0 #rospy.get_param("robot_max_ecc", 3.0)
+        self.areaMinFly = 35 #rospy.get_param("robot_min_area", 10)
+        self.areaMaxFly = 100 #rospy.get_param("robot_max_area", 1000)
         
 
         self.t = rospy.get_time()
-        #self.mask_radius = int(rospy.get_param("mask_radius","225"))
-        self.radiusArena = rospy.get_param("arena/radius_camera",25.4)
+        self.radiusArena = rospy.get_param("arena/radius_camera",100) # Pixels
 
         self.xSave = []
         self.ySave = []
@@ -437,8 +466,8 @@ class ContourIdentifier:
                                   pose=Pose(position=Point(x=0, 
                                                            y=0, 
                                                            z=0)),
-                                  scale=Vector3(x=self.radiusArena*2.0 * 80/470, #BUG: Need to properly convert from pixels to mm.
-                                                y=self.radiusArena*2.0 * 80/470,
+                                  scale=Vector3(x=self.radiusArena*2.0 * 85/470, #BUG: Need to properly convert from pixels to mm.
+                                                y=self.radiusArena*2.0 * 85/470,
                                                 z=0.01),
                                   color=ColorRGBA(a=0.05,
                                                   r=1.0,
@@ -472,22 +501,51 @@ class ContourIdentifier:
         
 
     def EndEffector_callback(self, state):
-        self.existsRobot = True
+        # When first called, need to reset all the fly objects, due to tracking of robot contour as a fly, hence having an extra object.
+        if self.stateEndEffector is None:
+            self.CreateFlyObjects()
+            
+            
         #self.stateEndEffector.header.frame_id = "Plate" # Interpret it as the Plate frame.
-        posesStage = PoseStamped(header=Header(frame_id=state.header.frame_id),
-                                 pose=state.pose)
-        try:
-            posesPlate = self.tfrx.transformPose('Plate',posesStage)
-            self.stateEndEffector = state
-            self.stateEndEffector.header = posesPlate.header
-            self.stateEndEffector.pose = posesPlate.pose
-        except tf.Exception:
-            pass
+        
+        if True: # Use EndEffector position from Fivebar
+            posesStage = PoseStamped(header=Header(frame_id=state.header.frame_id),
+                                     pose=state.pose)
+            try:
+                posesPlate = self.tfrx.transformPose('Plate',posesStage)
+                self.stateEndEffector = state
+                self.stateEndEffector.header = posesPlate.header
+                self.stateEndEffector.pose = posesPlate.pose
+            except tf.Exception:
+                pass
+        else: # Use link5 position
+            posesStage = PoseStamped(header=Header(frame_id='Plate'),
+                                     pose=Pose(position=Point(x=0, y=0, z=0)))
+            try:
+                posesPlate = self.tfrx.transformPose('link5',posesStage)
+                self.stateEndEffector = state
+                self.stateEndEffector.header = posesPlate.header
+                self.stateEndEffector.header.frame_id = 'Plate'
+                self.stateEndEffector.pose = posesPlate.pose
+            except tf.Exception:
+                pass
+                
         
         #rospy.loginfo ('CI received state=%s' % state)
         
 
-
+    def CreateFlyObjects (self):
+        #for i in range(len(self.objects)):
+        #    del self.objects[i]
+            
+        self.objects = []
+        for i in range(1+self.maxFlies):
+            self.objects.append(Fly())
+            self.objects[i].name = "Fly%s" % i
+        
+        self.objects[0].name = "Robot"
+        
+        
     def QuaternionPlateFromCamera(self, quat):
         # Must be cleverer way to calculate this using quaternion math...
         R = tf.transformations.quaternion_matrix(quat)
@@ -579,11 +637,11 @@ class ContourIdentifier:
         return contourinfoOut
       
 
-    # DistanceMatrix()
+    # GetDistanceMatrix()
     # Get the matrix of distances between each pair of points in the two lists.  Adjust distances with
     # priorities, where smaller=better.
     #
-    def DistanceMatrix(self, xy1, xy2, iPriorities):
+    def GetDistanceMatrix(self, xy1, xy2, iPriorities):
         d = N.array([[N.inf for n in range(len(xy2))] for m in range(len(xy1))])
         for m in range(len(xy1)):
             for n in range(len(xy2)):
@@ -604,7 +662,7 @@ class ContourIdentifier:
         return d
     
     
-    def DistanceMatrixContours(self, xyObjects, contours, contoursMin, contoursMax):
+    def GetDistanceMatrixFromContours(self, xyObjects, contours, contoursMin, contoursMax, contoursMean):
         d = N.array([[N.inf for n in range(len(contours))] for m in range(len(xyObjects))])
         for m in range(len(xyObjects)):
             for n in range(len(contours)):
@@ -613,15 +671,20 @@ class ContourIdentifier:
                                              xyObjects[m][1]-contours[n].y])
                     
                     # Penalize deviations from ideal visual characteristics.
-                    if contours[n].ecc <= contoursMin[m].ecc:
-                        d[m,n] += 200 
-                    if contoursMax[m].ecc <= contours[n].ecc: 
-                        d[m,n] += 200 
-                    if contours[n].area <= contoursMin[m].area:
-                        d[m,n] += 0 
-                    if contoursMax[m].area <= contours[n].area: 
-                        d[m,n] += 0 
-                        
+                    #if (contours[n].ecc <= contoursMin[m].ecc) or (contoursMax[m].ecc <= contours[n].ecc): 
+                    #    d[m,n] += 1000 
+                    #if (contours[n].area <= contoursMin[m].area) or (contoursMax[m].area <= contours[n].area): 
+                    #    d[m,n] += 0
+                    gainEcc = 10.0
+                    eccmetric = gainEcc * N.abs(contours[n].ecc - contoursMean[m].ecc) / N.max([contours[n].ecc, contoursMean[m].ecc]) # Ranges 0 to 1.
+                    d[m,n] += eccmetric
+                    
+                    gainArea = 0.1 
+                    areametric = gainArea * N.abs(contours[n].area - contoursMean[m].area)
+                    d[m,n] += areametric 
+                    #if m<2:
+                    #    rospy.logwarn('Object %s, eccmetric=%0.2f, areametric=%0.2f' % (m, eccmetric, areametric))    
+                    
                 except TypeError:
                     d[m,n] = None
         
@@ -726,31 +789,52 @@ class ContourIdentifier:
         # Construct two lists of contours, to describe the range of good robot/fly properties.
         contoursMin = []
         contoursMax = []
+        contoursMean = []
         
-        # Append the robot contour.
+        # Append the robot contour stats.
         if self.stateEndEffector is not None:
             contour = Contour()
-            contour.area   = self.robot_min_area
-            contour.ecc    = self.robot_min_ecc
+            
+            contour.area   = self.objects[0].areaMin #self.areaMinRobot
+            contour.ecc    = self.objects[0].eccMin #self.eccMinRobot
             contoursMin.append(contour)
-            contour.area   = self.robot_max_area
-            contour.ecc    = self.robot_max_ecc
+            
+            contour.area   = self.objects[0].areaMax #self.areaMaxRobot
+            contour.ecc    = self.objects[0].eccMax #self.eccMaxRobot
             contoursMax.append(contour)
+            
+            contour.area   = self.objects[0].areaSum / self.objects[0].areaCount 
+            contour.ecc    = self.objects[0].eccSum / self.objects[0].eccCount
+            contoursMean.append(contour)
+        
         
         # Append the fly contours.
         for i in range(1, 1 + self.maxFlies): 
             contour = Contour()
-            contour.area   = self.fly_min_area
-            contour.ecc    = self.fly_min_ecc
+            
+            contour.area   = self.objects[i].areaMin #self.areaMinFly
+            contour.ecc    = self.objects[i].eccMin #self.eccMinFly
             contoursMin.append(contour)
-            contour.area   = self.fly_max_area
-            contour.ecc    = self.fly_max_ecc
+            
+            contour.area   = self.objects[i].areaMax #self.areaMaxFly
+            contour.ecc    = self.objects[i].eccMax #self.eccMaxFly
             contoursMax.append(contour)
+            
+            contour.area   = self.objects[i].areaSum / self.objects[i].areaCount 
+            contour.ecc    = self.objects[i].eccSum / self.objects[i].eccCount
+            contoursMean.append(contour)
 
+
+        # Print ecc/area stats.
+        #rospy.logwarn ('robot,fly ecc=[%0.2f, %0.2f], area=[%0.2f, %0.2f]' % (self.objects[0].eccSum/self.objects[0].eccCount,
+        #                                                                      self.objects[1].eccSum/self.objects[1].eccCount,
+        #                                                                      self.objects[0].areaSum/self.objects[0].areaCount,
+        #                                                                      self.objects[1].areaSum/self.objects[1].areaCount))
+        
                 
         # Match flies with contours.
-        #d = self.DistanceMatrix(xyObjects, xyContours, iPriorities)
-        d = self.DistanceMatrixContours(xyObjects, self.contours, contoursMin, contoursMax)
+        #d = self.GetDistanceMatrix(xyObjects, xyContours, iPriorities)
+        d = self.GetDistanceMatrixFromContours(xyObjects, self.contours, contoursMin, contoursMax, contoursMean)
         (mapFliesStableMarriage, mapContours) = self.GetStableMatching(d)
         #(mapFliesHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
         #rospy.logwarn ('CI mapFliesStableMarriage=%s' % (mapFliesStableMarriage))
@@ -771,16 +855,16 @@ class ContourIdentifier:
         #            mapFlies[i] = None
         #    #mapFlies = list(mapFlies[i] for i in range(len(mapFlies)))
             
-        #rospy.logwarn ('CI xyObjects=%s' % xyObjects)
-        #rospy.logwarn ('CI xyContours=%s' % xyContours)
-        #rospy.logwarn ('CI mapFlies=%s' % (mapFlies))
-        
         #map = [None for i in range(self.maxRobots + self.maxFlies)]
         
         # If there's no robot, then prepend a None to the map.
         if self.stateEndEffector is None:
             mapFlies.insert(0,None)
             
+        #rospy.logwarn ('CI xyObjects=%s' % xyObjects)
+        #rospy.logwarn ('CI xyContours=%s' % xyContours)
+        #rospy.logwarn ('CI mapFlies=%s' % (mapFlies))
+        
         return mapFlies
     
 

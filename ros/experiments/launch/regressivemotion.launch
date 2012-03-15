@@ -13,6 +13,6 @@
 	
 	
 	<!-- *** The Experiment *** -->
-	<node pkg="experiments" type="Experiments.py" name="Experiment" />
+	<node pkg="experiments" type="RegressiveMotion.py" name="ExperimentRegressiveMotion" />
   
 </launch>

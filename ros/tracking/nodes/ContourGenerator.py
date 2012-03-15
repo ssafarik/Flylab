@@ -27,13 +27,13 @@ class ContourGenerator:
         
         # Messages
         self.camerainfo = None
-        self.subCameraInfo        = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
+        self.subCameraInfo       = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
         self.subImage            = rospy.Subscriber("camera/image_rect", Image, self.Image_callback)
         
-        self.pubImageProcessed  = rospy.Publisher("camera/image_processed", Image)
-        self.pubImageDiff       = rospy.Publisher("camera/image_diff", Image)
-        self.pubImageBackground = rospy.Publisher("camera/image_background", Image)
-        self.pubImageForeground = rospy.Publisher("camera/image_foreground", Image)
+        self.pubImageProcessed   = rospy.Publisher("camera/image_processed", Image)
+        self.pubImageDiff        = rospy.Publisher("camera/image_diff", Image)
+        self.pubImageBackground  = rospy.Publisher("camera/image_background", Image)
+        self.pubImageForeground  = rospy.Publisher("camera/image_foreground", Image)
         self.pubContourInfo      = rospy.Publisher("ContourInfo", ContourInfo)
         
         self.tfrx = tf.TransformListener()
@@ -548,9 +548,9 @@ class ContourGenerator:
         try:
             cv.Copy(self.imageProcessed, self.imageProcessed2)
             image2 = self.cvbridge.cv_to_imgmsg(self.imageProcessed2, "passthrough")
-            image2.header.stamp = image.header.stamp
+            image2.header = image.header
             self.pubImageProcessed.publish(image2)
-        except CvBridgeError, e:
+        except (CvBridgeError, ROSException), e:
             rospy.logwarn ('Exception %s' % e)
         
         # Publish background image
@@ -558,7 +558,7 @@ class ContourGenerator:
             image2 = self.cvbridge.cv_to_imgmsg(self.imageBackground, "passthrough")
             image2.header.stamp = image.header.stamp
             self.pubImageBackground.publish(image2)
-        except CvBridgeError, e:
+        except (CvBridgeError, ROSException), e:
             rospy.logwarn ('Exception %s' % e)
           
         # Publish foreground image
@@ -566,7 +566,7 @@ class ContourGenerator:
             image2 = self.cvbridge.cv_to_imgmsg(self.imageForeground, "passthrough")
             image2.header.stamp = image.header.stamp
             self.pubImageForeground.publish(image2)
-        except CvBridgeError, e:
+        except (CvBridgeError, ROSException), e:
             rospy.logwarn ('Exception %s' % e)
           
         # Publish diff image
@@ -574,7 +574,7 @@ class ContourGenerator:
             image2 = self.cvbridge.cv_to_imgmsg(self.imageForeground, "passthrough")
             image2.header.stamp = image.header.stamp
             self.pubImageDiff.publish(image2)
-        except CvBridgeError, e:
+        except (CvBridgeError, ROSException), e:
             rospy.logwarn ('Exception %s' % e)
 
 
