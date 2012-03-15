@@ -1,6 +1,7 @@
-msg_gen/*
-bin/*
-build/*
+bin/
+build/
+msg_gen/
+srv_gen/
 *.pyc
 *.metadata
 *.project
