@@ -1,0 +1,40 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the ARENA (i.e. the "plate" or "flybowl") -->
+    <!--                                                            -->
+    <!-- Edit this file to describe the particular flybowl.         -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the hardware-specific .launch file, and point here  -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+    
+	<param name="robot_description" textfile="$(find fivebar)/Fivebar_urdf_mm.xml" />
+	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />
+	<param name="fivebar/speed_max" type="double" value="200.0"/>
+	
+	<!-- Good PID gains for step response. -->
+	<!--
+		<param name="fivebar/kP"      type="double" value="0.2"/>
+		<param name="fivebar/kI"      type="double" value="0.0"/>
+		<param name="fivebar/kD"      type="double" value="0.15"/>
+	-->
+	
+	<!-- Good PID gains follow a walking fly. -->
+	<param name="fivebar/kP"      type="double" value="0.4"/>
+	<param name="fivebar/kI"      type="double" value="0.02"/>
+	<param name="fivebar/kD"      type="double" value="-0.3"/>
+	
+	
+	<param name="fivebar/maxI"    type="double" value="1.0"/>
+	<param name="fivebar/kWindup" type="double" value="0.5"/>  <!-- Antiwindup gain -->
+	
+
+	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A' units='radians'"/>
+	<node name="joint2" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint2' --id='0.0.B' units='radians'"/>
+	<node name="Fivebar" pkg="fivebar" type="Fivebar.py" />
+
+	<include file="$(find stage_action_server)/launch/stage_action_server.launch" />
+
+</launch>
+
