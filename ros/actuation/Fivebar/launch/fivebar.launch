@@ -1,5 +1,13 @@
 <launch>
-    <!-- Don't launch this file directly.  Launch stage.launch, and point to this from there. -->
+	<!-- ========================================================== -->
+	<!-- Configuration of the ARENA (i.e. the "plate" or "flybowl") -->
+    <!--                                                            -->
+    <!-- Edit this file to describe the particular flybowl.         -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the hardware-specific .launch file, and point here  -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
     
 	<param name="robot_description" textfile="$(find Fivebar)/Fivebar_urdf_mm.xml" />
 	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />

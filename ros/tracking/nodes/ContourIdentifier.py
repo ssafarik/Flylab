@@ -436,20 +436,7 @@ class ContourIdentifier:
         self.endeffector_endeffectorframe.point.y = 0
         self.endeffector_endeffectorframe.point.z = 0
         
-        # Robot Info
-        self.eccMinRobot = 0.9 #rospy.get_param("robot_min_ecc", 0.5)
-        self.eccMaxRobot = 1.50 #rospy.get_param("robot_max_ecc", 3.0)
-        self.areaMinRobot = 45 #rospy.get_param("robot_min_area", 10)
-        self.areaMaxRobot = 75 #rospy.get_param("robot_max_area", 1000)
-        #self.found_robot = False
 
-        self.eccMinFly = 1.51 #rospy.get_param("robot_min_ecc", 0.5)
-        self.eccMaxFly = 10.0 #rospy.get_param("robot_max_ecc", 3.0)
-        self.areaMinFly = 35 #rospy.get_param("robot_min_area", 10)
-        self.areaMaxFly = 100 #rospy.get_param("robot_max_area", 1000)
-        
-
-        self.t = rospy.get_time()
         self.radiusArena = rospy.get_param("arena/radius_camera",100) # Pixels
 
         self.xSave = []
@@ -761,14 +748,13 @@ class ContourIdentifier:
 
         # Robots.
         if self.stateEndEffector is not None:
-            iRobot = 0 
-            xyObjects.append([ptEndEffector.x + self.objects[iRobot].ptOffset.x,
-                              ptEndEffector.y + self.objects[iRobot].ptOffset.y])
-            #rospy.logwarn ('CI Robot image at %s' % ([self.objects[iRobot].state.pose.position.x,
-            #                                          self.objects[iRobot].state.pose.position.y]))
+            xyObjects.append([ptEndEffector.x + self.objects[0].ptOffset.x,
+                              ptEndEffector.y + self.objects[0].ptOffset.y])
+            #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
+            #                                          self.objects[0].state.pose.position.y]))
             
         # Flies.    
-        for iFly in range(1, 1 + self.maxFlies): 
+        for iFly in range(1, len(self.objects)): #1+self.maxFlies): 
             xyObjects.append([self.objects[iFly].state.pose.position.x,
                               self.objects[iFly].state.pose.position.y])
             #rospy.loginfo ('CI Object %s at x,y=%s' % (iFly,[self.objects[iFly].state.pose.position.x,
@@ -809,7 +795,7 @@ class ContourIdentifier:
         
         
         # Append the fly contours.
-        for i in range(1, 1 + self.maxFlies): 
+        for i in range(1, len(self.objects)): #1+self.maxFlies): 
             contour = Contour()
             
             contour.area   = self.objects[i].areaMin #self.areaMinFly
@@ -835,31 +821,34 @@ class ContourIdentifier:
         # Match flies with contours.
         #d = self.GetDistanceMatrix(xyObjects, xyContours, iPriorities)
         d = self.GetDistanceMatrixFromContours(xyObjects, self.contours, contoursMin, contoursMax, contoursMean)
-        (mapFliesStableMarriage, mapContours) = self.GetStableMatching(d)
-        #(mapFliesHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
-        #rospy.logwarn ('CI mapFliesStableMarriage=%s' % (mapFliesStableMarriage))
-        #rospy.logwarn ('CI mapFliesHungarian=%s, unmapped=%s' % (mapFliesHungarian,unmapped))
-
-        if True:
-            mapFlies = mapFliesStableMarriage
-        #else:  
-        #    mapFlies = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
-        #    for i in range(len(xyObjects)):
-        #        if mapFliesHungarian[i] != -1:
-        #            mapFlies[i] = int(mapFliesHungarian[i])
-        #            #if not unmapped[i]:
-        #            #    mapFlies.append(mapFliesHungarian[i])
-        #            #else:
-        #            #    mapFlies.append(None)
-        #        else:
-        #            mapFlies[i] = None
-        #    #mapFlies = list(mapFlies[i] for i in range(len(mapFlies)))
+        if d is not []:
+            (mapFliesStableMarriage, mapContours) = self.GetStableMatching(d)
+            #(mapFliesHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
+            #rospy.logwarn ('CI mapFliesStableMarriage=%s' % (mapFliesStableMarriage))
+            #rospy.logwarn ('CI mapFliesHungarian=%s, unmapped=%s' % (mapFliesHungarian,unmapped))
+    
+            if True:
+                mapFlies = mapFliesStableMarriage
+            #else:  
+            #    mapFlies = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
+            #    for i in range(len(xyObjects)):
+            #        if mapFliesHungarian[i] != -1:
+            #            mapFlies[i] = int(mapFliesHungarian[i])
+            #            #if not unmapped[i]:
+            #            #    mapFlies.append(mapFliesHungarian[i])
+            #            #else:
+            #            #    mapFlies.append(None)
+            #        else:
+            #            mapFlies[i] = None
+            #    #mapFlies = list(mapFlies[i] for i in range(len(mapFlies)))
+                
+            #map = [None for i in range(self.maxRobots + self.maxFlies)]
             
-        #map = [None for i in range(self.maxRobots + self.maxFlies)]
-        
-        # If there's no robot, then prepend a None to the map.
-        if self.stateEndEffector is None:
-            mapFlies.insert(0,None)
+            # If there's no robot, then prepend a None to the map.
+            if self.stateEndEffector is None:
+                mapFlies.insert(0,None)
+        else:
+            mapFlies = [None for k in range(1+len(self.objects))]
             
         #rospy.logwarn ('CI xyObjects=%s' % xyObjects)
         #rospy.logwarn ('CI xyContours=%s' % xyContours)
@@ -871,7 +860,6 @@ class ContourIdentifier:
     def ContourInfo_callback(self, contourinfo):
         if self.initialized:
             #rospy.logwarn ('contourinfo callback, stamp=%s' % contourinfo.header.stamp)
-            iRobot = 0
             
             #rospy.loginfo ('CI contourinfo0 %s' % contourinfo)
             contourinfo = self.TransformContourinfoPlateFromCamera(contourinfo)
@@ -910,10 +898,10 @@ class ContourIdentifier:
 
             # Update the robot state w/ the contour and end-effector positions.
             if self.stateEndEffector is not None:
-                if self.map[iRobot] is not None:
-                    self.objects[iRobot].Update(self.contours[self.map[iRobot]], self.stateEndEffector.pose.position)
+                if self.map[0] is not None:
+                    self.objects[0].Update(self.contours[self.map[0]], self.stateEndEffector.pose.position)
                 else:
-                    self.objects[iRobot].Update(None,                            self.stateEndEffector.pose.position)
+                    self.objects[0].Update(None,                            self.stateEndEffector.pose.position)
 
                 # Write a file (for getting Kalman covariances, etc).
                 #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateEndEffector.pose.position.x,
@@ -928,7 +916,7 @@ class ContourIdentifier:
                 
             
             # Update the flies' states.
-            for iFly in range(1, 1+self.maxFlies):
+            for iFly in range(1, len(self.objects)): #1+self.maxFlies):
                 if self.map[iFly] is not None:
                     self.objects[iFly].Update(self.contours[self.map[iFly]], None)
                 else:
@@ -949,18 +937,18 @@ class ContourIdentifier:
 
             # Construct the ArenaState message.
             arenastate = ArenaState()
-            #if self.objects[iRobot].state.pose.position.x is not None:
+            #if self.objects[0].state.pose.position.x is not None:
             if self.stateEndEffector is not None:
-                arenastate.robot.header.stamp    = self.objects[iRobot].state.header.stamp
-                arenastate.robot.header.frame_id = self.objects[iRobot].state.header.frame_id
-                arenastate.robot.pose            = self.objects[iRobot].state.pose
-                arenastate.robot.velocity        = self.objects[iRobot].state.velocity
-                #rospy.logwarn ('CI robot.position=%s, ptOffset=%s' % ([self.objects[iRobot].state.pose.position.x,
-                #                                                            self.objects[iRobot].state.pose.position.y],
-                #                                                           [self.objects[iRobot].ptOffset.x,
-                #                                                            self.objects[iRobot].ptOffset.y]))
+                arenastate.robot.header.stamp    = self.objects[0].state.header.stamp
+                arenastate.robot.header.frame_id = self.objects[0].state.header.frame_id
+                arenastate.robot.pose            = self.objects[0].state.pose
+                arenastate.robot.velocity        = self.objects[0].state.velocity
+                #rospy.logwarn ('CI robot.position=%s, ptOffset=%s' % ([self.objects[0].state.pose.position.x,
+                #                                                            self.objects[0].state.pose.position.y],
+                #                                                           [self.objects[0].ptOffset.x,
+                #                                                            self.objects[0].ptOffset.y]))
             
-            for iFly in range(1, 1+self.maxFlies):
+            for iFly in range(1, len(self.objects)): #1+self.maxFlies):
                 if (self.map[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
                     arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
                                                           pose = self.objects[iFly].state.pose,

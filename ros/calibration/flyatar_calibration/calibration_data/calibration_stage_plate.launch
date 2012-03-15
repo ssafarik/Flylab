@@ -1,18 +1,16 @@
 <launch>
-  <!-- Plate to Stage coordinate transform. -->
-  <!-- This is where you align the computed end-effector position with the magnet position as seen on camera. -->
-  <node pkg="tf" type="static_transform_publisher" name="statictf_Plate_Stage_publisher" args="5.0 -8 0 0 0 0 1 Plate Stage 100" /> 
-
-  <!--  
-  <param name="calibration/factor" type="string" value="1.29"/>
-  <param name="calibration/origin" type="string" value="[14.0, -13.0]"/>
-  <param name="calibration/direction" type="string" value="None"/>
-  -->
-<!-- T_stage_plate
-1.280  -0.110 0     -5.44
-0.110   1.280 0      1.95
-0       0     1.285  0
-0       0     0      1
--->
+  <!-- ================================================================== -->
+  <!-- This file contains the Plate-to-Stage transform.                   -->
+  <!-- This is where you align the computed end-effector position with    -->
+  <!-- the magnet position as seen on camera.                             -->
+  <!--                                                                    -->
+  <!-- "roslaunch flyatar_calibration StagePlate.launch"                  -->
+  <!-- Then let it run until the "Translation Vector" and "Quaternion"    -->
+  <!-- stabilize.  Then copy the translation & quaternion values to       -->
+  <!-- the "args" below, e.g.  as:  tx,ty,tz,qx,qy,qz,qw                  -->
+  <!--                                                                    -->
+  <!-- ================================================================== -->
+  
+  <node pkg="tf" type="static_transform_publisher" name="statictf_Plate_Stage_publisher" args="5.3 -7.0 0 0 0 0 1 Plate Stage 100" /> 
 
 </launch>

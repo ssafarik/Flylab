@@ -222,7 +222,7 @@ class PatternGenXY:
                             except rospy.ServiceException:
                                 pass
                             
-                        rospy.logwarn ('PG pt=%s' % [pts.point.x, pts.point.y])
+                        #rospy.logwarn ('PG pt=%s' % [pts.point.x, pts.point.y])
                         self.iPoint += 1
                         
                         # When the pattern output is completed, go to the next pattern.

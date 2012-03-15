@@ -1,8 +1,0 @@
-<launch>
-    <!-- This file points to the .launch file of the tracking system you are using.
-         Please put all the params, nodes, etc, in the specific launch file. -->
-    
-    
-	<include file="$(find tracking)/launch/tracking.launch" />
-	     
-</launch>

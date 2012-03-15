@@ -1,0 +1,19 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Hardware configuration of FLYDROME.                        -->
+    <!--                                                            -->
+    <!-- Edit this file to contain the elements of the particular   -->
+    <!-- hardware.                                                  -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch hardware.launch, and point here from there.         -->
+	<!-- ========================================================== -->
+
+	<include file="$(find camera1394v2)/launch/flyatar_camera.launch" />
+	<include file="$(find tracking)/launch/tracking.launch" />
+	<include file="$(find config)/launch/robot_0625h_0625w.launch" />
+	<include file="$(find config)/launch/flybowl_80mm.launch" /> 
+	<include file="$(find Fivebar)/launch/fivebar.launch" />
+</launch>
+	
+	

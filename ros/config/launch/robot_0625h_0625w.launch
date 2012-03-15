@@ -1,5 +1,11 @@
 <launch>
-    <!-- Don't launch this file directly.  Launch robot.launch, and point to this from there. -->
+	<!-- ========================================================== -->
+	<!-- Configuration of the ROBOT (i.e. the "magnet")             -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch hardware.launch, and point to this file from there. -->
+    <!--                                                            -->
+    <!-- Edit this file to describe the particular robot.           -->
+	<!-- ========================================================== -->
 
 
 	<param name="robot_width" type="double" value="1.5875"/>

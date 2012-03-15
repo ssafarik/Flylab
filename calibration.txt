@@ -2,7 +2,7 @@
 # Todo: Simplify calibration, change calibration data location, save all data automatically
 
 
-############################### Preliminary System Stuff:
+0 ############################### Preliminary System Stuff:
 # Create calibration directory.
 sudo mkdir /cameras
 sudo chgrp video cameras/
@@ -10,7 +10,16 @@ sudo chmod g+rwx cameras/
 groups   # (If "video" isn't listed, then "sudo usermod -a -G video username").
 
 
-############################### Adjust Camera Exposure:
+1 ############################### Point to your hardware:
+roscd config
+cd launch
+# Edit (or create) a .launch file that describes your hardware (see flydrome.launch for an example).
+# Edit hardware.launch to point to your .launch file.
+
+
+
+
+2 ############################### Adjust Camera Exposure:
 # Start the camera node.
 roslaunch camera1394v2 flyatar_camera.launch &
 
@@ -32,7 +41,7 @@ rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node &
 kill `ps a -o pid,args --no-headers | grep camera1394 | grep flyatar | cut -d ' ' -f 1`
 
 
-############################### Camera Intrinsic Parameters (i.e. Lens distortion):
+3 ############################### Camera Intrinsic Parameters (i.e. Lens distortion):
 rosdep install camera_calibration
 rosmake camera_calibration
 rosmake image_proc
@@ -51,7 +60,7 @@ rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/
 # Click <commit> button (writes data to /cameras/basler_a622f_calibration.yaml)
 
 
-############################### Camera Extrinsic Parameters (i.e. Relationship of Camera to Arena):
+4 ############################### Camera Extrinsic Parameters (i.e. Relationship of Camera to Arena):
 # Mount camera on flyatar rig, positioned so that the arena is roughly centered in image.
 roslaunch flyatar_calibration CameraPlate.launch
 
@@ -66,13 +75,13 @@ rostopic pub -1 Joystick/Commands geometry_msgs/Point -- dx dy dr (where dx,dy,d
 # Ctrl-c to shutdown CameraPlate.launch
 
 
-############################### Acquire a New Background Image:
+5 ############################### Acquire a New Background Image:
 # Remove all objects from plate, then:
 rm /cameras/background.png
 roslaunch track_image_contours track_image_contours_tf.launch
 
 
-############################### Stage Extrinsic Parameters (i.e. Relationship of Stage to Arena):
+6 ############################### Stage Extrinsic Parameters (i.e. Relationship of Stage to Arena):
 # Calibrate the Stage/Plate transform, and get robot image values.
 # place magnet on plate, check to see if contour is found properly
 # ctrl-c to shutdown track_image_contours_view_images.launch
@@ -80,10 +89,10 @@ roslaunch track_image_contours track_image_contours_tf.launch
 roslaunch flyatar_calibration StagePlate.launch
 
 # The magnet will drive in a spiral pattern to cover the plate.  After a number of cycles, the calibration values should converge.
-# Record robot_min_ecc, robot_max_ecc, robot_min_area, robot_max_area 
-#   in calibration_robotimage.launch
-# Record translation vector and quaternion info 
-#   in calibration_stage_plate.launch
+# Record translation vector and quaternion info in calibration_stage_plate.launch
+
+### Record robot_min_ecc, robot_max_ecc, robot_min_area, robot_max_area 
+###   in calibration_robotimage.launch
 # Ctrl-c to shutdown StagePlate.launch
 
 

@@ -1,18 +1,21 @@
 <launch>
-	<!-- *** Hardware Configuration *** -->
-	<include file="$(find config)/launch/camera.launch" />
-	<include file="$(find config)/launch/tracking.launch" />
-	<include file="$(find config)/launch/robot.launch" />
-	<include file="$(find config)/launch/arena.launch" />
-	<include file="$(find config)/launch/stage.launch" />
-	
+	<!-- ========================================================== -->
+	<!-- Configuration of the RECORD10SECTRIALSWITHMOVE experiment. -->
+    <!--                                                            -->
+    <!-- Edit this file to contain the elements of the particular   -->
+    <!-- experiment.                                                -->
+    <!--                                                            -->
+    <!-- Launch this file to run the experiment.                    -->
+	<!-- ========================================================== -->
 
 	<!-- *** Core stuff *** -->
 	<include file="$(find image_gui)/launch/DisplayDraw.launch" />
 	<include file="$(find save_data)/launch/save_data.launch" />
-	
+	<include file="$(find config)/launch/hardware.launch" />
+	<include file="$(find config)/launch/ui.launch" />
 	
 	<!-- *** The Experiment *** -->
+	<include file="$(find config)/launch/flies.launch" />
 	<node pkg="experiments" type="Record10SecTrialsWithMove.py" name="ExperimentRecord10SecTrialsWithMove" />
   
 </launch>

@@ -14,6 +14,8 @@ class Transforms:
     def __init__(self):
         self.camerainfo = None
         self.tfbx = tf.TransformBroadcaster()
+        self.Hinv = N.identity(3)
+        
         self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
         
         self.originPlateX = rospy.get_param('camera/originPlateX', 0.0) 
