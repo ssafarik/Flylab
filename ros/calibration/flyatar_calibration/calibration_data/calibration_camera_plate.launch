@@ -3,7 +3,7 @@
   <!-- These values come from CameraPlate.launch, from the origin of the mask circle. -->
   <param name="camera/originPlateX" type="double" value="661"/>
   <param name="camera/originPlateY" type="double" value="517"/>
-  <!-- Radius parameter value goes into the .launch file pointed to by Arena.launch -->
+  <!-- Radius parameter value goes into the arena .launch file (e.g. flybowl...) pointed to by hardware.launch -->
 
   <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
   <param name="camera_plate_rvec_0" type="double" value="-3.092"/>

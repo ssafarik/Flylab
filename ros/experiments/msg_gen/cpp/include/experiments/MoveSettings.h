@@ -14,6 +14,8 @@
 
 #include "ros/assert.h"
 
+#include "experiments/MoveRelative.h"
+#include "experiments/MovePattern.h"
 
 namespace experiments
 {
@@ -23,30 +25,18 @@ struct MoveSettings_ {
 
   MoveSettings_()
   : enabled(false)
-  , tracking(false)
-  , frameidOriginPosition()
-  , frameidOriginAngle()
-  , distance(0.0)
-  , angle(0.0)
-  , angleType()
-  , speed(0.0)
-  , speedType()
-  , tolerance(0.0)
+  , mode()
+  , relative()
+  , pattern()
   , timeout(0.0)
   {
   }
 
   MoveSettings_(const ContainerAllocator& _alloc)
   : enabled(false)
-  , tracking(false)
-  , frameidOriginPosition(_alloc)
-  , frameidOriginAngle(_alloc)
-  , distance(0.0)
-  , angle(0.0)
-  , angleType(_alloc)
-  , speed(0.0)
-  , speedType(_alloc)
-  , tolerance(0.0)
+  , mode(_alloc)
+  , relative(_alloc)
+  , pattern(_alloc)
   , timeout(0.0)
   {
   }
@@ -54,32 +44,14 @@ struct MoveSettings_ {
   typedef uint8_t _enabled_type;
   uint8_t enabled;
 
-  typedef uint8_t _tracking_type;
-  uint8_t tracking;
+  typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _mode_type;
+  std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  mode;
 
-  typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _frameidOriginPosition_type;
-  std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  frameidOriginPosition;
+  typedef  ::experiments::MoveRelative_<ContainerAllocator>  _relative_type;
+   ::experiments::MoveRelative_<ContainerAllocator>  relative;
 
-  typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _frameidOriginAngle_type;
-  std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  frameidOriginAngle;
-
-  typedef double _distance_type;
-  double distance;
-
-  typedef double _angle_type;
-  double angle;
-
-  typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _angleType_type;
-  std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  angleType;
-
-  typedef double _speed_type;
-  double speed;
-
-  typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _speedType_type;
-  std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  speedType;
-
-  typedef double _tolerance_type;
-  double tolerance;
+  typedef  ::experiments::MovePattern_<ContainerAllocator>  _pattern_type;
+   ::experiments::MovePattern_<ContainerAllocator>  pattern;
 
   typedef double _timeout_type;
   double timeout;
@@ -93,7 +65,7 @@ public:
   ROS_DEPRECATED const std::string __getDataType() const { return __s_getDataType_(); }
 
 private:
-  static const char* __s_getMD5Sum_() { return "47116853e5153e6d4a5bb554108d2128"; }
+  static const char* __s_getMD5Sum_() { return "0fab4270dabd2f4813bede984874380d"; }
 public:
   ROS_DEPRECATED static const std::string __s_getMD5Sum() { return __s_getMD5Sum_(); }
 
@@ -101,6 +73,14 @@ public:
 
 private:
   static const char* __s_getMessageDefinition_() { return "bool enabled\n\
+string mode  # 'pattern' or 'relative'\n\
+MoveRelative relative\n\
+MovePattern pattern\n\
+float64 timeout\n\
+\n\
+\n\
+================================================================================\n\
+MSG: experiments/MoveRelative\n\
 bool tracking\n\
 string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'\n\
 string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'\n\
@@ -110,7 +90,14 @@ string angleType # 'random' or 'constant'\n\
 float64 speed\n\
 string speedType # 'random' or 'constant'\n\
 float64 tolerance\n\
-float64 timeout\n\
+\n\
+\n\
+================================================================================\n\
+MSG: experiments/MovePattern\n\
+string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'\n\
+float64 radius\n\
+float64 hz\n\
+int32 count  # -1 means forever\n\
 \n\
 \n\
 "; }
@@ -123,15 +110,9 @@ public:
   {
     ros::serialization::OStream stream(write_ptr, 1000000000);
     ros::serialization::serialize(stream, enabled);
-    ros::serialization::serialize(stream, tracking);
-    ros::serialization::serialize(stream, frameidOriginPosition);
-    ros::serialization::serialize(stream, frameidOriginAngle);
-    ros::serialization::serialize(stream, distance);
-    ros::serialization::serialize(stream, angle);
-    ros::serialization::serialize(stream, angleType);
-    ros::serialization::serialize(stream, speed);
-    ros::serialization::serialize(stream, speedType);
-    ros::serialization::serialize(stream, tolerance);
+    ros::serialization::serialize(stream, mode);
+    ros::serialization::serialize(stream, relative);
+    ros::serialization::serialize(stream, pattern);
     ros::serialization::serialize(stream, timeout);
     return stream.getData();
   }
@@ -140,15 +121,9 @@ public:
   {
     ros::serialization::IStream stream(read_ptr, 1000000000);
     ros::serialization::deserialize(stream, enabled);
-    ros::serialization::deserialize(stream, tracking);
-    ros::serialization::deserialize(stream, frameidOriginPosition);
-    ros::serialization::deserialize(stream, frameidOriginAngle);
-    ros::serialization::deserialize(stream, distance);
-    ros::serialization::deserialize(stream, angle);
-    ros::serialization::deserialize(stream, angleType);
-    ros::serialization::deserialize(stream, speed);
-    ros::serialization::deserialize(stream, speedType);
-    ros::serialization::deserialize(stream, tolerance);
+    ros::serialization::deserialize(stream, mode);
+    ros::serialization::deserialize(stream, relative);
+    ros::serialization::deserialize(stream, pattern);
     ros::serialization::deserialize(stream, timeout);
     return stream.getData();
   }
@@ -157,15 +132,9 @@ public:
   {
     uint32_t size = 0;
     size += ros::serialization::serializationLength(enabled);
-    size += ros::serialization::serializationLength(tracking);
-    size += ros::serialization::serializationLength(frameidOriginPosition);
-    size += ros::serialization::serializationLength(frameidOriginAngle);
-    size += ros::serialization::serializationLength(distance);
-    size += ros::serialization::serializationLength(angle);
-    size += ros::serialization::serializationLength(angleType);
-    size += ros::serialization::serializationLength(speed);
-    size += ros::serialization::serializationLength(speedType);
-    size += ros::serialization::serializationLength(tolerance);
+    size += ros::serialization::serializationLength(mode);
+    size += ros::serialization::serializationLength(relative);
+    size += ros::serialization::serializationLength(pattern);
     size += ros::serialization::serializationLength(timeout);
     return size;
   }
@@ -198,12 +167,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::experiments::MoveSettings_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "47116853e5153e6d4a5bb554108d2128";
+    return "0fab4270dabd2f4813bede984874380d";
   }
 
   static const char* value(const  ::experiments::MoveSettings_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0x47116853e5153e6dULL;
-  static const uint64_t static_value2 = 0x4a5bb554108d2128ULL;
+  static const uint64_t static_value1 = 0x0fab4270dabd2f48ULL;
+  static const uint64_t static_value2 = 0x13bede984874380dULL;
 };
 
 template<class ContainerAllocator>
@@ -221,6 +190,14 @@ struct Definition< ::experiments::MoveSettings_<ContainerAllocator> > {
   static const char* value() 
   {
     return "bool enabled\n\
+string mode  # 'pattern' or 'relative'\n\
+MoveRelative relative\n\
+MovePattern pattern\n\
+float64 timeout\n\
+\n\
+\n\
+================================================================================\n\
+MSG: experiments/MoveRelative\n\
 bool tracking\n\
 string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'\n\
 string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'\n\
@@ -230,7 +207,14 @@ string angleType # 'random' or 'constant'\n\
 float64 speed\n\
 string speedType # 'random' or 'constant'\n\
 float64 tolerance\n\
-float64 timeout\n\
+\n\
+\n\
+================================================================================\n\
+MSG: experiments/MovePattern\n\
+string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'\n\
+float64 radius\n\
+float64 hz\n\
+int32 count  # -1 means forever\n\
 \n\
 \n\
 ";
@@ -252,15 +236,9 @@ template<class ContainerAllocator> struct Serializer< ::experiments::MoveSetting
   template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
   {
     stream.next(m.enabled);
-    stream.next(m.tracking);
-    stream.next(m.frameidOriginPosition);
-    stream.next(m.frameidOriginAngle);
-    stream.next(m.distance);
-    stream.next(m.angle);
-    stream.next(m.angleType);
-    stream.next(m.speed);
-    stream.next(m.speedType);
-    stream.next(m.tolerance);
+    stream.next(m.mode);
+    stream.next(m.relative);
+    stream.next(m.pattern);
     stream.next(m.timeout);
   }
 
@@ -281,24 +259,14 @@ struct Printer< ::experiments::MoveSettings_<ContainerAllocator> >
   {
     s << indent << "enabled: ";
     Printer<uint8_t>::stream(s, indent + "  ", v.enabled);
-    s << indent << "tracking: ";
-    Printer<uint8_t>::stream(s, indent + "  ", v.tracking);
-    s << indent << "frameidOriginPosition: ";
-    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.frameidOriginPosition);
-    s << indent << "frameidOriginAngle: ";
-    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.frameidOriginAngle);
-    s << indent << "distance: ";
-    Printer<double>::stream(s, indent + "  ", v.distance);
-    s << indent << "angle: ";
-    Printer<double>::stream(s, indent + "  ", v.angle);
-    s << indent << "angleType: ";
-    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.angleType);
-    s << indent << "speed: ";
-    Printer<double>::stream(s, indent + "  ", v.speed);
-    s << indent << "speedType: ";
-    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.speedType);
-    s << indent << "tolerance: ";
-    Printer<double>::stream(s, indent + "  ", v.tolerance);
+    s << indent << "mode: ";
+    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.mode);
+    s << indent << "relative: ";
+s << std::endl;
+    Printer< ::experiments::MoveRelative_<ContainerAllocator> >::stream(s, indent + "  ", v.relative);
+    s << indent << "pattern: ";
+s << std::endl;
+    Printer< ::experiments::MovePattern_<ContainerAllocator> >::stream(s, indent + "  ", v.pattern);
     s << indent << "timeout: ";
     Printer<double>::stream(s, indent + "  ", v.timeout);
   }

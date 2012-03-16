@@ -12,7 +12,7 @@
 	<include file="$(find image_gui)/launch/DisplayDraw.launch" />
 	<include file="$(find save_data)/launch/save_data.launch" />
 	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find config)/launch/ui.launch" />
+	<include file="$(find ui)/launch/ui.launch" />
 	
 	<!-- *** The Experiment *** -->
 	<include file="$(find config)/launch/flies.launch" />

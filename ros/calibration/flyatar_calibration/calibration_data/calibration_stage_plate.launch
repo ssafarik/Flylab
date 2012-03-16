@@ -2,7 +2,7 @@
   <!-- ================================================================== -->
   <!-- This file contains the Plate-to-Stage transform.                   -->
   <!-- This is where you align the computed end-effector position with    -->
-  <!-- the magnet position as seen on camera.                             -->
+  <!-- the visual end-effector position.                                  -->
   <!--                                                                    -->
   <!-- "roslaunch flyatar_calibration StagePlate.launch"                  -->
   <!-- Then let it run until the "Translation Vector" and "Quaternion"    -->

@@ -47,15 +47,16 @@ class ExperimentMoveAbsolute():
         self.experimentparams.triggerEntry.timeout = -1
         
         self.experimentparams.move.enabled = True
-        self.experimentparams.move.tracking = True
-        self.experimentparams.move.frameidOriginPosition = "Plate"
-        self.experimentparams.move.frameidOriginAngle = "Plate"
-        self.experimentparams.move.distance = 30.0
-        self.experimentparams.move.angle = 0.0
-        self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.speed = 200
-        self.experimentparams.move.speedType = 'constant'
-        self.experimentparams.move.tolerance = 2
+        self.experimentparams.move.mode = 'relative'
+        self.experimentparams.move.relative.tracking = True
+        self.experimentparams.move.relative.frameidOriginPosition = "Plate"
+        self.experimentparams.move.relative.frameidOriginAngle = "Plate"
+        self.experimentparams.move.relative.distance = 30.0
+        self.experimentparams.move.relative.angle = 0.0
+        self.experimentparams.move.relative.angleType = 'constant'
+        self.experimentparams.move.relative.speed = 200
+        self.experimentparams.move.relative.speedType = 'constant'
+        self.experimentparams.move.relative.tolerance = 2
         self.experimentparams.move.timeout = -1
         
         self.experimentparams.triggerExit.enabled = True

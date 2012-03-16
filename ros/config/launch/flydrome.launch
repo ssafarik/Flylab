@@ -1,6 +1,6 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Hardware configuration of FLYDROME.                        -->
+	<!-- Configuration of FLYDROME hardware.                        -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- hardware.                                                  -->

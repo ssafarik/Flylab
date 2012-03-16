@@ -891,81 +891,86 @@ class ContourIdentifier:
                 
 
             # Figure out who is who in the camera image.
-            self.map = self.MapObjectsToContours()
+            try:
+                self.map = self.MapObjectsToContours()
+            except IndexError:
+                self.map = None
+                
             #rospy.loginfo ('CI map=%s' % self.map)
             #rospy.loginfo ('CI contour[0].x,y=%s' % [self.contours[0].x,self.contours[0].y])
             #rospy.loginfo ('CI contour[1].x,y=%s' % [self.contours[1].x,self.contours[1].y])
 
             # Update the robot state w/ the contour and end-effector positions.
-            if self.stateEndEffector is not None:
-                if self.map[0] is not None:
-                    self.objects[0].Update(self.contours[self.map[0]], self.stateEndEffector.pose.position)
-                else:
-                    self.objects[0].Update(None,                            self.stateEndEffector.pose.position)
-
-                # Write a file (for getting Kalman covariances, etc).
-                #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateEndEffector.pose.position.x,
-                #                                     self.stateEndEffector.pose.position.y,
-                #                                     self.objects[0].state.pose.position.x, 
-                #                                     self.objects[0].state.pose.position.y,
-                #                                     self.contours[self.map[0]].x,
-                #                                     self.contours[self.map[0]].y)
-                #self.fidRobot.write(data)
-                
-                #rospy.loginfo ('CI update robot    contour=%s' % contour)
-                
-            
-            # Update the flies' states.
-            for iFly in range(1, len(self.objects)): #1+self.maxFlies):
-                if self.map[iFly] is not None:
-                    self.objects[iFly].Update(self.contours[self.map[iFly]], None)
-                else:
-                    self.objects[iFly].Update(None,                       None)
-
-                
-                #rospy.loginfo ('CI update state %s contour=%s' % (iFly,contour))
-
-                # Write a file.
-                #if self.map[1] is not None:
-                #    data = '%s, %s, %s, %s\n' % (self.contours[self.map[1]].x, 
-                #                                 self.contours[self.map[1]].y, 
-                #                                 self.objects[1].state.pose.position.x, 
-                #                                 self.objects[1].state.pose.position.y)
-                #    self.fidFly.write(data)
-            
-
-
-            # Construct the ArenaState message.
-            arenastate = ArenaState()
-            #if self.objects[0].state.pose.position.x is not None:
-            if self.stateEndEffector is not None:
-                arenastate.robot.header.stamp    = self.objects[0].state.header.stamp
-                arenastate.robot.header.frame_id = self.objects[0].state.header.frame_id
-                arenastate.robot.pose            = self.objects[0].state.pose
-                arenastate.robot.velocity        = self.objects[0].state.velocity
-                #rospy.logwarn ('CI robot.position=%s, ptOffset=%s' % ([self.objects[0].state.pose.position.x,
-                #                                                            self.objects[0].state.pose.position.y],
-                #                                                           [self.objects[0].ptOffset.x,
-                #                                                            self.objects[0].ptOffset.y]))
-            
-            for iFly in range(1, len(self.objects)): #1+self.maxFlies):
-                if (self.map[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
-                    arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
-                                                          pose = self.objects[iFly].state.pose,
-                                                          velocity = self.objects[iFly].state.velocity))
-                    #rospy.logwarn('arenastate.flies.append(%s)' % self.objects[iFly].name)
-            
-            # Publish the ArenaState.
-            self.pubArenaState.publish(arenastate)
-            
-            
-            # Publish the EndEffectorOffset.
-            self.pubEndEffectorOffset.publish(self.objects[0].ptOffset)
-            
-            
-            # Publish a disc to indicate the arena extent.
-            self.pubMarker.publish(self.markerArena)
+            if self.map is not None:
+                if self.stateEndEffector is not None:
+                    if self.map[0] is not None:
+                        self.objects[0].Update(self.contours[self.map[0]], self.stateEndEffector.pose.position)
+                    else:
+                        self.objects[0].Update(None,                            self.stateEndEffector.pose.position)
+    
+                    # Write a file (for getting Kalman covariances, etc).
+                    #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateEndEffector.pose.position.x,
+                    #                                     self.stateEndEffector.pose.position.y,
+                    #                                     self.objects[0].state.pose.position.x, 
+                    #                                     self.objects[0].state.pose.position.y,
+                    #                                     self.contours[self.map[0]].x,
+                    #                                     self.contours[self.map[0]].y)
+                    #self.fidRobot.write(data)
                     
+                    #rospy.loginfo ('CI update robot    contour=%s' % contour)
+                    
+                
+                # Update the flies' states.
+                for iFly in range(1, len(self.objects)): #1+self.maxFlies):
+                    if self.map[iFly] is not None:
+                        self.objects[iFly].Update(self.contours[self.map[iFly]], None)
+                    else:
+                        self.objects[iFly].Update(None,                       None)
+    
+                    
+                    #rospy.loginfo ('CI update state %s contour=%s' % (iFly,contour))
+    
+                    # Write a file.
+                    #if self.map[1] is not None:
+                    #    data = '%s, %s, %s, %s\n' % (self.contours[self.map[1]].x, 
+                    #                                 self.contours[self.map[1]].y, 
+                    #                                 self.objects[1].state.pose.position.x, 
+                    #                                 self.objects[1].state.pose.position.y)
+                    #    self.fidFly.write(data)
+                
+    
+    
+                # Construct the ArenaState message.
+                arenastate = ArenaState()
+                #if self.objects[0].state.pose.position.x is not None:
+                if self.stateEndEffector is not None:
+                    arenastate.robot.header.stamp    = self.objects[0].state.header.stamp
+                    arenastate.robot.header.frame_id = self.objects[0].state.header.frame_id
+                    arenastate.robot.pose            = self.objects[0].state.pose
+                    arenastate.robot.velocity        = self.objects[0].state.velocity
+                    #rospy.logwarn ('CI robot.position=%s, ptOffset=%s' % ([self.objects[0].state.pose.position.x,
+                    #                                                            self.objects[0].state.pose.position.y],
+                    #                                                           [self.objects[0].ptOffset.x,
+                    #                                                            self.objects[0].ptOffset.y]))
+                
+                for iFly in range(1, len(self.objects)): #1+self.maxFlies):
+                    if (self.map[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
+                        arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
+                                                              pose = self.objects[iFly].state.pose,
+                                                              velocity = self.objects[iFly].state.velocity))
+                        #rospy.logwarn('arenastate.flies.append(%s)' % self.objects[iFly].name)
+                
+                # Publish the ArenaState.
+                self.pubArenaState.publish(arenastate)
+                
+                
+                # Publish the EndEffectorOffset.
+                self.pubEndEffectorOffset.publish(self.objects[0].ptOffset)
+                
+                
+                # Publish a disc to indicate the arena extent.
+                self.pubMarker.publish(self.markerArena)
+                        
 
 
 if __name__ == '__main__':

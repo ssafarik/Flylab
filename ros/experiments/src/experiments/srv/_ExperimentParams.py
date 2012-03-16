@@ -5,7 +5,7 @@ import struct
 import experiments.msg
 
 class ExperimentParamsRequest(roslib.message.Message):
-  _md5sum = "88d290268c3a4162a2f4f46c955fc6bb"
+  _md5sum = "de43baf0c40e1fe7e5f0db1fac0d5403"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings experiment
@@ -52,6 +52,14 @@ float64 timeout
 ================================================================================
 MSG: experiments/MoveSettings
 bool enabled
+string mode  # 'pattern' or 'relative'
+MoveRelative relative
+MovePattern pattern
+float64 timeout
+
+
+================================================================================
+MSG: experiments/MoveRelative
 bool tracking
 string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'
 string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
@@ -61,7 +69,14 @@ string angleType # 'random' or 'constant'
 float64 speed
 string speedType # 'random' or 'constant'
 float64 tolerance
-float64 timeout
+
+
+================================================================================
+MSG: experiments/MovePattern
+string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'
+float64 radius
+float64 hz
+int32 count  # -1 means forever
 
 
 ================================================================================
@@ -139,24 +154,32 @@ bool onlyWhileTriggered
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_B2d2B.pack(_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled, _x.move.tracking))
-      _x = self.move.frameidOriginPosition
+      buff.write(_struct_B2dB.pack(_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled))
+      _x = self.move.mode
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.move.frameidOriginAngle
+      buff.write(_struct_B.pack(self.move.relative.tracking))
+      _x = self.move.relative.frameidOriginPosition
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2d.pack(_x.move.distance, _x.move.angle))
-      _x = self.move.angleType
-      length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.move.speed))
-      _x = self.move.speedType
+      _x = self.move.relative.frameidOriginAngle
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2dB6d.pack(_x.move.tolerance, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_2d.pack(_x.move.relative.distance, _x.move.relative.angle))
+      _x = self.move.relative.angleType
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_d.pack(self.move.relative.speed))
+      _x = self.move.relative.speedType
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_d.pack(self.move.relative.tolerance))
+      _x = self.move.pattern.shape
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_2didB6d.pack(_x.move.pattern.radius, _x.move.pattern.hz, _x.move.pattern.count, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
@@ -210,46 +233,64 @@ bool onlyWhileTriggered
       self.triggerEntry.angleTest = str[start:end]
       _x = self
       start = end
-      end += 19
-      (_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled, _x.move.tracking,) = _struct_B2d2B.unpack(str[start:end])
+      end += 18
+      (_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled,) = _struct_B2dB.unpack(str[start:end])
       self.triggerEntry.angleTestBilateral = bool(self.triggerEntry.angleTestBilateral)
       self.move.enabled = bool(self.move.enabled)
-      self.move.tracking = bool(self.move.tracking)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.frameidOriginPosition = str[start:end]
+      self.move.mode = str[start:end]
+      start = end
+      end += 1
+      (self.move.relative.tracking,) = _struct_B.unpack(str[start:end])
+      self.move.relative.tracking = bool(self.move.relative.tracking)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.frameidOriginAngle = str[start:end]
+      self.move.relative.frameidOriginPosition = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      self.move.relative.frameidOriginAngle = str[start:end]
       _x = self
       start = end
       end += 16
-      (_x.move.distance, _x.move.angle,) = _struct_2d.unpack(str[start:end])
+      (_x.move.relative.distance, _x.move.relative.angle,) = _struct_2d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.angleType = str[start:end]
+      self.move.relative.angleType = str[start:end]
       start = end
       end += 8
-      (self.move.speed,) = _struct_d.unpack(str[start:end])
+      (self.move.relative.speed,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.speedType = str[start:end]
+      self.move.relative.speedType = str[start:end]
+      start = end
+      end += 8
+      (self.move.relative.tolerance,) = _struct_d.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      self.move.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 65
-      (_x.move.tolerance, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2dB6d.unpack(str[start:end])
+      end += 77
+      (_x.move.pattern.radius, _x.move.pattern.hz, _x.move.pattern.count, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2didB6d.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -299,24 +340,32 @@ bool onlyWhileTriggered
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_B2d2B.pack(_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled, _x.move.tracking))
-      _x = self.move.frameidOriginPosition
+      buff.write(_struct_B2dB.pack(_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled))
+      _x = self.move.mode
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.move.frameidOriginAngle
+      buff.write(_struct_B.pack(self.move.relative.tracking))
+      _x = self.move.relative.frameidOriginPosition
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2d.pack(_x.move.distance, _x.move.angle))
-      _x = self.move.angleType
-      length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.move.speed))
-      _x = self.move.speedType
+      _x = self.move.relative.frameidOriginAngle
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2dB6d.pack(_x.move.tolerance, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_2d.pack(_x.move.relative.distance, _x.move.relative.angle))
+      _x = self.move.relative.angleType
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_d.pack(self.move.relative.speed))
+      _x = self.move.relative.speedType
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_d.pack(self.move.relative.tolerance))
+      _x = self.move.pattern.shape
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_2didB6d.pack(_x.move.pattern.radius, _x.move.pattern.hz, _x.move.pattern.count, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
@@ -372,46 +421,64 @@ bool onlyWhileTriggered
       self.triggerEntry.angleTest = str[start:end]
       _x = self
       start = end
-      end += 19
-      (_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled, _x.move.tracking,) = _struct_B2d2B.unpack(str[start:end])
+      end += 18
+      (_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled,) = _struct_B2dB.unpack(str[start:end])
       self.triggerEntry.angleTestBilateral = bool(self.triggerEntry.angleTestBilateral)
       self.move.enabled = bool(self.move.enabled)
-      self.move.tracking = bool(self.move.tracking)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.frameidOriginPosition = str[start:end]
+      self.move.mode = str[start:end]
+      start = end
+      end += 1
+      (self.move.relative.tracking,) = _struct_B.unpack(str[start:end])
+      self.move.relative.tracking = bool(self.move.relative.tracking)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.frameidOriginAngle = str[start:end]
+      self.move.relative.frameidOriginPosition = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      self.move.relative.frameidOriginAngle = str[start:end]
       _x = self
       start = end
       end += 16
-      (_x.move.distance, _x.move.angle,) = _struct_2d.unpack(str[start:end])
+      (_x.move.relative.distance, _x.move.relative.angle,) = _struct_2d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.angleType = str[start:end]
+      self.move.relative.angleType = str[start:end]
       start = end
       end += 8
-      (self.move.speed,) = _struct_d.unpack(str[start:end])
+      (self.move.relative.speed,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.move.speedType = str[start:end]
+      self.move.relative.speedType = str[start:end]
+      start = end
+      end += 8
+      (self.move.relative.tolerance,) = _struct_d.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      self.move.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 65
-      (_x.move.tolerance, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2dB6d.unpack(str[start:end])
+      end += 77
+      (_x.move.pattern.radius, _x.move.pattern.hz, _x.move.pattern.count, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2didB6d.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -444,12 +511,13 @@ bool onlyWhileTriggered
 
 _struct_I = roslib.message.struct_I
 _struct_2d = struct.Struct("<2d")
+_struct_B = struct.Struct("<B")
+_struct_2didB6d = struct.Struct("<2didB6d")
 _struct_d = struct.Struct("<d")
-_struct_B2d2B = struct.Struct("<B2d2B")
+_struct_B2dB = struct.Struct("<B2dB")
 _struct_2iB5dB6d = struct.Struct("<2iB5dB6d")
 _struct_B2d = struct.Struct("<B2d")
 _struct_4B = struct.Struct("<4B")
-_struct_2dB6d = struct.Struct("<2dB6d")
 """autogenerated by genmsg_py from ExperimentParamsResponse.msg. Do not edit."""
 import roslib.message
 import struct
@@ -558,6 +626,6 @@ _struct_I = roslib.message.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(roslib.message.ServiceDefinition):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '9a3ed8f74b7b0897436660f47751e051'
+  _md5sum = 'd405e32a918124b1d29b9abb62db96e2'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

@@ -14,6 +14,7 @@ from flycore.msg import *
 from flycore.srv import *
 from tracking.msg import ArenaState
 from experiments.srv import Trigger, ExperimentParams
+from patterngen.msg import MsgPatternGen
 
 
 #######################################################################################################
@@ -512,7 +513,7 @@ class GotoHome (smach.State):
             self.goal.state.pose.position.y = userdata.experimentparamsIn.home.y
             self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
                                                                           pose=self.goal.state.pose),
-                                                      speed = userdata.experimentparamsIn.move.speed))
+                                                      speed = userdata.experimentparamsIn.move.relative.speed))
 
             rv = 'aborted'
             while True:
@@ -563,6 +564,7 @@ class MoveRobot (smach.State):
         self.arenastate = None
         self.rosrate = rospy.Rate(100)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback)
+        self.pubPatternGen = rospy.Publisher('PatternGen', MsgPatternGen, latch=True)
 
         self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
         self.action.wait_for_server()
@@ -574,7 +576,7 @@ class MoveRobot (smach.State):
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
-        self.radiusInBounds = float(rospy.get_param("arena/radius_movement","25.4"))
+        self.radiusMovement = float(rospy.get_param("arena/radius_movement","25.4"))
         
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -589,7 +591,7 @@ class MoveRobot (smach.State):
 
 
     def execute(self, userdata):
-        rospy.logwarn("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.distance, userdata.experimentparamsIn.move.angle, userdata.experimentparamsIn.move.speed])
+        rospy.logwarn("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.relative.distance, userdata.experimentparamsIn.move.relative.angle, userdata.experimentparamsIn.move.relative.speed])
 
         rv = 'succeeded'
         if userdata.experimentparamsIn.move.enabled:
@@ -600,123 +602,173 @@ class MoveRobot (smach.State):
                     return 'preempted'
                 rospy.sleep(1.0)
     
+            if userdata.experimentparamsIn.move.mode=='relative':
+                rv = self.MoveRelative(userdata)
+            else:
+                rv = self.MovePattern(userdata)
+                
+        #rospy.logwarn ('EL Exiting MoveRobot()')
+        return rv
             
-            self.ptTarget = None
+            
+    def MoveRelative (self, userdata):            
+        self.ptTarget = None
 
-            while not rospy.is_shutdown():
-                posRobot = self.arenastate.robot.pose.position # Assumed in the "Plate" frame.
-                ptRobot = N.array([posRobot.x, posRobot.y])
-                
-                # Fly data.                        
-                if (len(self.arenastate.flies)>0):
-                    iFly = GetNearestFly(self.arenastate)
-                    posFly = self.arenastate.flies[iFly].pose.position # Assumed in the "Plate" frame
+        while not rospy.is_shutdown():
+            posRobot = self.arenastate.robot.pose.position # Assumed in the "Plate" frame.
+            ptRobot = N.array([posRobot.x, posRobot.y])
+            
+            # Fly data.                        
+            if (len(self.arenastate.flies)>0):
+                iFly = GetNearestFly(self.arenastate)
+                posFly = self.arenastate.flies[iFly].pose.position # Assumed in the "Plate" frame
 
-                
-                # Get a random velocity once per move, non-random velocity always.
-                if (userdata.experimentparamsIn.move.speedType=='random'):
-                    if (self.ptTarget is None):
-                        # Choose a random velocity forward or backward.                        
-                        speedTarget = userdata.experimentparamsIn.move.speed * (2.0*N.random.random() - 1.0) # Choose a random vel, plus or minus.
-                        # Choose a random velocity forward or backward.                        
-                        if speedTarget < 0:
-                            speedTarget = -speedTarget
-                            angleDirection = N.pi
-                        else:
-                            angleDirection = 0.0
-                else:
-                    speedTarget = userdata.experimentparamsIn.move.speed
-                    angleDirection = 0.0
-
-                
-                # Get a random angle once per move, non-random angle always.
-                if (userdata.experimentparamsIn.move.angleType=='random'):
-                    if (self.ptTarget is None):
-                        angle = 2.0*N.pi*N.random.random()
-                else:
-                    # Move at an angle relative to whose orientation?
-                    if (userdata.experimentparamsIn.move.frameidOriginAngle=="Fly1") and (len(self.arenastate.flies)>0):
-                        angle = GetOrientationFly(self.arenastate, iFly) + userdata.experimentparamsIn.move.angle
-                    elif userdata.experimentparamsIn.move.frameidOriginAngle=="Robot":
-                        angle = GetOrientationRobot(self.arenastate) + userdata.experimentparamsIn.move.angle
+            
+            # Get a random velocity once per move, non-random velocity always.
+            if (userdata.experimentparamsIn.move.relative.speedType=='random'):
+                if (self.ptTarget is None):
+                    # Choose a random velocity forward or backward.                        
+                    speedTarget = userdata.experimentparamsIn.move.relative.speed * (2.0*N.random.random() - 1.0) # Choose a random vel, plus or minus.
+                    # Choose a random velocity forward or backward.                        
+                    if speedTarget < 0:
+                        speedTarget = -speedTarget
+                        angleDirection = N.pi
                     else:
-                        angle = userdata.experimentparamsIn.move.angle # Relative to orientation of the Plate frame.
-    
-                    # Correct the angle for the velocity sign.
-                    angle = (angle + angleDirection) % (2.0*N.pi)    
-                    
-                                                       
-                # Move a distance relative to whose position?
-                if userdata.experimentparamsIn.move.frameidOriginPosition=="Fly1" and (len(self.arenastate.flies)>0):
-                    posOrigin = posFly
-                elif userdata.experimentparamsIn.move.frameidOriginPosition=="Robot":
-                    posOrigin = posRobot
+                        angleDirection = 0.0
+            else:
+                speedTarget = userdata.experimentparamsIn.move.relative.speed
+                angleDirection = 0.0
+
+            
+            # Get a random angle once per move, non-random angle always.
+            if (userdata.experimentparamsIn.move.relative.angleType=='random'):
+                if (self.ptTarget is None):
+                    angle = 2.0*N.pi*N.random.random()
+            else:
+                # Move at an angle relative to whose orientation?
+                if (userdata.experimentparamsIn.move.relative.frameidOriginAngle=="Fly1") and (len(self.arenastate.flies)>0):
+                    angle = GetOrientationFly(self.arenastate, iFly) + userdata.experimentparamsIn.move.relative.angle
+                elif userdata.experimentparamsIn.move.relative.frameidOriginAngle=="Robot":
+                    angle = GetOrientationRobot(self.arenastate) + userdata.experimentparamsIn.move.relative.angle
                 else:
-                    posOrigin = Point(x=0, y=0, z=0) # Relative to the origin of the Plate frame
+                    angle = userdata.experimentparamsIn.move.relative.angle # Relative to orientation of the Plate frame.
 
-
-                # If we need to calculate a target.
-                if (self.ptTarget is None) or (userdata.experimentparamsIn.move.tracking):
-                    # Compute target point in workspace (i.e. Plate) coordinates.
-                    ptOrigin = N.array([posOrigin.x, posOrigin.y])
-                    d = userdata.experimentparamsIn.move.distance
-                    ptRelative = d * N.array([N.cos(angle), N.sin(angle)])
-                    ptTarget = ptOrigin + ptRelative
-                    self.ptTarget = ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusInBounds)
-                    #self.ptTarget = ptTarget
-    
-                    #rospy.logwarn ('EL self.ptTarget=%s, ptOrigin=%s, ptRelative=%s, angle=%s, frameAngle=%s' % (self.ptTarget, ptOrigin, ptRelative, angle,userdata.experimentparamsIn.move.frameidOriginAngle))
-                    #rospy.logwarn('EL Robot/Fly frame_id=%s' % [self.arenastate.robot.header.frame_id,self.arenastate.flies[iFly].header.frame_id])
-    
-                    # Send the command.
-                    #self.goal.state.header = self.arenastate.flies[iFly].header
-                    self.goal.state.header = self.arenastate.robot.header
-                    self.goal.state.header.stamp = rospy.Time.now()
-                    self.goal.state.pose.position.x = self.ptTarget[0]
-                    self.goal.state.pose.position.y = self.ptTarget[1]
-                    
-                    
-                    #rospy.logwarn('EL calling set_stage_state(%s) pre' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
-                    try:
-                        self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                                      pose=self.goal.state.pose),
-                                                                  speed = speedTarget))
-                    except rospy.ServiceException:
-                        self.ptTarget = None
-                    #rospy.logwarn('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
-    
-    
-                # If no flies and no target, then preempt.
-                #if (len(self.arenastate.flies)==0) and (self.ptTarget is None):
-                #    rv = 'preempted'
-                #    break
-    
-                        
-                # Check if we're there yet.
-                if self.ptTarget is not None:
-                    r = N.linalg.norm(ptRobot-self.ptTarget)
-                    #rospy.logwarn ('EL ptTarget=%s, ptRobot=%s, r=%s' % (self.ptTarget, ptRobot, r))
-                    if (r <= userdata.experimentparamsIn.move.tolerance):
-                        rv = 'succeeded'
-                        break
-    
+                # Correct the angle for the velocity sign.
+                angle = (angle + angleDirection) % (2.0*N.pi)    
                 
-                if self.preempt_requested():
-                    rv = 'preempted'
+                                                   
+            # Move a distance relative to whose position?
+            if userdata.experimentparamsIn.move.relative.frameidOriginPosition=="Fly1" and (len(self.arenastate.flies)>0):
+                posOrigin = posFly
+            elif userdata.experimentparamsIn.move.relative.frameidOriginPosition=="Robot":
+                posOrigin = posRobot
+            else:
+                posOrigin = Point(x=0, y=0, z=0) # Relative to the origin of the Plate frame
+
+
+            # If we need to calculate a target.
+            if (self.ptTarget is None) or (userdata.experimentparamsIn.move.relative.tracking):
+                # Compute target point in workspace (i.e. Plate) coordinates.
+                ptOrigin = N.array([posOrigin.x, posOrigin.y])
+                d = userdata.experimentparamsIn.move.relative.distance
+                ptRelative = d * N.array([N.cos(angle), N.sin(angle)])
+                ptTarget = ptOrigin + ptRelative
+                self.ptTarget = ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
+                #self.ptTarget = ptTarget
+
+                #rospy.logwarn ('EL self.ptTarget=%s, ptOrigin=%s, ptRelative=%s, angle=%s, frameAngle=%s' % (self.ptTarget, ptOrigin, ptRelative, angle,userdata.experimentparamsIn.move.relative.frameidOriginAngle))
+                #rospy.logwarn('EL Robot/Fly frame_id=%s' % [self.arenastate.robot.header.frame_id,self.arenastate.flies[iFly].header.frame_id])
+
+                # Send the command.
+                #self.goal.state.header = self.arenastate.flies[iFly].header
+                self.goal.state.header = self.arenastate.robot.header
+                self.goal.state.header.stamp = rospy.Time.now()
+                self.goal.state.pose.position.x = self.ptTarget[0]
+                self.goal.state.pose.position.y = self.ptTarget[1]
+                
+                
+                #rospy.logwarn('EL calling set_stage_state(%s) pre' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
+                try:
+                    self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+                                                                                  pose=self.goal.state.pose),
+                                                              speed = speedTarget))
+                except rospy.ServiceException:
+                    self.ptTarget = None
+                #rospy.logwarn('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
+
+
+            # If no flies and no target, then preempt.
+            #if (len(self.arenastate.flies)==0) and (self.ptTarget is None):
+            #    rv = 'preempted'
+            #    break
+
+                    
+            # Check if we're there yet.
+            if self.ptTarget is not None:
+                r = N.linalg.norm(ptRobot-self.ptTarget)
+                #rospy.logwarn ('EL ptTarget=%s, ptRobot=%s, r=%s' % (self.ptTarget, ptRobot, r))
+                if (r <= userdata.experimentparamsIn.move.relative.tolerance):
+                    rv = 'succeeded'
                     break
 
-                
-                if userdata.experimentparamsIn.move.timeout != -1:
-                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
-                        rv = 'preempted'
-                        break
-                
-                self.rosrate.sleep()
-    
-    
-            #rospy.logwarn ('EL Exiting MoveRobot()')
-            self.ptTarget = None
             
+            if self.preempt_requested():
+                rv = 'preempted'
+                break
+
+            
+            if userdata.experimentparamsIn.move.timeout != -1:
+                if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+                    rv = 'preempted'
+                    break
+            
+            self.rosrate.sleep()
+
+
+        self.ptTarget = None
+        
+        return rv
+
+        
+    def MovePattern (self, userdata):
+                    
+        msgPattern = MsgPatternGen()
+
+        # Publish the spiral pattern message.
+        msgPattern.mode = 'byshape'
+        msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
+        msgPattern.points = []
+        msgPattern.hz = userdata.experimentparamsIn.move.pattern.hz
+        msgPattern.count = userdata.experimentparamsIn.move.pattern.count
+        msgPattern.radius = userdata.experimentparamsIn.move.pattern.radius
+        msgPattern.preempt = True
+        self.pubPatternGen.publish (msgPattern)
+                
+
+        rv = 'succeeded'
+        while not rospy.is_shutdown():
+            if self.preempt_requested():
+                rv = 'preempted'
+                break
+
+            
+            if userdata.experimentparamsIn.move.timeout != -1:
+                if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+                    rv = 'preempted'
+                    break
+            
+            self.rosrate.sleep()
+
+        # Turn off the pattern
+        msgPattern.mode = 'byshape'
+        msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
+        msgPattern.points = []
+        msgPattern.hz = userdata.experimentparamsIn.move.pattern.hz
+        msgPattern.count = 0
+        msgPattern.radius = userdata.experimentparamsIn.move.pattern.radius
+        msgPattern.preempt = True
+        self.pubPatternGen.publish (msgPattern)
+
         return rv
         
 

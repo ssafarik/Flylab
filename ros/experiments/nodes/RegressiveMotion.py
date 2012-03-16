@@ -47,15 +47,16 @@ class ExperimentRegressiveMotion():
         self.experimentparams.triggerEntry.timeout = -1
         
         self.experimentparams.move.enabled = True
-        self.experimentparams.move.tracking = False
-        self.experimentparams.move.frameidOriginPosition = "Robot"
-        self.experimentparams.move.frameidOriginAngle = "Fly1"
-        self.experimentparams.move.distance = 60
-        self.experimentparams.move.angle = 0
-        self.experimentparams.move.angleType = 'constant'
-        self.experimentparams.move.speed = 30
-        self.experimentparams.move.speedType = 'random'
-        self.experimentparams.move.tolerance = 2
+        self.experimentparams.move.mode = 'relative'        
+        self.experimentparams.move.relative.tracking = False
+        self.experimentparams.move.relative.frameidOriginPosition = "Robot"
+        self.experimentparams.move.relative.frameidOriginAngle = "Fly1"
+        self.experimentparams.move.relative.distance = 60
+        self.experimentparams.move.relative.angle = 0
+        self.experimentparams.move.relative.angleType = 'constant'
+        self.experimentparams.move.relative.speed = 30
+        self.experimentparams.move.relative.speedType = 'random'
+        self.experimentparams.move.relative.tolerance = 2
         self.experimentparams.move.timeout = 3
         
         self.experimentparams.triggerExit.enabled = False

@@ -2,12 +2,21 @@
 import roslib.message
 import struct
 
+import experiments.msg
 
 class MoveSettings(roslib.message.Message):
-  _md5sum = "47116853e5153e6d4a5bb554108d2128"
+  _md5sum = "0fab4270dabd2f4813bede984874380d"
   _type = "experiments/MoveSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool enabled
+string mode  # 'pattern' or 'relative'
+MoveRelative relative
+MovePattern pattern
+float64 timeout
+
+
+================================================================================
+MSG: experiments/MoveRelative
 bool tracking
 string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'
 string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
@@ -17,12 +26,19 @@ string angleType # 'random' or 'constant'
 float64 speed
 string speedType # 'random' or 'constant'
 float64 tolerance
-float64 timeout
+
+
+================================================================================
+MSG: experiments/MovePattern
+string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'
+float64 radius
+float64 hz
+int32 count  # -1 means forever
 
 
 """
-  __slots__ = ['enabled','tracking','frameidOriginPosition','frameidOriginAngle','distance','angle','angleType','speed','speedType','tolerance','timeout']
-  _slot_types = ['bool','bool','string','string','float64','float64','string','float64','string','float64','float64']
+  __slots__ = ['enabled','mode','relative','pattern','timeout']
+  _slot_types = ['bool','string','experiments/MoveRelative','experiments/MovePattern','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -32,7 +48,7 @@ float64 timeout
     changes.  You cannot mix in-order arguments and keyword arguments.
     
     The available fields are:
-       enabled,tracking,frameidOriginPosition,frameidOriginAngle,distance,angle,angleType,speed,speedType,tolerance,timeout
+       enabled,mode,relative,pattern,timeout
     
     @param args: complete set of field values, in .msg order
     @param kwds: use keyword arguments corresponding to message field names
@@ -43,37 +59,19 @@ float64 timeout
       #message fields cannot be None, assign default values for those that are
       if self.enabled is None:
         self.enabled = False
-      if self.tracking is None:
-        self.tracking = False
-      if self.frameidOriginPosition is None:
-        self.frameidOriginPosition = ''
-      if self.frameidOriginAngle is None:
-        self.frameidOriginAngle = ''
-      if self.distance is None:
-        self.distance = 0.
-      if self.angle is None:
-        self.angle = 0.
-      if self.angleType is None:
-        self.angleType = ''
-      if self.speed is None:
-        self.speed = 0.
-      if self.speedType is None:
-        self.speedType = ''
-      if self.tolerance is None:
-        self.tolerance = 0.
+      if self.mode is None:
+        self.mode = ''
+      if self.relative is None:
+        self.relative = experiments.msg.MoveRelative()
+      if self.pattern is None:
+        self.pattern = experiments.msg.MovePattern()
       if self.timeout is None:
         self.timeout = 0.
     else:
       self.enabled = False
-      self.tracking = False
-      self.frameidOriginPosition = ''
-      self.frameidOriginAngle = ''
-      self.distance = 0.
-      self.angle = 0.
-      self.angleType = ''
-      self.speed = 0.
-      self.speedType = ''
-      self.tolerance = 0.
+      self.mode = ''
+      self.relative = experiments.msg.MoveRelative()
+      self.pattern = experiments.msg.MovePattern()
       self.timeout = 0.
 
   def _get_types(self):
@@ -89,25 +87,32 @@ float64 timeout
     @type  buff: StringIO
     """
     try:
-      _x = self
-      buff.write(_struct_2B.pack(_x.enabled, _x.tracking))
-      _x = self.frameidOriginPosition
+      buff.write(_struct_B.pack(self.enabled))
+      _x = self.mode
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.frameidOriginAngle
+      buff.write(_struct_B.pack(self.relative.tracking))
+      _x = self.relative.frameidOriginPosition
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2d.pack(_x.distance, _x.angle))
-      _x = self.angleType
-      length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.speed))
-      _x = self.speedType
+      _x = self.relative.frameidOriginAngle
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2d.pack(_x.tolerance, _x.timeout))
+      buff.write(_struct_2d.pack(_x.relative.distance, _x.relative.angle))
+      _x = self.relative.angleType
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_d.pack(self.relative.speed))
+      _x = self.relative.speedType
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_d.pack(self.relative.tolerance))
+      _x = self.pattern.shape
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_2did.pack(_x.pattern.radius, _x.pattern.hz, _x.pattern.count, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -118,48 +123,69 @@ float64 timeout
     @type  str: str
     """
     try:
+      if self.relative is None:
+        self.relative = experiments.msg.MoveRelative()
+      if self.pattern is None:
+        self.pattern = experiments.msg.MovePattern()
       end = 0
-      _x = self
       start = end
-      end += 2
-      (_x.enabled, _x.tracking,) = _struct_2B.unpack(str[start:end])
+      end += 1
+      (self.enabled,) = _struct_B.unpack(str[start:end])
       self.enabled = bool(self.enabled)
-      self.tracking = bool(self.tracking)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.frameidOriginPosition = str[start:end]
+      self.mode = str[start:end]
+      start = end
+      end += 1
+      (self.relative.tracking,) = _struct_B.unpack(str[start:end])
+      self.relative.tracking = bool(self.relative.tracking)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.frameidOriginAngle = str[start:end]
+      self.relative.frameidOriginPosition = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      self.relative.frameidOriginAngle = str[start:end]
       _x = self
       start = end
       end += 16
-      (_x.distance, _x.angle,) = _struct_2d.unpack(str[start:end])
+      (_x.relative.distance, _x.relative.angle,) = _struct_2d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.angleType = str[start:end]
+      self.relative.angleType = str[start:end]
       start = end
       end += 8
-      (self.speed,) = _struct_d.unpack(str[start:end])
+      (self.relative.speed,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.speedType = str[start:end]
+      self.relative.speedType = str[start:end]
+      start = end
+      end += 8
+      (self.relative.tolerance,) = _struct_d.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      self.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 16
-      (_x.tolerance, _x.timeout,) = _struct_2d.unpack(str[start:end])
+      end += 28
+      (_x.pattern.radius, _x.pattern.hz, _x.pattern.count, _x.timeout,) = _struct_2did.unpack(str[start:end])
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
@@ -174,25 +200,32 @@ float64 timeout
     @type  numpy module
     """
     try:
-      _x = self
-      buff.write(_struct_2B.pack(_x.enabled, _x.tracking))
-      _x = self.frameidOriginPosition
+      buff.write(_struct_B.pack(self.enabled))
+      _x = self.mode
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.frameidOriginAngle
+      buff.write(_struct_B.pack(self.relative.tracking))
+      _x = self.relative.frameidOriginPosition
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2d.pack(_x.distance, _x.angle))
-      _x = self.angleType
-      length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.speed))
-      _x = self.speedType
+      _x = self.relative.frameidOriginAngle
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2d.pack(_x.tolerance, _x.timeout))
+      buff.write(_struct_2d.pack(_x.relative.distance, _x.relative.angle))
+      _x = self.relative.angleType
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_d.pack(self.relative.speed))
+      _x = self.relative.speedType
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_d.pack(self.relative.tolerance))
+      _x = self.pattern.shape
+      length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_2did.pack(_x.pattern.radius, _x.pattern.hz, _x.pattern.count, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -205,53 +238,75 @@ float64 timeout
     @type  numpy: module
     """
     try:
+      if self.relative is None:
+        self.relative = experiments.msg.MoveRelative()
+      if self.pattern is None:
+        self.pattern = experiments.msg.MovePattern()
       end = 0
-      _x = self
       start = end
-      end += 2
-      (_x.enabled, _x.tracking,) = _struct_2B.unpack(str[start:end])
+      end += 1
+      (self.enabled,) = _struct_B.unpack(str[start:end])
       self.enabled = bool(self.enabled)
-      self.tracking = bool(self.tracking)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.frameidOriginPosition = str[start:end]
+      self.mode = str[start:end]
+      start = end
+      end += 1
+      (self.relative.tracking,) = _struct_B.unpack(str[start:end])
+      self.relative.tracking = bool(self.relative.tracking)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.frameidOriginAngle = str[start:end]
+      self.relative.frameidOriginPosition = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      self.relative.frameidOriginAngle = str[start:end]
       _x = self
       start = end
       end += 16
-      (_x.distance, _x.angle,) = _struct_2d.unpack(str[start:end])
+      (_x.relative.distance, _x.relative.angle,) = _struct_2d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.angleType = str[start:end]
+      self.relative.angleType = str[start:end]
       start = end
       end += 8
-      (self.speed,) = _struct_d.unpack(str[start:end])
+      (self.relative.speed,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       start = end
       end += length
-      self.speedType = str[start:end]
+      self.relative.speedType = str[start:end]
+      start = end
+      end += 8
+      (self.relative.tolerance,) = _struct_d.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      self.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 16
-      (_x.tolerance, _x.timeout,) = _struct_2d.unpack(str[start:end])
+      end += 28
+      (_x.pattern.radius, _x.pattern.hz, _x.pattern.count, _x.timeout,) = _struct_2did.unpack(str[start:end])
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = roslib.message.struct_I
 _struct_2d = struct.Struct("<2d")
+_struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
-_struct_2B = struct.Struct("<2B")
+_struct_2did = struct.Struct("<2did")
