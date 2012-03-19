@@ -5,8 +5,8 @@ import rospy
 import tf
 from geometry_msgs.msg import Point
 from sensor_msgs.msg import JointState
-from flycore.msg import *
-from flycore.srv import *
+from flycore.msg import MsgFrameState
+from flycore.srv import SrvFrameState, SrvFrameStateResponse, SrvFrameStateRequest
 from patterngen.srv import SrvSignal, SrvSignalResponse
 
 
@@ -23,7 +23,6 @@ class NullMotor:
         
         # Publish & Subscribe
         rospy.Service('set_stage_state',    SrvFrameState, self.SetStageState_callback)
-        rospy.Service('set_stage_velocity', SrvFrameState, self.SetStageVelocity_callback)
         rospy.Service('get_stage_state',    SrvFrameState, self.GetStageState_callback)
         rospy.Service('home_stage',         SrvFrameState, self.HomeStage_callback)
         rospy.Service('calibrate_stage',    SrvFrameState, self.Calibrate_callback)
@@ -92,12 +91,6 @@ class NullMotor:
 
         return self.rvStageState
     
-
-    def SetStageVelocity_callback(self, reqStageState):
-        self.rvStageState.state.velocity = reqStageState.state.velocity
-
-        return self.rvStageState
-
 
     def HomeStage_callback(self, reqStageState):
         return self.rvStageState

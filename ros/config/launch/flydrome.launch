@@ -10,8 +10,6 @@
 	<!-- ========================================================== -->
 
 	<include file="$(find camera1394v2)/launch/flyatar_camera.launch" />
-	<include file="$(find tracking)/launch/tracking.launch" />
-	<include file="$(find config)/launch/robot_0625h_0625w.launch" />
 	<include file="$(find config)/launch/flybowl_80mm.launch" /> 
 	<include file="$(find fivebar)/launch/fivebar.launch" />
 </launch>

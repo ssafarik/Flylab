@@ -1,8 +1,16 @@
 <launch>
-  <!-- ***  Required Nodes for Flyatar2.  In addition, you'll want 
-            to launch {arena,stage,robot,camera,tracking}.launch files.                *** -->
+	<!-- ========================================================== -->
+	<!-- FLYCORE:  Required Nodes for Flyatar2.                     -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Include this file in your main launch file.                -->
+    <!--                                                            -->
+	<!-- ========================================================== -->
   
-  <include file="$(find image_gui)/launch/DisplayDraw.launch" />
-  <include file="$(find save_data)/launch/save_data.launch" />
+	<include file="$(find image_gui)/launch/DisplayDraw.launch" />
+	<include file="$(find save_data)/launch/save_data.launch" />
+	<include file="$(find tracking)/launch/tracking.launch" />
+	<include file="$(find ui)/launch/ui.launch" />
+	<node pkg="patterngen" type="PatternGenXY.py" name="PatternGen" />
   
 </launch>

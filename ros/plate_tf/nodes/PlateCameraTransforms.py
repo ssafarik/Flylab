@@ -102,9 +102,12 @@ class Transforms:
         rate = rospy.Rate(10)
         try:
             while not rospy.is_shutdown():
-                self.SendTransforms()
-                rate.sleep()
-        except KeyboardInterrupt:
+                try:
+                    self.SendTransforms()
+                    rate.sleep()
+                except tf.Exception:
+                    rospy.logwarn ('Exception in PlateCameraTransforms: %s' % e)
+        except:
             print "Shutting down"
 
 

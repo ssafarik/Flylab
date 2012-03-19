@@ -2,16 +2,17 @@
 from __future__ import division
 import roslib; roslib.load_manifest('stage_action_server')
 import rospy
+import numpy as N
+import threading
 import actionlib
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Header
-from stage_action_server.msg import *
-from flycore.msg import *
-from flycore.srv import *
 import tf
+
+from stage_action_server.msg import *
+from flycore.msg import MsgFrameState
+from flycore.srv import SrvFrameState, SrvFrameStateRequest
 import plate_tf.srv
-import numpy as N
-import threading
 
     
 
@@ -143,7 +144,7 @@ class StageActionServer(object):
         try:
             rospy.spin()
             
-        except KeyboardInterrupt:
+        except:
             print "Shutting down"
 
 

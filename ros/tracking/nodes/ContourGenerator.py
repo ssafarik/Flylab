@@ -16,6 +16,13 @@ from plate_tf.srv import PlateCameraConversion
 FILENAME_BACKGROUND="/cameras/background.png"
 
 
+
+###############################################################################
+###############################################################################
+###############################################################################
+# The class ContourGenerator subscribes to image_rect, and finds the contours of the objects in the image.
+# Publishes a ContourInfo message, and several intermediary images.
+#
 class ContourGenerator:
 
     def __init__(self):

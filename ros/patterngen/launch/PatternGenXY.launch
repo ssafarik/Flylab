@@ -1,4 +1,26 @@
 <launch>
+	<!-- ====================================================================== -->
+	<!-- Launch file for the PATTERNGENerator                                   -->
+    <!--                                                                        -->
+    <!-- Launch this file, and then send messages either programmatically       -->
+    <!-- or with the command:                                                   -->
+    <!--                                                                        -->
+    <!--    rostopic pub -1 PatternGen patterngen/MsgPatternGen mode shape pointlist frame hz count radius preempt   -->
+    <!-- e.g.                                                                   -->
+    <!--    rostopic pub -1 PatternGen patterngen/MsgPatternGen "byshape" "circle" [] "Stage" 0.25 1 40 True           -->
+    <!--                                                                        -->
+    <!-- where:                                                                 -->
+    <!--    mode = "byshape" or "bypoints"                                      -->
+    <!--    shape = "constant" or "circle" or "square" or "flylogo" or "spiral" -->
+    <!--    pointlist = [], or a list of points                                 -->
+    <!--    frame = frame of reference of the output points.                    -->
+    <!--    hz = pattern frequency in hertz                                     -->
+    <!--    count = number of patterns to output, or -1 if forever              -->
+    <!--    radius = maximum distance from center                               -->
+    <!--    preempt = True if this message should preempt prior messages.       -->
+    <!--                                                                        -->
+	<!-- ====================================================================== -->
+    
 	<node name="PatternGenXY" pkg="patterngen" type="PatternGenXY.py" /> 
 </launch>
 

@@ -79,7 +79,7 @@ if __name__ == '__main__':
         experiment = ExperimentPattern()
         experiment.Run()
         
-    except KeyboardInterrupt:
+    except:
         rospy.loginfo("Shutting down")
 
         

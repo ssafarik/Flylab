@@ -1,8 +1,8 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the ARENA (i.e. the "plate" or "flybowl") -->
+	<!-- Configuration of the FIVEBAR mechanism.                    -->
     <!--                                                            -->
-    <!-- Edit this file to describe the particular flybowl.         -->
+    <!-- Edit this file to describe the fivebar hardware.           -->
     <!--                                                            -->
     <!-- Don't launch this file directly.                           -->
     <!-- Launch the hardware-specific .launch file, and point here  -->
@@ -23,11 +23,21 @@
 	-->
 	
 	<!-- Good PID gains to follow a walking fly. -->
-	<param name="fivebar/kP"      type="double" value="0.4"/>
-	<param name="fivebar/kI"      type="double" value="0.6"/>
-	<param name="fivebar/kD"      type="double" value="-0.3"/>
-	<param name="fivebar/maxI"    type="double" value="1.0"/>  <!-- Saturation level of integrator -->
-	<param name="fivebar/kWindup" type="double" value="0.8"/>  <!-- Antiwindup gain -->
+	<!--
+	<param name="fivebar/kP"      type="double" value="0.2"/>
+	<param name="fivebar/kI"      type="double" value="0.4"/>
+	<param name="fivebar/kD"      type="double" value="0.4"/>
+	<param name="fivebar/maxI"    type="double" value="1.0"/>  
+	<param name="fivebar/kWindup" type="double" value="0.8"/>  
+	-->
+
+	<!-- Test PID gains. -->
+	<param name="fivebar/kP"      type="double" value="0.2"/>
+	<param name="fivebar/kI"      type="double" value="0.1"/>
+	<param name="fivebar/kD"      type="double" value="0.0"/>
+	<param name="fivebar/maxI"    type="double" value="0.0"/> 
+	<param name="fivebar/kWindup" type="double" value="1.1"/> 
+	<param name="fivebar/kTest" type="double" value="0.5"/> 
 	
 
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A' units='radians'"/>

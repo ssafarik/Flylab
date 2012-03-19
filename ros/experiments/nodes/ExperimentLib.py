@@ -10,8 +10,8 @@ import tf
 
 from geometry_msgs.msg import Pose, Point, Quaternion
 from stage_action_server.msg import *
-from flycore.msg import *
-from flycore.srv import *
+from flycore.msg import MsgFrameState
+from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from tracking.msg import ArenaState
 from experiments.srv import Trigger, ExperimentParams
 from patterngen.msg import MsgPatternGen
@@ -243,21 +243,26 @@ class NewTrial (smach.State):
 
         
     def execute(self, userdata):
+        rv = 'aborted'
         experimentparams = userdata.experimentparamsIn
         experimentparams.experiment.trial = userdata.experimentparamsIn.experiment.trial+1
         if (experimentparams.experiment.maxTrials != -1):
             if (experimentparams.experiment.maxTrials < experimentparams.experiment.trial):
-                return 'aborted'
+                return rv
 
         rospy.logwarn ('EL State NewTrial(%s)' % experimentparams.experiment.trial)
 
         self.TriggerNotify(False)
         userdata.experimentparamsOut = experimentparams
         #self.pub_experimentparams.publish(experimentparams)
-        self.NewTrial (experimentparams)
+        try:
+            self.NewTrial (experimentparams)
+            rv = 'succeeded'
+        except rospy.ServiceException:
+            rv = 'aborted'
 
         #rospy.logwarn ('EL Exiting NewTrial()')
-        return 'succeeded'
+        return rv
 
 
 
@@ -301,127 +306,130 @@ class TriggerOnStates (smach.State):
             trigger = userdata.experimentparamsIn.triggerExit
 
         rv = 'succeeded'
-        if trigger.enabled:
-            self.timeStart = rospy.Time.now()
-            self.isTriggered = False
-            self.timeTriggered  = None
-            
-            
-            while self.arenastate is None:
-                if self.preempt_requested():
-                    self.TriggerNotify(False)
-                    return 'preempted'
-                rospy.sleep(1.0)
-    
-    
-            rv = 'aborted'
-            while not rospy.is_shutdown():
-                if len(self.arenastate.flies)>0:
-                    iFly = GetNearestFly(self.arenastate)
-                    if iFly is None:
-                        continue
-    
-                    # Test for distance.
-                    isDistanceInRange = True
-                    dMin = trigger.distanceMin
-                    dMax = trigger.distanceMax
-                    distance = None
-                    if (dMin is not None) and (dMax is not None):
-                        distance = GetDistanceFlyToRobot(self.arenastate, iFly)
-                        isDistanceInRange = False
-                        if (dMin <= distance <= dMax):
-                            isDistanceInRange = True
-                            
-                    # Test for angle.
-                    isAngleInRange = True
-                    angleMin = trigger.angleMin
-                    angleMax = trigger.angleMax
-                    angleTest = trigger.angleTest
-                    angleTestBilateral = trigger.angleTestBilateral
-                    if (angleMin is not None) and (angleMax is not None):
-                        angle = GetAngleToRobotInFlyView(self.arenastate, iFly)
-                        
-                        angleA1 = angleMin % (2.0*N.pi)
-                        angleA2 = angleMax % (2.0*N.pi)
-                        angleB1 = (2.0*N.pi - angleA2) # % (2.0*N.pi)
-                        angleB2 = (2.0*N.pi - angleA1) # % (2.0*N.pi)
-        
-                        if angle is not None:
-                            # Test for angle meeting the angle criteria.
-                            isAngleInRange = False
-                            if angleTestBilateral:
-                                if angleTest=='inclusive':
-                                    #rospy.logwarn('EL angles %s' % [angleA1, angleA2, angleB1, angleB2, angle])
-                                    if (angleA1 <= angle <= angleA2) or (angleB1 <= angle <= angleB2):
-                                        isAngleInRange = True
-                                        
-                                elif angleTest=='exclusive':
-                                    if (0.0 <= angle < angleA1) or (angleA2 < angle < angleB1) or (angleB2 < angle <= (2.0*N.pi)):
-                                        isAngleInRange = True
-                            else:
-                                if angleTest=='inclusive':
-                                    if (angleA1 <= angle <= angleA2):
-                                        isAngleInRange = True
-                                        
-                                elif angleTest=='exclusive':
-                                    if (angle < angleA1) or (angleA2 < angle):
-                                        isAngleInRange = True
-                        
-                    
-                    # Test for speed.
-                    isSpeedInRange = True
-                    speedMin = trigger.speedMin
-                    speedMax = trigger.speedMax
-                    if (speedMin is not None) and (speedMax is not None):
-                        speed = GetSpeedFly(self.arenastate, iFly)
-                        #rospy.loginfo ('EL speed=%s' % speed)
-                        isSpeedInRange = False
-                        if speed is not None:
-                            if (speedMin <= speed <= speedMax):
-                                isSpeedInRange = True
-    
-                    # Test all the trigger criteria.
-                    if isDistanceInRange and isAngleInRange and isSpeedInRange:
-                        
-                        # Set the pending trigger start time.
-                        if not self.isTriggered:
-                            self.isTriggered = True
-                            self.timeTriggered = rospy.Time.now()
-                    else:
-                        # Cancel a pending trigger.
-                        self.isTriggered = False
-                        self.timeTriggered = None
-    
-                    #if (distance is not None) and (angle is not None) and (speed is not None):
-                    #    rospy.logwarn ('EL triggers=distance=%0.3f, speed=%0.3f, angle=%0.3f, bools=%s' % (distance, speed, angle, [isDistanceInRange, isSpeedInRange, isAngleInRange]))
-    
-                    # If pending trigger has lasted longer than requested duration, then set trigger.
-                    if (self.isTriggered):
-                        duration = rospy.Time.now().to_sec() - self.timeTriggered.to_sec()
-                        
-                        if duration >= trigger.timeHold:
-                            rv = 'succeeded'
-                            break
-                        
-                        #rospy.logwarn('EL duration=%s' % duration)
-                        
-                    
-                if self.preempt_requested():
-                    rv = 'preempted'
-                    break
+        try:
+            if trigger.enabled:
+                self.timeStart = rospy.Time.now()
+                self.isTriggered = False
+                self.timeTriggered  = None
                 
-                if trigger.timeout != -1:
-                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > trigger.timeout:
+                
+                while self.arenastate is None:
+                    if self.preempt_requested():
+                        self.TriggerNotify(False)
+                        return 'preempted'
+                    rospy.sleep(1.0)
+        
+        
+                rv = 'aborted'
+                while not rospy.is_shutdown():
+                    if len(self.arenastate.flies)>0:
+                        iFly = GetNearestFly(self.arenastate)
+                        if iFly is None:
+                            continue
+        
+                        # Test for distance.
+                        isDistanceInRange = True
+                        dMin = trigger.distanceMin
+                        dMax = trigger.distanceMax
+                        distance = None
+                        if (dMin is not None) and (dMax is not None):
+                            distance = GetDistanceFlyToRobot(self.arenastate, iFly)
+                            isDistanceInRange = False
+                            if (dMin <= distance <= dMax):
+                                isDistanceInRange = True
+                                
+                        # Test for angle.
+                        isAngleInRange = True
+                        angleMin = trigger.angleMin
+                        angleMax = trigger.angleMax
+                        angleTest = trigger.angleTest
+                        angleTestBilateral = trigger.angleTestBilateral
+                        if (angleMin is not None) and (angleMax is not None):
+                            angle = GetAngleToRobotInFlyView(self.arenastate, iFly)
+                            
+                            angleA1 = angleMin % (2.0*N.pi)
+                            angleA2 = angleMax % (2.0*N.pi)
+                            angleB1 = (2.0*N.pi - angleA2) # % (2.0*N.pi)
+                            angleB2 = (2.0*N.pi - angleA1) # % (2.0*N.pi)
+            
+                            if angle is not None:
+                                # Test for angle meeting the angle criteria.
+                                isAngleInRange = False
+                                if angleTestBilateral:
+                                    if angleTest=='inclusive':
+                                        #rospy.logwarn('EL angles %s' % [angleA1, angleA2, angleB1, angleB2, angle])
+                                        if (angleA1 <= angle <= angleA2) or (angleB1 <= angle <= angleB2):
+                                            isAngleInRange = True
+                                            
+                                    elif angleTest=='exclusive':
+                                        if (0.0 <= angle < angleA1) or (angleA2 < angle < angleB1) or (angleB2 < angle <= (2.0*N.pi)):
+                                            isAngleInRange = True
+                                else:
+                                    if angleTest=='inclusive':
+                                        if (angleA1 <= angle <= angleA2):
+                                            isAngleInRange = True
+                                            
+                                    elif angleTest=='exclusive':
+                                        if (angle < angleA1) or (angleA2 < angle):
+                                            isAngleInRange = True
+                            
+                        
+                        # Test for speed.
+                        isSpeedInRange = True
+                        speedMin = trigger.speedMin
+                        speedMax = trigger.speedMax
+                        if (speedMin is not None) and (speedMax is not None):
+                            speed = GetSpeedFly(self.arenastate, iFly)
+                            #rospy.loginfo ('EL speed=%s' % speed)
+                            isSpeedInRange = False
+                            if speed is not None:
+                                if (speedMin <= speed <= speedMax):
+                                    isSpeedInRange = True
+        
+                        # Test all the trigger criteria.
+                        if isDistanceInRange and isAngleInRange and isSpeedInRange:
+                            
+                            # Set the pending trigger start time.
+                            if not self.isTriggered:
+                                self.isTriggered = True
+                                self.timeTriggered = rospy.Time.now()
+                        else:
+                            # Cancel a pending trigger.
+                            self.isTriggered = False
+                            self.timeTriggered = None
+        
+                        #if (distance is not None) and (angle is not None) and (speed is not None):
+                        #    rospy.logwarn ('EL triggers=distance=%0.3f, speed=%0.3f, angle=%0.3f, bools=%s' % (distance, speed, angle, [isDistanceInRange, isSpeedInRange, isAngleInRange]))
+        
+                        # If pending trigger has lasted longer than requested duration, then set trigger.
+                        if (self.isTriggered):
+                            duration = rospy.Time.now().to_sec() - self.timeTriggered.to_sec()
+                            
+                            if duration >= trigger.timeHold:
+                                rv = 'succeeded'
+                                break
+                            
+                            #rospy.logwarn('EL duration=%s' % duration)
+                            
+                        
+                    if self.preempt_requested():
                         rv = 'preempted'
                         break
-                
-                self.rosrate.sleep()
-
-        if rv=='succeeded' and self.type=='entry':
-            self.TriggerNotify(True)
-        else:
-            self.TriggerNotify(False)
-        
+                    
+                    if trigger.timeout != -1:
+                        if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > trigger.timeout:
+                            rv = 'preempted'
+                            break
+                    
+                    self.rosrate.sleep()
+    
+            if rv=='succeeded' and self.type=='entry':
+                self.TriggerNotify(True)
+            else:
+                self.TriggerNotify(False)
+        except rospy.ServiceException:
+            rv = 'aborted'
+            
         #rospy.logwarn ('EL Exiting TriggerOnStates()')
         return rv
 
@@ -613,6 +621,7 @@ class MoveRobot (smach.State):
             
     def MoveRelative (self, userdata):            
         self.ptTarget = None
+        rv = 'aborted'
 
         while not rospy.is_shutdown():
             posRobot = self.arenastate.robot.pose.position # Assumed in the "Plate" frame.
@@ -692,7 +701,7 @@ class MoveRobot (smach.State):
                     self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
                                                                                   pose=self.goal.state.pose),
                                                               speed = speedTarget))
-                except rospy.ServiceException:
+                except (rospy.ServiceException, rospy.ROSInterruptException):
                     self.ptTarget = None
                 #rospy.logwarn('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
 
@@ -869,8 +878,12 @@ class Experiment():
 
     def Run(self):
         self.sis.start()
-        outcome = self.sm.execute()
-        rospy.logwarn ('Experiment returned with: %s' % outcome)
+        try:
+            outcome = self.sm.execute()
+            rospy.logwarn ('Experiment returned with: %s' % outcome)
+        except smach.exceptions.InvalidUserCodeError:
+            pass
+        
         self.sis.stop()
 
 

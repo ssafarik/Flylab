@@ -5,18 +5,20 @@
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- experiment.                                                -->
     <!--                                                            -->
-    <!-- Launch this file to run the experiment.                    -->
+    <!-- Launch this file to run the experiment, as in:             -->
+    <!-- roslaunch experiments chase.launch                         -->
+    <!--                                                            -->
 	<!-- ========================================================== -->
 
-	<!-- *** Core stuff *** -->
-	<include file="$(find image_gui)/launch/DisplayDraw.launch" />
-	<include file="$(find save_data)/launch/save_data.launch" />
-	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find ui)/launch/ui.launch" />
+	<!-- ***  Core stuff  *** -->
+	<include file="$(find flycore)/launch/flycore.launch" />
 	
-	<!-- *** The Experiment *** -->
+	<!-- ***  Hardware, Flies, and Robot  *** -->
+	<include file="$(find config)/launch/hardware.launch" />
+	<include file="$(find config)/launch/robot_0625h_0625w.launch" />
 	<include file="$(find config)/launch/flies.launch" />
-	<node pkg="patterngen" type="PatternGenXY.py" name="PatternGen" />
+
+	<!-- ***  The Experiment  *** -->
 	<node pkg="experiments" type="Pattern.py" name="ExperimentPattern" />
 
 	

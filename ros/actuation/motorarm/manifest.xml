@@ -1,14 +1,14 @@
 <package>
-  <description brief="Fivebar">
+  <description brief="motorarm">
 
-     Fivebar
+     motorarm
 
   </description>
   <author>Steve Safarik</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/Fivebar</url>
-  
+  <url>http://ros.org/wiki/motorarm</url>
+
   <depend package="rospy"/>
   <depend package="sensor_msgs"/>
   <depend package="geometry_msgs"/>
@@ -24,7 +24,6 @@
   
   <depend package="flycore"/>
   <depend package="patterngen"/>
-  
 
 </package>
 
