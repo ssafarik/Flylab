@@ -208,9 +208,9 @@ class MotorArm:
                                                      y=reqStageState.state.pose.position.y,
                                                      z=reqStageState.state.pose.position.z))
         try:
-            self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
-            self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
-            #self.ptsToolRef = self.ptsToolRefExternal
+            #self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
+            #self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
+            self.ptsToolRef = self.ptsToolRefExternal
             
         except tf.Exception:
             pass
@@ -241,9 +241,9 @@ class MotorArm:
         if self.initialized:
             self.ptsToolRefExternal = srvSignal.pts #self.pattern.points[self.iPoint]
             try:
-                self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
-                self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
-                #self.ptsToolRef = self.ptsToolRefExternal
+                #self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
+                #self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
+                self.ptsToolRef = self.ptsToolRefExternal
     
                 try:
                     self.speedCommandTool = self.speedStageMax

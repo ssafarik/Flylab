@@ -400,6 +400,7 @@ class ContourIdentifier:
 
     def __init__(self):
         self.initialized = False
+        self.stateEndEffector = None  # If no robot exists, this will remain as None.  Set in EndEffector callback.
         self.maxFlies = rospy.get_param('maxFlies', 1)
         
         self.contours = []
@@ -421,7 +422,6 @@ class ContourIdentifier:
         self.tfbx = tf.TransformBroadcaster()
         
         # Poses
-        self.stateEndEffector = None  # If no robot exists, this will remain as None.  Set in EndEffector callback.
         self.poseRobot = Pose()
         self.posearrayFly = PoseArray()
         
@@ -466,10 +466,10 @@ class ContourIdentifier:
             print "Service call failed: %s"%e
 
         # Open a file for saving raw data.
-        self.fidRobot = open("/home/ssafarik/robot.csv", 'w')
+        self.fidRobot = open("/tmp/robot.csv", 'w')
         self.fidRobot.write("xendeffector, yendeffector, xfiltered, yfiltered, xcontour, ycontour\n")
 
-        self.fidFly = open("/home/ssafarik/fly.csv", 'w')
+        self.fidFly = open("/tmp/fly.csv", 'w')
         self.fidFly.write("xraw, yraw, xfiltered, yfiltered\n")
 
         rospy.on_shutdown(self.OnShutdown_callback)
