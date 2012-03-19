@@ -81,7 +81,7 @@ class MotorArm:
         self.ptOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
         
         self.speedCommandTool = None 
-        self.speedStageMax = rospy.get_param('motor/speed_max', 200.0)
+        self.speedStageMax = rospy.get_param('motorarm/speed_max', 200.0)
         
         self.request = SrvFrameStateRequest()
         #self.request.state.header.stamp = rospy.Time.now()
@@ -274,7 +274,7 @@ class MotorArm:
     def SendTargetCommand(self):
         #rospy.loginfo ('MotorArm ptToolRef=%s' % self.ptToolRef)
         if self.ptsToolRef is not None:
-            self.speedStageMax = rospy.get_param('motor/speed_max', 200.0)
+            self.speedStageMax = rospy.get_param('motorarm/speed_max', 200.0)
             
             
             # Get the command for the hardware.            
@@ -496,9 +496,9 @@ class MotorArm:
 
 if __name__ == '__main__':
     try:
-        motor = MotorArm()
+        motorarm = MotorArm()
     except rospy.ROSInterruptException: 
         pass
     
-    motor.Mainloop()
+    motorarm.Mainloop()
     

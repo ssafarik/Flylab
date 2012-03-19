@@ -9,13 +9,13 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
     
-	<param name="robot_description" textfile="$(find motor)/motor_urdf.xml" />
+	<param name="robot_description" textfile="$(find motorarm)/motorarm_urdf.xml" />
 	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />
-	<param name="motor/speed_max" type="double" value="200.0"/>
+	<param name="motorarm/speed_max" type="double" value="200.0"/>
 	
 
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A' units='radians'"/>
-	<node name="Motor" pkg="motor" type="Motor.py" />
+	<node name="MotorArm" pkg="motorarm" type="MotorArm.py" />
 
 	<include file="$(find stage_action_server)/launch/stage_action_server.launch" />
 
