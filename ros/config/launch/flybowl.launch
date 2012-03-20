@@ -1,0 +1,17 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of FLYBOWL hardware.                         -->
+    <!--                                                            -->
+    <!-- Edit this file to contain the elements of the particular   -->
+    <!-- hardware.                                                  -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch hardware.launch, and point here from there.         -->
+	<!-- ========================================================== -->
+
+	<include file="$(find camera1394v2)/launch/flyatar_camera.launch" />
+	<include file="$(find config)/launch/flybowl_32mm.launch" /> 
+	<include file="$(find motorarm)/launch/motorarm.launch" />
+</launch>
+	
+	

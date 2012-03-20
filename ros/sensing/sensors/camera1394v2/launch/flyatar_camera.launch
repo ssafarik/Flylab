@@ -9,7 +9,8 @@
 	<include file="$(find plate_tf)/launch/plate_tf.launch" />
 	
 	<node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
-		<rosparam file="$(find flyatar_calibration)/calibration_data/$(optenv CAMERA settings_basler_a622f).yaml" />
+		<!-- <rosparam file="$(find flyatar_calibration)/calibration_data/$(optenv CAMERA settings_basler_a622f).yaml" /> -->
+		<rosparam file="/cameras/camera.yaml" />
 	</node>
 	<node ns="camera" name="image_proc" pkg="image_proc" type="image_proc" />
   
