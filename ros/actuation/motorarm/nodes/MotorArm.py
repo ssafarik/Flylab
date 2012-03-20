@@ -80,6 +80,8 @@ class MotorArm:
         self.ptEeCommand = Point(0,0,0) # Where to command the end-effector.
         self.ptOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
         
+        self.unwind = 0.0
+        self.thetaPrev = 0.0
         self.speedCommandTool = None 
         self.speedStageMax = rospy.get_param('motorarm/speed_max', 200.0)
         
@@ -148,9 +150,17 @@ class MotorArm:
     #
     def GetThetaFromXy (self, x, y):
         
-        t1 = N.arctan2(y,x)
+        theta = N.arctan2(y,x) + self.unwind
+        if (theta+self.unwind)-self.thetaPrev > N.pi:
+            self.unwind -= 2.0*N.pi 
+        if (theta+self.unwind)-self.thetaPrev < -N.pi:
+            self.unwind += 2.0*N.pi 
         
-        return t1
+        theta += self.unwind
+        self.thetaPrev = theta
+        
+        rospy.logwarn('theta=%0.2f, unwind=%0.2f' % (theta, self.unwind))
+        return theta
         
         
     

@@ -159,6 +159,28 @@ class PatternGenXY:
         return points
         
 
+    # GetPointsRamp() creates a set of points where pt.x goes from 0 to radius, and pt.y goes from radius to 0.
+    def GetPointsRamp(self):
+        nPoints = 360
+        delta = self.pattern.radius / (nPoints-1)
+        x = 0.0
+        points = []
+        for i in range(nPoints):
+            points.append(Point(x=x, 
+                                y=self.pattern.radius-x))
+            x = x+dx
+
+#                    if q%(2.0*N.pi) <= qrate*dt: # Next circle.
+#                        if self.TriggerNotify is not None:
+#                            self.TriggerNotify(False)
+#                        experimentparams.experiment.trial = 1+(experimentparams.experiment.trial % 2)
+#                        self.NewTrial (experimentparams)        
+#                        if self.TriggerNotify is not None:
+#                            self.TriggerNotify(True)
+
+        return points
+    
+        
     # PatternGen_callback() 
     #   Receive the message that sets up a pattern generation.
     #
@@ -186,14 +208,19 @@ class PatternGenXY:
         if self.pattern.mode == 'byshape':  # Create the point list.
             if self.pattern.shape == 'constant':
                 self.pattern.points = self.GetPointsConstant()
-            if self.pattern.shape == 'circle':
+            elif self.pattern.shape == 'circle':
                 self.pattern.points = self.GetPointsCircle()
-            if self.pattern.shape == 'square':
+            elif self.pattern.shape == 'square':
                 self.pattern.points = self.GetPointsSquare()
-            if self.pattern.shape == 'flylogo':
+            elif self.pattern.shape == 'flylogo':
                 self.pattern.points = self.GetPointsFlylogo()
-            if self.pattern.shape == 'spiral':
+            elif self.pattern.shape == 'spiral':
                 self.pattern.points = self.GetPointsSpiral()
+            elif self.pattern.shape == 'ramp':
+                self.pattern.points = self.GetPointsRamp()
+            else:
+                rospy.logerror('PatternGen: unknown shape')
+                
         
         self.dtPoint = (1/self.pattern.hz) / len(self.pattern.points)
 
