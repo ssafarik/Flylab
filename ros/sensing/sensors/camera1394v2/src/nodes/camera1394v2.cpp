@@ -348,8 +348,7 @@ public:
     // immediately with level 0xffffffff.  The reconfig() method will
     // set initial parameter values, then open the device if it can.
     dynamic_reconfigure::Server<Config> srv;
-    dynamic_reconfigure::Server<Config>::CallbackType f
-      = boost::bind(&Camera1394v2Node::reconfig, this, _1, _2);
+    dynamic_reconfigure::Server<Config>::CallbackType f = boost::bind(&Camera1394v2Node::reconfig, this, _1, _2);
     srv.setCallback(f);
 
     // set up ROS interfaces in camera namespace

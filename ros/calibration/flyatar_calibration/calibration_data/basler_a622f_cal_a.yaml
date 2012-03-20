@@ -1,3 +1,0 @@
-#guid: 00305300013aa532          # (defaults to first camera on bus)
-video_mode: format7_mode0
-frame_id: basler_a622f

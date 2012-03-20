@@ -84,7 +84,7 @@ if __name__ == '__main__':
         experiment = ExperimentChase()
         experiment.Run()
         
-    except KeyboardInterrupt:
-        rospy.loginfo("Shutting down")
+    except:
+        pass
 
         

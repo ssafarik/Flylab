@@ -2,7 +2,6 @@
   <include file="$(find flyatar_calibration)/calibration_data/calibration_stage_plate.launch" />
   <include file="$(find flyatar_calibration)/calibration_data/calibration_camera_plate.launch" />
 
-  <node pkg="tf" type="static_transform_publisher" name="statictf_baslera622f_Camera_publisher"    args="0 0 0 0 0 0 basler_a622f Camera     10" />
   <node name="plate_camera_transforms" pkg="plate_tf" type="PlateCameraTransforms.py"/>
   <node name="PlateStageTransforms" pkg="plate_tf" type="PlateStageTransforms.py"/>
 </launch>

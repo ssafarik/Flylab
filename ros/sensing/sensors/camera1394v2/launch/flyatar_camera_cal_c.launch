@@ -1,6 +1,0 @@
-<launch>
-  <node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
-    <rosparam file="$(find flyatar_calibration)/calibration_data/$(optenv CAMERA basler_a622f_cal_c).yaml" />
-  </node>
-  <node ns="camera" pkg="image_proc" type="image_proc" name="image_proc" />
-</launch>
