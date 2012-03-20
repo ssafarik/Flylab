@@ -1,6 +1,6 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of FLYBOWL hardware.                         -->
+	<!-- Configuration of COLOSSEUM hardware.                       -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- hardware.                                                  -->
@@ -9,9 +9,11 @@
     <!-- Launch hardware.launch, and point here from there.         -->
 	<!-- ========================================================== -->
 
-	<include file="$(find camera1394v2)/launch/flyatar_camera.launch" />
-	<include file="$(find config)/launch/flybowl_32mm.launch" /> 
-	<include file="$(find motorarm)/launch/motorarm.launch" />
+	<include file="$(find camera1394v2)/launch/camera_colosseum.launch" />
+	<include file="$(find config)/launch/flybowl_80mm.launch" /> 
+	<include file="$(find fivebar)/launch/fivebar.launch" />
+	
+	<include file="$(find flyatar_calibration)/calibration_data/calibration_colosseum.launch" />
 </launch>
 	
 	

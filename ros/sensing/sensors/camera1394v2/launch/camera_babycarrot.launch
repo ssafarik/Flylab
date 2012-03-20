@@ -1,16 +1,16 @@
 <launch>
 
 	<!-- ========================================================== -->
-	<!-- Configuration of a generic ieee1394 CAMERA                 -->
+	<!-- Configuration of the camera attached to the BABYCARROT.    -->
     <!-- Don't launch this file directly.                           -->
-    <!-- Launch camera.launch, and point here from there.           -->
+    <!-- Launch the babycarrot.launch file, and point here          -->
+    <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
 	<include file="$(find plate_tf)/launch/plate_tf.launch" />
-	<node pkg="tf" type="static_transform_publisher" name="statictf_baslera622f_Camera_publisher" args="0 0 0 0 0 0 NAME_OF_CAMERA Camera 10" />
+	<node pkg="tf" type="static_transform_publisher" name="statictf_baslera622f_Camera_publisher" args="0 0 0 0 0 0 basler_a622f Camera 10" />
 	<node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
-		<rosparam file="$(find flyatar_calibration)/calibration_data/settings_NAME_OF_CAMERA.yaml" />
-		
+		<rosparam file="$(find flyatar_calibration)/calibration_data/settings_camera_babycarrot.yaml" />
 	</node>
 	
 	<node ns="camera" name="image_proc" pkg="image_proc" type="image_proc" />
