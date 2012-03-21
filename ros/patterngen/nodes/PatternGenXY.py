@@ -42,6 +42,7 @@ class PatternGenXY:
 
 
     def GetPointsConstant(self):
+        pathlength = 1.0
         nPoints = 100
         points = [Point(x=self.pattern.radius, 
                         y=self.pattern.radius)] * nPoints  # [(r,r),(r,r),(r,r), ...]
@@ -50,8 +51,9 @@ class PatternGenXY:
 
     
     def GetPointsCircle(self):
-        nPoints = 360
-        q = N.pi/2.0  # Starting position
+        pathlength = 2.0 * N.pi * self.pattern.radius
+        nPoints = 100
+        q = 0.0 #N.pi/2.0  # Starting position
         dq = 2.0*N.pi/nPoints
         r = self.pattern.radius
 
@@ -61,18 +63,11 @@ class PatternGenXY:
                                 y=r*N.sin(q)))
             q = q + dq    # Step around the circle
 
-#                    if q%(2.0*N.pi) <= qrate*dt: # Next circle.
-#                        if self.TriggerNotify is not None:
-#                            self.TriggerNotify(False)
-#                        experimentparams.experiment.trial = 1+(experimentparams.experiment.trial % 2)
-#                        self.NewTrial (experimentparams)        
-#                        if self.TriggerNotify is not None:
-#                            self.TriggerNotify(True)
-
         return points
     
         
     def GetPointsSquare(self):
+        pathlength = 4.0 * self.pattern.radius * N.sqrt(2.0)
         nPoints = 1 # Points per side.
         xmin = -self.pattern.radius / N.sqrt(2)
         xmax =  self.pattern.radius / N.sqrt(2)
@@ -118,7 +113,9 @@ class PatternGenXY:
                    [-7, -4],[-6, -5],[-7, -7],[-3, -11],[-4, -14],[-3, -11],[-7, -7],[-6, -5],
                    [-3, -7],[3, -13],[13, -15],[16, -12],[12, -6],[4, -2],
                    [0, -1],[-5, -4],[-2, 0],[-5, 4],[0, 1],[4, 2],[4, -2],[7,0],[4, 2],[12, 6],[16, 12],[13, 15],[3, 13],[-3, 7],[-6, 5],[-7, 7],[-3, 11],[-4, 14]]
+        pathlength = 0.0
         points = []
+
         for k in range(len(flylogo)):
             pt = Point(x=float(flylogo[k][0]) * self.pattern.radius / 20.0, 
                        y=float(flylogo[k][1]) * self.pattern.radius / 20.0) # 20.0 is the max radius of the pointlist above.
@@ -128,6 +125,7 @@ class PatternGenXY:
     
         
     def GetPointsSpiral (self):
+        pathlength = 0.0
         nPointsPerSegment = 180
         nSegmentsPerPattern = 1
         pitchSpiral = 2
@@ -161,22 +159,20 @@ class PatternGenXY:
 
     # GetPointsRamp() creates a set of points where pt.x goes from 0 to radius, and pt.y goes from radius to 0.
     def GetPointsRamp(self):
-        nPoints = 360
-        delta = self.pattern.radius / (nPoints-1)
-        x = 0.0
+        pathlength = 0.0
+        nPoints = 100
+        xStart = 0.0
+        xEnd = self.pattern.radius
+
+        delta = (xEnd-xStart) / (nPoints-1)
+        
+        x = xStart
         points = []
         for i in range(nPoints):
             points.append(Point(x=x, 
-                                y=self.pattern.radius-x))
-            x = x+dx
+                                y=xEnd-x))
+            x = x+delta
 
-#                    if q%(2.0*N.pi) <= qrate*dt: # Next circle.
-#                        if self.TriggerNotify is not None:
-#                            self.TriggerNotify(False)
-#                        experimentparams.experiment.trial = 1+(experimentparams.experiment.trial % 2)
-#                        self.NewTrial (experimentparams)        
-#                        if self.TriggerNotify is not None:
-#                            self.TriggerNotify(True)
 
         return points
     
@@ -185,11 +181,11 @@ class PatternGenXY:
     #   Receive the message that sets up a pattern generation.
     #
     def PatternGen_callback (self, msgPatternGen):
-        self.pattern.mode = msgPatternGen.mode
-        self.pattern.shape = msgPatternGen.shape
-        self.pattern.frame = msgPatternGen.frame
-        self.pattern.hz = msgPatternGen.hz
-        self.pattern.count = msgPatternGen.count
+        self.pattern.mode   = msgPatternGen.mode
+        self.pattern.shape  = msgPatternGen.shape
+        self.pattern.frame  = msgPatternGen.frame
+        self.pattern.hz     = msgPatternGen.hz
+        self.pattern.count  = msgPatternGen.count
         self.pattern.radius = msgPatternGen.radius
 
         if self.pattern.count==-1:
@@ -232,6 +228,7 @@ class PatternGenXY:
             self.dtPoint = 1/self.hzPoint
 
         self.rosRate = rospy.Rate(self.hzPoint) # The proper rate.
+        rospy.logwarn('hzPoint=%0.2f' % self.hzPoint)
 
         
         
@@ -263,6 +260,7 @@ class PatternGenXY:
                             self.iPoint = 0
                             self.pattern.count -= 1
                             self.UpdatePatternPoints()
+                            self.UpdateTiming()
                             
                 
                 self.rosRate.sleep()
