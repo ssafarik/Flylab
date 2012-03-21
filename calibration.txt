@@ -1,5 +1,15 @@
-# Calibration:
-# Todo: Simplify calibration, change calibration data location, save all data automatically
+###############################################################################################################
+###############################################################################################################
+##  Calibration Overview:  
+##  The steps below result in several files specific to your camera, camera position, and experimental hardware:
+##  	<your device name>.launch
+##  	params_camera_<your device name>.yaml
+##  	camera_<your device name>.launch
+##  	calibration_<your device name>.yaml
+##  	/cameras/<your device name>_calibration.yaml
+##  	/cameras/background.png
+###############################################################################################################
+###############################################################################################################
 
 
 0 ############################### Preliminary System Stuff:
@@ -11,20 +21,21 @@ groups   # (If "video" isn't listed, then "sudo usermod -a -G video username").
 
 
 1 ############################### Point to your hardware:
+# Determine the name of your experimental hardware, i.e. <your device name>
 roscd config
 cd launch
-# Edit (or create) a .launch file that describes your hardware (see flydrome.launch for an example).
+# Edit (or create) a .launch file that describes your hardware (see colosseum.launch for an example).
 # Edit hardware.launch to point to your .launch file.
 
 # Create device-specific files:
 roscd flyatar_calibration/calibration_data/
-cp settings_camera_NAME.yaml settings_camera_<your device name>.yaml        # For example only.  Use your own device name.
+cp params_camera_NAME.yaml params_camera_<your device name>.yaml        # For example only.  Use your own device name.
 cp calibration_NAME.yaml calibration_<your device name>.yaml                # For example only.  Use your own device name.
 roscd camera1394v2/launch/
 cp camera_NAME.launch camera_<your device name>.launch                      # For example only.  Use your own device's name.
 # Edit "camera_<your device name>.launch" to refer to the <camera name> frame.
-# Edit "camera_<your device name>.launch" to refer to the "settings_camera_<your device name>.yaml" file.
-# Edit "settings_camera_<your device name>.launch" to refer to the yet-to-be-created "/cameras/<camera name>_calibration.yaml" file.
+# Edit "camera_<your device name>.launch" to refer to the "params_camera_<your device name>.yaml" file.
+# Edit "params_camera_<your device name>.yaml" to refer to the yet-to-be-created "/cameras/<camera name>_calibration.yaml" file.
 
 
 
@@ -42,7 +53,7 @@ rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node &
 
 
 # Adjust mode, brightness, exposure, gain, shutter, etc.
-# Edit "settings_camera_<your device name>.yaml" with the new settings, for example:
+# Edit "params_camera_<your device name>.yaml" with the new settings, for example:
 #     ~/git/Flyatar2/ros/calibration/flyatar_calibration/calibration_data/settings_basler_a622f.yaml
 # Close the Dynamic Reconfigure window.
 
