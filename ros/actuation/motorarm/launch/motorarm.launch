@@ -11,6 +11,8 @@
     
 	<param name="robot_description" textfile="$(find motorarm)/motorarm_urdf.xml" />
 	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />
+	<param name="rosSimpleStep/limitHi" type="double" value="2147483647" />
+	<param name="rosSimpleStep/limitLo" type="double" value="-2147483646" />
 	<param name="motorarm/speed_max" type="double" value="200.0"/>
 	
 

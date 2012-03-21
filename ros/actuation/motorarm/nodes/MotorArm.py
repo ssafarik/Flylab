@@ -150,19 +150,19 @@ class MotorArm:
     #
     def GetThetaFromXy (self, x, y):
         
-        theta = N.arctan2(y,x)+self.unwind
+        theta = (N.arctan2(y,x) % (2.0*N.pi))+self.unwind
         
-        if (theta-self.thetaPrev) > N.pi:
+        if (theta-self.thetaPrev) > N.pi: # Clockwise across zero.
             theta -= 2.0*N.pi
             self.unwind -= 2.0*N.pi
             
-        if (theta-self.thetaPrev) < -N.pi:
+        elif (theta-self.thetaPrev) < -N.pi: # CCW across zero.
             self.theta += 2.0*N.pi
             self.unwind += 2.0*N.pi 
         
         self.thetaPrev = theta
         
-        rospy.logwarn('theta=%0.2f, unwind=%0.2f' % (theta, self.unwind))
+        #rospy.logwarn('theta=%0.2f, unwind=%0.2f' % (theta, self.unwind))
         return theta
         
         

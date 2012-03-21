@@ -9,7 +9,7 @@ import numpy as N
 
 
 class NullClass:
-    None
+    pass
     
 class PatternGenXY:
 
@@ -226,8 +226,8 @@ class PatternGenXY:
 
         
         
-    def main(self):
-        rospy.loginfo('%s' % self.pattern)
+    def Main(self):
+        rospy.loginfo('pattern object=%s' % self.pattern)
         try:
             hzPoint = 10.0
             rosRate = rospy.Rate(hzPoint) # The default rate.
@@ -269,8 +269,8 @@ class PatternGenXY:
 
 if __name__ == '__main__':
     try:
-        node = PatternGenXY()
-        node.main()
+        patterngen = PatternGenXY()
+        patterngen.Main()
     except rospy.ROSInterruptException: 
         pass
 
