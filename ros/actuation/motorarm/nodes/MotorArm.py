@@ -136,10 +136,10 @@ class MotorArm:
         
 
     # Forward kinematics:  Get x,y from theta 1
-    def GetXyFromTheta (self, t1):
+    def GetXyFromTheta (self, angle):
         # Rotate the frames from centered to east-pointing. 
-        x = L1*N.cos(t1)
-        y = L1*N.sin(t1)
+        x = L1*N.cos(angle)
+        y = L1*N.sin(angle)
 
         return (x, y)
     
@@ -324,20 +324,24 @@ class MotorArm:
 
             
             # Get the desired positions for each joint.
-            t1 = self.GetThetaFromXy(self.ptEeCommand.x, self.ptEeCommand.y)
-            
+            if self.ptsToolRef.header.frame_id=='joint': # Jointspace uses pt.x at the angle
+                angle = self.ptEeCommand.x
+            else:                                        # Other frames of reference use the angle of (x,y)
+                angle = self.GetThetaFromXy(self.ptEeCommand.x, self.ptEeCommand.y)
+
+            # Compute deltas for velocity calc.
+            time = rospy.Time.now()
+            self.dAngle = angle - self.anglePrev
+            self.dTime = time - self.timePrev
+            self.anglePrev = angle
+            self.timePrev = time
     
             if (self.jointstate1 is not None):
-                # Cheap and wrong way to convert mm/sec to radians/sec.  Should use Jacobian.                    
-                speedMax = self.speedCommandTool * 0.0120 
-
-                v1 = speedMax
-                #rospy.logwarn('MotorArm speedMax=%s, v1=%s' % (speedMax,v1))
-        
+                velocity = self.dAngle / self.dTime
                 
                 with self.lock:
                     try:
-                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), t1, v1)
+                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angle, velocity)
                     except (rospy.ServiceException, IOError), e:
                         rospy.logwarn ("MotorArm FAILED %s"%e)
 
