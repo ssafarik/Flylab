@@ -157,7 +157,7 @@ class MotorArm:
             self.unwind -= 2.0*N.pi
             
         elif (theta-self.thetaPrev) < -N.pi: # CCW across zero.
-            self.theta += 2.0*N.pi
+            theta += 2.0*N.pi
             self.unwind += 2.0*N.pi 
         
         self.thetaPrev = theta

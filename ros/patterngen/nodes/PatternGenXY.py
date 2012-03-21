@@ -199,6 +199,7 @@ class PatternGenXY:
             self.pattern.points = msgPatternGen.points
             
         self.UpdatePatternPoints()
+        self.UpdateTiming()
         if msgPatternGen.preempt or self.iPoint >= len(self.pattern.points):
             self.iPoint = 0
             
@@ -221,23 +222,27 @@ class PatternGenXY:
             else:
                 rospy.logerror('PatternGen: unknown shape')
                 
-        
-        self.dtPoint = (1/self.pattern.hz) / len(self.pattern.points)
+                
+    def UpdateTiming (self):
+        if len(self.pattern.points)>0:
+            self.dtPoint = (1.0/self.pattern.hz) / len(self.pattern.points)
+            self.hzPoint = 1.0/self.dtPoint
+        else:
+            self.hzPoint = 100.0
+            self.dtPoint = 1/self.hzPoint
+
+        self.rosRate = rospy.Rate(self.hzPoint) # The proper rate.
 
         
         
     def Main(self):
         rospy.loginfo('pattern object=%s' % self.pattern)
         try:
-            hzPoint = 10.0
-            rosRate = rospy.Rate(hzPoint) # The default rate.
+            self.UpdateTiming()
+            
             while not rospy.is_shutdown():
-                self.dtPoint = 0.10
                 if self.pattern.points is not None and len(self.pattern.points)>0:
-                    self.dtPoint = (1.0/self.pattern.hz) / len(self.pattern.points)
-                    hzPoint = 1.0/self.dtPoint
-                    rosRate = rospy.Rate(hzPoint) # The proper rate.
-                    #rospy.logwarn('rate=%s' % hzPoint)
+                    #rospy.logwarn('rate=%s' % self.hzPoint)
                     if self.pattern.count>0:
                         pts = PointStamped()
                         pts.header.frame_id = self.pattern.frame
@@ -260,11 +265,11 @@ class PatternGenXY:
                             self.UpdatePatternPoints()
                             
                 
-                rosRate.sleep()
+                self.rosRate.sleep()
 
                 
-        except KeyboardInterrupt:
-            rospy.loginfo('Shutting down')
+        except:
+            rospy.logwarn('PatternGen shutting down')
 
 
 if __name__ == '__main__':
