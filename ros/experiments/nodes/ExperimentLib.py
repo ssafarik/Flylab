@@ -771,6 +771,7 @@ class MoveRobot (smach.State):
         # Turn off the pattern
         msgPattern.mode = 'byshape'
         msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
+        msgPattern.frame = 'Stage'
         msgPattern.points = []
         msgPattern.hz = userdata.experimentparamsIn.move.pattern.hz
         msgPattern.count = 0

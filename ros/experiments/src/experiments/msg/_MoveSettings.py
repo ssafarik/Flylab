@@ -5,7 +5,7 @@ import struct
 import experiments.msg
 
 class MoveSettings(roslib.message.Message):
-  _md5sum = "0fab4270dabd2f4813bede984874380d"
+  _md5sum = "1134374486ede5b193275bb436ea75fd"
   _type = "experiments/MoveSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool enabled
@@ -31,9 +31,9 @@ float64 tolerance
 ================================================================================
 MSG: experiments/MovePattern
 string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'
-float64 radius
 float64 hz
 int32 count  # -1 means forever
+float64 radius
 
 
 """
@@ -112,7 +112,7 @@ int32 count  # -1 means forever
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2did.pack(_x.pattern.radius, _x.pattern.hz, _x.pattern.count, _x.timeout))
+      buff.write(_struct_di2d.pack(_x.pattern.hz, _x.pattern.count, _x.pattern.radius, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -185,7 +185,7 @@ int32 count  # -1 means forever
       _x = self
       start = end
       end += 28
-      (_x.pattern.radius, _x.pattern.hz, _x.pattern.count, _x.timeout,) = _struct_2did.unpack(str[start:end])
+      (_x.pattern.hz, _x.pattern.count, _x.pattern.radius, _x.timeout,) = _struct_di2d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
@@ -225,7 +225,7 @@ int32 count  # -1 means forever
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2did.pack(_x.pattern.radius, _x.pattern.hz, _x.pattern.count, _x.timeout))
+      buff.write(_struct_di2d.pack(_x.pattern.hz, _x.pattern.count, _x.pattern.radius, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -300,7 +300,7 @@ int32 count  # -1 means forever
       _x = self
       start = end
       end += 28
-      (_x.pattern.radius, _x.pattern.hz, _x.pattern.count, _x.timeout,) = _struct_2did.unpack(str[start:end])
+      (_x.pattern.hz, _x.pattern.count, _x.pattern.radius, _x.timeout,) = _struct_di2d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
@@ -309,4 +309,4 @@ _struct_I = roslib.message.struct_I
 _struct_2d = struct.Struct("<2d")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
-_struct_2did = struct.Struct("<2did")
+_struct_di2d = struct.Struct("<di2d")

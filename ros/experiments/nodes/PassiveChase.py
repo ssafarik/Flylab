@@ -49,7 +49,6 @@ class ExperimentPassiveChase():
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.move.pattern.frame = 'Stage'
         self.experimentparams.move.pattern.hz = 0.0625
         self.experimentparams.move.pattern.count = -1
         self.experimentparams.move.pattern.radius = 40

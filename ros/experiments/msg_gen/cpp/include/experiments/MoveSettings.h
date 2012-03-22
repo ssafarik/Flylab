@@ -65,7 +65,7 @@ public:
   ROS_DEPRECATED const std::string __getDataType() const { return __s_getDataType_(); }
 
 private:
-  static const char* __s_getMD5Sum_() { return "0fab4270dabd2f4813bede984874380d"; }
+  static const char* __s_getMD5Sum_() { return "1134374486ede5b193275bb436ea75fd"; }
 public:
   ROS_DEPRECATED static const std::string __s_getMD5Sum() { return __s_getMD5Sum_(); }
 
@@ -95,9 +95,9 @@ float64 tolerance\n\
 ================================================================================\n\
 MSG: experiments/MovePattern\n\
 string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'\n\
-float64 radius\n\
 float64 hz\n\
 int32 count  # -1 means forever\n\
+float64 radius\n\
 \n\
 \n\
 "; }
@@ -167,12 +167,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::experiments::MoveSettings_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "0fab4270dabd2f4813bede984874380d";
+    return "1134374486ede5b193275bb436ea75fd";
   }
 
   static const char* value(const  ::experiments::MoveSettings_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0x0fab4270dabd2f48ULL;
-  static const uint64_t static_value2 = 0x13bede984874380dULL;
+  static const uint64_t static_value1 = 0x1134374486ede5b1ULL;
+  static const uint64_t static_value2 = 0x93275bb436ea75fdULL;
 };
 
 template<class ContainerAllocator>
@@ -212,9 +212,9 @@ float64 tolerance\n\
 ================================================================================\n\
 MSG: experiments/MovePattern\n\
 string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'\n\
-float64 radius\n\
 float64 hz\n\
 int32 count  # -1 means forever\n\
+float64 radius\n\
 \n\
 \n\
 ";

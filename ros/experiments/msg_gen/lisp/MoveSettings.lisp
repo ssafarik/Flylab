@@ -120,16 +120,16 @@
   "experiments/MoveSettings")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<MoveSettings>)))
   "Returns md5sum for a message object of type '<MoveSettings>"
-  "0fab4270dabd2f4813bede984874380d")
+  "1134374486ede5b193275bb436ea75fd")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'MoveSettings)))
   "Returns md5sum for a message object of type 'MoveSettings"
-  "0fab4270dabd2f4813bede984874380d")
+  "1134374486ede5b193275bb436ea75fd")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<MoveSettings>)))
   "Returns full string definition for message of type '<MoveSettings>"
-  (cl:format cl:nil "bool enabled~%string mode  # 'pattern' or 'relative'~%MoveRelative relative~%MovePattern pattern~%float64 timeout~%~%~%================================================================================~%MSG: experiments/MoveRelative~%bool tracking~%string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'~%string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'~%float64 distance~%float64 angle~%string angleType # 'random' or 'constant'~%float64 speed~%string speedType # 'random' or 'constant'~%float64 tolerance~%~%~%================================================================================~%MSG: experiments/MovePattern~%string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'~%float64 radius~%float64 hz~%int32 count  # -1 means forever~%~%~%~%"))
+  (cl:format cl:nil "bool enabled~%string mode  # 'pattern' or 'relative'~%MoveRelative relative~%MovePattern pattern~%float64 timeout~%~%~%================================================================================~%MSG: experiments/MoveRelative~%bool tracking~%string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'~%string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'~%float64 distance~%float64 angle~%string angleType # 'random' or 'constant'~%float64 speed~%string speedType # 'random' or 'constant'~%float64 tolerance~%~%~%================================================================================~%MSG: experiments/MovePattern~%string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'~%float64 hz~%int32 count  # -1 means forever~%float64 radius~%~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'MoveSettings)))
   "Returns full string definition for message of type 'MoveSettings"
-  (cl:format cl:nil "bool enabled~%string mode  # 'pattern' or 'relative'~%MoveRelative relative~%MovePattern pattern~%float64 timeout~%~%~%================================================================================~%MSG: experiments/MoveRelative~%bool tracking~%string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'~%string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'~%float64 distance~%float64 angle~%string angleType # 'random' or 'constant'~%float64 speed~%string speedType # 'random' or 'constant'~%float64 tolerance~%~%~%================================================================================~%MSG: experiments/MovePattern~%string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'~%float64 radius~%float64 hz~%int32 count  # -1 means forever~%~%~%~%"))
+  (cl:format cl:nil "bool enabled~%string mode  # 'pattern' or 'relative'~%MoveRelative relative~%MovePattern pattern~%float64 timeout~%~%~%================================================================================~%MSG: experiments/MoveRelative~%bool tracking~%string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'~%string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'~%float64 distance~%float64 angle~%string angleType # 'random' or 'constant'~%float64 speed~%string speedType # 'random' or 'constant'~%float64 tolerance~%~%~%================================================================================~%MSG: experiments/MovePattern~%string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'~%float64 hz~%int32 count  # -1 means forever~%float64 radius~%~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <MoveSettings>))
   (cl:+ 0
      1

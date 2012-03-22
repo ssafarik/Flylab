@@ -16,9 +16,9 @@
   <!-- =================================================================== -->
   
   <!-- The origin of the mask circle.    -->
-  <param name="camera/originPlateX" type="double" value="415"/>
-  <param name="camera/originPlateY" type="double" value="275"/>
-  <param name="arena/radius_camera" type="double" value="268"/>  <!-- pixels -->
+  <param name="camera/originPlateX" type="double" value="413"/>
+  <param name="camera/originPlateY" type="double" value="283"/>
+  <param name="arena/radius_camera" type="double" value="278"/>  <!-- pixels -->
 
 
 
