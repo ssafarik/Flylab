@@ -54,7 +54,7 @@ rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node &
 
 # Adjust mode, brightness, exposure, gain, shutter, etc.
 # Edit "params_camera_<your device name>.yaml" with the new settings, for example:
-#     ~/git/Flyatar2/ros/calibration/flyatar_calibration/calibration_data/settings_basler_a622f.yaml
+#     ~/git/Flyatar2/ros/calibration/flyatar_calibration/calibration_data/params_basler_a622f.yaml
 # Close the Dynamic Reconfigure window.
 
 

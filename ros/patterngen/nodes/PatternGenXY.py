@@ -246,6 +246,7 @@ class PatternGenXY:
                     if self.pattern.count>0:
                         pts = PointStamped()
                         pts.header.frame_id = self.pattern.frame
+                        pts.header.stamp = rospy.Time.now() + self.dtPoint
                         pts.point = self.pattern.points[self.iPoint]
                         try:
                             self.SignalOutput (pts)

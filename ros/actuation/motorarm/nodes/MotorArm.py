@@ -17,20 +17,6 @@ from flycore.srv import SrvFrameState, SrvFrameStateRequest, SrvFrameStateRespon
 from patterngen.srv import SrvSignal, SrvSignalResponse
 
 
-# Integer values for directions - used in usb set/get
-POSITIVE = 0
-NEGATIVE = 1
-
-# Link lengths (millimeters)
-L1 = 32  # Link 1
-
-
-# Parking spot (millimeters)
-XPARK = 0.0
-YPARK = 0.0
-Q1CENTERi = 0.0
-
-
 class MotorArm:
 
     def __init__(self):
@@ -79,6 +65,7 @@ class MotorArm:
         self.thetaPrev = 0.0
         self.speedCommandTool = None 
         self.speedStageMax = rospy.get_param('motorarm/speed_max', 200.0)
+        self.L1 = rospy.get_param('motorarm/L1', 9.9) # Length of link1
         self.anglePrev = 0.0
         self.timePrev = rospy.Time.now()
         
@@ -135,8 +122,8 @@ class MotorArm:
     # Forward kinematics:  Get x,y from theta 1
     def GetXyFromTheta (self, angle):
         # Rotate the frames from centered to east-pointing. 
-        x = L1*N.cos(angle)
-        y = L1*N.sin(angle)
+        x = self.L1*N.cos(angle)
+        y = self.L1*N.sin(angle)
 
         return (x, y)
     
@@ -325,7 +312,7 @@ class MotorArm:
             # Compute deltas for velocity calc.
             time = rospy.Time.now()
             self.dAngle = angle - self.anglePrev
-            self.dTime = time - self.timePrev
+            self.dTime = self.ptsToolRef.header.stamp - time #time - self.timePrev
             self.anglePrev = angle
             self.timePrev = time
     
@@ -355,13 +342,17 @@ class MotorArm:
         
         
     def Calibrate_callback(self, req):
+        # Integer values for directions - used in usb set/get
+        POSITIVE = 0
+        NEGATIVE = 1
+        
         # Convert parking coordinates to angles.
-        self.xPark = XPARK
-        self.yPark = YPARK
+        self.xPark = 0.0
+        self.yPark = 0.0
         with self.lock:
             q1park = self.GetThetaFromXy(self.xPark, self.yPark)
 
-        q1origin = Q1CENTERi # From the index switch
+        q1origin = 0.0 # From the index switch
 
         rospy.loginfo ('MotorArm Calibrating: q1origin=%s, q1park=%s' % (q1origin, q1park))
         with self.lock:

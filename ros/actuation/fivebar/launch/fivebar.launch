@@ -15,6 +15,10 @@
 	<param name="rosSimpleStep/limitLo" type="double" value="-6.283185" />
 	<param name="fivebar/speed_max" type="double" value="200.0"/>
 	
+    <!-- Specify the pattern to use for calibration (e.g. circle or spiral). -->
+	<param name="calibration/shape" type="string" value="circle"/>
+
+
 	<!-- Good PID gains for step response. -->
 	<!--
 		<param name="fivebar/kP"      type="double" value="0.2"/>

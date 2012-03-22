@@ -8,7 +8,6 @@
     <!-- .launch file from here.                                    -->
 	<!-- ========================================================== -->
     
-    
-    <include file="$(find config)/launch/flydrome.launch" />
+    <include file="$(find config)/launch/babycarrot.launch" />
      
 </launch>

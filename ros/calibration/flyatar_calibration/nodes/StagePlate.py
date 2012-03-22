@@ -40,6 +40,8 @@ class Calibration():
         self.poseRobot_rect = PoseStamped()
         self.poseRobot_plate = PoseStamped()
         
+        rospy.on_shutdown(self.OnShutdown_callback)
+
         self.cvbridge = CvBridge()
         self.color_max = 255
         self.font = cv.InitFont(cv.CV_FONT_HERSHEY_TRIPLEX,0.5,0.5)
@@ -84,6 +86,18 @@ class Calibration():
             self.camera_to_plate = rospy.ServiceProxy('camera_to_plate', PlateCameraConversion)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
+        
+        
+    def OnShutdown_callback(self):
+        if self.initialized:
+            msgPattern.mode = 'byshape'
+            msgPattern.shape = 'constant'
+            msgPattern.points = []
+            msgPattern.hz = 1.0
+            msgPattern.count = 1
+            msgPattern.radius = 0.0
+            msgPattern.preempt = True
+            self.pubPatternGen.publish (msgPattern)
         
     
     def EndEffector_callback (self, state):
@@ -492,12 +506,15 @@ class Calibration():
 
         # Publish the spiral pattern message.
         msgPattern.mode = 'byshape'
-        msgPattern.shape = 'spiral'
+        msgPattern.shape = rospy.get_param('motorarm/L1', 'spiral')
         msgPattern.points = []
-        msgPattern.hz = 0.01
         msgPattern.count = -1
         msgPattern.radius = 0.8 * rospy.get_param('arena/radius_movement', 25.4)
         msgPattern.preempt = False
+        if msgPattern.shape=='spiral':
+            msgPattern.hz = 0.01
+        else:
+            msgPattern.hz = 0.1
         self.pubPatternGen.publish (msgPattern)
 
         try:
