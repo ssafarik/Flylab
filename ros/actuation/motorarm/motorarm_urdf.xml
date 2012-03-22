@@ -3,9 +3,9 @@
 
   <link name="link1">
    <visual>
-     <origin xyz="44.45 0.0 -3.175" rpy="0 0 0" />
+     <origin xyz="16 0.0 -3.175" rpy="0 0 0" />
      <geometry>
-       <box size="88.9 25.4 3.175" />
+       <box size="42 10 3.175" />
      </geometry>
      <material name="one">
        <color rgba="128 128 128 1.0"/>
