@@ -25,7 +25,10 @@ class PatternGenXY:
         self.pattern.hz = 1.0
         self.pattern.count = 0
         self.iPoint = 0
+
         self.hzPoint = 100
+        self.ratePoint = rospy.Rate(self.hzPoint) # The proper rate.
+        rospy.loginfo('Point Output Rate (hz): %0.2f' % self.hzPoint)
         
         self.subPatternGen = rospy.Subscriber('PatternGen', MsgPatternGen, self.PatternGen_callback)
         
@@ -180,30 +183,6 @@ class PatternGenXY:
         return points
     
         
-    # PatternGen_callback() 
-    #   Receive the message that sets up a pattern generation.
-    #
-    def PatternGen_callback (self, msgPatternGen):
-        self.pattern.mode   = msgPatternGen.mode
-        self.pattern.shape  = msgPatternGen.shape
-        self.pattern.frame  = msgPatternGen.frame
-        self.pattern.hz     = msgPatternGen.hz
-        self.pattern.count  = msgPatternGen.count
-        self.pattern.radius = msgPatternGen.radius
-
-        if self.pattern.count==-1:
-            self.pattern.count = N.inf
-        
-        if self.pattern.mode=='bypoints':
-            self.pattern.points = msgPatternGen.points
-            
-        self.UpdatePatternPoints()
-        self.UpdateTiming()
-        if msgPatternGen.preempt or self.iPoint >= len(self.pattern.points):
-            self.iPoint = 0
-            
-            
-
     def UpdatePatternPoints (self):        
         if self.pattern.mode == 'byshape':  # Create the point list.
             if self.pattern.shape == 'constant':
@@ -222,24 +201,34 @@ class PatternGenXY:
                 rospy.logerror('PatternGen: unknown shape')
                 
                 
-    def UpdateTiming (self):
-        if len(self.pattern.points)>0:
-            self.dtPoint = (1.0/self.pattern.hz) / len(self.pattern.points)
-            self.hzPoint = 1.0/self.dtPoint
-        else:
-            self.hzPoint = 100.0
-            self.dtPoint = 1/self.hzPoint
-
-        self.rosRate = rospy.Rate(self.hzPoint) # The proper rate.
-        rospy.loginfo('Point Output Rate (hz): %0.2f' % self.hzPoint)
-
         
+    # PatternGen_callback() 
+    #   Receive the message that sets up a pattern generation.
+    #
+    def PatternGen_callback (self, msgPatternGen):
+        self.pattern.mode   = msgPatternGen.mode
+        self.pattern.shape  = msgPatternGen.shape
+        self.pattern.frame  = msgPatternGen.frame
+        self.pattern.hz     = msgPatternGen.hz
+        self.pattern.count  = msgPatternGen.count
+        self.pattern.radius = msgPatternGen.radius
+
+        if self.pattern.count==-1:
+            self.pattern.count = N.inf
+        
+        if self.pattern.mode=='bypoints':
+            self.pattern.points = msgPatternGen.points
+            
+        self.UpdatePatternPoints()
+        if msgPatternGen.preempt or self.iPoint >= len(self.pattern.points):
+            self.iPoint = 0
+            
+            
+
         
     def Main(self):
         #rospy.loginfo('pattern object=%s' % self.pattern)
         try:
-            self.UpdateTiming()
-            
             while not rospy.is_shutdown():
                 if self.pattern.points is not None and len(self.pattern.points)>0:
                     #rospy.logwarn('rate=%s' % self.hzPoint)
@@ -262,10 +251,9 @@ class PatternGenXY:
                             self.iPoint = 0
                             self.pattern.count -= 1
                             self.UpdatePatternPoints()
-                            self.UpdateTiming()
                             
                 
-                self.rosRate.sleep() # BUG: If there are too many points, then there won't be time to sleep(), and the timing will be off.
+                self.ratePoint.sleep()
 
                 
         except:

@@ -52,7 +52,7 @@ class ExperimentPassiveChase():
         self.experimentparams.move.pattern.hz = 0.10
         self.experimentparams.move.pattern.count = -1
         self.experimentparams.move.pattern.radius = 32
-        self.experimentparams.move.timeout = 60
+        self.experimentparams.move.timeout = 600
         
         self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.distanceMin = 0.0

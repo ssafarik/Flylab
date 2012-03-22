@@ -66,7 +66,6 @@ class MotorArm:
         self.speedCommandTool = None 
         self.speedStageMax = rospy.get_param('motorarm/speed_max', 200.0)
         self.L1 = rospy.get_param('motorarm/L1', 9.9) # Length of link1
-        self.anglePrev = 0.0
         self.timePrev = rospy.Time.now()
         
         self.request = SrvFrameStateRequest()
@@ -267,65 +266,6 @@ class MotorArm:
         return ptDir
     
 
-    # SendTargetCommand()
-    #   Updates the motor command with the current target.
-    #
-    def SendTargetCommand(self):
-        #rospy.loginfo ('MotorArm ptToolRef=%s' % self.ptToolRef)
-        if self.ptsToolRef is not None:
-            self.speedStageMax = rospy.get_param('motorarm/speed_max', 200.0)
-            
-            
-            # Get the command for the hardware.            
-            self.ptEeCommand.x = self.ptsToolRef.point.x
-            self.ptEeCommand.y = self.ptsToolRef.point.y
-            
-            #rospy.logwarn ('MotorArm ptEeCommand=%s' % [self.ptEeCommand.x, self.ptEeCommand.y])
-
-            # Display a vector in rviz.
-            ptBase = self.ptEeSense
-            ptEnd = self.ptEeCommand
-            markerCommand= Marker(header=Header(stamp = rospy.Time.now(),
-                                                frame_id='Stage'),
-                                  ns='command',
-                                  id=1,
-                                  type=0, #ARROW,
-                                  action=0,
-                                  scale=Vector3(x=0.1, # Shaft diameter
-                                                y=0.2, # Head diameter
-                                                z=0.0),
-                                  color=ColorRGBA(a=0.9,
-                                                  r=0.5,
-                                                  g=1.0,
-                                                  b=0.5),
-                                  lifetime=rospy.Duration(0.1),
-                                  points=[ptBase, ptEnd])
-            self.pubMarker.publish(markerCommand)
-
-            
-            # Get the desired positions for each joint.
-            if self.ptsToolRef.header.frame_id=='joint': # Jointspace uses pt.x as the angle
-                angle = self.ptEeCommand.x
-            else:                                        # Other frames of reference use the angle of cartesian (x,y)
-                angle = self.GetThetaFromXy(self.ptEeCommand.x, self.ptEeCommand.y)
-
-            # Compute deltas for velocity calc.
-            time = rospy.Time.now()
-            self.dAngle = angle - self.anglePrev
-            self.dTime = self.ptsToolRef.header.stamp - time #time - self.timePrev
-            self.anglePrev = angle
-            self.timePrev = time
-    
-            if (self.jointstate1 is not None):
-                velocity = N.abs(self.dAngle / self.dTime.to_sec())
-                
-                with self.lock:
-                    try:
-                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angle, velocity)
-                    except (rospy.ServiceException, IOError), e:
-                        rospy.logwarn ("MotorArm FAILED %s"%e)
-
-        
     def HomeStage_callback(self, reqStageState):
         while not self.initialized:
             rospy.sleep(0.1)
@@ -365,7 +305,7 @@ class MotorArm:
         return rvStageState
     
 
-    def SendTransforms(self):  
+    def GetState(self):  
         if self.initialized:
             with self.lock:
                 try:
@@ -376,6 +316,8 @@ class MotorArm:
                 #rospy.logwarn('MotorArm [j1,j2]=%s' % [self.jointstate1.position,self.jointstate2.position])
                     
 
+    def SendTransforms(self):  
+        if self.initialized:
             if (self.jointstate1 is not None):                    
                 #rospy.loginfo ('MotorArm self.jointstate1=%s' % self.jointstate1)
                 (self.ptEeSense.x, self.ptEeSense.y) = self.GetXyFromTheta(self.jointstate1.position)
@@ -470,6 +412,65 @@ class MotorArm:
 
 
 
+    # SendTargetCommand()
+    #   Updates the motor command with the current target.
+    #
+    def SendTargetCommand(self):
+        #rospy.loginfo ('MotorArm ptToolRef=%s' % self.ptToolRef)
+        if self.ptsToolRef is not None:
+            self.speedStageMax = rospy.get_param('motorarm/speed_max', 200.0)
+            
+            
+            # Get the command for the hardware.            
+            self.ptEeCommand.x = self.ptsToolRef.point.x
+            self.ptEeCommand.y = self.ptsToolRef.point.y
+            
+            #rospy.logwarn ('MotorArm ptEeCommand=%s' % [self.ptEeCommand.x, self.ptEeCommand.y])
+
+            # Display a vector in rviz.
+            ptBase = self.ptEeSense
+            ptEnd = self.ptEeCommand
+            markerCommand= Marker(header=Header(stamp = rospy.Time.now(),
+                                                frame_id='Stage'),
+                                  ns='command',
+                                  id=1,
+                                  type=0, #ARROW,
+                                  action=0,
+                                  scale=Vector3(x=0.1, # Shaft diameter
+                                                y=0.2, # Head diameter
+                                                z=0.0),
+                                  color=ColorRGBA(a=0.9,
+                                                  r=0.5,
+                                                  g=1.0,
+                                                  b=0.5),
+                                  lifetime=rospy.Duration(0.1),
+                                  points=[ptBase, ptEnd])
+            self.pubMarker.publish(markerCommand)
+
+            
+            # Get the desired positions for each joint.
+            if self.ptsToolRef.header.frame_id=='joint': # Jointspace uses pt.x as the angle
+                angleNext = self.ptEeCommand.x
+            else:                                        # Other frames of reference use the angle of cartesian (x,y)
+                angleNext = self.GetThetaFromXy(self.ptEeCommand.x, self.ptEeCommand.y)
+
+            # Compute deltas for velocity calc.
+            time = rospy.Time.now()
+            self.dAngle = angleNext - self.jointstate1.position
+            #self.dTime = self.ptsToolRef.header.stamp - time
+            self.dTime = time - self.timePrev
+            self.timePrev = time
+    
+            if (self.jointstate1 is not None):
+                velocity = N.abs(self.dAngle / self.dTime.to_sec())
+                
+                with self.lock:
+                    try:
+                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext, velocity)
+                    except (rospy.ServiceException, IOError), e:
+                        rospy.logwarn ("MotorArm FAILED %s"%e)
+
+        
     def OnShutdown_callback(self):
         rospy.loginfo("MotorArm Closed MotorArm device.")
 
@@ -486,6 +487,7 @@ class MotorArm:
         #try:
         while not rospy.is_shutdown():
             #rospy.logwarn('jointstate1=%s' % self.jointstate1)
+            self.GetState()
             self.SendTransforms()
             self.SendTargetCommand()
             rosrate.sleep()
