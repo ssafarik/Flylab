@@ -26,9 +26,9 @@
   <param name="camera_plate_rvec_0" type="double" value="-3.05"/>
   <param name="camera_plate_rvec_1" type="double" value="-0.008"/>
   <param name="camera_plate_rvec_2" type="double" value="0.10"/>
-  <param name="camera_plate_tvec_0" type="double" value="78.8"/> <!-- adjust for plate alignment here. -->
-  <param name="camera_plate_tvec_1" type="double" value="50.5"/> <!-- adjust for plate alignment here. -->
-  <param name="camera_plate_tvec_2" type="double" value="290.0"/>
+  <param name="camera_plate_tvec_0" type="double" value="84"/> <!-- adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_1" type="double" value="57"/> <!-- adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_2" type="double" value="290"/>
   
 
   <!-- ================================================================== -->

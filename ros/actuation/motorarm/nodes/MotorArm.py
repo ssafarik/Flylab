@@ -221,6 +221,7 @@ class MotorArm:
             #self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
             #self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
             self.ptsToolRef = self.ptsToolRefExternal
+            self.ptsToolRef.point.y *= -1
             
         except tf.Exception:
             pass
@@ -254,13 +255,14 @@ class MotorArm:
                 #self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
                 #self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
                 self.ptsToolRef = self.ptsToolRefExternal
+                self.ptsToolRef.point.y *= -1
     
                 try:
                     self.speedCommandTool = self.speedStageMax
                     rv.success = True
                 except AttributeError:
                     pass
-                rospy.logwarn ('MotorArm signal pts=%s' % [self.ptsToolRef.point.x,self.ptsToolRef.point.y])
+                #rospy.logwarn ('MotorArm signal pts=%s' % [self.ptsToolRef.point.x,self.ptsToolRef.point.y])
             except tf.Exception:
                 pass
         
@@ -328,7 +330,7 @@ class MotorArm:
             self.timePrev = time
     
             if (self.jointstate1 is not None):
-                velocity = self.dAngle / self.dTime.to_sec()
+                velocity = N.abs(self.dAngle / self.dTime.to_sec())
                 
                 with self.lock:
                     try:
