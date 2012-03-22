@@ -11,5 +11,5 @@ exposure: 0
 auto_gain: 3            #Manual 
 gain: 150
 auto_shutter: 3         #Manual
-shutter: 1200
+shutter: 512
 

@@ -21,18 +21,13 @@ from patterngen.srv import SrvSignal, SrvSignalResponse
 POSITIVE = 0
 NEGATIVE = 1
 
-MMPERINCH = 25.4 # This number converts from external reference (x,y) units to inches.
-
-# Link lengths (inches)
-L1 = 3.5  # Link 1
-
 # Link lengths (millimeters)
-L1 = 3.5*MMPERINCH  # Link 1
+L1 = 32  # Link 1
 
 
 # Parking spot (millimeters)
-XPARK = 0.0*MMPERINCH
-YPARK = 0.0*MMPERINCH
+XPARK = 0.0
+YPARK = 0.0
 Q1CENTERi = 0.0
 
 
