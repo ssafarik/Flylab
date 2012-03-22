@@ -44,7 +44,7 @@ class PatternGenXY:
 
     def GetPointsConstant(self):
         pathlength = 1.0
-        nPoints = self.hzPoint/self.pattern.hz
+        nPoints = int(self.hzPoint/self.pattern.hz)
         points = [Point(x=self.pattern.radius, 
                         y=self.pattern.radius)] * nPoints  # [(r,r),(r,r),(r,r), ...]
         
@@ -53,7 +53,7 @@ class PatternGenXY:
     
     def GetPointsCircle(self):
         pathlength = 2.0 * N.pi * self.pattern.radius
-        nPoints = self.hzPoint/self.pattern.hz
+        nPoints = int(self.hzPoint/self.pattern.hz)
         q = 0.0 #N.pi/2.0  # Starting position
         dq = 2.0*N.pi/nPoints
         r = self.pattern.radius
@@ -69,7 +69,7 @@ class PatternGenXY:
         
     def GetPointsSquare(self):
         pathlength = 4.0 * self.pattern.radius * N.sqrt(2.0)
-        nPoints = self.hzPoint/self.pattern.hz
+        nPoints = int(self.hzPoint/self.pattern.hz)
         nPointsSide = nPoints / 4.0 # Points per side
         xmin = -self.pattern.radius / N.sqrt(2)
         xmax =  self.pattern.radius / N.sqrt(2)
@@ -128,7 +128,7 @@ class PatternGenXY:
         
     def GetPointsSpiral (self):
         pathlength = 0.0
-        nPoints = self.hzPoint/self.pattern.hz
+        nPoints = int(self.hzPoint/self.pattern.hz)
         nSegmentsPerPattern = 1
         nPointsPerSegment = nPoints / nSegmentsPerPattern
         pitchSpiral = 2
@@ -163,7 +163,7 @@ class PatternGenXY:
     # GetPointsRamp() creates a set of points where pt.x goes from 0 to radius, and pt.y goes from radius to 0.
     def GetPointsRamp(self):
         pathlength = 0.0
-        nPoints = self.hzPoint/self.pattern.hz
+        nPoints = int(self.hzPoint/self.pattern.hz)
         xStart = 0.0
         xEnd = self.pattern.radius
 

@@ -84,6 +84,8 @@ class MotorArm:
         self.thetaPrev = 0.0
         self.speedCommandTool = None 
         self.speedStageMax = rospy.get_param('motorarm/speed_max', 200.0)
+        self.anglePrev = 0.0
+        self.timePrev = rospy.Time.now()
         
         self.request = SrvFrameStateRequest()
         #self.request.state.header.stamp = rospy.Time.now()
@@ -331,7 +333,7 @@ class MotorArm:
             self.timePrev = time
     
             if (self.jointstate1 is not None):
-                velocity = self.dAngle / self.dTime.to_sec())
+                velocity = self.dAngle / self.dTime.to_sec()
                 
                 with self.lock:
                     try:
