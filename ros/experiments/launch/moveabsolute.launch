@@ -16,9 +16,9 @@
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find config)/launch/robot_0625h_0625w.launch" />
-	<include file="$(find config)/launch/flies.launch" />
+	<include file="$(find config)/launch/flies_1.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="MoveAbsolute.py" name="ExperimentMoveAbsolute" />
+	<node pkg="experiments" type="MoveAbsolute.py" name="Experiment" />
   
 </launch>

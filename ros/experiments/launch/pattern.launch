@@ -16,10 +16,10 @@
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find config)/launch/robot_0625h_0625w.launch" />
-	<include file="$(find config)/launch/flies.launch" />
+	<include file="$(find config)/launch/flies_1.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="Pattern.py" name="ExperimentPattern" />
+	<node pkg="experiments" type="Pattern.py" name="Experiment" />
 
 	
   
