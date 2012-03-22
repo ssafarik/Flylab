@@ -342,7 +342,7 @@ def main(args):
     cal = Calibration()
     try:
         rospy.spin()
-    except KeyboardInterrupt:
+    except:
         print "Shutting down"
     cv.DestroyAllWindows()
 

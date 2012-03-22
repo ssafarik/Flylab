@@ -919,7 +919,7 @@ class ContourIdentifier:
                     # Update the flies' states.
                     for iFly in range(1, len(self.objects)):
                         if self.map[iFly] is not None:
-                            rospy.logwarn ('iFly=%d, self.map=%s, len(self.contours)=%d' % (iFly, self.map, len(self.objects)))
+                            #rospy.logwarn ('iFly=%d, self.map=%s, len(self.contours)=%d' % (iFly, self.map, len(self.objects)))
                             self.objects[iFly].Update(self.contours[self.map[iFly]], None)
                         else:
                             self.objects[iFly].Update(None,                       None)
@@ -952,7 +952,7 @@ class ContourIdentifier:
                     
                     r = range(1, len(self.objects))
                     for iFly in r:
-                        rospy.logwarn ('iFly=%d, self.map=%s, len(self.objects)=%d' % (iFly, self.map, len(self.objects)))
+                        #rospy.logwarn ('iFly=%d, self.map=%s, len(self.objects)=%d' % (iFly, self.map, len(self.objects)))
                         if (self.map[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
                             arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
                                                                   pose = self.objects[iFly].state.pose,

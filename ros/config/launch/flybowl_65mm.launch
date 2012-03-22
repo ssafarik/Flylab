@@ -8,6 +8,5 @@
     <!-- Launch arena.launch, and point here from there.            -->
 	<!-- ========================================================== -->
 
-	<param name="arena/radius_camera" type="double" value="382.0"/>  <!-- pixels -->
 	<param name="arena/radius_movement" type="double" value="65.0"/>  <!-- millimeters -->
 </launch>

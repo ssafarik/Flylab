@@ -18,8 +18,7 @@
   <!-- The origin of the mask circle.    -->
   <param name="camera/originPlateX" type="double" value="661"/>
   <param name="camera/originPlateY" type="double" value="517"/>
-
-  <!-- Radius parameter value goes into the flybowl .launch file pointed to by hardware.launch -->
+  <param name="arena/radius_camera" type="double" value="470"/>  <!-- pixels -->
 
 
   <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
