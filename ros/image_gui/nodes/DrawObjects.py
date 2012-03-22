@@ -76,7 +76,7 @@ class DrawObjects:
         self.origin = CvPrimitives.Point(0,0)
 
         self.tfrx = tf.TransformListener()
-        rospy.logwarn('DO waitForTransform(%s, %s, %s)' % (self.display_frame, self.robot_image_origin.header.frame_id, rospy.Time()))
+        #rospy.logwarn('DO waitForTransform(%s, %s, %s)' % (self.display_frame, self.robot_image_origin.header.frame_id, rospy.Time()))
         #self.tfrx.waitForTransform(self.display_frame, self.robot_image_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
         #self.tfrx.waitForTransform(self.display_frame, self.fly_image_origin.header.frame_id,   rospy.Time(), rospy.Duration(15.0))
         self.tfrx.waitForTransform(self.display_frame, self.plate_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
