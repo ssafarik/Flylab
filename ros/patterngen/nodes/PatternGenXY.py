@@ -25,25 +25,26 @@ class PatternGenXY:
         self.pattern.hz = 1.0
         self.pattern.count = 0
         self.iPoint = 0
+        self.hzPoint = 100
         
         self.subPatternGen = rospy.Subscriber('PatternGen', MsgPatternGen, self.PatternGen_callback)
         
         # Load stage services.
-        self.stSrv = 'signal_input'
-        rospy.loginfo('Waiting for: '+self.stSrv)
-        rospy.wait_for_service(self.stSrv)
+        self.stSignalInput = 'signal_input'
+        rospy.loginfo('Waiting for: '+self.stSignalInput)
+        rospy.wait_for_service(self.stSignalInput)
         try:
-            self.SignalOutput = rospy.ServiceProxy(self.stSrv, SrvSignal)
+            self.SignalOutput = rospy.ServiceProxy(self.stSignalInput, SrvSignal)
         except rospy.ServiceException, e:
-            rospy.loginfo ("FAILED %s: %s"%(self.stSrv,e))
-        rospy.loginfo('Passed: '+self.stSrv)
+            rospy.loginfo ("FAILED %s: %s"%(self.stSignalInput,e))
+        rospy.loginfo('Passed: '+self.stSignalInput)
         
         
 
 
     def GetPointsConstant(self):
         pathlength = 1.0
-        nPoints = 100
+        nPoints = self.hzPoint/self.pattern.hz
         points = [Point(x=self.pattern.radius, 
                         y=self.pattern.radius)] * nPoints  # [(r,r),(r,r),(r,r), ...]
         
@@ -52,7 +53,7 @@ class PatternGenXY:
     
     def GetPointsCircle(self):
         pathlength = 2.0 * N.pi * self.pattern.radius
-        nPoints = 100
+        nPoints = self.hzPoint/self.pattern.hz
         q = 0.0 #N.pi/2.0  # Starting position
         dq = 2.0*N.pi/nPoints
         r = self.pattern.radius
@@ -68,19 +69,20 @@ class PatternGenXY:
         
     def GetPointsSquare(self):
         pathlength = 4.0 * self.pattern.radius * N.sqrt(2.0)
-        nPoints = 1 # Points per side.
+        nPoints = self.hzPoint/self.pattern.hz
+        nPointsSide = nPoints / 4.0 # Points per side
         xmin = -self.pattern.radius / N.sqrt(2)
         xmax =  self.pattern.radius / N.sqrt(2)
         ymin = -self.pattern.radius / N.sqrt(2)
         ymax =  self.pattern.radius / N.sqrt(2)
-        step = (xmax-xmin)/((nPoints+1)-1)
+        step = (xmax-xmin)/((nPointsSide+1)-1)
 
         points = []        
         x = xmin
         y = ymin
         
         for iSide in [0,1,2,3]:
-            for i in range(nPoints):
+            for i in range(nPointsSide):
                 points.append(Point(x=x, y=y))
 
                 if iSide==0:
@@ -126,8 +128,9 @@ class PatternGenXY:
         
     def GetPointsSpiral (self):
         pathlength = 0.0
-        nPointsPerSegment = 180
+        nPoints = self.hzPoint/self.pattern.hz
         nSegmentsPerPattern = 1
+        nPointsPerSegment = nPoints / nSegmentsPerPattern
         pitchSpiral = 2
         points = []
         q = 2.0 * N.pi * N.random.random()
@@ -160,7 +163,7 @@ class PatternGenXY:
     # GetPointsRamp() creates a set of points where pt.x goes from 0 to radius, and pt.y goes from radius to 0.
     def GetPointsRamp(self):
         pathlength = 0.0
-        nPoints = 100
+        nPoints = self.hzPoint/self.pattern.hz
         xStart = 0.0
         xEnd = self.pattern.radius
 
@@ -228,12 +231,12 @@ class PatternGenXY:
             self.dtPoint = 1/self.hzPoint
 
         self.rosRate = rospy.Rate(self.hzPoint) # The proper rate.
-        rospy.logwarn('hzPoint=%0.2f' % self.hzPoint)
+        rospy.loginfo('Point Output Rate (hz): %0.2f' % self.hzPoint)
 
         
         
     def Main(self):
-        rospy.loginfo('pattern object=%s' % self.pattern)
+        #rospy.loginfo('pattern object=%s' % self.pattern)
         try:
             self.UpdateTiming()
             
@@ -247,10 +250,8 @@ class PatternGenXY:
                         try:
                             self.SignalOutput (pts)
                         except rospy.ServiceException:
-                            try:
-                                self.SignalOutput = rospy.ServiceProxy(self.stSrv, SrvSignal)
-                            except rospy.ServiceException:
-                                pass
+                            rospy.wait_for_service(self.stSignalInput)
+                            self.SignalOutput = rospy.ServiceProxy(self.stSignalInput, SrvSignal)
                             
                         #rospy.logwarn ('PG pt=%s' % [pts.point.x, pts.point.y])
                         self.iPoint += 1
@@ -263,7 +264,7 @@ class PatternGenXY:
                             self.UpdateTiming()
                             
                 
-                self.rosRate.sleep()
+                self.rosRate.sleep() # BUG: If there are too many points, then there won't be time to sleep(), and the timing will be off.
 
                 
         except:

@@ -313,20 +313,14 @@ class MotorArm:
                                                   g=1.0,
                                                   b=0.5),
                                   lifetime=rospy.Duration(0.1),
-#                                      points=[Point(x=self.ptEeSense.x +self.ptsToolRef.point.x-self.ptEeSense.x-self.ptEeError.x-self.ptOffsetSense.x, 
-#                                                    y=self.ptEeSense.y +self.ptsToolRef.point.y-self.ptEeSense.y-self.ptEeError.y-self.ptOffsetSense.y, 
-#                                                    z=self.ptEeSense.z +self.ptsToolRef.point.z-self.ptEeSense.z-self.ptEeError.z-self.ptOffsetSense.z),
-#                                              Point(x=self.ptEeCommand.x +self.ptsToolRef.point.x-self.ptEeSense.x-self.ptEeError.x-self.ptOffsetSense.x, 
-#                                                    y=self.ptEeCommand.y +self.ptsToolRef.point.y-self.ptEeSense.y-self.ptEeError.y-self.ptOffsetSense.y, 
-#                                                    z=self.ptEeCommand.z +self.ptsToolRef.point.z-self.ptEeSense.z-self.ptEeError.z-self.ptOffsetSense.z)])
                                   points=[ptBase, ptEnd])
             self.pubMarker.publish(markerCommand)
 
             
             # Get the desired positions for each joint.
-            if self.ptsToolRef.header.frame_id=='joint': # Jointspace uses pt.x at the angle
+            if self.ptsToolRef.header.frame_id=='joint': # Jointspace uses pt.x as the angle
                 angle = self.ptEeCommand.x
-            else:                                        # Other frames of reference use the angle of (x,y)
+            else:                                        # Other frames of reference use the angle of cartesian (x,y)
                 angle = self.GetThetaFromXy(self.ptEeCommand.x, self.ptEeCommand.y)
 
             # Compute deltas for velocity calc.
@@ -337,7 +331,7 @@ class MotorArm:
             self.timePrev = time
     
             if (self.jointstate1 is not None):
-                velocity = self.dAngle / self.dTime
+                velocity = self.dAngle / self.dTime.to_sec())
                 
                 with self.lock:
                     try:

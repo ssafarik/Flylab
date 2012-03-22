@@ -1,13 +1,13 @@
 ###############################################################################################################
 ###############################################################################################################
 ##  Calibration Overview:  
-##  The steps below result in several files specific to your camera, camera position, and experimental hardware:
-##  	<your device name>.launch
-##  	params_camera_<your device name>.yaml
-##  	camera_<your device name>.launch
-##  	calibration_<your device name>.yaml
-##  	/cameras/<your device name>_calibration.yaml
-##  	/cameras/background.png
+##  The steps below result in several files specific to your camera, camera position, actuator hardware, etc:
+##  	<your device name>.launch                          The main launch file to make your device available in ROS.
+##  	params_camera_<your device name>.yaml              Contains exposure, resolution, & other settings for your camera.
+##  	camera_<your device name>.launch                   The launch file for the camera mounted to your experimental device.
+##  	calibration_<your device name>.yaml                Parameters describing the relative positions of things.
+##  	/cameras/<your device name>_calibration.yaml       Contains distortion & other camera parameters.
+##  	/cameras/background.png                            Background image of an empty arena.
 ###############################################################################################################
 ###############################################################################################################
 
