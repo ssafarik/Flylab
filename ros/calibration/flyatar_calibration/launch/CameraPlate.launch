@@ -1,5 +1,0 @@
-<launch>
-  <include file="$(find camera1394v2)/launch/camera.launch" />
-  <node name="camera_plate_calibration" pkg="flyatar_calibration" type="CameraPlate.py">
-  </node>
-</launch>

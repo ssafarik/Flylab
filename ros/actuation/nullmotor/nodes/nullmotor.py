@@ -212,7 +212,7 @@ class NullMotor:
         
     def MainLoop(self):
         try:
-            rosrate = rospy.Rate(10)
+            rosrate = rospy.Rate(100)
             while not rospy.is_shutdown():
                 self.PublishEndEffector()
                 self.PublishJointState()

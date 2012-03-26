@@ -144,9 +144,9 @@ class ImageDisplay:
         self.setpoint_line_width = 2
         self.setpoint_size = 4
 
-        rospy.wait_for_service('plate_to_camera')
+        rospy.wait_for_service('camera_from_plate')
         try:
-            self.plate_to_camera = rospy.ServiceProxy('plate_to_camera', PlateCameraConversion)
+            self.camera_from_plate = rospy.ServiceProxy('camera_from_plate', PlateCameraConversion)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
@@ -166,7 +166,7 @@ class ImageDisplay:
         # rospy.logwarn("self.bounds_center_plate.point.y = %s" % (str(self.bounds_center_plate.point.y)))
         # rospy.logwarn("self.bounds_limit_plate.point.x = %s" % (str(self.bounds_limit_plate.point.x)))
         # rospy.logwarn("self.bounds_limit_plate.point.y = %s" % (str(self.bounds_limit_plate.point.y)))
-        response = self.plate_to_camera(Xsrc,Ysrc)
+        response = self.camera_from_plate(Xsrc,Ysrc)
         self.bounds_center_camera.point.x = response.Xdst[0]
         self.bounds_center_camera.point.y = response.Ydst[0]
         self.bounds_limit_camera.point.x = response.Xdst[1]
@@ -231,7 +231,7 @@ class ImageDisplay:
 
             Xsrc = [axes_center_plate.point.x,axes_x_tail_plate.point.x,axes_y_tail_plate.point.x,axes_x_head_plate.point.x,axes_y_head_plate.point.x,axes_x_head_shifted_plate.point.x,axes_x_tail_shifted_plate.point.x]
             Ysrc = [axes_center_plate.point.y,axes_x_tail_plate.point.y,axes_y_tail_plate.point.y,axes_x_head_plate.point.y,axes_y_head_plate.point.y,axes_x_head_shifted_plate.point.y,axes_x_tail_shifted_plate.point.y]
-            response = self.plate_to_camera(Xsrc,Ysrc)
+            response = self.camera_from_plate(Xsrc,Ysrc)
             self.axes_center_camera.point.x = response.Xdst[0]
             self.axes_center_camera.point.y = response.Ydst[0]
             self.axes_x_tail_camera.point.x = response.Xdst[1]
@@ -339,7 +339,7 @@ class ImageDisplay:
                 # rospy.logwarn("setpoint_plate.point.y = \n%s", str(setpoint_plate.point.y))
                 Xsrc = [setpoint_plate.point.x]
                 Ysrc = [setpoint_plate.point.y]
-                response = self.plate_to_camera(Xsrc,Ysrc)
+                response = self.camera_from_plate(Xsrc,Ysrc)
                 self.setpoint_camera.point.x = response.Xdst[0]
                 self.setpoint_camera.point.y = response.Ydst[0]
                 setpoint_image = self.tf_listener.transformPoint(self.image_frame,self.setpoint_camera)
@@ -355,7 +355,7 @@ class ImageDisplay:
                 # rospy.logwarn("setpoint_plate.point.y = \n%s", str(setpoint_plate.point.y))
                 Xsrc = [setpoint_line_tail_plate.point.x]
                 Ysrc = [setpoint_line_tail_plate.point.y]
-                response = self.plate_to_camera(Xsrc,Ysrc)
+                response = self.camera_from_plate(Xsrc,Ysrc)
                 self.setpoint_line_tail_camera.point.x = response.Xdst[0]
                 self.setpoint_line_tail_camera.point.y = response.Ydst[0]
                 setpoint_line_tail_image = self.tf_listener.transformPoint(self.image_frame,self.setpoint_line_tail_camera)

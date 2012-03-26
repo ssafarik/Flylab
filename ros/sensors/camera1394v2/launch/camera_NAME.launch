@@ -10,7 +10,7 @@
 	<include file="$(find plate_tf)/launch/plate_tf.launch" />
 	<node pkg="tf" type="static_transform_publisher" name="statictf_baslera622f_Camera_publisher" args="0 0 0 0 0 0 basler_a622f Camera 10" />
 	<node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
-		<rosparam file="$(find flyatar_calibration)/calibration_data/params_camera_NAME.yaml" />
+		<rosparam file="$(find calibration)/calibration_data/params_camera_NAME.yaml" />
 	</node>
 	
 	<node ns="camera" name="image_proc" pkg="image_proc" type="image_proc" />

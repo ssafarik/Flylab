@@ -454,7 +454,7 @@ class MotorArm:
             else:                                        # Other frames of reference use the angle of cartesian (x,y)
                 angleNext = self.GetThetaFromXy(self.ptEeCommand.x, self.ptEeCommand.y)
 
-            # Compute deltas for velocity calc.
+            # Compute deltas for speed calc.
             time = rospy.Time.now()
             self.dAngle = angleNext - self.jointstate1.position
             #self.dTime = self.ptsToolRef.header.stamp - time
@@ -462,11 +462,11 @@ class MotorArm:
             self.timePrev = time
     
             if (self.jointstate1 is not None):
-                velocity = N.abs(self.dAngle / self.dTime.to_sec())
+                speed = N.abs(self.dAngle / 1)#self.dTime.to_sec())
                 
                 with self.lock:
                     try:
-                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext, velocity)
+                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext, speed)
                     except (rospy.ServiceException, IOError), e:
                         rospy.logwarn ("MotorArm FAILED %s"%e)
 
@@ -483,7 +483,7 @@ class MotorArm:
         self.initialized = True
 
         # Process messages forever.
-        rosrate = rospy.Rate(20)
+        rosrate = rospy.Rate(100)
         #try:
         while not rospy.is_shutdown():
             #rospy.logwarn('jointstate1=%s' % self.jointstate1)

@@ -48,9 +48,9 @@ class ExperimentPattern():
         
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
-        self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'
-        self.experimentparams.move.pattern.radius = 40
-        self.experimentparams.move.pattern.hz = 0.0625
+        self.experimentparams.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'
+        self.experimentparams.move.pattern.radius = 14.143 # 10*sqrt(2)
+        self.experimentparams.move.pattern.hz = 0.125
         self.experimentparams.move.pattern.count = -1
         self.experimentparams.move.timeout = -1
         
@@ -80,6 +80,6 @@ if __name__ == '__main__':
         experiment.Run()
         
     except:
-        rospy.loginfo("Shutting down")
+        rospy.loginfo("Experiment Shutting down")
 
         

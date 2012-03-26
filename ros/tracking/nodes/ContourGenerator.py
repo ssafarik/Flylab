@@ -102,14 +102,14 @@ class ContourGenerator:
         self.tfrx.waitForTransform("ImageRect", self.ptsOriginROI.header.frame_id, rospy.Time(), rospy.Duration(5.0))
         self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(5.0))
 
-#        rospy.wait_for_service('plate_to_camera', timeout=10.0)
+#        rospy.wait_for_service('camera_from_plate', timeout=10.0)
 #        try:
-#            self.plate_to_camera = rospy.ServiceProxy('plate_to_camera', PlateCameraConversion)
+#            self.camera_from_plate = rospy.ServiceProxy('camera_from_plate', PlateCameraConversion)
 #        except rospy.ServiceException, e:
 #            print "Service call failed: %s"%e
-#        rospy.wait_for_service('camera_to_plate', timeout=10.0)
+#        rospy.wait_for_service('plate_from_camera', timeout=10.0)
 #        try:
-#            self.camera_to_plate = rospy.ServiceProxy('camera_to_plate', PlateCameraConversion)
+#            self.plate_from_camera = rospy.ServiceProxy('plate_from_camera', PlateCameraConversion)
 #        except rospy.ServiceException, e:
 #            print "Service call failed: %s"%e
 
@@ -126,7 +126,7 @@ class ContourGenerator:
         
         
         # Mask Info
-        self.radiusMask = int(rospy.get_param("arena/radius_camera",25.4))
+        self.radiusMask = int(rospy.get_param("camera/mask/radius", 25))
 
 #        rospy.logwarn('100 ImageRect = %s Plate' % self.MmFromPixels(100))
 #        rospy.logwarn('100 Plate = %s ImageRect' % self.PixelsFromMm(100))
@@ -139,7 +139,7 @@ class ContourGenerator:
 
     
     def MmFromPixels (self, xIn):
-        response = self.plate_to_camera(xIn, xIn)
+        response = self.camera_from_plate(xIn, xIn)
         return (response.Xdst, response.Ydst)
         
         
@@ -484,7 +484,7 @@ class ContourGenerator:
             else:
                 return
         
-        radiusMask = int(rospy.get_param("arena/radius_camera",25.4)) #int(rospy.get_param("radiusMask","225"))
+        radiusMask = int(rospy.get_param("camera/mask/radius", 25)) 
         if radiusMask != self.radiusMask:
             self.radiusMask = radiusMask 
             cv.Zero(self.imageMask)

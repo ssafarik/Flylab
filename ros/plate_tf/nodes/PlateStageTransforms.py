@@ -2,64 +2,106 @@
 from __future__ import division
 import roslib; roslib.load_manifest('plate_tf')
 import rospy
-import numpy
+import numpy as N
 import tf
 import plate_tf.srv
-import time
+from geometry_msgs.msg import Point, Quaternion
 
-class Transforms:
+
+class TransformServerPlateStage:
     def __init__(self):
-        self.tf_listener = tf.TransformListener()
-        self.bInitialized = False
-        while not self.bInitialized:
-            try:
-                (self.trans,self.rot) = self.tf_listener.lookupTransform("Stage", "Plate", rospy.Time(0))
-                self.bInitialized = True
-            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                pass
-            time.sleep(0.1)
+        self.initialized = False
+        rospy.init_node('TransformServerPlateStage')
 
-        self.T = tf.transformations.translation_matrix(self.trans)
-        self.R = tf.transformations.quaternion_matrix(self.rot)
+        self.tfrx = tf.TransformListener()
+        self.tfbx = tf.TransformBroadcaster()
+
+        self.ptPlateStage = Point()
+        self.ptPlateStage.x = rospy.get_param('plate_stage_x', 0.0)
+        self.ptPlateStage.y = rospy.get_param('plate_stage_y', 0.0)
+        self.ptPlateStage.z = rospy.get_param('plate_stage_z', 0.0)
+        self.qPlateStage = Quaternion()
+        self.qPlateStage.x = rospy.get_param('plate_stage_qx', 0.0)
+        self.qPlateStage.y = rospy.get_param('plate_stage_qy', 0.0)
+        self.qPlateStage.z = rospy.get_param('plate_stage_qz', 0.0)
+        self.qPlateStage.w = rospy.get_param('plate_stage_qw', 1.0)
+
+        #while not self.initialized:
+        #    try:
+        #        (self.trans,self.rot) = self.tfrx.lookupTransform("Stage", "Plate", rospy.Time(0))
+        #    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+        #        pass
+        #    time.sleep(0.5)
+        self.transPlateStage = (self.ptPlateStage.x,self.ptPlateStage.y,self.ptPlateStage.z)
+        self.rotPlateStage = (self.qPlateStage.x,self.qPlateStage.y,self.qPlateStage.z,self.qPlateStage.w)
+
+        self.T = tf.transformations.translation_matrix(self.transPlateStage)
+        self.R = tf.transformations.quaternion_matrix(self.rotPlateStage)
         self.M = tf.transformations.concatenate_matrices(self.T, self.R)
-        self.Minv = numpy.linalg.inv(self.M)
+        self.Minv = N.linalg.inv(self.M)
 
-    def plate_to_stage(self,req):
-        point_count = min(len(req.Xsrc), len(req.Ysrc))
+        srv_ps = rospy.Service('plate_to_stage', plate_tf.srv.PlateStageConversion, self.StageFromPlate_callback)
+        srv_sp = rospy.Service('stage_to_plate', plate_tf.srv.PlateStageConversion, self.PlateFromStage_callback)
+
+        self.initialized = True
+
+    def StageFromPlate_callback(self,req):
+    # Appears to be no longer used.
+        rospy.logwarn ('StageFromPlate_callback()')
+        nPoints = min(len(req.Xsrc), len(req.Ysrc))
         Xsrc = list(req.Xsrc)
         Ysrc = list(req.Ysrc)
-        Zsrc = [0]*point_count
-        Hsrc = [1]*point_count
-        plate_points = numpy.array([Xsrc, Ysrc, Zsrc, Hsrc])
-        stage_points = numpy.dot(self.M, plate_points)
+        Zsrc = [0]*nPoints
+        Hsrc = [1]*nPoints
+        plate_points = N.array([Xsrc, Ysrc, Zsrc, Hsrc])
+        stage_points = N.dot(self.M, plate_points)
         Xdst = stage_points[0,:]
         Ydst = stage_points[1,:]
         return {'Xdst': Xdst,
                 'Ydst': Ydst}
 
-    def stage_to_plate(self,req):
-        point_count = min(len(req.Xsrc), len(req.Ysrc))
+
+    def PlateFromStage_callback(self,req):
+    # Appears to be no longer used.
+        rospy.logwarn ('PlateFromStage_callback()')
+        nPoints = min(len(req.Xsrc), len(req.Ysrc))
         Xsrc = list(req.Xsrc)
         Ysrc = list(req.Ysrc)
-        Zsrc = [0]*point_count
-        Hsrc = [1]*point_count
-        stage_points = numpy.array([Xsrc, Ysrc, Zsrc, Hsrc])
-        plate_points = numpy.dot(self.Minv, stage_points)
+        Zsrc = [0]*nPoints
+        Hsrc = [1]*nPoints
+        stage_points = N.array([Xsrc, Ysrc, Zsrc, Hsrc])
+        plate_points = N.dot(self.Minv, stage_points)
 
         Xdst = plate_points[0,:]
         Ydst = plate_points[1,:]
         return {'Xdst': Xdst,
                 'Ydst': Ydst}
 
-def plate_stage_transforms_server():
-    rospy.init_node('PlateStageTransforms')
-    transforms = Transforms()
-    s_ps = rospy.Service('plate_to_stage', plate_tf.srv.PlateStageConversion, transforms.plate_to_stage)
-    s_sp = rospy.Service('stage_to_plate', plate_tf.srv.PlateStageConversion, transforms.stage_to_plate)
+
+    def SendTransforms(self):
+        if self.initialized:
+            self.tfbx.sendTransform(self.transPlateStage, 
+                                    self.rotPlateStage,
+                                    rospy.Time.now(),
+                                    "Stage",     # child
+                                    "Plate"      # parent
+                                    )
+        
+        
+    def Main(self):
+        rate = rospy.Rate(100) # BUG: Reducing this causes erratic behavior w/ patterngen & fivebar. 
+        try:
+            while not rospy.is_shutdown():
+                try:
+                    self.SendTransforms()
+                    rate.sleep()
+                except tf.Exception:
+                    rospy.logwarn ('Exception in TransformServerPlateStage()')
+        except:
+            print "Shutting down"
+
 
 if __name__ == "__main__":
-    plate_stage_transforms_server()
-    try:
-        rospy.spin()
-    except KeyboardInterrupt:
-        print "Shutting down"
+    tsps = TransformServerPlateStage()
+    tsps.Main()
+    

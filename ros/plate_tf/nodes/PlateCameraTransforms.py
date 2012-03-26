@@ -10,18 +10,26 @@ from pythonmodules import cvNumpy, CameraParameters
 import plate_tf.srv
 
 
-class Transforms:
+class TransformServerPlateCamera:
     def __init__(self):
+        self.initialized = False
         self.camerainfo = None
+        rospy.init_node('TransformServerPlateCamera')
+        
         self.tfbx = tf.TransformBroadcaster()
+
+        
+        self.xMask = rospy.get_param('camera/mask/x', 0.0) 
+        self.yMask = rospy.get_param('camera/mask/y', 0.0) 
+        self.zMask = rospy.get_param('camera/mask/z', 0.0) 
+
         self.Hinv = N.identity(3)
-        
         self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
+
+        rospy.Service('camera_from_plate', plate_tf.srv.PlateCameraConversion, self.CameraFromPlate_callback)
+        rospy.Service('plate_from_camera', plate_tf.srv.PlateCameraConversion, self.PlateFromCamera_callback)
         
-        self.originPlateX = rospy.get_param('camera/originPlateX', 0.0) 
-        self.originPlateY = rospy.get_param('camera/originPlateY', 0.0) 
-        self.originPlateZ = rospy.get_param('camera/originPlateZ', 0.0) 
-        
+        self.initialized = True
 
 
     def CameraInfo_callback (self, msgCameraInfo):
@@ -29,8 +37,6 @@ class Transforms:
             self.camerainfo = msgCameraInfo
             M = N.reshape(N.array(self.camerainfo.K),[3,3]) #cvNumpy.mat_to_array(N.array(self.camerainfo.K))
             #M = N.reshape(N.array(self.camerainfo.P),[3,4])[0:3,0:3]
-            #M = N.reshape(N.array([1690.6893719741, 0, 632.966049657568, 0, 1724.60733564515, 540.153219137248, 0, 0, 1]),[3,3])
-            #M = N.reshape(N.array([1699.89142716178, 0, 637.374529813928, 0, 0, 1734.32501822431, 533.670067729561, 0, 0, 0, 1, 0]),[3,4])[0:3,0:3]
             M[:-1,-1] = 0  # Zero the translation entries (1,3) and (2,3).
     
             (rvec, tvec) = CameraParameters.extrinsic("plate")
@@ -51,29 +57,7 @@ class Transforms:
             self.H = N.linalg.inv(self.Hinv)
             
 
-    def SendTransforms(self):      
-        if self.camerainfo is not None:
-            self.tfbx.sendTransform((0,0,0),#(-self.camerainfo.K[2], -self.camerainfo.K[5],0), #(-608, -581, 0), 
-                                    (0,0,0,1), 
-                                    rospy.Time.now(), 
-                                    "ImageRaw", "Camera")
-            self.tfbx.sendTransform((0,0,0),#(self.camerainfo.K[2], self.camerainfo.K[5],0), #(-607, -551, 0), 
-                                    (0,0,0,1), 
-                                    rospy.Time.now(), 
-                                    "ImageRect", "ImageRaw")
-            self.tfbx.sendTransform((self.originPlateX,
-                                     -self.originPlateY,
-                                     self.originPlateZ),#(19, -10, 0.0), # Comes from running CameraPlate.launch
-                                    (0,0,0,1), 
-                                    rospy.Time.now(), 
-                                    "Plate", "ImageRect")
-            self.tfbx.sendTransform((0, 0, 0), 
-                                    (0,0,0,1), 
-                                    rospy.Time.now(), 
-                                    "ROI", "ImageRect")
-      
-        
-    def plate_to_camera(self, req):
+    def CameraFromPlate_callback(self, req):
         point_count = min(len(req.Xsrc), len(req.Ysrc))
         Xsrc = list(req.Xsrc)
         Ysrc = list(req.Ysrc)
@@ -85,7 +69,7 @@ class Transforms:
         return {'Xdst': Xdst,
                 'Ydst': Ydst}
 
-    def camera_to_plate(self, req):
+    def PlateFromCamera_callback(self, req):
         point_count = min(len(req.Xsrc), len(req.Ysrc))
         Xsrc = list(req.Xsrc)
         Ysrc = list(req.Ysrc)
@@ -98,24 +82,43 @@ class Transforms:
         return {'Xdst': Xdst,
                 'Ydst': Ydst}
         
+
+    def SendTransforms(self):      
+        if self.camerainfo is not None:
+            self.tfbx.sendTransform((0,0,0),#(-self.camerainfo.K[2], -self.camerainfo.K[5],0), #(-608, -581, 0), 
+                                    (0,0,0,1), 
+                                    rospy.Time.now(), 
+                                    "ImageRaw", "Camera")
+            self.tfbx.sendTransform((0,0,0),#(self.camerainfo.K[2], self.camerainfo.K[5],0), #(-607, -551, 0), 
+                                    (0,0,0,1), 
+                                    rospy.Time.now(), 
+                                    "ImageRect", "ImageRaw")
+            self.tfbx.sendTransform((self.xMask,
+                                     -self.yMask,
+                                     self.zMask),
+                                    (0,0,0,1), 
+                                    rospy.Time.now(), 
+                                    "Plate", "ImageRect")
+            self.tfbx.sendTransform((0, 0, 0), 
+                                    (0,0,0,1), 
+                                    rospy.Time.now(), 
+                                    "ROI", "ImageRect")
+      
+        
     def Main(self):
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(100)
         try:
             while not rospy.is_shutdown():
                 try:
                     self.SendTransforms()
                     rate.sleep()
                 except tf.Exception:
-                    rospy.logwarn ('Exception in PlateCameraTransforms: %s' % e)
+                    rospy.logwarn ('Exception in TransformServerPlateCamera()')
         except:
             print "Shutting down"
 
 
-
 if __name__ == "__main__":
-    rospy.init_node('camera_transforms')
-    transforms = Transforms()
-    rospy.Service('plate_to_camera', plate_tf.srv.PlateCameraConversion, transforms.plate_to_camera)
-    rospy.Service('camera_to_plate', plate_tf.srv.PlateCameraConversion, transforms.camera_to_plate)
-    transforms.Main()
+    tspc = TransformServerPlateCamera()
+    tspc.Main()
 

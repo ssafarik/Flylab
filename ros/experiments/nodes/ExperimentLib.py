@@ -747,6 +747,7 @@ class MoveRobot (smach.State):
         msgPattern.mode = 'byshape'
         msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
         msgPattern.points = []
+        msgPattern.frame = 'Plate'
         msgPattern.hz = userdata.experimentparamsIn.move.pattern.hz
         msgPattern.count = userdata.experimentparamsIn.move.pattern.count
         msgPattern.radius = userdata.experimentparamsIn.move.pattern.radius
@@ -771,8 +772,8 @@ class MoveRobot (smach.State):
         # Turn off the pattern
         msgPattern.mode = 'byshape'
         msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
-        msgPattern.frame = 'Stage'
         msgPattern.points = []
+        msgPattern.frame = 'Plate'
         msgPattern.hz = userdata.experimentparamsIn.move.pattern.hz
         msgPattern.count = 0
         msgPattern.radius = userdata.experimentparamsIn.move.pattern.radius
@@ -883,7 +884,8 @@ class Experiment():
             outcome = self.sm.execute()
             rospy.logwarn ('Experiment returned with: %s' % outcome)
         except smach.exceptions.InvalidUserCodeError:
-            pass
+            rospy.logwarn('InvalidUserCodeError')
+            #pass
         
         self.sis.stop()
 

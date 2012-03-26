@@ -1,0 +1,21 @@
+<package>
+  <description brief="calibration">
+
+     calibration
+
+  </description>
+  <author>Peter Polidoro, Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/calibration</url>
+
+  <depend package="rospy"/>
+  <depend package="camera1394v2"/>
+  <depend package="pythonmodules"/>
+  <depend package="plate_tf"/>
+  <depend package="patterngen"/>
+  <depend package="tracking"/>
+
+</package>
+
+

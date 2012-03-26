@@ -433,7 +433,7 @@ class ContourIdentifier:
         self.endeffector_endeffectorframe.point.z = 0
         
 
-        self.radiusArena = rospy.get_param("arena/radius_camera",100) # Pixels
+        self.radiusMask = rospy.get_param("camera/mask/radius", 25) # Pixels
 
         self.xSave = []
         self.ySave = []
@@ -449,8 +449,8 @@ class ContourIdentifier:
                                   pose=Pose(position=Point(x=0, 
                                                            y=0, 
                                                            z=0)),
-                                  scale=Vector3(x=self.radiusArena*2.0 * 85/470, #BUG: Need to properly convert from pixels to mm.
-                                                y=self.radiusArena*2.0 * 85/470,
+                                  scale=Vector3(x=self.radiusMask*2.0 * 85/470, #BUG: Need to properly convert from pixels to mm.
+                                                y=self.radiusMask*2.0 * 85/470,
                                                 z=0.01),
                                   color=ColorRGBA(a=0.05,
                                                   r=1.0,
@@ -860,7 +860,7 @@ class ContourIdentifier:
                 #rospy.loginfo ('CI contourinfo0 %s' % contourinfo)
                 contourinfo = self.TransformContourinfoPlateFromCamera(contourinfo)
                 #rospy.loginfo ('CI contourinfo1 %s' % contourinfo)
-                contourinfo = self.FilterContourinfoWithinRadius(contourinfo, self.radiusArena)
+                contourinfo = self.FilterContourinfoWithinRadius(contourinfo, self.radiusMask)
                 #rospy.loginfo ('CI contourinfo2 %s' % contourinfo)
     
                 # Repackage the contourinfo into a list of contours

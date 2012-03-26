@@ -13,7 +13,7 @@
 	<include file="$(find config)/launch/flybowl_32mm.launch" /> 
 	<include file="$(find motorarm)/launch/motorarm.launch" />
 	
-	<include file="$(find flyatar_calibration)/calibration_data/calibration_babycarrot.launch" />
+	<include file="$(find calibration)/calibration_data/calibration_babycarrot.launch" />
 	
 </launch>
 	

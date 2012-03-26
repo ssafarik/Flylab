@@ -43,14 +43,6 @@ NEGATIVE = 1
 
 MMPERINCH = 25.4 # This number converts from external reference (x,y) units to inches.
 
-# Link lengths (inches)
-LINKWIDTH = 1.0
-L0 = 10.5 # Distance between motor shafts
-L1 = 3.5  # Link 1
-L2 = 3.5  # Link 2
-L3 = L1*3.0 # Link 3
-L4 = L2*3.0 # Link 4
-
 # Link lengths (millimeters)
 LINKWIDTH = 1.0*MMPERINCH
 L0 = 10.5*MMPERINCH #4.24*2 # Distance between motor shafts
@@ -163,6 +155,8 @@ class RosFivebar:
         self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
         self.radiusMovement = rospy.get_param('arena/radius_movement', 25.4)
         
+        self.timePrev = rospy.Time.now()
+        
         self.request = SrvFrameStateRequest()
         #self.request.state.header.stamp = rospy.Time.now()
         self.request.state.header.frame_id = 'Stage'
@@ -170,6 +164,7 @@ class RosFivebar:
         self.request.state.pose.position.y = 0.0
         self.request.state.pose.position.z = 0.0
 
+        self.iCount = 0
 
     def LoadServices(self):
         # Load joint1 services.
@@ -267,26 +262,26 @@ class RosFivebar:
                 
                 
     # Close the kinematics chain:  Get thetas 1,2,3,4 from thetas 1,2
-    def Get1234xyFrom12 (self, t1, t2):
+    def Get1234xyFrom12 (self, angle1, angle2):
         # Rotate the frames from centered to east-pointing. 
-        t1 = t1 + Q1CENTERe
-        t2 = t2 + Q2CENTERe
+        angle1 = angle1 + Q1CENTERe
+        angle2 = angle2 + Q2CENTERe
         
         # Set the crossover points at 0/2pi and pi/-pi
-        t1 = ( t1       % (2.0*N.pi))
-        t2 = ((t2+N.pi) % (2.0*N.pi)) - N.pi
+        angle1 = ( angle1       % (2.0*N.pi))
+        angle2 = ((angle2+N.pi) % (2.0*N.pi)) - N.pi
         
-        s1 = N.sin(t1)
-        c1 = N.cos(t1)
+        s1 = N.sin(angle1)
+        c1 = N.cos(angle1)
         
-        s2 = N.sin(t2)
-        c2 = N.cos(t2)
+        s2 = N.sin(angle2)
+        c2 = N.cos(angle2)
         
-        #s13 = N.sin(t1+t3)
-        #c13 = N.cos(t1+t3)
+        #s13 = N.sin(angle1+angle3)
+        #c13 = N.cos(angle1+angle3)
         
-        #s24 = N.sin(t2+t4)
-        #c24 = N.cos(t2+t4)
+        #s24 = N.sin(angle2+angle4)
+        #c24 = N.cos(angle2+angle4)
         
         j3x =       L1 * c1
         j3y =       L1 * s1
@@ -320,19 +315,19 @@ class RosFivebar:
         # Now get the joint angles.
         v3E = jE-j3
         v31 = -j3
-        t3 = N.arccos(N.dot(v3E,v31)/(N.linalg.norm(v3E)*N.linalg.norm(v31))) - N.pi
+        angle3 = N.arccos(N.dot(v3E,v31)/(N.linalg.norm(v3E)*N.linalg.norm(v31))) - N.pi
 
         v4E = jE-j4
         v42 = j2-j4
-        t4 = N.pi - N.arccos(N.dot(v4E,v42)/(N.linalg.norm(v4E)*N.linalg.norm(v42))) 
+        angle4 = N.pi - N.arccos(N.dot(v4E,v42)/(N.linalg.norm(v4E)*N.linalg.norm(v42))) 
             
         
         x = jEx - CENTERX
         y = jEy - CENTERY
 
-        #rospy.loginfo ('t1=%s, t2=%s' % (t1,t2))
+        #rospy.loginfo ('angle1=%s, angle2=%s' % (angle1,angle2))
         #rospy.loginfo ('Lc=%s, Ld=%s, tc=%s, td=%s, te=%s, tf=%s, tg=%s, th=%s' % (Lc, Ld, tc, td, te, tf, tg, th))
-        #rospy.loginfo ('t1=%s, t2=%s, t3=%s, t4=%s' % (t1, t2, t3, t4))
+        #rospy.loginfo ('angle1=%s, angle2=%s, angle3=%s, angle4=%s' % (angle1, angle2, angle3, angle4))
         #rospy.loginfo ('j3x=%s, j3y=%s, j4x=%s, j4y=%s, jEx=%s, jEy=%s, jFx=%s, jFy=%s' % (j3x, j3y, j4x, j4y, jEx, jEy, jFx, jFy))
         
         # Put angles into the proper range for their limits.
@@ -342,7 +337,7 @@ class RosFivebar:
         else:
             lo = 0.0
             hi = 2.0*N.pi
-        t1 = ((t1-lo)%(2.0*N.pi))+lo
+        angle1 = ((angle1-lo)%(2.0*N.pi))+lo
 
         if Q2MINe<0.0:
             lo = -N.pi
@@ -350,22 +345,22 @@ class RosFivebar:
         else:
             lo = 0.0
             hi = 2.0*N.pi
-        t2 = ((t2-lo)%(2.0*N.pi))+lo
+        angle2 = ((angle2-lo)%(2.0*N.pi))+lo
         
 
-        t1 = N.clip(t1,Q1MINe,Q1MAXe)
-        t2 = N.clip(t2,Q2MINe,Q2MAXe)
+        angle1 = N.clip(angle1,Q1MINe,Q1MAXe)
+        angle2 = N.clip(angle2,Q2MINe,Q2MAXe)
 
-        t1 = t1 - Q1CENTERe
-        t2 = t2 - Q2CENTERe
+        angle1 = angle1 - Q1CENTERe
+        angle2 = angle2 - Q2CENTERe
         
-        return (t1, t2, t3, t4, x, y)
+        return (angle1, angle2, angle3, angle4, x, y)
     
     
     # Get1234FromXY()
     # Inverse Kinematics: Get thetas (1,2,3,4) from the (x,y) end-effector position,
     # where (x,y) is in the coordinate frame of the workspace center,
-    # and (t1,t2)==(0,0) maps to (x,y)==(0,0).
+    # and (angle1,angle2)==(0,0) maps to (x,y)==(0,0).
     #
     def Get1234FromXY (self, x0, y0):
         x0,y0 = self.ClipXyToRadius(x0, y0)
@@ -429,7 +424,7 @@ class RosFivebar:
         #rospy.logwarn ('5B q4=%s' % q4)
                 
         
-        #(t1,t2) = (q1[1]-Q1CENTERe,q2[0]-Q2CENTERe)
+        #(angle1,angle2) = (q1[1]-Q1CENTERe,q2[0]-Q2CENTERe)
         
         # Put angles into the proper 2pi range for their limits.
         if Q1MINe<0.0:
@@ -452,17 +447,17 @@ class RosFivebar:
         
         
         # Select the proper configuration (it always seems to be k=1 and k=0, respectively)
-        t1 = 999.0
-        t2 = 999.0
-        t3 = 999.0
-        t4 = 999.0
+        angle1 = 999.0
+        angle2 = 999.0
+        angle3 = 999.0
+        angle4 = 999.0
         #for k in range(len(q1)):
         #    rospy.logwarn('5B Q1: %s < %s < %s and pi < %s' % (Q1MINe, q1[k], Q1MAXe, q3[k] %(2.0*N.pi)))
         for k in range(len(q1)):
             #if (Q1MINe < q1[k] < Q1MAXe) and (N.pi < (q3[k] %(2.0*N.pi))):
             if (N.pi < (q3[k] %(2.0*N.pi))):
-                t1 = q1[k]
-                t3 = q3[k]
+                angle1 = q1[k]
+                angle3 = q3[k]
                 k1 = k
                 break
             
@@ -472,25 +467,25 @@ class RosFivebar:
         for k in range(len(q2)):
             #if (Q2MINe < q2[k] < Q2MAXe) and ((q4[k] %(2.0*N.pi)) < N.pi):
             if ((q4[k] %(2.0*N.pi)) < N.pi):
-                t2 = q2[k]
-                t4 = q4[k]
+                angle2 = q2[k]
+                angle4 = q4[k]
                 k2 = k
                 break
         
-        #if (t1==999.0) or (t2==999.0) or (t3==999.0) or (t4==999.0):
-        #    rospy.logwarn('5B thetas=%s, x,y=%s' % ([t1,t2,t3,t4],[x0,y0]))
+        #if (angle1==999.0) or (angle2==999.0) or (angle3==999.0) or (angle4==999.0):
+        #    rospy.logwarn('5B thetas=%s, x,y=%s' % ([angle1,angle2,angle3,angle4],[x0,y0]))
             
-        t1 = N.clip(t1,Q1MINe,Q1MAXe)
-        t2 = N.clip(t2,Q2MINe,Q2MAXe)
+        angle1 = N.clip(angle1,Q1MINe,Q1MAXe)
+        angle2 = N.clip(angle2,Q2MINe,Q2MAXe)
 
-        t1 = t1 - Q1CENTERe
-        t2 = t2 - Q2CENTERe
+        angle1 = angle1 - Q1CENTERe
+        angle2 = angle2 - Q2CENTERe
 
-        return (t1,t2,t3,t4)
+        return (angle1,angle2,angle3,angle4)
         
         
-    def GetXyFrom12 (self, t1, t2):
-        (t1, t2, t3, t4, x, y) = self.Get1234xyFrom12(t1, t2)
+    def GetXyFrom12 (self, angle1, angle2):
+        (angle1, angle2, angle3, angle4, x, y) = self.Get1234xyFrom12(angle1, angle2)
         return (x, 
                 y)
     
@@ -555,7 +550,7 @@ class RosFivebar:
         
         #rospy.loginfo ('5B SetStageState_callback Request x,y=%s' % ([reqStageState.state.pose.position.x, 
         #                                                                 reqStageState.state.pose.position.y]))
-        #(t1,t2,t3,t4) = self.Get1234FromXY(reqStageState.state.pose.position.x-CENTERX, 
+        #(angle1,angle2,angle3,angle4) = self.Get1234FromXY(reqStageState.state.pose.position.x-CENTERX, 
         #                                   reqStageState.state.pose.position.y-CENTERY)
         self.ptsToolRefExternal = PointStamped(Header(frame_id=reqStageState.state.header.frame_id),
                                                Point(x=reqStageState.state.pose.position.x,
@@ -582,22 +577,30 @@ class RosFivebar:
     
 
     def SignalInput_callback (self, srvSignal):
+        #rospy.logwarn('A')
         rv = SrvSignalResponse()
         rv.success = False
         self.ptsToolRefExternal = srvSignal.pts #self.pattern.points[self.iPoint]
         try:
-            self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
+            #rospy.logwarn('B')
+            self.tfrx.waitForTransform('Stage', self.ptsToolRefExternal.header.frame_id, rospy.Time.now(), rospy.Duration(1.0))
+            #rospy.logwarn('C')
             self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
+            #rospy.logwarn('D')
 
             try:
+                #rospy.logwarn('E')
                 self.speedCommandTool = self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
+                #rospy.logwarn('F')
                 rv.success = True
+                #rospy.logwarn ('pt(%d)=[%0.2f,%0.2f]'%(self.iCount,self.ptsToolRefExternal.point.x,self.ptsToolRefExternal.point.y))
             except AttributeError:
                 pass
             #rospy.logwarn ('5B signal pt=%s' % [self.ptToolRef.x,self.ptToolRef.y])
         except tf.Exception:
             pass
-        
+        #rospy.logwarn('G')
+        self.iCount += 1
         return rv
 
 
@@ -611,6 +614,223 @@ class RosFivebar:
                        z=magPtMag/magPtDir*ptDir.z)
         return ptDir
     
+
+    def ClipPtMag (self, pt, magMax):
+        magPt = N.linalg.norm([pt.x, pt.y, pt.z])
+        if magPt > magMax:
+            r = magMax / magPt
+        else:
+            r = 1.0
+            
+        return Point(r*pt.x, r*pt.y, r*pt.z)
+            
+        
+    def EndEffectorOffset_callback(self, ptOffset):
+        self.ptOffsetSense = ptOffset #Point(0,0,0)#
+        #rospy.logwarn ('5B ptOffset=%s' % ptOffset)
+        
+        
+    def HomeStage_callback(self, reqStageState):
+        while not self.initialized:
+            rospy.sleep(0.1)
+            
+        with self.lock:
+            try:
+                self.park_joint1()
+                self.park_joint2()
+            except (rospy.ServiceException, IOError), e:
+                rospy.logwarn ("5B FAILED %s"%e)
+                
+        rvStageState = SrvFrameStateResponse()
+        rospy.loginfo ('5B HomeStage_callback rvStageState=%s' % rvStageState)
+        return rvStageState
+        
+        
+    def Calibrate_callback(self, req):
+        # Convert parking coordinates to angles.
+        self.xPark = XPARK
+        self.yPark = YPARK
+        with self.lock:
+            [q1park,q2park,q3park,q4park] = self.Get1234FromXY(self.xPark, self.yPark)
+
+        q1origin = Q1CENTERi # From the index switch
+        q2origin = Q2CENTERi # From the index switch
+
+        rospy.loginfo ('5B Center = %s, %s' % (CENTERX, CENTERY))
+        rospy.loginfo ('5B Calibrating: q1origin=%s, q1park=%s, q2origin=%s, q2park=%s' % (q1origin, q1park, q2origin, q2park))
+        with self.lock:
+            rv = self.calibrate_joint1(NEGATIVE, q1origin, q1park, True)
+            rospy.loginfo ('5B Calibrated joint1')
+            q1index = rv.position
+            rv = self.calibrate_joint2(POSITIVE, q2origin, q2park, True)
+            rospy.loginfo ('5B Calibrated joint2')
+            q2index = rv.position
+
+        rvStageState = self.GetStageState()
+        rospy.loginfo ('5B Calibrate_callback rvStageState=%s' % rvStageState)
+        return rvStageState
+    
+
+    def SendTransforms(self):  
+        if self.initialized:
+            with self.lock:
+                try:
+                    self.jointstate1 = self.getState_joint1()
+                    self.jointstate2 = self.getState_joint2()
+                except (rospy.ServiceException, IOError), e:
+                    rospy.logwarn ("5B FAILED %s"%e)
+                    self.jointstate1 = None
+                    self.jointstate2 = None
+                #rospy.logwarn('5B [j1,j2]=%s' % [self.jointstate1.position,self.jointstate2.position])
+                    
+
+            if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
+                #rospy.loginfo ('5B self.jointstate1=%s' % self.jointstate1)
+                (angle1,angle2,angle3,angle4, self.ptEeSense.x, self.ptEeSense.y) = self.Get1234xyFrom12(self.jointstate1.position, self.jointstate2.position)
+                #rospy.logwarn('5B compare [xc,yc]-[xa,ya]=%s' % [self.ptEeCommand.x-self.ptEeSense.x,self.ptEeCommand.y-self.ptEeSense.y])
+                #rospy.logwarn('5B actual [x,y]=%s' % [self.ptEeSense.x,self.ptEeSense.y])
+
+                #with self.lock:
+                #    (angle1a,angle2a,angle3a,angle4a) = self.Get1234FromXY(self.state.pose.position.x, self.state.pose.position.y)
+                #rospy.loginfo ('5B xy=%s, angle1-angle1a=%0.5f, angle2-angle2a=%0.5f, angle3-angle3a=%0.5f, angle4-angle4a=%0.5f' % ([self.state.pose.position.x, self.state.pose.position.y], angle1-angle1a, angle2-angle2a, angle3-angle3a, angle4-angle4a))
+                
+                # Move the crossover point from pi/-pi to 0/2pi
+                #angle1 = angle1 % (2.0*N.pi) 
+                #angle2 = angle2 % (2.0*N.pi)
+    
+                # Publish the joint states (for rviz, etc)    
+                self.js.header.seq = self.js.header.seq + 1
+                self.js.header.stamp.secs = rospy.get_time()
+                self.js.position = [angle1,angle2,angle3,angle4]
+                self.pubJointState.publish(self.js)
+    
+                state = MsgFrameState()
+                state.header.stamp = rospy.Time.now()
+                state.header.frame_id = 'Stage'
+                state.pose.position.x = self.ptEeSense.x
+                state.pose.position.y = self.ptEeSense.y
+                qEE = tf.transformations.quaternion_from_euler(0.0, 0.0, angle1+Q1CENTERe+angle3)
+                state.pose.orientation.x = qEE[0]
+                state.pose.orientation.y = qEE[1]
+                state.pose.orientation.z = qEE[2]
+                state.pose.orientation.w = qEE[3]
+                self.pubEndEffector.publish (state)
+                #rospy.loginfo ('5B publish state=%s' % state)
+            
+        
+        
+                # Publish the link transforms.
+                
+        
+                self.tfbx.sendTransform((-L3/2, -246.31423, 0.0), 
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
+                                        rospy.Time.now(),
+                                        "link0",     # child
+                                        "Stage"      # parent
+                                        )
+
+                self.tfbx.sendTransform((0.0, 0.0, 0.0), 
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, angle1+Q1CENTERe),
+                                        rospy.Time.now(),
+                                        "link1",     # child
+                                        "link0"      # parent
+                                        )
+                self.tfbx.sendTransform((L1, 0.0, 0.0), 
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, angle3),
+                                        rospy.Time.now(),
+                                        "link3",     # child
+                                        "link1"      # parent
+                                        )
+        
+                self.tfbx.sendTransform((L3, 0.0, 0.0), 
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
+                                        rospy.Time.now(),
+                                        "link5",     # child
+                                        "link3"      # parent
+                                        )
+
+                self.tfbx.sendTransform((L0, 0.0, 0.0), 
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, angle2+Q2CENTERe),
+                                        rospy.Time.now(),
+                                        "link2",     # child
+                                        "link0"      # parent
+                                        )
+                self.tfbx.sendTransform((L2, 0.0, 0.0), 
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, angle4),
+                                        rospy.Time.now(),
+                                        "link4",     # child
+                                        "link2"      # parent
+                                        )
+                
+                
+                # Frame EndEffector
+                self.tfbx.sendTransform((state.pose.position.x, state.pose.position.y, state.pose.position.z), 
+                                        qEE,
+                                        rospy.Time.now(),
+                                        "EndEffector",     # child
+                                        "Stage"      # parent
+                                        )
+                # Frame Target
+                if self.ptsToolRef is not None:
+                    markerTarget = Marker(header=Header(stamp = rospy.Time.now(),
+                                                        frame_id='Stage'),
+                                          ns='target',
+                                          id=0,
+                                          type=2, #SPHERE,
+                                          action=0,
+                                          pose=Pose(position=Point(x=self.ptsToolRef.point.x, 
+                                                                   y=self.ptsToolRef.point.y, 
+                                                                   z=self.ptsToolRef.point.z)),
+                                          scale=Vector3(x=3.0,
+                                                        y=3.0,
+                                                        z=3.0),
+                                          color=ColorRGBA(a=0.5,
+                                                          r=1.0,
+                                                          g=0.1,
+                                                          b=0.1),
+                                          lifetime=rospy.Duration(0.1))
+                    self.pubMarker.publish(markerTarget)
+
+#                    markerToolOffset   = Marker(header=Header(stamp = rospy.Time.now(),
+#                                                        frame_id='Stage'),
+#                                          ns='markers',
+#                                          id=1,
+#                                          type=2, #SPHERE,
+#                                          action=0,
+#                                          pose=Pose(position=Point(x=state.pose.position.x+self.ptOffsetSense.x, 
+#                                                                   y=state.pose.position.y+self.ptOffsetSense.y, 
+#                                                                   z=state.pose.position.z+self.ptOffsetSense.z)),
+#                                          scale=Vector3(x=6.0,
+#                                                        y=6.0,
+#                                                        z=6.0),
+#                                          color=ColorRGBA(a=0.5,
+#                                                          r=0.5,
+#                                                          g=0.5,
+#                                                          b=0.5),
+#                                          lifetime=rospy.Duration(0.1))
+                    markerToolOffset   = Marker(header=Header(stamp = rospy.Time.now(),
+                                                        frame_id='Stage'),
+                                          ns='tooloffset',
+                                          id=1,
+                                          type=0, #ARROW,
+                                          action=0,
+                                          scale=Vector3(x=0.1, # Shaft diameter
+                                                        y=0.2, # Head diameter
+                                                        z=0.0),
+                                          color=ColorRGBA(a=0.8,
+                                                          r=1.0,
+                                                          g=1.0,
+                                                          b=1.0),
+                                          lifetime=rospy.Duration(0.1),
+                                          points=[Point(x=state.pose.position.x, 
+                                                        y=state.pose.position.y, 
+                                                        z=state.pose.position.z),
+                                                  Point(x=state.pose.position.x+self.ptOffsetSense.x, 
+                                                        y=state.pose.position.y+self.ptOffsetSense.y, 
+                                                        z=state.pose.position.z+self.ptOffsetSense.z)])
+                    self.pubMarker.publish(markerToolOffset)
+
+
 
     # SendTargetCommand()
     #   Updates the motor command with the current target.
@@ -711,7 +931,7 @@ class RosFivebar:
 
             
             # Get the desired positions for each joint.
-            (t1,t2,t3,t4) = self.Get1234FromXY(self.ptEeCommand.x, 
+            (angle1,angle2,angle3,angle4) = self.Get1234FromXY(self.ptEeCommand.x, 
                                                self.ptEeCommand.y)
             
     
@@ -720,240 +940,28 @@ class RosFivebar:
                 speedMax = self.speedCommandTool * 0.0120 
 
                 # Distribute the velocity over the two joints.
-                dt1 = N.abs(t1-self.jointstate1.position) # Delta theta
-                dt2 = N.abs(t2-self.jointstate2.position)
-                scale1 = dt1/N.linalg.norm([dt1,dt2])
-                scale2 = dt2/N.linalg.norm([dt1,dt2])
+                dangle1 = N.abs(angle1-self.jointstate1.position) # Delta theta
+                dangle2 = N.abs(angle2-self.jointstate2.position)
+                scale1 = dangle1/N.linalg.norm([dangle1,dangle2])
+                scale2 = dangle2/N.linalg.norm([dangle1,dangle2])
                 v1 = scale1 * speedMax
                 v2 = scale2 * speedMax
+                
+                time = rospy.Time.now()
+                self.dt = time - self.timePrev
+                self.timePrev = time
                 #rospy.logwarn('5B speedMax=%s, v1,v2=%s' % (speedMax,[v1,v2]))
         
                 
                 with self.lock:
                     try:
-                        self.setPositionAtVel_joint1(Header(frame_id=self.names[0]), t1, v1)
-                        self.setPositionAtVel_joint2(Header(frame_id=self.names[1]), t2, v2)
+                        #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.ptsToolRef.point.x,self.ptsToolRef.point.y))
+                        self.setPositionAtVel_joint1(Header(frame_id=self.names[0]), angle1, v1)
+                        self.setPositionAtVel_joint2(Header(frame_id=self.names[1]), angle2, v2)
                     except (rospy.ServiceException, IOError), e:
                         rospy.logwarn ("5B FAILED %s"%e)
 
         
-    def ClipPtMag (self, pt, magMax):
-        magPt = N.linalg.norm([pt.x, pt.y, pt.z])
-        if magPt > magMax:
-            r = magMax / magPt
-        else:
-            r = 1.0
-            
-        return Point(r*pt.x, r*pt.y, r*pt.z)
-            
-        
-    def EndEffectorOffset_callback(self, ptOffset):
-        self.ptOffsetSense = ptOffset #Point(0,0,0)#
-        #rospy.logwarn ('5B ptOffset=%s' % ptOffset)
-        
-        
-    def HomeStage_callback(self, reqStageState):
-        while not self.initialized:
-            rospy.sleep(0.1)
-            
-        with self.lock:
-            try:
-                self.park_joint1()
-                self.park_joint2()
-            except (rospy.ServiceException, IOError), e:
-                rospy.logwarn ("5B FAILED %s"%e)
-                
-        rvStageState = SrvFrameStateResponse()
-        rospy.loginfo ('5B HomeStage_callback rvStageState=%s' % rvStageState)
-        return rvStageState
-        
-        
-    def Calibrate_callback(self, req):
-        # Convert parking coordinates to angles.
-        self.xPark = XPARK
-        self.yPark = YPARK
-        with self.lock:
-            [q1park,q2park,q3park,q4park] = self.Get1234FromXY(self.xPark, self.yPark)
-
-        q1origin = Q1CENTERi # From the index switch
-        q2origin = Q2CENTERi # From the index switch
-
-        rospy.loginfo ('5B Center = %s, %s' % (CENTERX, CENTERY))
-        rospy.loginfo ('5B Calibrating: q1origin=%s, q1park=%s, q2origin=%s, q2park=%s' % (q1origin, q1park, q2origin, q2park))
-        with self.lock:
-            rv = self.calibrate_joint1(NEGATIVE, q1origin, q1park, True)
-            rospy.loginfo ('5B Calibrated joint1')
-            q1index = rv.position
-            rv = self.calibrate_joint2(POSITIVE, q2origin, q2park, True)
-            rospy.loginfo ('5B Calibrated joint2')
-            q2index = rv.position
-
-        rvStageState = self.GetStageState()
-        rospy.loginfo ('5B Calibrate_callback rvStageState=%s' % rvStageState)
-        return rvStageState
-    
-
-    def SendTransforms(self):  
-        if self.initialized:
-            with self.lock:
-                try:
-                    self.jointstate1 = self.getState_joint1()
-                    self.jointstate2 = self.getState_joint2()
-                except (rospy.ServiceException, IOError), e:
-                    rospy.logwarn ("5B FAILED %s"%e)
-                    self.jointstate1 = None
-                    self.jointstate2 = None
-                #rospy.logwarn('5B [j1,j2]=%s' % [self.jointstate1.position,self.jointstate2.position])
-                    
-
-            if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
-                #rospy.loginfo ('5B self.jointstate1=%s' % self.jointstate1)
-                (t1,t2,t3,t4, self.ptEeSense.x, self.ptEeSense.y) = self.Get1234xyFrom12(self.jointstate1.position, self.jointstate2.position)
-                #rospy.logwarn('5B compare [xc,yc]-[xa,ya]=%s' % [self.ptEeCommand.x-self.ptEeSense.x,self.ptEeCommand.y-self.ptEeSense.y])
-                #rospy.logwarn('5B actual [x,y]=%s' % [self.ptEeSense.x,self.ptEeSense.y])
-
-                #with self.lock:
-                #    (t1a,t2a,t3a,t4a) = self.Get1234FromXY(self.state.pose.position.x, self.state.pose.position.y)
-                #rospy.loginfo ('5B xy=%s, t1-t1a=%0.5f, t2-t2a=%0.5f, t3-t3a=%0.5f, t4-t4a=%0.5f' % ([self.state.pose.position.x, self.state.pose.position.y], t1-t1a, t2-t2a, t3-t3a, t4-t4a))
-                
-                # Move the crossover point from pi/-pi to 0/2pi
-                #t1 = t1 % (2.0*N.pi) 
-                #t2 = t2 % (2.0*N.pi)
-    
-                # Publish the joint states (for rviz, etc)    
-                self.js.header.seq = self.js.header.seq + 1
-                self.js.header.stamp.secs = rospy.get_time()
-                self.js.position = [t1,t2,t3,t4]
-                self.pubJointState.publish(self.js)
-    
-                state = MsgFrameState()
-                state.header.stamp = rospy.Time.now()
-                state.header.frame_id = 'Stage'
-                state.pose.position.x = self.ptEeSense.x
-                state.pose.position.y = self.ptEeSense.y
-                qEE = tf.transformations.quaternion_from_euler(0.0, 0.0, t1+Q1CENTERe+t3)
-                state.pose.orientation.x = qEE[0]
-                state.pose.orientation.y = qEE[1]
-                state.pose.orientation.z = qEE[2]
-                state.pose.orientation.w = qEE[3]
-                self.pubEndEffector.publish (state)
-                #rospy.loginfo ('5B publish state=%s' % state)
-            
-        
-        
-                # Publish the link transforms.
-                
-        
-                self.tfbx.sendTransform((-L3/2, -246.31423, 0.0), 
-                                        tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
-                                        rospy.Time.now(),
-                                        "link0",     # child
-                                        "Stage"      # parent
-                                        )
-
-                self.tfbx.sendTransform((0.0, 0.0, 0.0), 
-                                        tf.transformations.quaternion_from_euler(0.0, 0.0, t1+Q1CENTERe),
-                                        rospy.Time.now(),
-                                        "link1",     # child
-                                        "link0"      # parent
-                                        )
-                self.tfbx.sendTransform((L1, 0.0, 0.0), 
-                                        tf.transformations.quaternion_from_euler(0.0, 0.0, t3),
-                                        rospy.Time.now(),
-                                        "link3",     # child
-                                        "link1"      # parent
-                                        )
-        
-                self.tfbx.sendTransform((L3, 0.0, 0.0), 
-                                        tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
-                                        rospy.Time.now(),
-                                        "link5",     # child
-                                        "link3"      # parent
-                                        )
-
-                self.tfbx.sendTransform((L0, 0.0, 0.0), 
-                                        tf.transformations.quaternion_from_euler(0.0, 0.0, t2+Q2CENTERe),
-                                        rospy.Time.now(),
-                                        "link2",     # child
-                                        "link0"      # parent
-                                        )
-                self.tfbx.sendTransform((L2, 0.0, 0.0), 
-                                        tf.transformations.quaternion_from_euler(0.0, 0.0, t4),
-                                        rospy.Time.now(),
-                                        "link4",     # child
-                                        "link2"      # parent
-                                        )
-                
-                
-                # Frame EndEffector
-                self.tfbx.sendTransform((state.pose.position.x, state.pose.position.y, state.pose.position.z), 
-                                        qEE,
-                                        rospy.Time.now(),
-                                        "EndEffector",     # child
-                                        "Stage"      # parent
-                                        )
-                # Frame Target
-                if self.ptsToolRef is not None:
-                    markerTarget = Marker(header=Header(stamp = rospy.Time.now(),
-                                                        frame_id='Stage'),
-                                          ns='target',
-                                          id=0,
-                                          type=2, #SPHERE,
-                                          action=0,
-                                          pose=Pose(position=Point(x=self.ptsToolRef.point.x, 
-                                                                   y=self.ptsToolRef.point.y, 
-                                                                   z=self.ptsToolRef.point.z)),
-                                          scale=Vector3(x=3.0,
-                                                        y=3.0,
-                                                        z=3.0),
-                                          color=ColorRGBA(a=0.5,
-                                                          r=1.0,
-                                                          g=0.1,
-                                                          b=0.1),
-                                          lifetime=rospy.Duration(0.1))
-                    self.pubMarker.publish(markerTarget)
-
-#                    markerToolOffset   = Marker(header=Header(stamp = rospy.Time.now(),
-#                                                        frame_id='Stage'),
-#                                          ns='markers',
-#                                          id=1,
-#                                          type=2, #SPHERE,
-#                                          action=0,
-#                                          pose=Pose(position=Point(x=state.pose.position.x+self.ptOffsetSense.x, 
-#                                                                   y=state.pose.position.y+self.ptOffsetSense.y, 
-#                                                                   z=state.pose.position.z+self.ptOffsetSense.z)),
-#                                          scale=Vector3(x=6.0,
-#                                                        y=6.0,
-#                                                        z=6.0),
-#                                          color=ColorRGBA(a=0.5,
-#                                                          r=0.5,
-#                                                          g=0.5,
-#                                                          b=0.5),
-#                                          lifetime=rospy.Duration(0.1))
-                    markerToolOffset   = Marker(header=Header(stamp = rospy.Time.now(),
-                                                        frame_id='Stage'),
-                                          ns='tooloffset',
-                                          id=1,
-                                          type=0, #ARROW,
-                                          action=0,
-                                          scale=Vector3(x=0.1, # Shaft diameter
-                                                        y=0.2, # Head diameter
-                                                        z=0.0),
-                                          color=ColorRGBA(a=0.8,
-                                                          r=1.0,
-                                                          g=1.0,
-                                                          b=1.0),
-                                          lifetime=rospy.Duration(0.1),
-                                          points=[Point(x=state.pose.position.x, 
-                                                        y=state.pose.position.y, 
-                                                        z=state.pose.position.z),
-                                                  Point(x=state.pose.position.x+self.ptOffsetSense.x, 
-                                                        y=state.pose.position.y+self.ptOffsetSense.y, 
-                                                        z=state.pose.position.z+self.ptOffsetSense.z)])
-                    self.pubMarker.publish(markerToolOffset)
-
-
-
     def OnShutdown_callback(self):
         rospy.loginfo("5B Closed Fivebar device.")
 
@@ -968,7 +976,7 @@ class RosFivebar:
         rospy.loginfo ('5B Q1CENTEReiz: %s, %s, %s' % (Q1CENTERe, Q1CENTERi, Q1CENTERz))
         rospy.loginfo ('5B Q2CENTEReiz: %s, %s, %s' % (Q2CENTERe, Q2CENTERi, Q2CENTERz))
         # Process messages forever.
-        rosrate = rospy.Rate(20)
+        rosrate = rospy.Rate(100)
         try:
             while not rospy.is_shutdown():
                 self.SendTransforms()

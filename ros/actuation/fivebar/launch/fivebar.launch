@@ -16,7 +16,7 @@
 	<param name="fivebar/speed_max" type="double" value="200.0"/>
 	
     <!-- Specify the pattern to use for calibration (e.g. circle or spiral). -->
-	<param name="calibration/shape" type="string" value="circle"/>
+	<param name="calibration/shape" type="string" value="spiral"/>
 
 
 	<!-- Good PID gains for step response. -->
@@ -39,7 +39,7 @@
 
 	<!-- Test PID gains. -->
 	<param name="fivebar/kP"      type="double" value="0.2"/>
-	<param name="fivebar/kI"      type="double" value="0.1"/>
+	<param name="fivebar/kI"      type="double" value="0.4"/>
 	<param name="fivebar/kD"      type="double" value="0.0"/>
 	<param name="fivebar/maxI"    type="double" value="0.0"/> 
 	<param name="fivebar/kWindup" type="double" value="1.1"/> 
