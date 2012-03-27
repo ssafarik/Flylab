@@ -6,6 +6,7 @@ from geometry_msgs.msg import PoseStamped
 import tf
 import sys
 import time, os, subprocess
+import threading
 import numpy as N
 from flycore.msg import MsgFrameState
 from experiments.srv import Trigger, ExperimentParams
@@ -37,7 +38,8 @@ class SaveArenaState:
         rospy.Service('new_trial', ExperimentParams, self.NewTrial_callback)
         rospy.Service('trigger', Trigger, self.Trigger_callback)
         self.tfrx = tf.TransformListener()
-
+        self.lock = threading.Lock()
+        
         self.save_count = 0
         self.filename = None
         self.fid = None
@@ -72,7 +74,8 @@ class SaveArenaState:
 
     def OnShutdown_callback(self):
         if (self.fid is not None) and (not self.fid.closed):
-            self.fid.close()
+            with self.lock:
+                self.fid.close()
             rospy.logwarn('SA close()')
             
         
@@ -89,7 +92,8 @@ class SaveArenaState:
             # Close the file is we're no longer saving.
             if (self.saveOnlyWhileTriggered) and (not self.triggered):
                 if self.fid is not None and not self.fid.closed:
-                    self.fid.close()
+                    with self.lock:
+                        self.fid.close()
                     rospy.logwarn('SA close()')
             
         return self.triggered
@@ -103,13 +107,16 @@ class SaveArenaState:
             if experimentparamsReq.save.arenastate:
                 if self.fid is not None:
                     if not self.fid.closed:
-                        self.fid.close()
+                        with self.lock:
+                            self.fid.close()
                         rospy.logwarn('SA close()')
 
                 self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
-                self.fid = open(self.filename, 'w')
+                with self.lock:
+                    self.fid = open(self.filename, 'w')
                 rospy.logwarn('SA open(%s)' % self.filename)
-                self.fid.write(self.headingsExperiment)
+                with self.lock:
+                    self.fid.write(self.headingsExperiment)
                 header_row = self.templateExperiment.format(date_time                  = str(rospy.Time.now().to_sec()),
                                                             description                = experimentparamsReq.experiment.description,
                                                             maxTrials                  = experimentparamsReq.experiment.maxTrials,
@@ -140,8 +147,9 @@ class SaveArenaState:
                                                             robot_scent                = str(self.robot_scent)
                                                             )
 
-                self.fid.write(header_row)
-                self.fid.write(self.headingsAbsolute)
+                with self.lock:
+                    self.fid.write(header_row)
+                    self.fid.write(self.headingsAbsolute)
 
         return True
     
@@ -156,7 +164,8 @@ class SaveArenaState:
             #rospy.logwarn ('SAVE %s' % [self.saveOnlyWhileTriggered,self.triggered,self.saveArenastate,bSave])
             if bSave:                    
                 if self.fid.closed:
-                    self.fid = open(self.filename, 'wa')
+                    with self.lock:
+                        self.fid = open(self.filename, 'wa')
                     rospy.logwarn('SA open2(%s)' % self.filename)
                     
                 # Get the state of the robot.
@@ -216,7 +225,8 @@ class SaveArenaState:
                                                     dRobotRel = dRobotRel
                                                     )
     
-                self.fid.write(data_row)
+                with self.lock:
+                    self.fid.write(data_row)
 
 
 if __name__ == '__main__':

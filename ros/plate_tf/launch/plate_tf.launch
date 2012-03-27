@@ -1,4 +1,4 @@
 <launch>
-  <node name="TransformServerPlateCamera" pkg="plate_tf" type="TransformServerPlateCamera"/>
-  <node name="TransformServerPlateStage" pkg="plate_tf" type="TransformServerPlateStage"/>
+  <node name="TransformServerPlateCamera" pkg="plate_tf" type="TransformServerPlateCamera.py"/>
+  <node name="TransformServerPlateStage" pkg="plate_tf" type="TransformServerPlateStage.py"/>
 </launch>

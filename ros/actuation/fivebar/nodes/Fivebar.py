@@ -949,8 +949,14 @@ class RosFivebar:
                 # Distribute the velocity over the two joints.
                 dangle1 = N.abs(angle1-self.jointstate1.position) # Delta theta
                 dangle2 = N.abs(angle2-self.jointstate2.position)
-                scale1 = dangle1/N.linalg.norm([dangle1,dangle2])
-                scale2 = dangle2/N.linalg.norm([dangle1,dangle2])
+                dist = N.linalg.norm([dangle1,dangle2])
+                if dist != 0.0:
+                    scale1 = dangle1/dist
+                    scale2 = dangle2/dist
+                else:
+                    scale1 = 0.5
+                    scale2 = 0.5
+                    
                 v1 = scale1 * speedMax
                 v2 = scale2 * speedMax
                 

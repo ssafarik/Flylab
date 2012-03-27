@@ -16,7 +16,7 @@
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find config)/launch/robot_0625h_0625w.launch" />
-	<include file="$(find config)/launch/flies_1.launch" />
+	<include file="$(find config)/launch/flies_2.launch" />
 
 	<!-- ***  The Experiment  *** -->
 	<node pkg="experiments" type="Chase.py" name="Experiment" />

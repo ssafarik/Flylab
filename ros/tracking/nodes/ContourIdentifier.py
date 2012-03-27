@@ -462,7 +462,7 @@ class ContourIdentifier:
         try:
             rospy.wait_for_service('plate_from_camera') #, timeout=10.0)
             self.plate_from_camera = rospy.ServiceProxy('plate_from_camera', PlateCameraConversion)
-        except (rospy.ServiceException, rospy.IOError), e:
+        except (rospy.ServiceException, IOError), e:
             print "Service call failed: %s"%e
 
         # Open a file for saving raw data.

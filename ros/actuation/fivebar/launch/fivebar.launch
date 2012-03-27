@@ -29,20 +29,22 @@
 	-->
 	
 	<!-- Good PID gains to follow a walking fly. -->
-	<!--
-	<param name="fivebar/kP"      type="double" value="0.2"/>
-	<param name="fivebar/kI"      type="double" value="0.4"/>
-	<param name="fivebar/kD"      type="double" value="0.4"/>
-	<param name="fivebar/maxI"    type="double" value="1.0"/>  
-	<param name="fivebar/kWindup" type="double" value="0.8"/>  
-	-->
+	<!-- -->
+	<param name="fivebar/kP"      type="double" value="0.01"/>
+	<param name="fivebar/kI"      type="double" value="0.05"/>
+	<param name="fivebar/kD"      type="double" value="0.0"/>
+	<param name="fivebar/maxI"    type="double" value="0.5"/>  
+	<param name="fivebar/kWindup" type="double" value="1.0"/>  
+	<!-- -->
 
-	<!-- Good PID gains for both step AND to follow a walking fly. -->
+	<!-- Good PID gains for both step AND ramp response. -->
+	<!--
 	<param name="fivebar/kP"      type="double" value="0.01"/>
 	<param name="fivebar/kI"      type="double" value="0.15"/>
 	<param name="fivebar/kD"      type="double" value="0.1"/>
 	<param name="fivebar/maxI"    type="double" value="6.0"/> 
 	<param name="fivebar/kWindup" type="double" value="0.9"/> 
+	-->
 	
 
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A' units='radians'"/>
