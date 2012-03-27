@@ -612,7 +612,7 @@ class RosFivebar:
         ptNew = Point (x=magPtMag/magPtDir*ptDir.x,
                        y=magPtMag/magPtDir*ptDir.y,
                        z=magPtMag/magPtDir*ptDir.z)
-        return ptDir
+        return ptNew
     
 
     def ClipPtMag (self, pt, magMax):
@@ -853,19 +853,26 @@ class RosFivebar:
             self.ptToolRefError.y = self.ptsToolRef.point.y - self.ptEeSense.y
 
             # Get the end-effector ref coordinates.
+            # Option A:
             #ptRef = self.ScaleVecToMag(self.ptToolRefError, self.ptOffsetSense)
             #self.ptEeRef.x = self.ptsToolRef.point.x+ptRef.x
             #self.ptEeRef.y = self.ptsToolRef.point.y+ptRef.y
-            kTest = rospy.get_param('fivebar/kTest', 0.0)
-            self.ptEeRef.x = self.ptsToolRef.point.x - self.ptOffsetSense.x + kTest*self.ptContourError.x
-            self.ptEeRef.y = self.ptsToolRef.point.y - self.ptOffsetSense.y + kTest*self.ptContourError.y
+
+            # Option B: works ok.
+            #kTest = rospy.get_param('fivebar/kTest', 0.0)
+            #self.ptEeRef.x = self.ptsToolRef.point.x - self.ptOffsetSense.x + kTest*self.ptContourError.x
+            #self.ptEeRef.y = self.ptsToolRef.point.y - self.ptOffsetSense.y + kTest*self.ptContourError.y
+
+            # Option C: best so far.
+            ptRef = self.ScaleVecToMag(self.ptContourError, self.ptOffsetSense)
+            self.ptEeRef.x = self.ptsToolRef.point.x + ptRef.x
+            self.ptEeRef.y = self.ptsToolRef.point.y + ptRef.y
             
             
             # PID Gains & Parameters.
             kP = rospy.get_param('fivebar/kP', 0.1)
-            kI = rospy.get_param('fivebar/kI', 0.05)
-            kD = rospy.get_param('fivebar/kD', -1.0)
-            maxPID = rospy.get_param('fivebar/maxPID', 9999.0)
+            kI = rospy.get_param('fivebar/kI', 0.0)
+            kD = rospy.get_param('fivebar/kD', 0.0)
             maxI = rospy.get_param('fivebar/maxI', 40.0)
             kWindup = rospy.get_param('fivebar/kWindup', 0.0)
 

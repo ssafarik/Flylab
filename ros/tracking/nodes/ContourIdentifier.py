@@ -460,8 +460,8 @@ class ContourIdentifier:
 
 
         try:
-            rospy.wait_for_service('camera_to_plate') #, timeout=10.0)
-            self.camera_to_plate = rospy.ServiceProxy('camera_to_plate', PlateCameraConversion)
+            rospy.wait_for_service('plate_from_camera') #, timeout=10.0)
+            self.plate_from_camera = rospy.ServiceProxy('plate_from_camera', PlateCameraConversion)
         except (rospy.ServiceException, rospy.IOError), e:
             print "Service call failed: %s"%e
 
@@ -547,7 +547,7 @@ class ContourIdentifier:
             ySrc = list(points_camera[1,:])
             # rospy.logwarn("xSrc = %s", str(xSrc))
             # rospy.logwarn("ySrc = %s", str(ySrc))
-            response = self.camera_to_plate(xSrc,ySrc)
+            response = self.plate_from_camera(xSrc,ySrc)
             points_plate_x = list(response.Xdst)
             points_plate_y = list(response.Ydst)
             z = [0]*len(points_plate_x)
@@ -558,7 +558,7 @@ class ContourIdentifier:
 
             xSrc = list(points_camera_rotated[0,:])
             ySrc = list(points_camera_rotated[1,:])
-            response = self.camera_to_plate(xSrc,ySrc)
+            response = self.plate_from_camera(xSrc,ySrc)
             points_plate_rotated_x = list(response.Xdst)
             points_plate_rotated_y = list(response.Ydst)
             # rospy.logwarn("points_plate_rotated_x = %s",str(points_plate_rotated_x))
@@ -611,7 +611,7 @@ class ContourIdentifier:
     def TransformContourinfoPlateFromCamera(self, contourinfoIn):
         contourinfoOut = ContourInfo()
         if self.initialized:
-            response = self.camera_to_plate(contourinfoIn.x, contourinfoIn.y)
+            response = self.plate_from_camera(contourinfoIn.x, contourinfoIn.y)
             contourinfoOut = contourinfoIn
             contourinfoOut.header.frame_id = "Plate"
             contourinfoOut.x = response.Xdst

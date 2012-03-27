@@ -1,7 +1,0 @@
-<launch>
-  <include file="$(find calibration)/calibration_data/calibration_stage_plate.launch" />
-  <node name="PlateStageTransforms" pkg="plate_tf" type="PlateStageTransforms.py"/>
-</launch>
-
-
-

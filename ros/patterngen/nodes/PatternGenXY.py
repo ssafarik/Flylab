@@ -243,7 +243,7 @@ class PatternGenXY:
                 
                 # When the pattern output is completed, go to the next pattern.
                 if self.iPoint >= len(self.pattern.points):
-                    rospy.logwarn('EndOfPattern: self.iPoint=%d, count=%d' % (self.iPoint, self.pattern.count))
+                    #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=%d' % (self.iPoint, self.pattern.count))
                     self.iPoint = 0
                     self.pattern.count -= 1
                     self.UpdatePatternPoints()

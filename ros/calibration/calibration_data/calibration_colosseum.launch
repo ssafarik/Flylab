@@ -22,7 +22,7 @@
 
 
 
-  <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
+  <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. They might need fiddling with after use. -->
   <param name="camera_plate_rvec_0" type="double" value="-3.126"/>
   <param name="camera_plate_rvec_1" type="double" value="-0.007"/>
   <param name="camera_plate_rvec_2" type="double" value="0.060"/>

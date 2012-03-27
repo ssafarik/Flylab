@@ -83,9 +83,9 @@ class CalibrateStagePlate():
             except:
                 rospy.logdebug("tf_listener.lookupTransform threw exception \n")
         
-        rospy.wait_for_service('camera_to_plate')
+        rospy.wait_for_service('plate_from_camera')
         try:
-            self.camera_to_plate = rospy.ServiceProxy('camera_to_plate', PlateCameraConversion)
+            self.plate_from_camera = rospy.ServiceProxy('plate_from_camera', PlateCameraConversion)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
         
@@ -418,7 +418,7 @@ class CalibrateStagePlate():
     #   self.poseRobot_camera.pose.position.x = contourinfo.pose.position.x
     #   self.poseRobot_camera.pose.position.y = contourinfo.pose.position.y
     #   self.poseRobot_rect = self.camera_to_rect_pose(self.poseRobot_camera)
-    #   self.poseRobot_plate = self.camera_to_plate_pose(self.poseRobot_camera)
+    #   self.poseRobot_plate = self.PosePlateFromCamera(self.poseRobot_camera)
     
     def contourinfo_callback(self,contourinfo):
         if self.initialized:
@@ -439,7 +439,7 @@ class CalibrateStagePlate():
                 self.poseRobot_camera.pose.position.x = x_list[0]
                 self.poseRobot_camera.pose.position.y = y_list[0]
                 self.poseRobot_rect = self.camera_to_rect_pose(self.poseRobot_camera)
-                self.poseRobot_plate = self.camera_to_plate_pose(self.poseRobot_camera)
+                self.poseRobot_plate = self.PosePlateFromCamera(self.poseRobot_camera)
                 self.areaRobot = area_list[0]
                 self.eccRobot = ecc_list[0]
             else:
@@ -477,8 +477,8 @@ class CalibrateStagePlate():
         return poseRect
     
     
-    def camera_to_plate_pose(self, poseCamera):
-        response = self.camera_to_plate([poseCamera.pose.position.x],[poseCamera.pose.position.y])
+    def PosePlateFromCamera(self, poseCamera):
+        response = self.plate_from_camera([poseCamera.pose.position.x],[poseCamera.pose.position.y])
         # rospy.logwarn("Xdst \n%s",str(response.Xdst))
         # rospy.logwarn("Ydst \n%s",str(response.Ydst))
         posePlate = PoseStamped()

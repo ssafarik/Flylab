@@ -1,4 +1,0 @@
-<launch>
-  <include file="$(find tracking)/launch/tracking" />
-  <include file="$(find plate_tf)/launch/plate_tf.launch" />
-</launch>
