@@ -86,7 +86,7 @@ roscd <your device name>/launch
 
 4 ############################### Camera Extrinsic Parameters (i.e. Relationship of Camera to Arena):
 # Mount camera on flyatar rig, positioned so that the arena is roughly centered in image.
-roscd calibration/launch
+roscd config/launch
 gedit hardware.launch
 # Make sure it points to <your device name>.launch, save & exit.
 roslaunch calibration CameraPlate.launch
@@ -106,14 +106,14 @@ roscd <your device name>/launch
 5 ############################### Acquire a New Background Image:
 # Remove all objects from plate, then:
 rm /cameras/background.png
-roslaunch <your device name> <your device name>.launch
+roslaunch experiments <any experiment>.launch
 #Ctrl+c after the file gets written.
 
 
 6 ############################### Stage Extrinsic Parameters (i.e. Relationship of Stage to Arena):
 # Calibrate the Stage/Plate transform, and get robot image values.
 # Place magnet on plate, check to see if contour is found properly.
-roscd calibration/launch
+roscd config/launch
 gedit hardware.launch
 # Make sure it points to <your device name>.launch, save & exit.
 roslaunch calibration StagePlate.launch
