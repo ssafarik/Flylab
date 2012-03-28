@@ -99,6 +99,7 @@ class ContourGenerator:
         self.ptsOriginPlate.point.x = 0
         self.ptsOriginPlate.point.y = 0
         
+        rospy.logwarn('ImageRect <--> %s', self.ptsOriginROI.header.frame_id)
         self.tfrx.waitForTransform("ImageRect", self.ptsOriginROI.header.frame_id, rospy.Time(), rospy.Duration(5.0))
         self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(5.0))
 

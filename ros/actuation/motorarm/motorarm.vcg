@@ -1,0 +1,10 @@
+Background\ ColorR=0
+Background\ ColorG=0
+Background\ ColorB=0
+Fixed\ Frame=/Stage
+Target\ Frame=<Fixed Frame>
+Tool\ 2D\ Nav\ GoalTopic=goal
+Tool\ 2D\ Pose\ EstimateTopic=initialpose
+Camera\ Type=rviz::OrbitViewController
+Camera\ Config=0.982794 1.5708 18.0278 0 9.53674e-07 0
+Property\ Grid\ State=selection=Fixed Frame;expanded=.Global Options;scrollpos=0,0;splitterpos=174,349;ispageselected=1

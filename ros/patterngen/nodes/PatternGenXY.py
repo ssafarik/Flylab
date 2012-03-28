@@ -28,7 +28,7 @@ class PatternGenXY:
 
         self.pts = PointStamped()
 
-        self.hzPoint = 50
+        self.hzPoint = 5#50
         self.dtPoint = rospy.Duration(1/self.hzPoint)
         self.ratePoint = rospy.Rate(self.hzPoint)
         rospy.loginfo('Point Output Rate (hz): %0.2f' % self.hzPoint)
