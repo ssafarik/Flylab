@@ -456,7 +456,7 @@ class ContourIdentifier:
                                                   r=1.0,
                                                   g=1.0,
                                                   b=1.0),
-                                  lifetime=rospy.Duration(0.1))
+                                  lifetime=rospy.Duration(1.0))
 
 
         try:
@@ -968,6 +968,7 @@ class ContourIdentifier:
                     
                     
                     # Publish a disc to indicate the arena extent.
+                    self.markerArena.header.stamp = rospy.Time.now()
                     self.pubMarker.publish(self.markerArena)
             except rospy.ServiceException:
                 pass

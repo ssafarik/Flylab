@@ -97,7 +97,8 @@ class CalibrateStagePlate():
             msgPattern.shape = 'constant'
             msgPattern.points = []
             msgPattern.frame = 'Stage'
-            msgPattern.hz = 1.0
+            msgPattern.hzPattern = 1.0
+            msgPattern.hzPoint = 100
             msgPattern.count = 1
             msgPattern.radius = 0.0
             msgPattern.preempt = True
@@ -499,7 +500,8 @@ class CalibrateStagePlate():
         msgPattern.shape = 'constant'
         msgPattern.points = []
         msgPattern.frame = 'Stage'
-        msgPattern.hz = 1.0
+        msgPattern.hzPattern = 1.0
+        msgPattern.hzPoint = rospy.get_param('actuator/hzPoint', 100.0)
         msgPattern.count = 1
         msgPattern.radius = 0.0
         msgPattern.preempt = True
@@ -518,9 +520,9 @@ class CalibrateStagePlate():
         msgPattern.radius = 0.8 * rospy.get_param('arena/radius_movement', 25.4)
         msgPattern.preempt = True
         if msgPattern.shape=='spiral':
-            msgPattern.hz = 0.01
+            msgPattern.hzPattern = 0.01
         else:
-            msgPattern.hz = 0.1
+            msgPattern.hzPattern = 0.1
         self.pubPatternGen.publish (msgPattern)
 
         try:

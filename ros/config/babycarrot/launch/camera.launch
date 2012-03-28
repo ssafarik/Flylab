@@ -1,0 +1,16 @@
+<launch>
+
+	<!-- ========================================================== -->
+	<!-- Configuration of the camera attached to the BABYCARROT.    -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the babycarrot.launch file, and point here          -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+
+	<node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
+		<rosparam file="$(find babycarrot)/launch/params_camera.yaml" />
+	</node>
+	
+	<node ns="camera" name="image_proc" pkg="image_proc" type="image_proc" />
+  
+</launch>

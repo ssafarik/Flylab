@@ -20,18 +20,21 @@ class PatternGenXY:
         self.pattern = NullClass()
         self.pattern.mode = 'byshape'
         self.pattern.shape = 'circle'
-        self.pattern.radius = 25.4
-        self.pattern.points = []
-        self.pattern.hz = 1.0
+        self.pattern.frame = 'Stage'
+        self.pattern.hzPattern = 1.0
+        self.pattern.hzPoint = 50
         self.pattern.count = 0
+        self.pattern.points = []
+        self.pattern.radius = 25.4
+        self.pattern.preempt = True
+
         self.iPoint = 0
 
         self.pts = PointStamped()
 
-        self.hzPoint = 5#50
-        self.dtPoint = rospy.Duration(1/self.hzPoint)
-        self.ratePoint = rospy.Rate(self.hzPoint)
-        rospy.loginfo('Point Output Rate (hz): %0.2f' % self.hzPoint)
+        self.dtPoint = rospy.Duration(1/self.pattern.hzPoint)
+        self.ratePoint = rospy.Rate(self.pattern.hzPoint)
+        rospy.loginfo('Point Output Rate (hz): %0.2f' % self.pattern.hzPoint)
         
         self.subPatternGen = rospy.Subscriber('PatternGen', MsgPatternGen, self.PatternGen_callback)
         
@@ -49,7 +52,7 @@ class PatternGenXY:
 
 
     def GetPointsConstant(self):
-        nPoints = int(self.hzPoint/self.pattern.hz)
+        nPoints = int(self.pattern.hzPoint/self.pattern.hzPattern)
         points = [Point(x=self.pattern.radius, 
                         y=self.pattern.radius)] * nPoints  # [(r,r),(r,r),(r,r), ...]
         
@@ -57,7 +60,7 @@ class PatternGenXY:
 
     
     def GetPointsCircle(self):
-        nPoints = int(self.hzPoint/self.pattern.hz)
+        nPoints = int(self.pattern.hzPoint/self.pattern.hzPattern)
         q = 0.0 #N.pi/2.0  # Starting position
         dq = 2.0*N.pi/nPoints
         r = self.pattern.radius
@@ -72,7 +75,7 @@ class PatternGenXY:
     
         
     def GetPointsSquare(self):
-        nPoints = int(self.hzPoint/self.pattern.hz)
+        nPoints = int(self.pattern.hzPoint/self.pattern.hzPattern)
         nPointsSide = int(nPoints / 4.0) # Points per side
         xmin = -self.pattern.radius / N.sqrt(2)
         xmax =  self.pattern.radius / N.sqrt(2)
@@ -129,7 +132,7 @@ class PatternGenXY:
     
         
     def GetPointsSpiral (self):
-        nPoints = int(self.hzPoint/self.pattern.hz)
+        nPoints = int(self.pattern.hzPoint/self.pattern.hzPattern)
         rospy.logwarn('nPoints=%d' % nPoints)
         pitchSpiral = 2
         nRevolutionsPerPattern = 2 * 2 * pitchSpiral  # nCworCCW * nInOrOut * pitch
@@ -165,7 +168,7 @@ class PatternGenXY:
 
     # GetPointsRamp() creates a set of points where pt.x goes from 0 to radius, and pt.y goes from radius to 0.
     def GetPointsRamp(self):
-        nPoints = int(self.hzPoint/self.pattern.hz)
+        nPoints = int(self.pattern.hzPoint/self.pattern.hzPattern)
         xStart = 0.0
         xEnd = self.pattern.radius
 
@@ -208,7 +211,7 @@ class PatternGenXY:
         self.pattern.mode   = msgPatternGen.mode
         self.pattern.shape  = msgPatternGen.shape
         self.pattern.frame  = msgPatternGen.frame
-        self.pattern.hz     = msgPatternGen.hz
+        self.pattern.hzPattern     = msgPatternGen.hzPattern
         self.pattern.count  = msgPatternGen.count
         self.pattern.radius = msgPatternGen.radius
 
@@ -225,7 +228,7 @@ class PatternGenXY:
             
     def SendSignalPoint(self): 
         if self.pattern.points is not None and len(self.pattern.points)>0:
-            #rospy.logwarn('rate=%s' % self.hzPoint)
+            #rospy.logwarn('rate=%s' % self.pattern.hzPoint)
             if self.pattern.count>0:
                 self.pts.header.frame_id = self.pattern.frame
                 #self.pts.header.stamp = rospy.Time.now() + self.dtPoint

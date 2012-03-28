@@ -1,0 +1,21 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of COLOSSEUM hardware.                       -->
+    <!--                                                            -->
+    <!-- Edit this file to contain the elements of the particular   -->
+    <!-- hardware.                                                  -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch hardware.launch, and point here from there.         -->
+	<!-- ========================================================== -->
+
+	<include file="$(find flybowls)/launch/flybowl_80mm.launch" /> 
+
+	<include file="$(find fivebar)/launch/fivebar.launch" />
+	<include file="$(find colosseum)/launch/params_actuator.launch" />
+	
+	<include file="$(find colosseum)/launch/camera.launch" />
+	<include file="$(find colosseum)/launch/calibration.launch" />
+</launch>
+	
+	

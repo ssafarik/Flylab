@@ -14,7 +14,7 @@
 	<!--                                                                    -->
 	<!-- ================================================================== -->
 	
-	<include file="$(find config)/launch/hardware.launch" />
+	<include file="$(find calibration)/launch/hardware.launch" />
 	<include file="$(find tracking)/launch/tracking.launch" />
 
 	<node pkg="calibration" type="CameraPlate.py" name="CameraPlateCalibration"/>

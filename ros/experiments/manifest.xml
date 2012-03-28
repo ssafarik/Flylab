@@ -20,6 +20,9 @@
   <depend package="image_gui"/>
   <depend package="plate_tf"/>
   <depend package="patterngen"/>
+
+  <depend package="babycarrot"/>
+  <depend package="colosseum"/>
  
 </package>
 

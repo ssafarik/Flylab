@@ -14,9 +14,9 @@
 	<include file="$(find flycore)/launch/flycore.launch" />
 	
 	<!-- ***  Hardware, Flies, and Robot  *** -->
-	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find config)/launch/robot_0625h_0625w.launch" />
-	<include file="$(find config)/launch/flies_1.launch" />
+	<include file="$(find colosseum)/launch/colosseum.launch" />
+	<include file="$(find robots)/launch/robot_0625h_0625w.launch" />
+	<include file="$(find flies)/launch/flies_1.launch" />
 
 	<!-- ***  The Experiment  *** -->
 	<node pkg="experiments" type="Record10MinTrials.py" name="Experiment" />

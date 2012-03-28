@@ -9,20 +9,11 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
     
-	<param name="robot_description" textfile="$(find motorarm)/motorarm_urdf.xml" />  <!-- Contains dimensions of hardware. -->
-	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />               <!-- Velocity to use when finding index, parking, etc. -->
-	<param name="rosSimpleStep/limitHi" type="double" value="2147483647" />           <!-- Max absolute angle. -->
-	<param name="rosSimpleStep/limitLo" type="double" value="-2147483646" />          <!-- Min absolute angle. -->
-	<param name="motorarm/speed_max" type="double" value="3.1"/>                      <!-- Radians per second. -->
-	<param name="motorarm/L1" type="double" value="32"/>                              <!-- Link1 length in millimeters. -->
-	
     <!-- Specify the pattern to use for calibration (e.g. circle or spiral). -->
 	<param name="calibration/shape" type="string" value="circle"/>
 
-	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.0' units='radians'"/>
 	<node name="MotorArm" pkg="motorarm" type="MotorArm.py" />
 
-	<include file="$(find stage_action_server)/launch/stage_action_server.launch" />
 
 </launch>
 

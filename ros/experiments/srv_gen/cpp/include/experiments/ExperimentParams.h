@@ -83,14 +83,14 @@ public:
   ROS_DEPRECATED const std::string __getDataType() const { return __s_getDataType_(); }
 
 private:
-  static const char* __s_getMD5Sum_() { return "df5f51a0f1107bf71a39897277548aa5"; }
+  static const char* __s_getMD5Sum_() { return "bea8e3514910f215b06899cabdaa1660"; }
 public:
   ROS_DEPRECATED static const std::string __s_getMD5Sum() { return __s_getMD5Sum_(); }
 
   ROS_DEPRECATED const std::string __getMD5Sum() const { return __s_getMD5Sum_(); }
 
 private:
-  static const char* __s_getServerMD5Sum_() { return "5808c8ba5652d03d7168883a279eaa4a"; }
+  static const char* __s_getServerMD5Sum_() { return "9c573b923fc0967cd6e6453ab8575aa6"; }
 public:
   ROS_DEPRECATED static const std::string __s_getServerMD5Sum() { return __s_getServerMD5Sum_(); }
 
@@ -162,8 +162,9 @@ float64 tolerance\n\
 \n\
 ================================================================================\n\
 MSG: experiments/MovePattern\n\
-string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'\n\
-float64 hz\n\
+string shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'spiral'\n\
+float64 hzPattern\n\
+float64 hzPoint\n\
 int32 count  # -1 means forever\n\
 float64 radius\n\
 \n\
@@ -265,7 +266,7 @@ public:
   ROS_DEPRECATED const std::string __getMD5Sum() const { return __s_getMD5Sum_(); }
 
 private:
-  static const char* __s_getServerMD5Sum_() { return "5808c8ba5652d03d7168883a279eaa4a"; }
+  static const char* __s_getServerMD5Sum_() { return "9c573b923fc0967cd6e6453ab8575aa6"; }
 public:
   ROS_DEPRECATED static const std::string __s_getServerMD5Sum() { return __s_getServerMD5Sum_(); }
 
@@ -335,12 +336,12 @@ template<class ContainerAllocator>
 struct MD5Sum< ::experiments::ExperimentParamsRequest_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "df5f51a0f1107bf71a39897277548aa5";
+    return "bea8e3514910f215b06899cabdaa1660";
   }
 
   static const char* value(const  ::experiments::ExperimentParamsRequest_<ContainerAllocator> &) { return value(); } 
-  static const uint64_t static_value1 = 0xdf5f51a0f1107bf7ULL;
-  static const uint64_t static_value2 = 0x1a39897277548aa5ULL;
+  static const uint64_t static_value1 = 0xbea8e3514910f215ULL;
+  static const uint64_t static_value2 = 0xb06899cabdaa1660ULL;
 };
 
 template<class ContainerAllocator>
@@ -422,8 +423,9 @@ float64 tolerance\n\
 \n\
 ================================================================================\n\
 MSG: experiments/MovePattern\n\
-string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'\n\
-float64 hz\n\
+string shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'spiral'\n\
+float64 hzPattern\n\
+float64 hzPoint\n\
 int32 count  # -1 means forever\n\
 float64 radius\n\
 \n\
@@ -542,7 +544,7 @@ template<>
 struct MD5Sum<experiments::ExperimentParams> {
   static const char* value() 
   {
-    return "5808c8ba5652d03d7168883a279eaa4a";
+    return "9c573b923fc0967cd6e6453ab8575aa6";
   }
 
   static const char* value(const experiments::ExperimentParams&) { return value(); } 
@@ -562,7 +564,7 @@ template<class ContainerAllocator>
 struct MD5Sum<experiments::ExperimentParamsRequest_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "5808c8ba5652d03d7168883a279eaa4a";
+    return "9c573b923fc0967cd6e6453ab8575aa6";
   }
 
   static const char* value(const experiments::ExperimentParamsRequest_<ContainerAllocator> &) { return value(); } 
@@ -582,7 +584,7 @@ template<class ContainerAllocator>
 struct MD5Sum<experiments::ExperimentParamsResponse_<ContainerAllocator> > {
   static const char* value() 
   {
-    return "5808c8ba5652d03d7168883a279eaa4a";
+    return "9c573b923fc0967cd6e6453ab8575aa6";
   }
 
   static const char* value(const experiments::ExperimentParamsResponse_<ContainerAllocator> &) { return value(); } 

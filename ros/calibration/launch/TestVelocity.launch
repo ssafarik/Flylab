@@ -1,9 +1,0 @@
-<launch>
-    <include file="$(find stage_action_server)/launch/stage_action_server.launch" />
-	<node name="PatternGen" pkg="patterngen" type="PatternGenXY.py" />
-    <node pkg="tracking" type="PublishSystemState.py" name="PublishSystemState" />
-    <include file="$(find image_gui)/launch/DisplayDraw.launch" />
-    <!--<node pkg="save_data" type="SaveBag.py" name="SaveBag" />-->
-    <node pkg="save_data" type="SaveArenaState.py" name="SaveArenaState" />
-</launch>
-

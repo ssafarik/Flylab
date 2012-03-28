@@ -1,0 +1,14 @@
+<package>
+  <description brief="colosseum">
+
+     colosseum
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/colosseum</url>
+
+</package>
+
+
