@@ -15,6 +15,7 @@
   <depend package="plate_tf"/>
   <depend package="patterngen"/>
   <depend package="tracking"/>
+  <depend package="config"/>
 
 </package>
 

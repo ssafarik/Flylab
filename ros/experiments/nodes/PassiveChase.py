@@ -34,7 +34,7 @@ class ExperimentPassiveChase():
         
         self.experimentparams.waitEntry = 0.0
         
-        self.experimentparams.triggerEntry.enabled = True
+        self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
         self.experimentparams.triggerEntry.speedMin =   0.0
@@ -49,12 +49,13 @@ class ExperimentPassiveChase():
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.move.pattern.hz = 0.10
+        self.experimentparams.move.pattern.hzPattern = 0.10
+        self.experimentparams.move.pattern.hzPoint = 10
         self.experimentparams.move.pattern.count = -1
         self.experimentparams.move.pattern.radius = 32
         self.experimentparams.move.timeout = 600
         
-        self.experimentparams.triggerExit.enabled = True
+        self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0
         self.experimentparams.triggerExit.speedMin =  0.0
@@ -75,11 +76,11 @@ class ExperimentPassiveChase():
 
 
 if __name__ == '__main__':
-    try:
+    #try:
         experiment = ExperimentPassiveChase()
         experiment.Run()
         
-    except:
+    #except:
         rospy.loginfo("Shutting down")
 
         
