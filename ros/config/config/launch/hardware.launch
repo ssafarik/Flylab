@@ -9,6 +9,5 @@
 	<!-- ========================================================== -->
     
     <include file="$(find babycarrot)/launch/babycarrot.launch" />
-    <!-- <include file="$(find colosseum)/launch/colosseum.launch" /> -->
      
 </launch>

@@ -111,7 +111,15 @@ class SaveArenaState:
                             self.fid.close()
                         rospy.logwarn('SA close()')
 
-                self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
+                #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
+                now = rospy.Time.now().to_sec()
+                self.filename = "%s%04d%02d%02d%02d%02d%02d.csv" % (experimentparamsReq.save.filenamebase, 
+                                                                    time.localtime(now).tm_year,
+                                                                    time.localtime(now).tm_mon,
+                                                                    time.localtime(now).tm_mday,
+                                                                    time.localtime(now).tm_hour,
+                                                                    time.localtime(now).tm_min,
+                                                                    time.localtime(now).tm_sec)
                 with self.lock:
                     self.fid = open(self.filename, 'w')
                 rospy.logwarn('SA open(%s)' % self.filename)
