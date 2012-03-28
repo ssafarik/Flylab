@@ -15,7 +15,7 @@
 	<param name="rosSimpleStep/limitLo" type="double" value="-2147483646" />          <!-- Min absolute angle. -->
 	<param name="motorarm/speed_max" type="double" value="3.1"/>                      <!-- Radians per second. -->
 	<param name="actuator/hzPoint" type="double" value="10.0"/>
-	<param name="motorarm/L1" type="double" value="32"/>                              <!-- Link1 length in millimeters. -->
+	<param name="motorarm/L1" type="double" value="30"/>                              <!-- Link1 length in millimeters. -->
 	
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.0' units='radians'"/>
 </launch>
