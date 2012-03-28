@@ -107,7 +107,7 @@ def ClipXyToRadius(x, y, rmax):
         angle = N.arctan2(y, x)
         xOut = (rmax*0.8) * N.cos(angle)
         yOut = (rmax*0.8) * N.sin(angle)
-        rospy.logwarn('EL CLIPPING x,y=%s to %s' % ([x,y],[xOut,yOut]))
+        #rospy.logwarn('EL CLIPPING x,y=%s to %s' % ([x,y],[xOut,yOut]))
         
     return [xOut,yOut]
 
@@ -748,7 +748,8 @@ class MoveRobot (smach.State):
         msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
         msgPattern.points = []
         msgPattern.frame = 'Plate'
-        msgPattern.hz = userdata.experimentparamsIn.move.pattern.hz
+        msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
+        msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
         msgPattern.count = userdata.experimentparamsIn.move.pattern.count
         msgPattern.radius = userdata.experimentparamsIn.move.pattern.radius
         msgPattern.preempt = True
@@ -774,7 +775,8 @@ class MoveRobot (smach.State):
         msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
         msgPattern.points = []
         msgPattern.frame = 'Plate'
-        msgPattern.hz = userdata.experimentparamsIn.move.pattern.hz
+        msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
+        msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
         msgPattern.count = 0
         msgPattern.radius = userdata.experimentparamsIn.move.pattern.radius
         msgPattern.preempt = True

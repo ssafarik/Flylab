@@ -1,0 +1,13 @@
+<launch>
+
+	<!-- ========================================================== -->
+    <!-- This file points to the hardware-specific .launch file of  -->
+    <!-- the HARDWARE you are using.                                -->
+    <!--                                                            -->
+    <!-- Only point to the single appropriate hardware-specific     -->
+    <!-- .launch file from here.                                    -->
+	<!-- ========================================================== -->
+    
+    <include file="$(find babycarrot)/launch/babycarrot.launch" />
+     
+</launch>

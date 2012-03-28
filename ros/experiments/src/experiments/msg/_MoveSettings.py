@@ -5,7 +5,7 @@ import struct
 import experiments.msg
 
 class MoveSettings(roslib.message.Message):
-  _md5sum = "1134374486ede5b193275bb436ea75fd"
+  _md5sum = "3b606570690c9cb62ec78b99c161556f"
   _type = "experiments/MoveSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool enabled
@@ -30,8 +30,9 @@ float64 tolerance
 
 ================================================================================
 MSG: experiments/MovePattern
-string shape  # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'
-float64 hz
+string shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'spiral'
+float64 hzPattern
+float64 hzPoint
 int32 count  # -1 means forever
 float64 radius
 
@@ -112,7 +113,7 @@ float64 radius
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_di2d.pack(_x.pattern.hz, _x.pattern.count, _x.pattern.radius, _x.timeout))
+      buff.write(_struct_2di2d.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.radius, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -184,8 +185,8 @@ float64 radius
       self.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 28
-      (_x.pattern.hz, _x.pattern.count, _x.pattern.radius, _x.timeout,) = _struct_di2d.unpack(str[start:end])
+      end += 36
+      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.radius, _x.timeout,) = _struct_2di2d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
@@ -225,7 +226,7 @@ float64 radius
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_di2d.pack(_x.pattern.hz, _x.pattern.count, _x.pattern.radius, _x.timeout))
+      buff.write(_struct_2di2d.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.radius, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -299,8 +300,8 @@ float64 radius
       self.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 28
-      (_x.pattern.hz, _x.pattern.count, _x.pattern.radius, _x.timeout,) = _struct_di2d.unpack(str[start:end])
+      end += 36
+      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.radius, _x.timeout,) = _struct_2di2d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
@@ -308,5 +309,5 @@ float64 radius
 _struct_I = roslib.message.struct_I
 _struct_2d = struct.Struct("<2d")
 _struct_B = struct.Struct("<B")
+_struct_2di2d = struct.Struct("<2di2d")
 _struct_d = struct.Struct("<d")
-_struct_di2d = struct.Struct("<di2d")

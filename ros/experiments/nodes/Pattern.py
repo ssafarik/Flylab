@@ -34,7 +34,7 @@ class ExperimentPattern():
         
         self.experimentparams.waitEntry = 0.0
         
-        self.experimentparams.triggerEntry.enabled = True
+        self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
         self.experimentparams.triggerEntry.speedMin =   0.0
@@ -49,12 +49,13 @@ class ExperimentPattern():
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'
-        self.experimentparams.move.pattern.radius = 50#30*1.4143#70.71#14.143
-        self.experimentparams.move.pattern.hz = 0.0625
+        self.experimentparams.move.pattern.hzPattern = 0.25  # Patterns per second.
+        self.experimentparams.move.pattern.hzPoint = rospy.get_param('actuator/hzPoint', 100.0)  # The update rate for the actuator.
         self.experimentparams.move.pattern.count = -1
+        self.experimentparams.move.pattern.radius = 50
         self.experimentparams.move.timeout = -1
         
-        self.experimentparams.triggerExit.enabled = True
+        self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0
         self.experimentparams.triggerExit.speedMin =  0.0
@@ -75,11 +76,11 @@ class ExperimentPattern():
 
 
 if __name__ == '__main__':
-    try:
+    #try:
         experiment = ExperimentPattern()
         experiment.Run()
         
-    except:
-        rospy.loginfo("Experiment Shutting down")
+    #except:
+    #    rospy.loginfo("Experiment Shutting down")
 
         

@@ -11,7 +11,7 @@
 	<!--                                                                    -->
 	<!-- ================================================================== -->
 	
-	<include file="$(find config)/launch/hardware.launch" />
+	<include file="$(find calibration)/launch/hardware.launch" />
 	<include file="$(find patterngen)/launch/PatternGenXY.launch" />
 	<include file="$(find tracking)/launch/tracking.launch" />
 

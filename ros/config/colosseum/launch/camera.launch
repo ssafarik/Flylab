@@ -1,0 +1,16 @@
+<launch>
+
+	<!-- ========================================================== -->
+	<!-- Configuration of the camera attached to the COLOSSEUM.     -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the colosseum.launch file, and point here           -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+
+	<node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
+		<rosparam file="$(find colosseum)/launch/params_camera.yaml" />
+	</node>
+	
+	<node ns="camera" name="image_proc" pkg="image_proc" type="image_proc" />
+  
+</launch>

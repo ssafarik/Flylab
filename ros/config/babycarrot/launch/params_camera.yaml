@@ -1,0 +1,16 @@
+#guid: 305300013a8cbc          # (defaults to first camera on bus)
+video_mode: 800x600_mono8
+frame_id: Camera0
+camera_info_url: file:///cameras/basler_a622f_calibration.yaml
+
+# Camera settings:
+frame_rate: 59          # Max.  What you can actually get depends on shutter & camera specs.
+auto_brightness: 3      #Manual 
+brightness: 8
+auto_exposure: 5        #None 
+exposure: 0
+auto_gain: 3            #Manual 
+gain: 150
+auto_shutter: 3         #Manual
+shutter: 512
+
