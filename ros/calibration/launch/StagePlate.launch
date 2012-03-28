@@ -13,6 +13,8 @@
 	
 	<include file="$(find calibration)/launch/hardware.launch" />
 	<include file="$(find patterngen)/launch/PatternGenXY.launch" />
+	<include file="$(find babycarrot)/launch/calibration.launch" />
+	<include file="$(find plate_tf)/launch/plate_tf.launch" />
 	<include file="$(find tracking)/launch/tracking.launch" />
 
 	<node pkg="calibration" type="StagePlate.py" name="StagePlateCalibration" />

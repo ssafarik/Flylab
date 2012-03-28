@@ -23,12 +23,12 @@
 
 
   <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
-  <param name="camera_plate_rvec_0" type="double" value="3.04"/>
-  <param name="camera_plate_rvec_1" type="double" value="-0.008"/>
-  <param name="camera_plate_rvec_2" type="double" value="-0.13"/>
-  <param name="camera_plate_tvec_0" type="double" value="80"/> <!-- adjust for plate alignment here. -->
-  <param name="camera_plate_tvec_1" type="double" value="55.6"/> <!-- adjust for plate alignment here. -->
-  <param name="camera_plate_tvec_2" type="double" value="297.5"/>
+  <param name="camera_plate_rvec_0" type="double" value="3.14"/>
+  <param name="camera_plate_rvec_1" type="double" value="0.0"/>
+  <param name="camera_plate_rvec_2" type="double" value="0.0"/>
+  <param name="camera_plate_tvec_0" type="double" value="81.3"/> <!-- Adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_1" type="double" value="55.5"/> <!-- Adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_2" type="double" value="248.0"/>
   
 
   <!-- ================================================================== -->
@@ -44,8 +44,8 @@
   <!-- ================================================================== -->
   
   <!-- <node pkg="tf" type="static_transform_publisher" name="statictf_Plate_Stage_publisher" args="0.8 -0.4 0 0 0 0 1 Plate Stage 100" />  -->
-  <param name="plate_stage_x" type="double" value="0"/>  <!-- 7.3 Adjust for stage alignment here. -->
-  <param name="plate_stage_y" type="double" value="0"/>  <!-- -2.6 Adjust for stage alignment here. -->
+  <param name="plate_stage_x" type="double" value="0"/>  <!-- Adjust for stage alignment here. -->
+  <param name="plate_stage_y" type="double" value="0"/>  <!-- Adjust for stage alignment here. -->
   <param name="plate_stage_z" type="double" value="0"/>
   <param name="plate_stage_qx" type="double" value="0"/>
   <param name="plate_stage_qy" type="double" value="0"/>
