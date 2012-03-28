@@ -1,19 +1,18 @@
 <launch>
 	<!-- ================================================================== -->
 	<!-- This is the launch file for the procedure to calibrate the         -->
-    <!-- Stage-to-Plate transform.                                          -->
+	<!-- Stage-to-Plate transform.                                          -->
 	<!--                                                                    -->
 	<!-- This is where you align the computed end-effector position with    -->
 	<!-- the visual end-effector position.                                  -->
 	<!--                                                                    -->
 	<!-- The results of this procedure go into the file                     -->
-	<!-- calibration_<your hardware name>.launch                            -->
+	<!-- calibration.launch                                                 -->
 	<!--                                                                    -->
 	<!-- ================================================================== -->
 	
-	<include file="$(find calibration)/launch/hardware.launch" />
+	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find patterngen)/launch/PatternGenXY.launch" />
-	<include file="$(find babycarrot)/launch/calibration.launch" />
 	<include file="$(find plate_tf)/launch/plate_tf.launch" />
 	<include file="$(find tracking)/launch/tracking.launch" />
 

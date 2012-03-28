@@ -1,7 +1,7 @@
 <launch>
 	<!-- ================================================================== -->
 	<!-- This is the launch file for the procedure to calibrate the         -->
-    <!-- Camera-to-Plate transform.                                         -->
+	<!-- Camera-to-Plate transform.                                         -->
 	<!--                                                                    -->
 	<!-- This is where you align the camera image with the arena.           -->
 	<!-- The command to move & resize the mask circle is:                   -->
@@ -10,12 +10,11 @@
 	<!--     with dashes).                                                  -->
 	<!--                                                                    -->
 	<!-- The results of this procedure go into the file                     -->
-	<!-- calibration_<your hardware name>.launch                            -->
+	<!-- calibration.launch                                                 -->
 	<!--                                                                    -->
 	<!-- ================================================================== -->
 	
-	<include file="$(find calibration)/launch/hardware.launch" />
-	<include file="$(find babycarrot)/launch/calibration.launch" />
+	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find plate_tf)/launch/plate_tf.launch" />
 	<include file="$(find tracking)/launch/tracking.launch" />
 

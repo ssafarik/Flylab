@@ -38,7 +38,9 @@ git commit -m "Adding new hardware config."
 
 1 ############################### Point to your hardware:
 # Determine the name of your experimental hardware, i.e. <your device name>
-# Edit hardware.launch to point to your .launch file.
+roscd config/launch
+gedit hardware.launch
+# Edit hardware.launch to point to your .launch file, e.g. babycarrot.launch
 
 
 
@@ -84,9 +86,9 @@ roscd <your device name>/launch
 
 4 ############################### Camera Extrinsic Parameters (i.e. Relationship of Camera to Arena):
 # Mount camera on flyatar rig, positioned so that the arena is roughly centered in image.
-roscd calibration/launch
+roscd config/launch
 gedit hardware.launch
-# Change the text to <your device name>.launch, save & exit.
+# Make sure it points to <your device name>.launch, save & exit.
 roslaunch calibration CameraPlate.launch
 
 # Use the following command to move the center and radius of the circle to correspond to the arena.
@@ -104,16 +106,16 @@ roscd <your device name>/launch
 5 ############################### Acquire a New Background Image:
 # Remove all objects from plate, then:
 rm /cameras/background.png
-roslaunch <your device name> <your device name>.launch
+roslaunch experiments <any experiment>.launch
 #Ctrl+c after the file gets written.
 
 
 6 ############################### Stage Extrinsic Parameters (i.e. Relationship of Stage to Arena):
 # Calibrate the Stage/Plate transform, and get robot image values.
 # Place magnet on plate, check to see if contour is found properly.
-roscd calibration/launch
+roscd config/launch
 gedit hardware.launch
-# Change the text to <your device name>.launch, save & exit.
+# Make sure it points to <your device name>.launch, save & exit.
 roslaunch calibration StagePlate.launch
 
 # The magnet will drive in a spiral pattern to cover the plate.  After a number of cycles, the calibration values should converge.

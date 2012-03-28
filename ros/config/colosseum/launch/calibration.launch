@@ -11,7 +11,7 @@
   <!--                                                                     -->
   <!-- Use the following command to move the center and radius of the      -->
   <!-- circle to correspond to the arena:                                  -->
-  <!-- rostopic pub -1 @@ Joystick/Commands geometry_msgs/Point dx dy dr   -->
+  <!-- rostopic pub -1 Joystick/Commands geometry_msgs/Point @@ dx dy dr   -->
   <!-- (where dx,dy,dr are replaced with numbers, and the @'s are hyphens) -->
   <!-- =================================================================== -->
   
