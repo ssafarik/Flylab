@@ -210,9 +210,9 @@ class SetpointControl:
 
         self.stopped = False
 
-        rospy.wait_for_service('plate_to_stage')
+        rospy.wait_for_service('stage_from_plate')
         try:
-            self.plate_to_stage = rospy.ServiceProxy('plate_to_stage', PlateCameraConversion)
+            self.stage_from_plate = rospy.ServiceProxy('stage_from_plate', PlateCameraConversion)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
@@ -220,7 +220,7 @@ class SetpointControl:
         # Ysrc = [0,10,-15.3,-65.9]
         # rospy.logwarn("self.plate_points_x = %s" % (str(Xsrc)))
         # rospy.logwarn("self.plate_points_y = %s" % (str(Ysrc)))
-        # response = self.plate_to_stage(Xsrc,Ysrc)
+        # response = self.stage_from_plate(Xsrc,Ysrc)
         # rospy.logwarn("stage_points_x = %s" % (str(response.Xdst)))
         # rospy.logwarn("stage_points_y = %s" % (str(response.Ydst)))
 
@@ -414,7 +414,7 @@ class SetpointControl:
         if (len(vel_mag_list) == 0) or (len(self.plate_points_x) == 1) or (len(self.plate_points_y) == 1):
             self.set_zero_velocity()
         else:
-            response = self.plate_to_stage(self.plate_points_x,self.plate_points_y)
+            response = self.stage_from_plate(self.plate_points_x,self.plate_points_y)
             # rospy.logwarn("self.plate_points_x = %s" % (str(self.plate_points_x)))
             # rospy.logwarn("self.plate_points_y = %s" % (str(self.plate_points_y)))
             stage_points_x = response.Xdst

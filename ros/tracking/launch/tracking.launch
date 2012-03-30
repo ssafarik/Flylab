@@ -1,14 +1,10 @@
 <launch>
-	<!-- Adjust this based on light brightness, etc, to get good contours. -->
-	<param name="diff_threshold" type="double" value="40"/>  
-	
 	<!-- 
 	You can use the ROS image viewer to look at the live video:
 	e.g. rosrun image_view image_view image:=camera/image_processed
 
 	camera/image_raw
 	camera/image_rect
-	camera/image_raw
 	camera/image_diff
 	camera/image_foreground
 	camera/image_processed

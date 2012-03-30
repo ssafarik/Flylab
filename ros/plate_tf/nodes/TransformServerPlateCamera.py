@@ -85,24 +85,29 @@ class TransformServerPlateCamera:
 
     def SendTransforms(self):      
         if self.camerainfo is not None:
+            now = rospy.Time.now()
             self.tfbx.sendTransform((0,0,0),#(-self.camerainfo.K[2], -self.camerainfo.K[5],0), #(-608, -581, 0), 
                                     (0,0,0,1), 
-                                    rospy.Time.now(), 
+                                    now, 
                                     "ImageRaw", "Camera")
             self.tfbx.sendTransform((0,0,0),#(self.camerainfo.K[2], self.camerainfo.K[5],0), #(-607, -551, 0), 
                                     (0,0,0,1), 
-                                    rospy.Time.now(), 
+                                    now, 
                                     "ImageRect", "ImageRaw")
             self.tfbx.sendTransform((self.xMask,
                                      -self.yMask,
                                      self.zMask),
                                     (0,0,0,1), 
-                                    rospy.Time.now(), 
+                                    now, 
                                     "Plate", "ImageRect")
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
-                                    rospy.Time.now(), 
+                                    now, 
                                     "ROI", "ImageRect")
+            self.tfbx.sendTransform((0, 0, 0), 
+                                    (0,0,0,1), 
+                                    now, 
+                                    "Camera", "Camera0")
       
         
     def Main(self):

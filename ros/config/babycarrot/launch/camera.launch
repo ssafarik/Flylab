@@ -7,7 +7,7 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<node pkg="camera1394v2" type="camera1394v2_node" name="camera1394v2_node" >
+	<node pkg="camera1394v2" type="camera1394v2_node" name="camera" >
 		<rosparam file="$(find babycarrot)/launch/params_camera.yaml" />
 	</node>
 	

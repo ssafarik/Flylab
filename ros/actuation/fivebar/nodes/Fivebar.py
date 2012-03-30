@@ -256,7 +256,7 @@ class RosFivebar:
             angle = N.arctan2(y,x)
             x = rLimit * N.cos(angle)
             y = rLimit * N.sin(angle)
-            rospy.logwarn('5B CLIPPING x,y to %s' % [x,y])
+            #rospy.logwarn('5B CLIPPING x,y to %s' % [x,y])
 
         return x,y
                 

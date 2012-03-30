@@ -49,11 +49,11 @@ class SaveArenaState:
 
         self.robot_move_commanded = False
 
-        self.robot_width = rospy.get_param("robot_width","3.175") # mm
-        self.robot_height = rospy.get_param("robot_height","3.175") # mm
-        self.robot_visible = bool(rospy.get_param("robot_visible","true"))
-        self.robot_paint = str(rospy.get_param("robot_paint","blackoxide"))
-        self.robot_scent = str(rospy.get_param("robot_scent","unscented"))
+        self.robot_width = rospy.get_param("robot/width","3.175") # mm
+        self.robot_height = rospy.get_param("robot/height","3.175") # mm
+        self.robot_visible = bool(rospy.get_param("robot/visible","true"))
+        self.robot_paint = str(rospy.get_param("robot/paint","blackoxide"))
+        self.robot_scent = str(rospy.get_param("robot/scent","unscented"))
 
         self.format_align = ">"
         self.format_sign = " "

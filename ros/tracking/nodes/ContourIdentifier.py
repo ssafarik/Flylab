@@ -39,6 +39,11 @@ def PolarFromXy(x, y):
     ang = N.arctan2(y, x)
     return (mag, ang)
 
+def XyFromPolar(mag, ang):
+    x = mag * N.cos(ang)
+    y = mag * N.sin(ang)
+    return (x, y)
+
 
 def YawFromQuaternion(q):
     rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
@@ -90,10 +95,14 @@ class Fly:
 
         self.kfState = filters.KalmanFilter()
         self.lpAngleF = filters.LowPassAngleFilter(RC=0.1)
-        self.lpOffsetX = filters.LowPassFilter(RC=0.1)
-        self.lpOffsetY = filters.LowPassFilter(RC=0.1)
+        #self.lpOffsetX = filters.LowPassFilter(RC=0.1)
+        #self.lpOffsetY = filters.LowPassFilter(RC=0.1)
+        self.lpOffsetMag = filters.LowPassFilter(RC=0.1)
+        self.lpOffsetAng = filters.LowPassFilter(RC=0.1)
         self.ptOffset = Point(x=0, y=0, z=0)  # Difference between contour position and (for robots) computed position.
         self.ptPPrev = Point(x=0, y=0, z=0)
+        self.angPrev = 0.0
+        self.unwind = 0.0
         
         # Orientation detection stuff.
         self.angleOfTravelRecent = None
@@ -102,10 +111,8 @@ class Fly:
         self.contour = None
         
         self.isVisible = False
-        self.isDead = False # To do: dead fly detection.
+        self.isDead = False # TO DO: dead fly detection.
 
-        self.timePrevious = None
-        
         self.state = MsgFrameState()
         self.state.header.frame_id = 'Plate'
         self.state.pose.position.x = 0.0
@@ -123,16 +130,19 @@ class Fly:
         self.state.velocity.angular.y = 0.0
         self.state.velocity.angular.z = 0.0
         
-        self.eccMin = 999
-        self.eccMax = 0
-        self.eccSum = 0
+        self.eccMin = 999.9
+        self.eccMax = 0.0
+        self.eccSum = 1.0
         self.eccCount = 1
-        self.areaMin = 999
-        self.areaMax = 0
-        self.areaSum = 0
+        
+        self.areaMin = 999.9
+        self.areaMax = 0.0
+        self.areaSum = 0.0
         self.areaCount = 1
-        self.robot_width = rospy.get_param ('robot_width', 1.0)
-        self.robot_height = rospy.get_param ('robot_height', 1.0)
+        
+        self.robot_width = rospy.get_param ('robot/width', 1.0)
+        self.robot_length = rospy.get_param ('robot/length', 1.0)
+        self.robot_height = rospy.get_param ('robot/height', 1.0)
         
         self.initialized = True
 
@@ -334,10 +344,22 @@ class Fly:
                     xPID = kP*ptP.x + kI*ptI.x + kD*ptD.x
                     yPID = kP*ptP.y + kI*ptI.y + kD*ptD.y
                     
-                    # Filtered offset.
-                    self.ptOffset = Point(x = self.lpOffsetX.Update(xPID, t),
-                                          y = self.lpOffsetY.Update(yPID, t),
-                                          z = 0)
+                    # Filter the offset as magnitude & angle.
+                    (mag,ang)=PolarFromXy(xPID,yPID)
+                    ang += self.unwind
+                    if ang-self.angPrev > N.pi:
+                        self.unwind -= 2.0*N.pi
+                        ang -= 2.0*N.pi
+                    elif ang-self.angPrev < -N.pi:
+                        self.unwind += 2.0*N.pi
+                        ang += 2.0*N.pi
+                    self.angPrev = ang
+                    rospy.logwarn('ang=%0.2f' % ang)
+                    (self.ptOffset.x,self.ptOffset.y) = XyFromPolar(self.lpOffsetMag.Update(mag, t),
+                                                                    self.lpOffsetAng.Update(ang, t))
+                    #self.ptOffset = Point(x = self.lpOffsetX.Update(xPID, t),
+                    #                      y = self.lpOffsetY.Update(yPID, t),
+                    #                      z = 0)
                     self.ptPPrev.x = ptP.x
                     self.ptPPrev.y = ptP.y
                 else:
@@ -380,7 +402,7 @@ class Fly:
                                                                    y=self.state.pose.position.y, 
                                                                    z=self.state.pose.position.z)),
                                           scale=Vector3(x=self.robot_width,
-                                                        y=self.robot_width,
+                                                        y=self.robot_length,
                                                         z=self.robot_height),
                                           color=ColorRGBA(a=0.7,
                                                           r=0.5,
@@ -744,17 +766,24 @@ class ContourIdentifier:
 
         # Robots.
         if self.stateEndEffector is not None:
-            xyObjects.append([ptEndEffector.x + self.objects[0].ptOffset.x,
-                              ptEndEffector.y + self.objects[0].ptOffset.y])
+            pt = [ptEndEffector.x + self.objects[0].ptOffset.x,
+                  ptEndEffector.y + self.objects[0].ptOffset.y]
+            xyObjects.append(pt)
             #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
             #                                          self.objects[0].state.pose.position.y]))
+            self.tfbx.sendTransform((pt[0], pt[1], 0.0),
+                                    tf.transformations.quaternion_about_axis(0, (0,0,1)),
+                                    rospy.Time.now(),
+                                    "RobotComputed",
+                                    "Plate")
             
         # Flies.    
         for iFly in range(1, len(self.objects)):
-            xyObjects.append([self.objects[iFly].state.pose.position.x,
-                              self.objects[iFly].state.pose.position.y])
-            #rospy.loginfo ('CI Object %s at x,y=%s' % (iFly,[self.objects[iFly].state.pose.position.x,
-            #                                                 self.objects[iFly].state.pose.position.y]))
+            #if self.objects[iFly].isVisible:
+                xyObjects.append([self.objects[iFly].state.pose.position.x,
+                                  self.objects[iFly].state.pose.position.y])
+                #rospy.loginfo ('CI Object %s at x,y=%s' % (iFly,[self.objects[iFly].state.pose.position.x,
+                #                                                 self.objects[iFly].state.pose.position.y]))
             
         # Make a list of contour positions.
         xyContours = []
@@ -768,7 +797,7 @@ class ContourIdentifier:
                 
         #rospy.loginfo ('CI flies[0,1].isVisible=%s' % [self.objects[0].isVisible, self.objects[1].isVisible])
 
-        # Construct two lists of contours, to describe the range of good robot/fly properties.
+        # Construct two lists of contour stats, to describe the range of good robot/fly properties.
         contoursMin = []
         contoursMax = []
         contoursMean = []
@@ -789,7 +818,7 @@ class ContourIdentifier:
             contoursMean.append(contour)
         
         
-        # Append the fly contours.
+        # Append the fly contour stats.
         for i in range(1, len(self.objects)):
             contour.area   = self.objects[i].areaMin #self.areaMinFly
             contour.ecc    = self.objects[i].eccMin #self.eccMinFly
@@ -820,20 +849,21 @@ class ContourIdentifier:
             #rospy.logwarn ('CI mapObjectsStableMarriage=%s' % (mapObjectsStableMarriage))
             #rospy.logwarn ('CI mapObjectsHungarian=%s, unmapped=%s' % (mapObjectsHungarian,unmapped))
     
-            if True:
-                mapObjects = mapObjectsStableMarriage
-            #else:  
-            #    mapObjects = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
-            #    for i in range(len(xyObjects)):
-            #        if mapObjectsHungarian[i] != -1:
-            #            mapObjects[i] = int(mapObjectsHungarian[i])
-            #            #if not unmapped[i]:
-            #            #    mapObjects.append(mapObjectsHungarian[i])
-            #            #else:
-            #            #    mapObjects.append(None)
-            #        else:
-            #            mapObjects[i] = None
-            #    #mapObjects = list(mapObjects[i] for i in range(len(mapObjects)))
+            # StableMarriage Algorithm.
+            mapObjects = mapObjectsStableMarriage
+            
+            # MatchHungarian Algorithm. (alternative)  
+            #mapObjects = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
+            #for i in range(len(xyObjects)):
+            #    if mapObjectsHungarian[i] != -1:
+            #        mapObjects[i] = int(mapObjectsHungarian[i])
+            #        #if not unmapped[i]:
+            #        #    mapObjects.append(mapObjectsHungarian[i])
+            #        #else:
+            #        #    mapObjects.append(None)
+            #    else:
+            #        mapObjects[i] = None
+            ##mapObjects = list(mapObjects[i] for i in range(len(mapObjects)))
                 
             # Prepend a None for a missing robot.
             if self.stateEndEffector is None:
@@ -846,9 +876,10 @@ class ContourIdentifier:
         else:
             mapObjects = [None for k in range(1+len(self.objects))]
             
-        #rospy.logwarn ('CI xyObjects=%s' % xyObjects)
-        #rospy.logwarn ('CI xyContours=%s' % xyContours)
-        #rospy.logwarn ('CI mapObjects=%s' % (mapObjects))
+        rospy.logwarn ('----------------------------------')
+        rospy.logwarn ('CI xyObjects=%s' % xyObjects)
+        rospy.logwarn ('CI xyContours=%s' % xyContours)
+        rospy.logwarn ('CI mapObjects=%s' % (mapObjects))
         
         return mapObjects
     
