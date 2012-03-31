@@ -132,15 +132,10 @@ class KalmanFilter:
     def __init__(self):
         self.initialized = False
         
-        # self.kal = cv.CreateKalman(4,2,0)
         self.kal = cv.CreateKalman(4,4,0)
-        # self.kal = cv.CreateKalman(6,6,0)
         cv.SetIdentity(self.kal.transition_matrix)
         cv.SetIdentity(self.kal.measurement_matrix)
         
-        #cv.SetIdentity(self.kal.process_noise_cov, 1.0)
-        #self.kal.process_noise_cov[2,2] = 0.5
-        #self.kal.process_noise_cov[3,3] = 0.5
         cv.SetIdentity(self.kal.process_noise_cov, 1.0)
         self.kal.process_noise_cov[2,2] = 0.5
         self.kal.process_noise_cov[3,3] = 0.5
@@ -171,13 +166,10 @@ class KalmanFilter:
         self.kal.measurement_noise_cov[3,3] =  0.21742
         
         
-        # self.measurement = cv.CreateMat(2,1,cv.GetElemType(self.kal.state_pre))
         self.measurement = cv.CreateMat(4,1,cv.GetElemType(self.kal.state_pre))
-        # self.measurement = cv.CreateMat(6,1,cv.GetElemType(self.kal.state_pre))
         self.t_previous = None
         self.x_previous = None
         self.y_previous = None
-        # self.a_previous = None
 
 
     def Update(self, z, t=None):
@@ -204,33 +196,23 @@ class KalmanFilter:
 
             # Kalman Filtering                
             state_pre = cv.KalmanPredict(self.kal)
-            # Q = self.kal.process_noise_cov[0,0]
-            # R = self.kal.measurement_noise_cov[0,0]
-            # rospy.logwarn("Q = %s, R = %s" % (str(Q),str(R)))
             if z is not None:
                 self.measurement[0,0] = x_current
                 self.measurement[1,0] = y_current
                 self.measurement[2,0] = (x_current - self.x_previous) / self.dt
                 self.measurement[3,0] = (y_current - self.y_previous) / self.dt
-                # self.measurement[5,0] = CircleFunctions.circle_dist(self.a_previous,z[2])/self.dt
-                # rospy.logwarn("x_velocity = %s, y_velocity = %s" % (str(self.measurement[2,0]),str(self.measurement[3,0])))
-    
-                # rospy.logwarn("measurement[0,0] = %s" % str(self.measurement[0,0]))
-                # rospy.logwarn("measurement[1,0] = %s" % str(self.measurement[1,0]))
     
                 state_post = cv.KalmanCorrect(self.kal, self.measurement)
                 x = state_post[0,0]
                 y = state_post[1,0]
                 vx = state_post[2,0]
                 vy = state_post[3,0]
-                # a = state_post[2,0]
-                # va = state_post[5,0]
             else:
                 x = state_pre[0,0]
                 y = state_pre[1,0]
                 vx = state_pre[2,0]
                 vy = state_pre[3,0]
-                rospy.logwarn('KF z==None -> x,y,vx,vy=%s' % [x,y,vx,vy])
+                rospy.logwarn('KF z==None -> x,y=%s' % [x,y])
                 
             self.t_previous = t_current
             self.x_previous = x
@@ -258,16 +240,8 @@ class KalmanFilter:
                 y = None
                 vx = None
                 vy = None
-                #x = state_pre[0,0]
-                #y = state_pre[1,0]
-                #vx = state_pre[2,0]
-                #vy = state_pre[3,0]
                 
-                
-            
-
         
-        # return (x,y,a,vx,vy,va)
         return (x, y, vx, vy)
 
 

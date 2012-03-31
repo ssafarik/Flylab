@@ -599,7 +599,10 @@ class MoveRobot (smach.State):
 
 
     def execute(self, userdata):
-        rospy.logwarn("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.relative.distance, userdata.experimentparamsIn.move.relative.angle, userdata.experimentparamsIn.move.relative.speed])
+        rospy.logwarn("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.mode,
+                                                  userdata.experimentparamsIn.move.relative.distance, 
+                                                  userdata.experimentparamsIn.move.relative.angle, 
+                                                  userdata.experimentparamsIn.move.relative.speed])
 
         rv = 'succeeded'
         if userdata.experimentparamsIn.move.enabled:
@@ -696,12 +699,14 @@ class MoveRobot (smach.State):
                 self.goal.state.pose.position.y = self.ptTarget[1]
                 
                 
-                #rospy.logwarn('EL calling set_stage_state(%s) pre' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
+                
                 try:
+                    #rospy.logwarn('EL set_stage_state(%s)' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
                     self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
                                                                                   pose=self.goal.state.pose),
                                                               speed = speedTarget))
-                except (rospy.ServiceException, rospy.ROSInterruptException):
+                except (rospy.ServiceException, rospy.ROSInterruptException), e:
+                    rospy.logwarn ('EL Exception calling set_stage_state(): %s' % e)
                     self.ptTarget = None
                 #rospy.logwarn('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
 

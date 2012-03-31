@@ -980,7 +980,7 @@ class RosFivebar:
 
 
         
-    def Mainloop(self):
+    def Main(self):
         self.LoadServices()
         self.Calibrate_callback(None)
         self.initialized = True
@@ -990,15 +990,12 @@ class RosFivebar:
         rospy.loginfo ('5B Q2CENTEReiz: %s, %s, %s' % (Q2CENTERe, Q2CENTERi, Q2CENTERz))
         # Process messages forever.
         rosrate = rospy.Rate(100)
-        try:
-            while not rospy.is_shutdown():
-                self.SendTransforms()
-                self.SendTargetCommand()
-                rosrate.sleep()
+
+        while not rospy.is_shutdown():
+            self.SendTransforms()
+            self.SendTargetCommand()
+            rosrate.sleep()
                 
-        except:
-            print "Shutting down"
-    
     
 
 if __name__ == '__main__':
@@ -1007,5 +1004,5 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException: 
         pass
     
-    fivebar.Mainloop()
+    fivebar.Main()
     

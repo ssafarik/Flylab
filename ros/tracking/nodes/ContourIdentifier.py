@@ -2,6 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('tracking')
 import sys
+import copy
 import rospy
 import tf
 import numpy as N
@@ -292,7 +293,7 @@ class Fly:
                 #self.lpOffsetY.Update(None,t)
                 #self.lpFlip.Update(0.0, t)
                 angleContour = 0.0
-                #rospy.logwarn('CI FILTER READ for %s w/ contour==None' % self.name)
+                rospy.logwarn('CI KFILTER READ for %s w/ contour==None' % self.name)
                 
                 
             if self.isVisible:
@@ -354,7 +355,7 @@ class Fly:
                         self.unwind += 2.0*N.pi
                         ang += 2.0*N.pi
                     self.angPrev = ang
-                    rospy.logwarn('ang=%0.2f' % ang)
+                    #rospy.logwarn('ang=%0.2f' % ang)
                     (self.ptOffset.x,self.ptOffset.y) = XyFromPolar(self.lpOffsetMag.Update(mag, t),
                                                                     self.lpOffsetAng.Update(ang, t))
                     #self.ptOffset = Point(x = self.lpOffsetX.Update(xPID, t),
@@ -423,10 +424,11 @@ class ContourIdentifier:
     def __init__(self):
         self.initialized = False
         self.stateEndEffector = None  # If no robot exists, this will remain as None.  Set in EndEffector callback.
-        self.maxFlies = rospy.get_param('maxFlies', 1)
+        self.nFlies = rospy.get_param('nFlies', 1)
+        self.nRobots = rospy.get_param('nRobots', 1)
         
         self.contours = []
-        self.map = []
+        self.mapContourFromObject = []      # A mapping from the (kalman) object number to the contour number.
         self.iContours = []
         self.objects = []
         
@@ -540,15 +542,23 @@ class ContourIdentifier:
         
 
     def ResetFlyObjects (self):
+        # Save status.
+        savInitialized = self.initialized
+        self.initialized = False
+        
         for i in range(len(self.objects)):
             del self.objects[0]
             
         self.objects = []
-        for i in range(1+self.maxFlies):
+        for i in range(self.nRobots+self.nFlies):
             self.objects.append(Fly())
             self.objects[i].name = "Fly%s" % i
         
-        self.objects[0].name = "Robot"
+        if (self.nRobots==1):
+            self.objects[0].name = "Robot"
+
+        # Restore status.
+        self.initialized = savInitialized
         
         
     def QuaternionPlateFromCamera(self, quat):
@@ -645,35 +655,38 @@ class ContourIdentifier:
     # GetDistanceMatrix()
     # Get the matrix of distances between each pair of points in the two lists.  Adjust distances with
     # priorities, where smaller=better.
+    # xy1 and xy2 are lists of points, i.e. xy1 is M x 2, xy2 is N x 2
     #
-    def GetDistanceMatrix(self, xy1, xy2, iPriorities):
+    def GetDistanceMatrix(self, xy1, xy2, iPriorities=None):
         d = N.array([[N.inf for n in range(len(xy2))] for m in range(len(xy1))])
         for m in range(len(xy1)):
             for n in range(len(xy2)):
                 try:
                     d[m,n] = N.linalg.norm([xy1[m][0]-xy2[n][0],
                                              xy1[m][1]-xy2[n][1]])
-                    
                     # Quick & dirty priority calc.
-                    d[m,n] += iPriorities[m]
-
+                    if iPriorities is not None:
+                        d[m,n] += iPriorities[m]
                 except TypeError:
                     d[m,n] = None
-        
         #rospy.loginfo('CI DM xy1=%s' % xy1)
         #rospy.loginfo('CI DM xy2=%s' % xy2)
         #rospy.loginfo('CI DM d=%s' % d)
-
         return d
     
     
-    def GetDistanceMatrixFromContours(self, xyObjects, contours, contoursMin, contoursMax, contoursMean):
+    def GetDistanceMatrixFromContours(self, xyObjects, contours, contoursMin, contoursMax, contoursMean, ptComputed):
         d = N.array([[N.inf for n in range(len(contours))] for m in range(len(xyObjects))])
         for m in range(len(xyObjects)):
             for n in range(len(contours)):
                 try:
                     d[m,n] = N.linalg.norm([xyObjects[m][0]-contours[n].x,
                                              xyObjects[m][1]-contours[n].y])
+
+                    # Penalize deviations from any known computed positions.
+                    if ptComputed[m] is not None:
+                        d[m,n] += N.linalg.norm([ptComputed[m].x-contours[n].x,
+                                                 ptComputed[m].y-contours[n].y])
                     
                     # Penalize deviations from ideal visual characteristics.
                     #if (contours[n].ecc <= contoursMin[m].ecc) or (contoursMax[m].ecc <= contours[n].ecc): 
@@ -686,13 +699,14 @@ class ContourIdentifier:
                     
                     gainArea = 0.1 
                     areametric = gainArea * N.abs(contours[n].area - contoursMean[m].area)
-                    d[m,n] += areametric 
+                    d[m,n] += areametric
                     #if m<2:
-                    #    rospy.logwarn('Object %s, eccmetric=%0.2f, areametric=%0.2f' % (m, eccmetric, areametric))    
+                    #    rospy.logwarn('Object %s, eccmetric=%0.2f, areametric=%0.2f' % (m, eccmetric, areametric))
+                    
                     
                 except TypeError:
                     d[m,n] = None
-        
+
         return d
     
     
@@ -701,10 +715,9 @@ class ContourIdentifier:
     #   Returns the mapping.
     #
     def GetStableMatching(self, d):
-        #rospy.loginfo ('CI d=%s' % d)
+        #rospy.logwarn ('CI GetStableMatching(d=%s)' % d)
         len0 = d.shape[0]
         len1 = d.shape[1]
-        
         #Initialize all m in M and w in W to free
         M = [None for i in range(len0)]
         W = [None for i in range(len1)]
@@ -713,6 +726,9 @@ class ContourIdentifier:
             proposed = [[0 for w in range(len1)] for m in range(len0)] 
             #while exists a free man m who still has a woman w to propose to
             while (None in W) and (None in M):
+                #rospy.logwarn('M=%s'%M)
+                #rospy.logwarn('W=%s'%W)
+                #rospy.logwarn('P=%s'%proposed)
                 if None in M:
                     m = M.index(None)
                 else:
@@ -721,6 +737,7 @@ class ContourIdentifier:
             #       w = m's highest ranked such woman who he has not proposed to yet
                     d2 = list(N.array(d[m])+N.array(proposed[m]))
                     w = d2.index(min(d2))
+                    #rospy.logwarn('m,w=%s'%[m,w])
             #       if w is free
                     if W[w] is None:
             #           (m, w) become engaged
@@ -745,40 +762,40 @@ class ContourIdentifier:
                             W[w] = mp
                             proposed[mp][w] = 999999
                             proposed[m][w] = 999999
-                
         return (M,W)        
                         
         
 
-    # MapObjectsToContours()
-    #   Uses self.contours & self.objects, and...
+    # MapContoursFromObjects()
+    #   Uses self.contours & self.objects,
     #   Returns a list of indices such that self.objects[k] = contour[map[k]], and self.objects[0]=therobot
-    def MapObjectsToContours(self):
-        if (self.stateEndEffector is not None):
-            ptEndEffector = Point(x = self.stateEndEffector.pose.position.x,
-                                  y = self.stateEndEffector.pose.position.y)
-        else:
-            ptEndEffector = self.objects[0].state.pose.position
-
-        
+    def MapContoursFromObjects(self):
         # Make a list of object positions (i.e. robots & flies).
         xyObjects = []
 
         # Robots.
-        if self.stateEndEffector is not None:
-            pt = [ptEndEffector.x + self.objects[0].ptOffset.x,
-                  ptEndEffector.y + self.objects[0].ptOffset.y]
-            xyObjects.append(pt)
-            #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
-            #                                          self.objects[0].state.pose.position.y]))
-            self.tfbx.sendTransform((pt[0], pt[1], 0.0),
+        if (self.nRobots==1):
+            if (self.stateEndEffector is not None):
+                xyRobotComputed = [self.stateEndEffector.pose.position.x,# + self.objects[0].ptOffset.x,
+                                   self.stateEndEffector.pose.position.y]# + self.objects[0].ptOffset.y]
+                #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
+                #                                          self.objects[0].state.pose.position.y]))
+            elif (len(self.objects)>0) and (self.objects[0].isVisible):
+                xyRobotComputed = [self.objects[0].state.pose.position.x,
+                                   self.objects[0].state.pose.position.y]
+            else:
+                xyRobotComputed = [0.0, 0.0]
+
+            xyObjects.append(xyRobotComputed)
+            self.tfbx.sendTransform((xyRobotComputed[0], xyRobotComputed[1], 0.0),
                                     tf.transformations.quaternion_about_axis(0, (0,0,1)),
                                     rospy.Time.now(),
                                     "RobotComputed",
                                     "Plate")
-            
+
+
         # Flies.    
-        for iFly in range(1, len(self.objects)):
+        for iFly in range(self.nRobots, len(self.objects)):
             #if self.objects[iFly].isVisible:
                 xyObjects.append([self.objects[iFly].state.pose.position.x,
                                   self.objects[iFly].state.pose.position.y])
@@ -804,7 +821,7 @@ class ContourIdentifier:
         
         # Append the robot contour stats.
         contour = Contour()
-        if self.stateEndEffector is not None:
+        if (self.nRobots==1):
             contour.area   = self.objects[0].areaMin #self.areaMinRobot
             contour.ecc    = self.objects[0].eccMin #self.eccMinRobot
             contoursMin.append(contour)
@@ -819,7 +836,7 @@ class ContourIdentifier:
         
         
         # Append the fly contour stats.
-        for i in range(1, len(self.objects)):
+        for i in range(self.nRobots, len(self.objects)):
             contour.area   = self.objects[i].areaMin #self.areaMinFly
             contour.ecc    = self.objects[i].eccMin #self.eccMinFly
             contoursMin.append(contour)
@@ -839,49 +856,71 @@ class ContourIdentifier:
         #                                                                      self.objects[0].areaSum/self.objects[0].areaCount,
         #                                                                      self.objects[1].areaSum/self.objects[1].areaCount))
         
-                
-        # Match flies with contours.
-        #d = self.GetDistanceMatrix(xyObjects, xyContours, iPriorities)
-        d = self.GetDistanceMatrixFromContours(xyObjects, self.contours, contoursMin, contoursMax, contoursMean)
+        
+        # Create a list of computed object positions, if any.        
+        ptComputed = [None for k in range(self.nRobots+len(self.objects))]
+        if (self.nRobots==1):
+            ptComputed[0] = Point(x=xyRobotComputed[0], y=xyRobotComputed[1])
+
+        # Augment the contours list, if necessary, so there are as many contours as objects.
+        contoursAug = self.contours
+        while len(contoursAug)<len(xyObjects):
+            contoursAug.append(ContourInfo(x=55555, y=55555, ecc=1.0, area=1.0)) # norm(x,y) must be less than 999999!
+            #rospy.logwarn ('len(contoursAug),len(xyObjects)=%s' % [len(contoursAug),len(xyObjects)])
+            
+        # Match objects with contours.
+        #rospy.logwarn ('GetDistanceMatrixFromContours()')
+        d = self.GetDistanceMatrixFromContours(xyObjects, contoursAug, contoursMin, contoursMax, contoursMean, ptComputed)
         if d is not []:
             (mapObjectsStableMarriage, mapContours) = self.GetStableMatching(d)
             #(mapObjectsHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
             #rospy.logwarn ('CI mapObjectsStableMarriage=%s' % (mapObjectsStableMarriage))
             #rospy.logwarn ('CI mapObjectsHungarian=%s, unmapped=%s' % (mapObjectsHungarian,unmapped))
     
-            # StableMarriage Algorithm.
-            mapObjects = mapObjectsStableMarriage
+            # Choose the algorithm.
+            mapContoursFromObjects = copy.deepcopy(mapObjectsStableMarriage)
             
+            # Set the augmented entries to None.
+            #rospy.logwarn('mapContoursFromObjects=%s'%mapContoursFromObjects)
+            #rospy.logwarn('len(mapContoursFromObjects)=%d'%len(mapContoursFromObjects))
+            #rospy.logwarn('len(xyContours)=%d'%len(xyContours))
+            for m in range(len(mapContoursFromObjects)):
+                #rospy.logwarn('mapContoursFromObjects[m], len(xyContours)=%s'%[mapContoursFromObjects[m],len(xyContours)])
+                if (mapContoursFromObjects[m])>=len(xyContours):
+                    mapContoursFromObjects[m] = None
+                    
             # MatchHungarian Algorithm. (alternative)  
-            #mapObjects = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
+            #mapContoursFromObjects = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
             #for i in range(len(xyObjects)):
             #    if mapObjectsHungarian[i] != -1:
-            #        mapObjects[i] = int(mapObjectsHungarian[i])
+            #        mapContoursFromObjects[i] = int(mapObjectsHungarian[i])
             #        #if not unmapped[i]:
-            #        #    mapObjects.append(mapObjectsHungarian[i])
+            #        #    mapContoursFromObjects.append(mapObjectsHungarian[i])
             #        #else:
-            #        #    mapObjects.append(None)
+            #        #    mapContoursFromObjects.append(None)
             #    else:
-            #        mapObjects[i] = None
-            ##mapObjects = list(mapObjects[i] for i in range(len(mapObjects)))
+            #        mapContoursFromObjects[i] = None
+            ##mapContoursFromObjects = list(mapContoursFromObjects[i] for i in range(len(mapContoursFromObjects)))
                 
             # Prepend a None for a missing robot.
-            if self.stateEndEffector is None:
-                mapObjects.insert(0,None)
+            #if self.stateEndEffector is None:
+            #    mapContoursFromObjects.insert(0,None)
                 
             # Append a None for missing flies.
-            while len(mapObjects) < 1+self.maxFlies:
-                mapObjects.append(None)
+            while len(mapContoursFromObjects) < self.nRobots+self.nFlies:
+                mapContoursFromObjects.append(None)
                 
         else:
-            mapObjects = [None for k in range(1+len(self.objects))]
+            mapContoursFromObjects = [None for k in range(len(self.objects))]
             
-        rospy.logwarn ('----------------------------------')
-        rospy.logwarn ('CI xyObjects=%s' % xyObjects)
-        rospy.logwarn ('CI xyContours=%s' % xyContours)
-        rospy.logwarn ('CI mapObjects=%s' % (mapObjects))
+#        rospy.logwarn ('----------------------------------')
+#        if (self.nRobots==1):
+#            rospy.logwarn ('CI xyRobotComputed=%s' % xyRobotComputed)
+#        rospy.logwarn ('CI xyObjects=%s' % xyObjects)
+#        rospy.logwarn ('CI xyContours=%s' % xyContours)
+#        rospy.logwarn ('CI mapObjects=%s' % (mapContoursFromObjects))
         
-        return mapObjects
+        return mapContoursFromObjects
     
 
     def ContourInfo_callback(self, contourinfo):
@@ -919,49 +958,49 @@ class ContourIdentifier:
     
                 # Figure out who is who in the camera image.
                 try:
-                    self.map = self.MapObjectsToContours()
+                    self.mapContourFromObject = self.MapContoursFromObjects()
                 except IndexError:
-                    self.map = None
+                    self.mapContourFromObject = None
                     
-                #rospy.loginfo ('CI map=%s' % self.map)
+                #rospy.loginfo ('CI map=%s' % self.mapContourFromObject)
                 #rospy.loginfo ('CI contour[0].x,y=%s' % [self.contours[0].x,self.contours[0].y])
                 #rospy.loginfo ('CI contour[1].x,y=%s' % [self.contours[1].x,self.contours[1].y])
     
                 # Update the robot state w/ the contour and end-effector positions.
-                if self.map is not None:
-                    if self.stateEndEffector is not None:
-                        if self.map[0] is not None:
-                            self.objects[0].Update(self.contours[self.map[0]], self.stateEndEffector.pose.position)
+                if self.mapContourFromObject is not None:
+                    if (self.nRobots==1) and (self.stateEndEffector is not None):
+                        if self.mapContourFromObject[0] is not None:
+                            self.objects[0].Update(self.contours[self.mapContourFromObject[0]], self.stateEndEffector.pose.position)
                         else:
-                            self.objects[0].Update(None,                       self.stateEndEffector.pose.position)
+                            self.objects[0].Update(None,                                        self.stateEndEffector.pose.position)
         
                         # Write a file (for getting Kalman covariances, etc).
                         #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateEndEffector.pose.position.x,
                         #                                     self.stateEndEffector.pose.position.y,
                         #                                     self.objects[0].state.pose.position.x, 
                         #                                     self.objects[0].state.pose.position.y,
-                        #                                     self.contours[self.map[0]].x,
-                        #                                     self.contours[self.map[0]].y)
+                        #                                     self.contours[self.mapContourFromObject[0]].x,
+                        #                                     self.contours[self.mapContourFromObject[0]].y)
                         #self.fidRobot.write(data)
                         
                         #rospy.loginfo ('CI update robot    contour=%s' % contour)
                         
                     
                     # Update the flies' states.
-                    for iFly in range(1, len(self.objects)):
-                        if self.map[iFly] is not None:
-                            #rospy.logwarn ('iFly=%d, self.map=%s, len(self.contours)=%d' % (iFly, self.map, len(self.objects)))
-                            self.objects[iFly].Update(self.contours[self.map[iFly]], None)
+                    for iFly in range(self.nRobots, len(self.objects)):
+                        if self.mapContourFromObject[iFly] is not None:
+                            #rospy.logwarn ('iFly=%d, self.mapContourFromObject=%s, len(self.contours)=%d' % (iFly, self.mapContourFromObject, len(self.objects)))
+                            self.objects[iFly].Update(self.contours[self.mapContourFromObject[iFly]], None)
                         else:
-                            self.objects[iFly].Update(None,                       None)
+                            self.objects[iFly].Update(None,                                           None)
         
                         
                         #rospy.loginfo ('CI update state %s contour=%s' % (iFly,contour))
         
                         # Write a file.
-                        #if self.map[1] is not None:
-                        #    data = '%s, %s, %s, %s\n' % (self.contours[self.map[1]].x, 
-                        #                                 self.contours[self.map[1]].y, 
+                        #if self.mapContourFromObject[1] is not None:
+                        #    data = '%s, %s, %s, %s\n' % (self.contours[self.mapContourFromObject[1]].x, 
+                        #                                 self.contours[self.mapContourFromObject[1]].y, 
                         #                                 self.objects[1].state.pose.position.x, 
                         #                                 self.objects[1].state.pose.position.y)
                         #    self.fidFly.write(data)
@@ -971,7 +1010,7 @@ class ContourIdentifier:
                     # Construct the ArenaState message.
                     arenastate = ArenaState()
                     #if self.objects[0].state.pose.position.x is not None:
-                    if self.stateEndEffector is not None:
+                    if self.nRobots==1:
                         arenastate.robot.header.stamp    = self.objects[0].state.header.stamp
                         arenastate.robot.header.frame_id = self.objects[0].state.header.frame_id
                         arenastate.robot.pose            = self.objects[0].state.pose
@@ -981,10 +1020,9 @@ class ContourIdentifier:
                         #                                                           [self.objects[0].ptOffset.x,
                         #                                                            self.objects[0].ptOffset.y]))
                     
-                    r = range(1, len(self.objects))
-                    for iFly in r:
-                        #rospy.logwarn ('iFly=%d, self.map=%s, len(self.objects)=%d' % (iFly, self.map, len(self.objects)))
-                        if (self.map[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
+                    for iFly in range(self.nRobots, len(self.objects)):
+                        #rospy.logwarn ('iFly=%d, self.mapContourFromObject=%s, len(self.objects)=%d' % (iFly, self.mapContourFromObject, len(self.objects)))
+                        if (self.mapContourFromObject[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
                             arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
                                                                   pose = self.objects[iFly].state.pose,
                                                                   velocity = self.objects[iFly].state.velocity))
@@ -995,7 +1033,8 @@ class ContourIdentifier:
                     
                     
                     # Publish the EndEffectorOffset.
-                    self.pubEndEffectorOffset.publish(self.objects[0].ptOffset)
+                    if len(self.objects)>0:
+                        self.pubEndEffectorOffset.publish(self.objects[0].ptOffset)
                     
                     
                     # Publish a disc to indicate the arena extent.
@@ -1009,10 +1048,10 @@ if __name__ == '__main__':
     rospy.init_node('ContourIdentifier')
     ci = ContourIdentifier()
 
-    try:
-        rospy.spin()
-    except:
-        rospy.loginfo("Shutting down")
+    #try:
+    rospy.spin()
+    #except:
+    #    rospy.loginfo("Shutting down")
 
     #cv.DestroyAllWindows()
 

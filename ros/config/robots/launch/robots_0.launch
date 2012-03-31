@@ -1,8 +1,8 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the FLIES (i.e. how many, etc).           -->
+	<!-- Configuration of the ROBOT (i.e. how many, etc).           -->
 	<!-- ========================================================== -->
 
-  <param name="nFlies" type="int" value="0" />
+  <param name="nRobots" type="int" value="0" />
     
 </launch>
