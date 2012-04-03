@@ -7,10 +7,8 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<node pkg="camera1394v2" type="camera1394v2_node" name="camera" >
-		<rosparam file="$(find babycarrot)/launch/params_camera.yaml" />
-	</node>
-	
-	<node ns="camera" name="image_proc" pkg="image_proc" type="image_proc" />
+	<include file="$(find babycarrot)/launch/params_camera.launch" ns="camera" />
+	<node name="camera" pkg="camera1394v2" type="camera1394v2_node" />
+	<node name="image_proc" pkg="image_proc" type="image_proc" ns="camera" />
   
 </launch>

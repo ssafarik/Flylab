@@ -29,7 +29,7 @@
 	<!-- Good PID gains to follow a walking fly. -->
 	<!-- -->
 	<param name="fivebar/kP"      type="double" value="0.02"/>
-	<param name="fivebar/kI"      type="double" value="0.05"/>
+	<param name="fivebar/kI"      type="double" value="0.08"/>
 	<param name="fivebar/kD"      type="double" value="-0.05"/>
 	<param name="fivebar/maxI"    type="double" value="2"/>  
 	<param name="fivebar/kWindup" type="double" value="1.0"/>  
