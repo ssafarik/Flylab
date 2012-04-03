@@ -39,7 +39,47 @@ class ButterworthFilter:
 
 
 
-class LowPassAngleFilter:
+class LowPassHalfCircleAngleFilter:
+    def __init__(self, RC=1.0):
+        self.RC = RC
+        self.t_previous = None
+        self.zf_previous = None
+
+        
+    def GetValue(self):
+        return self.zf_previous
+
+
+    def SetValue(self, z):
+        self.zf_previous = z
+
+
+    def Update(self, z, t):
+        if (self.zf_previous is not None) and (self.t_previous is not None): 
+            if (z is not None) and (t is not None):
+                
+                # Unwrap big jumps
+                if (z - self.zf_previous) > (N.pi/2.0):
+                    self.zf_previous += N.pi
+                if (z - self.zf_previous) < (-N.pi/2.0):
+                    self.zf_previous -= N.pi
+                    
+                dt = t - self.t_previous
+                alpha = dt/(self.RC + dt)
+                zf = alpha*z + (1 - alpha)*self.zf_previous
+            else: # Initialized, but no measurement.
+                zf = self.zf_previous
+        else: # Not initialized, but have a measurement.
+            zf = z
+
+
+        self.t_previous = t
+        self.zf_previous = zf
+
+        return zf
+
+
+class LowPassCircleFilter:
     def __init__(self, RC=1.0):
         self.RC = RC
         self.t_previous = None

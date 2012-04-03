@@ -15,6 +15,7 @@ from flycore.msg import MsgFrameState
 import filters
 from pythonmodules import CircleFunctions
 import Fly
+import MatchHungarian
 
 
 ###############################################################################
@@ -254,8 +255,12 @@ class ContourIdentifier:
 
                     # Penalize deviations from any known computed positions.
                     if ptComputed[m] is not None:
-                        d[m,n] += N.linalg.norm([ptComputed[m].x-contours[n].x,
+                        dComputed = N.linalg.norm([ptComputed[m].x-contours[n].x,
                                                  ptComputed[m].y-contours[n].y])
+                    else: # Use object position as the computed position.
+                        dComputed = d[m,n]
+                    
+                    d[m,n] += dComputed #* dComputed
                     
                     # Penalize deviations from ideal visual characteristics.
                     #if (contours[n].ecc <= contoursMin[m].ecc) or (contoursMax[m].ecc <= contours[n].ecc): 
@@ -295,12 +300,12 @@ class ContourIdentifier:
         return d
     
     
-    # GetStableMatching()
+    # GetMatchGaleShapely()
     #   Solve the "Stable Marriage Problem" for two sets of points in a distance matrix.
     #   Returns the mapping.
     #
-    def GetStableMatching(self, d):
-        #rospy.logwarn ('CI GetStableMatching(d=%s)' % d)
+    def GetMatchGaleShapely(self, d):
+        #rospy.logwarn ('CI GetMatchGaleShapely(d=%s)' % d)
         len0 = d.shape[0]
         len1 = d.shape[1]
         #Initialize all m in M and w in W to free
@@ -460,35 +465,37 @@ class ContourIdentifier:
         #rospy.logwarn ('GetDistanceMatrixFromContours()')
         d = self.GetDistanceMatrixFromContours(xyObjects, contoursAug, contoursMin, contoursMax, contoursMean, ptComputed)
         if d is not []:
-            (mapObjectsStableMarriage, mapContours) = self.GetStableMatching(d)
-            #(mapObjectsHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
-            #rospy.logwarn ('CI mapObjectsStableMarriage=%s' % (mapObjectsStableMarriage))
-            #rospy.logwarn ('CI mapObjectsHungarian=%s, unmapped=%s' % (mapObjectsHungarian,unmapped))
+            (mapObjectsGaleShapely, mapContours) = self.GetMatchGaleShapely(d)
+            (mapObjectsHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
+            #rospy.logwarn ('CI mapObjectsGaleShapely =%s' % (mapObjectsGaleShapely))
+            #rospy.logwarn ('CI mapObjectsHungarian  =%s, unmapped=%s' % (mapObjectsHungarian,unmapped))
+            #rospy.logwarn ('CI mapObjectsHungarian  =%s' % mapObjectsHungarian)
     
             # Choose the algorithm.
-            mapContoursFromObjects = copy.deepcopy(mapObjectsStableMarriage)
-            
-            # Set the augmented entries to None.
-            #rospy.logwarn('mapContoursFromObjects=%s'%mapContoursFromObjects)
-            #rospy.logwarn('len(mapContoursFromObjects)=%d'%len(mapContoursFromObjects))
-            #rospy.logwarn('len(xyContours)=%d'%len(xyContours))
-            for m in range(len(mapContoursFromObjects)):
-                #rospy.logwarn('mapContoursFromObjects[m], len(xyContours)=%s'%[mapContoursFromObjects[m],len(xyContours)])
-                if (mapContoursFromObjects[m])>=len(xyContours):
-                    mapContoursFromObjects[m] = None
-                    
-            # MatchHungarian Algorithm. (alternative)  
-            #mapContoursFromObjects = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
-            #for i in range(len(xyObjects)):
-            #    if mapObjectsHungarian[i] != -1:
-            #        mapContoursFromObjects[i] = int(mapObjectsHungarian[i])
-            #        #if not unmapped[i]:
-            #        #    mapContoursFromObjects.append(mapObjectsHungarian[i])
-            #        #else:
-            #        #    mapContoursFromObjects.append(None)
-            #    else:
-            #        mapContoursFromObjects[i] = None
-            ##mapContoursFromObjects = list(mapContoursFromObjects[i] for i in range(len(mapContoursFromObjects)))
+            if True:  # Gale-Shapely Algorithm.
+                mapContoursFromObjects = copy.copy(mapObjectsGaleShapely)
+                
+                # Set the augmented entries to None.
+                #rospy.logwarn('mapContoursFromObjects=%s'%mapContoursFromObjects)
+                #rospy.logwarn('len(mapContoursFromObjects)=%d'%len(mapContoursFromObjects))
+                #rospy.logwarn('len(xyContours)=%d'%len(xyContours))
+                for m in range(len(mapContoursFromObjects)):
+                    #rospy.logwarn('mapContoursFromObjects[m], len(xyContours)=%s'%[mapContoursFromObjects[m],len(xyContours)])
+                    if (mapContoursFromObjects[m])>=len(xyContours):
+                        mapContoursFromObjects[m] = None
+            else:  # MatchHungarian Algorithm.                    
+                mapContoursFromObjects = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
+                for i in range(len(xyObjects)):
+                    if mapObjectsHungarian[i] != -1:
+                        mapContoursFromObjects[i] = int(mapObjectsHungarian[i])
+                        #if not unmapped[i]:
+                        #    mapContoursFromObjects.append(mapObjectsHungarian[i])
+                        #else:
+                        #    mapContoursFromObjects.append(None)
+                    else:
+                        mapContoursFromObjects[i] = None
+                #mapContoursFromObjects = list(mapContoursFromObjects[i] for i in range(len(mapContoursFromObjects)))
+            #rospy.logwarn ('CI mapContoursFromObjects=%s' % mapContoursFromObjects)
                 
             # Prepend a None for a missing robot.
             #if self.stateEndEffector is None:
@@ -605,7 +612,7 @@ class ContourIdentifier:
                     # Construct the ArenaState message.
                     arenastate = ArenaState()
                     #if self.objects[0].state.pose.position.x is not None:
-                    if self.nRobots==1:
+                    if (self.nRobots==1) and (len(self.objects)>0):
                         arenastate.robot.header.stamp    = self.objects[0].state.header.stamp
                         arenastate.robot.header.frame_id = self.objects[0].state.header.frame_id
                         arenastate.robot.pose            = self.objects[0].state.pose

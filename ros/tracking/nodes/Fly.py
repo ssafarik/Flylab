@@ -50,7 +50,7 @@ class Fly:
         
 
         self.kfState = filters.KalmanFilter()
-        self.lpAngleF = filters.LowPassAngleFilter(RC=rospy.get_param('tracking/rcAngleFilter', 0.1))
+        self.lpAngleF = filters.LowPassHalfCircleAngleFilter(RC=rospy.get_param('tracking/rcAngleFilter', 0.1))
         #self.lpOffsetX = filters.LowPassFilter(RC=0.1)
         #self.lpOffsetY = filters.LowPassFilter(RC=0.1)
         self.lpOffsetMag = filters.LowPassFilter(RC=0.1)
@@ -69,6 +69,7 @@ class Fly:
         self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFlipFilter', 3.0))
         self.contour = None
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
+        self.maxOffset = N.inf #10.0
         
         self.isVisible = False
         self.isDead = False # TO DO: dead fly detection.
@@ -124,8 +125,10 @@ class Fly:
         return rpy[2]
 
 
+    # SetAngleOfTravel()
+    # If the speed surpasses a threshold, then update the direction of travel.
     def SetAngleOfTravel(self):
-        angleOfTravel = N.arctan2(self.state.velocity.linear.y, self.state.velocity.linear.x)
+        angleOfTravel = N.arctan2(self.state.velocity.linear.y, self.state.velocity.linear.x) % (2.0*N.pi)
         speed = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
         if speed > self.speedThresholdForTravel: 
             self.angleOfTravelRecent = angleOfTravel
@@ -133,8 +136,8 @@ class Fly:
 
     # GetNextFlipValue()
     #   Using self.contour, self.state, and self.angleOfTravelRecent,
-    #   we determine a value to use for updating the "flip state" filter,
-    #   which varies on [-1,+1].
+    #   we determine a value to use for updating the "flip" filter,
+    #   which varies on [-1,+1], and the sign of which determines if to flip.
     #
     # Returns the chosen flip value.
     #   
@@ -190,7 +193,7 @@ class Fly:
     #     OR
     #   flip==False -->  angleResolved = (angle of contour + pi)
     #
-    # Updates the flip status in self.
+    # Updates the flip status in self.flip
     #   
     def SetFlipState(self):
         # Update the flip filter, and convert it to a flip state.
@@ -205,21 +208,24 @@ class Fly:
         if speed > 3.0: # Deadband.
             self.flip = flipNew    
                 
-        # If the contour angle wrapped, then change the flip state.
+        # contour angle only ranges on [-pi,-0].  If wrapped, then change the flip state.
+        #if 'Fly1' in self.name:
+        #    rospy.logwarn('self.flip=%s'%self.flip)
         if self.contourPrev is not None:
             d = N.abs(CircleFunctions.circle_dist(self.contour.angle, self.contourPrev.angle))
             if (d > (N.pi/2.0)):
                 #if 'Fly1' in self.name:
                 #    rospy.logwarn('%s: wrap %0.2f, %0.2f, d=%0.2f'%(self.name, self.contour.angle, self.contourPrev.angle,d))
-                self.lpFlip.SetValue(-flipValuePost)
+                self.lpFlip.SetValue(-self.lpFlip.GetValue())
                 self.flip = not self.flip
 
+                
 
     def GetResolvedAngle(self):
         angleF = self.lpAngleF.GetValue()
                 
         if self.flip and ('Robot' not in self.name):
-            angleResolved = angleF + N.pi
+            angleResolved = (angleF + N.pi) % (2.0*N.pi)
         else:
             angleResolved = angleF
 
@@ -356,7 +362,7 @@ class Fly:
                         ang += 2.0*N.pi
                     self.angPrev = ang
                     #rospy.loginfo('ang=%0.2f' % ang)
-                    (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(self.lpOffsetMag.Update(mag, t),
+                    (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(mag, t),-self.maxOffset,self.maxOffset),
                                                                     self.lpOffsetAng.Update(ang, t))
                     #self.ptOffset = Point(x = self.lpOffsetX.Update(xPID, t),
                     #                      y = self.lpOffsetY.Update(yPID, t),
