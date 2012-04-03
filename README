@@ -1,21 +1,26 @@
 FlyLab Software (formerly Flyatar2)
 -------------------------------------
 
-This software is (i.e. hopes to be) the foundation software platform of the Dickinson Lab.  
+This software is (i.e. hopes to be) the foundation software platform of 
+the Dickinson Lab.  
 
-At the moment it provides a platform for virtual reality environments that may consist of some combination of 
-robot-magnet actuators, laser-galvo steering, realtime multifly tracking & visual servoing, an experiment 
-library & examples thereof, data-logging of fly & robot states, and other related pieces.
+At the moment it provides a platform for virtual reality environments that 
+may consist of some combination of robot-magnet actuators, laser-galvo steering, 
+realtime multifly tracking & visual servoing, an experiment library & examples 
+thereof, data-logging of fly & robot states, and other related pieces.
 
-A focus has been to enable easy operation across multiple machines and multiple experimental hardware platforms, and as such
-each piece of experimental hardware has a directory in the "config" package.  There you will find all the relevant
-parameters, etc, needed for the software to operate on a given piece of hardware.  To have the software use a given piece
-of hardware, simply point config/config/launch/hardware.launch to the name of your hardware.  Calibration and setup of
-the hardware is in the file calibration.txt.
+A focus has been to enable easy operation across multiple machines and multiple 
+experimental hardware platforms, and as such each piece of experimental hardware 
+has a directory in the "config" package.  There you will find all the relevant
+parameters, etc, needed for the software to operate on a given piece of hardware.  
+To have the software use a given piece of hardware, simply point 
+config/config/launch/hardware.launch to the name of your hardware.  Calibration 
+and setup of the hardware is in the file calibration.txt.
 
-There is also a set of experiments, and an experiment library, in the "experiments" package/directory.  An experiment is 
-specified by filling out a data structure in the appropriate <experimentname>.py file, and then roslaunch'ing the
-appropriate .launch file.  The experiments library has been written with the intention that a wide variety of experiments 
-are possible via this data structure.
+There is also a set of experiments, and an experiment library, in the "experiments" 
+package.  An experiment is specified by filling out a data structure in the 
+appropriate <experimentname>.py file, and then roslaunch'ing the appropriate 
+.launch file.  The experiments library has been written with the intention that 
+a wide variety of experiments are possible via this data structure.
 
         
