@@ -9,13 +9,15 @@ def mod_angle(angle):
         angle = angle%(2.0*N.pi)
     return angle
 
-def unwrap_angle(angle,angle_prev):
+
+def unwrap_angle(angle, angle_prev):
     if (angle is not None) and (angle_prev is not None):
         delta_angle = circle_dist(angle_prev,angle)
         unwrapped_angle = angle_prev + delta_angle
     elif angle is not None:
         unwrapped_angle = angle
     return unwrapped_angle
+
 
 
 # Rerange()
@@ -40,6 +42,8 @@ def circle_dist_OLD(angle1, angle2):
     
     return dist
 
+
+# Compute the distance from one angle to another.
 def circle_dist(angle1, angle2):
     angle1 = angle1 % (2.0*N.pi)
     angle2 = angle2 % (2.0*N.pi)
