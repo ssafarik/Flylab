@@ -73,11 +73,12 @@ class StageActionServer(object):
         
         # We can eliminate this section, as we are just transforming Plate to Plate.
         poseStamped = PoseStamped(header=goal.state.header, pose=goal.state.pose) #(header=Header(frame_id='Plate'), pose=goal.state.pose)
-        try:
-            poseStage = self._tfrx.transformPose('Plate', poseStamped)
-        except:
-            rospy.sleep(0.1)
-            poseStage = self._tfrx.transformPose('Plate', poseStamped)
+        #try:
+        self._tfrx.waitForTransform("Plate", poseStamped.header.frame_id, rospy.Time(), rospy.Duration(15.0))
+        poseStage = self._tfrx.transformPose('Plate', poseStamped)
+        #except:
+        #    rospy.sleep(0.1)
+        #    poseStage = self._tfrx.transformPose('Plate', poseStamped)
 
         rospy.loginfo ('SAS goalpose  pretransform %s' % poseStamped)
         rospy.loginfo ('SAS goalpose posttransform %s' % poseStage)
@@ -127,11 +128,7 @@ class StageActionServer(object):
                     else:
                         # We can eliminate this section, as we are just transforming Plate to Plate.
                         poseStamped = PoseStamped(header=Header(frame_id='Plate'), pose=responseStage.state.pose)
-                        try:
-                            posePlate = self._tfrx.transformPose('Plate', poseStamped)
-                        except:
-                            rospy.sleep(0.1)
-                            posePlate = self._tfrx.transformPose('Plate', poseStamped)
+                        posePlate = self._tfrx.transformPose('Plate', poseStamped)
                             
                         statePlate = ActionStageStateResult(state=MsgFrameState(header=posePlate.header, pose=posePlate.pose))
                         self._as.publish_feedback(statePlate)
@@ -141,11 +138,7 @@ class StageActionServer(object):
                                      
         
     def MainLoop(self):
-        try:
-            rospy.spin()
-            
-        except:
-            print "Shutting down"
+        rospy.spin()
 
 
 if __name__ == '__main__':

@@ -256,7 +256,7 @@ class RosFivebar:
             angle = N.arctan2(y,x)
             x = rLimit * N.cos(angle)
             y = rLimit * N.sin(angle)
-            rospy.logwarn('5B CLIPPING x,y to %s' % [x,y])
+            #rospy.logwarn('5B CLIPPING x,y to %s' % [x,y])
 
         return x,y
                 
@@ -486,8 +486,7 @@ class RosFivebar:
         
     def GetXyFrom12 (self, angle1, angle2):
         (angle1, angle2, angle3, angle4, x, y) = self.Get1234xyFrom12(angle1, angle2)
-        return (x, 
-                y)
+        return (x, y)
     
     
     def GetStageState_callback(self, reqStageState):
@@ -544,7 +543,7 @@ class RosFivebar:
     #
     def SetStageState_callback(self, reqStageState):
         while not self.initialized:
-            rospy.sleep(0.1)
+            rospy.sleep(0.5)
             
         #rospy.loginfo ('5B SetStageState_callback req=%s' % reqStageState)
         
@@ -560,8 +559,10 @@ class RosFivebar:
             self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
             self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
         except tf.Exception:
+            rospy.logwarn ('5B Exception in SetStageState_callback()')
             pass
 
+        #rospy.loginfo('5B ptsToolRef=[%0.2f, %0.2f], [%0.2f, %0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y,self.ptsToolRefExternal.point.x,self.ptsToolRefExternal.point.y))
         if reqStageState.speed is not None:
             self.speedCommandTool = reqStageState.speed # Requested speed for positioning.
         else:
@@ -772,6 +773,7 @@ class RosFivebar:
                                         )
                 # Frame Target
                 if self.ptsToolRef is not None:
+                    #rospy.logwarn('marker at [%0.2f,%0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y))
                     markerTarget = Marker(header=Header(stamp = rospy.Time.now(),
                                                         frame_id='Stage'),
                                           ns='target',
@@ -788,7 +790,7 @@ class RosFivebar:
                                                           r=1.0,
                                                           g=0.1,
                                                           b=0.1),
-                                          lifetime=rospy.Duration(0.1))
+                                          lifetime=rospy.Duration(1.0))
                     self.pubMarker.publish(markerTarget)
 
 #                    markerToolOffset   = Marker(header=Header(stamp = rospy.Time.now(),
@@ -821,7 +823,7 @@ class RosFivebar:
                                                           r=1.0,
                                                           g=1.0,
                                                           b=1.0),
-                                          lifetime=rospy.Duration(0.1),
+                                          lifetime=rospy.Duration(1.0),
                                           points=[Point(x=state.pose.position.x, 
                                                         y=state.pose.position.y, 
                                                         z=state.pose.position.z),
@@ -926,7 +928,7 @@ class RosFivebar:
                                                   r=0.5,
                                                   g=1.0,
                                                   b=0.5),
-                                  lifetime=rospy.Duration(0.1),
+                                  lifetime=rospy.Duration(1.0),
 #                                      points=[Point(x=self.ptEeSense.x +self.ptsToolRef.point.x-self.ptEeSense.x-self.ptEeError.x-self.ptOffsetSense.x, 
 #                                                    y=self.ptEeSense.y +self.ptsToolRef.point.y-self.ptEeSense.y-self.ptEeError.y-self.ptOffsetSense.y, 
 #                                                    z=self.ptEeSense.z +self.ptsToolRef.point.z-self.ptEeSense.z-self.ptEeError.z-self.ptOffsetSense.z),
@@ -980,7 +982,7 @@ class RosFivebar:
 
 
         
-    def Mainloop(self):
+    def Main(self):
         self.LoadServices()
         self.Calibrate_callback(None)
         self.initialized = True
@@ -990,15 +992,12 @@ class RosFivebar:
         rospy.loginfo ('5B Q2CENTEReiz: %s, %s, %s' % (Q2CENTERe, Q2CENTERi, Q2CENTERz))
         # Process messages forever.
         rosrate = rospy.Rate(100)
-        try:
-            while not rospy.is_shutdown():
-                self.SendTransforms()
-                self.SendTargetCommand()
-                rosrate.sleep()
+
+        while not rospy.is_shutdown():
+            self.SendTransforms()
+            self.SendTargetCommand()
+            rosrate.sleep()
                 
-        except:
-            print "Shutting down"
-    
     
 
 if __name__ == '__main__':
@@ -1007,5 +1006,5 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException: 
         pass
     
-    fivebar.Mainloop()
+    fivebar.Main()
     

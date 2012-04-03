@@ -58,7 +58,7 @@ class ContourGenerator:
         self.minSumImage = 100
         
         # Robot Info
-        #self.robot_visible = bool(rospy.get_param("robot_visible", "true"))
+        #self.robot_visible = bool(rospy.get_param("robot/visible", "true"))
         #if (not self.robot_visible) and (1 < self.nContours_max):
         if (1 < self.nContours_max):
             self.nContours_max -= 1
@@ -99,9 +99,8 @@ class ContourGenerator:
         self.ptsOriginPlate.point.x = 0
         self.ptsOriginPlate.point.y = 0
         
-        rospy.logwarn('ImageRect <--> %s', self.ptsOriginROI.header.frame_id)
-        self.tfrx.waitForTransform("ImageRect", self.ptsOriginROI.header.frame_id, rospy.Time(), rospy.Duration(5.0))
-        self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(5.0))
+        self.tfrx.waitForTransform("ImageRect", self.ptsOriginROI.header.frame_id, rospy.Time(), rospy.Duration(15.0))
+        self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(15.0))
 
 #        rospy.wait_for_service('camera_from_plate', timeout=10.0)
 #        try:
@@ -500,7 +499,7 @@ class ContourGenerator:
 
         
         # Look for new diff_threshold value
-        self.diff_threshold = int(rospy.get_param("diff_threshold",50))
+        self.diff_threshold = int(rospy.get_param("camera/diff_threshold", 50))
         
         # Apply mask and Subtract background
         #q1 = cv.GetSize(self.image)

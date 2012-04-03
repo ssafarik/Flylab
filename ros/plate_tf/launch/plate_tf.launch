@@ -1,5 +1,5 @@
 <launch>
 	<node name="TransformServerPlateCamera" pkg="plate_tf" type="TransformServerPlateCamera.py"/>
 	<node name="TransformServerPlateStage" pkg="plate_tf" type="TransformServerPlateStage.py"/>
-	<node pkg="tf" type="static_transform_publisher" name="statictf_Camera0_Camera_publisher" args="0 0 0 0 0 0 Camera0 Camera 10" />
+	<!-- <node pkg="tf" type="static_transform_publisher" name="statictf_Camera0_Camera_publisher" args="0 0 0 0 0 0 Camera0 Camera 10" /> -->
 </launch>

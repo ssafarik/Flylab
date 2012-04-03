@@ -2,11 +2,11 @@
 from __future__ import division
 import numpy as N
 
-pi = N.pi
+
 
 def mod_angle(angle):
     if angle is not None:
-        angle = angle%(2*pi)
+        angle = angle%(2.0*N.pi)
     return angle
 
 def unwrap_angle(angle,angle_prev):
@@ -18,10 +18,20 @@ def unwrap_angle(angle,angle_prev):
     return unwrapped_angle
 
 
+# Rerange()
+#   Put the angle into the range of -pi to +pi.
+#
+def Rerange(self, angle):
+    angleOut = ((angle+N.pi) % (2.0*N.pi)) - N.pi
+    
+    return angleOut
+    
+    
+
 # circle_dist()
 # Get the distance between two angles.  Cannot be further than pi apart.
 #
-def circle_dist(angle1, angle2):
+def circle_dist_OLD(angle1, angle2):
     angle1 = angle1 % (2.0*N.pi)
     angle2 = angle2 % (2.0*N.pi)
     dist = abs(angle1 - angle2)
@@ -29,35 +39,32 @@ def circle_dist(angle1, angle2):
         dist = (2.0*N.pi) - dist
     
     return dist
+
+def circle_dist(angle1, angle2):
+    angle1 = angle1 % (2.0*N.pi)
+    angle2 = angle2 % (2.0*N.pi)
+    dist = angle1 - angle2
+    if dist > N.pi:
+        dist = (2.0*N.pi) - dist
+    elif dist < -N.pi:
+        dist = (2.0*N.pi) + dist
     
-def circle_dist_OLD(start_angle, stop_angle):
-    if (start_angle is not None) and (stop_angle is not None):
-        start_angle = mod_angle(start_angle)
-        stop_angle = mod_angle(stop_angle)
-        diff1 = stop_angle - start_angle
-        if start_angle < stop_angle:
-            diff2 = stop_angle - 2*N.pi - start_angle
-        else:
-            diff2 = stop_angle + 2*N.pi - start_angle
-            
-        abs_min = min(abs(diff1),abs(diff2))
-        if abs_min == abs(diff1):
-            return diff1
-        else:
-            return diff2
+    return dist
+    
+
 
 def radians_to_degrees(angle):
     if angle is not None:
-        return angle*180/pi
+        return angle*180.0/N.pi
 
 def degrees_to_radians(angle):
     if angle is not None:
-        return angle*pi/180
+        return angle*N.pi/180.0
 
 if __name__ == '__main__':
     pi = N.pi
-    start_angle = [pi/4, pi/4, 7/4*pi, 7/4*pi]
-    stop_angle = [0, 7/4*pi, 0, pi/4]
+    start_angle = [N.pi/4.0, N.pi/4.0, 7.0/4.0*N.pi, 7.0/4.0*N.pi]
+    stop_angle = [0.0, 7.0/4.0*N.pi, 0.0, N.pi/4.0]
     for ang in range(len(start_angle)):
         start_ang = start_angle[ang]
         stop_ang = stop_angle[ang]

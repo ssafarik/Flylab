@@ -69,7 +69,7 @@ kill `ps a -o pid,args --no-headers | grep camera1394 | grep CAMERANAME | cut -d
 
 3 ############################### Camera Intrinsic Parameters (i.e. Lens distortion):
 # Launch the camera node with adjusted settings.
-roslaunch babycarrot camera.launch &
+roslaunch <your device name> camera.launch &
 
 # Calibrate for distortion.
 # Print out ~/git/Flyatar/ros/calibration/patterns/camera_calibration_pattern_30mm.pdf in 1:1 scale
@@ -107,15 +107,19 @@ roscd <your device name>/launch
 # Remove all objects from plate, then:
 rm /cameras/background.png
 roslaunch experiments <any experiment>.launch
-#Ctrl+c after the file gets written.
+# After the background.png file is written, place the magnet in the arena.
+
+# Adjust the diff_threshold so that contours look good.
+rosparam set camera/diff_threshold <value>
+# Once you have figured out the correct value, save it in the file "params_camera.yaml" 
+#Ctrl+c to kill the experiment.
 
 
 6 ############################### Stage Extrinsic Parameters (i.e. Relationship of Stage to Arena):
-# Calibrate the Stage/Plate transform, and get robot image values.
-# Place magnet on plate, check to see if contour is found properly.
 roscd config/launch
 gedit hardware.launch
 # Make sure it points to <your device name>.launch, save & exit.
+
 roslaunch calibration StagePlate.launch
 
 # The magnet will drive in a spiral pattern to cover the plate.  After a number of cycles, the calibration values should converge.

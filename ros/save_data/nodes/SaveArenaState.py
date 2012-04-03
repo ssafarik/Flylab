@@ -49,11 +49,11 @@ class SaveArenaState:
 
         self.robot_move_commanded = False
 
-        self.robot_width = rospy.get_param("robot_width","3.175") # mm
-        self.robot_height = rospy.get_param("robot_height","3.175") # mm
-        self.robot_visible = bool(rospy.get_param("robot_visible","true"))
-        self.robot_paint = str(rospy.get_param("robot_paint","blackoxide"))
-        self.robot_scent = str(rospy.get_param("robot_scent","unscented"))
+        self.robot_width = rospy.get_param("robot/width","3.175") # mm
+        self.robot_height = rospy.get_param("robot/height","3.175") # mm
+        self.robot_visible = bool(rospy.get_param("robot/visible","true"))
+        self.robot_paint = str(rospy.get_param("robot/paint","blackoxide"))
+        self.robot_scent = str(rospy.get_param("robot/scent","unscented"))
 
         self.format_align = ">"
         self.format_sign = " "
@@ -76,7 +76,7 @@ class SaveArenaState:
         if (self.fid is not None) and (not self.fid.closed):
             with self.lock:
                 self.fid.close()
-            rospy.logwarn('SA close()')
+            rospy.logwarn('SA logfile close()')
             
         
 
@@ -94,7 +94,7 @@ class SaveArenaState:
                 if self.fid is not None and not self.fid.closed:
                     with self.lock:
                         self.fid.close()
-                    rospy.logwarn('SA close()')
+                    rospy.logwarn('SA logfile close()')
             
         return self.triggered
         
@@ -109,7 +109,7 @@ class SaveArenaState:
                     if not self.fid.closed:
                         with self.lock:
                             self.fid.close()
-                        rospy.logwarn('SA close()')
+                        rospy.logwarn('SA logfile close()')
 
                 #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
                 now = rospy.Time.now().to_sec()
@@ -122,7 +122,7 @@ class SaveArenaState:
                                                                     time.localtime(now).tm_sec)
                 with self.lock:
                     self.fid = open(self.filename, 'w')
-                rospy.logwarn('SA open(%s)' % self.filename)
+                rospy.logwarn('SA logfile open(%s)' % self.filename)
                 with self.lock:
                     self.fid.write(self.headingsExperiment)
                 header_row = self.templateExperiment.format(date_time                  = str(rospy.Time.now().to_sec()),
@@ -174,7 +174,7 @@ class SaveArenaState:
                 if self.fid.closed:
                     with self.lock:
                         self.fid = open(self.filename, 'wa')
-                    rospy.logwarn('SA open2(%s)' % self.filename)
+                    rospy.logwarn('SA logfile open2(%s)' % self.filename)
                     
                 # Get the state of the robot.
                 stateRobot = arenastate.robot
@@ -195,46 +195,50 @@ class SaveArenaState:
                 angleFly = rpy[2] % (2.0 * N.pi)
                 
                 # Get the robot data relative to the fly.
+                isGoodData = False
                 try:
-                    pose = PoseStamped(header=stateRobot.header, pose=stateRobot.pose)
-                    robotRelativeToFly = self.tfrx.transformPose("Fly", pose)
+                    poses = PoseStamped(header=stateRobot.header, pose=stateRobot.pose)
+                    #self.tfrx.waitForTransform("Fly1", poses.header.frame_id, rospy.Time(), rospy.Duration(0.1))
+                    robotRelativeToFly = self.tfrx.transformPose("Fly1", poses)
                     xRobotRel = robotRelativeToFly.pose.position.x
                     yRobotRel = robotRelativeToFly.pose.position.y
                     aRobotRel = N.arctan2(yRobotRel,xRobotRel) % (2.0*N.pi)
                     dRobotRel = N.sqrt(xRobotRel**2 + yRobotRel**2)
-                except (tf.LookupException, tf.ConnectivityException):
+                    isGoodData = True
+                except (tf.Exception):
                     xRobotRel = 0.0
                     yRobotRel = 0.0
                     aRobotRel = 0.0
                     dRobotRel = 0.0
                 
                 # Write the robot & fly data to the file.
-                data_row = self.templateAbsolute.format(align   = self.format_align,
-                                                    sign    = self.format_sign,
-                                                    width   = self.format_width,
-                                                    precision = self.format_precision,
-                                                    type    = self.format_type,
-                                                    time    = rospy.Time.now().to_sec(), #stateRobot.header.stamp,
-                                                    xRobot  = stateRobot.pose.position.x,
-                                                    yRobot  = stateRobot.pose.position.y,
-                                                    aRobot  = angleRobot,
-                                                    vxRobot = stateRobot.velocity.linear.x,
-                                                    vyRobot = stateRobot.velocity.linear.y,
-                                                    vaRobot = stateRobot.velocity.angular.z,
-                                                    xFly    = stateFly.pose.position.x,
-                                                    yFly    = stateFly.pose.position.y,
-                                                    aFly    = angleFly,
-                                                    vxFly   = stateFly.velocity.linear.x,
-                                                    vyFly   = stateFly.velocity.linear.y,
-                                                    vaFly   = stateFly.velocity.angular.z,
-                                                    xRobotRel = xRobotRel,
-                                                    yRobotRel = yRobotRel,
-                                                    aRobotRel = aRobotRel,
-                                                    dRobotRel = dRobotRel
-                                                    )
+                if isGoodData:
+                    data_row = self.templateAbsolute.format(align   = self.format_align,
+                                                        sign    = self.format_sign,
+                                                        width   = self.format_width,
+                                                        precision = self.format_precision,
+                                                        type    = self.format_type,
+                                                        time    = rospy.Time.now().to_sec(), #stateRobot.header.stamp,
+                                                        xRobot  = stateRobot.pose.position.x,
+                                                        yRobot  = stateRobot.pose.position.y,
+                                                        aRobot  = angleRobot,
+                                                        vxRobot = stateRobot.velocity.linear.x,
+                                                        vyRobot = stateRobot.velocity.linear.y,
+                                                        vaRobot = stateRobot.velocity.angular.z,
+                                                        xFly    = stateFly.pose.position.x,
+                                                        yFly    = stateFly.pose.position.y,
+                                                        aFly    = angleFly,
+                                                        vxFly   = stateFly.velocity.linear.x,
+                                                        vyFly   = stateFly.velocity.linear.y,
+                                                        vaFly   = stateFly.velocity.angular.z,
+                                                        xRobotRel = xRobotRel,
+                                                        yRobotRel = yRobotRel,
+                                                        aRobotRel = aRobotRel,
+                                                        dRobotRel = dRobotRel
+                                                        )
     
-                with self.lock:
-                    self.fid.write(data_row)
+                    with self.lock:
+                        self.fid.write(data_row)
 
 
 if __name__ == '__main__':

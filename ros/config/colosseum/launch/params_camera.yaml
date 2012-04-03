@@ -14,3 +14,5 @@ gain: 100
 auto_shutter: 3         #Manual
 shutter: 512
 
+# Adjust this based on light brightness, etc, to get good contours.
+diff_threshold: 30

@@ -34,7 +34,7 @@ class ExperimentChase():
         
         self.experimentparams.waitEntry = 0.0
         
-        self.experimentparams.triggerEntry.enabled = True
+        self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
         self.experimentparams.triggerEntry.speedMin =   0.0
@@ -51,15 +51,15 @@ class ExperimentChase():
         self.experimentparams.move.relative.tracking = True
         self.experimentparams.move.relative.frameidOriginPosition = "Fly1"
         self.experimentparams.move.relative.frameidOriginAngle = "Fly1"
-        self.experimentparams.move.relative.distance = 10
+        self.experimentparams.move.relative.distance = 5
         self.experimentparams.move.relative.angle = 180.0 * N.pi / 180.0
         self.experimentparams.move.relative.angleType = 'constant'
         self.experimentparams.move.relative.speed = 200
         self.experimentparams.move.relative.speedType = 'constant'
-        self.experimentparams.move.relative.tolerance = 0.5
+        self.experimentparams.move.relative.tolerance = -1.0 # i.e. never get there.
         self.experimentparams.move.timeout = -1
         
-        self.experimentparams.triggerExit.enabled = True
+        self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0
         self.experimentparams.triggerExit.speedMin =  0.0
@@ -80,11 +80,11 @@ class ExperimentChase():
 
 
 if __name__ == '__main__':
-    try:
+    #try:
         experiment = ExperimentChase()
         experiment.Run()
         
-    except:
+    #except:
         pass
 
         

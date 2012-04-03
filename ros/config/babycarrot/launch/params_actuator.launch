@@ -9,13 +9,13 @@
     <!--                                                            -->
 	<!-- ========================================================== -->
     
-	<param name="robot_description" textfile="$(find motorarm)/motorarm_urdf.xml" />  <!-- Contains dimensions of hardware. -->
-	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />               <!-- Velocity to use when finding index, parking, etc. -->
-	<param name="rosSimpleStep/limitHi" type="double" value="2147483647" />           <!-- Max absolute angle. -->
-	<param name="rosSimpleStep/limitLo" type="double" value="-2147483646" />          <!-- Min absolute angle. -->
-	<param name="motorarm/speed_max" type="double" value="3.1"/>                      <!-- Radians per second. -->
-	<param name="actuator/hzPoint" type="double" value="10.0"/>
-	<param name="motorarm/L1" type="double" value="30"/>                              <!-- Link1 length in millimeters. -->
+	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />               	<!-- Velocity to use when finding index, parking, etc. -->
+	<param name="rosSimpleStep/limitHi" type="double" value="2147483647" />           	<!-- Max absolute angle. -->
+	<param name="rosSimpleStep/limitLo" type="double" value="-2147483646" />          	<!-- Min absolute angle. -->
+	<param name="motorarm/speed_max" type="double" value="3.1"/>                      	<!-- Radians per second. -->
+	<param name="actuator/hzPoint" type="double" value="10.0"/>							<!-- Update rate of actuator. -->
+	<param name="robot_description" textfile="$(find babycarrot)/motorarm_urdf.xml" />  <!-- Contains 3D model of hardware. -->
+	<param name="motorarm/L1" type="double" value="30"/>                              	<!-- Link1 length in millimeters. -->
 	
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.0' units='radians'"/>
 </launch>

@@ -40,8 +40,8 @@ class TransformServerPlateStage:
         self.M = tf.transformations.concatenate_matrices(self.T, self.R)
         self.Minv = N.linalg.inv(self.M)
 
-        srv_ps = rospy.Service('plate_to_stage', plate_tf.srv.PlateStageConversion, self.StageFromPlate_callback)
-        srv_sp = rospy.Service('stage_to_plate', plate_tf.srv.PlateStageConversion, self.PlateFromStage_callback)
+        srv_ps = rospy.Service('stage_from_plate', plate_tf.srv.PlateStageConversion, self.StageFromPlate_callback)
+        srv_sp = rospy.Service('plate_from_stage', plate_tf.srv.PlateStageConversion, self.PlateFromStage_callback)
 
         self.initialized = True
 

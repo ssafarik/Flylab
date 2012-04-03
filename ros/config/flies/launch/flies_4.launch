@@ -3,6 +3,6 @@
 	<!-- Configuration of the FLIES (i.e. how many, etc).           -->
 	<!-- ========================================================== -->
 
-  <param name="maxFlies" type="int" value="4" />
+  <param name="nFlies" type="int" value="4" />
     
 </launch>
