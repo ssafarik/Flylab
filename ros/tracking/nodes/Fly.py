@@ -176,8 +176,8 @@ class Fly:
         flipValueWeighted = (alpha * flipValuePrev) + ((1.0-alpha) * flipValueNew) 
 
         
-        if 'Fly1' in self.name:
-            rospy.logwarn('%s: flipValue %0.2f, %0.2f, %0.2f' % (self.name, flipValuePrev,flipValueWeighted,flipValueNew))
+        #if 'Fly1' in self.name:
+        #    rospy.logwarn('%s: flipValue %0.2f, %0.2f, %0.2f' % (self.name, flipValuePrev,flipValueWeighted,flipValueNew))
 
 
         return flipValueWeighted
@@ -209,8 +209,8 @@ class Fly:
         if self.contourPrev is not None:
             d = N.abs(CircleFunctions.circle_dist(self.contour.angle, self.contourPrev.angle))
             if (d > (N.pi/2.0)):
-                if 'Fly1' in self.name:
-                    rospy.logwarn('%s: wrap %0.2f, %0.2f, d=%0.2f'%(self.name, self.contour.angle, self.contourPrev.angle,d))
+                #if 'Fly1' in self.name:
+                #    rospy.logwarn('%s: wrap %0.2f, %0.2f, d=%0.2f'%(self.name, self.contour.angle, self.contourPrev.angle,d))
                 self.lpFlip.SetValue(-flipValuePost)
                 self.flip = not self.flip
 
@@ -316,9 +316,9 @@ class Fly:
                 self.SetAngleOfTravel()
                 self.SetFlipState()
                 self.angle = self.GetResolvedAngle()
-                if (self.contourPrev is not None):
-                    if 'Fly1' in self.name:
-                        rospy.logwarn('%s: angle=%0.2f %0.2f, %0.2f'%(self.name, self.angle, self.contourPrev.angle, self.contour.angle))
+                #if (self.contourPrev is not None):
+                #    if 'Fly1' in self.name:
+                #        rospy.logwarn('%s: angle=%0.2f %0.2f, %0.2f'%(self.name, self.angle, self.contourPrev.angle, self.contour.angle))
                 
                 (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = \
                     tf.transformations.quaternion_about_axis(self.angle, (0,0,1))
