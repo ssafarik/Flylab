@@ -14,6 +14,7 @@ from visualization_msgs.msg import Marker
 from flycore.msg import MsgFrameState
 import filters
 from pythonmodules import CircleFunctions
+import Fly
 
 
 ###############################################################################
@@ -29,392 +30,6 @@ from pythonmodules import CircleFunctions
 #
 
 
-
-        
-        
-###############################################################################
-###############################################################################
-###############################################################################
-def PolarFromXy(x, y):
-    mag = N.sqrt(x**2 + y**2)
-    ang = N.arctan2(y, x)
-    return (mag, ang)
-
-def XyFromPolar(mag, ang):
-    x = mag * N.cos(ang)
-    y = mag * N.sin(ang)
-    return (x, y)
-
-
-def YawFromQuaternion(q):
-    rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-    return rpy[2]
-
-
-# FlipQuaternion()
-# Cheesy way to flip quaternion, knowing it is a vector at origin in xy-plane
-#
-def FlipQuaternion(q):
-
-    angle = YawFromQuaternion(q)
-    # Add pi to angle and compute new quaternion
-    qz = tf.transformations.quaternion_about_axis((angle + N.pi), (0,0,1))
-    return qz
-
-
-# Unwrap()
-#   Put the angle into the range of -pi to +pi.
-#
-def Unwrap(self, angle):
-    angleOut = ((angle+N.pi) % (2.0*N.pi)) - N.pi
-    
-    #while N.pi < angleOut:
-    #    angleOut -= (2.0*N.pi)
-    #    
-    #while angleOut < -N.pi:
-    #    angleOut += (2.0*N.pi)
-    
-    return angleOut
-    
-    
-
-###############################################################################
-###############################################################################
-###############################################################################
-# class Fly()
-# Implements a fly (or robot) object in a 2D arena. 
-# Updates its state based on an image "contour" from a single camera.
-#
-class Fly:
-    def __init__(self, name=None):
-        self.initialized = False
-        self.name = name
-
-        self.tfbx = tf.TransformBroadcaster()
-        self.pubMarker = rospy.Publisher('visualization_marker', Marker)
-        
-
-        self.kfState = filters.KalmanFilter()
-        self.lpAngleF = filters.LowPassAngleFilter(RC=0.1)
-        #self.lpOffsetX = filters.LowPassFilter(RC=0.1)
-        #self.lpOffsetY = filters.LowPassFilter(RC=0.1)
-        self.lpOffsetMag = filters.LowPassFilter(RC=0.1)
-        self.lpOffsetAng = filters.LowPassFilter(RC=0.1)
-        self.ptOffset = Point(x=0, y=0, z=0)  # Difference between contour position and (for robots) computed position.
-        self.ptPPrev = Point(x=0, y=0, z=0)
-        self.angPrev = 0.0
-        self.unwind = 0.0
-        
-        # Orientation detection stuff.
-        self.angleOfTravelRecent = None
-        self.flip = False
-        self.lpFlip = filters.LowPassFilter(RC=3.0)
-        self.contour = None
-        
-        self.isVisible = False
-        self.isDead = False # TO DO: dead fly detection.
-
-        self.state = MsgFrameState()
-        self.state.header.frame_id = 'Plate'
-        self.state.pose.position.x = 0.0
-        self.state.pose.position.y = 0.0
-        self.state.pose.position.z = 0.0
-        q = tf.transformations.quaternion_about_axis(0.0, (0,0,1))
-        self.state.pose.orientation.x = q[0]    # Note: The orientation is ambiguous as to head/tail.  
-        self.state.pose.orientation.y = q[1]    #       Check the self.flip status to resolve it.
-        self.state.pose.orientation.z = q[2]    #
-        self.state.pose.orientation.w = q[3]    #
-        self.state.velocity.linear.x = 0.0
-        self.state.velocity.linear.y = 0.0
-        self.state.velocity.linear.z = 0.0
-        self.state.velocity.angular.x = 0.0
-        self.state.velocity.angular.y = 0.0
-        self.state.velocity.angular.z = 0.0
-        
-        self.eccMin = 999.9
-        self.eccMax = 0.0
-        self.eccSum = 1.0
-        self.eccCount = 1
-        
-        self.areaMin = 999.9
-        self.areaMax = 0.0
-        self.areaSum = 0.0
-        self.areaCount = 1
-        
-        self.robot_width = rospy.get_param ('robot/width', 1.0)
-        self.robot_length = rospy.get_param ('robot/length', 1.0)
-        self.robot_height = rospy.get_param ('robot/height', 1.0)
-        
-        self.initialized = True
-
-
-    # GetResolvedQuaternion()
-    #   Using self.flip and self.contour.angle, return a flipped & filtered quaternion.
-    #
-    def GetResolvedQuaternion(self):
-        if self.flip:
-            angle = self.contour.angle + N.pi
-        else:
-            angle = self.contour.angle
-            
-        angleResolved = self.lpAngleF.Update(angle, rospy.Time.now().to_sec())
-        qResolved = Quaternion()
-        (qResolved.x, qResolved.y, qResolved.z, qResolved.w) = tf.transformations.quaternion_about_axis(angleResolved, (0,0,1))
-
-        #if "Fly" in self.name:
-        #    rospy.logwarn ('CI contour.angle=%+0.3f, self.flip=%s, angle=%+0.3f, angleResolved=%+0.3f' % (self.contour.angle, self.flip, angle, angleResolved))
-
-        return qResolved
-
-
-        
-    # ResolveOrientation()
-    #   Using self.contour, self.state, and self.angleOfTravelRecent,
-    #   Choose among the various possibilities:
-    #   angleResolved = (angle of contour)
-    #     OR
-    #   angleResolved = (angle of contour + pi)
-    #
-    # Updates the flip status in self,
-    # and updates self.state.pose.orientation
-    #   
-    def ResolveOrientation(self):
-        # angleContour is ambiguous mod pi radians
-        eccmetric = (self.contour.ecc + 1/self.contour.ecc) - 1
-        if eccmetric > 1.5:
-            angleContour         = self.contour.angle #YawFromQuaternion(self.state.pose.orientation)
-            angleContour_flipped = angleContour + N.pi
-            
-            # Most recent angle of travel.
-            if self.angleOfTravelRecent is not None:
-                angleOfTravel = self.angleOfTravelRecent
-            else:
-                angleOfTravel = angleContour
-                
-                
-            flipValueLast = self.lpFlip.GetValue()
-            if flipValueLast is None:
-                flipValueLast = 0.0
-            
-            # Compare distances between angles of (travel - orientation) and (travel - flippedorientation)        
-            dist         = CircleFunctions.circle_dist(angleContour,         angleOfTravel)
-            dist_flipped = CircleFunctions.circle_dist(angleContour_flipped, angleOfTravel)
-            speed = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
-            
-            # Vote for flipped or non-flipped.
-            if dist < dist_flipped:
-                flipValueNew = -1.0 # Not flipped
-            else:
-                flipValueNew =  1.0 # Flipped
-
-            # Weight the prev/new values based on speed.                
-            flipValuePre = (10/(10+speed) * flipValueLast) + ((1-10/(10+speed)) * flipValueNew) 
-
-            # Update the filter, and get the flip state.
-            flipValuePost = self.lpFlip.Update(flipValuePre, rospy.Time.now().to_sec())
-            if flipValuePost > 0.0:
-                flipNew = True
-            else:
-                flipNew = False
-                    
-            if speed > 3.0: # Deadband.
-                self.flip = flipNew    
-                
-            self.state.pose.orientation = self.GetResolvedQuaternion()
-
-                            
-
-    # Update()
-    # Update the current state using the visual position and the computed position (if applicable)
-    def Update(self, contour, ptComputed):
-        #rospy.loginfo ('CI contour=%s' % (contour))
-        if self.initialized:
-            t = rospy.Time.now().to_sec()
-            contourPrev = self.contour
-            self.contour = contour
-            angleContourF = None
-            angleContour = None
-            
-            # Update the position & orientation filters
-            self.isVisible = False            
-            if (self.contour is not None):
-                # Update min/max ecc & area.
-                if contour.ecc < self.eccMin:
-                    self.eccMin = contour.ecc
-                if self.eccMax < contour.ecc:
-                    self.eccMax = contour.ecc
-                if contour.area < self.areaMin:
-                    self.areaMin = contour.area
-                if self.areaMax < contour.area:
-                    self.areaMax = contour.area
-                self.eccSum += contour.ecc
-                self.eccCount += 1
-                self.areaSum += contour.area
-                self.areaCount += 1
-                
-                if (self.contour.x is not None) and (self.contour.y is not None) and (self.contour.angle is not None):
-                    self.isVisible = True
-                    #rospy.loginfo ('CI kfState.state_post=%s' % self.kfState.state_post) 
-                    (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), t)
-                    #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
-                    if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
-                        rospy.logwarn ('CI LARGE CONTOUR.x=%s' % self.contour.x)
-                        rospy.logwarn ('CI LARGE         x=%s' % x)
-                        rospy.logwarn ('CI LARGE         t=%s' % t)
-
-                    # If there's a big jump in contour angle, then change the flip state.
-                    anglePrev = self.lpAngleF.GetValue()
-                    if contourPrev is not None:
-                        d = CircleFunctions.circle_dist(contourPrev.angle, self.contour.angle)
-                        if (d > (N.pi/2)):
-                            flipPrev = self.lpFlip.GetValue()
-                            if flipPrev is not None:
-                                self.lpFlip.SetValue(-flipPrev)
-                                self.flip = not self.flip
-                        
-                    #angleContourF = self.lpAngleF.Update(self.contour.angle, t)
-                    angleContour = self.contour.angle
-                    #rospy.loginfo ('CI kfState.Update name=%s pre=%s, post=%s, t=%s' % (self.name, [contour.x,contour.y], [x,y], t))
-    
-                # Use the unfiltered data for the case where the filters return None results.
-                if self.isVisible and ((x is None) or (y is None) or (angleContour is None)):
-                    x = self.contour.x
-                    y = self.contour.y
-                    vx = 0.0
-                    vy = 0.0
-                    #angleContourF = self.contour.angle
-                    angleContour = self.contour.angle
-                    rospy.logwarn('CI KFILTER RETURNED NONE on %s, %s' % ((self.contour.x, self.contour.y), t))
-
-            else: # self.contour is None
-                (x,y,vx,vy) = self.kfState.Update(None, t)
-                #self.lpAngleF.Update(None, t)
-                #self.lpOffsetX.Update(None,t)
-                #self.lpOffsetY.Update(None,t)
-                #self.lpFlip.Update(0.0, t)
-                angleContour = 0.0
-                rospy.logwarn('CI KFILTER READ for %s w/ contour==None' % self.name)
-                
-                
-            if self.isVisible:
-                # Store the latest state.
-                #if "Fly" in self.name:
-                #    rospy.logwarn ('CI angleContour=%s' % angleContour)
-                self.state.header.stamp = contour.header.stamp
-                self.state.pose.position.x = x
-                self.state.pose.position.y = y
-                self.state.pose.position.z = 0.0
-                #q = tf.transformations.quaternion_about_axis(angleContour, (0,0,1))
-                #self.state.pose.orientation.x = q[0]
-                #self.state.pose.orientation.y = q[1]
-                #self.state.pose.orientation.z = q[2]
-                #self.state.pose.orientation.w = q[3]
-                self.state.velocity.linear.x = vx
-                self.state.velocity.linear.y = vy
-                self.state.velocity.linear.z = 0.0
-                self.state.velocity.angular.x = 0.0
-                self.state.velocity.angular.y = 0.0
-                self.state.velocity.angular.z = 0.0
-
-                # Update the most recent angle of travel.
-                angleOfTravel = N.arctan2(self.state.velocity.linear.y, self.state.velocity.linear.x)
-                speed = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
-                if speed>5.0:
-                    self.angleOfTravelRecent = angleOfTravel
-                
-                self.ResolveOrientation()
-                
-                #rospy.logwarn ('CI %s ecc=%s,%s, area=%s,%s, speed=%0.3f' % (self.name, contour.ecc,[self.eccMin,self.eccMax], contour.area,[self.areaMin,self.areaMax], speed))
-                
-                # Update the tool offset.
-                if ptComputed is not None:
-
-                    # PID control of the offset.
-                    ptP = Point()
-                    ptI = Point()
-                    ptD = Point()
-                    ptP.x = x-ptComputed.x
-                    ptP.y = y-ptComputed.y
-                    ptI.x = ptI.x + ptP.x
-                    ptI.y = ptI.y + ptP.y
-                    ptD.x = ptP.x - self.ptPPrev.x
-                    ptD.y = ptP.y - self.ptPPrev.y
-                    kP = rospy.get_param('tooloffset/kP', 1.0)
-                    kI = rospy.get_param('tooloffset/kI', 0.0)
-                    kD = rospy.get_param('tooloffset/kD', 0.0)
-                    xPID = kP*ptP.x + kI*ptI.x + kD*ptD.x
-                    yPID = kP*ptP.y + kI*ptI.y + kD*ptD.y
-                    
-                    # Filter the offset as magnitude & angle.
-                    (mag,ang)=PolarFromXy(xPID,yPID)
-                    ang += self.unwind
-                    if ang-self.angPrev > N.pi:
-                        self.unwind -= 2.0*N.pi
-                        ang -= 2.0*N.pi
-                    elif ang-self.angPrev < -N.pi:
-                        self.unwind += 2.0*N.pi
-                        ang += 2.0*N.pi
-                    self.angPrev = ang
-                    #rospy.logwarn('ang=%0.2f' % ang)
-                    (self.ptOffset.x,self.ptOffset.y) = XyFromPolar(self.lpOffsetMag.Update(mag, t),
-                                                                    self.lpOffsetAng.Update(ang, t))
-                    #self.ptOffset = Point(x = self.lpOffsetX.Update(xPID, t),
-                    #                      y = self.lpOffsetY.Update(yPID, t),
-                    #                      z = 0)
-                    self.ptPPrev.x = ptP.x
-                    self.ptPPrev.y = ptP.y
-                else:
-                    self.ptOffset = Point(x=0, y=0, z=0)
-            
-
-                #rospy.logwarn ('x=%s,y=%s,orientation=%s,name=%s,frame_id=%s' % (self.state.pose.position.x, 
-                #                         self.state.pose.position.y,
-                #                        self.state.pose.orientation,
-                #                        self.name,
-                #                        self.state.header.frame_id))
-                
-                # Send the Raw transform.
-                self.tfbx.sendTransform((self.contour.x, 
-                                         self.contour.y, 
-                                         0.0),
-                                        tf.transformations.quaternion_about_axis(self.contour.angle, (0,0,1)),
-                                        self.contour.header.stamp,
-                                        self.name+"Contour",
-                                        "Plate")
-                
-                # Send the Filtered transform.
-                q = self.state.pose.orientation
-                self.tfbx.sendTransform((self.state.pose.position.x, 
-                                         self.state.pose.position.y, 
-                                         self.state.pose.position.z),
-                                        (q.x, q.y, q.z, q.w),
-                                        rospy.Time.now(),
-                                        self.name,
-                                        self.state.header.frame_id)
-
-                if 'Robot' in self.name:
-                    markerTarget = Marker(header=Header(stamp = rospy.Time.now(),
-                                                        frame_id='Plate'),
-                                          ns='robot',
-                                          id=0,
-                                          type=3, #cylinder,
-                                          action=0,
-                                          pose=Pose(position=Point(x=self.state.pose.position.x, 
-                                                                   y=self.state.pose.position.y, 
-                                                                   z=self.state.pose.position.z)),
-                                          scale=Vector3(x=self.robot_width,
-                                                        y=self.robot_length,
-                                                        z=self.robot_height),
-                                          color=ColorRGBA(a=0.7,
-                                                          r=0.5,
-                                                          g=0.5,
-                                                          b=0.5),
-                                          lifetime=rospy.Duration(0.1))
-                    self.pubMarker.publish(markerTarget)
-
-        #rospy.loginfo ('CI %s contour=%s, self.isVisible=%s' % (self.name, contour, self.isVisible))
-            
-        
 
 ###############################################################################
 ###############################################################################
@@ -432,6 +47,9 @@ class ContourIdentifier:
         self.iContours = []
         self.objects = []
         
+        self.tfrx = tf.TransformListener()
+        self.tfbx = tf.TransformBroadcaster()
+        
         self.ResetFlyObjects()
         
         
@@ -442,9 +60,6 @@ class ContourIdentifier:
         self.pubArenaState = rospy.Publisher('ArenaState', ArenaState)
         self.pubEndEffectorOffset = rospy.Publisher('EndEffectorOffset', Point)
 
-        self.tfrx = tf.TransformListener()
-        self.tfbx = tf.TransformBroadcaster()
-        
         # Poses
         self.poseRobot = Pose()
         self.posearrayFly = PoseArray()
@@ -543,7 +158,7 @@ class ContourIdentifier:
 
     def ResetFlyObjects (self):
         # Save status.
-        savInitialized = self.initialized
+        initializedSav = self.initialized
         self.initialized = False
         
         for i in range(len(self.objects)):
@@ -551,67 +166,21 @@ class ContourIdentifier:
             
         self.objects = []
         for i in range(self.nRobots+self.nFlies):
-            self.objects.append(Fly())
+            try:
+                self.objects.append(Fly.Fly(tfrx=self.tfrx))
+            except rospy.ServiceException:
+                pass
+            
             self.objects[i].name = "Fly%s" % i
         
         if (self.nRobots==1):
             self.objects[0].name = "Robot"
 
         # Restore status.
-        self.initialized = savInitialized
+        self.initialized = initializedSav
         
         
-    def QuaternionPlateFromCamera(self, quat):
-        # Must be cleverer way to calculate this using quaternion math...
-        R = tf.transformations.quaternion_matrix(quat)
-        scale_factor = 100
-        points_camera = N.array(\
-            [[0,  1, -1,  0,  0,  1, -1],
-             [0,  0,  0,  1, -1,  1, -1],
-             [0,  0,  0,  0,  0,  0,  0],
-             [1,  1,  1,  1,  1,  1,  1]])
-        points_camera = points_camera*scale_factor
-        # rospy.logwarn("points_camera = \n%s", str(points_camera))
-        points_camera_rotated = N.dot(R,points_camera)
-        # rospy.logwarn("points_camera_rotated = \n%s", str(points_camera_rotated))
-        try:
-            xSrc = list(points_camera[0,:])
-            ySrc = list(points_camera[1,:])
-            # rospy.logwarn("xSrc = %s", str(xSrc))
-            # rospy.logwarn("ySrc = %s", str(ySrc))
-            response = self.plate_from_camera(xSrc,ySrc)
-            points_plate_x = list(response.Xdst)
-            points_plate_y = list(response.Ydst)
-            z = [0]*len(points_plate_x)
-            w = [1]*len(points_plate_y)
-            points_plate = N.array([points_plate_x,points_plate_y,z,w])
-            points_plate = N.append(points_plate,[[0,0],[0,0],[scale_factor,-scale_factor],[1,1]],axis=1)
-            # rospy.logwarn("points_plate = \n%s", str(points_plate))
-
-            xSrc = list(points_camera_rotated[0,:])
-            ySrc = list(points_camera_rotated[1,:])
-            response = self.plate_from_camera(xSrc,ySrc)
-            points_plate_rotated_x = list(response.Xdst)
-            points_plate_rotated_y = list(response.Ydst)
-            # rospy.logwarn("points_plate_rotated_x = %s",str(points_plate_rotated_x))
-            # rospy.logwarn("points_plate_rotated_y = %s",str(points_plate_rotated_y))
-            # rospy.loginfo("z = %s",str(z))
-            # rospy.loginfo("w = %s",str(w))
-            points_plate_rotated = N.array([points_plate_rotated_x,points_plate_rotated_y,z,w])
-            points_plate_rotated = N.append(points_plate_rotated,[[0,0],[0,0],[scale_factor,-scale_factor],[1,1]],axis=1)
-            # rospy.loginfo("points_plate_rotated = \n%s", str(points_plate_rotated))
-            T = tf.transformations.superimposition_matrix(points_plate_rotated,points_plate)
-            # rospy.loginfo("T = \n%s", str(T))
-            # al, be, ga = tf.transformations.euler_from_matrix(T, 'rxyz')
-            # rospy.loginfo("ga = %s" % str(ga*180/N.pi))
-            quat_plate = tf.transformations.quaternion_from_matrix(T)
-            return quat_plate
-        # except (tf.LookupException, tf.ConnectivityException, rospy.ServiceException, IOError):
-        except (tf.LookupException, tf.ConnectivityException, tf.Exception, rospy.ServiceException, IOError, AttributeError, ValueError):
-            return None
-
-
-
+        
     # FilterContourinfoWithinRadius()
     # Filter the contours by radius.  Return a contourinfo containing only those within radius.
     #  
@@ -707,6 +276,22 @@ class ContourIdentifier:
                 except TypeError:
                     d[m,n] = None
 
+        t = rospy.Time.now()
+        for m in range(len(xyObjects)):
+            self.tfbx.sendTransform((xyObjects[m][0],xyObjects[m][1],0.0),
+                                    (0,0,0,1),
+                                    t,
+                                    "xyObjects"+str(m),
+                                    "Plate")
+            
+
+        for n in range(len(contours)):
+            self.tfbx.sendTransform((contours[n].x,contours[n].y,0.0),
+                                    (0,0,0,1),
+                                    t,
+                                    "contours"+str(n),
+                                    "Plate")
+        
         return d
     
     
@@ -776,20 +361,23 @@ class ContourIdentifier:
         # Robots.
         if (self.nRobots==1):
             if (self.stateEndEffector is not None):
-                xyRobotComputed = [self.stateEndEffector.pose.position.x,# + self.objects[0].ptOffset.x,
-                                   self.stateEndEffector.pose.position.y]# + self.objects[0].ptOffset.y]
+                t = self.stateEndEffector.header.stamp
+                xyRobotComputed = [self.stateEndEffector.pose.position.x + self.objects[0].ptOffset.x,
+                                   self.stateEndEffector.pose.position.y + self.objects[0].ptOffset.y]
                 #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
                 #                                          self.objects[0].state.pose.position.y]))
             elif (len(self.objects)>0) and (self.objects[0].isVisible):
+                t = self.objects[0].state.header.stamp
                 xyRobotComputed = [self.objects[0].state.pose.position.x,
                                    self.objects[0].state.pose.position.y]
             else:
+                t = rospy.Time.now()
                 xyRobotComputed = [0.0, 0.0]
 
             xyObjects.append(xyRobotComputed)
             self.tfbx.sendTransform((xyRobotComputed[0], xyRobotComputed[1], 0.0),
                                     tf.transformations.quaternion_about_axis(0, (0,0,1)),
-                                    rospy.Time.now(),
+                                    t,
                                     "RobotComputed",
                                     "Plate")
 
@@ -970,6 +558,13 @@ class ContourIdentifier:
                 if self.mapContourFromObject is not None:
                     if (self.nRobots==1) and (self.stateEndEffector is not None):
                         if self.mapContourFromObject[0] is not None:
+
+                            # For the robot, use the end-effector angle instead of the contour angle.
+                            if self.stateEndEffector is not None:
+                                q = self.stateEndEffector.pose.orientation
+                                rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
+                                self.contours[self.mapContourFromObject[0]].angle = rpy[2]
+                             
                             self.objects[0].Update(self.contours[self.mapContourFromObject[0]], self.stateEndEffector.pose.position)
                         else:
                             self.objects[0].Update(None,                                        self.stateEndEffector.pose.position)
@@ -994,7 +589,7 @@ class ContourIdentifier:
                         else:
                             self.objects[iFly].Update(None,                                           None)
         
-                        
+                        #self.stateEndEffector.header.stamp,#rospy.Time.now()
                         #rospy.loginfo ('CI update state %s contour=%s' % (iFly,contour))
         
                         # Write a file.
@@ -1038,7 +633,7 @@ class ContourIdentifier:
                     
                     
                     # Publish a disc to indicate the arena extent.
-                    self.markerArena.header.stamp = rospy.Time.now()
+                    self.markerArena.header.stamp = contourinfo.header.stamp #rospy.Time.now()
                     self.pubMarker.publish(self.markerArena)
             except rospy.ServiceException:
                 pass

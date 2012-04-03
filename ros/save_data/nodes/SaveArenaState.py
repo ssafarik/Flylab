@@ -76,7 +76,7 @@ class SaveArenaState:
         if (self.fid is not None) and (not self.fid.closed):
             with self.lock:
                 self.fid.close()
-            rospy.logwarn('SA close()')
+            rospy.logwarn('SA logfile close()')
             
         
 
@@ -94,7 +94,7 @@ class SaveArenaState:
                 if self.fid is not None and not self.fid.closed:
                     with self.lock:
                         self.fid.close()
-                    rospy.logwarn('SA close()')
+                    rospy.logwarn('SA logfile close()')
             
         return self.triggered
         
@@ -109,7 +109,7 @@ class SaveArenaState:
                     if not self.fid.closed:
                         with self.lock:
                             self.fid.close()
-                        rospy.logwarn('SA close()')
+                        rospy.logwarn('SA logfile close()')
 
                 #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
                 now = rospy.Time.now().to_sec()
@@ -122,7 +122,7 @@ class SaveArenaState:
                                                                     time.localtime(now).tm_sec)
                 with self.lock:
                     self.fid = open(self.filename, 'w')
-                rospy.logwarn('SA open(%s)' % self.filename)
+                rospy.logwarn('SA logfile open(%s)' % self.filename)
                 with self.lock:
                     self.fid.write(self.headingsExperiment)
                 header_row = self.templateExperiment.format(date_time                  = str(rospy.Time.now().to_sec()),
@@ -174,7 +174,7 @@ class SaveArenaState:
                 if self.fid.closed:
                     with self.lock:
                         self.fid = open(self.filename, 'wa')
-                    rospy.logwarn('SA open2(%s)' % self.filename)
+                    rospy.logwarn('SA logfile open2(%s)' % self.filename)
                     
                 # Get the state of the robot.
                 stateRobot = arenastate.robot

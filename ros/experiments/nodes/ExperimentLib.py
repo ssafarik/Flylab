@@ -73,7 +73,7 @@ def GetAngleToRobotInFlyView (arenastate, iFly):
         angleOfFly = rpy[2]
         angle = (angleToRobot - angleOfFly) % (2.0 * N.pi)
         
-    #rospy.logwarn('EL GetAngleToRobotInFlyView()=%s' % angle)
+    #rospy.loginfo('EL GetAngleToRobotInFlyView()=%s' % angle)
     return angle
 
 
@@ -84,7 +84,7 @@ def GetSpeedFly (arenastate, iFly):
                                        arenastate.flies[iFly].velocity.linear.y,
                                        arenastate.flies[iFly].velocity.linear.z]))
         
-    #rospy.logwarn ('EL GetSpeedFly()=%s' % speed)
+    #rospy.loginfo ('EL GetSpeedFly()=%s' % speed)
     return speed
 
 
@@ -95,7 +95,7 @@ def GetDistanceFlyToRobot (arenastate, iFly):
         dy = arenastate.robot.pose.position.y - arenastate.flies[iFly].pose.position.y
         distance = N.linalg.norm([dx,dy])
         
-    #rospy.logwarn('EL GetDistanceFlyToRobot()=%s' % distance)
+    #rospy.loginfo('EL GetDistanceFlyToRobot()=%s' % distance)
     return distance
 
 
@@ -107,7 +107,7 @@ def ClipXyToRadius(x, y, rmax):
         angle = N.arctan2(y, x)
         xOut = (rmax*0.8) * N.cos(angle)
         yOut = (rmax*0.8) * N.sin(angle)
-        #rospy.logwarn('EL CLIPPING x,y=%s to %s' % ([x,y],[xOut,yOut]))
+        #rospy.loginfo('EL CLIPPING x,y=%s to %s' % ([x,y],[xOut,yOut]))
         
     return [xOut,yOut]
 
@@ -161,7 +161,7 @@ class TemplateState (smach.State):
 
 
     def execute(self, userdata):
-        rospy.logwarn('Starting state (template)')
+        rospy.loginfo('Starting state (template)')
         self.timeStart = rospy.Time.now()
     
         while self.arenastate is None:
@@ -170,7 +170,7 @@ class TemplateState (smach.State):
                 return 'preempted'
             rospy.sleep(1.0)
 
-        rospy.logwarn("EL State state (template)...")
+        rospy.loginfo("EL State state (template)...")
         rv = 'aborted'
         while True:
             try:
@@ -217,12 +217,12 @@ class NewExperiment (smach.State):
         
     def execute(self, userdata):
         es = userdata.experimentparamsIn
-        rospy.logwarn("EL State NewExperiment(%s)" % es)
+        rospy.loginfo("EL State NewExperiment(%s)" % es)
 
         es.experiment.trial = es.experiment.trial-1 
         userdata.experimentparamsOut = es
         
-        #rospy.logwarn ('EL Exiting NewExperiment()')
+        #rospy.loginfo ('EL Exiting NewExperiment()')
         return 'succeeded'
 
 
@@ -250,7 +250,7 @@ class NewTrial (smach.State):
             if (experimentparams.experiment.maxTrials < experimentparams.experiment.trial):
                 return rv
 
-        rospy.logwarn ('EL State NewTrial(%s)' % experimentparams.experiment.trial)
+        rospy.loginfo ('EL State NewTrial(%s)' % experimentparams.experiment.trial)
 
         self.TriggerNotify(False)
         userdata.experimentparamsOut = experimentparams
@@ -261,7 +261,7 @@ class NewTrial (smach.State):
         except rospy.ServiceException:
             rv = 'aborted'
 
-        #rospy.logwarn ('EL Exiting NewTrial()')
+        #rospy.loginfo ('EL Exiting NewTrial()')
         return rv
 
 
@@ -298,7 +298,7 @@ class TriggerOnStates (smach.State):
 
 
     def execute(self, userdata):
-        rospy.logwarn("EL State TriggerOnStates(%s)" % (self.type))
+        rospy.loginfo("EL State TriggerOnStates(%s)" % (self.type))
 
         if self.type == 'entry':
             trigger = userdata.experimentparamsIn.triggerEntry
@@ -357,7 +357,7 @@ class TriggerOnStates (smach.State):
                                 isAngleInRange = False
                                 if angleTestBilateral:
                                     if angleTest=='inclusive':
-                                        #rospy.logwarn('EL angles %s' % [angleA1, angleA2, angleB1, angleB2, angle])
+                                        #rospy.loginfo('EL angles %s' % [angleA1, angleA2, angleB1, angleB2, angle])
                                         if (angleA1 <= angle <= angleA2) or (angleB1 <= angle <= angleB2):
                                             isAngleInRange = True
                                             
@@ -399,7 +399,7 @@ class TriggerOnStates (smach.State):
                             self.timeTriggered = None
         
                         #if (distance is not None) and (angle is not None) and (speed is not None):
-                        #    rospy.logwarn ('EL triggers=distance=%0.3f, speed=%0.3f, angle=%0.3f, bools=%s' % (distance, speed, angle, [isDistanceInRange, isSpeedInRange, isAngleInRange]))
+                        #    rospy.loginfo ('EL triggers=distance=%0.3f, speed=%0.3f, angle=%0.3f, bools=%s' % (distance, speed, angle, [isDistanceInRange, isSpeedInRange, isAngleInRange]))
         
                         # If pending trigger has lasted longer than requested duration, then set trigger.
                         if (self.isTriggered):
@@ -409,7 +409,7 @@ class TriggerOnStates (smach.State):
                                 rv = 'succeeded'
                                 break
                             
-                            #rospy.logwarn('EL duration=%s' % duration)
+                            #rospy.loginfo('EL duration=%s' % duration)
                             
                         
                     if self.preempt_requested():
@@ -430,7 +430,7 @@ class TriggerOnStates (smach.State):
         except rospy.ServiceException:
             rv = 'aborted'
             
-        #rospy.logwarn ('EL Exiting TriggerOnStates()')
+        #rospy.loginfo ('EL Exiting TriggerOnStates()')
         return rv
 
     
@@ -449,7 +449,7 @@ class TriggerOnTime (smach.State):
         
 
     def execute(self, userdata):
-        rospy.logwarn("EL State TriggerOnTime(%s)" % (userdata.experimentparamsIn.waitEntry))
+        rospy.loginfo("EL State TriggerOnTime(%s)" % (userdata.experimentparamsIn.waitEntry))
         rv = 'succeeded'
         rospy.sleep(userdata.experimentparamsIn.waitEntry)
 
@@ -459,7 +459,7 @@ class TriggerOnTime (smach.State):
         else:
             self.TriggerNotify(False)
 
-        #rospy.logwarn ('EL Exiting TriggerOnTime()')
+        #rospy.loginfo ('EL Exiting TriggerOnTime()')
         return rv
 
 
@@ -501,7 +501,7 @@ class GotoHome (smach.State):
 
 
     def execute(self, userdata):
-        rospy.logwarn("EL State GotoHome(%s)" % [userdata.experimentparamsIn.home.enabled, userdata.experimentparamsIn.home.x, userdata.experimentparamsIn.home.y])
+        rospy.loginfo("EL State GotoHome(%s)" % [userdata.experimentparamsIn.home.enabled, userdata.experimentparamsIn.home.x, userdata.experimentparamsIn.home.y])
 
         rv = 'succeeded'
         if userdata.experimentparamsIn.home.enabled:
@@ -532,7 +532,7 @@ class GotoHome (smach.State):
                 ptTarget = N.array([self.goal.state.pose.position.x,
                                     self.goal.state.pose.position.y])                
                 r = N.linalg.norm(ptRobot-ptTarget)
-                rospy.logwarn ('EL GotoHome() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
+                rospy.loginfo ('EL GotoHome() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
                 
                 
                 if (r <= userdata.experimentparamsIn.home.tolerance):
@@ -554,7 +554,7 @@ class GotoHome (smach.State):
                 self.rosrate.sleep()
 
 
-        #rospy.logwarn ('EL Exiting MoveRobot()')
+        #rospy.loginfo ('EL Exiting MoveRobot()')
         return rv
         
 
@@ -599,7 +599,7 @@ class MoveRobot (smach.State):
 
 
     def execute(self, userdata):
-        rospy.logwarn("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.mode,
+        rospy.loginfo("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.mode,
                                                   userdata.experimentparamsIn.move.relative.distance, 
                                                   userdata.experimentparamsIn.move.relative.angle, 
                                                   userdata.experimentparamsIn.move.relative.speed])
@@ -618,7 +618,7 @@ class MoveRobot (smach.State):
             else:
                 rv = self.MovePattern(userdata)
                 
-        #rospy.logwarn ('EL Exiting MoveRobot()')
+        #rospy.loginfo ('EL Exiting MoveRobot()')
         return rv
             
             
@@ -672,11 +672,15 @@ class MoveRobot (smach.State):
             # Move a distance relative to whose position?
             if userdata.experimentparamsIn.move.relative.frameidOriginPosition=="Fly1" and (len(self.arenastate.flies)>0):
                 posOrigin = posFly
+                doMove = True
             elif userdata.experimentparamsIn.move.relative.frameidOriginPosition=="Robot":
                 posOrigin = posRobot
+                doMove = True
             else:
                 posOrigin = Point(x=0, y=0, z=0) # Relative to the origin of the Plate frame
-
+                doMove = False
+            
+            #rospy.loginfo('EL len(ArenaState)=%d, posOrigin=[%0.2f,%0.2f]'%(len(self.arenastate.flies),posOrigin.x,posOrigin.y))
 
             # If we need to calculate a target.
             if (self.ptTarget is None) or (userdata.experimentparamsIn.move.relative.tracking):
@@ -688,8 +692,8 @@ class MoveRobot (smach.State):
                 self.ptTarget = ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
                 #self.ptTarget = ptTarget
 
-                #rospy.logwarn ('EL self.ptTarget=%s, ptOrigin=%s, ptRelative=%s, angle=%s, frameAngle=%s' % (self.ptTarget, ptOrigin, ptRelative, angle,userdata.experimentparamsIn.move.relative.frameidOriginAngle))
-                #rospy.logwarn('EL Robot/Fly frame_id=%s' % [self.arenastate.robot.header.frame_id,self.arenastate.flies[iFly].header.frame_id])
+                #rospy.loginfo ('EL self.ptTarget=%s, ptOrigin=%s, ptRelative=%s, angle=%s, frameAngle=%s' % (self.ptTarget, ptOrigin, ptRelative, angle,userdata.experimentparamsIn.move.relative.frameidOriginAngle))
+                #rospy.loginfo('EL Robot/Fly frame_id=%s' % [self.arenastate.robot.header.frame_id,self.arenastate.flies[iFly].header.frame_id])
 
                 # Send the command.
                 #self.goal.state.header = self.arenastate.flies[iFly].header
@@ -701,14 +705,15 @@ class MoveRobot (smach.State):
                 
                 
                 try:
-                    #rospy.logwarn('EL set_stage_state(%s)' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
-                    self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                                  pose=self.goal.state.pose),
-                                                              speed = speedTarget))
+                    if (doMove):
+                        #rospy.loginfo('EL set_stage_state(%s)' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
+                        self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+                                                                                      pose=self.goal.state.pose),
+                                                                  speed = speedTarget))
                 except (rospy.ServiceException, rospy.ROSInterruptException), e:
                     rospy.logwarn ('EL Exception calling set_stage_state(): %s' % e)
                     self.ptTarget = None
-                #rospy.logwarn('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
+                #rospy.loginfo('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
 
 
             # If no flies and no target, then preempt.
@@ -720,7 +725,7 @@ class MoveRobot (smach.State):
             # Check if we're there yet.
             if self.ptTarget is not None:
                 r = N.linalg.norm(ptRobot-self.ptTarget)
-                #rospy.logwarn ('EL ptTarget=%s, ptRobot=%s, r=%s' % (self.ptTarget, ptRobot, r))
+                #rospy.loginfo ('EL ptTarget=%s, ptRobot=%s, r=%s' % (self.ptTarget, ptRobot, r))
                 if (r <= userdata.experimentparamsIn.move.relative.tolerance):
                     rv = 'succeeded'
                     break
@@ -889,7 +894,7 @@ class Experiment():
         self.sis.start()
         try:
             outcome = self.sm.execute()
-            rospy.logwarn ('Experiment returned with: %s' % outcome)
+            rospy.loginfo ('Experiment returned with: %s' % outcome)
         except smach.exceptions.InvalidUserCodeError:
             rospy.logwarn('InvalidUserCodeError')
             #pass

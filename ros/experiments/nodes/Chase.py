@@ -56,7 +56,7 @@ class ExperimentChase():
         self.experimentparams.move.relative.angleType = 'constant'
         self.experimentparams.move.relative.speed = 200
         self.experimentparams.move.relative.speedType = 'constant'
-        self.experimentparams.move.relative.tolerance = 0.5
+        self.experimentparams.move.relative.tolerance = -1.0 # i.e. never get there.
         self.experimentparams.move.timeout = -1
         
         self.experimentparams.triggerExit.enabled = False

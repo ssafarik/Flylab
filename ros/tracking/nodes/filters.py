@@ -212,7 +212,7 @@ class KalmanFilter:
                 y = state_pre[1,0]
                 vx = state_pre[2,0]
                 vy = state_pre[3,0]
-                rospy.logwarn('KF z==None -> x,y=%s' % [x,y])
+                rospy.loginfo('KF z==None -> x,y=%s' % [x,y])
                 
             self.t_previous = t_current
             self.x_previous = x
@@ -228,7 +228,7 @@ class KalmanFilter:
                 cv.Set2D(self.kal.state_post, 1, 0, y_current)
                 cv.Set2D(self.kal.state_post, 2, 0, vx)
                 cv.Set2D(self.kal.state_post, 3, 0, vy)
-                rospy.logwarn ('FLT initialized kalman filter to %s' % [x_current, y_current, vx, vy])
+                rospy.loginfo ('FLT initialized kalman filter to %s' % [x_current, y_current, vx, vy])
 
                 self.t_previous = t_current
                 self.x_previous = x_current
