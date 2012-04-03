@@ -10,7 +10,7 @@ brightness: 8
 auto_exposure: 5        #None 
 exposure: 0
 auto_gain: 3            #Manual 
-gain: 150
+gain: 100
 auto_shutter: 3         #Manual
-shutter: 512
+shutter: 600
 

@@ -17,7 +17,7 @@ class ExperimentPassiveChase():
         self.experimentparams = ExperimentParamsRequest()
         
         self.experimentparams.experiment.description = "Fly Chases Robot Moving in Circle"
-        self.experimentparams.experiment.maxTrials = -1
+        self.experimentparams.experiment.maxTrials = 1
         self.experimentparams.experiment.trial = 1
         
         self.experimentparams.save.filenamebase = "passivechase"
@@ -32,7 +32,7 @@ class ExperimentPassiveChase():
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         
-        self.experimentparams.waitEntry = 0.0
+        self.experimentparams.waitEntry = 150.0
         
         self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.distanceMin =   0.0
@@ -52,7 +52,7 @@ class ExperimentPassiveChase():
         self.experimentparams.move.pattern.hzPattern = 0.10
         self.experimentparams.move.pattern.hzPoint = 10
         self.experimentparams.move.pattern.count = -1
-        self.experimentparams.move.pattern.radius = 32
+        self.experimentparams.move.pattern.radius = 30
         self.experimentparams.move.timeout = 600
         
         self.experimentparams.triggerExit.enabled = False

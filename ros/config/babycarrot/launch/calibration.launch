@@ -16,19 +16,19 @@
   <!-- =================================================================== -->
   
   <!-- The mask circle in camera coordinates (i.e. pixels).    -->
-  <param name="camera/mask/x" type="double" value="406"/>
-  <param name="camera/mask/y" type="double" value="278"/>
+  <param name="camera/mask/x" type="double" value="413"/>
+  <param name="camera/mask/y" type="double" value="261"/>
   <param name="camera/mask/radius" type="double" value="266"/>  <!-- pixels -->
 
 
 
   <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
-  <param name="camera_plate_rvec_0" type="double" value="3.14"/>
+  <param name="camera_plate_rvec_0" type="double" value="-3.13"/>
   <param name="camera_plate_rvec_1" type="double" value="0.0"/>
-  <param name="camera_plate_rvec_2" type="double" value="0.0"/>
-  <param name="camera_plate_tvec_0" type="double" value="81.3"/> <!-- Adjust for plate alignment here. -->
-  <param name="camera_plate_tvec_1" type="double" value="55.5"/> <!-- Adjust for plate alignment here. -->
-  <param name="camera_plate_tvec_2" type="double" value="248.0"/>
+  <param name="camera_plate_rvec_2" type="double" value="-0.1"/>
+  <param name="camera_plate_tvec_0" type="double" value="83.1"/> <!-- Adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_1" type="double" value="51.9"/> <!-- Adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_2" type="double" value="253.2"/>
   
 
   <!-- ================================================================== -->
@@ -43,8 +43,8 @@
   <!--                                                                    -->
   <!-- ================================================================== -->
   
-  <param name="plate_stage_x" type="double" value="0"/>  <!-- Adjust for stage alignment here. -->
-  <param name="plate_stage_y" type="double" value="0"/>  <!-- Adjust for stage alignment here. -->
+  <param name="plate_stage_x" type="double" value="3.7"/>  <!-- Adjust for stage alignment here. -->
+  <param name="plate_stage_y" type="double" value="-3.6"/>  <!-- Adjust for stage alignment here. -->
   <param name="plate_stage_z" type="double" value="0"/>
   <param name="plate_stage_qx" type="double" value="0"/>
   <param name="plate_stage_qy" type="double" value="0"/>

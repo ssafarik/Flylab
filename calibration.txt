@@ -69,7 +69,7 @@ kill `ps a -o pid,args --no-headers | grep camera1394 | grep CAMERANAME | cut -d
 
 3 ############################### Camera Intrinsic Parameters (i.e. Lens distortion):
 # Launch the camera node with adjusted settings.
-roslaunch camera1394v2 camera_<your device name>.launch &
+roslaunch babycarrot camera.launch &
 
 # Calibrate for distortion.
 # Print out ~/git/Flyatar/ros/calibration/patterns/camera_calibration_pattern_30mm.pdf in 1:1 scale
