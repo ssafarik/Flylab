@@ -1,7 +1,5 @@
 # Install Ubuntu:
-# http://www.ubuntu.com/desktop/get-ubuntu/download
-# ubuntu-10.04.1-desktop-amd64
-# Create user flyatar-admin
+# http://www.ubuntu.com/
 
 # Install Ubuntu packages
 sudo apt-get install build-essential python-yaml cmake subversion wget git-core git-gui git-doc
@@ -24,12 +22,11 @@ export PATH=~/bin:$PATH
 git clone git://github.com/peterpolidoro/Flyatar.git ~/git/Flyatar
 cp ~/git/Flyatar/ros/rosinstall ~/bin/
 source /opt/ros/cturtle/setup.sh
-rosinstall -o ~/ros/Flyatar ~/git/Flyatar/ros/flyatar.local.rosinstall
 echo "source ~/ros/Flyatar/setup.sh" >> ~/.bashrc
 . ~/.bashrc
 
 # Setting Groups and Permissions:
-sudo adduser $USER disk
+sudo adduser $USER video
 sudo groupadd usb
 sudo adduser $USER usb
 sudo cp ~/git/Flyatar/ros/udevrules/99*.rules /etc/udev/rules.d/
@@ -38,16 +35,14 @@ sudo cp ~/git/Flyatar/ros/udevrules/99*.rules /etc/udev/rules.d/
 # Compiling:
 rosmake flyatar_experiments
 
-# Running Wait Experiment:
-roslaunch flyatar_experiments wait_experiment.launch
+# Running the Pattern Experiment:
+roslaunch experiments pattern.launch
 
 # Updating Flyatar Code to get the latest git repository on github:
-cd ~/git/Flyatar
-git pull origin master
-rosinstall -u ~/ros/Flyatar
+cd ~/git/Flyatar2
+git pull
 
-# Updating Flyatar Code to get local git repository changes:
-rosinstall -u ~/ros/Flyatar
+
 
 # Example Local Repository Code Modification:
 # Change in-bounds radius from 60mm to 90mm for wait experiment
@@ -59,7 +54,6 @@ cd ~/git/Flyatar/ros/control/flyatar_experiments/launch
 # To this: <param name="move_distance" type="double" value="95"/>
 # Save wait_experiment.launch
 git commit -a -m "Modified in-bounds radius from 60mm to 90mm"
-rosinstall -u ~/ros/Flyatar
 
 # Converting bag files to directories of images and videos:
 # Create ~/FlyatarData/bag_file_play_list
@@ -75,74 +69,6 @@ rosinstall -u ~/ros/Flyatar
 rosmake save_data
 roslaunch save_data play_bags_save_video_nocat.launch
 
-# Calibration:
-# Todo: Simplify calibration, change calibration data location, save all data automatically
-sudo mkdir /cameras
-sudo chgrp disk cameras/
-sudo chmod g+rwx cameras/
-roslaunch camera1394v2 flyatar_camera_cal_a.launch
-# open new terminal
-rosmake image_view
-rosrun image_view image_view image:=camera/image_raw
-# open new terminal
-rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node
-# adjust camera and brightness, exposure, gain, and shutter values
-# record in Flyatar/ros/calibration/flyatar_calibration/calibration_data/basler_a622f_cal_b.yaml
-# record in Flyatar/ros/calibration/flyatar_calibration/calibration_data/basler_a622f_cal_c.yaml
-# ctrl-c to shutdown flyatar_camera_cal_a.launch
-roslaunch camera1394v2 flyatar_camera_cal_b.launch
-# open new terminal
-rosdep install camera_calibration
-rosmake camera_calibration
-# print out ~/git/Flyatar/ros/calibration/flyatar_calibration/patterns/camera_calibration_pattern_30mm.pdf in 1:1 scale
-# measure each checker to make sure it is 30mm, then tape pattern to something flat
-# unmount camera from rig if necessary to give calibration pattern plenty of room to move
-rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_raw camera:=/camera
-# wave 30mm checkerboard pattern in front of camera until calibrate button activates
-# click calibrate button
-# click commit button
-mv /tmp/calibration_00305300013c2f28.yaml /cameras/basler_a622f_calibration.yaml
-cp /cameras/basler_a622f_calibration.yaml /cameras/basler_a622f_rect_calibration.yaml
-# ctrl-c to shutdown flyatar_camera_cal_b.launch
-rosmake image_proc
-roslaunch camera1394v2 flyatar_camera_cal_c.launch
-# open new terminal
-rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_rect camera:=/camera
-# wave 30 mm checkerboard in front of camera until calibrate button activates
-# click calibrate button
-# click commit button
-# ctrl-c to shutdown flyatar_camera_cal_c.launch
-# transfer camera calibration info from /cameras/basler_a622f_calibration.yaml 
-#  and /cameras/basler_a622f_rect_calibration.yaml into 
-#  $(find flyatar_calibration)/calibration_data/camera_calibration_data.launch by hand
-# mount camera on flyatar rig, position so that the arena is roughly centered in image
-roslaunch flyatar_calibration CameraPlate.launch
-# use left joystick to move green circle until centered on plate
-# use right joystick to change green circle radius until on edges of plate
-# record mask radius and camera_plate_origin info into camera_plateimage_calibration_data.launch
-# print out ~/git/Flyatar/ros/calibration/flyatar_calibration/patterns/camera_plate_calibration_pattern.pdf in 1:1 scale
-# measure each checker to make sure it is 15mm, then use scissors to cut along circular line surrounding pattern
-# place cicular paper containing the checkerboard pattern on plate
-# record rvec and tvec info into camera_plate_calibration_data.launch, the values appear on the image if the calibration is successful
-# ctrl-c to shutdown CameraPlate.launch
-rm /cameras/background.png
-# remove all objects from plate, next step acquires a background image
-roslaunch track_image_contours track_image_contours_view_images.launch
-# place magnet on plate, check to see if contour is found properly
-# ctrl-c to shutdown track_image_contours_view_images.launch
-# reset power on Atmel motorcontroller, wait for motors to home
-rosmake flyatar_manual
-roslaunch flyatar_manual joystick_control.launch
-# test to make sure joystick moves stage
-# ctrl-c to shutdown joystick_control.launch
-roslaunch flyatar_calibration StagePlate.launch
-# drive magnet around randomly all over plate until calibration values seem to converge
-# record robot_min_ecc, robot_max_ecc, robot_min_area, robot_max_area in robotimage_calibration_data.launch
-# record translation vector and quaternion info in stage_plate_calibration_data.launch
-# ctrl-c to shutdown StagePlate.launch
-
-# Run in Avatar Mode:
-roslaunch flyatar_avatar avatar.launch
 
 # Compiling Stage USB Device Firmware:
 # Todo: Upgrade to new libusb-1.0, PyUSB, and newest LUFA release, implement acceleration variable, fix homing bug
@@ -169,41 +95,3 @@ make
 # Press 'Program' button on Teensy GUI 
 # Press 'Reboot' button on Teensy GUI 
 
-# Setup URL for remote login:
-# Static preferred, but DynamicDNS can be used for dynamic IP addresses
-# https://help.ubuntu.com/community/DynamicDNS
-
-# Controlling Just the Stage:
-roslaunch stage_message_interface stage_message_interface.launch
-# Open new terminal>
-rosmsg show stage/StageCommands
-# Example: Goto position 125,125 (mm in Stage coordinates) at 50 mm/s
-rostopic pub -1 /Stage/Commands stage/StageCommands -- [125] [125] [] [] [50]
-# Example: Set velocity -6,8 (mm/s in Stage coordinates)
-rostopic pub -1 /Stage/Commands stage/StageCommands -- [] [] [-6] [8] []
-# Example: Set velocity -6,8 (mm/s in Stage coordinates), equivalent to setting velocity to -3,4 with velocity magitude set to 10
-rostopic pub -1 /Stage/Commands stage/StageCommands -- [] [] [-3] [4] [10]
-# Example: Set velocity -6,8 (mm/s in Stage coordinates), equivalent to setting velocity to -0.6,0.8 with velocity magitude set to 10
-rostopic pub -1 /Stage/Commands stage/StageCommands -- [] [] [-0.6] [0.8] [10]
-# Example: Set velocity 5,5 (mm/s in Stage coordinates) for 160 ms (16 ms for every item in list, not counting last item) then stop (0 mm/s)
-rostopic pub -1 /Stage/Commands stage/StageCommands -- [] [] [5,5,5,5,5,5,5,5,5,5,0] [5,5,5,5,5,5,5,5,5,5,0] []
-# Example: Move in a square pattern at 50 mm/s
-rostopic pub -1 /Stage/Commands stage/StageCommands -- [100,150,150,100,100] [100,100,150,150,100] [] [] [50]
-# Example: Move in a square pattern at varying velocities, each velocity value sets the velocity of the move to reach the cooresponding x,y position
-rostopic pub -1 /Stage/Commands stage/StageCommands -- [100,150,150,100,100] [100,100,150,150,100] [] [] [50,10,70,30,50]
-
-# Flyatar Computer BIOS Settings:
-# On Startup, press delete to enter BIOS setup.
-Extreme Tweaker:
-   CPU Level Up -> crazy-4.00G
-   DRAM Freq -> DDR3-1066MHz
-
-Main:
-   Storage Configuration:
-       Configure SATA as -> AHCI
-   System Info:
-       System Memory Usable Size (Make sure it says ~24000MB)
-
-Advanced:
-   Onboard Devices Configuration:
-       Onboard SATA6 Controller -> AHCI Mode

@@ -8,6 +8,6 @@
     <!-- .launch file from here.                                    -->
 	<!-- ========================================================== -->
     
-    <include file="$(find babycarrot)/launch/babycarrot.launch" />
+    <include file="$(find babycarrot)/launch/main.launch" />
      
 </launch>
