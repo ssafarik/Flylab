@@ -66,6 +66,7 @@ class SaveArenaState:
 
         self.headingsAbsolute = 'time, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly, xRobotRel, yRobotRel, aRobotRel, dRobotRel\n'
         self.templateAbsolute = '{time:0.4f}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}, {xRobotRel:{align}{sign}{width}.{precision}{type}}, {yRobotRel:{align}{sign}{width}.{precision}{type}}, {aRobotRel:{align}{sign}{width}.{precision}{type}}, {dRobotRel:{align}{sign}{width}.{precision}{type}}\n'
+        self.templateAbsoluteNR = '{time:0.4f}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}\n'
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -195,7 +196,7 @@ class SaveArenaState:
                 angleFly = rpy[2] % (2.0 * N.pi)
                 
                 # Get the robot data relative to the fly.
-                isGoodData = False
+                isGoodRelative = False
                 try:
                     poses = PoseStamped(header=stateRobot.header, pose=stateRobot.pose)
                     #self.tfrx.waitForTransform("Fly1", poses.header.frame_id, rospy.Time(), rospy.Duration(0.1))
@@ -204,7 +205,7 @@ class SaveArenaState:
                     yRobotRel = robotRelativeToFly.pose.position.y
                     aRobotRel = N.arctan2(yRobotRel,xRobotRel) % (2.0*N.pi)
                     dRobotRel = N.sqrt(xRobotRel**2 + yRobotRel**2)
-                    isGoodData = True
+                    isGoodRelative = True
                 except (tf.Exception):
                     xRobotRel = 0.0
                     yRobotRel = 0.0
@@ -212,7 +213,7 @@ class SaveArenaState:
                     dRobotRel = 0.0
                 
                 # Write the robot & fly data to the file.
-                if isGoodData:
+                if isGoodRelative:
                     data_row = self.templateAbsolute.format(align   = self.format_align,
                                                         sign    = self.format_sign,
                                                         width   = self.format_width,
@@ -236,9 +237,30 @@ class SaveArenaState:
                                                         aRobotRel = aRobotRel,
                                                         dRobotRel = dRobotRel
                                                         )
+                else:
+                    data_row = self.templateAbsoluteNR.format(align   = self.format_align,
+                                                        sign    = self.format_sign,
+                                                        width   = self.format_width,
+                                                        precision = self.format_precision,
+                                                        type    = self.format_type,
+                                                        time    = rospy.Time.now().to_sec(), #stateRobot.header.stamp,
+                                                        xRobot  = stateRobot.pose.position.x,
+                                                        yRobot  = stateRobot.pose.position.y,
+                                                        aRobot  = angleRobot,
+                                                        vxRobot = stateRobot.velocity.linear.x,
+                                                        vyRobot = stateRobot.velocity.linear.y,
+                                                        vaRobot = stateRobot.velocity.angular.z,
+                                                        xFly    = stateFly.pose.position.x,
+                                                        yFly    = stateFly.pose.position.y,
+                                                        aFly    = angleFly,
+                                                        vxFly   = stateFly.velocity.linear.x,
+                                                        vyFly   = stateFly.velocity.linear.y,
+                                                        vaFly   = stateFly.velocity.angular.z
+                                                        )
+                    
     
-                    with self.lock:
-                        self.fid.write(data_row)
+                with self.lock:
+                    self.fid.write(data_row)
 
 
 if __name__ == '__main__':
