@@ -16,6 +16,7 @@ import filters
 from pythonmodules import CircleFunctions
 import Fly
 import MatchHungarian
+from munkres import Munkres
 
 
 ###############################################################################
@@ -47,6 +48,7 @@ class ContourIdentifier:
         self.mapContourFromObject = []      # A mapping from the (kalman) object number to the contour number.
         self.iContours = []
         self.objects = []
+        self.munkres = Munkres() # Hungarian assignment algorithm.
         
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
@@ -254,12 +256,15 @@ class ContourIdentifier:
                                              xyObjects[m][1]-contours[n].y])
 
                     # Penalize deviations from any known computed positions.
-                    if ptComputed[m] is not None:
+                    #if (ptComputed[m] is None) and (ptComputed[0] is not None):
+                    if (ptComputed[m] is not None):
                         dComputed = N.linalg.norm([ptComputed[m].x-contours[n].x,
-                                                 ptComputed[m].y-contours[n].y])
+                                                   ptComputed[m].y-contours[n].y])
+                        #dComputed = N.linalg.norm([ptComputed[m].x-xyObjects[m][0],
+                        #                         ptComputed[m].y-xyObjects[m][1]])
                     else: # Use object position as the computed position.
-                        dComputed = d[m,n]
-                    
+                        dComputed = 0 #d[m,n]
+                        
                     d[m,n] += dComputed #* dComputed
                     
                     # Penalize deviations from ideal visual characteristics.
@@ -353,8 +358,17 @@ class ContourIdentifier:
                             proposed[mp][w] = 999999
                             proposed[m][w] = 999999
         return (M,W)        
-                        
+                   
+                   
+    def GetMatchMunkres(self, d):
+        map = [None for i in range(len(d))]
+
+        indexes = self.munkres.compute(d)
+        for k in range(len(map)):
+            map[k] = indexes[k][1]
         
+        return map
+    
 
     # MapContoursFromObjects()
     #   Uses self.contours & self.objects,
@@ -465,14 +479,12 @@ class ContourIdentifier:
         #rospy.logwarn ('GetDistanceMatrixFromContours()')
         d = self.GetDistanceMatrixFromContours(xyObjects, contoursAug, contoursMin, contoursMax, contoursMean, ptComputed)
         if d is not []:
-            (mapObjectsGaleShapely, mapContours) = self.GetMatchGaleShapely(d)
-            (mapObjectsHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
-            #rospy.logwarn ('CI mapObjectsGaleShapely =%s' % (mapObjectsGaleShapely))
-            #rospy.logwarn ('CI mapObjectsHungarian  =%s, unmapped=%s' % (mapObjectsHungarian,unmapped))
-            #rospy.logwarn ('CI mapObjectsHungarian  =%s' % mapObjectsHungarian)
-    
             # Choose the algorithm.
-            if True:  # Gale-Shapely Algorithm.
+            #alg = 'galeshapely'
+            #alg = 'hungarian'
+            alg = 'munkres'
+            if alg=='galeshapely':
+                (mapObjectsGaleShapely, mapContours) = self.GetMatchGaleShapely(d)
                 mapContoursFromObjects = copy.copy(mapObjectsGaleShapely)
                 
                 # Set the augmented entries to None.
@@ -483,7 +495,8 @@ class ContourIdentifier:
                     #rospy.logwarn('mapContoursFromObjects[m], len(xyContours)=%s'%[mapContoursFromObjects[m],len(xyContours)])
                     if (mapContoursFromObjects[m])>=len(xyContours):
                         mapContoursFromObjects[m] = None
-            else:  # MatchHungarian Algorithm.                    
+            if alg=='hungarian':                    
+                (mapObjectsHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
                 mapContoursFromObjects = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
                 for i in range(len(xyObjects)):
                     if mapObjectsHungarian[i] != -1:
@@ -495,6 +508,15 @@ class ContourIdentifier:
                     else:
                         mapContoursFromObjects[i] = None
                 #mapContoursFromObjects = list(mapContoursFromObjects[i] for i in range(len(mapContoursFromObjects)))
+                
+            if alg=='munkres':
+                mapObjectsMunkres = self.GetMatchMunkres(d)
+                mapContoursFromObjects = mapObjectsMunkres
+                
+            #rospy.logwarn ('CI mapObjectsGaleShapely =%s' % (mapObjectsGaleShapely))
+            #rospy.logwarn ('CI mapObjectsHungarian  =%s, unmapped=%s' % (mapObjectsHungarian,unmapped))
+            #rospy.logwarn ('CI mapObjectsHungarian  =%s' % mapObjectsHungarian)
+    
             #rospy.logwarn ('CI mapContoursFromObjects=%s' % mapContoursFromObjects)
                 
             # Prepend a None for a missing robot.
@@ -511,9 +533,16 @@ class ContourIdentifier:
 #        rospy.logwarn ('----------------------------------')
 #        if (self.nRobots==1):
 #            rospy.logwarn ('CI xyRobotComputed=%s' % xyRobotComputed)
+
 #        rospy.logwarn ('CI xyObjects=%s' % xyObjects)
 #        rospy.logwarn ('CI xyContours=%s' % xyContours)
+#        if self.stateEndEffector is not None:
+#            rospy.logwarn ('CI ptComputed=(%0.2f+%0.2f, %0.2f+%0.2f)' % (self.stateEndEffector.pose.position.x, 
+#                                                                         self.objects[0].ptOffset.x,
+#                                                                         self.stateEndEffector.pose.position.y, 
+#                                                                         self.objects[0].ptOffset.y))
 #        rospy.logwarn ('CI mapObjects=%s' % (mapContoursFromObjects))
+#        rospy.logwarn('d=\n%s'%d)
         
         return mapContoursFromObjects
     
