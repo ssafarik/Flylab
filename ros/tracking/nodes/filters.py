@@ -38,7 +38,7 @@ class ButterworthFilter:
         return y
 
 
-
+# Filter an angle that only ranges over a distance of pi.
 class LowPassHalfCircleAngleFilter:
     def __init__(self, RC=1.0):
         self.RC = RC
@@ -79,6 +79,7 @@ class LowPassHalfCircleAngleFilter:
         return zf
 
 
+# Filter an angle, with unwrapping by 2*pi.
 class LowPassCircleFilter:
     def __init__(self, RC=1.0):
         self.RC = RC

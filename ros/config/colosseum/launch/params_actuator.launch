@@ -27,12 +27,19 @@
 	-->
 	
 	<!-- Good PID gains to follow a walking fly. -->
-	<!-- -->
+	<!--
 	<param name="fivebar/kP"      type="double" value="0.02"/>
 	<param name="fivebar/kI"      type="double" value="0.05"/>
 	<param name="fivebar/kD"      type="double" value="-0.05"/>
 	<param name="fivebar/maxI"    type="double" value="2"/>  
 	<param name="fivebar/kWindup" type="double" value="1.0"/>  
+	-->
+	<!-- -->
+	<param name="fivebar/kP"      type="double" value="0.05"/>
+	<param name="fivebar/kI"      type="double" value="0.05"/>
+	<param name="fivebar/kD"      type="double" value="-0.1"/>
+	<param name="fivebar/maxI"    type="double" value="0.0"/>  
+	<param name="fivebar/kWindup" type="double" value="0.8"/>  
 	<!-- -->
 
 	<!-- Good PID gains for both step AND ramp response. -->

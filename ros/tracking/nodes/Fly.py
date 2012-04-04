@@ -53,7 +53,7 @@ class Fly:
         self.lpAngleF = filters.LowPassHalfCircleAngleFilter(RC=rospy.get_param('tracking/rcAngleFilter', 0.1))
         #self.lpOffsetX = filters.LowPassFilter(RC=0.1)
         #self.lpOffsetY = filters.LowPassFilter(RC=0.1)
-        self.lpOffsetMag = filters.LowPassFilter(RC=0.1)
+        self.lpOffsetMag = filters.LowPassFilter(RC=1.0)
         self.lpOffsetAng = filters.LowPassFilter(RC=0.1)
         self.ptOffset = Point(x=0, y=0, z=0)  # Vector from computed position to contour position (for robots only).
         self.ptPPrev = Point(x=0, y=0, z=0)
@@ -69,7 +69,7 @@ class Fly:
         self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFlipFilter', 3.0))
         self.contour = None
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
-        self.maxOffset = N.inf #10.0
+        self.maxOffset = 10.0
         
         self.isVisible = False
         self.isDead = False # TO DO: dead fly detection.
@@ -211,7 +211,7 @@ class Fly:
         # contour angle only ranges on [-pi,-0].  If wrapped, then change the flip state.
         #if 'Fly1' in self.name:
         #    rospy.logwarn('self.flip=%s'%self.flip)
-        if self.contourPrev is not None:
+        if (self.contourPrev is not None) and (self.contour is not None):
             d = N.abs(CircleFunctions.circle_dist(self.contour.angle, self.contourPrev.angle))
             if (d > (N.pi/2.0)):
                 #if 'Fly1' in self.name:
@@ -244,8 +244,8 @@ class Fly:
             else:
                 t = rospy.Time.now().to_sec()
                 
-            self.contourPrev = self.contour
-            self.contour = contour
+            self.contourPrev = copy.copy(self.contour)
+            self.contour = copy.copy(contour)
             
             # Update the position & orientation filters
             self.isVisible = False            
@@ -264,19 +264,20 @@ class Fly:
                 self.areaSum += contour.area
                 self.areaCount += 1
                 
-                if (self.contour.x is not None) and (self.contour.y is not None) and (self.contour.angle is not None):
-                    self.isVisible = True
-                    #rospy.loginfo ('CI kfState.state_post=%s' % self.kfState.state_post) 
-                    (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), t)
-                    (z, vz) = (0.0, 0.0)
-                    #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
-                    angleF = self.lpAngleF.Update(self.contour.angle, self.contour.header.stamp.to_sec())
-                    
-                    
-                    if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
-                        rospy.logwarn ('FLY LARGE CONTOUR, check the parameter camera/diff_threshold.')
-
-                    #rospy.loginfo ('CI kfState.Update name=%s pre=%s, post=%s, t=%s' % (self.name, [contour.x,contour.y], [x,y], t))
+                if self.contour is not None:
+                    if (self.contour.x is not None) and (self.contour.y is not None) and (self.contour.angle is not None):
+                        self.isVisible = True
+                        #rospy.loginfo ('CI kfState.state_post=%s' % self.kfState.state_post) 
+                        (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), t)
+                        (z, vz) = (0.0, 0.0)
+                        #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
+                        angleF = self.lpAngleF.Update(self.contour.angle, self.contour.header.stamp.to_sec())
+                        
+                        
+                        if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
+                            rospy.logwarn ('FLY LARGE CONTOUR, check the parameter camera/diff_threshold.')
+    
+                        #rospy.loginfo ('CI kfState.Update name=%s pre=%s, post=%s, t=%s' % (self.name, [contour.x,contour.y], [x,y], t))
     
                 # Use the unfiltered data for the case where the filters return None results.
                 if self.isVisible and ((x is None) or (y is None)):
