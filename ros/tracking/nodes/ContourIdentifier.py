@@ -193,7 +193,7 @@ class ContourIdentifier:
             contourinfoOut.header = contourinfoIn.header
             contourinfoOut.x = []
             contourinfoOut.y = []
-            contourinfoOut.theta = []
+            contourinfoOut.angle = []
             contourinfoOut.area = []
             contourinfoOut.ecc = []
             
@@ -202,7 +202,7 @@ class ContourIdentifier:
                 if N.linalg.norm(N.array([contourinfoIn.x[iContour],contourinfoIn.y[iContour]])) <= radius:
                     contourinfoOut.x.append(contourinfoIn.x[iContour])
                     contourinfoOut.y.append(contourinfoIn.y[iContour])
-                    contourinfoOut.theta.append(contourinfoIn.theta[iContour])
+                    contourinfoOut.angle.append(contourinfoIn.angle[iContour])
                     contourinfoOut.area.append(contourinfoIn.area[iContour])
                     contourinfoOut.ecc.append(contourinfoIn.ecc[iContour])
                     
@@ -564,7 +564,7 @@ class ContourIdentifier:
                     contour.header = contourinfo.header
                     contour.x      = contourinfo.x[i]
                     contour.y      = contourinfo.y[i]
-                    contour.angle  = contourinfo.theta[i]
+                    contour.angle  = contourinfo.angle[i]
                     contour.area   = contourinfo.area[i]
                     contour.ecc    = contourinfo.ecc[i]
                     self.contours.append(contour)

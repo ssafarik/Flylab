@@ -264,21 +264,20 @@ class Fly:
                 self.areaSum += contour.area
                 self.areaCount += 1
                 
-                if self.contour is not None:
-                    if (self.contour.x is not None) and (self.contour.y is not None) and (self.contour.angle is not None):
-                        self.isVisible = True
-                        #rospy.loginfo ('CI kfState.state_post=%s' % self.kfState.state_post) 
-                        (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), t)
-                        (z, vz) = (0.0, 0.0)
-                        #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
-                        angleF = self.lpAngleF.Update(self.contour.angle, self.contour.header.stamp.to_sec())
-                        
-                        
-                        if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
-                            rospy.logwarn ('FLY LARGE CONTOUR, check the parameter camera/diff_threshold.')
-    
-                        #rospy.loginfo ('CI kfState.Update name=%s pre=%s, post=%s, t=%s' % (self.name, [contour.x,contour.y], [x,y], t))
-    
+                if (self.contour.x is not None) and (self.contour.y is not None) and (self.contour.angle is not None):
+                    self.isVisible = True
+                    #rospy.loginfo ('CI kfState.state_post=%s' % self.kfState.state_post) 
+                    (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), t)
+                    (z, vz) = (0.0, 0.0)
+                    #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
+                    angleF = self.lpAngleF.Update(self.contour.angle, self.contour.header.stamp.to_sec())
+                    
+                    
+                    if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
+                        rospy.logwarn ('FLY LARGE CONTOUR, check the parameter camera/diff_threshold.')
+
+                    #rospy.loginfo ('CI kfState.Update name=%s pre=%s, post=%s, t=%s' % (self.name, [contour.x,contour.y], [x,y], t))
+
                 # Use the unfiltered data for the case where the filters return None results.
                 if self.isVisible and ((x is None) or (y is None)):
                     rospy.logwarn('FLY Kalman filter returned \'None\' at %s, %s' % ([self.contour.x, self.contour.y], t))

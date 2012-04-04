@@ -426,10 +426,10 @@ class CalibrateStagePlate():
             header = contourinfo.header
             x_list = contourinfo.x
             y_list = contourinfo.y
-            theta_list = contourinfo.theta
+            angle_list = contourinfo.angle
             area_list = contourinfo.area
             ecc_list = contourinfo.ecc
-            contour_count = min(len(x_list),len(y_list),len(theta_list),len(area_list),len(ecc_list))
+            contour_count = min(len(x_list),len(y_list),len(angle_list),len(area_list),len(ecc_list))
             
             if contour_count == 1:
                 self.error_text = ""
@@ -450,7 +450,7 @@ class CalibrateStagePlate():
             # for contour in range(contour_count):
             #   x = x_list[contour]
             #   y = y_list[contour]
-            #   theta = theta_list[contour]
+            #   angle = angle_list[contour]
             #   area = area_list[contour]
             #   ecc = ecc_list[contour]
             #   # Identify robot

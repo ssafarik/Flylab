@@ -5,13 +5,13 @@ import struct
 import std_msgs.msg
 
 class ContourInfo(roslib.message.Message):
-  _md5sum = "c8fd16a1f087957d23963303f01c039b"
+  _md5sum = "dfa17fcfd02be6f8754e63cf1d4f40c3"
   _type = "tracking/ContourInfo"
   _has_header = True #flag to mark the presence of a Header object
   _full_text = """Header header
 float64[] x
 float64[] y
-float64[] theta
+float64[] angle
 float64[] area
 float64[] ecc
 ================================================================================
@@ -33,7 +33,7 @@ time stamp
 string frame_id
 
 """
-  __slots__ = ['header','x','y','theta','area','ecc']
+  __slots__ = ['header','x','y','angle','area','ecc']
   _slot_types = ['Header','float64[]','float64[]','float64[]','float64[]','float64[]']
 
   def __init__(self, *args, **kwds):
@@ -44,7 +44,7 @@ string frame_id
     changes.  You cannot mix in-order arguments and keyword arguments.
     
     The available fields are:
-       header,x,y,theta,area,ecc
+       header,x,y,angle,area,ecc
     
     @param args: complete set of field values, in .msg order
     @param kwds: use keyword arguments corresponding to message field names
@@ -59,8 +59,8 @@ string frame_id
         self.x = []
       if self.y is None:
         self.y = []
-      if self.theta is None:
-        self.theta = []
+      if self.angle is None:
+        self.angle = []
       if self.area is None:
         self.area = []
       if self.ecc is None:
@@ -69,7 +69,7 @@ string frame_id
       self.header = std_msgs.msg._Header.Header()
       self.x = []
       self.y = []
-      self.theta = []
+      self.angle = []
       self.area = []
       self.ecc = []
 
@@ -99,10 +99,10 @@ string frame_id
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
       buff.write(struct.pack(pattern, *self.y))
-      length = len(self.theta)
+      length = len(self.angle)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
-      buff.write(struct.pack(pattern, *self.theta))
+      buff.write(struct.pack(pattern, *self.angle))
       length = len(self.area)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
@@ -154,7 +154,7 @@ string frame_id
       pattern = '<%sd'%length
       start = end
       end += struct.calcsize(pattern)
-      self.theta = struct.unpack(pattern, str[start:end])
+      self.angle = struct.unpack(pattern, str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -196,10 +196,10 @@ string frame_id
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
       buff.write(self.y.tostring())
-      length = len(self.theta)
+      length = len(self.angle)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
-      buff.write(self.theta.tostring())
+      buff.write(self.angle.tostring())
       length = len(self.area)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
@@ -253,7 +253,7 @@ string frame_id
       pattern = '<%sd'%length
       start = end
       end += struct.calcsize(pattern)
-      self.theta = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
+      self.angle = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
