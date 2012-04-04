@@ -49,7 +49,7 @@ class ContourGenerator:
         self.contourinfo = ContourInfo()
         self.x0_list = []
         self.y0_list = []
-        self.theta_list = []
+        self.angle_list = []
         self.area_list = []
         self.ecc_list = []
         self.nContours = 0
@@ -314,7 +314,7 @@ class ContourGenerator:
     def AppendContour(self, contour_seq):
         #seq = cv.FindContours(self.imageContour, cv.CreateMemStorage()) # Finds contours from imageContour, not imageForeground_binary.
         moments = cv.Moments(contour_seq)
-        (xROI, yROI, area, theta, ecc) = self.ContourFromMoments(moments)
+        (xROI, yROI, area, angle, ecc) = self.ContourFromMoments(moments)
         
         
         # Save contour info
@@ -329,7 +329,7 @@ class ContourGenerator:
                 self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptContourROI)
                 self.x0_list.append(self.ptsOutput.point.x)
                 self.y0_list.append(self.ptsOutput.point.y)
-                self.theta_list.append(theta)
+                self.angle_list.append(angle)
                 self.area_list.append(area)
                 self.ecc_list.append(ecc)
                 self.nContours += 1
@@ -365,7 +365,7 @@ class ContourGenerator:
             display_text = "y0 = " + str(int(self.ptsOutput.point.y))
             cv.PutText(self.imageContourDisplay, display_text,(int(self.widthROI/2),45),self.font,cv.CV_RGB(self.color_max,0,0))
             
-            display_text = "theta = " + str(round(theta,2))
+            display_text = "angle = " + str(round(angle,2))
             cv.PutText(self.imageContourDisplay, display_text,(25,65),self.font,cv.CV_RGB(self.color_max,0,0))
             
             display_text = "output coordinates = " + self.frameidOutput
@@ -379,7 +379,7 @@ class ContourGenerator:
     def ContourinfoFromImage(self, image):
         self.x0_list = []
         self.y0_list = []
-        self.theta_list = []
+        self.angle_list = []
         self.area_list = []
         self.ecc_list = []
         
@@ -418,7 +418,7 @@ class ContourGenerator:
         if self.nContours != 0:
             contourinfo.x = self.x0_list
             contourinfo.y = self.y0_list
-            contourinfo.theta = self.theta_list
+            contourinfo.angle = self.angle_list
             contourinfo.area = self.area_list
             contourinfo.ecc = self.ecc_list
         
@@ -429,7 +429,7 @@ class ContourGenerator:
             for iContour in range(self.nContours):
                 contours.append([contourinfo.x[iContour], 
                                  contourinfo.y[iContour], 
-                                 contourinfo.theta[iContour], 
+                                 contourinfo.angle[iContour], 
                                  contourinfo.area[iContour], 
                                  contourinfo.ecc[iContour]])
             
@@ -442,13 +442,13 @@ class ContourGenerator:
             self.nContours = len(contours)
             contourinfo.x = []
             contourinfo.y = []
-            contourinfo.theta = []
+            contourinfo.angle = []
             contourinfo.area = []
             contourinfo.ecc = []
             for iContour in range(self.nContours):
                 contourinfo.x.append(contours[iContour][0])
                 contourinfo.y.append(contours[iContour][1])
-                contourinfo.theta.append(contours[iContour][2])
+                contourinfo.angle.append(contours[iContour][2])
                 contourinfo.area.append(contours[iContour][3])
                 contourinfo.ecc.append(contours[iContour][4])
             
@@ -457,7 +457,7 @@ class ContourGenerator:
             # TESTING...
         #       contourinfo.x = [0.0, 10.0]
         #       contourinfo.y = [0.0, 20.0]
-        #       contourinfo.theta = [0.0, 0.0]
+        #       contourinfo.angle = [0.0, 0.0]
         #       contourinfo.area = [100.0, 100.0]
         #       contourinfo.ecc = [1.0, 1.0]
         
