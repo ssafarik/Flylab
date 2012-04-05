@@ -211,7 +211,8 @@ class Fly:
         # contour angle only ranges on [-pi,-0].  If wrapped, then change the flip state.
         #if 'Fly1' in self.name:
         #    rospy.logwarn('self.flip=%s'%self.flip)
-        if (self.contourPrev is not None) and (self.contour is not None):
+        if (self.contourPrev is not None) and (self.contourPrev.angle != []) and (self.contour is not None) and (self.contour.angle != []):
+            #rospy.logwarn('contour.angle=%s, contourPrev.angle=%s'%(self.contour.angle, self.contourPrev.angle))
             d = N.abs(CircleFunctions.circle_dist(self.contour.angle, self.contourPrev.angle))
             if (d > (N.pi/2.0)):
                 #if 'Fly1' in self.name:
@@ -239,13 +240,14 @@ class Fly:
     def Update(self, contour, ptComputed):
         #rospy.loginfo ('CI contour=%s' % (contour))
         if self.initialized:
-            if (self.contour is not None):
-                t = self.contour.header.stamp.to_sec()
+            #rospy.logwarn ('contour=%s' % contour)
+            if (contour is not None):
+                t = contour.header.stamp.to_sec()
             else:
                 t = rospy.Time.now().to_sec()
                 
-            self.contourPrev = copy.copy(self.contour)
-            self.contour = copy.copy(contour)
+            self.contourPrev = self.contour
+            self.contour = contour
             
             # Update the position & orientation filters
             self.isVisible = False            
@@ -274,7 +276,7 @@ class Fly:
                     
                     
                     if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
-                        rospy.logwarn ('FLY LARGE CONTOUR, check the parameter camera/diff_threshold.')
+                        rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check the parameter camera/diff_threshold.' % (self.contour.x, x))
 
                     #rospy.loginfo ('CI kfState.Update name=%s pre=%s, post=%s, t=%s' % (self.name, [contour.x,contour.y], [x,y], t))
 
@@ -300,7 +302,7 @@ class Fly:
                 
             if self.isVisible:
                 # Store the latest state.
-                self.state.header.stamp = contour.header.stamp
+                self.state.header.stamp = self.contour.header.stamp
                 self.state.pose.position.x = x
                 self.state.pose.position.y = y
                 self.state.pose.position.z = z
