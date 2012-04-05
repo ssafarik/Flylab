@@ -39,7 +39,7 @@ class ButterworthFilter:
 
 
 # Filter an angle that only ranges over a distance of pi.
-class LowPassHalfCircleAngleFilter:
+class LowPassHalfCircleFilter:
     def __init__(self, RC=1.0):
         self.RC = RC
         self.t_previous = None
@@ -55,16 +55,16 @@ class LowPassHalfCircleAngleFilter:
 
 
     def Update(self, z, t):
+        if not isinstance(z,float):
+            z = None
+            
         if (self.zf_previous is not None) and (self.t_previous is not None): 
-            if (z is not None) and (z!=[]) and (t is not None):
-                try:
-                    # Unwrap big jumps
-                    if (z - self.zf_previous) > (N.pi/2.0):
-                        self.zf_previous += N.pi
-                    if (z - self.zf_previous) < (-N.pi/2.0):
-                        self.zf_previous -= N.pi
-                except:
-                    rospy.logwarn ('z=%s, zf_prev=%s'% (z, self.zf_previous))
+            if (z is not None) and (t is not None):
+                # Unwrap big jumps
+                if (z - self.zf_previous) > (N.pi/2.0):
+                    self.zf_previous += N.pi
+                if (z - self.zf_previous) < (-N.pi/2.0):
+                    self.zf_previous -= N.pi
                     
                 dt = t - self.t_previous
                 alpha = dt/(self.RC + dt)
@@ -98,6 +98,9 @@ class LowPassCircleFilter:
 
 
     def Update(self, z, t):
+        if not isinstance(z,float):
+            z = None
+            
         if (self.zf_previous is not None) and (self.t_previous is not None): 
             if (z is not None) and (t is not None):
                 
@@ -138,7 +141,10 @@ class LowPassFilter:
 
 
     def Update(self, z, t):
-        if (self.zf_previous is not None) and (self.t_previous is not None): 
+        if not isinstance(z,float):
+            z = None
+            
+        if (self.zf_previous is not None) and (self.t_previous is not None):
             if (z is not None) and (t is not None):
                 dt = t - self.t_previous
                 alpha = dt/(self.RC + dt)
@@ -147,7 +153,6 @@ class LowPassFilter:
                 zf = self.zf_previous
         else: # Not initialized, but have a measurement.
             zf = z
-
 
         self.t_previous = t
         self.zf_previous = zf

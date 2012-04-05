@@ -134,7 +134,7 @@ class ContourIdentifier:
         #self.stateEndEffector.header.frame_id = "Plate" # Interpret it as the Plate frame.
         
         if True: # Use EndEffector position from Fivebar
-            posesStage = PoseStamped(header=Header(frame_id=state.header.frame_id),
+            posesStage = PoseStamped(header=state.header,
                                      pose=state.pose)
             try:
                 posesPlate = self.tfrx.transformPose('Plate',posesStage)
@@ -393,6 +393,7 @@ class ContourIdentifier:
                 t = rospy.Time.now()
                 xyRobotComputed = [0.0, 0.0]
 
+
             xyObjects.append(xyRobotComputed)
             self.tfbx.sendTransform((xyRobotComputed[0], xyRobotComputed[1], 0.0),
                                     tf.transformations.quaternion_about_axis(0, (0,0,1)),
@@ -623,7 +624,13 @@ class ContourIdentifier:
                     for iFly in range(self.nRobots, len(self.objects)):
                         if self.mapContourFromObject[iFly] is not None:
                             #rospy.logwarn ('self.contours[self.mapContourFromObject[%d]]=%s' % (iFly, self.contours[self.mapContourFromObject[iFly]]))
-                            self.objects[iFly].Update(self.contours[self.mapContourFromObject[iFly]], None)
+                            try:
+                                self.objects[iFly].Update(self.contours[self.mapContourFromObject[iFly]], None)
+                            except IndexError:
+                                rospy.logwarn('iFly=%s' % iFly)
+                                rospy.logwarn('self.mapContourFromObject=%s' % self.mapContourFromObject)
+                                rospy.logwarn('self.contours=%s' % self.contours)
+                                rospy.logwarn('len(self.objects)=%s' % len(self.objects))
                         else:
                             self.objects[iFly].Update(None,                                           None)
         
@@ -671,7 +678,7 @@ class ContourIdentifier:
                     
                     
                     # Publish a disc to indicate the arena extent.
-                    self.markerArena.header.stamp = contourinfo.header.stamp #rospy.Time.now()
+                    self.markerArena.header.stamp = contourinfo.header.stamp
                     self.pubMarker.publish(self.markerArena)
             except rospy.ServiceException:
                 pass

@@ -156,15 +156,17 @@ class RosFivebar:
         self.radiusMovement = rospy.get_param('arena/radius_movement', 25.4)
         
         self.timePrev = rospy.Time.now()
+        self.time = rospy.Time.now()
         
         self.request = SrvFrameStateRequest()
-        #self.request.state.header.stamp = rospy.Time.now()
+        #self.request.state.header.stamp = self.time
         self.request.state.header.frame_id = 'Stage'
         self.request.state.pose.position.x = 0.0
         self.request.state.pose.position.y = 0.0
         self.request.state.pose.position.z = 0.0
 
         self.iCount = 0
+
 
     def LoadServices(self):
         # Load joint1 services.
@@ -523,7 +525,7 @@ class RosFivebar:
             pt.z = self.ptEeSense.z + self.ptOffsetSense.z 
             pt.point = self.ClipPtToRadius(pt.point)
             
-            #rvStageState.state.header.stamp = rospy.Time.now()
+            #rvStageState.state.header.stamp = self.time
             rvStageState.state.header.frame_id = 'Stage' # Always return Stage frame coordinates.
             rvStageState.state.pose.position.x = pt.x 
             rvStageState.state.pose.position.y = pt.y 
@@ -584,7 +586,7 @@ class RosFivebar:
         self.ptsToolRefExternal = srvSignal.pts #self.pattern.points[self.iPoint]
         try:
             #rospy.logwarn('B')
-            self.tfrx.waitForTransform('Stage', self.ptsToolRefExternal.header.frame_id, rospy.Time.now(), rospy.Duration(1.0))
+            self.tfrx.waitForTransform('Stage', self.ptsToolRefExternal.header.frame_id, self.time, rospy.Duration(1.0))
             #rospy.logwarn('C')
             self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
             #rospy.logwarn('D')
@@ -701,12 +703,12 @@ class RosFivebar:
     
                 # Publish the joint states (for rviz, etc)    
                 self.js.header.seq = self.js.header.seq + 1
-                self.js.header.stamp.secs = rospy.get_time()
+                self.js.header.stamp.secs = self.time #rospy.get_time()
                 self.js.position = [angle1,angle2,angle3,angle4]
                 self.pubJointState.publish(self.js)
     
                 state = MsgFrameState()
-                state.header.stamp = rospy.Time.now()
+                state.header.stamp = self.time
                 state.header.frame_id = 'Stage'
                 state.pose.position.x = self.ptEeSense.x
                 state.pose.position.y = self.ptEeSense.y
@@ -725,40 +727,40 @@ class RosFivebar:
         
                 self.tfbx.sendTransform((-L3/2, -246.31423, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
-                                        rospy.Time.now(),
+                                        state.header.stamp,
                                         "link0",     # child
                                         "Stage"      # parent
                                         )
 
                 self.tfbx.sendTransform((0.0, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle1+Q1CENTERe),
-                                        rospy.Time.now(),
+                                        state.header.stamp,
                                         "link1",     # child
                                         "link0"      # parent
                                         )
                 self.tfbx.sendTransform((L1, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle3),
-                                        rospy.Time.now(),
+                                        state.header.stamp,
                                         "link3",     # child
                                         "link1"      # parent
                                         )
         
                 self.tfbx.sendTransform((L3, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
-                                        rospy.Time.now(),
+                                        state.header.stamp,
                                         "link5",     # child
                                         "link3"      # parent
                                         )
 
                 self.tfbx.sendTransform((L0, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle2+Q2CENTERe),
-                                        rospy.Time.now(),
+                                        state.header.stamp,
                                         "link2",     # child
                                         "link0"      # parent
                                         )
                 self.tfbx.sendTransform((L2, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle4),
-                                        rospy.Time.now(),
+                                        state.header.stamp,
                                         "link4",     # child
                                         "link2"      # parent
                                         )
@@ -767,14 +769,14 @@ class RosFivebar:
                 # Frame EndEffector
                 self.tfbx.sendTransform((state.pose.position.x, state.pose.position.y, state.pose.position.z), 
                                         qEE,
-                                        rospy.Time.now(),
+                                        state.header.stamp,
                                         "EndEffector",     # child
                                         "Stage"      # parent
                                         )
                 # Frame Target
                 if self.ptsToolRef is not None:
                     #rospy.logwarn('marker at [%0.2f,%0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y))
-                    markerTarget = Marker(header=Header(stamp = rospy.Time.now(),
+                    markerTarget = Marker(header=Header(stamp = state.header.stamp,
                                                         frame_id='Stage'),
                                           ns='target',
                                           id=0,
@@ -793,8 +795,7 @@ class RosFivebar:
                                           lifetime=rospy.Duration(1.0))
                     self.pubMarker.publish(markerTarget)
 
-#                    markerToolOffset   = Marker(header=Header(stamp = rospy.Time.now(),
-#                                                        frame_id='Stage'),
+#                    markerToolOffset   = Marker(header=state.header,
 #                                          ns='markers',
 #                                          id=1,
 #                                          type=2, #SPHERE,
@@ -810,26 +811,25 @@ class RosFivebar:
 #                                                          g=0.5,
 #                                                          b=0.5),
 #                                          lifetime=rospy.Duration(0.1))
-                    markerToolOffset   = Marker(header=Header(stamp = rospy.Time.now(),
-                                                        frame_id='Stage'),
-                                          ns='tooloffset',
-                                          id=1,
-                                          type=0, #ARROW,
-                                          action=0,
-                                          scale=Vector3(x=0.1, # Shaft diameter
-                                                        y=0.2, # Head diameter
-                                                        z=0.0),
-                                          color=ColorRGBA(a=0.8,
-                                                          r=1.0,
-                                                          g=1.0,
-                                                          b=1.0),
-                                          lifetime=rospy.Duration(1.0),
-                                          points=[Point(x=state.pose.position.x, 
-                                                        y=state.pose.position.y, 
-                                                        z=state.pose.position.z),
-                                                  Point(x=state.pose.position.x+self.ptOffsetSense.x, 
-                                                        y=state.pose.position.y+self.ptOffsetSense.y, 
-                                                        z=state.pose.position.z+self.ptOffsetSense.z)])
+                    markerToolOffset   = Marker(header=state.header,
+                                                ns='tooloffset',
+                                                id=1,
+                                                type=0, #ARROW,
+                                                action=0,
+                                                scale=Vector3(x=0.1, # Shaft diameter
+                                                              y=0.2, # Head diameter
+                                                              z=0.0),
+                                                color=ColorRGBA(a=0.8,
+                                                                r=1.0,
+                                                                g=1.0,
+                                                                b=1.0),
+                                                lifetime=rospy.Duration(1.0),
+                                                points=[Point(x=state.pose.position.x, 
+                                                              y=state.pose.position.y, 
+                                                              z=state.pose.position.z),
+                                                        Point(x=state.pose.position.x+self.ptOffsetSense.x, 
+                                                              y=state.pose.position.y+self.ptOffsetSense.y, 
+                                                              z=state.pose.position.z+self.ptOffsetSense.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -915,7 +915,7 @@ class RosFivebar:
             # Display a vector in rviz.
             ptBase = self.ptEeSense
             ptEnd = self.ptEeCommand
-            markerCommand= Marker(header=Header(stamp = rospy.Time.now(),
+            markerCommand= Marker(header=Header(stamp = self.time,
                                                 frame_id='Stage'),
                                   ns='command',
                                   id=1,
@@ -962,9 +962,6 @@ class RosFivebar:
                 v1 = scale1 * speedMax
                 v2 = scale2 * speedMax
                 
-                time = rospy.Time.now()
-                self.dt = time - self.timePrev
-                self.timePrev = time
                 #rospy.logwarn('5B speedMax=%s, v1,v2=%s' % (speedMax,[v1,v2]))
         
                 
@@ -994,6 +991,10 @@ class RosFivebar:
         rosrate = rospy.Rate(100)
 
         while not rospy.is_shutdown():
+            self.time = rospy.Time.now()
+            self.dt = self.time - self.timePrev
+            self.timePrev = self.time
+
             self.SendTransforms()
             self.SendTargetCommand()
             rosrate.sleep()
