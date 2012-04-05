@@ -16,11 +16,6 @@ class ImageDisplay:
         self.initialized = False
         self.subImage = rospy.Subscriber("camera/image_rect", sensor_msgs.msg.Image, self.image_callback)
 
-        self.display_unprocessedimage = bool(rospy.get_param("display_unprocessedimage", "false"))
-
-        if self.display_unprocessedimage:
-            cv.NamedWindow("Unprocessed",1)
-            
         self.bridge = CvBridge()
         self.font = cv.InitFont(cv.CV_FONT_HERSHEY_TRIPLEX,0.5,0.5)
         self.circle_radius_min = 2
@@ -55,16 +50,13 @@ class ImageDisplay:
             self.initialize_images(cv_image)
 
         if self.initialized:
-            cv.CvtColor(cv_image,self.im_display,cv.CV_GRAY2RGB)
+            cv.CvtColor(cv_image, self.im_display, cv.CV_GRAY2RGB)
             self.draw_objects_on_image(self.draw_objects)
     
-            if self.display_unprocessedimage:
-                cv.ShowImage("Unprocessed", self.im_display)
-                
             cv.Resize(self.im_display, self.im_display_pub)
             # Publish processed image
             try:
-                self.pubImage.publish(self.bridge.cv_to_imgmsg(self.im_display_pub,"passthrough"))
+                self.pubImage.publish(self.bridge.cv_to_imgmsg(self.im_display_pub, "passthrough"))
             except CvBridgeError, e:
                 print e
             cv.WaitKey(3)

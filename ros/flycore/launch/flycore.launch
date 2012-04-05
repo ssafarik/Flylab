@@ -7,7 +7,7 @@
     <!--                                                            -->
 	<!-- ========================================================== -->
   
-	<include file="$(find image_gui)/launch/DisplayDraw.launch" />
+	<!-- <include file="$(find image_gui)/launch/DisplayDraw.launch" /> -->
 	<include file="$(find save_data)/launch/save_data.launch" />
 	<include file="$(find plate_tf)/launch/plate_tf.launch" />
 	<include file="$(find tracking)/launch/tracking.launch" />
