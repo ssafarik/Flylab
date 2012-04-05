@@ -41,56 +41,6 @@ from patterngen.srv import SrvSignal, SrvSignalResponse
 POSITIVE = 0
 NEGATIVE = 1
 
-MMPERINCH = 25.4 # This number converts from external reference (x,y) units to inches.
-
-# Link lengths (millimeters)
-LINKWIDTH = 1.0*MMPERINCH
-L0 = 10.5*MMPERINCH #4.24*2 # Distance between motor shafts
-L1 = 3.5*MMPERINCH  # Link 1
-L2 = 3.5*MMPERINCH  # Link 2
-L3 = L1*3.0 # Link 3
-L4 = L2*3.0 # Link 4
-
-
-# Parking spot (millimeters)
-XPARK = 0.0*MMPERINCH
-YPARK = 0.0*MMPERINCH
-
-FUDGEX = 0.0
-FUDGEY = -20.0  # Fudge factor to center things better in the reachable workspace.
-FUDGEQ1 = -0.15052268 # These are the angles that move down 20mm at center.
-FUDGEQ2 =  0.15052268
-
-alpha = N.arctan(LINKWIDTH/L1) # Smallest angle two links can collapse to.
-r = N.sqrt(L1**2.0 + L3**2.0 - 2.0*L1*L3*N.cos(alpha)) # Distance from joint 1 to EE when most open.
-beta = (N.pi - N.arcsin(L3*N.sin(alpha)/r)) % (2.0*N.pi) # Angle between link1 and EE when most open.
-
-# Joint angles CCW from East (i.e. "east" coordinates).
-Q1MINe    = (N.arccos((L0/2.0)/(L3+L1)) % (2.0*N.pi))
-Q1MAXe    = (N.arccos((L0/2.0)/r) + beta) % (2.0*N.pi)
-Q1CENTERe = (Q1MAXe+Q1MINe)/2.0 + FUDGEQ1
-Q2MINe    = (N.pi - N.arccos((L0/2.0)/r) - beta) 
-Q2MAXe    = (N.pi - N.arccos((L0/2.0)/(L3+L1))) % (2.0*N.pi)
-Q2CENTERe = (Q2MAXe+Q2MINe)/2.0 + FUDGEQ2
-
-# Joint angles from furthest reachable point to center of workspace (i.e. "index" coordinates)
-Q1CENTERi   = Q1CENTERe - Q1MINe
-Q2CENTERi   = Q2CENTERe - Q2MAXe
-
-# Joint angles at center of workspace (i.e. "zero" coordinates)
-Q1CENTERz   = 0.0
-Q2CENTERz   = 0.0
-Q1MAXz      = Q1MAXe - Q1CENTERe
-Q1MINz      = Q1MINe - Q1CENTERe
-Q2MAXz      = Q2MAXe - Q2CENTERe
-Q2MINz      = Q2MINe - Q2CENTERe
-
-# Center of workspace (x,y)
-CENTERX     = L0/2.0 + FUDGEX # Between motor shafts
-TMPx        = N.cos(N.pi - Q1CENTERe) * L1 + L0/2.0
-TMPy        = N.sin(N.pi - Q1CENTERe) * L1
-CENTERY     = N.sqrt(L3**2.0 - TMPx**2.0) + TMPy + FUDGEY
-REACHABLERADIUS = 0.98*(L1+L3-r)/2.0 # Really it's about 90.5.  Limits in xy are at roughly (64,64), (-64,64), (-64,-64), (64,-64).
 
 
 class RosFivebar:
@@ -103,6 +53,56 @@ class RosFivebar:
         rospy.init_node('Fivebar')
         rospy.loginfo ("Fivebar name=%s", __name__)
         rospy.on_shutdown(self.OnShutdown_callback)
+
+        # Link lengths (millimeters)
+        self.linkwidth = rospy.get_param('fivebar/linkwidth', 0.1)
+        self.L0 = rospy.get_param('fivebar/L0', 1.0) #4.24*2 # Distance between motor shafts
+        self.L1 = rospy.get_param('fivebar/L1', 1.0)  # Link 1
+        self.L2 = rospy.get_param('fivebar/L2', 1.0)  # Link 2
+        self.L3 = rospy.get_param('fivebar/L3', 1.0) # Link 3
+        self.L4 = rospy.get_param('fivebar/L4', 1.0) # Link 4
+
+        # Parking spot (millimeters)
+        self.xPark = 0.0
+        self.yPark = 0.0
+        
+        FUDGEX = 0.0
+        FUDGEY = -20.0  # Fudge factor to center things better in the reachable workspace.
+        FUDGEQ1 = -0.15052268 # These are the angles that move down 20mm at center.
+        FUDGEQ2 =  0.15052268
+        
+        alpha = N.arctan(self.linkwidth/self.L1) # Smallest angle two links can collapse to.
+        r = N.sqrt(self.L1**2.0 + self.L3**2.0 - 2.0*self.L1*self.L3*N.cos(alpha)) # Distance from joint 1 to EE when most open.
+        beta = (N.pi - N.arcsin(self.L3*N.sin(alpha)/r)) % (2.0*N.pi) # Angle between link1 and EE when most open.
+        
+        # Joint angles CCW from East (i.e. "east" coordinates).
+        self.q1MinE    = (N.arccos((self.L0/2.0)/(self.L3+self.L1)) % (2.0*N.pi))
+        self.q1MaxE    = (N.arccos((self.L0/2.0)/r) + beta) % (2.0*N.pi)
+        self.q1CenterE = (self.q1MaxE+self.q1MinE)/2.0 + FUDGEQ1
+        self.q2MinE    = (N.pi - N.arccos((self.L0/2.0)/r) - beta) 
+        self.q2MaxE    = (N.pi - N.arccos((self.L0/2.0)/(self.L3+self.L1))) % (2.0*N.pi)
+        self.q2CenterE = (self.q2MaxE+self.q2MinE)/2.0 + FUDGEQ2
+        
+        # Joint angles from furthest reachable point to center of workspace (i.e. "index" coordinates)
+        self.q1CenterI   = self.q1CenterE - self.q1MinE
+        self.q2CenterI   = self.q2CenterE - self.q2MaxE
+        
+        # Joint angles at center of workspace (i.e. "zero" coordinates)
+        self.q1CenterZ   = 0.0
+        self.q2CenterZ   = 0.0
+        q1MaxZ      = self.q1MaxE - self.q1CenterE
+        q1MinZ      = self.q1MinE - self.q1CenterE
+        q2MaxZ      = self.q2MaxE - self.q2CenterE
+        q2MinZ      = self.q2MinE - self.q2CenterE
+        
+        # Center of workspace (x,y)
+        self.xCenter    = self.L0/2.0 + FUDGEX # Between motor shafts
+        TMPx            = N.cos(N.pi - self.q1CenterE) * self.L1 + self.L0/2.0
+        TMPy            = N.sin(N.pi - self.q1CenterE) * self.L1
+        self.yCenter    = N.sqrt(self.L3**2.0 - TMPx**2.0) + TMPy + FUDGEY
+        self.radiusReachable = 0.98*(self.L1+self.L3-r)/2.0 # Really it's about 90.5.  Limits in xy are at roughly (64,64), (-64,64), (-64,-64), (64,-64).
+
+
 
         self.names = ['joint1','joint2','joint3','joint4']
         self.jointstate1 = None
@@ -132,8 +132,8 @@ class RosFivebar:
         self.js.name = self.names
         #self.js.velocity = [0.0, 0.0, 0.0, 0.0]
         
-        self.xc = CENTERX        
-        self.yc = CENTERY
+        self.xc = self.xCenter        
+        self.yc = self.yCenter
         self.ptsToolRefExternal = None #Point(0,0,0) # Where we want the "tool".
         self.ptsToolRef = None
         self.ptToolRefClipped = Point(0,0,0) 
@@ -252,7 +252,7 @@ class RosFivebar:
     
     def ClipXyToRadius(self, x, y):
         r = N.sqrt(x*x+y*y)
-        rLimit = N.min(self.radiusMovement, REACHABLERADIUS)
+        rLimit = N.min(self.radiusMovement, self.radiusReachable)
         
         if rLimit < r:
             angle = N.arctan2(y,x)
@@ -266,8 +266,8 @@ class RosFivebar:
     # Close the kinematics chain:  Get thetas 1,2,3,4 from thetas 1,2
     def Get1234xyFrom12 (self, angle1, angle2):
         # Rotate the frames from centered to east-pointing. 
-        angle1 = angle1 + Q1CENTERe
-        angle2 = angle2 + Q2CENTERe
+        angle1 = angle1 + self.q1CenterE
+        angle2 = angle2 + self.q2CenterE
         
         # Set the crossover points at 0/2pi and pi/-pi
         angle1 = ( angle1       % (2.0*N.pi))
@@ -285,19 +285,19 @@ class RosFivebar:
         #s24 = N.sin(angle2+angle4)
         #c24 = N.cos(angle2+angle4)
         
-        j3x =       L1 * c1
-        j3y =       L1 * s1
-        j4x =  L0 + L2 * c2
-        j4y =       L2 * s2
+        j3x =       self.L1 * c1
+        j3y =       self.L1 * s1
+        j4x =  self.L0 + self.L2 * c2
+        j4y =       self.L2 * s2
         cx = j4x - j3x
         cy = N.abs(j3y-j4y)
         Lc2 = cx*cx+cy*cy
         Lc = N.sqrt(Lc2)
 
         # Intersection of circles.
-        a = (L3*L3-L4*L4+Lc*Lc)/(2.0*Lc)
-        h = N.sqrt(L3*L3-a*a)
-        j2 = N.array([L0,0.0])
+        a = (self.L3*self.L3-self.L4*self.L4+Lc*Lc)/(2.0*Lc)
+        h = N.sqrt(self.L3*self.L3-a*a)
+        j2 = N.array([self.L0,0.0])
         j3 = N.array([j3x,j3y])
         j4 = N.array([j4x,j4y])
         p2 = j3 + (a/Lc)*(j4-j3)
@@ -324,8 +324,8 @@ class RosFivebar:
         angle4 = N.pi - N.arccos(N.dot(v4E,v42)/(N.linalg.norm(v4E)*N.linalg.norm(v42))) 
             
         
-        x = jEx - CENTERX
-        y = jEy - CENTERY
+        x = jEx - self.xCenter
+        y = jEy - self.yCenter
 
         #rospy.loginfo ('angle1=%s, angle2=%s' % (angle1,angle2))
         #rospy.loginfo ('Lc=%s, Ld=%s, tc=%s, td=%s, te=%s, tf=%s, tg=%s, th=%s' % (Lc, Ld, tc, td, te, tf, tg, th))
@@ -333,7 +333,7 @@ class RosFivebar:
         #rospy.loginfo ('j3x=%s, j3y=%s, j4x=%s, j4y=%s, jEx=%s, jEy=%s, jFx=%s, jFy=%s' % (j3x, j3y, j4x, j4y, jEx, jEy, jFx, jFy))
         
         # Put angles into the proper range for their limits.
-        if Q1MINe<0.0:
+        if self.q1MinE<0.0:
             lo = -N.pi
             hi =  N.pi
         else:
@@ -341,7 +341,7 @@ class RosFivebar:
             hi = 2.0*N.pi
         angle1 = ((angle1-lo)%(2.0*N.pi))+lo
 
-        if Q2MINe<0.0:
+        if self.q2MinE<0.0:
             lo = -N.pi
             hi =  N.pi
         else:
@@ -350,11 +350,11 @@ class RosFivebar:
         angle2 = ((angle2-lo)%(2.0*N.pi))+lo
         
 
-        angle1 = N.clip(angle1,Q1MINe,Q1MAXe)
-        angle2 = N.clip(angle2,Q2MINe,Q2MAXe)
+        angle1 = N.clip(angle1,self.q1MinE,self.q1MaxE)
+        angle2 = N.clip(angle2,self.q2MinE,self.q2MaxE)
 
-        angle1 = angle1 - Q1CENTERe
-        angle2 = angle2 - Q2CENTERe
+        angle1 = angle1 - self.q1CenterE
+        angle2 = angle2 - self.q2CenterE
         
         return (angle1, angle2, angle3, angle4, x, y)
     
@@ -372,19 +372,19 @@ class RosFivebar:
         y = y0
         
         # Translate to frame at joint1.
-        x = x + CENTERX
-        y = y + CENTERY
+        x = x + self.xCenter
+        y = y + self.yCenter
         
-        #rospy.logwarn('5B reachable: (x,y)=%s, norm0E=%s, norm2E=%s, L1+L3=%s, L2+L4=%s' % ([x,y], 
+        #rospy.logwarn('5B reachable: (x,y)=%s, norm0E=%s, norm2E=%s, self.L1+self.L3=%s, self.L2+self.L4=%s' % ([x,y], 
         #                                                                 N.linalg.norm(N.array([x,y])), 
-        #                                                                 N.linalg.norm(N.array([x-L0,y])), 
-        #                                                                 L1+L3, 
-        #                                                                 L2+L4))
-        L0sq = L0*L0
-        L1sq = L1*L1
-        L2sq = L2*L2
-        L3sq = L3*L3
-        L4sq = L4*L4
+        #                                                                 N.linalg.norm(N.array([x-self.L0,y])), 
+        #                                                                 self.L1+self.L3, 
+        #                                                                 self.L2+self.L4))
+        self.L0sq = self.L0*self.L0
+        self.L1sq = self.L1*self.L1
+        self.L2sq = self.L2*self.L2
+        self.L3sq = self.L3*self.L3
+        self.L4sq = self.L4*self.L4
         xsq = x*x
         ysq = y*y
         x3rd = x**3.0
@@ -393,31 +393,31 @@ class RosFivebar:
         y6th = y**6.0
         
         q1 = [ \
-                N.arctan2((-x*(x*L1sq+x3rd-x*L3sq+x*ysq+(2.0*xsq*L3sq*ysq+2.0*xsq*L1sq*ysq+2.0*ysq*L3sq*L1sq-2.0*xsq*y4th-x4th*ysq-ysq*L1**4.0-ysq*L3**4.0+2.0*y4th*L3sq+2.0*y4th*L1sq-y6th)**0.5)/(ysq+xsq)+L1sq-L3sq+ysq+xsq)/L1/y, \
-                          (x*L1sq+x3rd-x*L3sq+x*ysq+(2.0*xsq*L3sq*ysq+2.0*xsq*L1sq*ysq+2.0*ysq*L3sq*L1sq-2.0*xsq*y4th-x4th*ysq-ysq*L1**4.0-ysq*L3**4.0+2.0*y4th*L3sq+2.0*y4th*L1sq-y6th)**0.5)/(ysq+xsq)/L1), \
-                N.arctan2((-x*(x*L1sq+x3rd-x*L3sq+x*ysq-(2.0*xsq*L3sq*ysq+2.0*xsq*L1sq*ysq+2.0*ysq*L3sq*L1sq-2.0*xsq*y4th-x4th*ysq-ysq*L1**4.0-ysq*L3**4.0+2.0*y4th*L3sq+2.0*y4th*L1sq-y6th)**0.5)/(ysq+xsq)+L1sq-L3sq+ysq+xsq)/L1/y, \
-                          (x*L1sq+x3rd-x*L3sq+x*ysq-(2.0*xsq*L3sq*ysq+2.0*xsq*L1sq*ysq+2.0*ysq*L3sq*L1sq-2.0*xsq*y4th-x4th*ysq-ysq*L1**4.0-ysq*L3**4.0+2.0*y4th*L3sq+2.0*y4th*L1sq-y6th)**0.5)/(ysq+xsq)/L1) \
+                N.arctan2((-x*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq+(2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
+                          (x*self.L1sq+x3rd-x*self.L3sq+x*ysq+(2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5)/(ysq+xsq)/self.L1), \
+                N.arctan2((-x*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq-(2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
+                          (x*self.L1sq+x3rd-x*self.L3sq+x*ysq-(2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5)/(ysq+xsq)/self.L1) \
               ]
         
         q3 = [ \
-                N.arctan2((-2.0*y*x*L1sq+1.0/2.0*(y**3.0+xsq*y+y*L1sq-y*L3sq)*(x*L1sq+x3rd-x*L3sq+x*ysq+(2.0*xsq*L3sq*ysq+2.0*xsq*L1sq*ysq+2.0*ysq*L3sq*L1sq-2.0*xsq*y4th-x4th*ysq-ysq*L1**4.0-ysq*L3**4.0+2.0*y4th*L3sq+2.0*y4th*L1sq-y6th)**0.5)/(ysq+xsq))/(-L3*L1*x*(x*L1sq+x3rd-x*L3sq+x*ysq+(2.0*xsq*L3sq*ysq+2.0*xsq*L1sq*ysq+2.0*ysq*L3sq*L1sq-2.0*xsq*y4th-x4th*ysq-ysq*L1**4.0-ysq*L3**4.0+2.0*y4th*L3sq+2.0*y4th*L1sq-y6th)**0.5)/(ysq+xsq)+L3*L1**3.0-L3**3.0*L1+L3*L1*ysq+xsq*L3*L1), \
-                          1.0/2.0*(xsq-L3sq+ysq-L1sq)/L1/L3), \
-                N.arctan2((-2.0*y*x*L1sq+1.0/2.0*(y**3.0+xsq*y+y*L1sq-y*L3sq)*(x*L1sq+x3rd-x*L3sq+x*ysq-(2.0*xsq*L3sq*ysq+2.0*xsq*L1sq*ysq+2.0*ysq*L3sq*L1sq-2.0*xsq*y4th-x4th*ysq-ysq*L1**4.0-ysq*L3**4.0+2.0*y4th*L3sq+2.0*y4th*L1sq-y6th)**0.5)/(ysq+xsq))/(-L3*L1*x*(x*L1sq+x3rd-x*L3sq+x*ysq-(2.0*xsq*L3sq*ysq+2.0*xsq*L1sq*ysq+2.0*ysq*L3sq*L1sq-2.0*xsq*y4th-x4th*ysq-ysq*L1**4.0-ysq*L3**4.0+2.0*y4th*L3sq+2.0*y4th*L1sq-y6th)**0.5)/(ysq+xsq)+L3*L1**3.0-L3**3.0*L1+L3*L1*ysq+xsq*L3*L1), \
-                          1.0/2.0*(xsq-L3sq+ysq-L1sq)/L1/L3) \
+                N.arctan2((-2.0*y*x*self.L1sq+1.0/2.0*(y**3.0+xsq*y+y*self.L1sq-y*self.L3sq)*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq+(2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5)/(ysq+xsq))/(-self.L3*self.L1*x*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq+(2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5)/(ysq+xsq)+self.L3*self.L1**3.0-self.L3**3.0*self.L1+self.L3*self.L1*ysq+xsq*self.L3*self.L1), \
+                          1.0/2.0*(xsq-self.L3sq+ysq-self.L1sq)/self.L1/self.L3), \
+                N.arctan2((-2.0*y*x*self.L1sq+1.0/2.0*(y**3.0+xsq*y+y*self.L1sq-y*self.L3sq)*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq-(2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5)/(ysq+xsq))/(-self.L3*self.L1*x*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq-(2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5)/(ysq+xsq)+self.L3*self.L1**3.0-self.L3**3.0*self.L1+self.L3*self.L1*ysq+xsq*self.L3*self.L1), \
+                          1.0/2.0*(xsq-self.L3sq+ysq-self.L1sq)/self.L1/self.L3) \
               ]
         
         q2 = [ \
-                N.arctan2((xsq-2.0*L0*x+L0sq-L4sq+ysq+L2sq+1.0/2.0*(-2.0*x+2.0*L0)*(-L2sq*L0+x*L2sq-L0**3.0+x*ysq-ysq*L0-3*L0*xsq+L4sq*L0+x3rd-x*L4sq+3*L0sq*x+(-4.0*L2sq*L0*x*ysq-4.0*x*ysq*L4sq*L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*L2sq*ysq+2.0*L2sq*L0sq*ysq-6.0*xsq*ysq*L0sq+2.0*xsq*ysq*L4sq+4.0*x3rd*ysq*L0+4.0*x*y4th*L0+4.0*L0**3.0*x*ysq+2.0*ysq*L0sq*L4sq+2.0*ysq*L4sq*L2sq-2.0*y4th*L0sq-L0**4.0*ysq+2.0*y4th*L4sq-ysq*L2**4.0-ysq*L4**4.0+2.0*y4th*L2sq-y6th)**0.5)/(ysq+L0sq+xsq-2.0*L0*x))/L2/y, \
-                          (-L2sq*L0+x*L2sq-L0**3.0+x*ysq-ysq*L0-3*L0*xsq+L4sq*L0+x3rd-x*L4sq+3*L0sq*x+(-4.0*L2sq*L0*x*ysq-4.0*x*ysq*L4sq*L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*L2sq*ysq+2.0*L2sq*L0sq*ysq-6.0*xsq*ysq*L0sq+2.0*xsq*ysq*L4sq+4.0*x3rd*ysq*L0+4.0*x*y4th*L0+4.0*L0**3.0*x*ysq+2.0*ysq*L0sq*L4sq+2.0*ysq*L4sq*L2sq-2.0*y4th*L0sq-L0**4.0*ysq+2.0*y4th*L4sq-ysq*L2**4.0-ysq*L4**4.0+2.0*y4th*L2sq-y6th)**0.5)/(ysq+L0sq+xsq-2.0*L0*x)/L2), \
-                N.arctan2((xsq-2.0*L0*x+L0sq-L4sq+ysq+L2sq+1.0/2.0*(-2.0*x+2.0*L0)*(-L2sq*L0+x*L2sq-L0**3.0+x*ysq-ysq*L0-3*L0*xsq+L4sq*L0+x3rd-x*L4sq+3*L0sq*x-(-4.0*L2sq*L0*x*ysq-4.0*x*ysq*L4sq*L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*L2sq*ysq+2.0*L2sq*L0sq*ysq-6.0*xsq*ysq*L0sq+2.0*xsq*ysq*L4sq+4.0*x3rd*ysq*L0+4.0*x*y4th*L0+4.0*L0**3.0*x*ysq+2.0*ysq*L0sq*L4sq+2.0*ysq*L4sq*L2sq-2.0*y4th*L0sq-L0**4.0*ysq+2.0*y4th*L4sq-ysq*L2**4.0-ysq*L4**4.0+2.0*y4th*L2sq-y6th)**0.5)/(ysq+L0sq+xsq-2.0*L0*x))/L2/y, \
-                          (-L2sq*L0+x*L2sq-L0**3.0+x*ysq-ysq*L0-3*L0*xsq+L4sq*L0+x3rd-x*L4sq+3*L0sq*x-(-4.0*L2sq*L0*x*ysq-4.0*x*ysq*L4sq*L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*L2sq*ysq+2.0*L2sq*L0sq*ysq-6.0*xsq*ysq*L0sq+2.0*xsq*ysq*L4sq+4.0*x3rd*ysq*L0+4.0*x*y4th*L0+4.0*L0**3.0*x*ysq+2.0*ysq*L0sq*L4sq+2.0*ysq*L4sq*L2sq-2.0*y4th*L0sq-L0**4.0*ysq+2.0*y4th*L4sq-ysq*L2**4.0-ysq*L4**4.0+2.0*y4th*L2sq-y6th)**0.5)/(ysq+L0sq+xsq-2.0*L0*x)/L2) \
+                N.arctan2((xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq+self.L2sq+1.0/2.0*(-2.0*x+2.0*self.L0)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x+(-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5)/(ysq+self.L0sq+xsq-2.0*self.L0*x))/self.L2/y, \
+                          (-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x+(-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5)/(ysq+self.L0sq+xsq-2.0*self.L0*x)/self.L2), \
+                N.arctan2((xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq+self.L2sq+1.0/2.0*(-2.0*x+2.0*self.L0)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x-(-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5)/(ysq+self.L0sq+xsq-2.0*self.L0*x))/self.L2/y, \
+                          (-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x-(-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5)/(ysq+self.L0sq+xsq-2.0*self.L0*x)/self.L2) \
               ]
 
         q4 = [ \
-                N.arctan2((2.0*y*L2sq*L0-2.0*y*L2sq*x+1.0/2.0*(xsq*y-2.0*y*L0*x+y*L0sq-y*L4sq+y**3.0+y*L2sq)*(-L2sq*L0+x*L2sq-L0**3.0+x*ysq-ysq*L0-3*L0*xsq+L4sq*L0+x3rd-x*L4sq+3*L0sq*x+(-4.0*L2sq*L0*x*ysq-4.0*x*ysq*L4sq*L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*L2sq*ysq+2.0*L2sq*L0sq*ysq-6.0*xsq*ysq*L0sq+2.0*xsq*ysq*L4sq+4.0*x3rd*ysq*L0+4.0*x*y4th*L0+4.0*L0**3.0*x*ysq+2.0*ysq*L0sq*L4sq+2.0*ysq*L4sq*L2sq-2.0*y4th*L0sq-L0**4.0*ysq+2.0*y4th*L4sq-ysq*L2**4.0-ysq*L4**4.0+2.0*y4th*L2sq-y6th)**0.5)/(ysq+L0sq+xsq-2.0*L0*x))/(L2*L4*xsq-2.0*L2*L4*L0*x+L2*L4*L0sq-L2*L4**3.0+L2*L4*ysq+L2**3.0*L4+1.0/2.0*(-2.0*L2*L4*x+2.0*L2*L4*L0)*(-L2sq*L0+x*L2sq-L0**3.0+x*ysq-ysq*L0-3*L0*xsq+L4sq*L0+x3rd-x*L4sq+3*L0sq*x+(-4.0*L2sq*L0*x*ysq-4.0*x*ysq*L4sq*L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*L2sq*ysq+2.0*L2sq*L0sq*ysq-6.0*xsq*ysq*L0sq+2.0*xsq*ysq*L4sq+4.0*x3rd*ysq*L0+4.0*x*y4th*L0+4.0*L0**3.0*x*ysq+2.0*ysq*L0sq*L4sq+2.0*ysq*L4sq*L2sq-2.0*y4th*L0sq-L0**4.0*ysq+2.0*y4th*L4sq-ysq*L2**4.0-ysq*L4**4.0+2.0*y4th*L2sq-y6th)**0.5)/(ysq+L0sq+xsq-2.0*L0*x)), \
-                          1.0/2.0*(xsq-2.0*L0*x+L0sq-L4sq+ysq-L2sq)/L2/L4), \
-                N.arctan2((2.0*y*L2sq*L0-2.0*y*L2sq*x+1.0/2.0*(xsq*y-2.0*y*L0*x+y*L0sq-y*L4sq+y**3.0+y*L2sq)*(-L2sq*L0+x*L2sq-L0**3.0+x*ysq-ysq*L0-3*L0*xsq+L4sq*L0+x3rd-x*L4sq+3*L0sq*x-(-4.0*L2sq*L0*x*ysq-4.0*x*ysq*L4sq*L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*L2sq*ysq+2.0*L2sq*L0sq*ysq-6.0*xsq*ysq*L0sq+2.0*xsq*ysq*L4sq+4.0*x3rd*ysq*L0+4.0*x*y4th*L0+4.0*L0**3.0*x*ysq+2.0*ysq*L0sq*L4sq+2.0*ysq*L4sq*L2sq-2.0*y4th*L0sq-L0**4.0*ysq+2.0*y4th*L4sq-ysq*L2**4.0-ysq*L4**4.0+2.0*y4th*L2sq-y6th)**0.5)/(ysq+L0sq+xsq-2.0*L0*x))/(L2*L4*xsq-2.0*L2*L4*L0*x+L2*L4*L0sq-L2*L4**3.0+L2*L4*ysq+L2**3.0*L4+1.0/2.0*(-2.0*L2*L4*x+2.0*L2*L4*L0)*(-L2sq*L0+x*L2sq-L0**3.0+x*ysq-ysq*L0-3*L0*xsq+L4sq*L0+x3rd-x*L4sq+3*L0sq*x-(-4.0*L2sq*L0*x*ysq-4.0*x*ysq*L4sq*L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*L2sq*ysq+2.0*L2sq*L0sq*ysq-6.0*xsq*ysq*L0sq+2.0*xsq*ysq*L4sq+4.0*x3rd*ysq*L0+4.0*x*y4th*L0+4.0*L0**3.0*x*ysq+2.0*ysq*L0sq*L4sq+2.0*ysq*L4sq*L2sq-2.0*y4th*L0sq-L0**4.0*ysq+2.0*y4th*L4sq-ysq*L2**4.0-ysq*L4**4.0+2.0*y4th*L2sq-y6th)**0.5)/(ysq+L0sq+xsq-2.0*L0*x)), \
-                          1.0/2.0*(xsq-2.0*L0*x+L0sq-L4sq+ysq-L2sq)/L2/L4) \
+                N.arctan2((2.0*y*self.L2sq*self.L0-2.0*y*self.L2sq*x+1.0/2.0*(xsq*y-2.0*y*self.L0*x+y*self.L0sq-y*self.L4sq+y**3.0+y*self.L2sq)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x+(-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5)/(ysq+self.L0sq+xsq-2.0*self.L0*x))/(self.L2*self.L4*xsq-2.0*self.L2*self.L4*self.L0*x+self.L2*self.L4*self.L0sq-self.L2*self.L4**3.0+self.L2*self.L4*ysq+self.L2**3.0*self.L4+1.0/2.0*(-2.0*self.L2*self.L4*x+2.0*self.L2*self.L4*self.L0)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x+(-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5)/(ysq+self.L0sq+xsq-2.0*self.L0*x)), \
+                          1.0/2.0*(xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq-self.L2sq)/self.L2/self.L4), \
+                N.arctan2((2.0*y*self.L2sq*self.L0-2.0*y*self.L2sq*x+1.0/2.0*(xsq*y-2.0*y*self.L0*x+y*self.L0sq-y*self.L4sq+y**3.0+y*self.L2sq)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x-(-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5)/(ysq+self.L0sq+xsq-2.0*self.L0*x))/(self.L2*self.L4*xsq-2.0*self.L2*self.L4*self.L0*x+self.L2*self.L4*self.L0sq-self.L2*self.L4**3.0+self.L2*self.L4*ysq+self.L2**3.0*self.L4+1.0/2.0*(-2.0*self.L2*self.L4*x+2.0*self.L2*self.L4*self.L0)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x-(-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5)/(ysq+self.L0sq+xsq-2.0*self.L0*x)), \
+                          1.0/2.0*(xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq-self.L2sq)/self.L2/self.L4) \
               ]
 
         #rospy.logwarn ('5B q1=%s' % q1)
@@ -426,10 +426,10 @@ class RosFivebar:
         #rospy.logwarn ('5B q4=%s' % q4)
                 
         
-        #(angle1,angle2) = (q1[1]-Q1CENTERe,q2[0]-Q2CENTERe)
+        #(angle1,angle2) = (q1[1]-self.q1CenterE,q2[0]-self.q2CenterE)
         
         # Put angles into the proper 2pi range for their limits.
-        if Q1MINe<0.0:
+        if self.q1MinE<0.0:
             lo = -N.pi
             hi =  N.pi
         else:
@@ -438,7 +438,7 @@ class RosFivebar:
         q1[0] = ((q1[0]-lo)%(2.0*N.pi))+lo
         q1[1] = ((q1[1]-lo)%(2.0*N.pi))+lo
 
-        if Q2MINe<0.0:
+        if self.q2MinE<0.0:
             lo = -N.pi
             hi =  N.pi
         else:
@@ -454,9 +454,9 @@ class RosFivebar:
         angle3 = 999.0
         angle4 = 999.0
         #for k in range(len(q1)):
-        #    rospy.logwarn('5B Q1: %s < %s < %s and pi < %s' % (Q1MINe, q1[k], Q1MAXe, q3[k] %(2.0*N.pi)))
+        #    rospy.logwarn('5B Q1: %s < %s < %s and pi < %s' % (self.q1MinE, q1[k], self.q1MaxE, q3[k] %(2.0*N.pi)))
         for k in range(len(q1)):
-            #if (Q1MINe < q1[k] < Q1MAXe) and (N.pi < (q3[k] %(2.0*N.pi))):
+            #if (self.q1MinE < q1[k] < self.q1MaxE) and (N.pi < (q3[k] %(2.0*N.pi))):
             if (N.pi < (q3[k] %(2.0*N.pi))):
                 angle1 = q1[k]
                 angle3 = q3[k]
@@ -465,9 +465,9 @@ class RosFivebar:
             
         
         #for k in range(len(q2)):
-        #    rospy.logwarn('5B Q2: %s < %s < %s and %s < pi' % (Q2MINe, q2[k], Q2MAXe, q4[k] %(2.0*N.pi)))
+        #    rospy.logwarn('5B Q2: %s < %s < %s and %s < pi' % (self.q2MinE, q2[k], self.q2MaxE, q4[k] %(2.0*N.pi)))
         for k in range(len(q2)):
-            #if (Q2MINe < q2[k] < Q2MAXe) and ((q4[k] %(2.0*N.pi)) < N.pi):
+            #if (self.q2MinE < q2[k] < self.q2MaxE) and ((q4[k] %(2.0*N.pi)) < N.pi):
             if ((q4[k] %(2.0*N.pi)) < N.pi):
                 angle2 = q2[k]
                 angle4 = q4[k]
@@ -477,11 +477,11 @@ class RosFivebar:
         #if (angle1==999.0) or (angle2==999.0) or (angle3==999.0) or (angle4==999.0):
         #    rospy.logwarn('5B thetas=%s, x,y=%s' % ([angle1,angle2,angle3,angle4],[x0,y0]))
             
-        angle1 = N.clip(angle1,Q1MINe,Q1MAXe)
-        angle2 = N.clip(angle2,Q2MINe,Q2MAXe)
+        angle1 = N.clip(angle1,self.q1MinE,self.q1MaxE)
+        angle2 = N.clip(angle2,self.q2MinE,self.q2MaxE)
 
-        angle1 = angle1 - Q1CENTERe
-        angle2 = angle2 - Q2CENTERe
+        angle1 = angle1 - self.q1CenterE
+        angle2 = angle2 - self.q2CenterE
 
         return (angle1,angle2,angle3,angle4)
         
@@ -551,8 +551,8 @@ class RosFivebar:
         
         #rospy.loginfo ('5B SetStageState_callback Request x,y=%s' % ([reqStageState.state.pose.position.x, 
         #                                                                 reqStageState.state.pose.position.y]))
-        #(angle1,angle2,angle3,angle4) = self.Get1234FromXY(reqStageState.state.pose.position.x-CENTERX, 
-        #                                   reqStageState.state.pose.position.y-CENTERY)
+        #(angle1,angle2,angle3,angle4) = self.Get1234FromXY(reqStageState.state.pose.position.x-self.xCenter, 
+        #                                   reqStageState.state.pose.position.y-self.yCenter)
         self.ptsToolRefExternal = PointStamped(Header(frame_id=reqStageState.state.header.frame_id),
                                                Point(x=reqStageState.state.pose.position.x,
                                                      y=reqStageState.state.pose.position.y,
@@ -651,15 +651,15 @@ class RosFivebar:
         
     def Calibrate_callback(self, req):
         # Convert parking coordinates to angles.
-        self.xPark = XPARK
-        self.yPark = YPARK
+        self.xPark = self.xPark
+        self.yPark = self.yPark
         with self.lock:
             [q1park,q2park,q3park,q4park] = self.Get1234FromXY(self.xPark, self.yPark)
 
-        q1origin = Q1CENTERi # From the index switch
-        q2origin = Q2CENTERi # From the index switch
+        q1origin = self.q1CenterI # From the index switch
+        q2origin = self.q2CenterI # From the index switch
 
-        rospy.loginfo ('5B Center = %s, %s' % (CENTERX, CENTERY))
+        rospy.loginfo ('5B Center = %s, %s' % (self.xCenter, self.yCenter))
         rospy.loginfo ('5B Calibrating: q1origin=%s, q1park=%s, q2origin=%s, q2park=%s' % (q1origin, q1park, q2origin, q2park))
         with self.lock:
             rv = self.calibrate_joint1(NEGATIVE, q1origin, q1park, True)
@@ -712,7 +712,7 @@ class RosFivebar:
                 state.header.frame_id = 'Stage'
                 state.pose.position.x = self.ptEeSense.x
                 state.pose.position.y = self.ptEeSense.y
-                qEE = tf.transformations.quaternion_from_euler(0.0, 0.0, angle1+Q1CENTERe+angle3)
+                qEE = tf.transformations.quaternion_from_euler(0.0, 0.0, angle1+self.q1CenterE+angle3)
                 state.pose.orientation.x = qEE[0]
                 state.pose.orientation.y = qEE[1]
                 state.pose.orientation.z = qEE[2]
@@ -725,7 +725,7 @@ class RosFivebar:
                 # Publish the link transforms.
                 
         
-                self.tfbx.sendTransform((-L3/2, -246.31423, 0.0), 
+                self.tfbx.sendTransform((-self.L3/2, -246.31423, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
                                         state.header.stamp,
                                         "link0",     # child
@@ -733,32 +733,32 @@ class RosFivebar:
                                         )
 
                 self.tfbx.sendTransform((0.0, 0.0, 0.0), 
-                                        tf.transformations.quaternion_from_euler(0.0, 0.0, angle1+Q1CENTERe),
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, angle1+self.q1CenterE),
                                         state.header.stamp,
                                         "link1",     # child
                                         "link0"      # parent
                                         )
-                self.tfbx.sendTransform((L1, 0.0, 0.0), 
+                self.tfbx.sendTransform((self.L1, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle3),
                                         state.header.stamp,
                                         "link3",     # child
                                         "link1"      # parent
                                         )
         
-                self.tfbx.sendTransform((L3, 0.0, 0.0), 
+                self.tfbx.sendTransform((self.L3, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
                                         state.header.stamp,
                                         "link5",     # child
                                         "link3"      # parent
                                         )
 
-                self.tfbx.sendTransform((L0, 0.0, 0.0), 
-                                        tf.transformations.quaternion_from_euler(0.0, 0.0, angle2+Q2CENTERe),
+                self.tfbx.sendTransform((self.L0, 0.0, 0.0), 
+                                        tf.transformations.quaternion_from_euler(0.0, 0.0, angle2+self.q2CenterE),
                                         state.header.stamp,
                                         "link2",     # child
                                         "link0"      # parent
                                         )
-                self.tfbx.sendTransform((L2, 0.0, 0.0), 
+                self.tfbx.sendTransform((self.L2, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle4),
                                         state.header.stamp,
                                         "link4",     # child
@@ -984,9 +984,9 @@ class RosFivebar:
         self.Calibrate_callback(None)
         self.initialized = True
 
-        rospy.loginfo ('5B QMIN,QMAX: %s, %s, %s, %s' % (Q1MINe, Q1MAXe, Q2MINe, Q2MAXe))
-        rospy.loginfo ('5B Q1CENTEReiz: %s, %s, %s' % (Q1CENTERe, Q1CENTERi, Q1CENTERz))
-        rospy.loginfo ('5B Q2CENTEReiz: %s, %s, %s' % (Q2CENTERe, Q2CENTERi, Q2CENTERz))
+        rospy.loginfo ('5B QMIN,QMAX: %s, %s, %s, %s' % (self.q1MinE, self.q1MaxE, self.q2MinE, self.q2MaxE))
+        rospy.loginfo ('5B self.q1CenterEiz: %s, %s, %s' % (self.q1CenterE, self.q1CenterI, self.q1CenterZ))
+        rospy.loginfo ('5B self.q2CenterEiz: %s, %s, %s' % (self.q2CenterE, self.q2CenterI, self.q2CenterZ))
         # Process messages forever.
         rosrate = rospy.Rate(100)
 
