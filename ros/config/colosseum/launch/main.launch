@@ -12,9 +12,9 @@
 	<include file="$(find colosseum)/launch/calibration.launch" />
 	<include file="$(find flybowls)/launch/flybowl_80mm.launch" /> 
 
+	
 	<include file="$(find fivebar)/launch/fivebar.launch" />
 	<include file="$(find colosseum)/launch/params_actuator.launch" />
-	
 	<include file="$(find colosseum)/launch/camera.launch" />
 </launch>
 	

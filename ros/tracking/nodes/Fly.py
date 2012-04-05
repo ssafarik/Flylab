@@ -50,11 +50,11 @@ class Fly:
         
 
         self.kfState = filters.KalmanFilter()
-        self.lpAngleF = filters.LowPassHalfCircleAngleFilter(RC=rospy.get_param('tracking/rcAngleFilter', 0.1))
+        self.lpAngleF = filters.LowPassHalfCircleFilter(RC=rospy.get_param('tracking/rcAngleFilter', 0.1))
         #self.lpOffsetX = filters.LowPassFilter(RC=0.1)
         #self.lpOffsetY = filters.LowPassFilter(RC=0.1)
         self.lpOffsetMag = filters.LowPassFilter(RC=1.0)
-        self.lpOffsetAng = filters.LowPassFilter(RC=0.1)
+        self.lpOffsetAng = filters.LowPassCircleFilter(RC=0.001)
         self.ptOffset = Point(x=0, y=0, z=0)  # Vector from computed position to contour position (for robots only).
         self.ptPPrev = Point(x=0, y=0, z=0)
         self.angPrev = 0.0
@@ -211,7 +211,7 @@ class Fly:
         # contour angle only ranges on [-pi,-0].  If wrapped, then change the flip state.
         #if 'Fly1' in self.name:
         #    rospy.logwarn('self.flip=%s'%self.flip)
-        if (self.contourPrev is not None) and (self.contourPrev.angle != []) and (self.contour is not None) and (self.contour.angle != []):
+        if (self.contourPrev is not None) and (isinstance(self.contourPrev.angle,float)) and (self.contour is not None) and (isinstance(self.contour.angle,float)):
             #rospy.logwarn('contour.angle=%s, contourPrev.angle=%s'%(self.contour.angle, self.contourPrev.angle))
             d = N.abs(CircleFunctions.circle_dist(self.contour.angle, self.contourPrev.angle))
             if (d > (N.pi/2.0)):
@@ -238,9 +238,7 @@ class Fly:
     # Update()
     # Update the current state using the visual position and the computed position (if applicable)
     def Update(self, contour, ptComputed):
-        #rospy.loginfo ('CI contour=%s' % (contour))
         if self.initialized:
-            #rospy.logwarn ('contour=%s' % contour)
             if (contour is not None):
                 t = contour.header.stamp.to_sec()
             else:
@@ -268,17 +266,15 @@ class Fly:
                 
                 if (self.contour.x is not None) and (self.contour.y is not None) and (self.contour.angle is not None):
                     self.isVisible = True
-                    #rospy.loginfo ('CI kfState.state_post=%s' % self.kfState.state_post) 
                     (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), t)
                     (z, vz) = (0.0, 0.0)
                     #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
-                    angleF = self.lpAngleF.Update(self.contour.angle, self.contour.header.stamp.to_sec())
+                    angleF = self.lpAngleF.Update(self.contour.angle, t)#self.contour.header.stamp.to_sec())
                     
                     
                     if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
                         rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check the parameter camera/diff_threshold.' % (self.contour.x, x))
 
-                    #rospy.loginfo ('CI kfState.Update name=%s pre=%s, post=%s, t=%s' % (self.name, [contour.x,contour.y], [x,y], t))
 
                 # Use the unfiltered data for the case where the filters return None results.
                 if self.isVisible and ((x is None) or (y is None)):
@@ -294,10 +290,6 @@ class Fly:
                 #rospy.logwarn('FLY No contour seen for %s; check your nFlies parameter.' % self.name)
                 (x,y,vx,vy) = self.kfState.Update(None, t)
                 (z, vz) = (0.0, 0.0)
-                #self.lpAngleF.Update(None, t)
-                #self.lpOffsetX.Update(None,t)
-                #self.lpOffsetY.Update(None,t)
-                #self.lpFlip.Update(0.0, t)
                 
                 
             if self.isVisible:
@@ -363,23 +355,15 @@ class Fly:
                         self.unwind += 2.0*N.pi
                         ang += 2.0*N.pi
                     self.angPrev = ang
-                    #rospy.loginfo('ang=%0.2f' % ang)
-                    (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(mag, t),-self.maxOffset,self.maxOffset),
-                                                                    self.lpOffsetAng.Update(ang, t))
-                    #self.ptOffset = Point(x = self.lpOffsetX.Update(xPID, t),
-                    #                      y = self.lpOffsetY.Update(yPID, t),
-                    #                      z = 0)
+                    
+                    (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(mag, t), -self.maxOffset, self.maxOffset),
+                                                                                self.lpOffsetAng.Update(ang, t))
                     self.ptPPrev.x = ptP.x
                     self.ptPPrev.y = ptP.y
                 else:
                     self.ptOffset = Point(x=0, y=0, z=0)
             
 
-                #rospy.loginfo ('x=%s,y=%s,orientation=%s,name=%s,frame_id=%s' % (self.state.pose.position.x, 
-                #                         self.state.pose.position.y,
-                #                        self.state.pose.orientation,
-                #                        self.name,
-                #                        self.state.header.frame_id))
                 
                 # Send the Raw transform.
                 self.tfbx.sendTransform((self.contour.x, 
@@ -389,6 +373,7 @@ class Fly:
                                         self.contour.header.stamp,
                                         self.name+"Contour",
                                         "Plate")
+
                 
                 # Send the Filtered transform.
                 q = self.state.pose.orientation
@@ -400,8 +385,10 @@ class Fly:
                                         self.name,
                                         self.state.header.frame_id)
 
+
+                # Publish a 3D model marker for the robot.
                 if 'Robot' in self.name:
-                    markerTarget = Marker(header=Header(stamp = self.state.header.stamp,#rospy.Time.now(),
+                    markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
                                                         frame_id='Plate'),
                                           ns='robot',
                                           id=0,
@@ -418,9 +405,8 @@ class Fly:
                                                           g=0.5,
                                                           b=0.5),
                                           lifetime=rospy.Duration(0.5))
-                    self.pubMarker.publish(markerTarget)
+                    self.pubMarker.publish(markerRobot)
 
-        #rospy.loginfo ('CI %s contour=%s, self.isVisible=%s' % (self.name, contour, self.isVisible))
             
         
 

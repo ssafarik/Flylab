@@ -5,18 +5,12 @@
 
 	camera/image_raw
 	camera/image_rect
-	camera/image_diff
 	camera/image_foreground
 	camera/image_processed
 	-->
 	  
-	<!-- Turn on/off various windows. No longer needed, see above.  -->
-	<param name="display_unprocessedimage" type="boolean" value="false"/>
-	<param name="display_processedimage"   type="boolean" value="false"/>
+	<!-- Turn on/off contour windows. -->
 	<param name="display_contours"         type="boolean" value="false"/>
-	<param name="display_diff"             type="boolean" value="false"/>
-	<param name="display_foreground"       type="boolean" value="false"/>
-	<param name="display_background"       type="boolean" value="false"/>
 
 	<param name="frameid_contours" type="string" value="ImageRect"/>
 

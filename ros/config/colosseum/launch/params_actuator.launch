@@ -16,6 +16,13 @@
 	<param name="fivebar/speed_max" type="double" value="200.0"/>
 	<param name="actuator/hzPoint" type="double" value="100.0"/>
 
+	<param name="fivebar/linkwidth" type="double" value="25.4"/> 
+	<param name="fivebar/L0" type="double" value="266.7"/>  <!-- Distance between motor shafts -->
+	<param name="fivebar/L1" type="double" value="88.9"/>
+	<param name="fivebar/L2" type="double" value="88.9"/>
+	<param name="fivebar/L3" type="double" value="266.7"/>
+	<param name="fivebar/L4" type="double" value="266.7"/>
+
 
 	<!-- Good PID gains for step response. -->
 	<!--
