@@ -56,13 +56,15 @@ class LowPassHalfCircleAngleFilter:
 
     def Update(self, z, t):
         if (self.zf_previous is not None) and (self.t_previous is not None): 
-            if (z is not None) and (t is not None):
-                
-                # Unwrap big jumps
-                if (z - self.zf_previous) > (N.pi/2.0):
-                    self.zf_previous += N.pi
-                if (z - self.zf_previous) < (-N.pi/2.0):
-                    self.zf_previous -= N.pi
+            if (z is not None) and (z!=[]) and (t is not None):
+                try:
+                    # Unwrap big jumps
+                    if (z - self.zf_previous) > (N.pi/2.0):
+                        self.zf_previous += N.pi
+                    if (z - self.zf_previous) < (-N.pi/2.0):
+                        self.zf_previous -= N.pi
+                except:
+                    rospy.logwarn ('z=%s, zf_prev=%s'% (z, self.zf_previous))
                     
                 dt = t - self.t_previous
                 alpha = dt/(self.RC + dt)
@@ -237,7 +239,7 @@ class KalmanFilter:
 
             # Kalman Filtering                
             state_pre = cv.KalmanPredict(self.kal)
-            if z is not None:
+            if (z is not None) and (self.dt != 0):
                 self.measurement[0,0] = x_current
                 self.measurement[1,0] = y_current
                 self.measurement[2,0] = (x_current - self.x_previous) / self.dt

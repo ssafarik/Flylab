@@ -470,7 +470,7 @@ class ContourIdentifier:
             ptComputed[0] = Point(x=xyRobotComputed[0], y=xyRobotComputed[1])
 
         # Augment the contours list, if necessary, so there are as many contours as objects.
-        contoursAug = self.contours
+        contoursAug = copy.copy(self.contours)
         while len(contoursAug)<len(xyObjects):
             contoursAug.append(ContourInfo(x=55555, y=55555, ecc=1.0, area=1.0)) # norm(x,y) must be less than 999999!
             #rospy.logwarn ('len(contoursAug),len(xyObjects)=%s' % [len(contoursAug),len(xyObjects)])
@@ -485,16 +485,8 @@ class ContourIdentifier:
             alg = 'munkres'
             if alg=='galeshapely':
                 (mapObjectsGaleShapely, mapContours) = self.GetMatchGaleShapely(d)
-                mapContoursFromObjects = copy.copy(mapObjectsGaleShapely)
+                mapContoursFromObjects = mapObjectsGaleShapely
                 
-                # Set the augmented entries to None.
-                #rospy.logwarn('mapContoursFromObjects=%s'%mapContoursFromObjects)
-                #rospy.logwarn('len(mapContoursFromObjects)=%d'%len(mapContoursFromObjects))
-                #rospy.logwarn('len(xyContours)=%d'%len(xyContours))
-                for m in range(len(mapContoursFromObjects)):
-                    #rospy.logwarn('mapContoursFromObjects[m], len(xyContours)=%s'%[mapContoursFromObjects[m],len(xyContours)])
-                    if (mapContoursFromObjects[m])>=len(xyContours):
-                        mapContoursFromObjects[m] = None
             if alg=='hungarian':                    
                 (mapObjectsHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
                 mapContoursFromObjects = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
@@ -513,6 +505,15 @@ class ContourIdentifier:
                 mapObjectsMunkres = self.GetMatchMunkres(d)
                 mapContoursFromObjects = mapObjectsMunkres
                 
+            #rospy.logwarn('mapContoursFromObjects=%s'%mapContoursFromObjects)
+            #rospy.logwarn('len(mapContoursFromObjects)=%d'%len(mapContoursFromObjects))
+            #rospy.logwarn('len(xyContours)=%d'%len(xyContours))
+            # Set the augmented entries to None.
+            for m in range(len(mapContoursFromObjects)):
+                #rospy.logwarn('mapContoursFromObjects[m], len(xyContours)=%s'%[mapContoursFromObjects[m],len(xyContours)])
+                if (mapContoursFromObjects[m])>=len(xyContours):
+                    mapContoursFromObjects[m] = None
+
             #rospy.logwarn ('CI mapObjectsGaleShapely =%s' % (mapObjectsGaleShapely))
             #rospy.logwarn ('CI mapObjectsHungarian  =%s, unmapped=%s' % (mapObjectsHungarian,unmapped))
             #rospy.logwarn ('CI mapObjectsHungarian  =%s' % mapObjectsHungarian)
@@ -568,6 +569,7 @@ class ContourIdentifier:
                     contour.area   = contourinfo.area[i]
                     contour.ecc    = contourinfo.ecc[i]
                     self.contours.append(contour)
+                    #rospy.logwarn('contour.angle=%0.2f' % (contour.angle))
     
                     # Send the contour transforms.
                     self.tfbx.sendTransform((contour.x, 
@@ -620,7 +622,7 @@ class ContourIdentifier:
                     # Update the flies' states.
                     for iFly in range(self.nRobots, len(self.objects)):
                         if self.mapContourFromObject[iFly] is not None:
-                            #rospy.logwarn ('iFly=%d, self.mapContourFromObject=%s, len(self.contours)=%d' % (iFly, self.mapContourFromObject, len(self.objects)))
+                            #rospy.logwarn ('self.contours[self.mapContourFromObject[%d]]=%s' % (iFly, self.contours[self.mapContourFromObject[iFly]]))
                             self.objects[iFly].Update(self.contours[self.mapContourFromObject[iFly]], None)
                         else:
                             self.objects[iFly].Update(None,                                           None)
