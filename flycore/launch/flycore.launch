@@ -1,0 +1,17 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- FLYCORE:  Required Nodes for Flylab.                     -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Include this file in your main launch file.                -->
+    <!--                                                            -->
+	<!-- ========================================================== -->
+  
+	<include file="$(find save_data)/launch/save_data.launch" />
+	<include file="$(find plate_tf)/launch/plate_tf.launch" />
+	<include file="$(find tracking)/launch/tracking.launch" />
+	<include file="$(find ui)/launch/ui.launch" />
+	<include file="$(find stage_action_server)/launch/stage_action_server.launch" />
+	<node pkg="patterngen" type="PatternGenXY.py" name="PatternGen" />
+  
+</launch>

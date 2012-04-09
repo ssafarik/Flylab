@@ -22,11 +22,12 @@ groups   # (If "video" isn't listed, then "sudo usermod -a -G video username").
 rosdep install camera_calibration
 rosmake camera_calibration
 rosmake image_proc
-
+rosmake experiments
+rosmake calibration
 
 
 0 ############################### If this is new hardware:
-cd ...Flyatar2/ros/config
+cd ...Flylab/ros/config
 roscreate-pkg <your device name>
 cp -r colosseum/launch <your device name>/launch
 # Edit the files in the launch directory as appropriate.
@@ -59,7 +60,7 @@ rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node &
 
 # Adjust mode, brightness, exposure, gain, shutter, etc.
 # Edit "params_camera.yaml" with the new settings, for example:
-#     ~/git/Flyatar2/ros/babycarrot/launch/params_camera.yaml
+#     ~/git/Flylab/ros/babycarrot/launch/params_camera.yaml
 # Close the Dynamic Reconfigure window.
 
 
@@ -72,7 +73,7 @@ kill `ps a -o pid,args --no-headers | grep camera1394 | grep CAMERANAME | cut -d
 roslaunch <your device name> camera.launch &
 
 # Calibrate for distortion.
-# Print out ~/git/Flyatar/ros/calibration/patterns/camera_calibration_pattern_30mm.pdf in 1:1 scale
+# Print out ~/git/Flylab/ros/calibration/patterns/camera_calibration_pattern_30mm.pdf in 1:1 scale
 # Measure each checker to make sure it is 30mm, then tape pattern to something flat
 # Unmount camera from rig if necessary to give calibration pattern plenty of room to move
 rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_raw camera:=/camera
@@ -85,7 +86,7 @@ roscd <your device name>/launch
 
 
 4 ############################### Camera Extrinsic Parameters (i.e. Relationship of Camera to Arena):
-# Mount camera on flyatar rig, positioned so that the arena is roughly centered in image.
+# Mount camera on flylab rig, positioned so that the arena is roughly centered in image.
 roscd config/launch
 gedit hardware.launch
 # Make sure it points to <your device name>.launch, save & exit.
@@ -96,7 +97,7 @@ rostopic pub -1 Joystick/Commands geometry_msgs/Point -- dx dy dr            #(w
 
 roscd <your device name>/launch
 # Edit calibration.launch with mask/x, mask/y, mask/radius, etc. 
-# Print ~/git/Flyatar/ros/calibration/patterns/camera_plate_calibration_pattern.pdf in 1:1 scale
+# Print ~/git/Flylab/ros/calibration/patterns/camera_plate_calibration_pattern.pdf in 1:1 scale
 # Measure each checker to make sure it is 15mm, then use scissors to cut along circular line surrounding pattern
 # Place circular paper containing the checkerboard pattern on plate
 # Edit calibration.launch with rvec and tvec values.

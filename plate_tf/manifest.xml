@@ -1,0 +1,20 @@
+<package>
+  <description brief="plate_tf">
+
+	plate_tf
+
+  </description>
+  <author>Steve Safarik, Peter Polidoro</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/transform_server</url>
+  <depend package="rospy"/>
+  <depend package="tf"/>
+
+  <depend package="geometry_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="pythonmodules"/>
+
+</package>
+
+
