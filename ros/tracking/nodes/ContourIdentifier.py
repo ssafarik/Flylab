@@ -6,8 +6,8 @@ import copy
 import rospy
 import tf
 import numpy as N
-from tracking.msg import *
-from plate_tf.srv import *
+from tracking.msg import ArenaState, Contour, ContourInfo
+from plate_tf.srv import PlateCameraConversion
 from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker

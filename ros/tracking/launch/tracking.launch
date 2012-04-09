@@ -1,12 +1,12 @@
 <launch>
 	<!-- 
-	You can use the ROS image viewer to look at the live video:
-	e.g. rosrun image_view image_view image:=camera/image_processed
+	You can use the ROS image viewer to look at the live video, for example:
+	 
+	rosrun image_view image_view image:=camera/image_raw
+	rosrun image_view image_view image:=camera/image_rect
+	rosrun image_view image_view image:=camera/image_foreground
+	rosrun image_view image_view image:=camera/image_processed
 
-	camera/image_raw
-	camera/image_rect
-	camera/image_foreground
-	camera/image_processed
 	-->
 	  
 	<!-- Turn on/off contour windows. -->

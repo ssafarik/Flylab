@@ -16,27 +16,12 @@ import filters
 from pythonmodules import CircleFunctions
 
 
-###############################################################################
-###############################################################################
-###############################################################################
-# The class ContourIdentifier subscribes to ContourInfo and EndEffector state, 
-# and determines which of the visual contours correspond to the robot, and which 
-# to the flies.  Retains identities of the individual flies, determines their
-# orientation, and computes the error offset between the computed end effector
-# position and the visual robot position.
-#
-# Publishes an ArenaState message, and the EndEffectorOffset.
-#
-
-
-
-        
         
 ###############################################################################
 ###############################################################################
 ###############################################################################
 # class Fly()
-# Implements a fly (or robot) object in a 2D arena. 
+# Implements a fly or robot object in a 2D arena. 
 # Updates its state based on an image "contour" from a single camera.
 #
 class Fly:
