@@ -15,7 +15,6 @@ from flycore.msg import MsgFrameState
 import filters
 from pythonmodules import CircleFunctions
 import Fly
-import MatchHungarian
 from munkres import Munkres
 
 
@@ -482,25 +481,10 @@ class ContourIdentifier:
         if d is not []:
             # Choose the algorithm.
             #alg = 'galeshapely'
-            #alg = 'hungarian'
             alg = 'munkres'
             if alg=='galeshapely':
                 (mapObjectsGaleShapely, mapContours) = self.GetMatchGaleShapely(d)
                 mapContoursFromObjects = mapObjectsGaleShapely
-                
-            if alg=='hungarian':                    
-                (mapObjectsHungarian, unmapped) = MatchHungarian.MatchIdentities(d.transpose())
-                mapContoursFromObjects = [None for i in range(len(xyObjects))] #list(N.zeros(len(xyObjects)))
-                for i in range(len(xyObjects)):
-                    if mapObjectsHungarian[i] != -1:
-                        mapContoursFromObjects[i] = int(mapObjectsHungarian[i])
-                        #if not unmapped[i]:
-                        #    mapContoursFromObjects.append(mapObjectsHungarian[i])
-                        #else:
-                        #    mapContoursFromObjects.append(None)
-                    else:
-                        mapContoursFromObjects[i] = None
-                #mapContoursFromObjects = list(mapContoursFromObjects[i] for i in range(len(mapContoursFromObjects)))
                 
             if alg=='munkres':
                 mapObjectsMunkres = self.GetMatchMunkres(d)
@@ -516,8 +500,7 @@ class ContourIdentifier:
                     mapContoursFromObjects[m] = None
 
             #rospy.logwarn ('CI mapObjectsGaleShapely =%s' % (mapObjectsGaleShapely))
-            #rospy.logwarn ('CI mapObjectsHungarian  =%s, unmapped=%s' % (mapObjectsHungarian,unmapped))
-            #rospy.logwarn ('CI mapObjectsHungarian  =%s' % mapObjectsHungarian)
+            #rospy.logwarn ('CI mapObjectsMunkres  =%s' % mapObjectsMunkres)
     
             #rospy.logwarn ('CI mapContoursFromObjects=%s' % mapContoursFromObjects)
                 
@@ -626,11 +609,12 @@ class ContourIdentifier:
                             #rospy.logwarn ('self.contours[self.mapContourFromObject[%d]]=%s' % (iFly, self.contours[self.mapContourFromObject[iFly]]))
                             try:
                                 self.objects[iFly].Update(self.contours[self.mapContourFromObject[iFly]], None)
-                            except IndexError:
-                                rospy.logwarn('iFly=%s' % iFly)
-                                rospy.logwarn('self.mapContourFromObject=%s' % self.mapContourFromObject)
-                                rospy.logwarn('self.contours=%s' % self.contours)
-                                rospy.logwarn('len(self.objects)=%s' % len(self.objects))
+                            except IndexError, e:
+                                #rospy.logwarn('iFly=%s' % iFly)
+                                #rospy.logwarn('self.mapContourFromObject=%s' % self.mapContourFromObject)
+                                #rospy.logwarn('self.contours=%s' % self.contours)
+                                #rospy.logwarn('len(self.objects)=%s' % len(self.objects))
+                                rospy.logwarn('Exception on objects[%d].Update(): %s' % (iFly, e))
                         else:
                             self.objects[iFly].Update(None,                                           None)
         

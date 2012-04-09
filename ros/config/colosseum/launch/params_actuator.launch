@@ -16,7 +16,7 @@
 	<param name="fivebar/speed_max" type="double" value="200.0"/>
 	<param name="actuator/hzPoint" type="double" value="100.0"/>
 
-	<param name="fivebar/linkwidth" type="double" value="25.4"/> 
+	<param name="fivebar/linkwidth" type="double" value="25.4"/>  <!-- Affects the smallest closing angle. -->
 	<param name="fivebar/L0" type="double" value="266.7"/>  <!-- Distance between motor shafts -->
 	<param name="fivebar/L1" type="double" value="88.9"/>
 	<param name="fivebar/L2" type="double" value="88.9"/>
@@ -31,6 +31,15 @@
 		<param name="fivebar/kD"      type="double" value="0.2"/>
 		<param name="fivebar/maxI"    type="double" value="2.0"/> 
 		<param name="fivebar/kWindup" type="double" value="0.9"/> 
+	-->
+
+	<!-- Good PID gains for both step AND ramp response. -->
+	<!--
+	<param name="fivebar/kP"      type="double" value="0.01"/>
+	<param name="fivebar/kI"      type="double" value="0.15"/>
+	<param name="fivebar/kD"      type="double" value="0.1"/>
+	<param name="fivebar/maxI"    type="double" value="6.0"/> 
+	<param name="fivebar/kWindup" type="double" value="0.9"/> 
 	-->
 	
 	<!-- Good PID gains to follow a walking fly. -->
@@ -48,15 +57,6 @@
 	<param name="fivebar/maxI"    type="double" value="0.0"/>  
 	<param name="fivebar/kWindup" type="double" value="0.8"/>  
 	<!-- -->
-
-	<!-- Good PID gains for both step AND ramp response. -->
-	<!--
-	<param name="fivebar/kP"      type="double" value="0.01"/>
-	<param name="fivebar/kI"      type="double" value="0.15"/>
-	<param name="fivebar/kD"      type="double" value="0.1"/>
-	<param name="fivebar/maxI"    type="double" value="6.0"/> 
-	<param name="fivebar/kWindup" type="double" value="0.9"/> 
-	-->
 
 </launch>
 	
