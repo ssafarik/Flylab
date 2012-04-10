@@ -1,4 +1,4 @@
-FlyLab Software (formerly Flyatar2)
+Flylab Software (formerly Flyatar2)
 -------------------------------------
 
 This software is (i.e. hopes to be) the foundation software platform of 
@@ -15,12 +15,48 @@ has a directory in the "config" package.  There you will find all the relevant
 parameters, etc, needed for the software to operate on a given piece of hardware.  
 To have the software use a given piece of hardware, simply point 
 config/config/launch/hardware.launch to the name of your hardware.  Calibration 
-and setup of the hardware is in the file calibration.txt.
+and setup instructions are in the file calibration.txt.
 
-There is also a set of experiments, and an experiment library, in the "experiments" 
-package.  An experiment is specified by filling out a data structure in the 
-appropriate <experimentname>.py file, and then roslaunch'ing the appropriate 
-.launch file.  The experiments library has been written with the intention that 
-a wide variety of experiments are possible via this data structure.
+In the "experiments" package there is a set of experiments, and an experiment library.  
+An experiment runs as a "state machine", and the specific parameters are 
+specified by filling out a data structure in the appropriate <experimentname>.py 
+file, and then roslaunch'ing the appropriate .launch file.  The experiments 
+library has been written with the intention that a wide variety of experiments 
+are possible via this data structure.  During operation, you may view the state
+machine graph of the experiment with the following command:
+rosrun smach_viewer smach_viewer.py
 
-        
+
+Some useful commands:
+-----------------------
+roslaunch experiments <experimentname>.launch					# Run an experiment.
+
+roslaunch <your device name> camera.launch						# Run the camera; publish image_raw.
+ROS_NAMESPACE=camera rosrun image_proc image_proc				# Run the image processor; publish image_rect.
+roslaunch tracking tracking.launch								# Run the image tracking system; publish image_processed.
+
+rosrun image_view image_view image:=camera/image_raw			# Open a window for image_raw.
+rosrun image_view image_view image:=camera/image_rect			# Open a window for image_rect.
+rosrun image_view image_view image:=camera/image_processed		# Open a window for image_processed.
+rosrun dynamic_reconfigure reconfigure_gui camera				# Open a window to change camera settings.
+
+roslaunch config hardware.launch								# Load the currently configured hardware.
+
+roslaunch patterngen PatternGenXY.py							# Run the 2D pattern generator.
+rostopic pub -1 PatternGen patterngen/MsgPatternGen -- \           # Send a command to the pattern generator:
+													   mode \      # <byshape | bypoints > 
+													   shape \     # <constant | ramp | circle | square | flylogo | spiral> 
+													   frame \     # the reference frame for the pattern. 
+													   hzPattern \ # patterns per second.
+													   hzPoint \   # points per second of the pattern.
+													   count \     # total number of patterns to output, -1 means forever.
+													   pointlist \ # [...] a list of points.
+													   radius      # max distance from origin.
+													   preempt     # whether or not to interrupt the current pattern, <True|False>
+rostopic pub -1 PatternGen patterngen/MsgPatternGen "byshape" "circle" "Stage" 0.25 50 1 [] 40 True  # For example.
+
+rxgraph															# Show the graph of ROS nodes.
+rxconsole														# Show ROS messages, logs, etc.
+rosrun smach_viewer smach_viewer.py								# Show the state machine graph.
+
+

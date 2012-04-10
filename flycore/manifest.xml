@@ -1,0 +1,18 @@
+<package>
+  <description brief="flycore">
+
+     flycore
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/flycore</url>
+  <depend package="rospy"/>
+  <depend package="pythonmodules"/>
+  <depend package="geometry_msgs"/>
+  
+
+</package>
+
+

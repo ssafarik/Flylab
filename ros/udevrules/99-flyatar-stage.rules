@@ -1,3 +1,0 @@
-# Flyatar USB Control
-SUBSYSTEM=="usb_device", ACTION=="add", SYSFS{idVendor}=="0004",
-SYSFS{idProduct}=="0002", GROUP="usb", MODE="0660"

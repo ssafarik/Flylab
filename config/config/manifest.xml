@@ -1,0 +1,17 @@
+<package>
+  <description brief="config">
+
+     config
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/config</url>
+
+  <depend package="colosseum"/>
+  <depend package="babycarrot"/>
+
+</package>
+
+

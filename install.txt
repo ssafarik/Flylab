@@ -1,3 +1,8 @@
+###
+# NOTE: These instructions are outdated.
+###
+
+
 # Install Ubuntu:
 # http://www.ubuntu.com/
 
@@ -11,42 +16,42 @@ sudo apt-get update
 echo "hddtemp hddtemp/daemon boolean false" | sudo debconf-set-selections
 sudo apt-get install ros-cturtle-pr2all
 
-# Make new user flyatar-user
-sudo adduser flyatar-user
+# Make new user flylab-user
+sudo adduser flylab-user
 
-# Login as flyatar-user and setup local bin directory
+# Login as flylab-user and setup local bin directory
 mkdir ~/bin
 export PATH=~/bin:$PATH
 
-# Create Local Flyatar Git Repository:
-git clone git://github.com/peterpolidoro/Flyatar.git ~/git/Flyatar
-cp ~/git/Flyatar/ros/rosinstall ~/bin/
+# Create Local Flylab Git Repository:
+git clone git://github.com/peterpolidoro/Flylab.git ~/git/Flylab
+cp ~/git/Flylab/ros/rosinstall ~/bin/
 source /opt/ros/cturtle/setup.sh
-echo "source ~/ros/Flyatar/setup.sh" >> ~/.bashrc
+echo "source ~/ros/Flylab/setup.sh" >> ~/.bashrc
 . ~/.bashrc
 
 # Setting Groups and Permissions:
 sudo adduser $USER video
 sudo groupadd usb
 sudo adduser $USER usb
-sudo cp ~/git/Flyatar/ros/udevrules/99*.rules /etc/udev/rules.d/
+sudo cp ~/git/Flylab/ros/udevrules/99*.rules /etc/udev/rules.d/
 # restart computer
 
 # Compiling:
-rosmake flyatar_experiments
+rosmake experiments
 
 # Running the Pattern Experiment:
 roslaunch experiments pattern.launch
 
-# Updating Flyatar Code to get the latest git repository on github:
-cd ~/git/Flyatar2
+# Updating Flylab Code to get the latest git repository on github:
+cd ~/git/Flylab
 git pull
 
 
 
 # Example Local Repository Code Modification:
 # Change in-bounds radius from 60mm to 90mm for wait experiment
-cd ~/git/Flyatar/ros/control/flyatar_experiments/launch
+cd ~/git/Flylab/ros/experiments/launch
 # Open wait_experiment.launch in your favorite editor
 # Change this line: <param name="in_bounds_radius" type="double" value="60"/>
 # To this: <param name="in_bounds_radius" type="double" value="90"/>
@@ -56,15 +61,15 @@ cd ~/git/Flyatar/ros/control/flyatar_experiments/launch
 git commit -a -m "Modified in-bounds radius from 60mm to 90mm"
 
 # Converting bag files to directories of images and videos:
-# Create ~/FlyatarData/bag_file_play_list
+# Create ~/FlylabData/bag_file_play_list
 # Each line of the file bag_file_play list should contain the name of a single bag file
-# The bag files should be in the directory ~/FlyatarData/*_Bags/
+# The bag files should be in the directory ~/FlylabData/*_Bags/
 # Example bag_file_play_list:
 # 2010_12_14_14_46_07.bag
 # 2010_12_14_14_46_17.bag
 # 2010_12_14_14_46_23.bag
 # 
-# These bag files should be located in ~/FlyatarData/2010_12_14_Bags/
+# These bag files should be located in ~/FlylabData/2010_12_14_Bags/
 # Then run roslaunch file to save images and videos to ~/Videos/
 rosmake save_data
 roslaunch save_data play_bags_save_video_nocat.launch
@@ -85,13 +90,13 @@ cd ~/TEENSY
 wget http://www.pjrc.com/teensy/teensy.gz
 gzip -d teensy.gz
 chmod 755 teensy
-sudo cp ~/git/Flyatar/ros/udevrules/49-teensy.rules /etc/udev/rules.d/
-cd ~/ros/Flyatar/Flyatar/ros/actuation/stage/usb_device/
+sudo cp ~/git/Flylab/ros/udevrules/49-teensy.rules /etc/udev/rules.d/
+cd ~/ros/Flylab/ros/actuation/stage/usb_device/
 make clean
 make
 ~/TEENSY/teensy &
 # Press button on teensy board
-# Select hex file in ~/ros/Flyatar/Flyatar/ros/actuation/stage/usb_device/
+# Select hex file in ~/ros/Flylab/ros/actuation/stage/usb_device/
 # Press 'Program' button on Teensy GUI 
 # Press 'Reboot' button on Teensy GUI 
 

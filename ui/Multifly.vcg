@@ -1,0 +1,245 @@
+Background\ ColorR=0
+Background\ ColorG=0
+Background\ ColorB=0
+Fixed\ Frame=/Plate
+Target\ Frame=<Fixed Frame>
+CameraAxes.Enabled=0
+CameraAxes.Length=30
+CameraAxes.Radius=0.2
+CameraAxes.Reference\ Frame=/Camera
+EndEffector.Enabled=0
+EndEffector.Length=13
+EndEffector.Radius=0.2
+EndEffector.Reference\ Frame=/EndEffector
+Fly1.Enabled=1
+Fly1.Length=5
+Fly1.Radius=2
+Fly1.Reference\ Frame=/Fly1
+Fly10.Enabled=0
+Fly10.Length=1
+Fly10.Radius=0.1
+Fly10.Reference\ Frame=<Fixed Frame>
+<<<<<<< HEAD:ros/ui/Multifly.vcg
+=======
+Fly11.Enabled=0
+Fly11.Length=5
+Fly11.Radius=1
+Fly11.Reference\ Frame=/Fly11
+Fly12.Enabled=0
+Fly12.Length=5
+Fly12.Radius=1
+Fly12.Reference\ Frame=/Fly12
+Fly13.Enabled=0
+Fly13.Length=5
+Fly13.Radius=1
+Fly13.Reference\ Frame=/Fly13
+Fly14.Enabled=0
+Fly14.Length=5
+Fly14.Radius=1
+Fly14.Reference\ Frame=/Fly14
+>>>>>>> 9c1a4a3c2e4737d1e04dc78a9ac15ef164e80ec7:ui/Multifly.vcg
+Fly1Contour.Enabled=0
+Fly1Contour.Length=7
+Fly1Contour.Radius=0.5
+Fly1Contour.Reference\ Frame=/Fly1Contour
+Fly2.Enabled=0
+Fly2.Length=5
+Fly2.Radius=1
+Fly2.Reference\ Frame=/Fly2
+Fly3.Enabled=0
+Fly3.Length=5
+Fly3.Radius=1
+Fly3.Reference\ Frame=/Fly3
+Fly4.Enabled=0
+Fly4.Length=5
+Fly4.Radius=1
+Fly4.Reference\ Frame=/Fly4
+Fly5.Enabled=0
+Fly5.Length=5
+Fly5.Radius=1
+Fly5.Reference\ Frame=/Fly5
+Fly6.Enabled=0
+Fly6.Length=5
+Fly6.Radius=1
+Fly6.Reference\ Frame=/Fly6
+Fly7.Enabled=0
+Fly7.Length=5
+Fly7.Radius=1
+Fly7.Reference\ Frame=/Fly7
+Fly8.Enabled=0
+Fly8.Length=5
+Fly8.Radius=1
+Fly8.Reference\ Frame=/Fly8
+Fly9.Enabled=0
+Fly9.Length=5
+Fly9.Radius=1
+Fly9.Reference\ Frame=/Fly9
+Grid.Alpha=0.5
+Grid.Cell\ Size=10
+Grid.ColorR=0.5
+Grid.ColorG=0.5
+Grid.ColorB=0.5
+Grid.Enabled=1
+Grid.Line\ Style=0
+Grid.Line\ Width=0.03
+Grid.Normal\ Cell\ Count=0
+Grid.OffsetX=0
+Grid.OffsetY=0
+Grid.OffsetZ=0
+Grid.Plane=0
+Grid.Plane\ Cell\ Count=20
+Grid.Reference\ Frame=<Fixed Frame>
+Plate.Enabled=0
+Plate.Length=30
+Plate.Radius=0.2
+Plate.Reference\ Frame=/Plate
+Robot\ Model.Alpha=0.2
+Robot\ Model.Collision\ Enabled=0
+Robot\ Model.Enabled=1
+Robot\ Model.Robot\ Description=robot_description
+Robot\ Model.TF\ Prefix=
+Robot\ Model.Update\ Interval=0.02
+Robot\ Model.Visual\ Enabled=1
+Robot.Enabled=1
+Robot.Length=0.75
+Robot.Radius=0.2
+Robot.Reference\ Frame=/Robot
+Robot\:\ Robot\ Model\ Link\ link1Show\ Axes=0
+Robot\:\ Robot\ Model\ Link\ link1Show\ Trail=0
+RobotContour.Enabled=0
+RobotContour.Length=7
+RobotContour.Radius=0.5
+RobotContour.Reference\ Frame=/RobotContour
+Stage.Enabled=0
+Stage.Length=30
+Stage.Radius=0.22
+Stage.Reference\ Frame=/Stage
+TF.All\ Enabled=1
+TF.Enabled=0
+TF.Frame\ Timeout=15
+TF.Marker\ Scale=10
+TF.Show\ Arrows=1
+TF.Show\ Axes=1
+TF.Show\ Names=1
+TF.Update\ Interval=0
+Target.Enabled=1
+Target.Marker\ Topic=visualization_marker
+Target.arena=1
+Target.robot=1
+contour0.Enabled=0
+contour0.Length=5
+contour0.Radius=0.5
+contour0.Reference\ Frame=/contour0
+contour1.Enabled=0
+contour1.Length=5
+contour1.Radius=0.5
+contour1.Reference\ Frame=/contour1
+link5.Enabled=0
+link5.Length=1
+link5.Radius=0.1
+link5.Reference\ Frame=/link5
+Tool\ 2D\ Nav\ GoalTopic=goal
+Tool\ 2D\ Pose\ EstimateTopic=initialpose
+Camera\ Type=rviz::OrbitViewController
+Camera\ Config=0.001 0.00266457 208.352 0.321204 0.30182 -0.90312
+<<<<<<< HEAD:ros/ui/Multifly.vcg
+Property\ Grid\ State=selection=Fly10.Enabled;expanded=.Global Options,TF.Enabled.TF.StatusTopStatus,TF.Enabled.TF.Tree,Stage.Enabled.Stage.StatusTopStatus,Plate.Enabled.Plate.StatusTopStatus,Fly1Contour.Enabled.Fly1Contour.StatusTopStatus,RobotContour.Enabled.RobotContour.StatusTopStatus,EndEffector.Enabled.EndEffector.StatusTopStatus,Target.Enabled.Target.Namespaces,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour0.Enabled.contour0.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus,link5.Enabled.link5.StatusTopStatus;scrollpos=0,0;splitterpos=174,333;ispageselected=1
+=======
+Property\ Grid\ State=selection=Fly6.Enabled;expanded=.Global Options,TF.Enabled.TF.StatusTopStatus,TF.Enabled.TF.Tree,Stage.Enabled.Stage.StatusTopStatus,Plate.Enabled.Plate.StatusTopStatus,Fly1Contour.Enabled.Fly1Contour.StatusTopStatus,RobotContour.Enabled.RobotContour.StatusTopStatus,EndEffector.Enabled.EndEffector.StatusTopStatus,Target.Enabled.Target.Namespaces,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour0.Enabled.contour0.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus,link5.Enabled.link5.StatusTopStatus,RobotComputed.Enabled.RobotComputed.StatusTopStatus;scrollpos=0,19;splitterpos=160,305;ispageselected=1
+>>>>>>> 9c1a4a3c2e4737d1e04dc78a9ac15ef164e80ec7:ui/Multifly.vcg
+[Display0]
+Name=Grid
+Package=rviz
+ClassName=rviz::GridDisplay
+[Display1]
+Name=TF
+Package=rviz
+ClassName=rviz::TFDisplay
+[Display2]
+Name=Robot Model
+Package=rviz
+ClassName=rviz::RobotModelDisplay
+[Display3]
+Name=Stage
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display4]
+Name=Plate
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display5]
+Name=Robot
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display6]
+Name=Fly1Contour
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display7]
+Name=RobotContour
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display8]
+Name=EndEffector
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display9]
+Name=Target
+Package=rviz
+ClassName=rviz::MarkerDisplay
+[Display10]
+Name=CameraAxes
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display11]
+Name=contour0
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display12]
+Name=contour1
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display13]
+Name=link5
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display14]
+Name=Fly1
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display15]
+Name=Fly2
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display16]
+Name=Fly3
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display17]
+Name=Fly4
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display18]
+Name=Fly5
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display19]
+Name=Fly6
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display20]
+Name=Fly7
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display21]
+Name=Fly8
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display22]
+Name=Fly9
+Package=rviz
+ClassName=rviz::AxesDisplay
+[Display23]
+Name=Fly10
+Package=rviz
+ClassName=rviz::AxesDisplay
