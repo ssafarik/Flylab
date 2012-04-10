@@ -12,8 +12,8 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 from stage_action_server.msg import *
 from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
-from tracking.msg import ArenaState
 from experiments.srv import Trigger, ExperimentParams
+from tracking.msg import ArenaState
 from patterngen.msg import MsgPatternGen
 
 
