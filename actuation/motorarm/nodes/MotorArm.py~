@@ -501,7 +501,7 @@ if __name__ == '__main__':
     try:
         motorarm = MotorArm()
         motorarm.Mainloop()
-    except rospy.exceptions.ROSInterruptException: 
+    except rospy.ROSInterruptException: 
         pass
     
     

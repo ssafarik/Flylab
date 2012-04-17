@@ -227,7 +227,7 @@ class NullMotor:
 if __name__ == '__main__':
     try:
         nullmotor = NullMotor()
-    except rospy.exceptions.ROSInterruptException: 
+    except rospy.ROSInterruptException: 
         pass
     
     nullmotor.MainLoop()

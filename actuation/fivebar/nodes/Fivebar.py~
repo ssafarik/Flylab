@@ -641,7 +641,7 @@ class RosFivebar:
             try:
                 self.park_joint1()
                 self.park_joint2()
-            except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
+            except (rospy.ServiceException, IOError), e:
                 rospy.logwarn ("5B FAILED %s"%e)
                 
         rvStageState = SrvFrameStateResponse()

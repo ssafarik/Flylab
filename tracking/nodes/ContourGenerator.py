@@ -85,8 +85,22 @@ class ContourGenerator:
         self.ptsOriginPlate.point.x = 0
         self.ptsOriginPlate.point.y = 0
         
-        self.tfrx.waitForTransform("ImageRect", self.ptsOriginROI.header.frame_id, rospy.Time(), rospy.Duration(15.0))
-        self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(15.0))
+        initialized_transforms = False
+        while (not initialized_transforms):
+            try:
+                if rospy.is_shutdown():
+                    raise rospy.exceptions.ROSInterruptException
+                self.tfrx.waitForTransform("ImageRect", self.ptsOriginROI.header.frame_id, rospy.Time(), rospy.Duration(0.5))
+                self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(0.5))
+                initialized_transforms = True
+            except tf.Exception:
+                rospy.loginfo('ContourGenerator waiting for transforms: ImageRect, ROI...')
+                pass
+            except:
+                raise sys.exc_info() #rospy.exceptions.ROSInterruptException
+
+            rospy.loginfo('ContourGenerator found for transforms.')
+
 
 #        rospy.wait_for_service('camera_from_plate', timeout=10.0)
 #        try:
@@ -567,10 +581,10 @@ class ContourGenerator:
 
 def main(args):
     rospy.init_node('ContourGenerator') #, anonymous=True)
-    ip = ContourGenerator()
     try:
+        ip = ContourGenerator()
         ip.Main()
-    except KeyboardInterrupt:
+    except rospy.exceptions.ROSInterruptException:
         rospy.loginfo("Shutting down")
     cv.DestroyAllWindows()
 

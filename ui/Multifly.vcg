@@ -19,25 +19,6 @@ Fly10.Enabled=0
 Fly10.Length=1
 Fly10.Radius=0.1
 Fly10.Reference\ Frame=<Fixed Frame>
-<<<<<<< HEAD:ros/ui/Multifly.vcg
-=======
-Fly11.Enabled=0
-Fly11.Length=5
-Fly11.Radius=1
-Fly11.Reference\ Frame=/Fly11
-Fly12.Enabled=0
-Fly12.Length=5
-Fly12.Radius=1
-Fly12.Reference\ Frame=/Fly12
-Fly13.Enabled=0
-Fly13.Length=5
-Fly13.Radius=1
-Fly13.Reference\ Frame=/Fly13
-Fly14.Enabled=0
-Fly14.Length=5
-Fly14.Radius=1
-Fly14.Reference\ Frame=/Fly14
->>>>>>> 9c1a4a3c2e4737d1e04dc78a9ac15ef164e80ec7:ui/Multifly.vcg
 Fly1Contour.Enabled=0
 Fly1Contour.Length=7
 Fly1Contour.Radius=0.5
@@ -106,6 +87,12 @@ Robot.Radius=0.2
 Robot.Reference\ Frame=/Robot
 Robot\:\ Robot\ Model\ Link\ link1Show\ Axes=0
 Robot\:\ Robot\ Model\ Link\ link1Show\ Trail=0
+Robot\:\ Robot\ Model\ Link\ link2Show\ Axes=0
+Robot\:\ Robot\ Model\ Link\ link2Show\ Trail=0
+Robot\:\ Robot\ Model\ Link\ link3Show\ Axes=0
+Robot\:\ Robot\ Model\ Link\ link3Show\ Trail=0
+Robot\:\ Robot\ Model\ Link\ link4Show\ Axes=0
+Robot\:\ Robot\ Model\ Link\ link4Show\ Trail=0
 RobotContour.Enabled=0
 RobotContour.Length=7
 RobotContour.Radius=0.5
@@ -125,7 +112,10 @@ TF.Update\ Interval=0
 Target.Enabled=1
 Target.Marker\ Topic=visualization_marker
 Target.arena=1
+Target.command=1
 Target.robot=1
+Target.target=1
+Target.tooloffset=1
 contour0.Enabled=0
 contour0.Length=5
 contour0.Radius=0.5
@@ -142,11 +132,7 @@ Tool\ 2D\ Nav\ GoalTopic=goal
 Tool\ 2D\ Pose\ EstimateTopic=initialpose
 Camera\ Type=rviz::OrbitViewController
 Camera\ Config=0.001 0.00266457 208.352 0.321204 0.30182 -0.90312
-<<<<<<< HEAD:ros/ui/Multifly.vcg
-Property\ Grid\ State=selection=Fly10.Enabled;expanded=.Global Options,TF.Enabled.TF.StatusTopStatus,TF.Enabled.TF.Tree,Stage.Enabled.Stage.StatusTopStatus,Plate.Enabled.Plate.StatusTopStatus,Fly1Contour.Enabled.Fly1Contour.StatusTopStatus,RobotContour.Enabled.RobotContour.StatusTopStatus,EndEffector.Enabled.EndEffector.StatusTopStatus,Target.Enabled.Target.Namespaces,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour0.Enabled.contour0.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus,link5.Enabled.link5.StatusTopStatus;scrollpos=0,0;splitterpos=174,333;ispageselected=1
-=======
-Property\ Grid\ State=selection=Fly6.Enabled;expanded=.Global Options,TF.Enabled.TF.StatusTopStatus,TF.Enabled.TF.Tree,Stage.Enabled.Stage.StatusTopStatus,Plate.Enabled.Plate.StatusTopStatus,Fly1Contour.Enabled.Fly1Contour.StatusTopStatus,RobotContour.Enabled.RobotContour.StatusTopStatus,EndEffector.Enabled.EndEffector.StatusTopStatus,Target.Enabled.Target.Namespaces,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour0.Enabled.contour0.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus,link5.Enabled.link5.StatusTopStatus,RobotComputed.Enabled.RobotComputed.StatusTopStatus;scrollpos=0,19;splitterpos=160,305;ispageselected=1
->>>>>>> 9c1a4a3c2e4737d1e04dc78a9ac15ef164e80ec7:ui/Multifly.vcg
+Property\ Grid\ State=selection=Fly6.Enabled;expanded=.Global Options,TF.Enabled.TF.StatusTopStatus,TF.Enabled.TF.Tree,Stage.Enabled.Stage.StatusTopStatus,Plate.Enabled.Plate.StatusTopStatus,Fly1Contour.Enabled.Fly1Contour.StatusTopStatus,RobotContour.Enabled.RobotContour.StatusTopStatus,EndEffector.Enabled.EndEffector.StatusTopStatus,Target.Enabled.Target.Namespaces,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour0.Enabled.contour0.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus,link5.Enabled.link5.StatusTopStatus,Fly2.Enabled.Fly2.StatusTopStatus,Fly3.Enabled.Fly3.StatusTopStatus,Fly4.Enabled.Fly4.StatusTopStatus,Fly5.Enabled.Fly5.StatusTopStatus,Fly6.Enabled.Fly6.StatusTopStatus,Fly7.Enabled.Fly7.StatusTopStatus,Fly8.Enabled.Fly8.StatusTopStatus,Fly9.Enabled.Fly9.StatusTopStatus,Fly10.Enabled.Fly10.StatusTopStatus;scrollpos=0,8;splitterpos=150,301;ispageselected=1
 [Display0]
 Name=Grid
 Package=rviz

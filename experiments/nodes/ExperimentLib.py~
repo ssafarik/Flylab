@@ -710,7 +710,7 @@ class MoveRobot (smach.State):
                         self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
                                                                                       pose=self.goal.state.pose),
                                                                   speed = speedTarget))
-                except (rospy.ServiceException, rospy.exceptions.ROSInterruptException), e:
+                except (rospy.ServiceException, rospy.ROSInterruptException), e:
                     rospy.logwarn ('EL Exception calling set_stage_state(): %s' % e)
                     self.ptTarget = None
                 #rospy.loginfo('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
