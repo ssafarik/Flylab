@@ -1,4 +1,5 @@
 <launch>
-  <node pkg="save_data" type="SaveBag.py" name="SaveBag" />
+  <!-- <node pkg="save_data" type="SaveBag.py" name="SaveBag" /> -->
   <node pkg="save_data" type="SaveArenaState.py" name="SaveArenaState" />
+  <node pkg="save_data" type="SaveVideo.py" name="SaveVideo" />
 </launch>

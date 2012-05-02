@@ -112,28 +112,52 @@ def ClipXyToRadius(x, y, rmax):
     return [xOut,yOut]
 
 
-def TriggerServiceAttach():
-    trigger = None
-    stSrv = "trigger"
-    rospy.wait_for_service(stSrv)
-    try:
-        trigger = rospy.ServiceProxy(stSrv, Trigger)
-    except rospy.ServiceException, e:
-        rospy.logwarn ("FAILED %s: %s"%(stSrv,e))
+# TriggerService()
+# Sends trigger commands to a list of services.
+#
+class TriggerService():
+    def __init__(self):
+        self.services = {"save/arenastate/trigger": None, 
+                         "save/video/trigger": None}
         
-    return trigger
-
-
-def NewTrialServiceAttach():
-    NewTrial = None    
-    stSrv = "new_trial"
-    rospy.wait_for_service(stSrv)
-    try:
-        NewTrial = rospy.ServiceProxy(stSrv, ExperimentParams)
-    except rospy.ServiceException, e:
-        rospy.logwarn ("FAILED %s: %s"%(stSrv,e))
+    def attach(self):
+        for key in self.services:
+            #rospy.logwarn('Waiting for service: %s' % key)
+            rospy.wait_for_service(key)
+            try:
+                self.services[key] = rospy.ServiceProxy(key, Trigger)
+            except rospy.ServiceException, e:
+                rospy.logwarn ("FAILED %s: %s" % (key,e))
         
-    return NewTrial
+    def notify(self, status):
+        for key,callback in self.services.iteritems():
+            if callback is not None:
+                callback(status)
+            
+        
+
+# NewTrialService()
+# Sends new_trial commands to a list of services.
+#
+class NewTrialService():
+    def __init__(self):
+        self.services = {"save/arenastate/new_trial": None, 
+                         "save/video/new_trial": None}
+    
+    def attach(self):
+        for key in self.services:
+            #rospy.logwarn('Waiting for service: %s' % key)
+            rospy.wait_for_service(key)
+            try:
+                self.services[key] = rospy.ServiceProxy(key, ExperimentParams)
+            except rospy.ServiceException, e:
+                rospy.logwarn ("FAILED %s: %s" % (key,e))
+        
+    def notify(self, experimentparams):
+        for key,callback in self.services.iteritems():
+            if callback is not None:
+                callback(experimentparams)
+
     
 
 #######################################################################################################
@@ -149,7 +173,8 @@ class TemplateState (smach.State):
         self.rosrate = rospy.Rate(100)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback)
 
-        self.TriggerNotify = TriggerServiceAttach()
+        self.Trigger = TriggerService()
+        self.Trigger.attach()
         
     
     def OnShutdown_callback(self):
@@ -166,7 +191,7 @@ class TemplateState (smach.State):
     
         while self.arenastate is None:
             if self.preempt_requested():
-                self.TriggerNotify(False)
+                self.Trigger.notify(False)
                 return 'preempted'
             rospy.sleep(1.0)
 
@@ -196,9 +221,9 @@ class TemplateState (smach.State):
 
          # Send trigger status.
         if rv=='succeeded' and self.type=='entry':
-            self.TriggerNotify(True)
+            self.Trigger.notify(True)
         else:
-            self.TriggerNotify(False)
+            self.Trigger.notify(False)
 
         
                  
@@ -238,8 +263,11 @@ class NewTrial (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         #self.pub_experimentparams = rospy.Publisher('ExperimentParams', ExperimentParams)
-        self.TriggerNotify = TriggerServiceAttach()
-        self.NewTrial = NewTrialServiceAttach()
+        self.Trigger = TriggerService()
+        self.Trigger.attach()
+        
+        self.NewTrial = NewTrialService()
+        self.NewTrial.attach()
 
         
     def execute(self, userdata):
@@ -252,11 +280,11 @@ class NewTrial (smach.State):
 
         rospy.loginfo ('EL State NewTrial(%s)' % experimentparams.experiment.trial)
 
-        self.TriggerNotify(False)
+        self.Trigger.notify(False)
         userdata.experimentparamsOut = experimentparams
         #self.pub_experimentparams.publish(experimentparams)
         try:
-            self.NewTrial (experimentparams)
+            self.NewTrial.notify(experimentparams)
             rv = 'succeeded'
         except rospy.ServiceException:
             rv = 'aborted'
@@ -286,7 +314,8 @@ class TriggerOnStates (smach.State):
         self.rosrate = rospy.Rate(100)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback)
 
-        self.TriggerNotify = TriggerServiceAttach()
+        self.Trigger = TriggerService()
+        self.Trigger.attach()
     
     
     def OnShutdown_callback(self):
@@ -315,7 +344,7 @@ class TriggerOnStates (smach.State):
                 
                 while self.arenastate is None:
                     if self.preempt_requested():
-                        self.TriggerNotify(False)
+                        self.Trigger.notify(False)
                         return 'preempted'
                     rospy.sleep(1.0)
         
@@ -422,11 +451,12 @@ class TriggerOnStates (smach.State):
                             break
                     
                     self.rosrate.sleep()
-    
+
             if rv=='succeeded' and self.type=='entry':
-                self.TriggerNotify(True)
+                self.Trigger.notify(True)
             else:
-                self.TriggerNotify(False)
+                self.Trigger.notify(False)
+                
         except rospy.ServiceException:
             rv = 'aborted'
             
@@ -445,7 +475,8 @@ class TriggerOnTime (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
 
-        self.TriggerNotify = TriggerServiceAttach()
+        self.Trigger = TriggerService()
+        self.Trigger.attach()
         
 
     def execute(self, userdata):
@@ -453,11 +484,10 @@ class TriggerOnTime (smach.State):
         rv = 'succeeded'
         rospy.sleep(userdata.experimentparamsIn.waitEntry)
 
-    
         if rv=='succeeded' and self.type=='entry':
-            self.TriggerNotify(True)
+            self.Trigger.notify(True)
         else:
-            self.TriggerNotify(False)
+            self.Trigger.notify(False)
 
         #rospy.loginfo ('EL Exiting TriggerOnTime()')
         return rv
@@ -521,7 +551,7 @@ class GotoHome (smach.State):
             self.goal.state.pose.position.y = userdata.experimentparamsIn.home.y
             self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
                                                                           pose=self.goal.state.pose),
-                                                      speed = userdata.experimentparamsIn.move.relative.speed))
+                                                      speed = userdata.experimentparamsIn.home.speed))
 
             rv = 'aborted'
             while True:
@@ -738,7 +768,7 @@ class MoveRobot (smach.State):
             
             if userdata.experimentparamsIn.move.timeout != -1:
                 if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
-                    rv = 'preempted'
+                    rv = 'succeeded'
                     break
             
             self.rosrate.sleep()
@@ -775,7 +805,7 @@ class MoveRobot (smach.State):
             
             if userdata.experimentparamsIn.move.timeout != -1:
                 if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
-                    rv = 'preempted'
+                    rv = 'succeeded'
                     break
             
             self.rosrate.sleep()
@@ -808,28 +838,20 @@ class Experiment():
         
         
         with self.sm:
-            #self.goalStart = stage_action_server.msg.ActionStageStateGoal()
-            #self.goalStart.state.header.frame_id = 'Plate'
-            #self.goalStart.state.pose.position.x = self.xHome
-            #self.goalStart.state.pose.position.y = self.yHome
 
-            # Add states.
             smach.StateMachine.add('NEW_EXPERIMENT',
                                    NewExperiment(),
-                                   transitions={'succeeded':'GOTO_HOME_PRE',
+                                   transitions={'succeeded':'GOTO_HOME',
                                                 'aborted':'aborted',
                                                 'preempted':'NEW_EXPERIMENT'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
-            smach.StateMachine.add('GOTO_HOME_PRE',
+            smach.StateMachine.add('GOTO_HOME',
                                    GotoHome(),
-                                   #smach_ros.SimpleActionState('StageActionServer',
-                                   #                            ActionStageStateAction,
-                                   #                            goal=self.goalStart),
                                    transitions={'succeeded':'NEW_TRIAL',
                                                 'aborted':'aborted',
-                                                'preempted':'GOTO_HOME_PRE'},
+                                                'preempted':'GOTO_HOME'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
@@ -867,20 +889,9 @@ class Experiment():
 
             smach.StateMachine.add('EXITTRIGGER', 
                                    TriggerOnStates(type='exit'),
-                                   transitions={'succeeded':'GOTO_HOME_POST',
+                                   transitions={'succeeded':'GOTO_HOME',
                                                 'aborted':'aborted',
-                                                'preempted':'GOTO_HOME_POST'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
-
-            smach.StateMachine.add('GOTO_HOME_POST',
-                                   GotoHome(),
-                                   #smach_ros.SimpleActionState('StageActionServer',
-                                   #                            ActionStageStateAction,
-                                   #                            goal=self.goalStart),
-                                   transitions={'succeeded':'NEW_TRIAL',
-                                                'aborted':'aborted',
-                                                'preempted':'NEW_TRIAL'},
+                                                'preempted':'GOTO_HOME'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 

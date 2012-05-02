@@ -5,7 +5,7 @@ import struct
 import experiments.msg
 
 class ExperimentParamsRequest(roslib.message.Message):
-  _md5sum = "bea8e3514910f215b06899cabdaa1660"
+  _md5sum = "1e95b5f2c80621a002d46555834ab68e"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings experiment
@@ -28,6 +28,7 @@ MSG: experiments/HomeSettings
 bool enabled
 float64 x
 float64 y
+float64 speed
 float64 tolerance
 float64 timeout
 
@@ -150,7 +151,7 @@ bool onlyWhileTriggered
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2iB5dB6d.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
+      buff.write(_struct_2iB6dB6d.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
       _x = self.triggerEntry.angleTest
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
@@ -222,8 +223,8 @@ bool onlyWhileTriggered
       self.experiment.description = str[start:end]
       _x = self
       start = end
-      end += 98
-      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_2iB5dB6d.unpack(str[start:end])
+      end += 106
+      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_2iB6dB6d.unpack(str[start:end])
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
       start = end
@@ -336,7 +337,7 @@ bool onlyWhileTriggered
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2iB5dB6d.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
+      buff.write(_struct_2iB6dB6d.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
       _x = self.triggerEntry.angleTest
       length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
@@ -410,8 +411,8 @@ bool onlyWhileTriggered
       self.experiment.description = str[start:end]
       _x = self
       start = end
-      end += 98
-      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_2iB5dB6d.unpack(str[start:end])
+      end += 106
+      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_2iB6dB6d.unpack(str[start:end])
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
       start = end
@@ -511,14 +512,14 @@ bool onlyWhileTriggered
       raise roslib.message.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = roslib.message.struct_I
-_struct_2d = struct.Struct("<2d")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
 _struct_B2dB = struct.Struct("<B2dB")
-_struct_2iB5dB6d = struct.Struct("<2iB5dB6d")
+_struct_2d = struct.Struct("<2d")
 _struct_B2d = struct.Struct("<B2d")
 _struct_2di2dB6d = struct.Struct("<2di2dB6d")
 _struct_4B = struct.Struct("<4B")
+_struct_2iB6dB6d = struct.Struct("<2iB6dB6d")
 """autogenerated by genmsg_py from ExperimentParamsResponse.msg. Do not edit."""
 import roslib.message
 import struct
@@ -627,6 +628,6 @@ _struct_I = roslib.message.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(roslib.message.ServiceDefinition):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '9c573b923fc0967cd6e6453ab8575aa6'
+  _md5sum = '2e4da8739f4b9829d90d50823130dccd'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

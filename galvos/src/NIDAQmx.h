@@ -1,1 +1,0 @@
-/usr/local/natinst/nidaqmx/include/NIDAQmx.h
