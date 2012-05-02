@@ -32,7 +32,7 @@ class ExperimentPassiveChase():
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         
-        self.experimentparams.waitEntry = 150.0
+        self.experimentparams.waitEntry = 0#150.0
         
         self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.distanceMin =   0.0
@@ -49,7 +49,7 @@ class ExperimentPassiveChase():
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.move.pattern.hzPattern = 0.10
+        self.experimentparams.move.pattern.hzPattern = .05
         self.experimentparams.move.pattern.hzPoint = 10
         self.experimentparams.move.pattern.count = -1
         self.experimentparams.move.pattern.radius = 30

@@ -55,7 +55,7 @@ rosrun image_view image_view image:=camera/image_raw &
 
 
 # Open the camera properties window.
-rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node &
+rosrun dynamic_reconfigure reconfigure_gui camera &
 
 
 # Adjust mode, brightness, exposure, gain, shutter, etc.
