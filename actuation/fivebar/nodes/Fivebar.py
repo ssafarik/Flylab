@@ -252,7 +252,7 @@ class RosFivebar:
     
     def ClipXyToRadius(self, x, y):
         r = N.sqrt(x*x+y*y)
-        rLimit = N.min(self.radiusMovement, self.radiusReachable)
+        rLimit = N.min([self.radiusMovement, self.radiusReachable])
         
         if rLimit < r:
             angle = N.arctan2(y,x)
@@ -641,7 +641,7 @@ class RosFivebar:
             try:
                 self.park_joint1()
                 self.park_joint2()
-            except (rospy.ServiceException, IOError), e:
+            except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
                 rospy.logwarn ("5B FAILED %s"%e)
                 
         rvStageState = SrvFrameStateResponse()
@@ -662,12 +662,16 @@ class RosFivebar:
         rospy.loginfo ('5B Center = %s, %s' % (self.xCenter, self.yCenter))
         rospy.loginfo ('5B Calibrating: q1origin=%s, q1park=%s, q2origin=%s, q2park=%s' % (q1origin, q1park, q2origin, q2park))
         with self.lock:
-            rv = self.calibrate_joint1(NEGATIVE, q1origin, q1park, True)
-            rospy.loginfo ('5B Calibrated joint1')
-            q1index = rv.position
-            rv = self.calibrate_joint2(POSITIVE, q2origin, q2park, True)
-            rospy.loginfo ('5B Calibrated joint2')
-            q2index = rv.position
+            try:
+                rv = self.calibrate_joint1(NEGATIVE, q1origin, q1park, True)
+                rospy.loginfo ('5B Calibrated joint1')
+                q1index = rv.position
+                rv = self.calibrate_joint2(POSITIVE, q2origin, q2park, True)
+                rospy.loginfo ('5B Calibrated joint2')
+                q2index = rv.position
+            except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
+                rospy.logwarn ("5B Exception:  %s" % e)
+           
 
         rvStageState = self.GetStageState()
         rospy.loginfo ('5B Calibrate_callback rvStageState=%s' % rvStageState)
@@ -970,8 +974,8 @@ class RosFivebar:
                         #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.ptsToolRef.point.x,self.ptsToolRef.point.y))
                         self.setPositionAtVel_joint1(Header(frame_id=self.names[0]), angle1, v1)
                         self.setPositionAtVel_joint2(Header(frame_id=self.names[1]), angle2, v2)
-                    except (rospy.ServiceException, IOError), e:
-                        rospy.logwarn ("5B FAILED %s"%e)
+                    except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
+                        rospy.logwarn ("5B Exception:  %s" % e)
 
         
     def OnShutdown_callback(self):
@@ -1004,7 +1008,7 @@ class RosFivebar:
 if __name__ == '__main__':
     try:
         fivebar = RosFivebar()
-    except rospy.ROSInterruptException: 
+    except rospy.exceptions.ROSInterruptException:
         pass
     
     fivebar.Main()

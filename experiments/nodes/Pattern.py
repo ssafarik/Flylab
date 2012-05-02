@@ -22,13 +22,14 @@ class ExperimentPattern():
         
         self.experimentparams.save.filenamebase = "pattern"
         self.experimentparams.save.arenastate = False
-        self.experimentparams.save.video = False
+        self.experimentparams.save.video = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.home.enabled = False
+        self.experimentparams.home.enabled = True
         self.experimentparams.home.x = 0.0
         self.experimentparams.home.y = 0.0
+        self.experimentparams.home.speed = 20
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         
@@ -49,11 +50,11 @@ class ExperimentPattern():
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral'
-        self.experimentparams.move.pattern.hzPattern = 0.01  # Patterns per second.
+        self.experimentparams.move.pattern.hzPattern = 0.05  # Patterns per second.
         self.experimentparams.move.pattern.hzPoint = rospy.get_param('actuator/hzPoint', 100.0)  # The update rate for the actuator.
-        self.experimentparams.move.pattern.count = -1
+        self.experimentparams.move.pattern.count = 1
         self.experimentparams.move.pattern.radius = 50
-        self.experimentparams.move.timeout = -1
+        self.experimentparams.move.timeout = self.experimentparams.move.pattern.count * (1.0/self.experimentparams.move.pattern.hzPattern)
         
         self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0

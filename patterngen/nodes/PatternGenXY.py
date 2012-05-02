@@ -268,6 +268,6 @@ if __name__ == '__main__':
     try:
         patterngen = PatternGenXY()
         patterngen.Main()
-    except rospy.ROSInterruptException: 
+    except rospy.exceptions.ROSInterruptException: 
         pass
 

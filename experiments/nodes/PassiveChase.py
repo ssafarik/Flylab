@@ -29,6 +29,7 @@ class ExperimentPassiveChase():
         self.experimentparams.home.enabled = False
         self.experimentparams.home.x = 0.0
         self.experimentparams.home.y = 0.0
+        self.experimentparams.home.speed = 20
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         

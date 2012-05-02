@@ -36,8 +36,8 @@ class SaveArenaState:
         self.sub_arenastate = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback)
         #self.sub_commandsavedata = rospy.Subscriber("CommandSavedata", CommandSavedata, self.commandsavedata_callback)
         #self.sub_experimentparams = rospy.Subscriber("ExperimentParams", ExperimentParams, self.NewTrial_callback)
-        rospy.Service('new_trial', ExperimentParams, self.NewTrial_callback)
-        rospy.Service('trigger', Trigger, self.Trigger_callback)
+        rospy.Service('save/arenastate/new_trial', ExperimentParams, self.NewTrial_callback)
+        rospy.Service('save/arenastate/trigger', Trigger, self.Trigger_callback)
         self.tfrx = tf.TransformListener()
         self.lock = threading.Lock()
         

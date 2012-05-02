@@ -25,11 +25,6 @@ rosmake image_proc
 rosmake experiments
 rosmake calibration
 
-# If using simple_step
-cd ~/git/Flylab/udevrules
-sudo cp 99-simple_step.rules /etc/udev/rules.d
-sudo usermod -a -G plugdev <username>
-
 
 0 ############################### If this is new hardware:
 cd ...Flylab/ros/config
@@ -60,7 +55,7 @@ rosrun image_view image_view image:=camera/image_raw &
 
 
 # Open the camera properties window.
-rosrun dynamic_reconfigure reconfigure_gui camera &
+rosrun dynamic_reconfigure reconfigure_gui camera1394v2_node &
 
 
 # Adjust mode, brightness, exposure, gain, shutter, etc.

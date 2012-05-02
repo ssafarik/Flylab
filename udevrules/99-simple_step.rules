@@ -1,0 +1,2 @@
+#Will Dickson's simple-step usb device
+SUBSYSTEM=="usb", ACTION=="add", ENV{ID_VENDOR_ID}=="1781", GROUP:="plugdev", MODE:="0664"

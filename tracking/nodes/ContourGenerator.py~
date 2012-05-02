@@ -94,12 +94,12 @@ class ContourGenerator:
                 self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(0.5))
                 initialized_transforms = True
             except tf.Exception:
-                rospy.loginfo('ContourGenerator waiting for transforms: ImageRect, ROI...')
+                rospy.logwarn('ContourGenerator waiting for transforms: ImageRect, ROI...')
                 pass
             except:
                 raise sys.exc_info() #rospy.exceptions.ROSInterruptException
 
-            rospy.loginfo('ContourGenerator found for transforms.')
+            rospy.logwarn('ContourGenerator found for transforms.')
 
 
 #        rospy.wait_for_service('camera_from_plate', timeout=10.0)
