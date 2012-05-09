@@ -123,7 +123,7 @@ class SaveVideo:
                 rospy.logerr('Exception running avconv')
                 
             rospy.logwarn('Saved %s' % (self.filenameVideo))
-            self.reset_frames()
+            #self.reset_frames()
 
             
     def reset_frames(self):
@@ -143,10 +143,12 @@ class SaveVideo:
     #    Closes the log file if triggering state goes from True->False.
     #
     def Trigger_callback(self, reqTrigger):
-        #rospy.logwarn('savevideo trigger callback %s' % reqTrigger.triggered)
-        if self.triggered != reqTrigger.triggered:
+        if self.triggered != reqTrigger.triggered: # Change in trigger state.
             self.triggered = reqTrigger.triggered
             
+            if self.triggered: # Rising edge.
+                self.reset_frames()
+                
             # At the end of a trial (i.e. trigger falling edge), convert the frames to video.
             if (self.saveOnlyWhileTriggered) and (not self.triggered):
                 self.save_video_from_frames()
