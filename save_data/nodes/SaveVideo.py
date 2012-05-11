@@ -44,6 +44,7 @@ class SaveVideo:
         rospy.Service('save/video/trigger', Trigger, self.Trigger_callback)
         
         self.bridge = CvBridge()
+	self.saveVideo = False
 
         self.framerate = rospy.get_param("save/framerate", 30)
         #self.nRepeatFrames = int(rospy.get_param('save/video_image_repeat_count'))
@@ -73,7 +74,7 @@ class SaveVideo:
 
 
     def image_callback(self, image):
-        if (self.initialized) and (self.triggered):
+        if (self.saveVideo) and (self.initialized) and (self.triggered):
             with self.lock:
                 # Convert ROS image to OpenCV image
                 try:
@@ -96,34 +97,35 @@ class SaveVideo:
     
 
     def save_video_from_frames(self):
-        with self.lock:
-            
-            # Rewrite all the image files, with duplicate frames to simulate slow-motion.
-            #chdir(self.dirImage)
-            #imagenames = self.get_imagenames(self.dirImage)
-            #iFrame = 0
-            #for imagename in imagenames:
-            #    chdir(self.dirImages)
-            #    image = cv.LoadImage(imagename)
-            #    chdir(self.dirImages2)
-            #    for iRepeat in range(self.nRepeatFrames):
-            #        filenameImage = "{num:06d}.png".format(num=iFrame)
-            #        cv.SaveImage(filenameImage, image)
-            #        iFrame += 1
-    
-#            cmdCreateVideoFile = 'ffmpeg -f image2 -i ' + self.dirImages + '/%06d.png -r ' + str(self.framerate) + ' ' + \
-#                                   '-sameq -s 640x480 -mbd rd -trellis 2 -cmp 2 -subcmp 2 -g 100 -bf 2 -pass 1/2 ' + \
-#                                   self.filenameVideo
-            cmdCreateVideoFile = 'avconv -i ' + self.dirImages + '/%06d.png ' + self.filenameVideo
-            rospy.logwarn('Converting .png images to video using command:')
-            rospy.logwarn (cmdCreateVideoFile)
-            try:
-                subprocess.check_call(cmdCreateVideoFile, shell=True)
-            except:
-                rospy.logerr('Exception running avconv')
+        if (self.saveVideo) and (self.initialized):
+            with self.lock:
                 
-            rospy.logwarn('Saved %s' % (self.filenameVideo))
-            #self.reset_frames()
+                # Rewrite all the image files, with duplicate frames to simulate slow-motion.
+                #chdir(self.dirImage)
+                #imagenames = self.get_imagenames(self.dirImage)
+                #iFrame = 0
+                #for imagename in imagenames:
+                #    chdir(self.dirImages)
+                #    image = cv.LoadImage(imagename)
+                #    chdir(self.dirImages2)
+                #    for iRepeat in range(self.nRepeatFrames):
+                #        filenameImage = "{num:06d}.png".format(num=iFrame)
+                #        cv.SaveImage(filenameImage, image)
+                #        iFrame += 1
+        
+    #            cmdCreateVideoFile = 'ffmpeg -f image2 -i ' + self.dirImages + '/%06d.png -r ' + str(self.framerate) + ' ' + \
+    #                                   '-sameq -s 640x480 -mbd rd -trellis 2 -cmp 2 -subcmp 2 -g 100 -bf 2 -pass 1/2 ' + \
+    #                                   self.filenameVideo
+                cmdCreateVideoFile = 'avconv -i ' + self.dirImages + '/%06d.png ' + self.filenameVideo
+                rospy.logwarn('Converting .png images to video using command:')
+                rospy.logwarn (cmdCreateVideoFile)
+                try:
+                    subprocess.check_call(cmdCreateVideoFile, shell=True)
+                except:
+                    rospy.logerr('Exception running avconv')
+                    
+                rospy.logwarn('Saved %s' % (self.filenameVideo))
+                #self.reset_frames()
 
             
     def reset_frames(self):
