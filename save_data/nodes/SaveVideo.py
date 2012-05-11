@@ -44,6 +44,7 @@ class SaveVideo:
         rospy.Service('save/video/trigger', Trigger, self.Trigger_callback)
         
         self.bridge = CvBridge()
+	self.saveVideo = False
 
         self.framerate = rospy.get_param("save/framerate", 30)
         #self.nRepeatFrames = int(rospy.get_param('save/video_image_repeat_count'))
