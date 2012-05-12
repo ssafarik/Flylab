@@ -50,7 +50,7 @@ class SaveVideo:
         #self.nRepeatFrames = int(rospy.get_param('save/video_image_repeat_count'))
         self.sizeImage = None
         
-        self.reset_frames()
+        #self.reset_frames()
         rospy.on_shutdown(self.OnShutdown_callback)
 
         self.initialized = True
@@ -58,7 +58,6 @@ class SaveVideo:
 
     def OnShutdown_callback(self):
         with self.lock:
-            #self.reset_frames()
             if (self.fileNull is not None) and (not self.fileNull.closed):
                 self.fileNull.close()
                 self.fileNull = None
@@ -125,12 +124,12 @@ class SaveVideo:
                     rospy.logerr('Exception running avconv')
                     
                 rospy.logwarn('Saved %s' % (self.filenameVideo))
-                #self.reset_frames()
 
             
     def reset_frames(self):
         try:
-            subprocess.call('rm '+self.dirImages+'/*.png')
+            rospy.logwarn('Deleting frame images.')
+            subprocess.call('rm '+self.dirImages+'/*.png', shell=True)
         except OSError:
             pass
         
