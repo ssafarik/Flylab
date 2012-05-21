@@ -22,7 +22,7 @@ class ExperimentDodgeball():
         
         self.experimentparams.save.filenamebase = "dodgeball"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = False
+        self.experimentparams.save.video = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
@@ -37,7 +37,7 @@ class ExperimentDodgeball():
         
         self.experimentparams.triggerEntry.enabled = True
         self.experimentparams.triggerEntry.distanceMin = 20.0
-        self.experimentparams.triggerEntry.distanceMax = 35.0
+        self.experimentparams.triggerEntry.distanceMax = 50.0
         self.experimentparams.triggerEntry.speedMin =  3.0
         self.experimentparams.triggerEntry.speedMax = 40.0
         self.experimentparams.triggerEntry.angleMin = 00.0 * N.pi / 180.0
@@ -49,7 +49,7 @@ class ExperimentDodgeball():
         
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'relative'        
-        self.experimentparams.move.relative.tracking = True
+        self.experimentparams.move.relative.tracking = False
         self.experimentparams.move.relative.frameidOriginPosition = "Fly1"
         self.experimentparams.move.relative.frameidOriginAngle = "Fly1"
         self.experimentparams.move.relative.distance = 3
