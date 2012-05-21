@@ -112,10 +112,17 @@ TF.Update\ Interval=0
 Target.Enabled=1
 Target.Marker\ Topic=visualization_marker
 Target.arena=1
+<<<<<<< HEAD
+Target.command=0
+Target.robot=1
+Target.target=1
+Target.tooloffset=0
+=======
 Target.command=1
 Target.robot=1
 Target.target=1
 Target.tooloffset=1
+>>>>>>> 48c559d65a08036911a805da2106fd9cb44d2f28
 contour0.Enabled=0
 contour0.Length=5
 contour0.Radius=0.5
@@ -132,7 +139,11 @@ Tool\ 2D\ Nav\ GoalTopic=goal
 Tool\ 2D\ Pose\ EstimateTopic=initialpose
 Camera\ Type=rviz::OrbitViewController
 Camera\ Config=0.001 0.00266457 208.352 0.321204 0.30182 -0.90312
+<<<<<<< HEAD
+Property\ Grid\ State=selection=Target.command;expanded=.Global Options,TF.Enabled.TF.StatusTopStatus,TF.Enabled.TF.Tree,Stage.Enabled.Stage.StatusTopStatus,Plate.Enabled.Plate.StatusTopStatus,Fly1Contour.Enabled.Fly1Contour.StatusTopStatus,RobotContour.Enabled.RobotContour.StatusTopStatus,EndEffector.Enabled.EndEffector.StatusTopStatus,Target.Enabled,Target.Enabled.Target.Namespaces,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour0.Enabled.contour0.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus,link5.Enabled.link5.StatusTopStatus,Fly2.Enabled.Fly2.StatusTopStatus,Fly3.Enabled.Fly3.StatusTopStatus,Fly4.Enabled.Fly4.StatusTopStatus,Fly5.Enabled.Fly5.StatusTopStatus,Fly6.Enabled.Fly6.StatusTopStatus,Fly7.Enabled.Fly7.StatusTopStatus,Fly8.Enabled.Fly8.StatusTopStatus,Fly9.Enabled.Fly9.StatusTopStatus,Fly10.Enabled.Fly10.StatusTopStatus;scrollpos=0,1;splitterpos=174,333;ispageselected=1
+=======
 Property\ Grid\ State=selection=Fly6.Enabled;expanded=.Global Options,TF.Enabled.TF.StatusTopStatus,TF.Enabled.TF.Tree,Stage.Enabled.Stage.StatusTopStatus,Plate.Enabled.Plate.StatusTopStatus,Fly1Contour.Enabled.Fly1Contour.StatusTopStatus,RobotContour.Enabled.RobotContour.StatusTopStatus,EndEffector.Enabled.EndEffector.StatusTopStatus,Target.Enabled.Target.Namespaces,CameraAxes.Enabled.CameraAxes.StatusTopStatus,contour0.Enabled.contour0.StatusTopStatus,contour1.Enabled.contour1.StatusTopStatus,link5.Enabled.link5.StatusTopStatus,Fly2.Enabled.Fly2.StatusTopStatus,Fly3.Enabled.Fly3.StatusTopStatus,Fly4.Enabled.Fly4.StatusTopStatus,Fly5.Enabled.Fly5.StatusTopStatus,Fly6.Enabled.Fly6.StatusTopStatus,Fly7.Enabled.Fly7.StatusTopStatus,Fly8.Enabled.Fly8.StatusTopStatus,Fly9.Enabled.Fly9.StatusTopStatus,Fly10.Enabled.Fly10.StatusTopStatus;scrollpos=0,8;splitterpos=150,301;ispageselected=1
+>>>>>>> 48c559d65a08036911a805da2106fd9cb44d2f28
 [Display0]
 Name=Grid
 Package=rviz
