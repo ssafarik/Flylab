@@ -37,7 +37,7 @@ class SaveVideo:
 
         self.fileNull = open('/dev/null', 'w')
         self.lock = threading.Lock()
-
+        self.iFrame = 0
 
         self.subImage = rospy.Subscriber('camera/image_rect', Image, self.image_callback)
         rospy.Service('save/video/new_trial', ExperimentParams, self.NewTrial_callback)
@@ -127,11 +127,11 @@ class SaveVideo:
 
             
     def reset_frames(self):
-        try:
-            rospy.logwarn('Deleting frame images.')
-            subprocess.call('rm '+self.dirImages+'/*.png', shell=True)
-        except OSError:
-            pass
+        #try:
+        #    rospy.logwarn('Deleting frame images.')
+        #    subprocess.call('rm '+self.dirFrames+'/*.png', shell=True)
+        #except OSError:
+        #    pass
         
         self.iFrame = 0
 
