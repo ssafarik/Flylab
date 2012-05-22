@@ -9,52 +9,56 @@ from experiments.srv import *
 
 
 #######################################################################################################
-class ExperimentPassiveChase():
+class ExperimentDodgeball():
     def __init__(self):
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Fly Chases Robot Moving in Circle"
-        self.experimentparams.experiment.maxTrials = 1
+        self.experimentparams.experiment.description = "Dodgeball"
+        self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "passivechase"
+        self.experimentparams.save.filenamebase = "dodgeball"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = True
+        self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.home.enabled = False
+        self.experimentparams.home.enabled = True
         self.experimentparams.home.x = 0.0
         self.experimentparams.home.y = 0.0
         self.experimentparams.home.speed = 20
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         
-        self.experimentparams.waitEntry = 0#150.0
+        self.experimentparams.waitEntry = 0.0
         
-        self.experimentparams.triggerEntry.enabled = False
-        self.experimentparams.triggerEntry.distanceMin =   0.0
-        self.experimentparams.triggerEntry.distanceMax = 999.0
-        self.experimentparams.triggerEntry.speedMin =   0.0
-        self.experimentparams.triggerEntry.speedMax = 999.0
-        self.experimentparams.triggerEntry.angleMin =  0.0 * N.pi / 180.0
+        self.experimentparams.triggerEntry.enabled = True
+        self.experimentparams.triggerEntry.distanceMin = 20.0
+        self.experimentparams.triggerEntry.distanceMax = 35.0
+        self.experimentparams.triggerEntry.speedMin =  3.0
+        self.experimentparams.triggerEntry.speedMax = 40.0
+        self.experimentparams.triggerEntry.angleMin = 00.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleTest = 'inclusive'
         self.experimentparams.triggerEntry.angleTestBilateral = True
-        self.experimentparams.triggerEntry.timeHold = 0.0
+        self.experimentparams.triggerEntry.timeHold = 0.5
         self.experimentparams.triggerEntry.timeout = -1
         
         self.experimentparams.move.enabled = True
-        self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
-        self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.move.pattern.hzPattern = .05
-        self.experimentparams.move.pattern.hzPoint = 10
-        self.experimentparams.move.pattern.count = -1
-        self.experimentparams.move.pattern.radius = 30
-        self.experimentparams.move.timeout = 600
+        self.experimentparams.move.mode = 'relative'        
+        self.experimentparams.move.relative.tracking = True
+        self.experimentparams.move.relative.frameidOriginPosition = "Fly1"
+        self.experimentparams.move.relative.frameidOriginAngle = "Fly1"
+        self.experimentparams.move.relative.distance = 3
+        self.experimentparams.move.relative.angle = 0
+        self.experimentparams.move.relative.angleType = 'constant'
+        self.experimentparams.move.relative.speed = 20
+        self.experimentparams.move.relative.speedType = 'constant'
+        self.experimentparams.move.relative.tolerance = 2
+        self.experimentparams.move.timeout = 4
         
         self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0
@@ -65,7 +69,7 @@ class ExperimentPassiveChase():
         self.experimentparams.triggerExit.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerExit.angleTest = 'inclusive'
         self.experimentparams.triggerExit.angleTestBilateral = True
-        self.experimentparams.triggerExit.timeHold = 0.0
+        self.experimentparams.triggerExit.timeHold = 1.0
         self.experimentparams.triggerExit.timeout = -1
 
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
@@ -77,11 +81,11 @@ class ExperimentPassiveChase():
 
 
 if __name__ == '__main__':
-    #try:
-        experiment = ExperimentPassiveChase()
+    try:
+        experiment = ExperimentDodgeball()
         experiment.Run()
         
-    #except:
+    except KeyboardInterrupt:
         rospy.loginfo("Shutting down")
 
         
