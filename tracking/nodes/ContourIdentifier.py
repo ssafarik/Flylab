@@ -212,10 +212,10 @@ class ContourIdentifier:
     # Transform the points in contourinfoIn to be in the Plate frame.
     #
     def TransformContourinfoPlateFromCamera(self, contourinfoIn):
-        contourinfoOut = ContourInfo()
+        #contourinfoOut = ContourInfo()
         if self.initialized:
             response = self.plate_from_camera(contourinfoIn.x, contourinfoIn.y)
-            contourinfoOut = contourinfoIn
+            contourinfoOut = copy.copy(contourinfoIn)
             contourinfoOut.header.frame_id = "Plate"
             contourinfoOut.x = response.Xdst
             contourinfoOut.y = response.Ydst

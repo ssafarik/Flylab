@@ -73,16 +73,17 @@ class SaveVideo:
 
 
     def image_callback(self, image):
-        if (self.saveVideo) and (self.initialized) and (self.triggered):
-            with self.lock:
-                # Convert ROS image to OpenCV image
-                try:
-                  cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(image, "passthrough"))
-                except CvBridgeError, e:
-                  print e
-                # cv.CvtColor(cv_image, self.im_display, cv.CV_GRAY2RGB)
-    
-                self.save_png(cv_image)
+        if self.initialized:
+            if (self.saveVideo) and (self.triggered):
+                with self.lock:
+                    # Convert ROS image to OpenCV image
+                    try:
+                      cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(image, "passthrough"))
+                    except CvBridgeError, e:
+                      print e
+                    # cv.CvtColor(cv_image, self.im_display, cv.CV_GRAY2RGB)
+        
+                    self.save_png(cv_image)
 
 
     def get_imagenames(self, dir):
