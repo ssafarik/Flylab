@@ -62,6 +62,14 @@ class RosFivebar:
         self.L3 = rospy.get_param('fivebar/L3', 1.0) # Link 3
         self.L4 = rospy.get_param('fivebar/L4', 1.0) # Link 4
 
+        # PID Gains & Parameters.
+        self.kP = rospy.get_param('fivebar/kP', 0.1)
+        self.kI = rospy.get_param('fivebar/kI', 0.0)
+        self.kD = rospy.get_param('fivebar/kD', 0.0)
+        self.maxI = rospy.get_param('fivebar/maxI', 40.0)
+        self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+
+
         # Parking spot (millimeters)
         self.xPark = 0.0
         self.yPark = 0.0
@@ -844,8 +852,8 @@ class RosFivebar:
     def SendTargetCommand(self):
         #rospy.loginfo ('5B ptToolRef=%s' % self.ptToolRef)
         if self.ptsToolRef is not None:
-            self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
-            self.radiusMovement = rospy.get_param('arena/radius_movement', 25.4)
+            #self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
+            #self.radiusMovement = rospy.get_param('arena/radius_movement', 25.4)
             
             # Clip the target point to the arena bounds.
             #self.ptToolRefClipped = self.ClipPtToRadius(self.ptsToolRefExternal.point)
@@ -876,11 +884,11 @@ class RosFivebar:
             
             
             # PID Gains & Parameters.
-            kP = rospy.get_param('fivebar/kP', 0.1)
-            kI = rospy.get_param('fivebar/kI', 0.0)
-            kD = rospy.get_param('fivebar/kD', 0.0)
-            maxI = rospy.get_param('fivebar/maxI', 40.0)
-            kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+            #self.kP = rospy.get_param('fivebar/kP', 0.1)
+            #self.kI = rospy.get_param('fivebar/kI', 0.0)
+            #self.kD = rospy.get_param('fivebar/kD', 0.0)
+            #self.maxI = rospy.get_param('fivebar/maxI', 40.0)
+            #self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
 
             # PID control of the end-effector error.
             self.ptEeError.x = self.ptEeRef.x - self.ptEeSense.x
@@ -889,15 +897,15 @@ class RosFivebar:
             self.ptEeIerror.y = self.ptEeIerror.y + self.ptEeError.y
             self.ptEeDerror.x = self.ptEeError.x - self.ptEeErrorPrev.x
             self.ptEeDerror.y = self.ptEeError.y - self.ptEeErrorPrev.y
-            ptPID = Point(kP*self.ptEeError.x + kI*self.ptEeIerror.x + kD*self.ptEeDerror.x,
-                          kP*self.ptEeError.y + kI*self.ptEeIerror.y + kD*self.ptEeDerror.y,
+            ptPID = Point(self.kP*self.ptEeError.x + self.kI*self.ptEeIerror.x + self.kD*self.ptEeDerror.x,
+                          self.kP*self.ptEeError.y + self.kI*self.ptEeIerror.y + self.kD*self.ptEeDerror.y,
                           0.0)
             
             # Anti-windup
-            self.ptEeIerrorClipped = self.ClipPtMag (self.ptEeIerror, maxI)
-            self.ptAntiwindup = Point(kWindup * (self.ptEeIerror.x - self.ptEeIerrorClipped.x),
-                                      kWindup * (self.ptEeIerror.y - self.ptEeIerrorClipped.y),
-                                      kWindup * (self.ptEeIerror.z - self.ptEeIerrorClipped.z))
+            self.ptEeIerrorClipped = self.ClipPtMag (self.ptEeIerror, self.maxI)
+            self.ptAntiwindup = Point(self.kWindup * (self.ptEeIerror.x - self.ptEeIerrorClipped.x),
+                                      self.kWindup * (self.ptEeIerror.y - self.ptEeIerrorClipped.y),
+                                      self.kWindup * (self.ptEeIerror.z - self.ptEeIerrorClipped.z))
             magP = N.linalg.norm([self.ptEeError.x, self.ptEeError.y])
             magI = N.linalg.norm([self.ptEeIerror.x, self.ptEeIerror.y])
             magD = N.linalg.norm([self.ptEeDerror.x, self.ptEeDerror.y])

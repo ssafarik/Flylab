@@ -31,20 +31,20 @@ class SaveVideo:
         chdir(self.dirBase)
         self.dirVideo = self.dirBase + "/" + time.strftime("%Y_%m_%d")
         chdir(self.dirVideo)
-        self.dirImages = self.dirVideo + "/frames"
-        chdir(self.dirImages)
+        #self.dirFrames = self.dirVideo + "/frames"
+        #chdir(self.dirFrames)
         # At this point we should be in ~/FlylabData/YYYYmmdd/images
 
         self.fileNull = open('/dev/null', 'w')
         self.lock = threading.Lock()
-
+        self.iFrame = 0
 
         self.subImage = rospy.Subscriber('camera/image_rect', Image, self.image_callback)
         rospy.Service('save/video/new_trial', ExperimentParams, self.NewTrial_callback)
         rospy.Service('save/video/trigger', Trigger, self.Trigger_callback)
         
         self.bridge = CvBridge()
-	self.saveVideo = False
+        self.saveVideo = False
 
         self.framerate = rospy.get_param("save/framerate", 30)
         #self.nRepeatFrames = int(rospy.get_param('save/video_image_repeat_count'))
@@ -67,22 +67,23 @@ class SaveVideo:
     def save_png(self, cv_image):
         if self.sizeImage is None:
             self.sizeImage = cv.GetSize(cv_image)
-        filenameImage = self.dirImages+"/{num:06d}.png".format(num=self.iFrame)
+        filenameImage = self.dirFrames+"/{num:06d}.png".format(num=self.iFrame)
         cv.SaveImage(filenameImage, cv_image)
         self.iFrame += 1
 
 
     def image_callback(self, image):
-        if (self.saveVideo) and (self.initialized) and (self.triggered):
-            with self.lock:
-                # Convert ROS image to OpenCV image
-                try:
-                  cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(image, "passthrough"))
-                except CvBridgeError, e:
-                  print e
-                # cv.CvtColor(cv_image, self.im_display, cv.CV_GRAY2RGB)
-    
-                self.save_png(cv_image)
+        if self.initialized:
+            if (self.saveVideo) and (self.triggered):
+                with self.lock:
+                    # Convert ROS image to OpenCV image
+                    try:
+                      cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(image, "passthrough"))
+                    except CvBridgeError, e:
+                      print e
+                    # cv.CvtColor(cv_image, self.im_display, cv.CV_GRAY2RGB)
+        
+                    self.save_png(cv_image)
 
 
     def get_imagenames(self, dir):
@@ -104,18 +105,18 @@ class SaveVideo:
                 #imagenames = self.get_imagenames(self.dirImage)
                 #iFrame = 0
                 #for imagename in imagenames:
-                #    chdir(self.dirImages)
+                #    chdir(self.dirFrames)
                 #    image = cv.LoadImage(imagename)
-                #    chdir(self.dirImages2)
+                #    chdir(self.dirFrames2)
                 #    for iRepeat in range(self.nRepeatFrames):
                 #        filenameImage = "{num:06d}.png".format(num=iFrame)
                 #        cv.SaveImage(filenameImage, image)
                 #        iFrame += 1
         
-    #            cmdCreateVideoFile = 'ffmpeg -f image2 -i ' + self.dirImages + '/%06d.png -r ' + str(self.framerate) + ' ' + \
+    #            cmdCreateVideoFile = 'ffmpeg -f image2 -i ' + self.dirFrames + '/%06d.png -r ' + str(self.framerate) + ' ' + \
     #                                   '-sameq -s 640x480 -mbd rd -trellis 2 -cmp 2 -subcmp 2 -g 100 -bf 2 -pass 1/2 ' + \
     #                                   self.filenameVideo
-                cmdCreateVideoFile = 'avconv -i ' + self.dirImages + '/%06d.png ' + self.filenameVideo
+                cmdCreateVideoFile = 'avconv -i ' + self.dirFrames + '/%06d.png ' + self.filenameVideo
                 rospy.logwarn('Converting .png images to video using command:')
                 rospy.logwarn (cmdCreateVideoFile)
                 try:
@@ -127,11 +128,11 @@ class SaveVideo:
 
             
     def reset_frames(self):
-        try:
-            rospy.logwarn('Deleting frame images.')
-            subprocess.call('rm '+self.dirImages+'/*.png', shell=True)
-        except OSError:
-            pass
+        #try:
+        #    rospy.logwarn('Deleting frame images.')
+        #    subprocess.call('rm '+self.dirFrames+'/*.png', shell=True)
+        #except OSError:
+        #    pass
         
         self.iFrame = 0
 
@@ -167,14 +168,26 @@ class SaveVideo:
             
             #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
             now = rospy.Time.now().to_sec()
+            self.dirFrames = "%s%04d%02d%02d%02d%02d%02d" % (self.experimentparams.save.filenamebase, 
+                                                            time.localtime(now).tm_year,
+                                                            time.localtime(now).tm_mon,
+                                                            time.localtime(now).tm_mday,
+                                                            time.localtime(now).tm_hour,
+                                                            time.localtime(now).tm_min,
+                                                            time.localtime(now).tm_sec)
+            try:
+                os.mkdir(self.dirFrames)
+            except OSError:
+                pass
+            
             self.filenameVideo = "%s/%s%04d%02d%02d%02d%02d%02d.mov" % (self.dirVideo,
-                                                                        self.experimentparams.save.filenamebase, 
-                                                                        time.localtime(now).tm_year,
-                                                                        time.localtime(now).tm_mon,
-                                                                        time.localtime(now).tm_mday,
-                                                                        time.localtime(now).tm_hour,
-                                                                        time.localtime(now).tm_min,
-                                                                        time.localtime(now).tm_sec)
+                                                            self.experimentparams.save.filenamebase, 
+                                                            time.localtime(now).tm_year,
+                                                            time.localtime(now).tm_mon,
+                                                            time.localtime(now).tm_mday,
+                                                            time.localtime(now).tm_hour,
+                                                            time.localtime(now).tm_min,
+                                                            time.localtime(now).tm_sec)
         return True
     
     

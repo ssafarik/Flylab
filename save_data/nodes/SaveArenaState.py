@@ -62,8 +62,8 @@ class SaveArenaState:
         self.format_precision = "2"
         self.format_type = "f"
         
-        self.headingsExperiment = 'date_time, description, maxTrials, trial, waitEntry, trigger1DistanceMin, trigger1DistanceMax, trigger1SpeedMin, trigger1SpeedMax, trigger1AngleMin, trigger1AngleMax, trigger1AngleTest, trigger1AngleTestBilateral, trigger1TimeHold, trigger2DistanceMin, trigger2DistanceMax, trigger2SpeedMin, trigger2SpeedMax, trigger2AngleMin, trigger2AngleMax, trigger2AngleTest, trigger2AngleTestBilateral, trigger2TimeHold, robot_width, robot_height, robot_visible, robot_paint, robot_scent\n'
-        self.templateExperiment = '{date_time:s}, {description:s}, {maxTrials:>4d}, {trial:>4d}, {waitEntry:> 7.4f}, {trigger1DistanceMin:> 7.4f}, {trigger1DistanceMax:> 7.4f}, {trigger1SpeedMin:> 7.4f}, {trigger1SpeedMax:> 7.4f}, {trigger1AngleMin:> 7.4f}, {trigger1AngleMax:> 7.4f}, {trigger1AngleTest:s}, {trigger1AngleTestBilateral:>d}, {trigger1TimeHold:> 7.4f}, {trigger2DistanceMin:> 7.4f}, {trigger2DistanceMax:> 7.4f}, {trigger2SpeedMin:> 7.4f}, {trigger2SpeedMax:> 7.4f}, {trigger2AngleMin:> 7.4f}, {trigger2AngleMax:> 7.4f}, {trigger2AngleTest:s}, {trigger2AngleTestBilateral:>d}, {trigger2TimeHold:> 7.4f}, {robot_width:>6.3f}, {robot_height:>6.3f}, {robot_visible:>d}, {robot_paint:s}, {robot_scent:s}\n\n'
+        self.headingsExperiment = 'date_time, description, maxTrials, trial, waitEntry, trigger1DistanceMin, trigger1DistanceMax, trigger1SpeedMin, trigger1SpeedMax, trigger1AngleMin, trigger1AngleMax, trigger1AngleTest, trigger1AngleTestBilateral, trigger1TimeHold, trigger2DistanceMin, trigger2DistanceMax, trigger2SpeedMin, trigger2SpeedMax, trigger2AngleMin, trigger2AngleMax, trigger2AngleTest, trigger2AngleTestBilateral, trigger2TimeHold, robot_width, robot_height, robot_visible, robot_paint, robot_scent, movePatternShape, movePatternHz, movePatternHzPoint, movePatternCount, movePatternRadius, moveRelTracking, moveRelOriginPosition, moveRelOriginAngle, moveRelDistance, moveRelAngle, moveRelAngleType, moveRelSpeed, moveRelSpeedType, moveRelTolerance\n'
+        self.templateExperiment = '{date_time:s}, {description:s}, {maxTrials:>4d}, {trial:>4d}, {waitEntry:> 7.4f}, {trigger1DistanceMin:> 7.4f}, {trigger1DistanceMax:> 7.4f}, {trigger1SpeedMin:> 7.4f}, {trigger1SpeedMax:> 7.4f}, {trigger1AngleMin:> 7.4f}, {trigger1AngleMax:> 7.4f}, {trigger1AngleTest:s}, {trigger1AngleTestBilateral:>d}, {trigger1TimeHold:> 7.4f}, {trigger2DistanceMin:> 7.4f}, {trigger2DistanceMax:> 7.4f}, {trigger2SpeedMin:> 7.4f}, {trigger2SpeedMax:> 7.4f}, {trigger2AngleMin:> 7.4f}, {trigger2AngleMax:> 7.4f}, {trigger2AngleTest:s}, {trigger2AngleTestBilateral:>d}, {trigger2TimeHold:> 7.4f}, {robot_width:>6.3f}, {robot_height:>6.3f}, {robot_visible:>d}, {robot_paint:s}, {robot_scent:s}, {movePatternShape:s}, {movePatternHz:> 7.4f}, {movePatternHzPoint:> 7.4f}, {movePatternCount:>d}, {movePatternRadius:> 7.4f}, {moveRelTracking:>d}, {moveRelOriginPosition:s}, {moveRelOriginAngle:s}, {moveRelDistance:> 7.4f}, {moveRelAngle:> 7.4f}, {moveRelAngleType:s}, {moveRelSpeed:> 7.4f}, {moveRelSpeedType:s}, {moveRelTolerance:> 7.4f}\n\n'
 
         self.headingsAbsolute = 'time, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly, xRobotRel, yRobotRel, aRobotRel, dRobotRel\n'
         self.templateAbsolute = '{time:0.4f}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}, {xRobotRel:{align}{sign}{width}.{precision}{type}}, {yRobotRel:{align}{sign}{width}.{precision}{type}}, {aRobotRel:{align}{sign}{width}.{precision}{type}}, {dRobotRel:{align}{sign}{width}.{precision}{type}}\n'
@@ -154,7 +154,21 @@ class SaveArenaState:
                                                             robot_height               = self.robot_height,
                                                             robot_visible              = self.robot_visible,
                                                             robot_paint                = str(self.robot_paint),
-                                                            robot_scent                = str(self.robot_scent)
+                                                            robot_scent                = str(self.robot_scent),
+                                                            movePatternShape           = experimentparamsReq.move.pattern.shape,
+                                                            movePatternHz              = experimentparamsReq.move.pattern.hzPattern,
+                                                            movePatternHzPoint         = experimentparamsReq.move.pattern.hzPoint,
+                                                            movePatternCount           = experimentparamsReq.move.pattern.count,
+                                                            movePatternRadius          = experimentparamsReq.move.pattern.radius,
+                                                            moveRelTracking            = experimentparamsReq.move.relative.tracking,
+                                                            moveRelOriginPosition      = experimentparamsReq.move.relative.frameidOriginPosition,
+                                                            moveRelOriginAngle         = experimentparamsReq.move.relative.frameidOriginAngle,
+                                                            moveRelDistance            = experimentparamsReq.move.relative.distance,
+                                                            moveRelAngle               = experimentparamsReq.move.relative.angle,
+                                                            moveRelAngleType           = experimentparamsReq.move.relative.angleType,
+                                                            moveRelSpeed               = experimentparamsReq.move.relative.speed,
+                                                            moveRelSpeedType           = experimentparamsReq.move.relative.speedType,
+                                                            moveRelTolerance           = experimentparamsReq.move.relative.tolerance,
                                                             )
 
                 with self.lock:
