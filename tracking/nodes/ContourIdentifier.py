@@ -84,7 +84,7 @@ class ContourIdentifier:
         self.markerArena = Marker(header=Header(stamp = rospy.Time.now(),
                                                 frame_id='/Plate'),
                                   ns='arena',
-                                  id=2,
+                                  id=0,
                                   type=3, #CYLINDER,
                                   action=0,
                                   pose=Pose(position=Point(x=0, 
@@ -125,6 +125,8 @@ class ContourIdentifier:
         
 
     def EndEffector_callback(self, state):
+        #rospy.logwarn('EndEffector_callback:')
+        #rospy.logwarn('%s' % state)
         # When first called, need to reset all the fly objects, due to tracking of robot contour as a fly, hence having an extra object.
         if self.stateEndEffector is None:
             self.ResetFlyObjects()
@@ -132,16 +134,19 @@ class ContourIdentifier:
             
         #self.stateEndEffector.header.frame_id = "Plate" # Interpret it as the Plate frame.
         
-        if True: # Use EndEffector position from Fivebar
+        if True: # Use EndEffector position.
             posesStage = PoseStamped(header=state.header,
                                      pose=state.pose)
             try:
-                posesPlate = self.tfrx.transformPose('Plate',posesStage)
+                self.tfrx.waitForTransform('Plate', posesStage.header.frame_id, state.header.stamp, rospy.Duration(1.0))
+                posesPlate = self.tfrx.transformPose('Plate', posesStage)
+            except tf.Exception, e:
+                rospy.logwarn ('Exception in EndEffector_callback: %s' % e)
+            else:
                 self.stateEndEffector = state
                 self.stateEndEffector.header = posesPlate.header
                 self.stateEndEffector.pose = posesPlate.pose
-            except tf.Exception:
-                pass
+
         else: # Use link5 position
             posesStage = PoseStamped(header=Header(frame_id='Plate'),
                                      pose=Pose(position=Point(x=0, y=0, z=0)))
@@ -151,8 +156,8 @@ class ContourIdentifier:
                 self.stateEndEffector.header = posesPlate.header
                 self.stateEndEffector.header.frame_id = 'Plate'
                 self.stateEndEffector.pose = posesPlate.pose
-            except tf.Exception:
-                pass
+            except tf.Exception, e:
+                rospy.logwarn ('Exception in EndEffector_callback: %s' % e)
                 
         
         #rospy.loginfo ('CI received state=%s' % state)
@@ -285,22 +290,6 @@ class ContourIdentifier:
                 except TypeError:
                     d[m,n] = None
 
-        t = rospy.Time.now()
-        for m in range(len(xyObjects)):
-            self.tfbx.sendTransform((xyObjects[m][0],xyObjects[m][1],0.0),
-                                    (0,0,0,1),
-                                    t,
-                                    "xyObjects"+str(m),
-                                    "Plate")
-            
-
-        for n in range(len(contours)):
-            self.tfbx.sendTransform((contours[n].x,contours[n].y,0.0),
-                                    (0,0,0,1),
-                                    t,
-                                    "contours"+str(n),
-                                    "Plate")
-        
         return d
     
     
@@ -399,6 +388,8 @@ class ContourIdentifier:
                                     t,
                                     "RobotComputed",
                                     "Plate")
+        else:
+            t = rospy.Time.now()
 
 
         # Flies.    
@@ -477,6 +468,21 @@ class ContourIdentifier:
             
         # Match objects with contours.
         #rospy.logwarn ('GetDistanceMatrixFromContours()')
+        for m in range(len(xyObjects)):
+            self.tfbx.sendTransform((xyObjects[m][0],xyObjects[m][1],0.0),
+                                    (0,0,0,1),
+                                    t,
+                                    "xyObjects"+str(m),
+                                    "Plate")
+            
+
+        for n in range(len(contoursAug)):
+            self.tfbx.sendTransform((contoursAug[n].x,contoursAug[n].y,0.0),
+                                    (0,0,0,1),
+                                    t,
+                                    "contours"+str(n),
+                                    "Plate")
+        
         d = self.GetDistanceMatrixFromContours(xyObjects, contoursAug, contoursMin, contoursMax, contoursMean, ptComputed)
         if d is not []:
             # Choose the algorithm.
@@ -580,7 +586,6 @@ class ContourIdentifier:
                 if self.mapContourFromObject is not None:
                     if (self.nRobots==1) and (self.stateEndEffector is not None):
                         if self.mapContourFromObject[0] is not None:
-
                             # For the robot, use the end-effector angle instead of the contour angle.
                             if self.stateEndEffector is not None:
                                 q = self.stateEndEffector.pose.orientation
