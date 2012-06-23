@@ -313,6 +313,42 @@ class Fly:
                 
                 # Update the tool offset.
                 if ptComputed is not None:
+#                    marker = Marker(header=Header(stamp=rospy.Time.now(),
+#                                                        frame_id='Plate'),
+#                                          ns='kalman',
+#                                          id=4,
+#                                          type=2, #SPHERE,
+#                                          action=0,
+#                                          pose=Pose(position=Point(x=x, 
+#                                                                   y=y, 
+#                                                                   z=z)),
+#                                          scale=Vector3(x=3.0,
+#                                                        y=3.0,
+#                                                        z=3.0),
+#                                          color=ColorRGBA(a=0.5,
+#                                                          r=0.5,
+#                                                          g=0.5,
+#                                                          b=0.5),
+#                                          lifetime=rospy.Duration(1.0))
+#                    self.pubMarker.publish(marker)
+#                    marker = Marker(header=Header(stamp=rospy.Time.now(),
+#                                                        frame_id='Plate'),
+#                                          ns='computed',
+#                                          id=5,
+#                                          type=2, #SPHERE,
+#                                          action=0,
+#                                          pose=Pose(position=Point(x=ptComputed.x, 
+#                                                                   y=ptComputed.y, 
+#                                                                   z=ptComputed.z)),
+#                                          scale=Vector3(x=3.0,
+#                                                        y=3.0,
+#                                                        z=3.0),
+#                                          color=ColorRGBA(a=0.5,
+#                                                          r=0.1,
+#                                                          g=0.1,
+#                                                          b=1.0),
+#                                          lifetime=rospy.Duration(1.0))
+#                    self.pubMarker.publish(marker)
 
                     # PID control of the offset.
                     ptP = Point()
@@ -332,6 +368,7 @@ class Fly:
                     
                     # Filter the offset as magnitude & angle.
                     (mag,ang)=self.PolarFromXy(xPID,yPID)
+                    #rospy.logwarn('ang=%0.2f' % ang)
                     ang += self.unwind
                     if ang-self.angPrev > N.pi:
                         self.unwind -= 2.0*N.pi
@@ -341,8 +378,10 @@ class Fly:
                         ang += 2.0*N.pi
                     self.angPrev = ang
                     
+                    ang_filtered = self.lpOffsetAng.Update(ang, t)
+                    #rospy.logwarn('ang=%0.2f, ang_filtered=%0.2f' % (ang,ang_filtered))
                     (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(mag, t), -self.maxOffset, self.maxOffset),
-                                                                                self.lpOffsetAng.Update(ang, t))
+                                                                         ang_filtered)
                     self.ptPPrev.x = ptP.x
                     self.ptPPrev.y = ptP.y
                 else:
@@ -376,7 +415,7 @@ class Fly:
                     markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
                                                         frame_id='Plate'),
                                           ns='robot',
-                                          id=0,
+                                          id=1,
                                           type=3, #cylinder,
                                           action=0,
                                           pose=Pose(position=Point(x=self.state.pose.position.x, 

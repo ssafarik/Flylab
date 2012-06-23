@@ -56,8 +56,8 @@ class ContourIdentifier:
         
         
         # Messages
-        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback)
-        self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback)
+        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback, queue_size=1)
+        self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback, queue_size=1)
         
         self.pubArenaState = rospy.Publisher('ArenaState', ArenaState)
         self.pubEndEffectorOffset = rospy.Publisher('EndEffectorOffset', Point)
@@ -138,10 +138,10 @@ class ContourIdentifier:
             posesStage = PoseStamped(header=state.header,
                                      pose=state.pose)
             try:
-                self.tfrx.waitForTransform('Plate', posesStage.header.frame_id, state.header.stamp, rospy.Duration(1.0))
+                self.tfrx.waitForTransform('Plate', posesStage.header.frame_id, posesStage.header.stamp, rospy.Duration(1.0))
                 posesPlate = self.tfrx.transformPose('Plate', posesStage)
             except tf.Exception, e:
-                rospy.logwarn ('Exception in EndEffector_callback: %s' % e)
+                rospy.logwarn ('Exception in EndEffector_callbackA: %s' % e)
             else:
                 self.stateEndEffector = state
                 self.stateEndEffector.header = posesPlate.header
@@ -151,13 +151,14 @@ class ContourIdentifier:
             posesStage = PoseStamped(header=Header(frame_id='Plate'),
                                      pose=Pose(position=Point(x=0, y=0, z=0)))
             try:
+                self.tfrx.waitForTransform('link5', posesStage.header.frame_id, posesStage.header.stamp, rospy.Duration(1.0))
                 posesPlate = self.tfrx.transformPose('link5',posesStage)
                 self.stateEndEffector = state
                 self.stateEndEffector.header = posesPlate.header
                 self.stateEndEffector.header.frame_id = 'Plate'
                 self.stateEndEffector.pose = posesPlate.pose
             except tf.Exception, e:
-                rospy.logwarn ('Exception in EndEffector_callback: %s' % e)
+                rospy.logwarn ('Exception in EndEffector_callbackB: %s' % e)
                 
         
         #rospy.loginfo ('CI received state=%s' % state)

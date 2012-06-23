@@ -33,7 +33,7 @@ class SaveArenaState:
         self.dirWorking = self.dirWorking_base + "/" + self.dirRelative
         chdir(self.dirWorking)
 
-        self.sub_arenastate = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback)
+        self.sub_arenastate = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback, queue_size=1)
         #self.sub_commandsavedata = rospy.Subscriber("CommandSavedata", CommandSavedata, self.commandsavedata_callback)
         #self.sub_experimentparams = rospy.Subscriber("ExperimentParams", ExperimentParams, self.NewTrial_callback)
         rospy.Service('save/arenastate/new_trial', ExperimentParams, self.NewTrial_callback)
