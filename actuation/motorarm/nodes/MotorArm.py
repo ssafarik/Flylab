@@ -40,7 +40,7 @@ class MotorArm:
         rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
-        self.subEndEffectorOffset = rospy.Subscriber('EndEffectorOffset', Point, self.EndEffectorOffset_callback)
+        self.subEndEffectorOffset = rospy.Subscriber('EndEffectorOffset', Point, self.EndEffectorOffset_callback, queue_size=1)
         self.pubJointState        = rospy.Publisher('joint_states', JointState)
         self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         self.pubMarker            = rospy.Publisher('visualization_marker', Marker)
@@ -51,7 +51,7 @@ class MotorArm:
         self.js = JointState()
         self.js.header.seq = 0
         self.js.header.stamp = rospy.Time.now()
-        self.js.header.frame_id = "1"
+        self.js.header.frame_id = "notset"
         self.js.name = self.names
         #self.js.velocity = [0.0]
         
@@ -59,18 +59,18 @@ class MotorArm:
         self.ptsToolRef = None
         self.ptEeSense = Point(0,0,0)
         self.ptEeCommand = Point(0,0,0) # Where to command the end-effector.
-        self.ptOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
+        self.vecOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
         self.ptToolRefClipped = Point(0,0,0) 
         self.ptContourSense = Point(0,0,0)
-        self.ptContourError = Point(0,0,0)
-        self.ptToolRefError = Point(0,0,0)
+        self.vecContourError = Point(0,0,0)
+        self.vecToolRefError = Point(0,0,0)
         self.ptEeRef = Point(0,0,0)
-        self.ptEeError = Point(0,0,0)
-        self.ptEeErrorPrev = Point(0,0,0)
-        self.ptEeDerror = Point(0,0,0)
-        self.ptEeIerror = Point(0,0,0)
-        self.ptEeIerrorClipped = Point(0,0,0)
-        self.ptAntiwindup = Point(0,0,0)
+        self.vecError = Point(0,0,0)
+        self.vecErrorPrev = Point(0,0,0)
+        self.vecDError = Point(0,0,0)
+        self.vecIError = Point(0,0,0)
+        self.vecIErrorClipped = Point(0,0,0)
+        self.vecAntiwindup = Point(0,0,0)
         
         self.unwind = 0.0
         self.thetaPrev = 0.0
@@ -163,7 +163,7 @@ class MotorArm:
     #
     def GetThetaFromXy (self, x, y):
         
-        theta = (N.arctan2(y,x) % (2.0*N.pi))+self.unwind
+        theta = (N.arctan2(y,x) % (2.0*N.pi)) + self.unwind
         
         if (theta-self.thetaPrev) > N.pi: # Clockwise across zero.
             theta -= 2.0*N.pi
@@ -199,9 +199,9 @@ class MotorArm:
             
             # Transform the point into the requested frame.
             pt = Point()
-            pt.x = self.ptEeSense.x + self.ptOffsetSense.x 
-            pt.y = self.ptEeSense.y + self.ptOffsetSense.y 
-            pt.z = self.ptEeSense.z + self.ptOffsetSense.z 
+            pt.x = self.ptEeSense.x + self.vecOffsetSense.x 
+            pt.y = self.ptEeSense.y + self.vecOffsetSense.y 
+            pt.z = self.ptEeSense.z + self.vecOffsetSense.z 
             
             #rvStageState.state.header.stamp = rospy.Time.now()
             rvStageState.state.header.frame_id = 'Stage' # Always return Stage frame coordinates.
@@ -233,14 +233,14 @@ class MotorArm:
                                                Point(x=reqStageState.state.pose.position.x,
                                                      y=reqStageState.state.pose.position.y,
                                                      z=reqStageState.state.pose.position.z))
-        self.ptsToolRefExternal.point.y *= -1
+        #self.ptsToolRefExternal.point.y *= -1
         try:
-            self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
+            self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, self.ptsToolRefExternal.header.stamp, rospy.Duration(1.0))
             self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
             #self.ptsToolRef = self.ptsToolRefExternal
             
-        except tf.Exception:
-            pass
+        except tf.Exception, e:
+            rospy.logwarn('Exception on transformPoint(ptsToolRefExternal): %s' % e)
 
         if reqStageState.speed is not None:
             self.speedCommandTool = reqStageState.speed # Requested speed for positioning.
@@ -256,8 +256,8 @@ class MotorArm:
         return rvStageState
     
 
-    def EndEffectorOffset_callback(self, ptOffset):
-        self.ptOffsetSense = ptOffset #Point(0,0,0)#
+    def EndEffectorOffset_callback(self, vecOffset):
+        self.vecOffsetSense = vecOffset #Point(0,0,0)#
         
         
     def SignalInput_callback (self, srvSignal):
@@ -267,9 +267,9 @@ class MotorArm:
         rv.success = False
         if self.initialized:
             self.ptsToolRefExternal = srvSignal.pts #self.pattern.points[self.iPoint]
-            self.ptsToolRefExternal.point.y *= -1
+            #self.ptsToolRefExternal.point.y *= -1
             try:
-                self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
+                self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, self.ptsToolRefExternal.header.stamp, rospy.Duration(1.0))
                 self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
                 #self.ptsToolRef = self.ptsToolRefExternal
     
@@ -279,8 +279,8 @@ class MotorArm:
                 except AttributeError:
                     pass
                 #rospy.logwarn ('MotorArm signal pts=%s' % [self.ptsToolRef.point.x,self.ptsToolRef.point.y])
-            except tf.Exception:
-                pass
+            except tf.Exception, e:
+                rospy.logwarn('Exception on transformPoint(ptsToolRefExternal): %s' % e)
         
         return rv
 
@@ -345,7 +345,27 @@ class MotorArm:
                     rospy.logwarn ("MotorArm FAILED %s"%e)
                     self.jointstate1 = None
                 #rospy.logwarn('MotorArm [j1,j2]=%s' % [self.jointstate1.position,self.jointstate2.position])
-                    
+
+    def PublishMarker (self, pt, id, name):
+        marker = Marker(header=Header(stamp=rospy.Time.now(),
+                                      frame_id='Stage'),
+                          ns=name,
+                          id=id,
+                          type=2, #SPHERE,
+                          action=0,
+                          pose=Pose(position=Point(x=pt.x, 
+                                                   y=pt.y, 
+                                                   z=pt.z)),
+                          scale=Vector3(x=2.0,
+                                        y=2.0,
+                                        z=2.0),
+                          color=ColorRGBA(a=0.5,
+                                          r=0.1,
+                                          g=0.1,
+                                          b=1.0),
+                          lifetime=rospy.Duration(1.0))
+        self.pubMarker.publish(marker)
+
 
     def SendTransforms(self):  
         if self.initialized:
@@ -404,7 +424,7 @@ class MotorArm:
                     markerTarget = Marker(header=Header(stamp=now,
                                                         frame_id=self.ptsToolRef.header.frame_id),
                                           ns='target',
-                                          id=0,
+                                          id=2,
                                           type=2, #SPHERE,
                                           action=0,
                                           pose=Pose(position=Point(x=self.ptsToolRef.point.x, 
@@ -423,7 +443,7 @@ class MotorArm:
                     markerToolOffset   = Marker(header=Header(stamp = now,
                                                               frame_id='Stage'),
                                           ns='tooloffset',
-                                          id=1,
+                                          id=3,
                                           type=0, #ARROW,
                                           action=0,
                                           scale=Vector3(x=0.1, # Shaft diameter
@@ -437,9 +457,9 @@ class MotorArm:
                                           points=[Point(x=state.pose.position.x, 
                                                         y=state.pose.position.y, 
                                                         z=state.pose.position.z),
-                                                  Point(x=state.pose.position.x+self.ptOffsetSense.x, 
-                                                        y=state.pose.position.y+self.ptOffsetSense.y, 
-                                                        z=state.pose.position.z+self.ptOffsetSense.z)])
+                                                  Point(x=state.pose.position.x+self.vecOffsetSense.x, 
+                                                        y=state.pose.position.y+self.vecOffsetSense.y, 
+                                                        z=state.pose.position.z+self.vecOffsetSense.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -453,69 +473,74 @@ class MotorArm:
             #self.speedStageMax = rospy.get_param('motorarm/speed_max', 200.0)
 
             # Compute various vectors.
-            self.ptContourSense.x = self.ptEeSense.x + self.ptOffsetSense.x
-            self.ptContourSense.y = self.ptEeSense.y + self.ptOffsetSense.y
-            self.ptContourError.x = self.ptsToolRef.point.x - self.ptContourSense.x #- self.ptOffsetSense.x
-            self.ptContourError.y = self.ptsToolRef.point.y - self.ptContourSense.y #- self.ptOffsetSense.y
-            self.ptToolRefError.x = self.ptsToolRef.point.x - self.ptEeSense.x
-            self.ptToolRefError.y = self.ptsToolRef.point.y - self.ptEeSense.y
+            self.ptContourSense.x = self.ptEeSense.x + self.vecOffsetSense.x
+            self.ptContourSense.y = self.ptEeSense.y + self.vecOffsetSense.y
+            self.vecContourError.x = self.ptsToolRef.point.x - self.ptContourSense.x #- self.vecOffsetSense.x
+            self.vecContourError.y = self.ptsToolRef.point.y - self.ptContourSense.y #- self.vecOffsetSense.y
 
             
             # Get the end-effector ref coordinates.
             # Option A:
-            #ptRef = self.ScaleVecToMag(self.ptToolRefError, self.ptOffsetSense)
+            #self.vecToolRefError.x = self.ptsToolRef.point.x - self.ptEeSense.x
+            #self.vecToolRefError.y = self.ptsToolRef.point.y - self.ptEeSense.y
+            #ptRef = self.ScaleVecToMag(self.vecToolRefError, self.vecOffsetSense)
             #self.ptEeRef.x = self.ptsToolRef.point.x+ptRef.x
             #self.ptEeRef.y = self.ptsToolRef.point.y+ptRef.y
 
             # Option B: works ok.
             #kTest = rospy.get_param('motorarm/kTest', 0.0)
-            #self.ptEeRef.x = self.ptsToolRef.point.x - self.ptOffsetSense.x + kTest*self.ptContourError.x
-            #self.ptEeRef.y = self.ptsToolRef.point.y - self.ptOffsetSense.y + kTest*self.ptContourError.y
+            #self.ptEeRef.x = self.ptsToolRef.point.x - self.vecOffsetSense.x + kTest*self.vecContourError.x
+            #self.ptEeRef.y = self.ptsToolRef.point.y - self.vecOffsetSense.y + kTest*self.vecContourError.y
 
             # Option C: best so far.
-            ptRef = self.ScaleVecToMag(self.ptContourError, self.ptOffsetSense)
-            self.ptEeRef.x = self.ptsToolRef.point.x + ptRef.x
-            self.ptEeRef.y = self.ptsToolRef.point.y + ptRef.y
+            #vecRef = self.ScaleVecToMag(self.vecContourError, self.vecOffsetSense)
+            self.ptEeRef.x = self.ptsToolRef.point.x + self.vecOffsetSense.x# + vecRef.x
+            self.ptEeRef.y = self.ptsToolRef.point.y + self.vecOffsetSense.x# + vecRef.y
             
             
             # PID Gains & Parameters.
-            #self.kP = rospy.get_param('motorarm/kP', 1.0)
-            #self.kI = rospy.get_param('motorarm/kI', 0.0)
-            #self.kD = rospy.get_param('motorarm/kD', 0.0)
-            #self.maxI = rospy.get_param('motorarm/maxI', 40.0)
-            #self.kWindup = rospy.get_param('motorarm/kWindup', 0.0)
+            self.kP = rospy.get_param('motorarm/kP', 1.0)
+            self.kI = rospy.get_param('motorarm/kI', 0.0)
+            self.kD = rospy.get_param('motorarm/kD', 0.0)
+            self.maxI = rospy.get_param('motorarm/maxI', 40.0)
+            self.kWindup = rospy.get_param('motorarm/kWindup', 0.0)
 
-            # PID control of the end-effector error.
-            self.ptEeError.x = self.ptEeRef.x - self.ptEeSense.x
-            self.ptEeError.y = self.ptEeRef.y - self.ptEeSense.y
-            self.ptEeIerror.x = self.ptEeIerror.x + self.ptEeError.x
-            self.ptEeIerror.y = self.ptEeIerror.y + self.ptEeError.y
-            self.ptEeDerror.x = self.ptEeError.x - self.ptEeErrorPrev.x
-            self.ptEeDerror.y = self.ptEeError.y - self.ptEeErrorPrev.y
-            ptPID = Point(self.kP*self.ptEeError.x + self.kI*self.ptEeIerror.x + self.kD*self.ptEeDerror.x,
-                          self.kP*self.ptEeError.y + self.kI*self.ptEeIerror.y + self.kD*self.ptEeDerror.y,
-                          0.0)
+            # PID control of the error.
+            self.vecError.x = self.vecContourError.x#self.ptEeRef.x - self.ptEeSense.x
+            self.vecError.y = self.vecContourError.y#self.ptEeRef.y - self.ptEeSense.y
+            self.vecIError.x = self.vecIError.x + self.vecError.x
+            self.vecIError.y = self.vecIError.y + self.vecError.y
+            self.vecDError.x = self.vecError.x - self.vecErrorPrev.x
+            self.vecDError.y = self.vecError.y - self.vecErrorPrev.y
+            vecPID = Point(self.kP*self.vecError.x + self.kI*self.vecIError.x + self.kD*self.vecDError.x,
+                           self.kP*self.vecError.y + self.kI*self.vecIError.y + self.kD*self.vecDError.y,
+                           0.0)
             
             # Anti-windup
-            self.ptEeIerrorClipped = self.ClipPtMag (self.ptEeIerror, self.maxI)
-            self.ptAntiwindup = Point(self.kWindup * (self.ptEeIerror.x - self.ptEeIerrorClipped.x),
-                                      self.kWindup * (self.ptEeIerror.y - self.ptEeIerrorClipped.y),
-                                      self.kWindup * (self.ptEeIerror.z - self.ptEeIerrorClipped.z))
-            magP = N.linalg.norm([self.ptEeError.x, self.ptEeError.y])
-            magI = N.linalg.norm([self.ptEeIerror.x, self.ptEeIerror.y])
-            magD = N.linalg.norm([self.ptEeDerror.x, self.ptEeDerror.y])
-            magPID = N.linalg.norm([ptPID.x, ptPID.y])
-            #magPIDRaw = N.linalg.norm([ptPIDRaw.x, ptPIDRaw.y])
+            self.vecIErrorClipped = self.ClipPtMag (self.vecIError, self.maxI)
+            self.vecAntiwindup = Point(self.kWindup * (self.vecIError.x - self.vecIErrorClipped.x),
+                                       self.kWindup * (self.vecIError.y - self.vecIErrorClipped.y),
+                                       self.kWindup * (self.vecIError.z - self.vecIErrorClipped.z))
+            magP = N.linalg.norm([self.vecError.x, self.vecError.y])
+            magI = N.linalg.norm([self.vecIError.x, self.vecIError.y])
+            magD = N.linalg.norm([self.vecDError.x, self.vecDError.y])
+            magPID = N.linalg.norm([vecPID.x, vecPID.y])
+            #magPIDRaw = N.linalg.norm([vecPIDRaw.x, vecPIDRaw.y])
             #rospy.logwarn('[P,I,D]=[%0.2f,%0.2f,%0.2f], PID=%0.4f' % (magP,magI,magD, magPID))
-            self.ptEeIerror.x -= self.ptAntiwindup.x
-            self.ptEeIerror.y -= self.ptAntiwindup.y
+            self.vecIError.x -= self.vecAntiwindup.x
+            self.vecIError.y -= self.vecAntiwindup.y
 
             # Get the command for the hardware.            
-            self.ptEeCommand.x = ptPID.x + self.ptEeSense.x
-            self.ptEeCommand.y = ptPID.y + self.ptEeSense.y
+            self.ptEeCommand.x = self.ptEeSense.x + vecPID.x #+ self.vecOffsetSense.x
+            self.ptEeCommand.y = self.ptEeSense.y + vecPID.y #+ self.vecOffsetSense.y
             
-            self.ptEeErrorPrev.x = self.ptEeError.x 
-            self.ptEeErrorPrev.y = self.ptEeError.y 
+            self.vecErrorPrev.x = self.vecError.x 
+            self.vecErrorPrev.y = self.vecError.y 
+            
+            #self.PublishMarker(self.ptEeRef, 301, "ptEeRef")
+            #self.PublishMarker(self.ptEeSense, 302, "ptEeSense")
+            #self.PublishMarker(self.ptEeCommand, 303, "ptEeCommand")
+            #self.PublishMarker(self.ptContourSense, 304, "ptContourSense")
             
             
             # Get the command for the hardware.            
@@ -524,64 +549,6 @@ class MotorArm:
             
             #rospy.logwarn ('MotorArm ptEeCommand=%s' % [self.ptEeCommand.x, self.ptEeCommand.y])
 
-            #########################
-#            markerTest = Marker(header=Header(stamp = rospy.Time.now(),
-#                                                frame_id='Plate'),
-#                                  ns='ptEeRef',
-#                                  id=3,
-#                                  type=2, #SPHERE,
-#                                  action=0,
-#                                  pose=Pose(position=Point(x=self.ptEeRef.x, 
-#                                                           y=self.ptEeRef.y, 
-#                                                           z=self.ptEeRef.z)),
-#                                  scale=Vector3(x=1.0,
-#                                                y=1.0,
-#                                                z=3.0),
-#                                  color=ColorRGBA(a=0.5,
-#                                                  r=0.1,
-#                                                  g=1.0,
-#                                                  b=0.1),
-#                                  lifetime=rospy.Duration(1.0))
-#            self.pubMarker.publish(markerTest)
-#
-#            markerTest = Marker(header=Header(stamp = rospy.Time.now(),
-#                                    frame_id='Plate'),
-#                      ns='ptContourError',
-#                      id=4,
-#                      type=2, #SPHERE,
-#                      action=0,
-#                      pose=Pose(position=Point(x=self.ptContourError.x, 
-#                                               y=self.ptContourError.y, 
-#                                               z=self.ptContourError.z)),
-#                      scale=Vector3(x=1.0,
-#                                    y=1.0,
-#                                    z=3.0),
-#                      color=ColorRGBA(a=0.5,
-#                                      r=0.0,
-#                                      g=1.0,
-#                                      b=0.1),
-#                      lifetime=rospy.Duration(1.0))
-#            self.pubMarker.publish(markerTest)
-#            
-#            markerTest = Marker(header=Header(stamp = rospy.Time.now(),
-#                                    frame_id='Plate'),
-#                      ns='ptOffsetSense',
-#                      id=5,
-#                      type=2, #SPHERE,
-#                      action=0,
-#                      pose=Pose(position=Point(x=self.ptOffsetSense.x, 
-#                                               y=self.ptOffsetSense.y, 
-#                                               z=self.ptOffsetSense.z)),
-#                      scale=Vector3(x=1.0,
-#                                    y=1.0,
-#                                    z=3.0),
-#                      color=ColorRGBA(a=0.5,
-#                                      r=0.1,
-#                                      g=1.0,
-#                                      b=0.0),
-#                      lifetime=rospy.Duration(1.0))
-#            self.pubMarker.publish(markerTest)
-            #########################
             
             # Display a vector in rviz.
             ptBase = self.ptEeSense
@@ -589,7 +556,7 @@ class MotorArm:
             markerCommand= Marker(header=Header(stamp = rospy.Time.now(),
                                                 frame_id='Stage'),
                                   ns='command',
-                                  id=2,
+                                  id=4,
                                   type=0, #ARROW,
                                   action=0,
                                   scale=Vector3(x=0.1, # Shaft diameter
@@ -618,7 +585,8 @@ class MotorArm:
             self.timePrev = time
     
             if (self.jointstate1 is not None):
-                speed = N.abs(self.dAngle / 1)#self.dTime.to_sec())
+                speed = N.abs(self.dAngle / 1) #self.dTime.to_sec())
+                #speed = N.abs((10*self.dAngle) / self.dTime.to_sec())
                 
                 with self.lock:
                     try:
