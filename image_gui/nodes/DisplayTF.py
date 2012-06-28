@@ -324,8 +324,8 @@ class ImageDisplay:
 
 
 
-        except (tf.LookupException, tf.ConnectivityException, rospy.ServiceException):
-            pass
+        except (tf.LookupException, tf.ConnectivityException, rospy.ServiceException), e:
+            rospy.logwarn ('Exception in DisplayTF: %s' % e)
 
     def draw_setpoint(self):
         try:
@@ -380,8 +380,8 @@ class ImageDisplay:
                 #               (int(setpoint_image.point.x),int(setpoint_image.point.y)),
                 #               self.setpoint_size, self.setpoint_color, cv.CV_FILLED)
 
-        except (tf.LookupException, tf.ConnectivityException, rospy.ServiceException):
-            pass
+        except (tf.LookupException, tf.ConnectivityException, rospy.ServiceException), e:
+            rospy.logwarn ('Exception in DisplayTF: %s' % e)
 
         # display_text = "setpoint_camera.x = " + str(setpoint_camera.point.x)
         # cv.PutText(self.im_display,display_text,(25,65),self.font,cv.CV_RGB(self.color_max,0,0))
@@ -426,8 +426,8 @@ class ImageDisplay:
             if self.robot_in_bounds_state.InBounds:
                 self.draw_axes("Robot")
 
-        except (tf.LookupException, tf.ConnectivityException):
-            pass
+        except (tf.LookupException, tf.ConnectivityException), e:
+            rospy.logwarn ('Exception in DisplayTF: %s' % e)
 
         # display_text = "radius setpoint = " + str(self.setpoint.radius)
         # cv.PutText(self.im_display,display_text,(25,25),self.font,cv.CV_RGB(self.color_max,0,0))

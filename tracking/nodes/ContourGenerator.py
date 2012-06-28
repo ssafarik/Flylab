@@ -90,12 +90,11 @@ class ContourGenerator:
             try:
                 if rospy.is_shutdown():
                     raise rospy.exceptions.ROSInterruptException
-                self.tfrx.waitForTransform("ImageRect", self.ptsOriginROI.header.frame_id, rospy.Time(), rospy.Duration(0.5))
-                self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time(), rospy.Duration(0.5))
+                self.tfrx.waitForTransform("ImageRect", self.ptsOriginROI.header.frame_id, rospy.Time.now(), rospy.Duration(0.5))
+                self.tfrx.waitForTransform("ROI", self.ptsOriginPlate.header.frame_id, rospy.Time.now(), rospy.Duration(0.5))
                 initialized_transforms = True
-            except tf.Exception:
-                rospy.loginfo('ContourGenerator waiting for transforms: ImageRect, ROI...')
-                pass
+            except tf.Exception, e:
+                rospy.loginfo('ContourGenerator waiting for transforms: ImageRect, ROI: %s' % e)
             except:
                 raise sys.exc_info() #rospy.exceptions.ROSInterruptException
 
@@ -334,12 +333,12 @@ class ContourGenerator:
                 self.ecc_list.append(ecc)
                 self.nContours += 1
 
-            except tf.Exception:
-                rospy.logwarn ('Cannot transform point to frame=%s from frame=%s' % (self.frameidOutput,ptContourROI.header.frame_id))
+            except tf.Exception, e:
+                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContourROI.header.frame_id, e))
                 self.ptsOutput = PointStamped()
             except TypeError:
-                pass
-
+                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContourROI.header.frame_id, e))
+                
         
 
 
@@ -463,7 +462,7 @@ class ContourGenerator:
         #       contourinfo.ecc = [1.0, 1.0]
         
             #rospy.loginfo ('IP contourinfo.x,y = %s, %s' %  (contourinfo.x, contourinfo.y))      
-            self.pubContourInfo.publish(contourinfo)
+            
         
         return contourinfo, contour_seq    
         
@@ -529,6 +528,8 @@ class ContourGenerator:
         (self.contourinfo, self.contour_seq) = self.ContourinfoFromImage(self.imageForeground_binary)
         #rospy.logwarn ('IP self.contourinfo=\n%s\n, self.contour_seq\n=%s' % (self.contourinfo,self.contour_seq))
         
+        #if len(self.contourinfo.x)>0:
+        self.pubContourInfo.publish(self.contourinfo)
         
         # Convert to color for display image
         if self.pubImageProcessed.get_num_connections() > 0:
@@ -539,8 +540,6 @@ class ContourGenerator:
                 cv.DrawContours(self.imageProcessed, self.contour_seq, cv.CV_RGB(0,0,self.color_max), cv.CV_RGB(0,self.color_max,0), 1, 1)
             
             
-        cv.WaitKey(3)
-        
         
         # Publish processed image
         if self.pubImageProcessed.get_num_connections() > 0:

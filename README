@@ -43,7 +43,7 @@ rosrun dynamic_reconfigure reconfigure_gui camera				# Open a window to change c
 roslaunch config hardware.launch								# Load the currently configured hardware.
 
 roslaunch patterngen PatternGenXY.py							# Run the 2D pattern generator.
-rostopic pub -1 PatternGen patterngen/MsgPatternGen -- \           # Send a command to the pattern generator:
+rostopic pub -1 PatternGen patterngen/MsgPattern -- \           # Send a command to the pattern generator:
 													   mode \      # <byshape | bypoints > 
 													   shape \     # <constant | ramp | circle | square | flylogo | spiral> 
 													   frame \     # the reference frame for the pattern. 
@@ -53,7 +53,7 @@ rostopic pub -1 PatternGen patterngen/MsgPatternGen -- \           # Send a comm
 													   pointlist \ # [...] a list of points.
 													   radius      # max distance from origin.
 													   preempt     # whether or not to interrupt the current pattern, <True|False>
-rostopic pub -1 PatternGen patterngen/MsgPatternGen "byshape" "circle" "Stage" 0.25 50 1 [] 40 True  # For example.
+rostopic pub -1 PatternGen patterngen/MsgPattern "byshape" "circle" "Stage" 0.25 50 1 [] 40 True  # For example.
 
 rxgraph															# Show the graph of ROS nodes.
 rxconsole														# Show ROS messages, logs, etc.

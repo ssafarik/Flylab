@@ -1,0 +1,18 @@
+<package>
+  <description brief="skynet">
+
+     skynet
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/skynet</url>
+
+  <depend package="camera1394v2"/>
+  <depend package="galvodirector"/>
+  <depend package="patterngen"/>
+
+</package>
+
+

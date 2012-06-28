@@ -1,0 +1,15 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Start the GALVODIRECTOR.                                   -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the hardware-specific .launch file, and point here  -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+    
+	
+	<node name="GalvoDirector" pkg="galvodirector" type="GalvoDirector.py" />
+
+
+</launch>
+

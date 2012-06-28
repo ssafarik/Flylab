@@ -90,6 +90,7 @@ class Fly:
         self.robot_length = rospy.get_param ('robot/length', 1.0)
         self.robot_height = rospy.get_param ('robot/height', 1.0)
         
+        rospy.logwarn('Fly() added, name=%s' % name)
         
         self.initialized = True
 

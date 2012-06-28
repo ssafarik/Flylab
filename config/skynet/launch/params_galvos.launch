@@ -1,0 +1,15 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the galvo parameters for SKYNET           -->
+    <!--                                                            -->
+    <!-- Edit this file to describe the galvo hardware.             -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the skynet.launch file, and point here              -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+
+	<param name="galvos/rate_point" type="double" value="1000.0"/>
+
+</launch>
+	

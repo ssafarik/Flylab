@@ -65,7 +65,7 @@ class CalibrateCameraPlate:
         self.col_corner_number = self.pattern_size[0]
         self.row_corner_number = self.pattern_size[1]
         self.board_corner_number = self.col_corner_number * self.row_corner_number
-        self.checker_size = 7.5
+        self.checker_size = rospy.get_param('calibration/checker_size', 15.0)
         self.win = (4,4)
         self.zero_zone = (2,2)
         self.criteria = (cv.CV_TERMCRIT_ITER+cv.CV_TERMCRIT_EPS,100,.01)
@@ -301,30 +301,31 @@ class CalibrateCameraPlate:
             if not self.initialized_images:
                 self.initialize_images(cv_image)
             
-            self.im = cv.CloneImage(cv_image)
-            cv.CvtColor(cv_image,self.im_display, cv.CV_GRAY2RGB)
-            
-            # display_text = "originPlate.point.x = " + str(int(self.originPlate.point.x))
-            display_text = "originPlate = [%0.0f, %0.0f]" % (self.originPlate.point.x, self.originPlate.point.y)
-            cv.PutText(self.im_display,display_text,(25,25),self.font,self.font_color)
-            # display_text = "originPlate.point.y = " + str(int(self.originPlate.point.y))
-            # cv.PutText(self.im_display,display_text,(25,45),self.font,self.font_color)
-            
-            try:
-                self.undistorted_camera = self.tfrx.transformPoint(FRAME_IMAGERECT, self.originCamera)
-                cv.Circle(self.im_display, (int(self.undistorted_camera.point.x),int(self.undistorted_camera.point.y)), 3, cv.CV_RGB(self.color_max,0,self.color_max), cv.CV_FILLED)
-                self.undistorted_plate = self.tfrx.transformPoint(FRAME_IMAGERECT,self.originPlate)
-                cv.Circle(self.im_display, (int(self.undistorted_plate.point.x),int(self.undistorted_plate.point.y)), 3, cv.CV_RGB(0,self.color_max,0), cv.CV_FILLED)
-                cv.Circle(self.im_display, (int(self.undistorted_plate.point.x),int(self.undistorted_plate.point.y)), int(self.radiusMask), cv.CV_RGB(0,self.color_max,0))
-                display_text = "radiusMask = " + str(int(self.radiusMask))
-                cv.PutText(self.im_display,display_text,(25,45),self.font,self.font_color)
+            if self.initialized_images:
+                self.im = cv.CloneImage(cv_image)
+                cv.CvtColor(cv_image, self.im_display, cv.CV_GRAY2RGB)
                 
-                self.find_extrinsics()
-            except (tf.LookupException, tf.ConnectivityException):
-                pass
-            
-            cv.ShowImage("Camera Plate Calibration", self.im_display)
-            cv.WaitKey(3)
+                # display_text = "originPlate.point.x = " + str(int(self.originPlate.point.x))
+                display_text = "originPlate = [%0.0f, %0.0f]" % (self.originPlate.point.x, self.originPlate.point.y)
+                cv.PutText(self.im_display, display_text,(25,25),self.font,self.font_color)
+                # display_text = "originPlate.point.y = " + str(int(self.originPlate.point.y))
+                # cv.PutText(self.im_display,display_text,(25,45),self.font,self.font_color)
+                
+                try:
+                    self.undistorted_camera = self.tfrx.transformPoint(FRAME_IMAGERECT, self.originCamera)
+                    cv.Circle(self.im_display, (int(self.undistorted_camera.point.x),int(self.undistorted_camera.point.y)), 3, cv.CV_RGB(self.color_max,0,self.color_max), cv.CV_FILLED)
+                    self.undistorted_plate = self.tfrx.transformPoint(FRAME_IMAGERECT,self.originPlate)
+                    cv.Circle(self.im_display, (int(self.undistorted_plate.point.x),int(self.undistorted_plate.point.y)), 3, cv.CV_RGB(0,self.color_max,0), cv.CV_FILLED)
+                    cv.Circle(self.im_display, (int(self.undistorted_plate.point.x),int(self.undistorted_plate.point.y)), int(self.radiusMask), cv.CV_RGB(0,self.color_max,0))
+                    display_text = "radiusMask = " + str(int(self.radiusMask))
+                    cv.PutText(self.im_display,display_text,(25,45),self.font,self.font_color)
+                    
+                    self.find_extrinsics()
+                except (tf.LookupException, tf.ConnectivityException):
+                    pass
+                
+                cv.ShowImage("Camera Plate Calibration", self.im_display)
+                cv.WaitKey(3)
 
     
     def joy_callback(self, data):

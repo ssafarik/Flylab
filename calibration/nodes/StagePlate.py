@@ -11,7 +11,7 @@ from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import PoseStamped
 from plate_tf.srv import *
 from tracking.msg import ContourInfo
-from patterngen.msg import MsgPatternGen
+from patterngen.msg import MsgPattern
 from flycore.msg import MsgFrameState
 
 
@@ -32,7 +32,7 @@ class CalibrateStagePlate():
         self.subImage = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
         self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.contourinfo_callback)
         self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback)
-        self.pubPatternGen = rospy.Publisher('PatternGen', MsgPatternGen, latch=True)
+        self.pubPatternGen = rospy.Publisher('SetSignalGen', MsgPattern, latch=True)
         
         self.tf_listener = tf.TransformListener()
 
@@ -92,7 +92,7 @@ class CalibrateStagePlate():
         
     def OnShutdown_callback(self):
         if self.initialized:
-            msgPattern = MsgPatternGen()
+            msgPattern = MsgPattern()
             msgPattern.mode = 'byshape'
             msgPattern.shape = 'constant'
             msgPattern.points = []
@@ -493,7 +493,7 @@ class CalibrateStagePlate():
         return posePlate
     
     def Main(self):
-        msgPattern = MsgPatternGen()
+        msgPattern = MsgPattern()
 
         # Publish a goto(0,0) pattern message, and wait for the end effector to initialize.
         msgPattern.mode = 'byshape'

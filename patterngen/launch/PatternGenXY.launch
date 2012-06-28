@@ -5,9 +5,9 @@
     <!-- Launch this file, and then send messages either programmatically       -->
     <!-- or with the command:                                                   -->
     <!--                                                                        -->
-    <!--    rostopic pub -1 PatternGen patterngen/MsgPatternGen mode shape frame hzPattern hzPoint count pointlist radius preempt   -->
-    <!-- For example, a 40mm radius circle in 4 seconds, 50hz update rate.      -->
-    <!--    rostopic pub -1 PatternGen patterngen/MsgPatternGen "byshape" "circle" "Stage" 0.25 50 1 [] 40 True           -->
+    <!--    rostopic pub -1 PatternGen patterngen/MsgPattern mode shape frame hzPattern hzPoint count pointlist radius preempt   -->
+    <!-- For example, a 40mm radius circle in 4 seconds, 50hz update rate.                                                       -->
+    <!--    rostopic pub -1 PatternGen patterngen/MsgPattern "byshape" "circle" "Stage" 0.25 50 1 [] 40 True                     -->
     <!--                                                                        -->
     <!-- where:                                                                 -->
     <!--    mode = "byshape" or "bypoints"                                      -->

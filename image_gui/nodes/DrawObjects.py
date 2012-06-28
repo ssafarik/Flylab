@@ -115,16 +115,16 @@ class DrawObjects:
                 self.robot_image_origin_display_frame = self.tfrx.transformPoint(self.display_frame, self.robot_image_origin)
                 self.markerRobot.change_center(CvPrimitives.Point(self.robot_image_origin_display_frame.point.x,
                                                                   self.robot_image_origin_display_frame.point.y).point)
-            except (tf.LookupException, tf.ConnectivityException, tf.Exception):
-                pass
+            except (tf.LookupException, tf.ConnectivityException, tf.Exception), e:
+                rospy.logwarn ('Exception in DrawObjects: %s' % e)
 
             try:                
                 #self.tfrx.waitForTransform(self.display_frame, self.fly_image_origin.header.frame_id, rospy.Time(), rospy.Duration(1.0))
                 self.fly_image_origin_display_frame = self.tfrx.transformPoint(self.display_frame, self.fly_image_origin)
                 self.markerFly.change_center(CvPrimitives.Point(self.fly_image_origin_display_frame.point.x,
                                                                 self.fly_image_origin_display_frame.point.y).point)
-            except (tf.LookupException, tf.ConnectivityException, tf.Exception):
-                pass
+            except (tf.LookupException, tf.ConnectivityException, tf.Exception), e:
+                rospy.logwarn ('Exception in DrawObjects: %s' % e)
                 
             #self.markerRobot.change_center(CvPrimitives.Point(self.arenastate.robot.pose.position.x,
             #                                                   self.arenastate.robot.pose.position.y).point)

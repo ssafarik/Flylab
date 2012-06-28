@@ -96,7 +96,7 @@ private:
   Config config_;
 
   /** camera calibration information */
-  CameraInfoManager *cinfo_;
+  camera_info_manager::CameraInfoManager *cinfo_;
   bool calibration_matches_;            // cam_info_ matches video mode
 
   /** image transport interfaces */
@@ -111,7 +111,7 @@ public:
     privNH_ = ros::NodeHandle("~");
     camera_nh_ = ros::NodeHandle("camera");
     camera_name_ = "camera";
-    cinfo_ = new CameraInfoManager(camera_nh_);
+    cinfo_ = new camera_info_manager::CameraInfoManager(camera_nh_);
     dev_ = new camera1394v2::Camera1394v2();
     calibration_matches_ = true;
   }

@@ -1,0 +1,15 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Start the GALVODRIVER mechanism.                                -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the hardware-specific .launch file, and point here  -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+    
+	
+	<node name="GalvoDriver" pkg="galvodriver" type="GalvoDriver.cpp" />
+
+
+</launch>
+

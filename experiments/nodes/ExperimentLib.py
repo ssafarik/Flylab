@@ -14,7 +14,7 @@ from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from experiments.srv import Trigger, ExperimentParams
 from tracking.msg import ArenaState
-from patterngen.msg import MsgPatternGen
+from patterngen.msg import MsgPattern
 
 
 #######################################################################################################
@@ -602,7 +602,7 @@ class MoveRobot (smach.State):
         self.arenastate = None
         self.rosrate = rospy.Rate(100)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=1)
-        self.pubPatternGen = rospy.Publisher('PatternGen', MsgPatternGen, latch=True)
+        self.pubPatternGen = rospy.Publisher('SetSignalGen', MsgPattern, latch=True)
 
         self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
         self.action.wait_for_server()
@@ -781,7 +781,7 @@ class MoveRobot (smach.State):
         
     def MovePattern (self, userdata):
                     
-        msgPattern = MsgPatternGen()
+        msgPattern = MsgPattern()
 
         # Publish the spiral pattern message.
         msgPattern.mode = 'byshape'
