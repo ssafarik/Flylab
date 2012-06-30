@@ -4,6 +4,8 @@ import roslib; roslib.load_manifest('galvodirector')
 import rospy
 import tf
 import numpy as N
+import threading
+
 from galvodirector.msg import MsgGalvoCommand
 from tracking.msg import ArenaState
 from plate_tf.srv import PlateCameraConversion
@@ -33,12 +35,13 @@ class GalvoDirector:
 
     def __init__(self):
         self.initialized = False
-
+        self.lock = threading.Lock()
+        
         self.tfrx = tf.TransformListener()
 
         # Messages
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback)
-        self.subGalvoCommand = rospy.Subscriber('GalvoDirector/command', MsgGalvoCommand, self.GalvoCommand_callback)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
+        self.subGalvoCommand = rospy.Subscriber('GalvoDirector/command', MsgGalvoCommand, self.GalvoCommand_callback, queue_size=2)
         self.pubGalvoPointCloud = rospy.Publisher('GalvoDriver/pointcloud', PointCloud)
 
         # Attach to services.
@@ -50,28 +53,22 @@ class GalvoDirector:
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
-        self.req_gpp = SrvGetPatternPointsRequest()
-        self.req_gpp.pattern.mode       = 'byshape'
-        self.req_gpp.pattern.shape      = 'flylogo'
-        self.req_gpp.pattern.frame      = 'Plate'
-        self.req_gpp.pattern.hzPattern  = 1.0
-        self.req_gpp.pattern.hzPoint    = 100.0
-        self.req_gpp.pattern.count      = 1
-        self.req_gpp.pattern.points     = []
-        self.req_gpp.pattern.radius     = 20 # At the moment this is volts.
-        self.req_gpp.pattern.preempt    = False
-        
         self.frameid_target_list = []
         self.pointcloudtemplate_list = []
         self.pointcloud_list = []
+        self.units = 'millimeters'
+        
+        # Calibration data from Calibrator.py
+        self.mx =  0.0602
+        self.bx = -0.581
+        self.my = -0.0582
+        self.by =  3.490
 
         self.initialized = True
-        self.AddPatternToTemplates(self.req_gpp)
 
 
     def OnShutdown_callback(self):
-        self.req_gpp.pattern.shape      = 'flylogo'
-        #self.SendPattern(self.req_gpp)
+        pass
 
 
     # GalvoCommand_callback()
@@ -79,48 +76,79 @@ class GalvoDirector:
     #
     def GalvoCommand_callback(self, command):
         if (self.initialized):
-            # Regenerate all the patterns requested.  This "template" is the computed points centered at (0,0).
-            self.pointcloudtemplate_list = []
-            self.frameid_target_list = []
-            
-            for iPattern in range(len(command.pattern_list)):
+            with self.lock:
+                # Regenerate all the patterns requested.  This "template" is the computed points centered at (0,0).
+                self.pointcloudtemplate_list = []
+                self.frameid_target_list = []
                 
-                # If no points, then compute them.
-                if len(command.pattern_list[i].points)==0:
-                    gpp = self.GetPatternPoints(GetPatternPointsRequest(pattern=command.pattern_list[i]))
-                    points = gpp.pattern.points
-                else:
-                    points = pattern.points
+                for iPattern in range(len(command.pattern_list)):
+                    
+                    # If no pattern points, then compute them.
+                    if len(command.pattern_list[iPattern].points)==0:
+                        gpp = self.GetPatternPoints(SrvGetPatternPointsRequest(pattern=command.pattern_list[iPattern]))
+                        pattern = gpp.pattern
+                    else:
+                        pattern = command.pattern_list[iPattern]
+                    
+                    # Store the pointcloud for later.
+                    self.pointcloudtemplate_list.append(self.PointCloudFromPoints(pattern.frame_id, pattern.points))
+                    self.frameid_target_list.append(command.frameid_target_list[iPattern])
+                    self.units = command.units # Units apply to all the patterns.
+                        
+                self.PublishPointcloud()
 
-                points[0].z = 0.0   # Laser line to next pattern is off.
-    
-                # Store the pointcloud for later.
-                self.pointcloudtemplate_list.append(self.PointCloudFromPoints(pattern.frame_id, points))
-                self.frameid_target_list.append(command.frameid_target_list[i])
 
-    
-    # Each time we get an ArenaState message, transform the pointcloudtemplates onto their respective frames,
-    # then update the DAQ.
     def ArenaState_callback(self, arenastate):
+        with self.lock:
+            self.arenastate = arenastate
+            self.PublishPointcloud()
+        
+    
+    # GetMaxPatternRate()
+    # Get the fastest pattern update rate.
+    #
+    def GetMaxPatternRate(self, pattern_list):
+        hzPatternMax = 0
+        for pattern in pattern_list:
+            hzPatternMax = max(hzPatternMax, pattern.hzPattern)
+
+        return hzPatternMax
+    
+    
+        
+    # PublishPointcloud()
+    # Transform the pointcloudtemplates onto their respective frames,
+    # then post it to the driver.
+    #
+    def PublishPointcloud(self):
         if self.initialized:
             self.pointcloud_list = []
             if len(self.pointcloudtemplate_list) > 0:
                 for i in range(len(self.pointcloudtemplate_list)):
-                    self.pointcloudtemplate_list[i].header.stamp = rospy.Time.now()
+                    frame_id_target = self.frameid_target_list[i]
+                    pointcloud_template = self.pointcloudtemplate_list[i]
+
                     try:
-                        self.tfrx.waitForTransform(self.frameid_target_list[i], 
-                                                   self.pointcloudtemplate_list[i].header.frame_id, 
-                                                   self.pointcloudtemplate_list[i].header.stamp, 
+                        pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
+                    except:
+                        pointcloud_template.header.stamp = rospy.Time.now()
+
+                    try:
+                        self.tfrx.waitForTransform(frame_id_target, 
+                                                   pointcloud_template.header.frame_id, 
+                                                   pointcloud_template.header.stamp, 
                                                    rospy.Duration(1.0))
                     except tf.Exception, e:
-                        rospy.logwarn('Exception waiting for transform pointcloud=%s, frames %s -> %s: %s' % (self.pointcloudtemplate_list[i].header, self.pointcloudtemplate_list[i].header.frame_id, self.frameid_target_list[i], e))
+                        rospy.logwarn('Exception waiting for transform pointcloud=%s, frames %s -> %s: %s' % (pointcloud_template.header, pointcloud_template.header.frame_id, frame_id_target, e))
                         
                     try:
-                        self.pointcloud_list.append(self.tfrx.transformPointCloud(self.frameid_target_list[i], self.pointcloudtemplate_list[i]))
+                        pointcloud = self.tfrx.transformPointCloud(frame_id_target, pointcloud_template)
                     except tf.Exception, e:
-                        rospy.logwarn('Exception transforming pointcloud=%s, frames %s -> %s: %s' % (self.pointcloudtemplate_list[i].header, self.pointcloudtemplate_list[i].header.frame_id, self.frameid_target_list[i], e))
+                        rospy.logwarn('Exception transforming pointcloud=%s, frames %s -> %s: %s' % (pointcloud_template.header, pointcloud_template.header.frame_id, frame_id_target, e))
+                    else:
+                        self.pointcloud_list.append(pointcloud)
             
-                self.pubGalvoPointCloud.publish(self.RescalePointcloud(self.GetUnifiedPointcloud(self.pointcloud_list)))
+                self.pubGalvoPointCloud.publish(self.VoltsFromUnitsPointcloud(self.GetUnifiedPointcloud(self.pointcloud_list)))
         
 
     # GetUnifiedPointcloud()
@@ -144,7 +172,7 @@ class GalvoDirector:
     # Append the requested pattern to the list of pointcloud templates.
     #
     def AddPatternToTemplates(self, req_gpp):
-        if (self.initialized):# and (len(self.pointcloud_list)>0):
+        if (self.initialized):
             resp_gpp = self.GetPatternPoints(req_gpp)
             pointcloud = self.PointCloudFromPoints('Plate', resp_gpp.pattern.points)
             self.pointcloudtemplate_list.append(pointcloud)
@@ -152,16 +180,28 @@ class GalvoDirector:
             #rospy.logwarn(resp_gpp.pattern.points)
 
 
-    def RescalePointcloud(self, pointcloud):
-        for point in pointcloud.points:
-            point.y += 120
+    # VoltsFromUnitsPointcloud()
+    # Convert the pointcloud units into volts.
+    #
+    def VoltsFromUnitsPointcloud(self, pointcloud):
+        if self.units == 'millimeters':
+            for point in pointcloud.points:
+                point.x *= self.mx
+                point.x += self.bx
 
-            point.x *= 0.02
-            point.y *= 0.02
+                point.y *= self.my
+                point.y += self.by
+    
+        elif self.units=='volts':
+            pass
+
             
         return pointcloud
     
 
+    # PointCloudFromPoints()
+    # Reformat the given points as a pointcloud.
+    #
     def PointCloudFromPoints(self, frame_id, points):            
         points_xy = [] 
         intensity = []
@@ -169,7 +209,11 @@ class GalvoDirector:
             points_xy.append(Point(x=points[i].x,
                                    y=points[i].y,
                                    z=0.0))
-            intensity.append(points[i].z)
+            intensity.append(1.0)# i.e. LASERON   #points[i].z)
+            
+        if len(intensity)>0:
+            intensity[0] = 0.0   # Make sure laser is off when going to start of pattern.
+        
 
         pointcloud = PointCloud(header=Header(frame_id=frame_id, stamp=rospy.Time.now()),
                                 points=points_xy,
@@ -177,12 +221,19 @@ class GalvoDirector:
                                                          values=intensity),])
         return pointcloud                
             
-        
+
+    def Main(self):
+#        while not rospy.is_shutdown():
+#            self.PublishPointcloud() 
+#            self.rosRate.sleep()
+        rospy.spin()
+            
+
 
 if __name__ == '__main__':
     rospy.init_node('GalvoDirector')
     gd = GalvoDirector()
-
-    rospy.spin()
+    gd.Main()
+    
 
 

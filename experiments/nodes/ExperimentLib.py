@@ -171,7 +171,7 @@ class TemplateState (smach.State):
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
         self.rosrate = rospy.Rate(100)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
 
         self.Trigger = TriggerService()
         self.Trigger.attach()
@@ -312,7 +312,7 @@ class TriggerOnStates (smach.State):
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
         self.rosrate = rospy.Rate(100)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
 
         self.Trigger = TriggerService()
         self.Trigger.attach()
@@ -506,7 +506,7 @@ class GotoHome (smach.State):
 
         self.arenastate = None
         self.rosrate = rospy.Rate(100)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
 
         self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
         self.action.wait_for_server()
@@ -601,7 +601,7 @@ class MoveRobot (smach.State):
 
         self.arenastate = None
         self.rosrate = rospy.Rate(100)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
         self.pubPatternGen = rospy.Publisher('SetSignalGen', MsgPattern, latch=True)
 
         self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)

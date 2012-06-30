@@ -40,7 +40,7 @@ class MotorArm:
         rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
-        self.subEndEffectorOffset = rospy.Subscriber('EndEffectorOffset', Point, self.EndEffectorOffset_callback, queue_size=1)
+        self.subEndEffectorOffset = rospy.Subscriber('EndEffectorOffset', Point, self.EndEffectorOffset_callback, queue_size=2)
         self.pubJointState        = rospy.Publisher('joint_states', JointState)
         self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         self.pubMarker            = rospy.Publisher('visualization_marker', Marker)

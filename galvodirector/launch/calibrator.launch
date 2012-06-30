@@ -1,0 +1,20 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configure the galvo calibration.                           -->
+    <!--                                                            -->
+	<!-- ========================================================== -->
+
+	<!-- ***  Core stuff  *** -->
+	<include file="$(find flycore)/launch/flycore.launch" />
+	
+	<!-- ***  Hardware, Flies, and Robot  *** -->
+	<include file="$(find config)/launch/hardware.launch" />
+	<include file="$(find robots)/launch/robots_0.launch" />
+	<include file="$(find flies)/launch/flies_3.launch" />
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="galvodirector" type="Calibrator.py" name="GalvoCalibrator" />
+
+	
+  
+</launch>

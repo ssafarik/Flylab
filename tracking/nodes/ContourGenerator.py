@@ -324,20 +324,21 @@ class ContourGenerator:
             ptContourROI.header.frame_id = "ROI"
             ptContourROI.point.x = xROI
             ptContourROI.point.y = yROI
-            try:
-                self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptContourROI)
-                self.x0_list.append(self.ptsOutput.point.x)
-                self.y0_list.append(self.ptsOutput.point.y)
-                self.angle_list.append(angle)
-                self.area_list.append(area)
-                self.ecc_list.append(ecc)
-                self.nContours += 1
-
-            except tf.Exception, e:
-                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContourROI.header.frame_id, e))
-                self.ptsOutput = PointStamped()
-            except TypeError:
-                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContourROI.header.frame_id, e))
+            if xROI is not None:
+                try:
+                    self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptContourROI)
+                    self.x0_list.append(self.ptsOutput.point.x)
+                    self.y0_list.append(self.ptsOutput.point.y)
+                    self.angle_list.append(angle)
+                    self.area_list.append(area)
+                    self.ecc_list.append(ecc)
+                    self.nContours += 1
+    
+                except tf.Exception, e:
+                    rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContourROI.header.frame_id, e))
+                    self.ptsOutput = PointStamped()
+                except TypeError, e:
+                    rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContourROI.header.frame_id, e))
                 
         
 
@@ -530,6 +531,7 @@ class ContourGenerator:
         
         #if len(self.contourinfo.x)>0:
         self.pubContourInfo.publish(self.contourinfo)
+        #rospy.logwarn('Published ContourInfo')
         
         # Convert to color for display image
         if self.pubImageProcessed.get_num_connections() > 0:

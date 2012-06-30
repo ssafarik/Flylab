@@ -21,20 +21,24 @@
 #define LASERON	TRUE
 #define LASEROFF FALSE
 
+#define NBUFFERCOPIES 2
 
-uInt64 					g_nPointsBuffer=0;
-uInt64 					g_nPointsBufferRegistered = -1;
-uInt64 					g_nPointsBufferMax=0;
+int32 					g_nPointsBuffer=0;
+int32 					g_nPointsBufferRegistered = -1;
+int32 					g_nPointsBufferMax=0;
+int32					g_nPointclouds = 0;
+
 float64 			   *g_pBufferPoints=NULL;
 int32 				   *g_pBufferBlanking=NULL;
-boost::mutex 			g_mutex;
+
+boost::mutex 			g_mutex; // To prevent the various callbacks from colliding.
 sensor_msgs::PointCloud g_pointcloud;
+
 int						g_bStarted=FALSE;
 
-float64					g_hzPoint = 10000.0;
-int						g_nPointclouds = 1;
-float64					g_hzPointcloud = 20.0;
-float64					g_hzUSB = 20.0;
+float64					g_hzPoint = 16384.0;  // Delay of laser movement = onboardbufsize/g_hzPoint, e.g. 4095/16384 = 0.25 seconds.
+float64					g_hzPointcloud = 0.0;
+float64					g_hzUSB = 70.0;
 
 int32   e=0;
 char    errBuff[2048]={'\0'};
@@ -48,9 +52,10 @@ int32 CVICALLBACK OnEveryNSamples_callback (TaskHandle hTask, int32 eventType, u
 //
 void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointcloud)
 {
-	ROS_WARN("Received Pointcloud.");
-	boost::lock_guard<boost::mutex> lock(g_mutex);
-	g_pointcloud = sensor_msgs::PointCloud(*pointcloud);
+	//ROS_WARN("Received Pointcloud, len=%d.", pointcloud->points.size());
+	
+	boost::lock_guard<boost::mutex> lock(g_mutex); // Lock the global pointcloud.
+	g_pointcloud = sensor_msgs::PointCloud(*pointcloud); // Copy the given pointcloud.
 	
 }
 
@@ -63,28 +68,32 @@ void ConvertPointsFromPointcloud()
 {
 	int			i=0;
 	int			iPoint=0;
-	int			iBlanking=0;
 	int			iPointcloud=0;
-	int			nPoints=0;
+	int32		nPointsPerCloud=0;
 
-	
 	boost::lock_guard<boost::mutex> lock(g_mutex);
 
-	nPoints = MAX(1,g_pointcloud.points.size());
-	g_hzPointcloud = g_hzPoint / (float64)nPoints;
+	nPointsPerCloud = MAX(1,g_pointcloud.points.size());
+	g_hzPointcloud = g_hzPoint / (float64)nPointsPerCloud;
 	
 	
-	g_nPointclouds = (int)MAX(1.0, ceil(g_hzPointcloud/g_hzUSB) + 1.0);
-	g_nPointsBuffer = g_nPointclouds * nPoints;
+	g_nPointclouds = (int32)MAX(1.0, ceil(g_hzPointcloud/g_hzUSB) + 1.0);
+	g_nPointsBuffer = g_nPointclouds * nPointsPerCloud;
+	//ROS_WARN("nPointsPerCloud=%lu, g_hzPointcloud=%0.2f, g_hzUSB=%0.2f, g_nPointclouds=%lu, g_nPointsBuffer=%lu", 
+	//	nPointsPerCloud,
+	//	g_hzPointcloud, 
+	//	g_hzUSB, 
+	//	g_nPointclouds, 
+	//	g_nPointsBuffer);
 	
-	// Realloc old memory if more points now.  This is one buffer containing multiple pointclouds.  The DAQ will use this buffer twice.
+	// Realloc old memory if more points now.  This is one buffer containing multiple copies of pointcloud.  The DAQ will use this buffer NBUFFERCOPIES times.
 	if (g_nPointsBufferMax < g_nPointsBuffer)
 	{
 		g_nPointsBufferMax = g_nPointsBuffer;
 
 		if (g_pBufferPoints != NULL)
 			delete g_pBufferPoints;
-		g_pBufferPoints = new float64[g_nPointsBuffer * 2]; // Two values per point (x,y).
+		g_pBufferPoints = new float64[g_nPointsBuffer * 2]; // Two values per point, i.e. (x,y).
 
 		if (g_pBufferBlanking != NULL)
 			delete g_pBufferBlanking;
@@ -96,29 +105,34 @@ void ConvertPointsFromPointcloud()
 	iPoint = 0;		// The cumulative point in the buffer.
 	for (iPointcloud=0; iPointcloud<g_nPointclouds; iPointcloud++)
 	{
-		for (i=0; i<nPoints; i++)
-		{
-			if (nPoints>1)
+		if (g_pointcloud.points.size()>0)
+			for (i=0; i<nPointsPerCloud; i++)
 			{
 				// Copy the (x,y) values.
-				g_pBufferPoints[iPoint*2] = g_pointcloud.points[i].x;
-				g_pBufferPoints[iPoint*2+1] = g_pointcloud.points[i].y;
+				g_pBufferPoints[iPoint*2]   = (float64)g_pointcloud.points[i].x;
+				g_pBufferPoints[iPoint*2+1] = (float64)g_pointcloud.points[i].y;
 			
 				// Copy the z-blanking value.
 				g_pBufferBlanking[iPoint] = (g_pointcloud.points[i].z != 0.0) ? LASERON : LASEROFF;
+		
+				iPoint++;
+
+				//ROS_WARN("(%0.4f, %0.4f)", g_pointcloud.points[i].x, g_pointcloud.points[i].y);
 			}
-			else
-			{
-				// Copy the (x,y) values.
-				g_pBufferPoints[iPoint*2] = 0.0;
-				g_pBufferPoints[iPoint*2+1] = 0.0;
+		else
+		{
+			// Use (0,0).
+			g_pBufferPoints[iPoint*2] = 0.0;
+			g_pBufferPoints[iPoint*2+1] = 0.0;
 			
-				// Copy the z-blanking value.
-				g_pBufferBlanking[iPoint] = LASERON;
-			}
-			
+			// Copy the z-blanking value.
+			g_pBufferBlanking[iPoint] = LASERON;
+	
 			iPoint++;
+
+			//ROS_WARN("(default point)");
 		}
+			
 	}
 }
 
@@ -131,7 +145,7 @@ void WritePoints(TaskHandle hTask)
 	int32		nPointsWritten = 0;
 
 	// Write the buffer.
-	e=DAQmxWriteAnalogF64 (hTask, g_nPointsBuffer, FALSE, 10.0, DAQmx_Val_GroupByScanNumber, g_pBufferPoints, &nPointsWritten, NULL);
+	e=DAQmxWriteAnalogF64 (hTask, g_nPointsBuffer, FALSE, 0.0, DAQmx_Val_GroupByScanNumber, g_pBufferPoints, &nPointsWritten, NULL);
 	if (DAQmxFailed(e))
 	{
 		DAQmxGetExtendedErrorInfo(errBuff,2048);
@@ -139,6 +153,7 @@ void WritePoints(TaskHandle hTask)
 	}
 
 }
+
 
 
 // ************************************
@@ -151,6 +166,8 @@ int RegisterCallback (TaskHandle hTask)
 	
 	if (g_nPointsBuffer != g_nPointsBufferRegistered)
 	{
+		ROS_WARN("Resetting task, %d, pc.size=%d", g_nPointsBuffer, g_pointcloud.points.size());
+
 		g_nPointsBufferRegistered = g_nPointsBuffer;
 		if (g_bStarted)
 		{
@@ -173,7 +190,7 @@ int RegisterCallback (TaskHandle hTask)
 		}
 
 		// Resize the output buffer.
-		e=DAQmxCfgOutputBuffer (hTask, 2*g_nPointsBufferRegistered);
+		e=DAQmxCfgOutputBuffer (hTask, NBUFFERCOPIES*g_nPointsBufferRegistered);
 		if (DAQmxFailed(e))
 		{
 			DAQmxGetExtendedErrorInfo(errBuff,2048);
@@ -206,7 +223,8 @@ int32 CVICALLBACK OnEveryNSamples_callback (TaskHandle hTask, int32 eventType, u
 		ConvertPointsFromPointcloud();
 
 		if (RegisterCallback(hTask))
-			WritePoints(hTask);
+			for (int i=0; i<(NBUFFERCOPIES-1); i++)
+				WritePoints(hTask);
 		
 		WritePoints(hTask);
 
@@ -234,13 +252,12 @@ int main(int argc, char **argv)
 	ros::NodeHandle node;
 	TaskHandle 	 	hTask;
 
-	ros::Subscriber subGalvoPoints = node.subscribe("GalvoDriver/pointcloud", 1000, GalvoPointCloud_callback);
-	//ros::Rate rateUpdate(10);
-
 	char 		szTask[]="OutputPointList";
 	char		szPhysicalChannel[]="Dev1/ao0:1";
 	float64		points[]={0.0, 0.0, 0.0, 0.0};
 
+	ros::Subscriber subGalvoPoints = node.subscribe("GalvoDriver/pointcloud", 2, GalvoPointCloud_callback);
+	
 
 	ROS_WARN ("Listening for points on ROS topic GalvoDriver/pointcloud...");
 
@@ -255,14 +272,14 @@ int main(int argc, char **argv)
 	}
 	
 	ConvertPointsFromPointcloud();
-	e=DAQmxCfgOutputBuffer (hTask, 2*g_nPointsBuffer);
+	e=DAQmxCfgOutputBuffer (hTask, NBUFFERCOPIES*g_nPointsBuffer);
 	if (DAQmxFailed(e))
 	{
 		DAQmxGetExtendedErrorInfo(errBuff, 2048);
 		ROS_WARN(errBuff);
 	}
-	WritePoints (hTask);
-	WritePoints (hTask);
+	for (int i=0; i<NBUFFERCOPIES; i++)
+		WritePoints(hTask);
 	RegisterCallback(hTask);
 	if (!g_bStarted)
 	{
@@ -275,7 +292,10 @@ int main(int argc, char **argv)
 			ROS_WARN(errBuff);
 		}
 	}
-	
+	uInt32 data;
+	DAQmxSetBufOutputOnbrdBufSize(hTask, 2048);
+	DAQmxGetBufOutputOnbrdBufSize(hTask, &data);
+	ROS_WARN("Onboard bufsize=%u", data);
 	ros::spin();
 	
 	e=DAQmxStopTask (hTask);

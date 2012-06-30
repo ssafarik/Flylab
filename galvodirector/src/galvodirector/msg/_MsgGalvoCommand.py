@@ -8,17 +8,19 @@ import geometry_msgs.msg
 import patterngen.msg
 
 class MsgGalvoCommand(genpy.Message):
-  _md5sum = "b7d582278340e1dc0c2908f55fff7424"
+  _md5sum = "622c375190d4530fee967c00883a5993"
   _type = "galvodirector/MsgGalvoCommand"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """string[] frameid_target_list
 patterngen/MsgPattern[] pattern_list
+string units	# 'volts' or 'millimeters'
+
 
 ================================================================================
 MSG: patterngen/MsgPattern
 string                mode      # 'byshape' or 'bypoints'
 string                shape     # 'square' or 'circle' or 'flylogo' or 'spiral'
-string                frame     # The frame in which to output the points.
+string                frame_id  # The frame in which to output the points.
 float64               hzPattern # Frequency of the pattern.
 float64               hzPoint   # Frequency of points making up the pattern.
 int32                 count     # How many times to output the pattern (-1 or N.inf means infinite).
@@ -35,8 +37,8 @@ float64 y
 float64 z
 
 """
-  __slots__ = ['frameid_target_list','pattern_list']
-  _slot_types = ['string[]','patterngen/MsgPattern[]']
+  __slots__ = ['frameid_target_list','pattern_list','units']
+  _slot_types = ['string[]','patterngen/MsgPattern[]','string']
 
   def __init__(self, *args, **kwds):
     """
@@ -46,7 +48,7 @@ float64 z
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       frameid_target_list,pattern_list
+       frameid_target_list,pattern_list,units
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -59,9 +61,12 @@ float64 z
         self.frameid_target_list = []
       if self.pattern_list is None:
         self.pattern_list = []
+      if self.units is None:
+        self.units = ''
     else:
       self.frameid_target_list = []
       self.pattern_list = []
+      self.units = ''
 
   def _get_types(self):
     """
@@ -98,7 +103,7 @@ float64 z
           _x = _x.encode('utf-8')
           length = len(_x)
         buff.write(struct.pack('<I%ss'%length, length, _x))
-        _x = val1.frame
+        _x = val1.frame_id
         length = len(_x)
         if python3 or type(_x) == unicode:
           _x = _x.encode('utf-8')
@@ -113,6 +118,12 @@ float64 z
           buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
         buff.write(_struct_dB.pack(_x.radius, _x.preempt))
+      _x = self.units
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -170,9 +181,9 @@ float64 z
         start = end
         end += length
         if python3:
-          val1.frame = str[start:end].decode('utf-8')
+          val1.frame_id = str[start:end].decode('utf-8')
         else:
-          val1.frame = str[start:end]
+          val1.frame_id = str[start:end]
         _x = val1
         start = end
         end += 20
@@ -194,6 +205,15 @@ float64 z
         (_x.radius, _x.preempt,) = _struct_dB.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
         self.pattern_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.units = str[start:end].decode('utf-8')
+      else:
+        self.units = str[start:end]
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -229,7 +249,7 @@ float64 z
           _x = _x.encode('utf-8')
           length = len(_x)
         buff.write(struct.pack('<I%ss'%length, length, _x))
-        _x = val1.frame
+        _x = val1.frame_id
         length = len(_x)
         if python3 or type(_x) == unicode:
           _x = _x.encode('utf-8')
@@ -244,6 +264,12 @@ float64 z
           buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
         buff.write(_struct_dB.pack(_x.radius, _x.preempt))
+      _x = self.units
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -302,9 +328,9 @@ float64 z
         start = end
         end += length
         if python3:
-          val1.frame = str[start:end].decode('utf-8')
+          val1.frame_id = str[start:end].decode('utf-8')
         else:
-          val1.frame = str[start:end]
+          val1.frame_id = str[start:end]
         _x = val1
         start = end
         end += 20
@@ -326,6 +352,15 @@ float64 z
         (_x.radius, _x.preempt,) = _struct_dB.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
         self.pattern_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.units = str[start:end].decode('utf-8')
+      else:
+        self.units = str[start:end]
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill

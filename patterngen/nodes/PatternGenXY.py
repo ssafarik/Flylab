@@ -24,7 +24,7 @@ class PatternGenXY:
         self.signal = NullClass()
         self.signal.mode = 'byshape'
         self.signal.shape = 'none'
-        self.signal.frame = 'Stage'
+        self.signal.frame_id = 'Stage'
         self.signal.hzPattern = 1.0
         self.signal.hzPoint = 50
         self.signal.count = 0
@@ -36,7 +36,7 @@ class PatternGenXY:
         self.pattern = NullClass()
         self.pattern.mode = 'byshape'
         self.pattern.shape = 'none'
-        self.pattern.frame = 'Stage'
+        self.pattern.frame_id = 'Stage'
         self.pattern.hzPattern = 1.0
         self.pattern.hzPoint = 50
         self.pattern.count = 0
@@ -240,6 +240,7 @@ class PatternGenXY:
             else:
                 pattern.points = []
                 rospy.logerror('PatternGen: unknown shape')
+        #else pattern.points = pattern.points
                 
                 
         
@@ -250,7 +251,7 @@ class PatternGenXY:
         with self.lock:
             self.signal.mode        = msgPatternGen.mode
             self.signal.shape       = msgPatternGen.shape
-            self.signal.frame       = msgPatternGen.frame
+            self.signal.frame_id    = msgPatternGen.frame_id
             self.signal.hzPattern   = msgPatternGen.hzPattern
             self.signal.hzPoint     = msgPatternGen.hzPoint
             self.signal.count       = msgPatternGen.count
@@ -272,7 +273,7 @@ class PatternGenXY:
             
 #            pattern.mode       = reqGetPatternPoints.pattern.mode
 #            pattern.shape      = reqGetPatternPoints.pattern.shape
-#            pattern.frame      = reqGetPatternPoints.pattern.frame
+#            pattern.frame_id   = reqGetPatternPoints.pattern.frame_id
 #            pattern.hzPattern  = reqGetPatternPoints.pattern.hzPattern
 #            pattern.hzPoint    = reqGetPatternPoints.pattern.hzPoint
 #            pattern.count      = reqGetPatternPoints.pattern.count
@@ -297,7 +298,7 @@ class PatternGenXY:
         if self.pattern.points is not None and len(self.pattern.points)>0:
             #rospy.logwarn('rate=%s' % self.pattern.hzPoint)
             if self.pattern.count>0:
-                self.pts.header.frame_id = self.pattern.frame
+                self.pts.header.frame_id = self.pattern.frame_id
                 #self.pts.header.stamp = rospy.Time.now() + self.dtPoint
                 self.pts.point = self.pattern.points[self.iPoint]
                 try:

@@ -56,8 +56,8 @@ class ContourIdentifier:
         
         
         # Messages
-        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback, queue_size=1)
-        self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback, queue_size=1)
+        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback, queue_size=2)
+        self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback, queue_size=2)
         
         self.pubArenaState = rospy.Publisher('ArenaState', ArenaState)
         self.pubEndEffectorOffset = rospy.Publisher('EndEffectorOffset', Point)
@@ -557,7 +557,7 @@ class ContourIdentifier:
     
 
     def ContourInfo_callback(self, contourinfo):
-        rospy.logwarn ('contourinfo callback, stamp=%s, initialized=%s' % (contourinfo.header.stamp, self.initialized))
+        #rospy.logwarn ('contourinfo callback, stamp=%s, initialized=%s' % (contourinfo.header.stamp, self.initialized))
         if self.initialized:
             try:
                 #rospy.logwarn ('CI contourinfo0 %s' % contourinfo)
