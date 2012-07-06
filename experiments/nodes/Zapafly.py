@@ -91,8 +91,10 @@ class ExperimentZapafly():
         pattern.hzPoint    = 1000.0
         pattern.count      = 1
         pattern.points     = []
-        pattern.radius     = 5
+        pattern.size.x     = 6
+        pattern.size.y     = 6
         pattern.preempt    = False
+        pattern.param      = 1.0
     
         command = MsgGalvoCommand()
         command.frameid_target_list = ['Plate',]

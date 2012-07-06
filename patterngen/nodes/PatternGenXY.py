@@ -29,8 +29,9 @@ class PatternGenXY:
         self.signal.hzPoint = 50
         self.signal.count = 0
         self.signal.points = []
-        self.signal.radius = 25.4
+        self.signal.size = Point(25.4, 25.4, 0.0)
         self.signal.preempt = True
+        self.signal.param = 0.0
 
         # The pattern to use for point creation.
         self.pattern = NullClass()
@@ -41,8 +42,9 @@ class PatternGenXY:
         self.pattern.hzPoint = 50
         self.pattern.count = 0
         self.pattern.points = []
-        self.pattern.radius = 25.4
+        self.pattern.size = Point(25.4, 25.4, 0.0)
         self.pattern.preempt = True
+        self.pattern.param = 0.0
 
         self.iPoint = 0
 
@@ -71,8 +73,8 @@ class PatternGenXY:
 
     def GetPointsConstant(self, pattern):
         nPoints = int(pattern.hzPoint/pattern.hzPattern)
-        points = [Point(x=pattern.radius, 
-                        y=pattern.radius)] * nPoints  # [(r,r),(r,r),(r,r), ...]
+        points = [Point(x=pattern.size.x, 
+                        y=pattern.size.y)] * nPoints  # [(x,y),(x,y),(x,y), ...]
         
         return points
 
@@ -81,7 +83,7 @@ class PatternGenXY:
         nPoints = int(pattern.hzPoint/pattern.hzPattern)
         q = 0.0 #N.pi/2.0  # Starting position
         dq = 2.0*N.pi/nPoints
-        r = pattern.radius
+        r = N.linalg.norm([pattern.size.x, pattern.size.y])
 
         points = []
         for i in range(nPoints):
@@ -95,10 +97,10 @@ class PatternGenXY:
     def GetPointsSquare(self, pattern):
         nPoints = int(pattern.hzPoint/pattern.hzPattern)
         nPointsSide = int(nPoints / 4.0) # Points per side
-        xmin = -pattern.radius / N.sqrt(2)
-        xmax =  pattern.radius / N.sqrt(2)
-        ymin = -pattern.radius / N.sqrt(2)
-        ymax =  pattern.radius / N.sqrt(2)
+        xmin = -pattern.size.x / 2
+        xmax =  pattern.size.x / 2
+        ymin = -pattern.size.y / 2
+        ymax =  pattern.size.y / 2
         step = (xmax-xmin)/((nPointsSide+1)-1)
 
         points = []        
@@ -141,9 +143,11 @@ class PatternGenXY:
                    [0, -1],[-5, -4],[-2, 0],[-5, 4],[0, 1],[4, 2],[4, -2],[7,0],[4, 2],[12, 6],[16, 12],[13, 15],[3, 13],[-3, 7],[-6, 5],[-7, 7],[-3, 11],[-4, 14]]
         points = []
 
+        xmax = 16.0
+        ymax = 15.0
         for k in range(len(flylogo)):
-            pt = Point(x=float(flylogo[k][0]) * pattern.radius / 20.0, 
-                       y=float(flylogo[k][1]) * pattern.radius / 20.0) # 20.0 is the max radius of the pointlist above.
+            pt = Point(x=float(flylogo[k][0]) * pattern.size.x / xmax,
+                       y=float(flylogo[k][1]) * pattern.size.y / ymax)
             points.append(pt)
            
         return points
@@ -157,8 +161,9 @@ class PatternGenXY:
         nPointsPerRevolution = nPoints / nRevolutionsPerPattern
         q = 2.0 * N.pi * N.random.random()
         dq = 2.0 * N.pi/nPointsPerRevolution
+        radius = N.linalg.norm([pattern.size.x, pattern.size.y])
         
-        rmax = pattern.radius
+        rmax = radius
         rmin = 0.10
         r = rmin
         dr = (rmax-rmin) / (pitchSpiral * nPointsPerRevolution)
@@ -184,32 +189,39 @@ class PatternGenXY:
         return points
         
 
-    # GetPointsRamp() creates a set of points where pt.x goes from 0 to radius, and pt.y goes from radius to 0.
+    # GetPointsRamp() creates a set of points where pt.x goes from 0 to size.x, and pt.y goes from size.y to 0.
     def GetPointsRamp(self, pattern):
         nPoints = int(pattern.hzPoint/pattern.hzPattern)
         xStart = 0.0
-        xEnd = pattern.radius
+        xEnd = pattern.size.x
+        yStart = pattern.size.y
+        yEnd = 0.0
 
-        delta = (xEnd-xStart) / (nPoints-1)
+        xDelta = (xEnd-xStart) / (nPoints-1)
+        yDelta = (yEnd-yStart) / (nPoints-1)
         
         x = xStart
+        y = yStart
         points = []
         for i in range(nPoints):
             points.append(Point(x=x, 
-                                y=xEnd-x))
-            x = x+delta
+                                y=y))
+            x = x+xDelta
+            y = y+yDelta
 
-
+        # Alternatively do something like:  points = N.linspace([xStart,yStart],[xEnd,yEnd],nPoints)
+        
         return points
     
         
     def GetPointsGridRaster(self, pattern):
+        gridpitch = int(pattern.param)
         nPoints = int(pattern.hzPoint/pattern.hzPattern)
-        nPointsSide = int(nPoints / 10.0) # Points per side
-        xmin = -pattern.radius / N.sqrt(2)
-        xmax =  pattern.radius / N.sqrt(2)
-        ymin = -pattern.radius / N.sqrt(2)
-        ymax =  pattern.radius / N.sqrt(2)
+        nPointsSide = int(nPoints / gridpitch)
+        xmin = -pattern.size.x / 2
+        xmax =  pattern.size.x / 2
+        ymin = -pattern.size.y / 2
+        ymax =  pattern.size.y / 2
 
         points = []        
         for x in N.linspace(xmin, xmax, nPointsSide+1):
@@ -220,6 +232,7 @@ class PatternGenXY:
         return points
 
 
+    # PeanoCurve() generates a fractal Peano curve.
     class PeanoCurve:
         points = []
         
@@ -372,12 +385,11 @@ class PatternGenXY:
                 self.K(level-1)
                 #self.Left()
     
-        def GetPoints(self, level, width):
-            d = width / (2**(level+1)-1)
-            self.x = -d/2#-(d * 2^level)
-            self.y = d/2#-(d * 2^level)
-            self.dx = d
-            self.dy = d
+        def GetPoints(self, level, xSize, ySize):
+            self.dx = xSize / (2**(level+1)-1)
+            self.dy = ySize / (2**(level+1)-1)
+            self.x = -self.dx/2
+            self.y = self.dy/2
             
             self.points = []
             self.A(level)
@@ -388,19 +400,19 @@ class PatternGenXY:
             self.Up()
             self.J(level)
             self.Left()
-            #self.Move(0,0)
             
             return self.points
 
 
     def GetPointsGridPeano(self, pattern):
         peano = self.PeanoCurve()
-        level=1
-        width = pattern.radius / N.sqrt(2)
+        level = int(pattern.param)
             
-        return peano.GetPoints(level, width)
+        return peano.GetPoints(level, pattern.size.x, pattern.size.y)
     
 
+    # HilbertCurve() generates a fractal Hilbert curve.
+    # This code needs to be tweaked to take xSize,ySize, etc, as w/ Peano. 
     class HilbertCurve:
         points = []
         
@@ -455,17 +467,16 @@ class PatternGenXY:
             self.y = -(d * 2^level)
             self.points = []
             self.HilbertA(level, d)
-            #self.HilbertMove(0,0)
             
             return self.points
 
 
     def GetPointsGridHilbert(self, pattern):
         hilbert = self.HilbertCurve()
-        level=2
-        d = 2  # Grid spacing.
+        level = int(pattern.param)
+        width = 10
             
-        return hilbert.GetPoints(level, d)
+        return hilbert.GetPoints(level, width)
     
 
     def GetPointsGrid(self, pattern):
@@ -514,7 +525,7 @@ class PatternGenXY:
             self.signal.hzPattern   = msgPatternGen.hzPattern
             self.signal.hzPoint     = msgPatternGen.hzPoint
             self.signal.count       = msgPatternGen.count
-            self.signal.radius      = msgPatternGen.radius
+            self.signal.size        = msgPatternGen.size
     
             if self.signal.count==-1:
                 self.signal.count = 2147483640 # MAX_INT
@@ -536,7 +547,7 @@ class PatternGenXY:
 #            pattern.hzPattern  = reqGetPatternPoints.pattern.hzPattern
 #            pattern.hzPoint    = reqGetPatternPoints.pattern.hzPoint
 #            pattern.count      = reqGetPatternPoints.pattern.count
-#            pattern.radius     = reqGetPatternPoints.pattern.radius
+#            pattern.size       = reqGetPatternPoints.pattern.size
 #    
 #            if pattern.count==-1:
 #                pattern.count = 2147483640 # MAX_INT

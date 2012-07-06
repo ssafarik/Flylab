@@ -2,5 +2,5 @@ string shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'sp
 float64 hzPattern
 float64 hzPoint
 int32 count  # -1 means forever
-float64 radius
+geometry_msgs/Point size
 

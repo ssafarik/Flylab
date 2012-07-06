@@ -791,8 +791,9 @@ class MoveRobot (smach.State):
         msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
         msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
         msgPattern.count = userdata.experimentparamsIn.move.pattern.count
-        msgPattern.radius = userdata.experimentparamsIn.move.pattern.radius
+        msgPattern.size = userdata.experimentparamsIn.move.pattern.size
         msgPattern.preempt = True
+        msgPattern.param = userdata.experimentparamsIn.move.pattern.param
         self.pubPatternGen.publish (msgPattern)
                 
 
@@ -818,8 +819,9 @@ class MoveRobot (smach.State):
         msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
         msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
         msgPattern.count = 0
-        msgPattern.radius = userdata.experimentparamsIn.move.pattern.radius
+        msgPattern.size = userdata.experimentparamsIn.move.pattern.size
         msgPattern.preempt = True
+        msgPattern.param = userdata.experimentparamsIn.move.pattern.param
         self.pubPatternGen.publish (msgPattern)
 
         return rv

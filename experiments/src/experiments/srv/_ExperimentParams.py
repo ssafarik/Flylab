@@ -4,10 +4,11 @@ python3 = True if sys.hexversion > 0x03000000 else False
 import genpy
 import struct
 
+import geometry_msgs.msg
 import experiments.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "1e95b5f2c80621a002d46555834ab68e"
+  _md5sum = "de553ee0efb35978fc28bd0b4804b5ef"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings experiment
@@ -80,8 +81,15 @@ string shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'sp
 float64 hzPattern
 float64 hzPoint
 int32 count  # -1 means forever
-float64 radius
+geometry_msgs/Point size
 
+
+================================================================================
+MSG: geometry_msgs/Point
+# This contains the position of a point in free space
+float64 x
+float64 y
+float64 z
 
 ================================================================================
 MSG: experiments/SaveSettings
@@ -206,7 +214,7 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di2dB6d.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.radius, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_2di4dB6d.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -345,8 +353,8 @@ bool onlyWhileTriggered
         self.move.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 85
-      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.radius, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2di2dB6d.unpack(str[start:end])
+      end += 101
+      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2di4dB6d.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -449,7 +457,7 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di2dB6d.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.radius, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_2di4dB6d.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -589,8 +597,8 @@ bool onlyWhileTriggered
         self.move.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 85
-      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.radius, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2di2dB6d.unpack(str[start:end])
+      end += 101
+      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2di4dB6d.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -630,10 +638,10 @@ bool onlyWhileTriggered
 _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
+_struct_2di4dB6d = struct.Struct("<2di4dB6d")
 _struct_B2dB = struct.Struct("<B2dB")
 _struct_2d = struct.Struct("<2d")
 _struct_B2d = struct.Struct("<B2d")
-_struct_2di2dB6d = struct.Struct("<2di2dB6d")
 _struct_4B = struct.Struct("<4B")
 _struct_2iB6dB6d = struct.Struct("<2iB6dB6d")
 """autogenerated by genpy from experiments/ExperimentParamsResponse.msg. Do not edit."""
@@ -740,6 +748,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '2e4da8739f4b9829d90d50823130dccd'
+  _md5sum = 'ed2fc10ff503065650d058094047b669'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

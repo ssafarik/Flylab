@@ -8,7 +8,7 @@ import geometry_msgs.msg
 import patterngen.msg
 
 class MsgGalvoCommand(genpy.Message):
-  _md5sum = "622c375190d4530fee967c00883a5993"
+  _md5sum = "38c7439c81fb54ea17f679ad55059a89"
   _type = "galvodirector/MsgGalvoCommand"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """string[] frameid_target_list
@@ -19,14 +19,16 @@ string units	# 'volts' or 'millimeters'
 ================================================================================
 MSG: patterngen/MsgPattern
 string                mode      # 'byshape' or 'bypoints'
-string                shape     # 'square' or 'circle' or 'flylogo' or 'spiral'
-string                frame_id  # The frame in which to output the points.
+string                shape     # 'constant' or 'square' or 'circle' or 'flylogo' or 'spiral' or 'ramp' or 'grid' or 'raster' or 'hilbert' or 'peano' or 'none'
+string                frame_id  # The frame to which the pattern applies.
 float64               hzPattern # Frequency of the pattern.
 float64               hzPoint   # Frequency of points making up the pattern.
 int32                 count     # How many times to output the pattern (-1 or N.inf means infinite).
 geometry_msgs/Point[] points    # If mode=='bypoints', then this is the list of points to scan.
-float64               radius    # Center to max distance.
+geometry_msgs/Point   size      # (x,y) dimensions.
 bool				  preempt   # Should this message restart an in-progress pattern.
+float64               param     # An extra parameter, if needed by the particular pattern (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
+ 
 
 
 ================================================================================
@@ -116,8 +118,11 @@ float64 z
         for val2 in val1.points:
           _x = val2
           buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+        _v1 = val1.size
+        _x = _v1
+        buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
-        buff.write(_struct_dB.pack(_x.radius, _x.preempt))
+        buff.write(_struct_Bd.pack(_x.preempt, _x.param))
       _x = self.units
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -199,10 +204,15 @@ float64 z
           end += 24
           (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
           val1.points.append(val2)
+        _v2 = val1.size
+        _x = _v2
+        start = end
+        end += 24
+        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         _x = val1
         start = end
         end += 9
-        (_x.radius, _x.preempt,) = _struct_dB.unpack(str[start:end])
+        (_x.preempt, _x.param,) = _struct_Bd.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
         self.pattern_list.append(val1)
       start = end
@@ -262,8 +272,11 @@ float64 z
         for val2 in val1.points:
           _x = val2
           buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+        _v3 = val1.size
+        _x = _v3
+        buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
-        buff.write(_struct_dB.pack(_x.radius, _x.preempt))
+        buff.write(_struct_Bd.pack(_x.preempt, _x.param))
       _x = self.units
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -346,10 +359,15 @@ float64 z
           end += 24
           (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
           val1.points.append(val2)
+        _v4 = val1.size
+        _x = _v4
+        start = end
+        end += 24
+        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         _x = val1
         start = end
         end += 9
-        (_x.radius, _x.preempt,) = _struct_dB.unpack(str[start:end])
+        (_x.preempt, _x.param,) = _struct_Bd.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
         self.pattern_list.append(val1)
       start = end
@@ -366,6 +384,6 @@ float64 z
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_dB = struct.Struct("<dB")
+_struct_Bd = struct.Struct("<Bd")
 _struct_2di = struct.Struct("<2di")
 _struct_3d = struct.Struct("<3d")

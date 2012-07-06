@@ -53,7 +53,8 @@ class ExperimentPassiveChase():
         self.experimentparams.move.pattern.hzPattern = 1/30
         self.experimentparams.move.pattern.hzPoint = 10
         self.experimentparams.move.pattern.count = -1
-        self.experimentparams.move.pattern.radius = 28
+        self.experimentparams.move.pattern.size.x = 20
+        self.experimentparams.move.pattern.size.y = 20
         self.experimentparams.move.timeout = 600
         
         self.experimentparams.triggerExit.enabled = False

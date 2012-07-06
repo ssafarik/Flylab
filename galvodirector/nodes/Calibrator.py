@@ -93,8 +93,10 @@ class GalvoCalibrator:
         pattern.hzPoint    = 100.0
         pattern.count      = 1
         pattern.points     = self.pointsInput
-        pattern.radius     = 20.0
+        pattern.size.x     = 20.0
+        pattern.size.y     = 20.0
         pattern.preempt    = False
+        pattern.param      = 0.0
     
         command = MsgGalvoCommand()
         command.frameid_target_list = ['Plate',]
@@ -106,7 +108,6 @@ class GalvoCalibrator:
     def Main(self):
         while not rospy.is_shutdown():
             self.SendInputPoints()
-            #rospy.logwarn('Published ===============================================')
             rospy.sleep(1.0)
             
     
