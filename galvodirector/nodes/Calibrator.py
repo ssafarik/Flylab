@@ -37,9 +37,9 @@ class GalvoCalibrator:
         # Messages
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback)
         self.pubGalvoCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand)
-        self.pointsInput = [Point(x=0.0, y=0.0), 
-                            Point(x=2.0, y=0.0), 
-                            Point(x=0.0, y=4.0)]
+        self.pointsInput = [Point(x=-4.0, y=1.0), 
+                            Point(x=3.0, y=1.0), 
+                            Point(x=-1.0, y=7.0)]
 
         rospy.on_shutdown(self.OnShutdown_callback)
         

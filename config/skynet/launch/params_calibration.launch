@@ -16,19 +16,19 @@
   <!-- =================================================================== -->
   
   <!-- The mask circle in camera coordinates (i.e. pixels).    -->
-  <param name="camera/mask/x" type="double" value="305"/>
-  <param name="camera/mask/y" type="double" value="225"/>
+  <param name="camera/mask/x" type="double" value="320"/>
+  <param name="camera/mask/y" type="double" value="220"/>
   <param name="camera/mask/radius" type="double" value="210"/>  <!-- pixels -->
 
 
 
   <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. They might need fiddling with after use. -->
-  <param name="camera_plate_rvec_0" type="double" value="-3.126"/>
+  <param name="camera_plate_rvec_0" type="double" value="-3.11"/>
   <param name="camera_plate_rvec_1" type="double" value="0.000"/>
   <param name="camera_plate_rvec_2" type="double" value="0.000"/>
-  <param name="camera_plate_tvec_0" type="double" value="130"/> <!-- Adjust for plate alignment here. -->
-  <param name="camera_plate_tvec_1" type="double" value="91"/> <!-- Adjust for plate alignment here. -->
-  <param name="camera_plate_tvec_2" type="double" value="342"/>
+  <param name="camera_plate_tvec_0" type="double" value="160"/> <!-- Adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_1" type="double" value="110"/> <!-- Adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_2" type="double" value="415"/>
   
 
   <!-- ================================================================== -->

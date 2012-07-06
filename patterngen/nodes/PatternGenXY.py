@@ -203,7 +203,7 @@ class PatternGenXY:
         return points
     
         
-    def GetPointsGrid(self, pattern):
+    def GetPointsGridRaster(self, pattern):
         nPoints = int(pattern.hzPoint/pattern.hzPattern)
         nPointsSide = int(nPoints / 10.0) # Points per side
         xmin = -pattern.radius / N.sqrt(2)
@@ -215,9 +215,262 @@ class PatternGenXY:
         for x in N.linspace(xmin, xmax, nPointsSide+1):
             for y in N.linspace(ymin, ymax, nPointsSide+1):
                 points.append(Point(x,y,0))
+
     
         return points
+
+
+    class PeanoCurve:
+        points = []
+        
+        def Left (self):
+            self.x += -self.dx
+            self.points.append(Point(self.x, self.y, 0))
+            
+        def Right (self):
+            self.x += self.dx
+            self.points.append(Point(self.x, self.y, 0))
+            
+        def Up (self):
+            self.y += self.dy
+            self.points.append(Point(self.x, self.y, 0))
+            
+        def Down (self):
+            self.y += -self.dy
+            self.points.append(Point(self.x, self.y, 0))
+            
+        
+        def A(self, level):
+            if level > 0:
+                self.I(level-1)
+                self.Up()
+                self.J(level-1)
+                self.Left()
+                self.A(level-1)
+                self.Down()
+                self.B(level-1)
+                #self.Down()
     
+        def B(self, level):
+            if level > 0:
+                self.D(level-1)
+                self.Right()
+                self.C(level-1)
+                self.Down()
+                self.L(level-1)
+                self.Left()
+                self.A(level-1)
+                #self.Down()
+    
+        def C(self, level):
+            if level > 0:
+                self.E(level-1)
+                self.Right()
+                self.C(level-1)
+                self.Down()
+                self.L(level-1)
+                self.Left()
+                self.A(level-1)
+                #self.Down()
+    
+        def D(self, level):
+            if level > 0:
+                self.B(level-1)
+                self.Down()
+                self.D(level-1)
+                self.Right()
+                self.G(level-1)
+                self.Up()
+                self.F(level-1)
+                #self.Right()
+    
+        def E(self, level):
+            if level > 0:
+                self.C(level-1)
+                self.Down()
+                self.D(level-1)
+                self.Right()
+                self.G(level-1)
+                self.Up()
+                self.F(level-1)
+                #self.Right()
+    
+        def F(self, level):
+            if level > 0:
+                self.J(level-1)
+                self.Left()
+                self.I(level-1)
+                self.Up()
+                self.F(level-1)
+                self.Right()
+                self.E(level-1)
+                #self.Right()
+    
+        def G(self, level):
+            if level > 0:
+                self.C(level-1)
+                self.Down()
+                self.D(level-1)
+                self.Right()
+                self.G(level-1)
+                self.Up()
+                self.H(level-1)
+                #self.Up()
+    
+        def H(self, level):
+            if level > 0:
+                self.J(level-1)
+                self.Left()
+                self.I(level-1)
+                self.Up()
+                self.F(level-1)
+                self.Right()
+                self.G(level-1)
+                #self.Up()
+    
+        def I(self, level):
+            if level > 0:
+                self.K(level-1)
+                self.Left()
+                self.I(level-1)
+                self.Up()
+                self.F(level-1)
+                self.Right()
+                self.G(level-1)
+                #self.Up()
+    
+        def J(self, level):
+            if level > 0:
+                self.H(level-1)
+                self.Up()
+                self.J(level-1)
+                self.Left()
+                self.A(level-1)
+                self.Down()
+                self.L(level-1)
+                #self.Left()
+    
+        def K(self, level):
+            if level > 0:
+                self.I(level-1)
+                self.Up()
+                self.J(level-1)
+                self.Left()
+                self.A(level-1)
+                self.Down()
+                self.L(level-1)
+                #self.Left()
+    
+        def L(self, level):
+            if level > 0:
+                self.D(level-1)
+                self.Right()
+                self.C(level-1)
+                self.Down()
+                self.L(level-1)
+                self.Left()
+                self.K(level-1)
+                #self.Left()
+    
+        def GetPoints(self, level, width):
+            d = width / (2**(level+1)-1)
+            self.x = -d/2#-(d * 2^level)
+            self.y = d/2#-(d * 2^level)
+            self.dx = d
+            self.dy = d
+            
+            self.points = []
+            self.A(level)
+            self.Down()
+            self.D(level)
+            self.Right()
+            self.G(level)
+            self.Up()
+            self.J(level)
+            self.Left()
+            #self.Move(0,0)
+            
+            return self.points
+
+
+    def GetPointsGridPeano(self, pattern):
+        peano = self.PeanoCurve()
+        level=1
+        width = pattern.radius / N.sqrt(2)
+            
+        return peano.GetPoints(level, width)
+    
+
+    class HilbertCurve:
+        points = []
+        
+        def HilbertMove (self, dx, dy):
+            self.x += dx
+            self.y += dy
+            self.points.append(Point(self.x, self.y, 0))
+            
+        
+        def HilbertA(self, level, d):
+            if level > 0:
+                self.HilbertB(level-1,d)
+                self.HilbertMove(0,d)
+                self.HilbertA(level-1,d)
+                self.HilbertMove(d,0)
+                self.HilbertA(level-1,d)
+                self.HilbertMove(0,-d)
+                self.HilbertC(level-1,d)
+    
+        def HilbertB(self, level, d):
+            if level > 0:
+                self.HilbertA(level-1,d)
+                self.HilbertMove(d,0)
+                self.HilbertB(level-1,d)
+                self.HilbertMove(0,d)
+                self.HilbertB(level-1,d)
+                self.HilbertMove(-d,0)
+                self.HilbertD(level-1,d)
+    
+        def HilbertC(self, level, d):
+            if level > 0:
+                self.HilbertD(level-1,d)
+                self.HilbertMove(-d,0)
+                self.HilbertC(level-1,d)
+                self.HilbertMove(0,-d)
+                self.HilbertC(level-1,d)
+                self.HilbertMove(d,0)
+                self.HilbertA(level-1,d)
+    
+        def HilbertD(self, level, d):
+            if level > 0:
+                self.HilbertC(level-1,d)
+                self.HilbertMove(0,-d)
+                self.HilbertD(level-1,d)
+                self.HilbertMove(-d,0)
+                self.HilbertD(level-1,d)
+                self.HilbertMove(0,d)
+                self.HilbertB(level-1,d)
+    
+        def GetPoints(self, level, d):
+            self.x = -(d * 2^level)
+            self.y = -(d * 2^level)
+            self.points = []
+            self.HilbertA(level, d)
+            #self.HilbertMove(0,0)
+            
+            return self.points
+
+
+    def GetPointsGridHilbert(self, pattern):
+        hilbert = self.HilbertCurve()
+        level=2
+        d = 2  # Grid spacing.
+            
+        return hilbert.GetPoints(level, d)
+    
+
+    def GetPointsGrid(self, pattern):
+        return self.GetPointsGridPeano(pattern)
+
 
     def UpdatePatternPoints (self, pattern):        
         if pattern.mode == 'byshape':  # Create the point list.
@@ -235,6 +488,12 @@ class PatternGenXY:
                 pattern.points = self.GetPointsRamp(pattern)
             elif pattern.shape == 'grid':
                 pattern.points = self.GetPointsGrid(pattern)
+            elif pattern.shape == 'raster':
+                pattern.points = self.GetPointsGridRaster(pattern)
+            elif pattern.shape == 'hilbert':
+                pattern.points = self.GetPointsGridHilbert(pattern)
+            elif pattern.shape == 'peano':
+                pattern.points = self.GetPointsGridPeano(pattern)
             elif pattern.shape == 'none':
                 pattern.points = []
             else:

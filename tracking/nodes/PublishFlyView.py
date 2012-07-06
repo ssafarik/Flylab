@@ -13,7 +13,7 @@ from pythonmodules import CircleFunctions
 class PublishFlyView:
     def __init__(self):
         self.initialized = False
-        self.radiusArena = rospy.get_param('arena/radius_movement', 25.4)
+        self.radiusArena = rospy.get_param('arena/radius_inner', 25.4)
         self.subArenaState = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback)
         self.tfrx = tf.TransformListener()
 

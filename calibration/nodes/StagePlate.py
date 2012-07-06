@@ -517,7 +517,7 @@ class CalibrateStagePlate():
         msgPattern.points = []
         msgPattern.frame = 'Stage'
         msgPattern.count = -1
-        msgPattern.radius = 0.8 * rospy.get_param('arena/radius_movement', 25.4)
+        msgPattern.radius = 0.8 * rospy.get_param('arena/radius_inner', 25.4)
         msgPattern.preempt = True
         if msgPattern.shape=='spiral':
             msgPattern.hzPattern = 0.01

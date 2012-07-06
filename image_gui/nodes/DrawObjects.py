@@ -32,7 +32,7 @@ class DrawObjects:
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
-        self.radiusArena = rospy.get_param('arena/radius_movement', 25.4)
+        self.radiusArena = rospy.get_param('arena/radius_inner', 25.4)
         self.axis_length_plate = 4
         self.radiusMask = rospy.get_param('camera/mask/radius', 25)
 

@@ -9,7 +9,7 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<param name="galvos/rate_point" type="double" value="1000.0"/>
+	<param name="galvodriver/hzPoint" type="double" value="131072.0"/>
 
 </launch>
 	

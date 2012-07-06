@@ -85,51 +85,28 @@ class ExperimentZapafly():
     def TrackFly1(self):
         pattern = MsgPattern()
         pattern.mode       = 'byshape'
-        pattern.shape      = 'circle'
+        pattern.shape      = 'grid'
         pattern.frame_id   = 'Fly1'
         pattern.hzPattern  = 40.0
         pattern.hzPoint    = 1000.0
         pattern.count      = 1
         pattern.points     = []
-        pattern.radius     = 5.0
+        pattern.radius     = 5
         pattern.preempt    = False
     
         command = MsgGalvoCommand()
         command.frameid_target_list = ['Plate',]
         command.pattern_list = [pattern,]
-        command.units = 'millimeters' # 'volts' #
+        command.units = 'millimeters' # 'millimeters' or 'volts'
         self.pubGalvoCommand.publish(command)
 
         
-    def ArenaState_callback(self, arenastate):
-        points = []
-        for fly in arenastate.flies:
-            points.append(fly.pose.position)
-            
-        pattern = MsgPattern()
-        pattern.mode       = 'bypoints'
-        pattern.shape      = 'constant'
-        pattern.frame_id   = 'Fly1'
-        pattern.hzPattern  = 100.0
-        pattern.hzPoint    = 1000.0
-        pattern.count      = 1
-        pattern.points     = points
-        pattern.radius     = 20.0
-        pattern.preempt    = False
-    
-        command = MsgGalvoCommand()
-        command.frameid_target_list = ['Plate',]
-        command.pattern_list = [pattern,]
-        command.units = 'millimeters' # 'volts' #
-        self.pubGalvoCommand.publish(command)
-        
-
     def Run(self):
         #self.experiment.Run()
         
         while not rospy.is_shutdown():
             self.TrackFly1() 
-            rospy.sleep(1)
+            rospy.sleep(10)
         
 
 

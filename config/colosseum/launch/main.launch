@@ -9,7 +9,7 @@
     <!-- Launch hardware.launch, and point here from there.         -->
 	<!-- ========================================================== -->
 
-	<include file="$(find colosseum)/launch/calibration.launch" />
+	<include file="$(find colosseum)/launch/params_calibration.launch" />
 	<include file="$(find flybowls)/launch/flybowl_80mm.launch" /> 
 
 	

@@ -53,16 +53,28 @@ class GalvoDirector:
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
+        self.arenastate = ArenaState()
         self.frameid_target_list = []
         self.pointcloudtemplate_list = []
         self.pointcloud_list = []
         self.units = 'millimeters'
         
         # Calibration data from Calibrator.py
-        self.mx =  0.0602
-        self.bx = -0.581
-        self.my = -0.0582
-        self.by =  3.490
+#        self.mx =  0.060
+#        self.bx = -0.595
+#        self.my = -0.05675
+#        self.by =  3.467
+
+        self.mx=0.04677
+        self.bx=-0.87983
+        self.my=-0.04383
+        self.by=3.15202
+
+#[WARN] [WallTime: 1341358930.862809] self.mx=0.04670
+#[WARN] [WallTime: 1341358930.862926] self.bx=-0.87488
+#[WARN] [WallTime: 1341358930.863040] self.my=-0.04385
+#[WARN] [WallTime: 1341358930.863150] self.by=3.15458
+
 
         self.initialized = True
 
@@ -100,6 +112,7 @@ class GalvoDirector:
 
     def ArenaState_callback(self, arenastate):
         with self.lock:
+            #rospy.logwarn(arenastate)
             self.arenastate = arenastate
             self.PublishPointcloud()
         
@@ -121,33 +134,35 @@ class GalvoDirector:
     # then post it to the driver.
     #
     def PublishPointcloud(self):
-        if self.initialized:
+        if self.initialized and len(self.arenastate.flies)>0:
             self.pointcloud_list = []
             if len(self.pointcloudtemplate_list) > 0:
                 for i in range(len(self.pointcloudtemplate_list)):
                     frame_id_target = self.frameid_target_list[i]
                     pointcloud_template = self.pointcloudtemplate_list[i]
+                    pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
 
-                    try:
-                        pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
-                    except:
-                        pointcloud_template.header.stamp = rospy.Time.now()
-
+                    t1 = rospy.Time.now().to_sec()
                     try:
                         self.tfrx.waitForTransform(frame_id_target, 
                                                    pointcloud_template.header.frame_id, 
                                                    pointcloud_template.header.stamp, 
                                                    rospy.Duration(1.0))
                     except tf.Exception, e:
-                        rospy.logwarn('Exception waiting for transform pointcloud=%s, frames %s -> %s: %s' % (pointcloud_template.header, pointcloud_template.header.frame_id, frame_id_target, e))
+                        rospy.logwarn('Exception waiting for transform pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, frame_id_target, e))
                         
+                    t2 = rospy.Time.now().to_sec()
+
                     try:
                         pointcloud = self.tfrx.transformPointCloud(frame_id_target, pointcloud_template)
                     except tf.Exception, e:
-                        rospy.logwarn('Exception transforming pointcloud=%s, frames %s -> %s: %s' % (pointcloud_template.header, pointcloud_template.header.frame_id, frame_id_target, e))
+                        rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, frame_id_target, e))
                     else:
                         self.pointcloud_list.append(pointcloud)
-            
+
+                    t3 = rospy.Time.now().to_sec()
+                    rospy.logwarn('TF time: %0.5f + %0.5f = %0.5f' % ((t2-t1),(t3-t2),(t3-t1)))
+                    
                 self.pubGalvoPointCloud.publish(self.VoltsFromUnitsPointcloud(self.GetUnifiedPointcloud(self.pointcloud_list)))
         
 
@@ -191,6 +206,11 @@ class GalvoDirector:
 
                 point.y *= self.my
                 point.y += self.by
+                
+                point.x = min(point.x,+10.0)
+                point.x = max(point.x,-10.0)
+                point.y = min(point.y,+10.0)
+                point.y = max(point.y,-10.0)
     
         elif self.units=='volts':
             pass

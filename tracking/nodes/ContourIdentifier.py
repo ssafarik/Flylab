@@ -75,6 +75,8 @@ class ContourIdentifier:
         
 
         self.radiusMask = rospy.get_param("camera/mask/radius", 25) # Pixels
+        self.radiusArenaInner = rospy.get_param("arena/radius_inner", 25) # Millimeters
+        self.radiusArenaOuter = rospy.get_param("arena/radius_outer", 30) # Millimeters
 
         self.xSave = []
         self.ySave = []
@@ -90,8 +92,10 @@ class ContourIdentifier:
                                   pose=Pose(position=Point(x=0, 
                                                            y=0, 
                                                            z=0)),
-                                  scale=Vector3(x=self.radiusMask*2.0 * 85/470, #BUG: Need to properly convert from pixels to mm.
-                                                y=self.radiusMask*2.0 * 85/470,
+                                  #scale=Vector3(x=self.radiusMask*2.0 * 85/470, #BUG: Need to properly convert from pixels to mm.
+                                  #              y=self.radiusMask*2.0 * 85/470,
+                                  scale=Vector3(x=self.radiusArenaOuter*2.0, #BUG: Need to properly convert from pixels to mm.
+                                                y=self.radiusArenaOuter*2.0,
                                                 z=0.01),
                                   color=ColorRGBA(a=0.05,
                                                   r=1.0,

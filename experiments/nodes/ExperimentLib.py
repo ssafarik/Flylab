@@ -614,7 +614,7 @@ class MoveRobot (smach.State):
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
-        self.radiusMovement = float(rospy.get_param("arena/radius_movement","25.4"))
+        self.radiusMovement = float(rospy.get_param("arena/radius_inner","25.4"))
         
         rospy.on_shutdown(self.OnShutdown_callback)
         

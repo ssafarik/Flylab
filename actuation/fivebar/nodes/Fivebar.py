@@ -161,7 +161,7 @@ class RosFivebar:
         
         self.speedCommandTool = None 
         self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
-        self.radiusMovement = rospy.get_param('arena/radius_movement', 25.4)
+        self.radiusMovement = rospy.get_param('arena/radius_inner', 25.4)
         
         self.timePrev = rospy.Time.now()
         self.time = rospy.Time.now()
@@ -853,7 +853,7 @@ class RosFivebar:
         #rospy.loginfo ('5B ptToolRef=%s' % self.ptToolRef)
         if self.ptsToolRef is not None:
             #self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
-            #self.radiusMovement = rospy.get_param('arena/radius_movement', 25.4)
+            #self.radiusMovement = rospy.get_param('arena/radius_inner', 25.4)
             
             # Clip the target point to the arena bounds.
             #self.ptToolRefClipped = self.ClipPtToRadius(self.ptsToolRefExternal.point)
