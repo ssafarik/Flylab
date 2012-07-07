@@ -13,6 +13,7 @@ from stage_action_server.msg import *
 from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from experiments.srv import Trigger, ExperimentParams
+from galvodirector.msg import MsgGalvoCommand
 from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
 
@@ -114,6 +115,7 @@ def ClipXyToRadius(x, y, rmax):
 
 # TriggerService()
 # Sends trigger commands to a list of services.
+# When you call TriggerService.notify(), then for each in the list, we call the ".../trigger" services with the given "status" parameter.
 #
 class TriggerService():
     def __init__(self):
@@ -138,6 +140,7 @@ class TriggerService():
 
 # NewTrialService()
 # Sends new_trial commands to a list of services.
+# When you call NewTrialService.notify(), then for each in the list, we call the ".../new_trial" services with the given "experimentparams" parameter.
 #
 class NewTrialService():
     def __init__(self):
@@ -511,12 +514,7 @@ class GotoHome (smach.State):
         self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
         self.action.wait_for_server()
         self.goal = ActionStageStateGoal()
-
-        rospy.wait_for_service('set_stage_state')
-        try:
-            self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+        self.set_stage_state = None
         
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -535,6 +533,13 @@ class GotoHome (smach.State):
 
         rv = 'succeeded'
         if userdata.experimentparamsIn.home.enabled:
+            rospy.wait_for_service('set_stage_state')
+            try:
+                self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
+            except rospy.ServiceException, e:
+                print "Service call failed: %s"%e
+            
+
             self.timeStart = rospy.Time.now()
     
             while self.arenastate is None:
@@ -607,12 +612,7 @@ class MoveRobot (smach.State):
         self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
         self.action.wait_for_server()
         self.goal = ActionStageStateGoal()
-
-        rospy.wait_for_service('set_stage_state')
-        try:
-            self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+        self.set_stage_state = None
 
         self.radiusMovement = float(rospy.get_param("arena/radius_inner","25.4"))
         
@@ -636,6 +636,12 @@ class MoveRobot (smach.State):
 
         rv = 'succeeded'
         if userdata.experimentparamsIn.move.enabled:
+            rospy.wait_for_service('set_stage_state')
+            try:
+                self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
+            except rospy.ServiceException, e:
+                print "Service call failed: %s"%e
+            
             self.timeStart = rospy.Time.now()
     
             while self.arenastate is None:
@@ -830,6 +836,77 @@ class MoveRobot (smach.State):
 
 #######################################################################################################
 #######################################################################################################
+class Lasertrack (smach.State):
+    def __init__(self):
+
+        smach.State.__init__(self, 
+                             outcomes=['succeeded','preempted','aborted'],
+                             input_keys=['experimentparamsIn'],
+                             output_keys=['experimentparamsOut'])
+
+        self.rosrate = rospy.Rate(100)
+        self.pubGalvoCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
+
+        rospy.on_shutdown(self.OnShutdown_callback)
+        
+        
+    def OnShutdown_callback(self):
+        pass
+        
+        
+    def execute(self, userdata):
+        rospy.loginfo("EL State Lasertrack(%s)" % userdata.experimentparamsIn.lasertrack.pattern)
+
+        rv = 'succeeded'
+        if userdata.experimentparamsIn.lasertrack.enabled:
+            self.timeStart = rospy.Time.now()
+    
+            # Send the tracking command to the galvo director.
+            command = MsgGalvoCommand()
+            command.pattern_list = [userdata.experimentparamsIn.lasertrack.pattern,]
+            command.units = 'millimeters' # 'millimeters' or 'volts'
+            self.pubGalvoCommand.publish(command)
+    
+            # Wait until finished.        
+            while not rospy.is_shutdown():
+                if self.preempt_requested():
+                    rv = 'preempted'
+                    break
+    
+                
+                if userdata.experimentparamsIn.move.timeout != -1:
+                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.lasertrack.timeout:
+                        rv = 'succeeded'
+                        break
+                
+                self.rosrate.sleep()
+    
+            # Turn off the tracking.
+            pattern = MsgPattern()
+            pattern.mode = 'byshape'
+            pattern.shape = 'none'
+            pattern.points = []
+            pattern.frame = 'Plate'
+            pattern.hzPattern = 1.0
+            pattern.hzPoint = 1.0
+            pattern.count = 0
+            pattern.size.x = 1.0
+            pattern.size.x = 1.0
+            pattern.preempt = True
+            pattern.param = 0.0
+    
+            command.pattern_list = [pattern,]
+            command.units = 'millimeters' # 'millimeters' or 'volts'
+            self.pubGalvoCommand.publish(command)
+
+        return rv
+        
+
+
+            
+            
+#######################################################################################################
+#######################################################################################################
 class Experiment():
     def __init__(self, experimentparams=None):
         self.sm = smach.StateMachine(['succeeded','aborted','preempted'])
@@ -883,6 +960,14 @@ class Experiment():
 
             smach.StateMachine.add('MOVE', 
                                    MoveRobot (),
+                                   transitions={'succeeded':'LASERTRACK',
+                                                'aborted':'aborted',
+                                                'preempted':'NEW_TRIAL'},
+                                   remapping={'experimentparamsIn':'experimentparams',
+                                              'experimentparamsOut':'experimentparams'})
+
+            smach.StateMachine.add('LASERTRACK', 
+                                   Lasertrack (),
                                    transitions={'succeeded':'EXITTRIGGER',
                                                 'aborted':'aborted',
                                                 'preempted':'NEW_TRIAL'},
@@ -898,7 +983,6 @@ class Experiment():
                                               'experimentparamsOut':'experimentparams'})
 
 
-
         self.sis = smach_ros.IntrospectionServer('sis_experiment',
                                                  self.sm,
                                                  '/EXPERIMENT')
@@ -907,10 +991,8 @@ class Experiment():
         self.sis.start()
         try:
             outcome = self.sm.execute()
-            rospy.loginfo ('Experiment returned with: %s' % outcome)
-        except smach.exceptions.InvalidUserCodeError:
-            rospy.logwarn('InvalidUserCodeError')
-            #pass
+        except smach.exceptions.InvalidUserCodeError, e:
+            rospy.logwarn('Exception InvalidUserCodeError executing state machine: %s' % e)
         
         self.sis.stop()
 

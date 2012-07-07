@@ -20,23 +20,23 @@ float64 timeout
 
 ================================================================================
 MSG: experiments/MoveRelative
-bool tracking
-string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'
-string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
-float64 distance
-float64 angle
-string angleType # 'random' or 'constant'
-float64 speed
-string speedType # 'random' or 'constant'
-float64 tolerance
+bool 		tracking
+string 		frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'
+string 		frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
+float64 	distance
+float64 	angle
+string 		angleType # 'random' or 'constant'
+float64 	speed
+string 		speedType # 'random' or 'constant'
+float64 	tolerance
 
 
 ================================================================================
 MSG: experiments/MovePattern
-string shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'spiral'
-float64 hzPattern
-float64 hzPoint
-int32 count  # -1 means forever
+string 				shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'spiral'
+float64 			hzPattern
+float64 			hzPoint
+int32 				count  # -1 means forever
 geometry_msgs/Point size
 
 

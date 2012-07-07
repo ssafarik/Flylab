@@ -6,18 +6,20 @@ import struct
 
 import geometry_msgs.msg
 import experiments.msg
+import patterngen.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "de553ee0efb35978fc28bd0b4804b5ef"
+  _md5sum = "d434089535e88179972909454f7c0b47"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """ExperimentSettings experiment
-HomeSettings home
-float64 waitEntry
-TriggerSettings triggerEntry
-MoveSettings move
-TriggerSettings triggerExit
-SaveSettings save
+  _full_text = """ExperimentSettings 	experiment
+HomeSettings 		home
+float64 			waitEntry
+TriggerSettings 	triggerEntry
+MoveSettings 		move
+LasertrackSettings 	lasertrack
+TriggerSettings 	triggerExit
+SaveSettings 		save
 
 ================================================================================
 MSG: experiments/ExperimentSettings
@@ -64,23 +66,23 @@ float64 timeout
 
 ================================================================================
 MSG: experiments/MoveRelative
-bool tracking
-string frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'
-string frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
-float64 distance
-float64 angle
-string angleType # 'random' or 'constant'
-float64 speed
-string speedType # 'random' or 'constant'
-float64 tolerance
+bool 		tracking
+string 		frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'
+string 		frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
+float64 	distance
+float64 	angle
+string 		angleType # 'random' or 'constant'
+float64 	speed
+string 		speedType # 'random' or 'constant'
+float64 	tolerance
 
 
 ================================================================================
 MSG: experiments/MovePattern
-string shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'spiral'
-float64 hzPattern
-float64 hzPoint
-int32 count  # -1 means forever
+string 				shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'spiral'
+float64 			hzPattern
+float64 			hzPoint
+int32 				count  # -1 means forever
 geometry_msgs/Point size
 
 
@@ -92,6 +94,28 @@ float64 y
 float64 z
 
 ================================================================================
+MSG: experiments/LasertrackSettings
+bool 					enabled
+patterngen/MsgPattern 	pattern
+float64 				timeout
+
+
+================================================================================
+MSG: patterngen/MsgPattern
+string                mode      # 'byshape' or 'bypoints'
+string                shape     # 'constant' or 'square' or 'circle' or 'flylogo' or 'spiral' or 'ramp' or 'grid' or 'raster' or 'hilbert' or 'peano' or 'none'
+string                frame_id  # The frame to which the pattern applies.
+float64               hzPattern # Frequency of the pattern.
+float64               hzPoint   # Frequency of points making up the pattern.
+int32                 count     # How many times to output the pattern (-1 or N.inf means infinite).
+geometry_msgs/Point[] points    # If mode=='bypoints', then this is the list of points to scan.
+geometry_msgs/Point   size      # (x,y) dimensions.
+bool				  preempt   # Should this message restart an in-progress pattern.
+float64               param     # An extra parameter, if needed by the particular pattern (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
+ 
+
+
+================================================================================
 MSG: experiments/SaveSettings
 string filenamebase
 bool arenastate
@@ -101,8 +125,8 @@ bool onlyWhileTriggered
 
 
 """
-  __slots__ = ['experiment','home','waitEntry','triggerEntry','move','triggerExit','save']
-  _slot_types = ['experiments/ExperimentSettings','experiments/HomeSettings','float64','experiments/TriggerSettings','experiments/MoveSettings','experiments/TriggerSettings','experiments/SaveSettings']
+  __slots__ = ['experiment','home','waitEntry','triggerEntry','move','lasertrack','triggerExit','save']
+  _slot_types = ['experiments/ExperimentSettings','experiments/HomeSettings','float64','experiments/TriggerSettings','experiments/MoveSettings','experiments/LasertrackSettings','experiments/TriggerSettings','experiments/SaveSettings']
 
   def __init__(self, *args, **kwds):
     """
@@ -112,7 +136,7 @@ bool onlyWhileTriggered
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       experiment,home,waitEntry,triggerEntry,move,triggerExit,save
+       experiment,home,waitEntry,triggerEntry,move,lasertrack,triggerExit,save
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -131,6 +155,8 @@ bool onlyWhileTriggered
         self.triggerEntry = experiments.msg.TriggerSettings()
       if self.move is None:
         self.move = experiments.msg.MoveSettings()
+      if self.lasertrack is None:
+        self.lasertrack = experiments.msg.LasertrackSettings()
       if self.triggerExit is None:
         self.triggerExit = experiments.msg.TriggerSettings()
       if self.save is None:
@@ -141,6 +167,7 @@ bool onlyWhileTriggered
       self.waitEntry = 0.
       self.triggerEntry = experiments.msg.TriggerSettings()
       self.move = experiments.msg.MoveSettings()
+      self.lasertrack = experiments.msg.LasertrackSettings()
       self.triggerExit = experiments.msg.TriggerSettings()
       self.save = experiments.msg.SaveSettings()
 
@@ -214,7 +241,34 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di4dB6d.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_2di4dB.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled))
+      _x = self.lasertrack.pattern.mode
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.lasertrack.pattern.shape
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.lasertrack.pattern.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_2di.pack(_x.lasertrack.pattern.hzPattern, _x.lasertrack.pattern.hzPoint, _x.lasertrack.pattern.count))
+      length = len(self.lasertrack.pattern.points)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.lasertrack.pattern.points:
+        _x = val1
+        buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+      _x = self
+      buff.write(_struct_3dB2dB6d.pack(_x.lasertrack.pattern.size.x, _x.lasertrack.pattern.size.y, _x.lasertrack.pattern.size.z, _x.lasertrack.pattern.preempt, _x.lasertrack.pattern.param, _x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -248,6 +302,8 @@ bool onlyWhileTriggered
         self.triggerEntry = experiments.msg.TriggerSettings()
       if self.move is None:
         self.move = experiments.msg.MoveSettings()
+      if self.lasertrack is None:
+        self.lasertrack = experiments.msg.LasertrackSettings()
       if self.triggerExit is None:
         self.triggerExit = experiments.msg.TriggerSettings()
       if self.save is None:
@@ -353,8 +409,56 @@ bool onlyWhileTriggered
         self.move.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 101
-      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2di4dB6d.unpack(str[start:end])
+      end += 53
+      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled,) = _struct_2di4dB.unpack(str[start:end])
+      self.lasertrack.enabled = bool(self.lasertrack.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.lasertrack.pattern.mode = str[start:end].decode('utf-8')
+      else:
+        self.lasertrack.pattern.mode = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.lasertrack.pattern.shape = str[start:end].decode('utf-8')
+      else:
+        self.lasertrack.pattern.shape = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.lasertrack.pattern.frame_id = str[start:end].decode('utf-8')
+      else:
+        self.lasertrack.pattern.frame_id = str[start:end]
+      _x = self
+      start = end
+      end += 20
+      (_x.lasertrack.pattern.hzPattern, _x.lasertrack.pattern.hzPoint, _x.lasertrack.pattern.count,) = _struct_2di.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.lasertrack.pattern.points = []
+      for i in range(0, length):
+        val1 = geometry_msgs.msg.Point()
+        _x = val1
+        start = end
+        end += 24
+        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+        self.lasertrack.pattern.points.append(val1)
+      _x = self
+      start = end
+      end += 90
+      (_x.lasertrack.pattern.size.x, _x.lasertrack.pattern.size.y, _x.lasertrack.pattern.size.z, _x.lasertrack.pattern.preempt, _x.lasertrack.pattern.param, _x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_3dB2dB6d.unpack(str[start:end])
+      self.lasertrack.pattern.preempt = bool(self.lasertrack.pattern.preempt)
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -457,7 +561,34 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di4dB6d.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_2di4dB.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled))
+      _x = self.lasertrack.pattern.mode
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.lasertrack.pattern.shape
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.lasertrack.pattern.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_2di.pack(_x.lasertrack.pattern.hzPattern, _x.lasertrack.pattern.hzPoint, _x.lasertrack.pattern.count))
+      length = len(self.lasertrack.pattern.points)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.lasertrack.pattern.points:
+        _x = val1
+        buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+      _x = self
+      buff.write(_struct_3dB2dB6d.pack(_x.lasertrack.pattern.size.x, _x.lasertrack.pattern.size.y, _x.lasertrack.pattern.size.z, _x.lasertrack.pattern.preempt, _x.lasertrack.pattern.param, _x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -492,6 +623,8 @@ bool onlyWhileTriggered
         self.triggerEntry = experiments.msg.TriggerSettings()
       if self.move is None:
         self.move = experiments.msg.MoveSettings()
+      if self.lasertrack is None:
+        self.lasertrack = experiments.msg.LasertrackSettings()
       if self.triggerExit is None:
         self.triggerExit = experiments.msg.TriggerSettings()
       if self.save is None:
@@ -597,8 +730,56 @@ bool onlyWhileTriggered
         self.move.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 101
-      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_2di4dB6d.unpack(str[start:end])
+      end += 53
+      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled,) = _struct_2di4dB.unpack(str[start:end])
+      self.lasertrack.enabled = bool(self.lasertrack.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.lasertrack.pattern.mode = str[start:end].decode('utf-8')
+      else:
+        self.lasertrack.pattern.mode = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.lasertrack.pattern.shape = str[start:end].decode('utf-8')
+      else:
+        self.lasertrack.pattern.shape = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.lasertrack.pattern.frame_id = str[start:end].decode('utf-8')
+      else:
+        self.lasertrack.pattern.frame_id = str[start:end]
+      _x = self
+      start = end
+      end += 20
+      (_x.lasertrack.pattern.hzPattern, _x.lasertrack.pattern.hzPoint, _x.lasertrack.pattern.count,) = _struct_2di.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.lasertrack.pattern.points = []
+      for i in range(0, length):
+        val1 = geometry_msgs.msg.Point()
+        _x = val1
+        start = end
+        end += 24
+        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+        self.lasertrack.pattern.points.append(val1)
+      _x = self
+      start = end
+      end += 90
+      (_x.lasertrack.pattern.size.x, _x.lasertrack.pattern.size.y, _x.lasertrack.pattern.size.z, _x.lasertrack.pattern.preempt, _x.lasertrack.pattern.param, _x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_3dB2dB6d.unpack(str[start:end])
+      self.lasertrack.pattern.preempt = bool(self.lasertrack.pattern.preempt)
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -638,11 +819,14 @@ bool onlyWhileTriggered
 _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
-_struct_2di4dB6d = struct.Struct("<2di4dB6d")
+_struct_3dB2dB6d = struct.Struct("<3dB2dB6d")
+_struct_4B = struct.Struct("<4B")
 _struct_B2dB = struct.Struct("<B2dB")
 _struct_2d = struct.Struct("<2d")
 _struct_B2d = struct.Struct("<B2d")
-_struct_4B = struct.Struct("<4B")
+_struct_2di4dB = struct.Struct("<2di4dB")
+_struct_3d = struct.Struct("<3d")
+_struct_2di = struct.Struct("<2di")
 _struct_2iB6dB6d = struct.Struct("<2iB6dB6d")
 """autogenerated by genpy from experiments/ExperimentParamsResponse.msg. Do not edit."""
 import sys
@@ -655,7 +839,7 @@ class ExperimentParamsResponse(genpy.Message):
   _md5sum = "95e696a0d10686913abb262e0b4cbbcf"
   _type = "experiments/ExperimentParamsResponse"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """bool succeeded
+  _full_text = """bool 				succeeded
 
 
 
@@ -748,6 +932,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = 'ed2fc10ff503065650d058094047b669'
+  _md5sum = 'ba61ea92f0ca9a56ed1da8c2355f10f2'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

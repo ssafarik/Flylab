@@ -60,6 +60,8 @@ class ExperimentOpenTrigger():
         self.experimentparams.move.relative.tolerance = 2
         self.experimentparams.move.timeout = -1
         
+        self.experimentparams.lasertrack.enabled = False
+        
         self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0

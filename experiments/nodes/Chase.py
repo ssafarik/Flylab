@@ -60,6 +60,8 @@ class ExperimentChase():
         self.experimentparams.move.relative.tolerance = -1.0 # i.e. never get there.
         self.experimentparams.move.timeout = 600
         
+        self.experimentparams.lasertrack.enabled = False
+        
         self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0

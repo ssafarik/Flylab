@@ -60,6 +60,8 @@ class ExperimentDodgeball():
         self.experimentparams.move.relative.tolerance = 2
         self.experimentparams.move.timeout = 4
         
+        self.experimentparams.lasertrack.enabled = False
+        
         self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0

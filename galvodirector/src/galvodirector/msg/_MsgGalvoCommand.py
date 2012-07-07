@@ -8,11 +8,10 @@ import geometry_msgs.msg
 import patterngen.msg
 
 class MsgGalvoCommand(genpy.Message):
-  _md5sum = "38c7439c81fb54ea17f679ad55059a89"
+  _md5sum = "dee47c215ced6390d30ecf201bca7bde"
   _type = "galvodirector/MsgGalvoCommand"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """string[] frameid_target_list
-patterngen/MsgPattern[] pattern_list
+  _full_text = """patterngen/MsgPattern[] pattern_list
 string units	# 'volts' or 'millimeters'
 
 
@@ -39,8 +38,8 @@ float64 y
 float64 z
 
 """
-  __slots__ = ['frameid_target_list','pattern_list','units']
-  _slot_types = ['string[]','patterngen/MsgPattern[]','string']
+  __slots__ = ['pattern_list','units']
+  _slot_types = ['patterngen/MsgPattern[]','string']
 
   def __init__(self, *args, **kwds):
     """
@@ -50,7 +49,7 @@ float64 z
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       frameid_target_list,pattern_list,units
+       pattern_list,units
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -59,14 +58,11 @@ float64 z
     if args or kwds:
       super(MsgGalvoCommand, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
-      if self.frameid_target_list is None:
-        self.frameid_target_list = []
       if self.pattern_list is None:
         self.pattern_list = []
       if self.units is None:
         self.units = ''
     else:
-      self.frameid_target_list = []
       self.pattern_list = []
       self.units = ''
 
@@ -82,14 +78,6 @@ float64 z
     :param buff: buffer, ``StringIO``
     """
     try:
-      length = len(self.frameid_target_list)
-      buff.write(_struct_I.pack(length))
-      for val1 in self.frameid_target_list:
-        length = len(val1)
-        if python3 or type(val1) == unicode:
-          val1 = val1.encode('utf-8')
-          length = len(val1)
-        buff.write(struct.pack('<I%ss'%length, length, val1))
       length = len(self.pattern_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.pattern_list:
@@ -141,21 +129,6 @@ float64 z
       if self.pattern_list is None:
         self.pattern_list = None
       end = 0
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.frameid_target_list = []
-      for i in range(0, length):
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        start = end
-        end += length
-        if python3:
-          val1 = str[start:end].decode('utf-8')
-        else:
-          val1 = str[start:end]
-        self.frameid_target_list.append(val1)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -236,14 +209,6 @@ float64 z
     :param numpy: numpy python module
     """
     try:
-      length = len(self.frameid_target_list)
-      buff.write(_struct_I.pack(length))
-      for val1 in self.frameid_target_list:
-        length = len(val1)
-        if python3 or type(val1) == unicode:
-          val1 = val1.encode('utf-8')
-          length = len(val1)
-        buff.write(struct.pack('<I%ss'%length, length, val1))
       length = len(self.pattern_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.pattern_list:
@@ -296,21 +261,6 @@ float64 z
       if self.pattern_list is None:
         self.pattern_list = None
       end = 0
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.frameid_target_list = []
-      for i in range(0, length):
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        start = end
-        end += length
-        if python3:
-          val1 = str[start:end].decode('utf-8')
-        else:
-          val1 = str[start:end]
-        self.frameid_target_list.append(val1)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])

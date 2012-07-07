@@ -57,6 +57,8 @@ class ExperimentPattern():
         self.experimentparams.move.pattern.size.y = 20
         self.experimentparams.move.timeout = -1 #self.experimentparams.move.pattern.count * (1.0/self.experimentparams.move.pattern.hzPattern)
         
+        self.experimentparams.lasertrack.enabled = False
+        
         self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0

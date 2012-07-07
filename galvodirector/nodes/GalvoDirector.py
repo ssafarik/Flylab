@@ -54,7 +54,6 @@ class GalvoDirector:
         rospy.on_shutdown(self.OnShutdown_callback)
         
         self.arenastate = ArenaState()
-        self.frameid_target_list = []
         self.pointcloudtemplate_list = []
         self.pointcloud_list = []
         self.units = 'millimeters'
@@ -91,7 +90,6 @@ class GalvoDirector:
             with self.lock:
                 # Regenerate all the patterns requested.  This "template" is the computed points centered at (0,0).
                 self.pointcloudtemplate_list = []
-                self.frameid_target_list = []
                 
                 for iPattern in range(len(command.pattern_list)):
                     
@@ -104,7 +102,6 @@ class GalvoDirector:
                     
                     # Store the pointcloud for later.
                     self.pointcloudtemplate_list.append(self.PointCloudFromPoints(pattern.frame_id, pattern.points))
-                    self.frameid_target_list.append(command.frameid_target_list[iPattern])
                     self.units = command.units # Units apply to all the patterns.
                         
                 self.PublishPointcloud()
@@ -138,25 +135,24 @@ class GalvoDirector:
             self.pointcloud_list = []
             if len(self.pointcloudtemplate_list) > 0:
                 for i in range(len(self.pointcloudtemplate_list)):
-                    frame_id_target = self.frameid_target_list[i]
                     pointcloud_template = self.pointcloudtemplate_list[i]
                     pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
 
                     t1 = rospy.Time.now().to_sec()
                     try:
-                        self.tfrx.waitForTransform(frame_id_target, 
+                        self.tfrx.waitForTransform('Plate', 
                                                    pointcloud_template.header.frame_id, 
                                                    pointcloud_template.header.stamp, 
                                                    rospy.Duration(1.0))
                     except tf.Exception, e:
-                        rospy.logwarn('Exception waiting for transform pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, frame_id_target, e))
+                        rospy.logwarn('Exception waiting for transform pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
                         
                     t2 = rospy.Time.now().to_sec()
 
                     try:
-                        pointcloud = self.tfrx.transformPointCloud(frame_id_target, pointcloud_template)
+                        pointcloud = self.tfrx.transformPointCloud('Plate', pointcloud_template)
                     except tf.Exception, e:
-                        rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, frame_id_target, e))
+                        rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
                     else:
                         self.pointcloud_list.append(pointcloud)
 
@@ -191,7 +187,6 @@ class GalvoDirector:
             resp_gpp = self.GetPatternPoints(req_gpp)
             pointcloud = self.PointCloudFromPoints('Plate', resp_gpp.pattern.points)
             self.pointcloudtemplate_list.append(pointcloud)
-            self.frameid_target_list.append('Fly1')
             #rospy.logwarn(resp_gpp.pattern.points)
 
 

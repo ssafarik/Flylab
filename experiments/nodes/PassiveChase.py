@@ -47,6 +47,8 @@ class ExperimentPassiveChase():
         self.experimentparams.triggerEntry.timeHold = 0.0
         self.experimentparams.triggerEntry.timeout = -1
         
+        self.experimentparams.lasertrack.enabled = False
+        
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'

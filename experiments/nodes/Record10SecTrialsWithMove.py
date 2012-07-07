@@ -60,6 +60,8 @@ class ExperimentRecord10SecTrialsWithMove():
         self.experimentparams.move.relative.tolerance = 2
         self.experimentparams.move.timeout = -1
         
+        self.experimentparams.lasertrack.enabled = False
+        
         self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.distanceMin = 999.0
         self.experimentparams.triggerExit.distanceMax =   0.0

@@ -8,29 +8,29 @@
 
 
 #ifndef NULL
-#define NULL 0
+#define NULL 			0
 #endif
 
 #ifndef FALSE
-#define FALSE 0
-#define TRUE (!FALSE)
+#define FALSE 			0
+#define TRUE 			(!FALSE)
 #endif
 
-#define MAX(a,b) ((a)<(b) ? (b) : (a))
+#define MAX(a,b) 		((a)<(b) ? (b) : (a))
 
-#define LASERON	TRUE
-#define LASEROFF FALSE
+#define LASERON			TRUE
+#define LASEROFF 		FALSE
 
 #define DEVICE			"Dev1"
 #define CHANNELS		"ao0:1"
 
 #define NCOPIES_POINTCLOUDEX 2
 
-#define LENERR	2048
+#define LENERR			2048
 char    				szErr[LENERR]={'\0'};
 int32   				e=0;
 
-TaskHandle 	 			g_hTask=0;
+TaskHandle 	 			g_hTask=NULL;
 int32 					g_nPointsPointcloudEx=0;
 int32 					g_nPointsBufferDaqRegistered = -1;
 int32 					g_nPointsPointcloudExMax=0;
@@ -41,15 +41,14 @@ int32 				   *g_pPointcloudExIntensity=NULL;
 
 boost::mutex 			g_lockPointcloud; 	// To prevent the various callbacks from colliding.
 boost::mutex 			g_lockDAQ; 			// To prevent the various callbacks from colliding.
-//int						g_lockPointcloud = FALSE;
 sensor_msgs::PointCloud g_pointcloud;
 
 int						g_bStarted=FALSE;
 
-double					g_hzPoint = 10.0; // The point rate effects the delay of laser movement = onboardbufsize/g_hzPoint, e.g. 4095/16384 = 0.25 seconds.
+double					g_hzPoint = 10.0; // The point rate effects the lag in the pointcloud update = onboardbufsize/g_hzPoint, e.g. 4095/16384 = 0.25 seconds.
 double					g_hzPointcloud = 0.0;
 double					g_hzPointcloudEx = 0.0;
-double					g_hzUSB = 70.0;
+double					g_hzUSB = 50.0;
 
 int 					g_bError=FALSE;	// Flag any errors in DAQmx function calls.
 
@@ -72,7 +71,6 @@ void 				ResetDAQ (void);
 //
 void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointcloud)
 {
-	//ROS_WARN("GalvoPointCloud_callback()");
 	boost::lock_guard<boost::mutex> lock(g_lockPointcloud);
 
 	// Copy the given pointcloud, if it contains points.
@@ -81,7 +79,6 @@ void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointclou
 
 	ros::param::get("galvodriver/hzPoint", g_hzPoint);
 
-	//ROS_WARN("GalvoPointCloud_callback() Done");
 }
 
 
@@ -91,7 +88,6 @@ void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointclou
 //
 int32 CVICALLBACK OnEveryNSamples_callback (TaskHandle hTask, int32 eventType, uInt32 nSamples, void *callbackData)
 {
-	//ROS_WARN("OnEveryNSamples_callback()");
 	boost::lock_guard<boost::mutex> lock1(g_lockDAQ);
 	boost::lock_guard<boost::mutex> lock2(g_lockPointcloud);
 	
@@ -115,7 +111,6 @@ int32 CVICALLBACK OnEveryNSamples_callback (TaskHandle hTask, int32 eventType, u
 	if (g_bError)
 		ResetDAQ();
 
-	//ROS_WARN("OnEveryNSamples_callback() Done");
 
 	return 0;	
 }
@@ -133,7 +128,6 @@ void UpdatePointsFromPointcloud(void)
 	int			iDuplicate=0;
 	int32		nPointsPerCloud=0;
 
-	//ROS_WARN("UpdatePointsFromPointcloud()");
 
 	nPointsPerCloud = MAX(1,g_pointcloud.points.size());
 	g_hzPointcloud = g_hzPoint / (double)nPointsPerCloud;					// Output rate of the given pointcloud.
@@ -192,7 +186,6 @@ void UpdatePointsFromPointcloud(void)
 			}
 		}
 	}
-	//ROS_WARN("UpdatePointsFromPointcloud() Done");
 }
 
 
@@ -215,11 +208,9 @@ void WritePoints(TaskHandle hTask)
 {
 	int32		nPointsWritten = 0;
 	
-	//ROS_WARN("WritePoints()");
 	// Write to the (offboard) buffer.
 	e=DAQmxWriteAnalogF64 (hTask, g_nPointsPointcloudEx, FALSE, 0.0, DAQmx_Val_GroupByScanNumber, g_pPointcloudExPoints, &nPointsWritten, NULL);
 	HandleDAQError(e);
-	//ROS_WARN("WritePoints() Done");
 }
 
 
@@ -232,7 +223,6 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 {
 	int rv=FALSE;
 	
-	//ROS_WARN("RegisterCallbackDAQBuffer()");
 
 	if (g_nPointsBufferDaq != g_nPointsBufferDaqRegistered)
 	{
@@ -262,17 +252,16 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 		e=DAQmxRegisterEveryNSamplesEvent (hTask, DAQmx_Val_Transferred_From_Buffer, g_nPointsPointcloudEx, 0, OnEveryNSamples_callback, NULL);
 		HandleDAQError(e);
 		
-		ROS_WARN("New buffer size:  nPointsPerCloud=%lu (hz=%0.2f), nPointsPerCloudEx=%lu (hz=%0.2f), nDuplicates=%lu", 
-			MAX(1,g_pointcloud.points.size()),
-			g_hzPointcloud, 
-			g_nPointsPointcloudEx,
-			g_hzPointcloudEx, 
-			g_nDuplicates);
+		ROS_WARN("Offboard buffer size=%lu, hzPattern=%0.2f, nPointsPerCloud=%lu (hz=%0.2f), nDuplicates=%lu", 
+				g_nPointsPointcloudEx,
+				g_hzPointcloudEx, 
+				MAX(1,g_pointcloud.points.size()),
+				g_hzPointcloud, 
+				g_nDuplicates);
 	
 		rv = TRUE;
 	}
 	
-	//ROS_WARN("RegisterCallbackDAQBuffer() Done");
 	return rv;
 }
 
@@ -283,7 +272,6 @@ void ResetDAQ(void)
 	char 				szTask[]="OutputPointList";
 	char				szPhysicalChannel[]=DEVICE "/" CHANNELS;
 
-	//ROS_WARN("ResetDAQ()");
 	
 	g_bError = FALSE;
 	g_nPointsBufferDaqRegistered = -1;
@@ -295,6 +283,8 @@ void ResetDAQ(void)
 		
 		e=DAQmxClearTask (g_hTask);
 		HandleDAQError(e);
+		
+		g_hTask = NULL;
 	}
 	
 	e=DAQmxResetDevice(DEVICE);
@@ -315,7 +305,7 @@ void ResetDAQ(void)
 		HandleDAQError(e);
 		
 		
-		// Set/Get the onboard DAQ buffer size.if (
+		// Set/Get the onboard DAQ buffer size.
 		//e=DAQmxSetBufOutputOnbrdBufSize(g_hTask, 4095);  // Only allowed value for NI USB-6211 is 4095.
 		//HandleDAQError(e);
 		
@@ -341,7 +331,6 @@ void ResetDAQ(void)
 	else
 		ROS_WARN("Failed to reset DAQ.");
 
-	//ROS_WARN("ResetDAQ() Done");
 }
 
 
@@ -364,7 +353,7 @@ int main(int argc, char **argv)
 
 	e=DAQmxGetBufOutputOnbrdBufSize(g_hTask, &data);
 	HandleDAQError(e);
-	ROS_WARN("Onboard bufsize=%u", data);
+	ROS_WARN("Onboard buffer size=%u", data);
 	
 	ros::spin();
 	
