@@ -25,6 +25,6 @@
 	<param name="motorarm/maxI"    type="double" value="0.0"/>  
 	
 	
-	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.0'"/>
+	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.0' --units='radians'"/>
 </launch>
 
