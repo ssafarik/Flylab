@@ -1,4 +1,4 @@
 bool 					enabled
-patterngen/MsgPattern 	pattern
+patterngen/MsgPattern[] pattern_list
 float64 				timeout
 

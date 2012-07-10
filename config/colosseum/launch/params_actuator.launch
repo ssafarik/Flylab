@@ -58,5 +58,8 @@
 	<param name="fivebar/kWindup" type="double" value="0.8"/>  
 	<!-- -->
 
+	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A'"/>
+	<node name="joint2" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint2' --id='0.0.B'"/>
+
 </launch>
 	

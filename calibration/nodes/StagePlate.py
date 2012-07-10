@@ -96,7 +96,7 @@ class CalibrateStagePlate():
             msgPattern.mode = 'byshape'
             msgPattern.shape = 'constant'
             msgPattern.points = []
-            msgPattern.frame = 'Stage'
+            msgPattern.frame_id = 'Stage'
             msgPattern.hzPattern = 1.0
             msgPattern.hzPoint = 100
             msgPattern.count = 1
@@ -499,7 +499,7 @@ class CalibrateStagePlate():
         msgPattern.mode = 'byshape'
         msgPattern.shape = 'constant'
         msgPattern.points = []
-        msgPattern.frame = 'Stage'
+        msgPattern.frame_id = 'Stage'
         msgPattern.hzPattern = 1.0
         msgPattern.hzPoint = rospy.get_param('actuator/hzPoint', 100.0)
         msgPattern.count = 1
@@ -515,7 +515,7 @@ class CalibrateStagePlate():
         msgPattern.mode = 'byshape'
         msgPattern.shape = rospy.get_param('calibration/shape', 'spiral')
         msgPattern.points = []
-        msgPattern.frame = 'Stage'
+        msgPattern.frame_id = 'Stage'
         msgPattern.count = -1
         msgPattern.radius = 0.8 * rospy.get_param('arena/radius_inner', 25.4)
         msgPattern.preempt = True
@@ -533,7 +533,7 @@ class CalibrateStagePlate():
             msgPattern.mode = 'byshape'
             msgPattern.shape = 'constant'
             msgPattern.points = []
-            msgPattern.frame = 'Stage'
+            msgPattern.frame_id = 'Stage'
             msgPattern.hz = 1.0
             msgPattern.count = 1
             msgPattern.radius = 0.0

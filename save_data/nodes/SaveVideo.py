@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import division
-import roslib
-roslib.load_manifest('save_data')
+import roslib; roslib.load_manifest('save_data')
 import rospy
 
 import sys

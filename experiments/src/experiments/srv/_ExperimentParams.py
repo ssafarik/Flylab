@@ -9,7 +9,7 @@ import experiments.msg
 import patterngen.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "d434089535e88179972909454f7c0b47"
+  _md5sum = "6c57e032d2b8ba6185fa6e58e7f9ff69"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings 	experiment
@@ -96,7 +96,7 @@ float64 z
 ================================================================================
 MSG: experiments/LasertrackSettings
 bool 					enabled
-patterngen/MsgPattern 	pattern
+patterngen/MsgPattern[] pattern_list
 float64 				timeout
 
 
@@ -111,7 +111,7 @@ int32                 count     # How many times to output the pattern (-1 or N.
 geometry_msgs/Point[] points    # If mode=='bypoints', then this is the list of points to scan.
 geometry_msgs/Point   size      # (x,y) dimensions.
 bool				  preempt   # Should this message restart an in-progress pattern.
-float64               param     # An extra parameter, if needed by the particular pattern (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
+float64               param     # An extra shape-dependent parameter, if needed (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
  
 
 
@@ -242,33 +242,41 @@ bool onlyWhileTriggered
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_struct_2di4dB.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled))
-      _x = self.lasertrack.pattern.mode
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.lasertrack.pattern.shape
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.lasertrack.pattern.frame_id
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2di.pack(_x.lasertrack.pattern.hzPattern, _x.lasertrack.pattern.hzPoint, _x.lasertrack.pattern.count))
-      length = len(self.lasertrack.pattern.points)
+      length = len(self.lasertrack.pattern_list)
       buff.write(_struct_I.pack(length))
-      for val1 in self.lasertrack.pattern.points:
+      for val1 in self.lasertrack.pattern_list:
+        _x = val1.mode
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
+        _x = val1.shape
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
+        _x = val1.frame_id
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
         _x = val1
+        buff.write(_struct_2di.pack(_x.hzPattern, _x.hzPoint, _x.count))
+        length = len(val1.points)
+        buff.write(_struct_I.pack(length))
+        for val2 in val1.points:
+          _x = val2
+          buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+        _v1 = val1.size
+        _x = _v1
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+        _x = val1
+        buff.write(_struct_Bd.pack(_x.preempt, _x.param))
       _x = self
-      buff.write(_struct_3dB2dB6d.pack(_x.lasertrack.pattern.size.x, _x.lasertrack.pattern.size.y, _x.lasertrack.pattern.size.z, _x.lasertrack.pattern.preempt, _x.lasertrack.pattern.param, _x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_dB6d.pack(_x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -415,50 +423,66 @@ bool onlyWhileTriggered
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.lasertrack.pattern.mode = str[start:end].decode('utf-8')
-      else:
-        self.lasertrack.pattern.mode = str[start:end]
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.lasertrack.pattern.shape = str[start:end].decode('utf-8')
-      else:
-        self.lasertrack.pattern.shape = str[start:end]
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.lasertrack.pattern.frame_id = str[start:end].decode('utf-8')
-      else:
-        self.lasertrack.pattern.frame_id = str[start:end]
-      _x = self
-      start = end
-      end += 20
-      (_x.lasertrack.pattern.hzPattern, _x.lasertrack.pattern.hzPoint, _x.lasertrack.pattern.count,) = _struct_2di.unpack(str[start:end])
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.lasertrack.pattern.points = []
+      self.lasertrack.pattern_list = []
       for i in range(0, length):
-        val1 = geometry_msgs.msg.Point()
+        val1 = patterngen.msg.MsgPattern()
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.mode = str[start:end].decode('utf-8')
+        else:
+          val1.mode = str[start:end]
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.shape = str[start:end].decode('utf-8')
+        else:
+          val1.shape = str[start:end]
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.frame_id = str[start:end].decode('utf-8')
+        else:
+          val1.frame_id = str[start:end]
         _x = val1
+        start = end
+        end += 20
+        (_x.hzPattern, _x.hzPoint, _x.count,) = _struct_2di.unpack(str[start:end])
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        val1.points = []
+        for i in range(0, length):
+          val2 = geometry_msgs.msg.Point()
+          _x = val2
+          start = end
+          end += 24
+          (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+          val1.points.append(val2)
+        _v2 = val1.size
+        _x = _v2
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
-        self.lasertrack.pattern.points.append(val1)
+        _x = val1
+        start = end
+        end += 9
+        (_x.preempt, _x.param,) = _struct_Bd.unpack(str[start:end])
+        val1.preempt = bool(val1.preempt)
+        self.lasertrack.pattern_list.append(val1)
       _x = self
       start = end
-      end += 90
-      (_x.lasertrack.pattern.size.x, _x.lasertrack.pattern.size.y, _x.lasertrack.pattern.size.z, _x.lasertrack.pattern.preempt, _x.lasertrack.pattern.param, _x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_3dB2dB6d.unpack(str[start:end])
-      self.lasertrack.pattern.preempt = bool(self.lasertrack.pattern.preempt)
+      end += 57
+      (_x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_dB6d.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -562,33 +586,41 @@ bool onlyWhileTriggered
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_struct_2di4dB.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled))
-      _x = self.lasertrack.pattern.mode
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.lasertrack.pattern.shape
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.lasertrack.pattern.frame_id
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2di.pack(_x.lasertrack.pattern.hzPattern, _x.lasertrack.pattern.hzPoint, _x.lasertrack.pattern.count))
-      length = len(self.lasertrack.pattern.points)
+      length = len(self.lasertrack.pattern_list)
       buff.write(_struct_I.pack(length))
-      for val1 in self.lasertrack.pattern.points:
+      for val1 in self.lasertrack.pattern_list:
+        _x = val1.mode
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
+        _x = val1.shape
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
+        _x = val1.frame_id
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
         _x = val1
+        buff.write(_struct_2di.pack(_x.hzPattern, _x.hzPoint, _x.count))
+        length = len(val1.points)
+        buff.write(_struct_I.pack(length))
+        for val2 in val1.points:
+          _x = val2
+          buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+        _v3 = val1.size
+        _x = _v3
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+        _x = val1
+        buff.write(_struct_Bd.pack(_x.preempt, _x.param))
       _x = self
-      buff.write(_struct_3dB2dB6d.pack(_x.lasertrack.pattern.size.x, _x.lasertrack.pattern.size.y, _x.lasertrack.pattern.size.z, _x.lasertrack.pattern.preempt, _x.lasertrack.pattern.param, _x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_dB6d.pack(_x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -736,50 +768,66 @@ bool onlyWhileTriggered
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.lasertrack.pattern.mode = str[start:end].decode('utf-8')
-      else:
-        self.lasertrack.pattern.mode = str[start:end]
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.lasertrack.pattern.shape = str[start:end].decode('utf-8')
-      else:
-        self.lasertrack.pattern.shape = str[start:end]
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.lasertrack.pattern.frame_id = str[start:end].decode('utf-8')
-      else:
-        self.lasertrack.pattern.frame_id = str[start:end]
-      _x = self
-      start = end
-      end += 20
-      (_x.lasertrack.pattern.hzPattern, _x.lasertrack.pattern.hzPoint, _x.lasertrack.pattern.count,) = _struct_2di.unpack(str[start:end])
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      self.lasertrack.pattern.points = []
+      self.lasertrack.pattern_list = []
       for i in range(0, length):
-        val1 = geometry_msgs.msg.Point()
+        val1 = patterngen.msg.MsgPattern()
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.mode = str[start:end].decode('utf-8')
+        else:
+          val1.mode = str[start:end]
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.shape = str[start:end].decode('utf-8')
+        else:
+          val1.shape = str[start:end]
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.frame_id = str[start:end].decode('utf-8')
+        else:
+          val1.frame_id = str[start:end]
         _x = val1
+        start = end
+        end += 20
+        (_x.hzPattern, _x.hzPoint, _x.count,) = _struct_2di.unpack(str[start:end])
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        val1.points = []
+        for i in range(0, length):
+          val2 = geometry_msgs.msg.Point()
+          _x = val2
+          start = end
+          end += 24
+          (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+          val1.points.append(val2)
+        _v4 = val1.size
+        _x = _v4
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
-        self.lasertrack.pattern.points.append(val1)
+        _x = val1
+        start = end
+        end += 9
+        (_x.preempt, _x.param,) = _struct_Bd.unpack(str[start:end])
+        val1.preempt = bool(val1.preempt)
+        self.lasertrack.pattern_list.append(val1)
       _x = self
       start = end
-      end += 90
-      (_x.lasertrack.pattern.size.x, _x.lasertrack.pattern.size.y, _x.lasertrack.pattern.size.z, _x.lasertrack.pattern.preempt, _x.lasertrack.pattern.param, _x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_3dB2dB6d.unpack(str[start:end])
-      self.lasertrack.pattern.preempt = bool(self.lasertrack.pattern.preempt)
+      end += 57
+      (_x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_dB6d.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -817,13 +865,14 @@ bool onlyWhileTriggered
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
+_struct_Bd = struct.Struct("<Bd")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
-_struct_3dB2dB6d = struct.Struct("<3dB2dB6d")
 _struct_4B = struct.Struct("<4B")
 _struct_B2dB = struct.Struct("<B2dB")
 _struct_2d = struct.Struct("<2d")
 _struct_B2d = struct.Struct("<B2d")
+_struct_dB6d = struct.Struct("<dB6d")
 _struct_2di4dB = struct.Struct("<2di4dB")
 _struct_3d = struct.Struct("<3d")
 _struct_2di = struct.Struct("<2di")
@@ -932,6 +981,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = 'ba61ea92f0ca9a56ed1da8c2355f10f2'
+  _md5sum = 'f282360b5e54d872ba79f631397bb89e'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

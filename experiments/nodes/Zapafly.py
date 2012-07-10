@@ -4,6 +4,7 @@ import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
 import ExperimentLib
+from geometry_msgs.msg import Point
 from experiments.srv import *
 from galvodirector.msg import MsgGalvoCommand
 from patterngen.msg import MsgPattern
@@ -65,18 +66,30 @@ class ExperimentZapafly():
         self.experimentparams.move.timeout = 600
         
         self.experimentparams.lasertrack.enabled = True
-        self.experimentparams.lasertrack.pattern.mode       = 'byshape'
-        self.experimentparams.lasertrack.pattern.shape      = 'grid'
-        self.experimentparams.lasertrack.pattern.frame_id   = 'Fly1'
-        self.experimentparams.lasertrack.pattern.hzPattern  = 40.0
-        self.experimentparams.lasertrack.pattern.hzPoint    = 1000.0
-        self.experimentparams.lasertrack.pattern.count      = 1
-        #self.experimentparams.lasertrack.pattern.points     = []
-        self.experimentparams.lasertrack.pattern.size.x     = 6
-        self.experimentparams.lasertrack.pattern.size.y     = 6
-        self.experimentparams.lasertrack.pattern.preempt    = False
-        self.experimentparams.lasertrack.pattern.param      = 1.0
-        self.experimentparams.lasertrack.timeout            = 600
+        self.experimentparams.lasertrack.pattern_list = []
+        self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+                                                                        shape      = 'grid',
+                                                                        frame_id   = 'Fly1',
+                                                                        hzPattern  = 40.0,
+                                                                        hzPoint    = 1000.0,
+                                                                        count      = 1,
+                                                                        size       = Point(x=6,
+                                                                                           y=6),
+                                                                        preempt    = False,
+                                                                        param      = 1), # Peano curve level.
+                                                             )
+#        self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+#                                                                        shape      = 'circle',
+#                                                                        frame_id   = 'Plate',
+#                                                                        hzPattern  = 40.0,
+#                                                                        hzPoint    = 1000.0,
+#                                                                        count      = 1,
+#                                                                        size       = Point(x=10,
+#                                                                                           y=10),
+#                                                                        preempt    = False,
+#                                                                        param      = 1), # Peano curve level.
+#                                                             )
+        self.experimentparams.lasertrack.timeout = 600
         
         self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0
@@ -92,37 +105,11 @@ class ExperimentZapafly():
 
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 
-        #self.pubGalvoCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
 
 
-    def TrackFly1(self):
-        pattern = MsgPattern()
-        pattern.mode       = 'byshape'
-        pattern.shape      = 'circle'
-        pattern.frame_id   = 'Fly1'
-        pattern.hzPattern  = 40.0
-        pattern.hzPoint    = 1000.0
-        pattern.count      = 1
-        pattern.points     = []
-        pattern.size.x     = 6
-        pattern.size.y     = 6
-        pattern.preempt    = False
-        pattern.param      = 1.0
-    
-        command = MsgGalvoCommand()
-        command.pattern_list = [pattern,]
-        command.units = 'millimeters' # 'millimeters' or 'volts'
-        self.pubGalvoCommand.publish(command)
-
-        
     def Run(self):
         self.experiment.Run()
         
-#        while not rospy.is_shutdown():
-#            self.TrackFly1() 
-#            rospy.sleep(10)
-        
-
 
 
 

@@ -51,6 +51,8 @@ class GalvoDirector:
         except (rospy.ServiceException, IOError), e:
             print "Service GetPatternPoints not found: %s" % e
 
+
+        rospy.core.add_client_shutdown_hook(self.Preshutdown_callback)
         rospy.on_shutdown(self.OnShutdown_callback)
         
         self.arenastate = ArenaState()
@@ -58,25 +60,33 @@ class GalvoDirector:
         self.pointcloud_list = []
         self.units = 'millimeters'
         
-        # Calibration data from Calibrator.py
-#        self.mx =  0.060
-#        self.bx = -0.595
-#        self.my = -0.05675
-#        self.by =  3.467
-
-        self.mx=0.04677
-        self.bx=-0.87983
-        self.my=-0.04383
-        self.by=3.15202
-
-#[WARN] [WallTime: 1341358930.862809] self.mx=0.04670
-#[WARN] [WallTime: 1341358930.862926] self.bx=-0.87488
-#[WARN] [WallTime: 1341358930.863040] self.my=-0.04385
-#[WARN] [WallTime: 1341358930.863150] self.by=3.15458
-
+        # Calibration data (median values) from "roslaunch galvodirector calibrator.launch"
+        self.mx=0.04661
+        self.bx=-0.83793
+        self.my=-0.04376
+        self.by=3.32871
 
         self.initialized = True
 
+
+    def Preshutdown_callback(self, reason=None):
+        self.ToBeamDump()
+        
+        
+    def ToBeamDump(self):
+        pattern = MsgPattern()
+        pattern.mode = 'bypoints'
+        pattern.points = [Point(0,-10,0)] # volts
+        pattern.frame_id = 'Plate'
+        pattern.preempt = True
+
+        command = MsgGalvoCommand()
+        command.pattern_list = [pattern,]
+        command.units = 'volts' # 'millimeters' or 'volts'
+        self.GalvoCommand_callback(command)
+        
+
+        
 
     def OnShutdown_callback(self):
         pass
@@ -157,7 +167,8 @@ class GalvoDirector:
                         self.pointcloud_list.append(pointcloud)
 
                     t3 = rospy.Time.now().to_sec()
-                    rospy.logwarn('TF time: %0.5f + %0.5f = %0.5f' % ((t2-t1),(t3-t2),(t3-t1)))
+                    rospy.logwarn('TF time: stamp=%s, %0.5f + %0.5f = %0.5f' % (pointcloud_template.header.stamp, (t2-t1),(t3-t2),(t3-t1))) # BUG: Occasional 0.01 sec times.
+                    rospy.logwarn ('now,pointcloud_template,%s,%s' % (rospy.Time.now(), pointcloud_template.header.stamp))
                     
                 self.pubGalvoPointCloud.publish(self.VoltsFromUnitsPointcloud(self.GetUnifiedPointcloud(self.pointcloud_list)))
         
@@ -172,9 +183,11 @@ class GalvoDirector:
         
         if len(pointcloud_list) > 0:
             pointcloudUnified.header = pointcloud_list[0].header  # They all have different headers, but just use the first one.
+            pointcloudUnified.channels.append(ChannelFloat32(name='intensity', values=[]))
+                                              
             for pointcloud in pointcloud_list:
                 pointcloudUnified.points.extend(pointcloud.points)
-                pointcloudUnified.channels.extend(pointcloud.channels)
+                pointcloudUnified.channels[0].values.extend(pointcloud.channels[0].values)
         
         return pointcloudUnified
             
@@ -238,9 +251,6 @@ class GalvoDirector:
             
 
     def Main(self):
-#        while not rospy.is_shutdown():
-#            self.PublishPointcloud() 
-#            self.rosRate.sleep()
         rospy.spin()
             
 

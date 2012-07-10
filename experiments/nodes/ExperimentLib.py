@@ -17,6 +17,8 @@ from galvodirector.msg import MsgGalvoCommand
 from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
 
+gRate = 100
+
 
 #######################################################################################################
 #######################################################################################################
@@ -173,7 +175,7 @@ class TemplateState (smach.State):
 
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
-        self.rosrate = rospy.Rate(100)
+        self.rosrate = rospy.Rate(gRate)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
 
         self.Trigger = TriggerService()
@@ -314,7 +316,7 @@ class TriggerOnStates (smach.State):
                              output_keys=['experimentparamsOut'])
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
-        self.rosrate = rospy.Rate(100)
+        self.rosrate = rospy.Rate(gRate)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
 
         self.Trigger = TriggerService()
@@ -508,7 +510,7 @@ class GotoHome (smach.State):
                              output_keys=['experimentparamsOut'])
 
         self.arenastate = None
-        self.rosrate = rospy.Rate(100)
+        self.rosrate = rospy.Rate(gRate)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
 
         self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
@@ -605,7 +607,7 @@ class MoveRobot (smach.State):
                              output_keys=['experimentparamsOut'])
 
         self.arenastate = None
-        self.rosrate = rospy.Rate(100)
+        self.rosrate = rospy.Rate(gRate)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
         self.pubPatternGen = rospy.Publisher('SetSignalGen', MsgPattern, latch=True)
 
@@ -793,7 +795,7 @@ class MoveRobot (smach.State):
         msgPattern.mode = 'byshape'
         msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
         msgPattern.points = []
-        msgPattern.frame = 'Plate'
+        msgPattern.frame_id = 'Plate'
         msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
         msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
         msgPattern.count = userdata.experimentparamsIn.move.pattern.count
@@ -821,7 +823,7 @@ class MoveRobot (smach.State):
         msgPattern.mode = 'byshape'
         msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
         msgPattern.points = []
-        msgPattern.frame = 'Plate'
+        msgPattern.frame_id = 'Plate'
         msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
         msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
         msgPattern.count = 0
@@ -844,7 +846,7 @@ class Lasertrack (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
 
-        self.rosrate = rospy.Rate(100)
+        self.rosrate = rospy.Rate(gRate)
         self.pubGalvoCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
 
         rospy.on_shutdown(self.OnShutdown_callback)
@@ -855,7 +857,8 @@ class Lasertrack (smach.State):
         
         
     def execute(self, userdata):
-        rospy.loginfo("EL State Lasertrack(%s)" % userdata.experimentparamsIn.lasertrack.pattern)
+        for pattern in userdata.experimentparamsIn.lasertrack.pattern_list:
+            rospy.loginfo("EL State Lasertrack(%s)" % pattern)
 
         rv = 'succeeded'
         if userdata.experimentparamsIn.lasertrack.enabled:
@@ -863,7 +866,7 @@ class Lasertrack (smach.State):
     
             # Send the tracking command to the galvo director.
             command = MsgGalvoCommand()
-            command.pattern_list = [userdata.experimentparamsIn.lasertrack.pattern,]
+            command.pattern_list = userdata.experimentparamsIn.lasertrack.pattern_list
             command.units = 'millimeters' # 'millimeters' or 'volts'
             self.pubGalvoCommand.publish(command)
     
@@ -876,32 +879,13 @@ class Lasertrack (smach.State):
                 
                 if userdata.experimentparamsIn.move.timeout != -1:
                     if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.lasertrack.timeout:
-                        rv = 'succeeded'
                         break
                 
                 self.rosrate.sleep()
-    
-            # Turn off the tracking.
-            pattern = MsgPattern()
-            pattern.mode = 'byshape'
-            pattern.shape = 'none'
-            pattern.points = []
-            pattern.frame = 'Plate'
-            pattern.hzPattern = 1.0
-            pattern.hzPoint = 1.0
-            pattern.count = 0
-            pattern.size.x = 1.0
-            pattern.size.x = 1.0
-            pattern.preempt = True
-            pattern.param = 0.0
-    
-            command.pattern_list = [pattern,]
-            command.units = 'millimeters' # 'millimeters' or 'volts'
-            self.pubGalvoCommand.publish(command)
-
+                
         return rv
-        
 
+    
 
             
             

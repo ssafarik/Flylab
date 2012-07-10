@@ -383,35 +383,48 @@ class ContourIdentifier:
     # MapContoursFromObjects()
     #   Uses self.contours & self.objects,
     #   Returns a list of indices such that self.objects[k] = contour[map[k]], and self.objects[0]=therobot
+    #
     def MapContoursFromObjects(self):
         # Make a list of object positions (i.e. robots & flies).
         xyObjects = []
 
+        # Time.
+        if (self.stateEndEffector is not None):
+            stamp = self.stateEndEffector.header.stamp
+            #rospy.logwarn('Using stamp=EndEffector')
+        elif (len(self.objects)>0) and (self.objects[0].isVisible):
+            stamp = self.objects[0].state.header.stamp
+            #rospy.logwarn('Using stamp=object[0]')
+        else:
+            stamp = rospy.Time.now()
+            #rospy.logwarn('Using stamp=now()')
+
+
         # Robots.
         if (self.nRobots==1):
             if (self.stateEndEffector is not None):
-                t = self.stateEndEffector.header.stamp
+                #stamp = self.stateEndEffector.header.stamp
                 xyRobotComputed = [self.stateEndEffector.pose.position.x + self.objects[0].ptOffset.x,
                                    self.stateEndEffector.pose.position.y + self.objects[0].ptOffset.y]
                 #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
                 #                                          self.objects[0].state.pose.position.y]))
             elif (len(self.objects)>0) and (self.objects[0].isVisible):
-                t = self.objects[0].state.header.stamp
+                #stamp = self.objects[0].state.header.stamp
                 xyRobotComputed = [self.objects[0].state.pose.position.x,
                                    self.objects[0].state.pose.position.y]
             else:
-                t = rospy.Time.now()
+                #stamp = rospy.Time.now()
                 xyRobotComputed = [0.0, 0.0]
 
 
             xyObjects.append(xyRobotComputed)
             self.tfbx.sendTransform((xyRobotComputed[0], xyRobotComputed[1], 0.0),
                                     tf.transformations.quaternion_about_axis(0, (0,0,1)),
-                                    t,
+                                    stamp,
                                     "RobotComputed",
                                     "Plate")
-        else:
-            t = rospy.Time.now()
+        #else:
+        #    stamp = rospy.Time.now()
 
 
         # Flies.    
@@ -493,7 +506,7 @@ class ContourIdentifier:
         for m in range(len(xyObjects)):
             self.tfbx.sendTransform((xyObjects[m][0],xyObjects[m][1],0.0),
                                     (0,0,0,1),
-                                    t,
+                                    stamp,
                                     "xyObjects"+str(m),
                                     "Plate")
             
@@ -501,7 +514,7 @@ class ContourIdentifier:
         for n in range(len(contoursAug)):
             self.tfbx.sendTransform((contoursAug[n].x,contoursAug[n].y,0.0),
                                     (0,0,0,1),
-                                    t,
+                                    stamp,
                                     "contours"+str(n),
                                     "Plate")
         

@@ -9,10 +9,13 @@
   <review status="unreviewed" notes=""/>
   <url></url>
   <depend package="rospy"/>
+  <depend package="sensor_msgs"/>
+  <depend package="geometry_msgs"/>
   
   <depend package="experiments"/>
   <depend package="flycore"/>
   <depend package="tracking"/>
+  <depend package="patterngen"/>
 
 </package>
 
