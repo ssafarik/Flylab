@@ -97,8 +97,8 @@ class ContourGenerator:
                 rospy.loginfo('ContourGenerator waiting for transforms: ImageRect, ROI: %s' % e)
             except:
                 raise sys.exc_info() #rospy.exceptions.ROSInterruptException
-
-            rospy.loginfo('ContourGenerator found for transforms.')
+            else:
+                rospy.loginfo('ContourGenerator found transforms.')
 
 
 #        rospy.wait_for_service('camera_from_plate', timeout=10.0)

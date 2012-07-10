@@ -77,11 +77,7 @@ class GalvoCalibrator:
             
             bx = -((mx * xmin) - self.pointsInput[0].x)
             by = -((my * ymin) - self.pointsInput[2].y)
-            rospy.logwarn ('Enter these in GalvoDirector.py')
-            rospy.logwarn ('self.mx=%0.5f' % mx)
-            rospy.logwarn ('self.bx=%0.5f' % bx)
-            rospy.logwarn ('self.my=%0.5f' % my)
-            rospy.logwarn ('self.by=%0.5f' % by)
+            rospy.logwarn ('mx, bx, my, by:  %0.6f, %0.6f, %0.6f, %0.6f' % (mx,bx,my,by))
              
     
     def SendInputPoints(self):
@@ -99,13 +95,15 @@ class GalvoCalibrator:
         pattern.param      = 0.0
     
         command = MsgGalvoCommand()
-        command.frameid_target_list = ['Plate',]
         command.pattern_list = [pattern,]
         command.units = 'volts' #'millimeters' # 'volts' #
         self.pubGalvoCommand.publish(command)
         
 
     def Main(self):
+        rospy.logwarn ('Find the median values, and enter them in GalvoDirector.py')
+        rospy.logwarn ('mx, bx, my, by:')
+
         while not rospy.is_shutdown():
             self.SendInputPoints()
             rospy.sleep(1.0)

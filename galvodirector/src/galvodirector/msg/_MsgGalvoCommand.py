@@ -26,7 +26,7 @@ int32                 count     # How many times to output the pattern (-1 or N.
 geometry_msgs/Point[] points    # If mode=='bypoints', then this is the list of points to scan.
 geometry_msgs/Point   size      # (x,y) dimensions.
 bool				  preempt   # Should this message restart an in-progress pattern.
-float64               param     # An extra parameter, if needed by the particular pattern (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
+float64               param     # An extra shape-dependent parameter, if needed (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
  
 
 

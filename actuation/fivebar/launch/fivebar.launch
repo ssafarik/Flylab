@@ -14,8 +14,6 @@
 	<param name="calibration/shape" type="string" value="spiral"/>
 	
 
-	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A' units='radians'"/>
-	<node name="joint2" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint2' --id='0.0.B' units='radians'"/>
 	<node name="Fivebar" pkg="fivebar" type="Fivebar.py" />
 
 

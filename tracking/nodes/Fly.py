@@ -90,7 +90,7 @@ class Fly:
         self.robot_length = rospy.get_param ('robot/length', 1.0)
         self.robot_height = rospy.get_param ('robot/height', 1.0)
         
-        rospy.logwarn('Fly() added, name=%s' % name)
+        rospy.logwarn('Fly() object added, name=%s' % name)
         
         self.initialized = True
 
@@ -226,9 +226,9 @@ class Fly:
     def Update(self, contour, ptComputed):
         if self.initialized:
             if (contour is not None):
-                t = contour.header.stamp.to_sec()
+                time = contour.header.stamp.to_sec()
             else:
-                t = rospy.Time.now().to_sec()
+                time = rospy.Time.now().to_sec()
                 
             self.contourPrev = self.contour
             self.contour = contour
@@ -252,10 +252,10 @@ class Fly:
                 
                 if (self.contour.x is not None) and (self.contour.y is not None) and (self.contour.angle is not None):
                     self.isVisible = True
-                    (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), t)
+                    (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), time)
                     (z, vz) = (0.0, 0.0)
                     #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
-                    angleF = self.lpAngleF.Update(self.contour.angle, t)#self.contour.header.stamp.to_sec())
+                    angleF = self.lpAngleF.Update(self.contour.angle, time)#self.contour.header.stamp.to_sec())
                     
                     
                     if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
@@ -264,7 +264,7 @@ class Fly:
 
                 # Use the unfiltered data for the case where the filters return None results.
                 if self.isVisible and ((x is None) or (y is None)):
-                    rospy.logwarn('FLY Kalman filter returned \'None\' at %s, %s' % ([self.contour.x, self.contour.y], t))
+                    rospy.logwarn('FLY Kalman filter returned \'None\' at %s, %s' % ([self.contour.x, self.contour.y], time))
                     x = self.contour.x
                     y = self.contour.y
                     z = 0.0
@@ -274,7 +274,7 @@ class Fly:
 
             else: # self.contour is None
                 #rospy.logwarn('FLY No contour seen for %s; check your nFlies parameter.' % self.name)
-                (x,y,vx,vy) = self.kfState.Update(None, t)
+                (x,y,vx,vy) = self.kfState.Update(None, time)
                 (z, vz) = (0.0, 0.0)
                 
                 
@@ -379,9 +379,9 @@ class Fly:
                         ang += 2.0*N.pi
                     self.angPrev = ang
                     
-                    ang_filtered = self.lpOffsetAng.Update(ang, t)
+                    ang_filtered = self.lpOffsetAng.Update(ang, time)
                     #rospy.logwarn('ang=%0.2f, ang_filtered=%0.2f' % (ang,ang_filtered))
-                    (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(mag, t), -self.maxOffset, self.maxOffset),
+                    (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(mag, time), -self.maxOffset, self.maxOffset),
                                                                          ang_filtered)
                     self.ptPPrev.x = ptP.x
                     self.ptPPrev.y = ptP.y
@@ -406,10 +406,11 @@ class Fly:
                                          self.state.pose.position.y, 
                                          self.state.pose.position.z),
                                         (q.x, q.y, q.z, q.w),
-                                        self.state.header.stamp,#rospy.Time.now(),
+                                        self.state.header.stamp,
                                         self.name,
                                         self.state.header.frame_id)
-
+                #rospy.logwarn('sendTransform(frame=%s, stamp=%s, now-stamp=%s)' % (self.name, self.state.header.stamp, rospy.Time.now()-self.state.header.stamp))
+                #rospy.logwarn ('now,transform,%s,%s' % (rospy.Time.now(), self.state.header.stamp))
 
                 # Publish a 3D model marker for the robot.
                 if 'Robot' in self.name:

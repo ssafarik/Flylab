@@ -22,7 +22,7 @@ class StageActionServer(object):
         self.isRunning = False
         self.isAtGoal = False
         
-        self.rate = rospy.Rate(100)
+        self.rosRate = rospy.Rate(100)
         self._action_name = name
         rospy.loginfo ('%s' % name)
         self._tfrx = tf.TransformListener() 
@@ -40,23 +40,17 @@ class StageActionServer(object):
         self.requestStageState = SrvFrameStateRequest()
             
 
-        rospy.wait_for_service('get_stage_state')
         try:
+            rospy.wait_for_service('get_stage_state')
             self.get_stage_state = rospy.ServiceProxy('get_stage_state', SrvFrameState)
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
-        
-        rospy.wait_for_service('set_stage_state')
-        try:
+            
+            rospy.wait_for_service('set_stage_state')
             self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
-        
-        rospy.wait_for_service('home_stage')
-        try:
+
+            rospy.wait_for_service('home_stage')
             self.home_stage = rospy.ServiceProxy('home_stage', SrvFrameState)
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
+        except (rospy.exceptions.ROSInterruptException, rospy.ServiceException), e:
+            print "Service call failed: %s" % e
         
         
         self.tolerance = 1.0             # mm
@@ -74,7 +68,7 @@ class StageActionServer(object):
         # We can eliminate this section, as we are just transforming Plate to Plate.
         poseStamped = PoseStamped(header=goal.state.header, pose=goal.state.pose) #(header=Header(frame_id='Plate'), pose=goal.state.pose)
         #try:
-        self._tfrx.waitForTransform("Plate", poseStamped.header.frame_id, rospy.Time(), rospy.Duration(15.0))
+        self._tfrx.waitForTransform("Plate", poseStamped.header.frame_id, poseStamped.header.stamp, rospy.Duration(5.0))#rospy.Time(), rospy.Duration(15.0))
         poseStage = self._tfrx.transformPose('Plate', poseStamped)
         #except:
         #    rospy.sleep(0.1)
@@ -134,7 +128,7 @@ class StageActionServer(object):
                         self._as.publish_feedback(statePlate)
             
             
-            self.rate.sleep()
+            self.rosRate.sleep()
                                      
         
     def MainLoop(self):

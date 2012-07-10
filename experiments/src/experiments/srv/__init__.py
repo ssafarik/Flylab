@@ -1,2 +1,2 @@
-from _Trigger import *
-from _ExperimentParams import *
+from ._Trigger import *
+from ._ExperimentParams import *

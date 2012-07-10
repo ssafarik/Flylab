@@ -9,7 +9,7 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<param name="galvodriver/hzPoint" type="double" value="131072.0"/>
+	<param name="galvodriver/hzPoint" type="double" value="262144.0"/>
 
 </launch>
 	

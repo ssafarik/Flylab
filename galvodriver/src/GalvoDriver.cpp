@@ -50,7 +50,7 @@ double					g_hzPointcloud = 0.0;
 double					g_hzPointcloudEx = 0.0;
 double					g_hzUSB = 50.0;
 
-int 					g_bError=FALSE;	// Flag any errors in DAQmx function calls.
+int 					g_bNeedToReset=FALSE;	// If true, then reset the DAQ.  Checked periodically.
 
 
 // ************************************
@@ -71,13 +71,21 @@ void 				ResetDAQ (void);
 //
 void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointcloud)
 {
+	double	hzPoint = 0.0;
+	
+	
 	boost::lock_guard<boost::mutex> lock(g_lockPointcloud);
 
 	// Copy the given pointcloud, if it contains points.
 	if (pointcloud->points.size()>0)
 		g_pointcloud = sensor_msgs::PointCloud(*pointcloud); 
 
-	ros::param::get("galvodriver/hzPoint", g_hzPoint);
+	//ros::param::get("galvodriver/hzPoint", hzPoint);
+	//if (g_hzPoint != hzPoint)
+	//{
+	//	g_hzPoint = hzPoint;
+	//	g_bNeedToReset = TRUE;
+	//}
 
 }
 
@@ -108,7 +116,7 @@ int32 CVICALLBACK OnEveryNSamples_callback (TaskHandle hTask, int32 eventType, u
 	}
 		
 	// If there was an error in a prior DAQmx call, then reset the device.
-	if (g_bError)
+	if (g_bNeedToReset)
 		ResetDAQ();
 
 
@@ -194,7 +202,7 @@ void HandleDAQError(int32 e)
 {
 	if (DAQmxFailed(e))
 	{
-		g_bError = TRUE;
+		g_bNeedToReset = TRUE;
 		DAQmxGetExtendedErrorInfo(szErr,LENERR);
 		ROS_WARN(szErr);
 	}
@@ -273,7 +281,7 @@ void ResetDAQ(void)
 	char				szPhysicalChannel[]=DEVICE "/" CHANNELS;
 
 	
-	g_bError = FALSE;
+	g_bNeedToReset = FALSE;
 	g_nPointsBufferDaqRegistered = -1;
 	
 	if (g_hTask)

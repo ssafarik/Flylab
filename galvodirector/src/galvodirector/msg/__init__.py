@@ -1,2 +1,2 @@
-from _MsgGalvoCommand import *
-from _MsgGalvoTracking import *
+from ._MsgGalvoCommand import *
+from ._MsgGalvoTracking import *
