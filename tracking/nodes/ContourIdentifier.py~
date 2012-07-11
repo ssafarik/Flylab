@@ -686,9 +686,9 @@ class ContourIdentifier:
                         #                                                           [self.objects[0].ptOffset.x,
                         #                                                            self.objects[0].ptOffset.y]))
                     
-		    #rospy.logwarn('iFly_list=%s, len(mapContourFromObject)=%d' % (self.iFly_list,len(self.mapContourFromObject)))
+#		    rospy.logwarn('iFly_list=%s, len(mapContourFromObject)=%d' % (self.iFly_list,len(self.mapContourFromObject)))
                     for iFly in self.iFly_list:
-                        #rospy.logwarn ('iFly=%d, self.mapContourFromObject=%s, len(self.objects)=%d' % (iFly, self.mapContourFromObject, len(self.objects)))
+                        rospy.logwarn ('iFly=%d, self.mapContourFromObject=%s, len(self.objects)=%d' % (iFly, self.mapContourFromObject, len(self.objects)))
                         if (self.mapContourFromObject[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
                             arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
                                                                   pose = self.objects[iFly].state.pose,

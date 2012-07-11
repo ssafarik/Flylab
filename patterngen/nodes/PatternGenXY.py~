@@ -91,7 +91,8 @@ class PatternGenXY:
                                 y=r*N.sin(q)))
             q = q + dq    # Step around the circle
 
-	return points
+	rospy.logwarn ('len(circle points)=%d' % len(points))
+        return points
     
         
     def GetPointsSquare(self, pattern):

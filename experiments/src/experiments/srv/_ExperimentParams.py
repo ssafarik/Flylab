@@ -9,7 +9,7 @@ import experiments.msg
 import patterngen.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "6c57e032d2b8ba6185fa6e58e7f9ff69"
+  _md5sum = "0891a3da32b0fce37a0d3e9662abde2d"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings 	experiment
@@ -84,6 +84,7 @@ float64 			hzPattern
 float64 			hzPoint
 int32 				count  # -1 means forever
 geometry_msgs/Point size
+float64                         param
 
 
 ================================================================================
@@ -241,7 +242,7 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di4dB.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled))
+      buff.write(_struct_2di5dB.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.pattern.param, _x.move.timeout, _x.lasertrack.enabled))
       length = len(self.lasertrack.pattern_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.lasertrack.pattern_list:
@@ -417,8 +418,8 @@ bool onlyWhileTriggered
         self.move.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 53
-      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled,) = _struct_2di4dB.unpack(str[start:end])
+      end += 61
+      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.pattern.param, _x.move.timeout, _x.lasertrack.enabled,) = _struct_2di5dB.unpack(str[start:end])
       self.lasertrack.enabled = bool(self.lasertrack.enabled)
       start = end
       end += 4
@@ -585,7 +586,7 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di4dB.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled))
+      buff.write(_struct_2di5dB.pack(_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.pattern.param, _x.move.timeout, _x.lasertrack.enabled))
       length = len(self.lasertrack.pattern_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.lasertrack.pattern_list:
@@ -762,8 +763,8 @@ bool onlyWhileTriggered
         self.move.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 53
-      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.timeout, _x.lasertrack.enabled,) = _struct_2di4dB.unpack(str[start:end])
+      end += 61
+      (_x.move.pattern.hzPattern, _x.move.pattern.hzPoint, _x.move.pattern.count, _x.move.pattern.size.x, _x.move.pattern.size.y, _x.move.pattern.size.z, _x.move.pattern.param, _x.move.timeout, _x.lasertrack.enabled,) = _struct_2di5dB.unpack(str[start:end])
       self.lasertrack.enabled = bool(self.lasertrack.enabled)
       start = end
       end += 4
@@ -866,6 +867,7 @@ bool onlyWhileTriggered
 
 _struct_I = genpy.struct_I
 _struct_Bd = struct.Struct("<Bd")
+_struct_2di5dB = struct.Struct("<2di5dB")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
 _struct_4B = struct.Struct("<4B")
@@ -873,7 +875,6 @@ _struct_B2dB = struct.Struct("<B2dB")
 _struct_2d = struct.Struct("<2d")
 _struct_B2d = struct.Struct("<B2d")
 _struct_dB6d = struct.Struct("<dB6d")
-_struct_2di4dB = struct.Struct("<2di4dB")
 _struct_3d = struct.Struct("<3d")
 _struct_2di = struct.Struct("<2di")
 _struct_2iB6dB6d = struct.Struct("<2iB6dB6d")
@@ -981,6 +982,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = 'f282360b5e54d872ba79f631397bb89e'
+  _md5sum = '71a4fe056120e7ffb72be76bd9f6d505'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse
