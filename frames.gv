@@ -1,0 +1,16 @@
+digraph G {
+"/Camera" -> "/ImageRaw"[label="Broadcaster: /TransformServerPlateCamera\nAverage rate: 100.200 Hz\nMost recent transform: 0.010 sec old \nBuffer length: 4.980 sec\n"];
+"/Camera0" -> "/Camera"[label="Broadcaster: /TransformServerPlateCamera\nAverage rate: 100.200 Hz\nMost recent transform: 0.010 sec old \nBuffer length: 4.980 sec\n"];
+"/ImageRaw" -> "/ImageRect"[label="Broadcaster: /TransformServerPlateCamera\nAverage rate: 100.200 Hz\nMost recent transform: 0.010 sec old \nBuffer length: 4.980 sec\n"];
+"/ImageRect" -> "/Plate"[label="Broadcaster: /TransformServerPlateCamera\nAverage rate: 100.200 Hz\nMost recent transform: 0.010 sec old \nBuffer length: 4.980 sec\n"];
+"/ImageRect" -> "/ROI"[label="Broadcaster: /TransformServerPlateCamera\nAverage rate: 100.200 Hz\nMost recent transform: 0.010 sec old \nBuffer length: 4.980 sec\n"];
+"/Plate" -> "/Stage"[label="Broadcaster: /TransformServerPlateStage\nAverage rate: 100.201 Hz\nMost recent transform: 0.004 sec old \nBuffer length: 4.980 sec\n"];
+"/Plate" -> "/xyObjects0"[label="Broadcaster: /ContourIdentifier\nAverage rate: 33.685 Hz\nMost recent transform: 0.020 sec old \nBuffer length: 4.987 sec\n"];
+"/Plate" -> "/contours0"[label="Broadcaster: /ContourIdentifier\nAverage rate: 33.685 Hz\nMost recent transform: 0.020 sec old \nBuffer length: 4.987 sec\n"];
+"/Plate" -> "/Fly1Contour"[label="Broadcaster: /ContourIdentifier\nAverage rate: 34.142 Hz\nMost recent transform: 0.008 sec old \nBuffer length: 4.921 sec\n"];
+"/Plate" -> "/Fly1"[label="Broadcaster: /ContourIdentifier\nAverage rate: 34.142 Hz\nMost recent transform: 0.008 sec old \nBuffer length: 4.921 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1341961749.614"[ shape=plaintext ] ;
+ }->"/Camera0";
+}

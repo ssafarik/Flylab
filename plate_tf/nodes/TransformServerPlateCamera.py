@@ -32,9 +32,9 @@ class TransformServerPlateCamera:
         self.initialized = True
 
 
-    def CameraInfo_callback (self, msgCameraInfo):
+    def CameraInfo_callback (self, camerainfo):
         if self.camerainfo is None:
-            self.camerainfo = msgCameraInfo
+            self.camerainfo = camerainfo
             M = N.reshape(N.array(self.camerainfo.K),[3,3]) #cvNumpy.mat_to_array(N.array(self.camerainfo.K))
             #M = N.reshape(N.array(self.camerainfo.P),[3,4])[0:3,0:3]
             M[:-1,-1] = 0  # Zero the translation entries (1,3) and (2,3).
@@ -85,29 +85,29 @@ class TransformServerPlateCamera:
 
     def SendTransforms(self):      
         if self.camerainfo is not None:
-            now = rospy.Time.now()
+            stamp = self.camerainfo.header.stamp #rospy.Time.now()
+            self.tfbx.sendTransform((0, 0, 0), 
+                                    (0,0,0,1), 
+                                    stamp, 
+                                    "Camera", "Camera0")
             self.tfbx.sendTransform((0,0,0),#(-self.camerainfo.K[2], -self.camerainfo.K[5],0), #(-608, -581, 0), 
                                     (0,0,0,1), 
-                                    now, 
+                                    stamp, 
                                     "ImageRaw", "Camera")
             self.tfbx.sendTransform((0,0,0),#(self.camerainfo.K[2], self.camerainfo.K[5],0), #(-607, -551, 0), 
                                     (0,0,0,1), 
-                                    now, 
+                                    stamp, 
                                     "ImageRect", "ImageRaw")
             self.tfbx.sendTransform((self.xMask,
                                      -self.yMask,
                                      self.zMask),
                                     (0,0,0,1), 
-                                    now, 
+                                    stamp, 
                                     "Plate", "ImageRect")
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
-                                    now, 
+                                    stamp, 
                                     "ROI", "ImageRect")
-            self.tfbx.sendTransform((0, 0, 0), 
-                                    (0,0,0,1), 
-                                    now, 
-                                    "Camera", "Camera0")
       
         
     def Main(self):
