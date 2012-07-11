@@ -8,7 +8,7 @@ import geometry_msgs.msg
 import experiments.msg
 
 class MoveSettings(genpy.Message):
-  _md5sum = "871f82c3d8e1776912f76a7710d2fb2e"
+  _md5sum = "c08573c1aa714edccca84e966bc89462"
   _type = "experiments/MoveSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool enabled
@@ -38,6 +38,7 @@ float64 			hzPattern
 float64 			hzPoint
 int32 				count  # -1 means forever
 geometry_msgs/Point size
+float64                         param
 
 
 ================================================================================
@@ -140,7 +141,7 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di4d.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.timeout))
+      buff.write(_struct_2di5d.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.param, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -229,8 +230,8 @@ float64 z
         self.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 52
-      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.timeout,) = _struct_2di4d.unpack(str[start:end])
+      end += 60
+      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.param, _x.timeout,) = _struct_2di5d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -286,7 +287,7 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di4d.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.timeout))
+      buff.write(_struct_2di5d.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.param, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -376,14 +377,14 @@ float64 z
         self.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 52
-      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.timeout,) = _struct_2di4d.unpack(str[start:end])
+      end += 60
+      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.param, _x.timeout,) = _struct_2di5d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
 _struct_2d = struct.Struct("<2d")
-_struct_2di4d = struct.Struct("<2di4d")
+_struct_2di5d = struct.Struct("<2di5d")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")

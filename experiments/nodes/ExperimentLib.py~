@@ -791,7 +791,7 @@ class MoveRobot (smach.State):
                     
         msgPattern = MsgPattern()
 
-        # Publish the pattern message.
+        # Publish the spiral pattern message.
         msgPattern.mode = 'byshape'
         msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
         msgPattern.points = []

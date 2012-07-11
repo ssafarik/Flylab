@@ -33,7 +33,7 @@ class ExperimentPassiveChase():
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         
-        self.experimentparams.waitEntry = 0#150.0
+        self.experimentparams.waitEntry = 10#150.0
         
         self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.distanceMin =   0.0
