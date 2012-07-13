@@ -365,9 +365,18 @@ int main(int argc, char **argv)
 	
 	ros::spin();
 	
-	e=DAQmxStopTask (g_hTask);
-	e=DAQmxClearTask (g_hTask);
-	e=DAQmxResetDevice (DEVICE);
+	ResetDAQ();
+	g_nPointsPointcloudEx = 2;
+	g_pPointcloudExPoints = new float64[g_nPointsPointcloudEx * 2];
+	g_pPointcloudExPoints[0] =   0.0;
+	g_pPointcloudExPoints[1] = -10.0;
+	g_pPointcloudExPoints[2] =   0.0;
+	g_pPointcloudExPoints[3] = -10.0;
+	WritePoints(g_hTask);
+	
+	//e=DAQmxStopTask (g_hTask);
+	//e=DAQmxClearTask (g_hTask);
+	//e=DAQmxResetDevice (DEVICE);
 
 
 	return 0;

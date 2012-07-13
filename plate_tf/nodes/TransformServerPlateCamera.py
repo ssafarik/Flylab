@@ -99,19 +99,15 @@ class TransformServerPlateCamera:
                                     stamp, 
                                     "ImageRect", "ImageRaw")
             self.tfbx.sendTransform((self.xMask,
-                                     -self.yMask,
+                                     self.yMask,
                                      self.zMask),
                                     (0,0,0,1), 
                                     stamp, 
                                     "Plate", "ImageRect")
-            self.tfbx.sendTransform((0, 0, 0), 
-                                    (0,0,0,1), 
-                                    stamp, 
-                                    "ROI", "ImageRect")
       
         
     def Main(self):
-        rate = rospy.Rate(100)
+        rate = rospy.Rate(200)
         try:
             while not rospy.is_shutdown():
                 try:

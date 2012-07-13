@@ -209,7 +209,9 @@ public:
             // warn user once
             calibration_matches_ = false;
             ROS_WARN_STREAM("[" << camera_name_
-                            << "] calibration does not match video mode "
+                                 << "] camera_info_url: " << config_.camera_info_url);
+            ROS_WARN_STREAM("[" << camera_name_
+                            << "] calibration (" << cam_info_.width << "x" << cam_info_.height << ") does not match video mode (" << image_.width << "x" << image_.height << ") "
                             << "(publishing uncalibrated data)");
           }
         cam_info_ = sensor_msgs::CameraInfo();
