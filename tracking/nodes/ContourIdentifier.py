@@ -597,16 +597,14 @@ class ContourIdentifier:
                     #rospy.logwarn('contour.angle=%0.2f' % (contour.angle))
     
                     # Send the contour transforms.
-                    try:
-                        self.tfbx.sendTransform((contour.x, 
-                                                 contour.y, 
-                                                 0.0),
-                                                tf.transformations.quaternion_about_axis(contour.angle, (0,0,1)),
-                                                contour.header.stamp,
-                                                "contour"+str(i),
-                                                "ImageRect")
-                    except tf.Exception, e:
-                        rospy.logwarn ('Exception in sendTransform(%s->%s): %s' % ("contour"+str(i),"ImageRect",e))
+#                    try:
+#                        self.tfbx.sendTransform((contour.x, contour.y, 0.0),
+#                                                tf.transformations.quaternion_about_axis(contour.angle, (0,0,1)),
+#                                                contour.header.stamp,
+#                                                "contour"+str(i),
+#                                                "ImageRect")
+#                    except tf.Exception, e:
+#                        rospy.logwarn ('Exception in sendTransform(%s->%s): %s' % ("contour"+str(i),"ImageRect",e))
                     
     
                 # Figure out who is who in the camera image.

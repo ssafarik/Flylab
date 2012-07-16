@@ -60,11 +60,11 @@ class GalvoDirector:
         self.pointcloud_list = []
         self.units = 'millimeters'
         
-        # Calibration data (median values) from "roslaunch galvodirector calibrator.launch"
-        self.mx=0.04661
-        self.bx=-0.83793
-        self.my=-0.04376
-        self.by=3.32871
+        # Calibration data (median values) to convert millimeters to volts, from "roslaunch galvodirector calibrator.launch".
+        self.mx=0.051481
+        self.bx=-0.8630875
+        self.my=-0.049321
+        self.by=3.1356655
 
         self.initialized = True
 
@@ -167,8 +167,9 @@ class GalvoDirector:
                         self.pointcloud_list.append(pointcloud)
 
                     t3 = rospy.Time.now().to_sec()
-                    rospy.logwarn('TF time: stamp=%s, %0.5f + %0.5f = %0.5f' % (pointcloud_template.header.stamp, (t2-t1),(t3-t2),(t3-t1))) # BUG: Occasional 0.01 sec times.
-                    rospy.logwarn ('now,pointcloud_template,%s,%s' % (rospy.Time.now(), pointcloud_template.header.stamp))
+                    if False:#(t2-t1)>0.01:
+                        rospy.logwarn('TF time: stamp=%s, %0.5f + %0.5f = %0.5f' % (pointcloud_template.header.stamp, (t2-t1),(t3-t2),(t3-t1))) # BUG: Occasional 0.01 sec times.
+                        #rospy.logwarn ('now,pointcloud_template,%s,%s' % (rospy.Time.now(), pointcloud_template.header.stamp))
                     
                 self.pubGalvoPointCloud.publish(self.VoltsFromUnitsPointcloud(self.GetUnifiedPointcloud(self.pointcloud_list)))
         

@@ -75,6 +75,9 @@ class CalibrateCameraPlate:
         self.point_counts = cv.CreateMat(1, 1, cv.CV_32SC1)
         self.rvec = cv.CreateMat(1, 3, cv.CV_32FC1)
         self.tvec = cv.CreateMat(1, 3, cv.CV_32FC1)
+        self.rvec_sum = [0,0,0]
+        self.tvec_sum = [0,0,0]
+        self.n = 0
         
         self.origin_points = cv.CreateMat(4, 3, cv.CV_32FC1)
         self.origin_points_projected = cv.CreateMat(4, 2, cv.CV_32FC1)
@@ -268,18 +271,32 @@ class CalibrateCameraPlate:
             self.tvec_array = N.array(trans)
             self.rvec = cvNumpy.array_to_mat(self.rvec_array)
             self.tvec = cvNumpy.array_to_mat(self.tvec_array)
+
+            self.rvec_sum[0] += self.rvec_array[0]
+            self.rvec_sum[1] += self.rvec_array[1]
+            self.rvec_sum[2] += self.rvec_array[2]
+            self.tvec_sum[0] += self.tvec_array[0]
+            self.tvec_sum[1] += self.tvec_array[1]
+            self.tvec_sum[2] += self.tvec_array[2]
+            self.n += 1
             
-            display_text = "rvec = [%0.3f, %0.3f, %0.3f]" % (self.rvec_array[0],
-                                                             self.rvec_array[1],
-                                                             self.rvec_array[2])
+            display_text = "checker_size=%0.3f" % self.checker_size
+            cv.PutText(self.im_display,
+                       display_text,
+                       (25,400),
+                       self.font,
+                       self.font_color)
+
+            display_text = "rvec=[%-0.3f, %-0.3f, %-0.3f] avg=[%-0.3f, %-0.3f, %-0.3f]" % (self.rvec_array[0],      self.rvec_array[1],      self.rvec_array[2],
+                                                                                     self.rvec_sum[0]/self.n, self.rvec_sum[1]/self.n, self.rvec_sum[2]/self.n)
             cv.PutText(self.im_display,
                        display_text,
                        (25,420),
                        self.font,
                        self.font_color)
-            display_text = "tvec = [%0.3f, %0.3f, %0.3f]" % (self.tvec_array[0],
-                                                             self.tvec_array[1],
-                                                             self.tvec_array[2])
+            #display_text = "tvec = [%0.3f, %0.3f, %0.3f]" % (self.tvec_array[0], self.tvec_array[1], self.tvec_array[2])
+            display_text = "tvec=[%-0.3f, %-0.3f, %-0.3f] avg=[%-0.3f, %-0.3f, %-0.3f]" % (self.tvec_array[0],      self.tvec_array[1],      self.tvec_array[2],
+                                                                                     self.tvec_sum[0]/self.n, self.tvec_sum[1]/self.n, self.tvec_sum[2]/self.n)
             cv.PutText(self.im_display,
                        display_text,
                        (25,440),
