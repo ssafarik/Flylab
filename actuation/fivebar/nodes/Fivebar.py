@@ -135,7 +135,7 @@ class RosFivebar:
 
         self.js = JointState()
         self.js.header.seq = 0
-        self.js.header.stamp.secs = rospy.get_time()
+        self.js.header.stamp = rospy.Time.now()
         self.js.header.frame_id = "1"
         self.js.name = self.names
         #self.js.velocity = [0.0, 0.0, 0.0, 0.0]
@@ -533,7 +533,7 @@ class RosFivebar:
             pt.z = self.ptEeSense.z + self.ptOffsetSense.z 
             pt.point = self.ClipPtToRadius(pt.point)
             
-            #rvStageState.state.header.stamp = self.time
+            rvStageState.state.header.stamp = self.time
             rvStageState.state.header.frame_id = 'Stage' # Always return Stage frame coordinates.
             rvStageState.state.pose.position.x = pt.x 
             rvStageState.state.pose.position.y = pt.y 
@@ -561,12 +561,13 @@ class RosFivebar:
         #                                                                 reqStageState.state.pose.position.y]))
         #(angle1,angle2,angle3,angle4) = self.Get1234FromXY(reqStageState.state.pose.position.x-self.xCenter, 
         #                                   reqStageState.state.pose.position.y-self.yCenter)
-        self.ptsToolRefExternal = PointStamped(Header(frame_id=reqStageState.state.header.frame_id),
+        self.ptsToolRefExternal = PointStamped(Header(frame_id=reqStageState.state.header.frame_id,
+                                                      stamp=reqStageState.state.header.stamp),
                                                Point(x=reqStageState.state.pose.position.x,
                                                      y=reqStageState.state.pose.position.y,
                                                      z=reqStageState.state.pose.position.z))
         try:
-            self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, rospy.Time(), rospy.Duration(1.0))
+            self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, self.ptsToolRefExternal.header.stamp, rospy.Duration(1.0))
             self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
         except tf.Exception:
             rospy.logwarn ('5B Exception in SetStageState_callback()')
@@ -715,7 +716,7 @@ class RosFivebar:
     
                 # Publish the joint states (for rviz, etc)    
                 self.js.header.seq = self.js.header.seq + 1
-                self.js.header.stamp.secs = self.time #rospy.get_time()
+                self.js.header.stamp.secs = self.time
                 self.js.position = [angle1,angle2,angle3,angle4]
                 self.pubJointState.publish(self.js)
     
@@ -761,7 +762,7 @@ class RosFivebar:
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
                                         state.header.stamp,
                                         "link5",     # child
-                                        "link3"      # parent
+                                        "link3"      # parentset_stage_state
                                         )
 
                 self.tfbx.sendTransform((self.L0, 0.0, 0.0), 

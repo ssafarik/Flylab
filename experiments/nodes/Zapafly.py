@@ -69,13 +69,13 @@ class ExperimentZapafly():
         self.experimentparams.lasertrack.pattern_list = []
         for iFly in range(rospy.get_param('nFlies', 0)):
             self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
-                                                                            shape      = 'grid',
+                                                                            shape      = 'constant', #'grid', # '%s' % (iFly+1), #
                                                                             frame_id   = 'Fly%d' % (iFly+1),
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
-                                                                            size       = Point(x=2,
-                                                                                               y=2),
+                                                                            size       = Point(x=0,
+                                                                                               y=0),
                                                                             preempt    = False,
                                                                             param      = 2), # Peano curve level.
                                                                  )

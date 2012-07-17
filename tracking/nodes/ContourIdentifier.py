@@ -119,7 +119,7 @@ class ContourIdentifier:
 
         rospy.on_shutdown(self.OnShutdown_callback)
 
-
+        self.timePrev = rospy.Time.now().to_sec()
         self.initialized = True
 
 
@@ -574,6 +574,9 @@ class ContourIdentifier:
     
 
     def ContourInfo_callback(self, contourinfo):
+#        rospy.logwarn('ContourInfo_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
+#        self.timePrev = rospy.Time.now().to_sec()
+
         #rospy.logwarn ('contourinfo callback, stamp=%s, initialized=%s' % (contourinfo.header.stamp, self.initialized))
         if self.initialized:
             try:
@@ -692,6 +695,7 @@ class ContourIdentifier:
                                                                   pose = self.objects[iFly].state.pose,
                                                                   velocity = self.objects[iFly].state.velocity))
                             #rospy.logwarn('arenastate.flies.append(%s)' % self.objects[iFly].name)
+
                     
                     # Publish the ArenaState.
                     self.pubArenaState.publish(arenastate)

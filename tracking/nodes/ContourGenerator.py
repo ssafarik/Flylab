@@ -34,7 +34,8 @@ class ContourGenerator:
         # Messages
         self.camerainfo = None
         self.subCameraInfo       = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
-        self.subImage            = rospy.Subscriber("camera/image_rect", Image, self.Image_callback)
+        self.subImageRect        = rospy.Subscriber("camera/image_rect", Image, self.Image_callback, queue_size=1, buff_size=262144, tcp_nodelay=True)
+        #self.subImageRaw         = rospy.Subscriber("camera/image_raw", Image, self.ImageRaw_callback, queue_size=1, buff_size=262144, tcp_nodelay=True)
         
         self.pubImageProcessed   = rospy.Publisher("camera/image_processed", Image)
         self.pubImageBackground  = rospy.Publisher("camera/image_background", Image)
@@ -91,6 +92,7 @@ class ContourGenerator:
         # Mask Info
         self.radiusMask = int(rospy.get_param("camera/mask/radius", 25))
 
+        self.timePrev = rospy.Time.now().to_sec()
         self.preinit = True
         
 
@@ -399,7 +401,15 @@ class ContourGenerator:
         return contourinfo, cvseqContours    
         
 
+    def ImageRaw_callback(self, image):
+        rospy.logwarn('ImageRaw_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
+        self.timePrev = rospy.Time.now().to_sec()
+
+
     def Image_callback(self, image):
+#        rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
+#        self.timePrev = rospy.Time.now().to_sec()
+
         if not self.preinit:
             return
 

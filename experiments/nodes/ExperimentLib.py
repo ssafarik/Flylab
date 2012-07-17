@@ -553,7 +553,7 @@ class GotoHome (smach.State):
     
             # Send the command.
             self.goal.state.header = self.arenastate.robot.header
-            self.goal.state.header.stamp = rospy.Time.now()
+            #self.goal.state.header.stamp = rospy.Time.now()
             self.goal.state.pose.position.x = userdata.experimentparamsIn.home.x
             self.goal.state.pose.position.y = userdata.experimentparamsIn.home.y
             self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
@@ -736,7 +736,7 @@ class MoveRobot (smach.State):
                 # Send the command.
                 #self.goal.state.header = self.arenastate.flies[iFly].header
                 self.goal.state.header = self.arenastate.robot.header
-                self.goal.state.header.stamp = rospy.Time.now()
+                #self.goal.state.header.stamp = rospy.Time.now()
                 self.goal.state.pose.position.x = self.ptTarget[0]
                 self.goal.state.pose.position.y = self.ptTarget[1]
                 

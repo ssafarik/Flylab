@@ -17,7 +17,7 @@ from tracking.msg import ArenaState
 class DrawObjects:
     def __init__(self):
         self.initialized = False
-        self.display_frame = "ImageRect"
+        self.frameidDisplay = "ImageRect"
         self.pubDrawObjects = rospy.Publisher("DrawObjects/image_rect", image_gui.msg.DrawObjects)
         self.draw_objects = image_gui.msg.DrawObjects()
         self.subArenaState = rospy.Subscriber("ArenaState", ArenaState, self.arenastate_callback)
@@ -36,19 +36,22 @@ class DrawObjects:
         self.axis_length_plate = 4
         self.radiusMask = rospy.get_param('camera/mask/radius', 25)
 
+        Xsrc = [0, self.radiusArena, self.axis_length_plate]
+        Ysrc = [0, 0, 0]
+
         self.plate_origin_camera = PointStamped()
         self.plate_origin_camera.header.frame_id = "Camera"
-        self.plate_point_camera = PointStamped()
-        self.plate_point_camera.header.frame_id = "Camera"
-        Xsrc = [0,self.radiusArena,self.axis_length_plate]
-        Ysrc = [0,0,0]
         response = self.camera_from_plate(Xsrc,Ysrc)
         x0 = self.plate_origin_camera.point.x = response.Xdst[0]
         y0 = self.plate_origin_camera.point.y = response.Ydst[0]
+
+        self.plate_point_camera = PointStamped()
+        self.plate_point_camera.header.frame_id = "Camera"
         x1 = self.plate_point_camera.point.x = response.Xdst[1]
         y1 = self.plate_point_camera.point.y = response.Ydst[1]
         x2 = response.Xdst[2]
         y2 = response.Ydst[2]
+        
         self.radiusMask = N.sqrt((x1-x0)**2 + (y1-y0)**2)
         self.axis_length_camera = N.sqrt((x2-x0)**2 + (y2-y0)**2)
 
@@ -76,13 +79,13 @@ class DrawObjects:
         self.origin = CvPrimitives.Point(0,0)
 
         self.tfrx = tf.TransformListener()
-        #rospy.logwarn('DO waitForTransform(%s, %s, %s)' % (self.display_frame, self.robot_image_origin.header.frame_id, rospy.Time()))
-        #self.tfrx.waitForTransform(self.display_frame, self.robot_image_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
-        #self.tfrx.waitForTransform(self.display_frame, self.fly_image_origin.header.frame_id,   rospy.Time(), rospy.Duration(15.0))
-        self.tfrx.waitForTransform(self.display_frame, self.plate_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
+        #rospy.logwarn('DO waitForTransform(%s, %s, %s)' % (self.frameidDisplay, self.robot_image_origin.header.frame_id, rospy.Time()))
+        #self.tfrx.waitForTransform(self.frameidDisplay, self.robot_image_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
+        #self.tfrx.waitForTransform(self.frameidDisplay, self.fly_image_origin.header.frame_id,   rospy.Time(), rospy.Duration(15.0))
+        self.tfrx.waitForTransform(self.frameidDisplay, self.plate_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
             
 
-        self.plate_origin_display_frame = self.tfrx.transformPoint(self.display_frame, self.plate_origin)
+        self.plate_origin_display_frame = self.tfrx.transformPoint(self.frameidDisplay, self.plate_origin)
 
         self.plate_origin_primitives = CvPrimitives.Point(self.plate_origin_display_frame.point.x,
                                                           self.plate_origin_display_frame.point.y)
@@ -111,16 +114,16 @@ class DrawObjects:
     def update(self):
         if (self.initialized) and (self.arenastate is not None):
             try:
-                #self.tfrx.waitForTransform(self.display_frame, self.robot_image_origin.header.frame_id, rospy.Time(), rospy.Duration(1.0))
-                self.robot_image_origin_display_frame = self.tfrx.transformPoint(self.display_frame, self.robot_image_origin)
+                #self.tfrx.waitForTransform(self.frameidDisplay, self.robot_image_origin.header.frame_id, rospy.Time(), rospy.Duration(1.0))
+                self.robot_image_origin_display_frame = self.tfrx.transformPoint(self.frameidDisplay, self.robot_image_origin)
                 self.markerRobot.change_center(CvPrimitives.Point(self.robot_image_origin_display_frame.point.x,
                                                                   self.robot_image_origin_display_frame.point.y).point)
             except (tf.LookupException, tf.ConnectivityException, tf.Exception), e:
                 rospy.logwarn ('Exception in DrawObjects: %s' % e)
 
             try:                
-                #self.tfrx.waitForTransform(self.display_frame, self.fly_image_origin.header.frame_id, rospy.Time(), rospy.Duration(1.0))
-                self.fly_image_origin_display_frame = self.tfrx.transformPoint(self.display_frame, self.fly_image_origin)
+                #self.tfrx.waitForTransform(self.frameidDisplay, self.fly_image_origin.header.frame_id, rospy.Time(), rospy.Duration(1.0))
+                self.fly_image_origin_display_frame = self.tfrx.transformPoint(self.frameidDisplay, self.fly_image_origin)
                 self.markerFly.change_center(CvPrimitives.Point(self.fly_image_origin_display_frame.point.x,
                                                                 self.fly_image_origin_display_frame.point.y).point)
             except (tf.LookupException, tf.ConnectivityException, tf.Exception), e:

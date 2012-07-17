@@ -91,7 +91,8 @@ class Fly:
         self.robot_height = rospy.get_param ('robot/height', 1.0)
         
         rospy.logwarn('Fly() object added, name=%s' % name)
-        
+        self.timePrev = rospy.Time.now().to_sec()
+        self.theta = 0.0
         self.initialized = True
 
 
@@ -224,6 +225,11 @@ class Fly:
     # Update()
     # Update the current state using the visual position and the computed position (if applicable)
     def Update(self, contour, ptComputed):
+#        if self.name=='Fly1':
+#            rospy.logwarn('Fly sendTransform(frame=%s, stamp=%s, now-prev=%s)' % (self.name, self.state.header.stamp, rospy.Time.now().to_sec()-self.timePrev))
+#            self.timePrev = rospy.Time.now().to_sec()
+
+        
         if self.initialized:
             if (contour is not None):
                 time = contour.header.stamp.to_sec()
@@ -399,6 +405,11 @@ class Fly:
                                         self.name+"Contour",
                                         "Plate")
 
+                # TEST CODE
+#                self.state.pose.position.x = 30 * N.cos(self.theta)
+#                self.state.pose.position.y = 30 * N.sin(self.theta)
+#                self.theta += 0.05
+            
                 
                 # Send the Filtered transform.
                 q = self.state.pose.orientation

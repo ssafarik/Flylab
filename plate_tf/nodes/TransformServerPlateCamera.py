@@ -33,10 +33,9 @@ class TransformServerPlateCamera:
 
 
     def CameraInfo_callback (self, camerainfo):
-        if self.camerainfo is None:
-            self.camerainfo = camerainfo
-            M = N.reshape(N.array(self.camerainfo.K),[3,3]) #cvNumpy.mat_to_array(N.array(self.camerainfo.K))
-            #M = N.reshape(N.array(self.camerainfo.P),[3,4])[0:3,0:3]
+        if (self.initialized) and (self.camerainfo is None):
+            M = N.reshape(N.array(camerainfo.K),[3,3]) #cvNumpy.mat_to_array(N.array(camerainfo.K))
+            #M = N.reshape(N.array(camerainfo.P),[3,4])[0:3,0:3]
             M[:-1,-1] = 0  # Zero the translation entries (1,3) and (2,3).
     
             (rvec, tvec) = CameraParameters.extrinsic("plate")
@@ -55,36 +54,49 @@ class TransformServerPlateCamera:
             #rospy.logwarn ('Hinv scalar %f' % self.Hinv[-1,-1])
             self.Hinv = self.Hinv / self.Hinv[-1,-1]
             self.H = N.linalg.inv(self.Hinv)
+
+        self.camerainfo = camerainfo
             
 
     def CameraFromPlate_callback(self, req):
-        point_count = min(len(req.Xsrc), len(req.Ysrc))
-        Xsrc = list(req.Xsrc)
-        Ysrc = list(req.Ysrc)
-        Zsrc = [1]*point_count
-        plate_points = N.array([Xsrc, Ysrc, Zsrc])
-        camera_points = N.dot(self.Hinv, plate_points)
-        Xdst = camera_points[0,:]
-        Ydst = camera_points[1,:]
-        return {'Xdst': Xdst,
-                'Ydst': Ydst}
+        if (self.camerainfo is not None):
+            point_count = min(len(req.Xsrc), len(req.Ysrc))
+            xSrc = list(req.Xsrc)
+            ySrc = list(req.Ysrc)
+            zSrc = [1]*point_count
+            plate_points = N.array([xSrc, ySrc, zSrc])
+            camera_points = N.dot(self.Hinv, plate_points)
+
+            xDst = camera_points[0,:]
+            yDst = camera_points[1,:]
+        else:
+            xDst = None
+            yDst = None
+            
+        return {'Xdst': xDst,
+                'Ydst': yDst}
 
     def PlateFromCamera_callback(self, req):
-        point_count = min(len(req.Xsrc), len(req.Ysrc))
-        Xsrc = list(req.Xsrc)
-        Ysrc = list(req.Ysrc)
-        Zsrc = [1]*point_count
-        camera_points = N.array([Xsrc, Ysrc, Zsrc])
-        plate_points = N.dot(self.H, camera_points)
-
-        Xdst = plate_points[0,:]
-        Ydst = plate_points[1,:]
-        return {'Xdst': Xdst,
-                'Ydst': Ydst}
+        if (self.camerainfo is not None):
+            point_count = min(len(req.Xsrc), len(req.Ysrc))
+            xSrc = list(req.Xsrc)
+            ySrc = list(req.Ysrc)
+            zSrc = [1]*point_count
+            camera_points = N.array([xSrc, ySrc, zSrc])
+            plate_points = N.dot(self.H, camera_points)
+    
+            xDst = plate_points[0,:]
+            yDst = plate_points[1,:]
+        else:
+            xDst = None
+            yDst = None
+            
+        return {'Xdst': xDst,
+                'Ydst': yDst}
         
 
     def SendTransforms(self):      
-        if self.camerainfo is not None:
+        if (self.camerainfo is not None):
             stamp = self.camerainfo.header.stamp #rospy.Time.now()
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
@@ -107,7 +119,7 @@ class TransformServerPlateCamera:
       
         
     def Main(self):
-        rate = rospy.Rate(200)
+        rate = rospy.Rate(100)
         try:
             while not rospy.is_shutdown():
                 try:
