@@ -65,7 +65,7 @@ class CalibrateCameraPlate:
         self.col_corner_number = self.pattern_size[0]
         self.row_corner_number = self.pattern_size[1]
         self.board_corner_number = self.col_corner_number * self.row_corner_number
-        self.checker_size = rospy.get_param('calibration/checker_size', 7.5)
+        self.checker_size = rospy.get_param('calibration/checker_size', 15)
         self.win = (4,4)
         self.zero_zone = (2,2)
         self.criteria = (cv.CV_TERMCRIT_ITER+cv.CV_TERMCRIT_EPS,100,.01)

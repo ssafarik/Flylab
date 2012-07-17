@@ -1,0 +1,14 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the ARENA (i.e. the "plate" or "flybowl") -->
+    <!--                                                            -->
+    <!-- Edit this file to describe the particular flybowl.         -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch arena.launch, and point here from there.            -->
+	<!-- ========================================================== -->
+
+	<param name="arena/radius_inner" type="double" value="85.0"/>  <!-- millimeters -->
+	<param name="arena/radius_outer" type="double" value="85.0"/>  <!-- millimeters -->
+	
+</launch>
