@@ -167,93 +167,23 @@ class NewTrialService():
 
 #######################################################################################################
 #######################################################################################################
-class TemplateState (smach.State):
-    def __init__(self, type='entry', timeout=None):
-        self.type = type
-        self.timeout = timeout
-        smach.State.__init__(self, outcomes=['succeeded','preempted','aborted'])
-
-        rospy.on_shutdown(self.OnShutdown_callback)
-        self.arenastate = None
-        self.rosrate = rospy.Rate(gRate)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
-
-        self.Trigger = TriggerService()
-        self.Trigger.attach()
-        
-    
-    def OnShutdown_callback(self):
-        pass
-        
-
-    def ArenaState_callback(self, arenastate):
-        self.arenastate = arenastate
-
-
-    def execute(self, userdata):
-        rospy.loginfo('Starting state (template)')
-        self.timeStart = rospy.Time.now()
-    
-        while self.arenastate is None:
-            if self.preempt_requested():
-                self.Trigger.notify(False)
-                return 'preempted'
-            rospy.sleep(1.0)
-
-        rospy.loginfo("EL State state (template)...")
-        rv = 'aborted'
-        while True:
-            try:
-                #if something:
-                #    rv = 'succeeded'
-
-                #if something:
-                #    rv = 'aborted'
-                
-                if self.preempt_requested():
-                    rv = 'preempted'
-                    break
-                
-                if self.timeout is not None:
-                    if rospy.Time.now()-self.timeStart > self.timeout:
-                        rv = 'preempted'
-                        break
-            except:
-                pass
-            
-            self.rosrate.sleep()
-
-
-         # Send trigger status.
-        if rv=='succeeded' and self.type=='entry':
-            self.Trigger.notify(True)
-        else:
-            self.Trigger.notify(False)
-
-        
-                 
-        return rv
-
-    
-#######################################################################################################
-#######################################################################################################
 class NewExperiment (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['succeeded','preempted','aborted'],
+                             outcomes=['success','abort'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         
         
     def execute(self, userdata):
-        es = userdata.experimentparamsIn
-        rospy.loginfo("EL State NewExperiment(%s)" % es)
+        experimentparams = userdata.experimentparamsIn
+        rospy.loginfo("EL State NewExperiment(%s)" % experimentparams)
 
-        es.experiment.trial = es.experiment.trial-1 
-        userdata.experimentparamsOut = es
+        experimentparams.experiment.trial = experimentparams.experiment.trial-1 
+        userdata.experimentparamsOut = experimentparams
         
         #rospy.loginfo ('EL Exiting NewExperiment()')
-        return 'succeeded'
+        return 'success'
 
 
 #######################################################################################################
@@ -264,7 +194,7 @@ class NewExperiment (smach.State):
 class NewTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['succeeded','preempted','aborted'],
+                             outcomes=['continue','stop','abort'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         #self.pub_experimentparams = rospy.Publisher('ExperimentParams', ExperimentParams)
@@ -276,7 +206,7 @@ class NewTrial (smach.State):
 
         
     def execute(self, userdata):
-        rv = 'aborted'
+        rv = 'stop'
         experimentparams = userdata.experimentparamsIn
         experimentparams.experiment.trial = userdata.experimentparamsIn.experiment.trial+1
         if (experimentparams.experiment.maxTrials != -1):
@@ -290,9 +220,9 @@ class NewTrial (smach.State):
         #self.pub_experimentparams.publish(experimentparams)
         try:
             self.NewTrial.notify(experimentparams)
-            rv = 'succeeded'
+            rv = 'continue'
         except rospy.ServiceException:
-            rv = 'aborted'
+            rv = 'abort'
 
         #rospy.loginfo ('EL Exiting NewTrial()')
         return rv
@@ -311,9 +241,8 @@ class TriggerOnStates (smach.State):
         
         
         smach.State.__init__(self, 
-                             outcomes=['succeeded','preempted','aborted'],
-                             input_keys=['experimentparamsIn'],
-                             output_keys=['experimentparamsOut'])
+                             outcomes=['success','disabled','timeout','abort'],
+                             input_keys=['experimentparamsIn'])
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
         self.rosrate = rospy.Rate(gRate)
@@ -322,6 +251,8 @@ class TriggerOnStates (smach.State):
         self.Trigger = TriggerService()
         self.Trigger.attach()
     
+        self.nRobots = rospy.get_param('nRobots', 0)
+        
     
     def OnShutdown_callback(self):
         pass
@@ -339,24 +270,27 @@ class TriggerOnStates (smach.State):
         else:
             trigger = userdata.experimentparamsIn.triggerExit
 
-        rv = 'succeeded'
+        rv = 'disabled'
         try:
             if trigger.enabled:
                 self.timeStart = rospy.Time.now()
                 self.isTriggered = False
                 self.timeTriggered  = None
                 
-                
+                # Wait for an arenastate.
                 while self.arenastate is None:
-                    if self.preempt_requested():
-                        self.Trigger.notify(False)
-                        return 'preempted'
+                    if trigger.timeout != -1:
+                        if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > trigger.timeout:
+                            return 'timeout'
+                    #if self.preempt_requested():
+                    #    self.Trigger.notify(False)
+                    #    return 'preempt'
                     rospy.sleep(1.0)
         
         
-                rv = 'aborted'
+                rv = 'abort'
                 while not rospy.is_shutdown():
-                    if len(self.arenastate.flies)>0:
+                    if (len(self.arenastate.flies)>0) and (self.nRobots>0):
                         iFly = GetNearestFly(self.arenastate)
                         if iFly is None:
                             continue
@@ -440,30 +374,30 @@ class TriggerOnStates (smach.State):
                             duration = rospy.Time.now().to_sec() - self.timeTriggered.to_sec()
                             
                             if duration >= trigger.timeHold:
-                                rv = 'succeeded'
+                                rv = 'success'
                                 break
                             
                             #rospy.loginfo('EL duration=%s' % duration)
                             
                         
-                    if self.preempt_requested():
-                        rv = 'preempted'
-                        break
+                    #if self.preempt_requested():
+                    #    rv = 'preempt'
+                    #    break
                     
                     if trigger.timeout != -1:
                         if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > trigger.timeout:
-                            rv = 'preempted'
+                            rv = 'timeout'
                             break
                     
                     self.rosrate.sleep()
 
-            if rv=='succeeded' and self.type=='entry':
+            if rv=='success' and self.type=='entry':
                 self.Trigger.notify(True)
             else:
                 self.Trigger.notify(False)
                 
         except rospy.ServiceException:
-            rv = 'aborted'
+            rv = 'abort'
             
         #rospy.loginfo ('EL Exiting TriggerOnStates()')
         return rv
@@ -476,9 +410,8 @@ class TriggerOnTime (smach.State):
     def __init__(self, type='entry'):
         self.type = type
         smach.State.__init__(self, 
-                             outcomes=['succeeded','preempted','aborted'],
-                             input_keys=['experimentparamsIn'],
-                             output_keys=['experimentparamsOut'])
+                             outcomes=['success','abort'],
+                             input_keys=['experimentparamsIn'])
 
         self.Trigger = TriggerService()
         self.Trigger.attach()
@@ -486,10 +419,13 @@ class TriggerOnTime (smach.State):
 
     def execute(self, userdata):
         rospy.loginfo("EL State TriggerOnTime(%s)" % (userdata.experimentparamsIn.waitEntry))
-        rv = 'succeeded'
-        rospy.sleep(userdata.experimentparamsIn.waitEntry)
+        rv = 'success'
+        try:
+            rospy.sleep(userdata.experimentparamsIn.waitEntry)
+        except rospy.ServiceException:
+            rv = 'abort'
 
-        if rv=='succeeded' and self.type=='entry':
+        if rv=='success' and self.type=='entry':
             self.Trigger.notify(True)
         else:
             self.Trigger.notify(False)
@@ -501,13 +437,12 @@ class TriggerOnTime (smach.State):
 
 #######################################################################################################
 #######################################################################################################
-class GotoHome (smach.State):
+class ResetRobot (smach.State):
     def __init__(self):
 
         smach.State.__init__(self, 
-                             outcomes=['succeeded','preempted','aborted'],
-                             input_keys=['experimentparamsIn'],
-                             output_keys=['experimentparamsOut'])
+                             outcomes=['success','disabled','timeout','abort'],
+                             input_keys=['experimentparamsIn'])
 
         self.arenastate = None
         self.rosrate = rospy.Rate(gRate)
@@ -531,10 +466,12 @@ class GotoHome (smach.State):
 
 
     def execute(self, userdata):
-        rospy.loginfo("EL State GotoHome(%s)" % [userdata.experimentparamsIn.home.enabled, userdata.experimentparamsIn.home.x, userdata.experimentparamsIn.home.y])
+        rospy.loginfo("EL State ResetRobot(%s)" % [userdata.experimentparamsIn.home.enabled, userdata.experimentparamsIn.home.x, userdata.experimentparamsIn.home.y])
 
-        rv = 'succeeded'
+        rv = 'disabled'
         if userdata.experimentparamsIn.home.enabled:
+            self.timeStart = rospy.Time.now()
+    
             rospy.wait_for_service('set_stage_state')
             try:
                 self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
@@ -542,11 +479,12 @@ class GotoHome (smach.State):
                 print "Service call failed: %s"%e
             
 
-            self.timeStart = rospy.Time.now()
-    
             while self.arenastate is None:
-                if self.preempt_requested():
-                    return 'preempted'
+                if userdata.experimentparamsIn.home.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.home.timeout:
+                        return 'timeout'
+                #if self.preempt_requested():
+                #    return 'preempt'
                 rospy.sleep(1.0)
     
     
@@ -560,8 +498,8 @@ class GotoHome (smach.State):
                                                                           pose=self.goal.state.pose),
                                                       speed = userdata.experimentparamsIn.home.speed))
 
-            rv = 'aborted'
-            while True:
+            rv = 'abort'
+            while not rospy.is_shutdown():
                 # Are we there yet?
                 
                 ptRobot = N.array([self.arenastate.robot.pose.position.x, 
@@ -569,23 +507,23 @@ class GotoHome (smach.State):
                 ptTarget = N.array([self.goal.state.pose.position.x,
                                     self.goal.state.pose.position.y])                
                 r = N.linalg.norm(ptRobot-ptTarget)
-                rospy.loginfo ('EL GotoHome() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
+                rospy.loginfo ('EL ResetRobot() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
                 
                 
                 if (r <= userdata.experimentparamsIn.home.tolerance):
                     rospy.sleep(0.5) # Allow some settling time.
-                    rv = 'succeeded'
+                    rv = 'success'
                     break
                 
                 
-                if self.preempt_requested():
-                    rv = 'preempted'
-                    break
+                #if self.preempt_requested():
+                #    rv = 'preempt'
+                #    break
                 
                 
                 if userdata.experimentparamsIn.home.timeout != -1:
                     if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.home.timeout:
-                        rv = 'preempted'
+                        rv = 'timeout'
                         break
                 
                 self.rosrate.sleep()
@@ -602,9 +540,8 @@ class MoveRobot (smach.State):
     def __init__(self):
 
         smach.State.__init__(self, 
-                             outcomes=['succeeded','preempted','aborted'],
-                             input_keys=['experimentparamsIn'],
-                             output_keys=['experimentparamsOut'])
+                             outcomes=['success','disabled','timeout','preempt','abort'],
+                             input_keys=['experimentparamsIn'])
 
         self.arenastate = None
         self.rosrate = rospy.Rate(gRate)
@@ -636,7 +573,7 @@ class MoveRobot (smach.State):
                                                   userdata.experimentparamsIn.move.relative.angle, 
                                                   userdata.experimentparamsIn.move.relative.speed])
 
-        rv = 'succeeded'
+        rv = 'disabled'
         if userdata.experimentparamsIn.move.enabled:
             rospy.wait_for_service('set_stage_state')
             try:
@@ -647,9 +584,15 @@ class MoveRobot (smach.State):
             self.timeStart = rospy.Time.now()
     
             while self.arenastate is None:
+                if userdata.experimentparamsIn.move.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+                        return 'timeout'
+                
                 if self.preempt_requested():
-                    return 'preempted'
+                    return 'preempt'
+                
                 rospy.sleep(1.0)
+    
     
             if userdata.experimentparamsIn.move.mode=='relative':
                 rv = self.MoveRelative(userdata)
@@ -662,7 +605,7 @@ class MoveRobot (smach.State):
             
     def MoveRelative (self, userdata):            
         self.ptTarget = None
-        rv = 'aborted'
+        rv = 'abort'
 
         while not rospy.is_shutdown():
             posRobot = self.arenastate.robot.pose.position # Assumed in the "Plate" frame.
@@ -754,9 +697,10 @@ class MoveRobot (smach.State):
                 #rospy.loginfo('EL calling set_stage_state(%s) post' % [self.goal.state.pose.position.x,self.goal.state.pose.position.y])
 
 
-            # If no flies and no target, then preempt.
+            # If no flies and no target, then abort.
             #if (len(self.arenastate.flies)==0) and (self.ptTarget is None):
-            #    rv = 'preempted'
+            #    rv = 'abort'
+            #    rospy.logwarn ('No flies and no target.')
             #    break
 
                     
@@ -765,18 +709,18 @@ class MoveRobot (smach.State):
                 r = N.linalg.norm(ptRobot-self.ptTarget)
                 #rospy.loginfo ('EL ptTarget=%s, ptRobot=%s, r=%s' % (self.ptTarget, ptRobot, r))
                 if (r <= userdata.experimentparamsIn.move.relative.tolerance):
-                    rv = 'succeeded'
+                    rv = 'success'
                     break
 
             
             if self.preempt_requested():
-                rv = 'preempted'
+                rv = 'preempt'
                 break
 
             
             if userdata.experimentparamsIn.move.timeout != -1:
                 if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
-                    rv = 'succeeded'
+                    rv = 'timeout'
                     break
             
             self.rosrate.sleep()
@@ -805,16 +749,16 @@ class MoveRobot (smach.State):
         self.pubPatternGen.publish (msgPattern)
                 
 
-        rv = 'succeeded'
+        rv = 'abort'
         while not rospy.is_shutdown():
             if self.preempt_requested():
-                rv = 'preempted'
+                rv = 'preempt'
                 break
 
             
             if userdata.experimentparamsIn.move.timeout != -1:
-                if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
-                    rv = 'succeeded'
+                if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+                    rv = 'timeout'
                     break
             
             self.rosrate.sleep()
@@ -842,9 +786,8 @@ class Lasertrack (smach.State):
     def __init__(self):
 
         smach.State.__init__(self, 
-                             outcomes=['succeeded','preempted','aborted'],
-                             input_keys=['experimentparamsIn'],
-                             output_keys=['experimentparamsOut'])
+                             outcomes=['disabled','timeout','preempt','abort'],
+                             input_keys=['experimentparamsIn'])
 
         self.rosrate = rospy.Rate(gRate)
         self.pubGalvoCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
@@ -860,7 +803,7 @@ class Lasertrack (smach.State):
         for pattern in userdata.experimentparamsIn.lasertrack.pattern_list:
             rospy.loginfo("EL State Lasertrack(%s)" % pattern)
 
-        rv = 'succeeded'
+        rv = 'disabled'
         if userdata.experimentparamsIn.lasertrack.enabled:
             self.timeStart = rospy.Time.now()
     
@@ -870,15 +813,15 @@ class Lasertrack (smach.State):
             command.units = 'millimeters' # 'millimeters' or 'volts'
             self.pubGalvoCommand.publish(command)
     
-            # Wait until finished.        
+            # Move galvos until preempt or timeout.        
             while not rospy.is_shutdown():
                 if self.preempt_requested():
-                    rv = 'preempted'
+                    rv = 'preempt'
                     break
     
-                
-                if userdata.experimentparamsIn.move.timeout != -1:
-                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.lasertrack.timeout:
+                if userdata.experimentparamsIn.lasertrack.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.lasertrack.timeout:
+                        rv = 'timeout'
                         break
                 
                 self.rosrate.sleep()
@@ -893,91 +836,135 @@ class Lasertrack (smach.State):
 #######################################################################################################
 class Experiment():
     def __init__(self, experimentparams=None):
-        self.sm = smach.StateMachine(['succeeded','aborted','preempted'])
-        self.sm.userdata.experimentparams = experimentparams
-        
         self.xHome = 0
         self.yHome = 0
         
+        # Create the state machine.
+        self.stateTop = smach.StateMachine(['success','abort'])
+        self.stateTop.userdata.experimentparams = experimentparams
         
-        with self.sm:
+        # Create the "action" concurrency state.
+        stateAction = smach.Concurrence(outcomes=['success','disabled','abort'],
+                                        default_outcome='abort',
+                                        child_termination_cb=self.child_term_callback,
+                                        outcome_cb=self.all_term_callback,
+                                        input_keys=['experimentparamsIn'])
 
-            smach.StateMachine.add('NEW_EXPERIMENT',
+        with stateAction:
+            smach.Concurrence.add('MOVEROBOT', 
+                                  MoveRobot ())
+            smach.Concurrence.add('LASERTRACK', 
+                                  Lasertrack ())
+            smach.Concurrence.add('EXITTRIGGER', 
+                                  TriggerOnStates(type='exit'))
+
+        
+        with self.stateTop:
+            smach.StateMachine.add('NEWEXPERIMENT',
                                    NewExperiment(),
-                                   transitions={'succeeded':'GOTO_HOME',
-                                                'aborted':'aborted',
-                                                'preempted':'NEW_EXPERIMENT'},
+                                   transitions={'success':'RESETHARDWARE',
+                                                'abort':'abort'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
-            smach.StateMachine.add('GOTO_HOME',
-                                   GotoHome(),
-                                   transitions={'succeeded':'NEW_TRIAL',
-                                                'aborted':'aborted',
-                                                'preempted':'GOTO_HOME'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
+            smach.StateMachine.add('RESETHARDWARE',
+                                   ResetRobot(),
+                                   transitions={'success':'NEWTRIAL',
+                                                'disabled':'NEWTRIAL',
+                                                'timeout':'NEWTRIAL',
+                                                'abort':'abort'},
+                                   remapping={'experimentparamsIn':'experimentparams'})
 
-            smach.StateMachine.add('NEW_TRIAL',
+            smach.StateMachine.add('NEWTRIAL',
                                    NewTrial(),
-                                   transitions={'succeeded':'ENTRYWAIT',
-                                                'aborted':'aborted',
-                                                'preempted':'NEW_TRIAL'},
+                                   transitions={'continue':'ENTRYWAIT',
+                                                'stop':'success',
+                                                'abort':'abort'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
             smach.StateMachine.add('ENTRYWAIT', 
                                    TriggerOnTime(type='none'),
-                                   transitions={'succeeded':'ENTRYTRIGGER',
-                                                'aborted':'aborted',
-                                                'preempted':'NEW_TRIAL'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
+                                   transitions={'success':'ENTRYTRIGGER',
+                                                'abort':'abort'},
+                                   remapping={'experimentparamsIn':'experimentparams'})
 
             smach.StateMachine.add('ENTRYTRIGGER', 
                                    TriggerOnStates(type='entry'),
-                                   transitions={'succeeded':'MOVE',
-                                                'aborted':'aborted',
-                                                'preempted':'NEW_TRIAL'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
+                                   transitions={'success':'ACTION',
+                                                'disabled':'ACTION',
+                                                'timeout':'ACTION',
+                                                'abort':'abort'},
+                                   remapping={'experimentparamsIn':'experimentparams'})
 
-            smach.StateMachine.add('MOVE', 
-                                   MoveRobot (),
-                                   transitions={'succeeded':'LASERTRACK',
-                                                'aborted':'aborted',
-                                                'preempted':'NEW_TRIAL'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
-
-            smach.StateMachine.add('LASERTRACK', 
-                                   Lasertrack (),
-                                   transitions={'succeeded':'EXITTRIGGER',
-                                                'aborted':'aborted',
-                                                'preempted':'NEW_TRIAL'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
-
-            smach.StateMachine.add('EXITTRIGGER', 
-                                   TriggerOnStates(type='exit'),
-                                   transitions={'succeeded':'GOTO_HOME',
-                                                'aborted':'aborted',
-                                                'preempted':'GOTO_HOME'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
+            smach.StateMachine.add('ACTION', stateAction,
+                                   transitions={'success':'RESETHARDWARE',
+                                                'disabled':'RESETHARDWARE',
+                                                'abort':'abort'},
+                                   remapping={'experimentparamsIn':'experimentparams'})
 
 
         self.sis = smach_ros.IntrospectionServer('sis_experiment',
-                                                 self.sm,
+                                                 self.stateTop,
                                                  '/EXPERIMENT')
+        
+    # Gets called upon ANY child state termination.
+    def child_term_callback(self, outcome_map):
+        rv = False
+
+        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map):
+            # If any of the states either succeeds or times-out, then we're done (i.e. preempt the other states).
+            if (outcome_map['EXITTRIGGER']=='timeout') or (outcome_map['EXITTRIGGER']=='success'):
+                rv = True 
+            
+            if (outcome_map['MOVEROBOT']=='timeout') or (outcome_map['MOVEROBOT']=='success'):
+                rv = True 
+            
+            if (outcome_map['LASERTRACK']=='timeout') or (outcome_map['LASERTRACK']=='success'):
+                rv = True 
+        
+            
+        # True:  Preempt remaining states.
+        # False: Let remaining states keep going.
+        return rv
+    
+
+    # Gets called after all child states are terminated.
+    def all_term_callback(self, outcome_map):
+        rv = 'abort'
+        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map):
+            if (outcome_map['EXITTRIGGER']=='timeout') or \
+               (outcome_map['EXITTRIGGER']=='success') or \
+               (outcome_map['MOVEROBOT']=='timeout') or \
+               (outcome_map['MOVEROBOT']=='success') or \
+               (outcome_map['LASERTRACK']=='timeout') or \
+               (outcome_map['LASERTRACK']=='success'):
+                rv = 'success'
+                
+            elif (outcome_map['EXITTRIGGER']=='preempt') and (outcome_map['MOVEROBOT']=='preempt') and (outcome_map['LASERTRACK']=='preempt'):
+                rv = 'preempt'
+                rospy.logwarn ('All experiment actions preempted.')
+                 
+            elif (outcome_map['EXITTRIGGER']=='disabled') and (outcome_map['MOVEROBOT']=='disabled') and (outcome_map['LASERTRACK']=='disabled'):
+                rv = 'disabled'
+                rospy.logwarn ('All experiment actions set as disabled.')
+                
+            else: # Some preempted, some disabled.
+                rv = 'disabled'
+                rospy.logwarn ('Unexpected state outcomes.  Please check this.') 
+
+        return rv
+
+        
 
     def Run(self):
         self.sis.start()
         try:
-            outcome = self.sm.execute()
+            outcome = self.stateTop.execute()
         except smach.exceptions.InvalidUserCodeError, e:
             rospy.logwarn('Exception InvalidUserCodeError executing state machine: %s' % e)
         
+        rospy.logwarn ('Experiment state machine finished with outcome=%s' % outcome)
         self.sis.stop()
 
 

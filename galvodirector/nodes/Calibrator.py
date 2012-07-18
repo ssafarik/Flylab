@@ -124,36 +124,6 @@ class GalvoCalibrator:
         pass
     
 
-#    def ArenaState_callback(self, arenastate):
-#        # Compute the linear relationship between volts and arenastate units.
-#        # Should be correct, except for the possible ordering of the points.
-#        # Need to determine the output orientation of the triangle.
-            
-#        if len(arenastate.flies)==len(self.pointsInput):
-#            dxIn = self.pointsInput[1].x - self.pointsInput[0].x # i.e. +1
-#            dyIn = self.pointsInput[1].y - self.pointsInput[2].y # i.e. -2
-#            
-#            xmax = 0
-#            xmin = 99999
-#            ymax = 0
-#            ymin = 99999
-#            for i in range(len(arenastate.flies)):
-#                xmin = min(xmin,arenastate.flies[i].pose.position.x)
-#                ymin = min(ymin,arenastate.flies[i].pose.position.y)
-#                xmax = max(xmax,arenastate.flies[i].pose.position.x)
-#                ymax = max(ymax,arenastate.flies[i].pose.position.y)
-#    
-#            dxOut = xmax-xmin
-#            dyOut = ymax-ymin
-#    
-#            mx = dxIn / dxOut
-#            my = dyIn / dyOut
-#            
-#            bx = -((mx * xmin) - self.pointsInput[0].x)
-#            by = -((my * ymin) - self.pointsInput[2].y)
-#            rospy.logwarn ('mx, bx, my, by:  %0.6f, %0.6f, %0.6f, %0.6f' % (mx,bx,my,by))
-
-             
     # Append the input/output pairs to the calibration data.
     def ArenaState_callback(self, arenastate):
         with self.lock:
@@ -226,7 +196,7 @@ class GalvoCalibrator:
     def Main(self):
         rosRate = rospy.Rate(1.0)
     
-        rospy.logwarn ('Find the median values, and enter them in GalvoDirector.py')
+        rospy.logwarn ('Find the median values, and enter them in params_galvos.launch')
         rospy.logwarn ('mx, bx, my, by:')
 
         self.iPoint = 0
@@ -237,6 +207,7 @@ class GalvoCalibrator:
             
             output_byinput = self.GetInputOutputMedian()
 
+            # Compute the linear relationship between volts and arenastate units.
             if len(output_byinput)>1:
                 # Convert galvo axis(1,2) in/out pairs to x/y pairs.
                 x1 = [] # galvo axis 1
@@ -264,15 +235,16 @@ class GalvoCalibrator:
                 A = N.vstack([x, N.ones(len(x))]).T
                 m2, b2 = N.linalg.lstsq(A, y)[0]
                 
-                rospy.logwarn ('I/O pairs: %d' % len(output_byinput))
+                rospy.logwarn ('I/O point pairs: %d' % len(output_byinput))
                 rospy.logwarn ('Samples per input point: %d' % n)
-                rospy.logwarn ('Millimeters -> Volts:')
+                rospy.logwarn ('Least Squares.  Millimeters -> Volts:')
                 rospy.logwarn ('mx=%0.8f, bx=%0.8f, my=%0.8f, by=%0.8f' % (m1,b1,m2,b2))
 
-                plt.scatter(x, y, 1)
-                plt.plot(x, m*x + c, 'r', label='Fitted line')
-                #plt.legend()
-                plt.show()    
+                if (n>500):
+                    plt.scatter(x, y, 4)
+                    plt.plot(x, m*x + c, 'r', label='Fitted line')
+                    #plt.legend()
+                    plt.show()    
     
                 rospy.logwarn('-------------------')
             rosRate.sleep()

@@ -52,6 +52,9 @@ class ExperimentZapafly():
         self.experimentparams.triggerEntry.timeHold = 0.0
         self.experimentparams.triggerEntry.timeout = -1
         
+        
+        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # The first one to finish preempts the others.
         self.experimentparams.move.enabled = False
         self.experimentparams.move.mode = 'relative'        
         self.experimentparams.move.relative.tracking = True
@@ -79,9 +82,9 @@ class ExperimentZapafly():
                                                                             preempt    = False,
                                                                             param      = 2), # Peano curve level.
                                                                  )
-        self.experimentparams.lasertrack.timeout = 600
+        self.experimentparams.lasertrack.timeout = -1
         
-        self.experimentparams.triggerExit.enabled = False
+        self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0
         self.experimentparams.triggerExit.speedMin =  0.0
@@ -91,7 +94,7 @@ class ExperimentZapafly():
         self.experimentparams.triggerExit.angleTest = 'inclusive'
         self.experimentparams.triggerExit.angleTestBilateral = True
         self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = -1
+        self.experimentparams.triggerExit.timeout = 10
 
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 

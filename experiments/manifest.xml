@@ -11,6 +11,7 @@
 
   <depend package="rospy"/>
   <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
   <depend package="smach"/>
   <depend package="smach_ros"/>
   <depend package="actionlib"/>

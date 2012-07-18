@@ -65,10 +65,10 @@ class GalvoDirector:
         self.units = 'millimeters'
         
         # Calibration data (median values) to convert millimeters to volts, from "roslaunch galvodirector calibrator.launch".
-        self.mx=0.05111587
-        self.bx=-0.90610801
-        self.my=-0.05003545
-        self.by=3.15307329
+        self.mx = rospy.get_param('galvodirector/mx', 0.0) #0.05111587
+        self.bx = rospy.get_param('galvodirector/bx', 0.0) #-0.90610801
+        self.my = rospy.get_param('galvodirector/my', 0.0) #-0.05003545
+        self.by = rospy.get_param('galvodirector/by', 0.0) #3.15307329
         
         self.timePrev = rospy.Time.now().to_sec()
         

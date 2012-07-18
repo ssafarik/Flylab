@@ -556,7 +556,7 @@ class PatternGenXY:
                 pattern.points = self.GetPointsGridHilbert(pattern)
             elif pattern.shape == 'peano':
                 pattern.points = self.GetPointsGridPeano(pattern)
-            elif len(pattern.shape)==1 and pattern.shape.isalnum():
+            elif (len(pattern.shape)==1) and (pattern.shape.isalnum()):
                 pattern.points = self.GetPointsCharacter(pattern)
             elif pattern.shape == 'none':
                 pattern.points = []

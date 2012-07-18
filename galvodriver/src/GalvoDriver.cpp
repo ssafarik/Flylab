@@ -80,12 +80,12 @@ void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointclou
 	if (pointcloud->points.size()>0)
 		g_pointcloud = sensor_msgs::PointCloud(*pointcloud); 
 
-	//ros::param::get("galvodriver/hzPoint", hzPoint);
-	//if (g_hzPoint != hzPoint)
-	//{
-	//	g_hzPoint = hzPoint;
-	//	g_bNeedToReset = TRUE;
-	//}
+	ros::param::get("galvodriver/hzPoint", hzPoint);
+	if (g_hzPoint != hzPoint)
+	{
+		g_hzPoint = hzPoint;
+		g_bNeedToReset = TRUE;
+	}
 
 }
 

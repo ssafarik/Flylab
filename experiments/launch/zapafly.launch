@@ -16,7 +16,7 @@
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find robots)/launch/robots_0.launch" />
-	<include file="$(find flies)/launch/flies_2.launch" />
+	<include file="$(find flies)/launch/flies_1.launch" />
 
 	<!-- ***  The Experiment  *** -->
 	<node pkg="experiments" type="Zapafly.py" name="Experiment" />
