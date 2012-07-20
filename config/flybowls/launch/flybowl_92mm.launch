@@ -8,7 +8,7 @@
     <!-- Launch arena.launch, and point here from there.            -->
 	<!-- ========================================================== -->
 
-	<param name="arena/radius_inner" type="double" value="62.5"/>  <!-- millimeters -->
-	<param name="arena/radius_outer" type="double" value="80.0"/>  <!-- millimeters -->
+	<param name="arena/radius_inner" type="double" value="75"/>  <!-- millimeters -->
+	<param name="arena/radius_outer" type="double" value="92"/>  <!-- millimeters -->
 	
 </launch>

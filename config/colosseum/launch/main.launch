@@ -10,7 +10,7 @@
 	<!-- ========================================================== -->
 
 	<include file="$(find colosseum)/launch/params_calibration.launch" />
-	<include file="$(find flybowls)/launch/flybowl_80mm.launch" /> 
+	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" /> 
 
 	
 	<include file="$(find fivebar)/launch/fivebar.launch" />

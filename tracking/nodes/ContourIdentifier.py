@@ -92,9 +92,7 @@ class ContourIdentifier:
                                   pose=Pose(position=Point(x=0, 
                                                            y=0, 
                                                            z=0)),
-                                  #scale=Vector3(x=self.radiusMask*2.0 * 85/470, #BUG: Need to properly convert from pixels to mm.
-                                  #              y=self.radiusMask*2.0 * 85/470,
-                                  scale=Vector3(x=self.radiusArenaOuter*2.0, #BUG: Need to properly convert from pixels to mm.
+                                  scale=Vector3(x=self.radiusArenaOuter*2.0,
                                                 y=self.radiusArenaOuter*2.0,
                                                 z=0.01),
                                   color=ColorRGBA(a=0.05,
