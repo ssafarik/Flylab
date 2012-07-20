@@ -146,7 +146,7 @@ class PatternGenXY:
         xmax = 16.0
         ymax = 15.0
         for k in range(len(flylogo)):
-            pt = Point(x=float(flylogo[k][0]) * pattern.size.x / xmax,
+            pt = Point(x=-float(flylogo[k][0]) * pattern.size.x / xmax,
                        y=float(flylogo[k][1]) * pattern.size.y / ymax)
             points.append(pt)
            
@@ -459,8 +459,8 @@ class PatternGenXY:
         if pattern.shape in points_bychar:
             xy_list = points_bychar[pattern.shape]
             for xy in xy_list:
-                point_list.append(Point(x=-xy[0] * pattern.size.x / 10.0, 
-                                        y=xy[1] * pattern.size.y / 10.0))
+                point_list.append(Point(x=xy[0] * pattern.size.x / 10.0, 
+                                        y=-xy[1] * pattern.size.y / 10.0))
         #if pattern.shape=='4':
         #    rospy.logwarn(self.InterpolatePoints(point_list, 0.2))
             

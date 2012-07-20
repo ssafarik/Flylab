@@ -174,7 +174,7 @@ class GalvoDirector:
                             self.tfrx.waitForTransform('Plate', 
                                                        pointcloud_template.header.frame_id, 
                                                        pointcloud_template.header.stamp, 
-                                                       rospy.Duration(1.0))
+                                                       rospy.Duration(0.1))
                         except tf.Exception, e:
                             rospy.logwarn('Exception waiting for transform pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
                             

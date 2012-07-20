@@ -15,7 +15,7 @@
 	<param name="tooloffset/kD"      type="double" value="0.0"/>
 
 	<param name="tracking/speedThresholdForTravel" type="double" value="5.0"/>
-	<param name="tracking/dtVelocity"              type="double" value="0.5"/>
+	<param name="tracking/dtVelocity"              type="double" value="0.2"/>
 
 	<node pkg="tracking" type="ContourGenerator.py" name="ContourGenerator" />
 	<node pkg="tracking" type="ContourIdentifier.py" name="ContourIdentifier" />

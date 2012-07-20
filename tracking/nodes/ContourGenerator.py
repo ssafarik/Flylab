@@ -195,6 +195,8 @@ class ContourGenerator:
         return (ptsOut.point.x - ptsOrigin.point.x)
         
         
+    # Given the various image moments, compute the angle and eccentricity.
+    # Angle is set to NaN when the image is circular. 
     def FindAngleEcc(self, Uu20, Uu11, Uu02):
         angle = float('NaN')
         ecc = 1.0
