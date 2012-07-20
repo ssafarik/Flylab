@@ -163,42 +163,42 @@ class GalvoDirector:
             if len(self.pointcloudtemplate_list) > 0:
                 for i in range(len(self.pointcloudtemplate_list)):
                     pointcloud_template = self.pointcloudtemplate_list[i]
-                    pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
+                    #t1 = rospy.Time.now().to_sec()
+                    if True: # Use latest time.
+                        if ('Fly' in pointcloud_template.header.frame_id) and len(self.arenastate.flies)>0:
+                            pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp # BUG: Need to make this use the correct fly #.
+                        else:
+                            pointcloud_template.header.stamp = rospy.Time.now() 
+        
+                        try:
+                            self.tfrx.waitForTransform('Plate', 
+                                                       pointcloud_template.header.frame_id, 
+                                                       pointcloud_template.header.stamp, 
+                                                       rospy.Duration(1.0))
+                        except tf.Exception, e:
+                            rospy.logwarn('Exception waiting for transform pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
+                            
+                    else: # Use latest common time.
+                        try:
+                            pointcloud_template.header.stamp = self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id)
+                        except tf.Exception:
+                            pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
+
+                    #t2 = rospy.Time.now().to_sec()
                     try:
-                        pointcloud_template.header.stamp = self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id)
-                    except tf.Exception:
-                        pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
-
-#                    #t1 = rospy.Time.now().to_sec()
-#                    try:
-#                        self.tfrx.waitForTransform('Plate', 
-#                                                   pointcloud_template.header.frame_id, 
-#                                                   pointcloud_template.header.stamp, 
-#                                                   rospy.Duration(1.0))
-#                    except tf.Exception, e:
-#                        rospy.logwarn('Exception waiting for transform pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
-#                        
-#                    #t2 = rospy.Time.now().to_sec()
-#
-#                    try:
-#                        pointcloud = self.tfrx.transformPointCloud('Plate', pointcloud_template)
-#                    except tf.Exception, e:
-#                        rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
-#                    else:
-#                        self.pointcloud_list.append(pointcloud)
-#
-#                    #t3 = rospy.Time.now().to_sec()
-#                    #rospy.logwarn('GalvoDirector, stamp=%s, wait dt=%0.5f, transform dt=%0.5f' % (pointcloud_template.header.stamp,(t2-t1),(t3-t2))) # BUG: Occasional 0.01 sec times.
-#                    #rospy.logwarn ('now,pointcloud_template,%s,%s' % (rospy.Time.now(), pointcloud_template.header.stamp))
-
+                        pointcloud = self.tfrx.transformPointCloud('Plate', pointcloud_template)
+                    except tf.Exception, e:
+                        rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
+                    else:
+                        self.pointcloud_list.append(pointcloud)
+    
+                    #t3 = rospy.Time.now().to_sec()
+                    #rospy.logwarn('GalvoDirector, stamp=%s, wait dt=%0.5f, transform dt=%0.5f' % (pointcloud_template.header.stamp,(t2-t1),(t3-t2))) # BUG: Occasional 0.01 sec times.
+                    #rospy.logwarn ('now,pointcloud_template,%s,%s' % (rospy.Time.now(), pointcloud_template.header.stamp))
+    
                     #rospy.logwarn('tfrx.getLatestCommonTime()=%s, stamp=%s' % (self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id),pointcloud_template.header.stamp))
-                        
-                    pointcloud = self.tfrx.transformPointCloud('Plate', pointcloud_template)
-                    self.pointcloud_list.append(pointcloud)
-#                    else:
-#                        rospy.logwarn('cannot transform %s<-%s @ %s **************************' % ('Plate', 
-#                                                                                                   pointcloud_template.header.frame_id, 
-#                                                                                                   pointcloud_template.header.stamp))
+
+
                     
                 self.pubGalvoPointCloud.publish(self.VoltsFromUnitsPointcloud(self.GetUnifiedPointcloud(self.pointcloud_list)))
         

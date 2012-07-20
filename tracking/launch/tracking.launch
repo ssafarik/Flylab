@@ -6,17 +6,16 @@
 	rosrun image_view image_view image:=camera/image_rect
 	rosrun image_view image_view image:=camera/image_foreground
 	rosrun image_view image_view image:=camera/image_processed
-
 	-->
 	  
-	<!-- Turn on/off contour windows. -->
-	<param name="display_contours"         type="boolean" value="false"/>
-
 	<param name="frameid_contours" type="string" value="ImageRect"/>
 
 	<param name="tooloffset/kP"      type="double" value="1.0"/>
 	<param name="tooloffset/kI"      type="double" value="0.0"/>
 	<param name="tooloffset/kD"      type="double" value="0.0"/>
+
+	<param name="tracking/speedThresholdForTravel" type="double" value="5.0"/>
+	<param name="tracking/dtVelocity"              type="double" value="0.5"/>
 
 	<node pkg="tracking" type="ContourGenerator.py" name="ContourGenerator" />
 	<node pkg="tracking" type="ContourIdentifier.py" name="ContourIdentifier" />

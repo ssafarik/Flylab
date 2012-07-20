@@ -47,6 +47,9 @@ class ExperimentSSOOF():
         self.experimentparams.triggerEntry.timeHold = 0.2
         self.experimentparams.triggerEntry.timeout = -1
         
+
+        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # The first one to finish preempts the others.
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'relative'        
         self.experimentparams.move.relative.tracking = True

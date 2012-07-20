@@ -40,8 +40,8 @@ class Fly:
         #self.lpOffsetY = filters.LowPassFilter(RC=0.1)
         self.lpOffsetMag = filters.LowPassFilter(RC=1.0)
         self.lpOffsetAng = filters.LowPassCircleFilter(RC=0.001)
+        self.maxOffset = 10.0
         self.ptOffset = Point(x=0, y=0, z=0)  # Vector from computed position to contour position (for robots only).
-        self.ptPPrev = Point(x=0, y=0, z=0)
         self.angPrev = 0.0
         self.angle = 0.0
         self.stampPrev = rospy.Time.now()
@@ -50,11 +50,9 @@ class Fly:
         
         # Orientation detection stuff.
         self.angleOfTravelRecent = None
-        self.flip = False
         self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFlipFilter', 3.0))
         self.contour = None
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
-        self.maxOffset = 10.0
         
         self.isVisible = False
         self.isDead = False # TO DO: dead fly detection.
@@ -66,7 +64,7 @@ class Fly:
         self.state.pose.position.z = 0.0
         q = tf.transformations.quaternion_about_axis(0.0, (0,0,1))
         self.state.pose.orientation.x = q[0]    # Note: The orientation is ambiguous as to head/tail.  
-        self.state.pose.orientation.y = q[1]    #       Check the self.flip status to resolve it:  use self.ResolvedAngleFromContour().
+        self.state.pose.orientation.y = q[1]    #       Check the self.lpFlip sign to resolve it:  use self.ResolvedAngleFromContour().
         self.state.pose.orientation.z = q[2]    #
         self.state.pose.orientation.w = q[3]    #
         self.state.velocity.linear.x = 0.0
@@ -121,98 +119,93 @@ class Fly:
             self.angleOfTravelRecent = angleOfTravel
 
 
-    # GetNextFlipValue()
+    # GetNextFlipUpdate()
     #   Using self.contour, self.state, and self.angleOfTravelRecent,
     #   we determine a value to use for updating the "flip" filter,
     #   which varies on [-1,+1], and the sign of which determines if to flip.
     #
     # Returns the chosen flip value.
     #   
-    def GetNextFlipValue(self):
+    def GetNextFlipUpdate(self):
         # Get the prior flip value.
-        flipValuePrev = self.lpFlip.GetValue()
-        if flipValuePrev is None:
-            flipValuePrev = 0.0
+        flipvaluePrev = self.lpFlip.GetValue()
+        if flipvaluePrev is None:
+            flipvaluePrev = 0.0
 
-        # angleContour is ambiguous mod pi radians
-        eccmetric = (self.contour.ecc + 1/self.contour.ecc) - 1
-        #rospy.loginfo('%s: eccmetric=%0.2f' % (self.name, eccmetric))
-        if (eccmetric > 1.5):
-            angleContour         = self.contour.angle #self.YawFromQuaternion(self.state.pose.orientation)
-            angleContour_flipped = angleContour + N.pi
-            
-            # Most recent angle of travel.
-            if self.angleOfTravelRecent is not None:
-                angleOfTravel = self.angleOfTravelRecent
-            else:
-                angleOfTravel = angleContour
-                
-                
-            # Compare distances between angles of (travel - orientation) and (travel - flippedorientation)        
-            dist         = N.abs(CircleFunctions.circle_dist(angleContour,         angleOfTravel))
-            dist_flipped = N.abs(CircleFunctions.circle_dist(angleContour_flipped, angleOfTravel))
-            
-            # Vote for flipped or non-flipped.
-            if dist < dist_flipped:
-                flipValueNew = -1.0 # Not flipped
-            else:
-                flipValueNew =  1.0 # Flipped
+
+        angleContour         = self.contour.angle #self.YawFromQuaternion(self.state.pose.orientation)
+        angleContour_flipped = angleContour + N.pi
+        
+        # Most recent angle of travel.
+        if self.angleOfTravelRecent is not None:
+            angleOfTravel = self.angleOfTravelRecent
         else:
-            flipValueNew = flipValuePrev
+            angleOfTravel = angleContour
+            
+            
+        # Compare distances between angles of (travel - orientation) and (travel - flippedorientation)        
+        dist         = N.abs(CircleFunctions.circle_dist(angleContour,         angleOfTravel))
+        dist_flipped = N.abs(CircleFunctions.circle_dist(angleContour_flipped, angleOfTravel))
+        
+        # Choose the better orientation.
+        if dist < dist_flipped:
+            flipvalueSign =  1.0 # Not flipped
+        else:
+            flipvalueSign = -1.0 # Flipped
 
-        # Weight the prev/new values based on speed.                
+
         speed = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
-        alpha = 10.0/(10.0+speed)
-        flipValueWeighted = (alpha * flipValuePrev) + ((1.0-alpha) * flipValueNew) 
+        eccmetric = (self.contour.ecc + 1/self.contour.ecc) - 1 #self.contour.ecc#
+        #rospy.logwarn('%s: eccmetric=%0.2f' % (self.name, eccmetric))
+
+
+        flipvalueMag = N.abs(flipvaluePrev)
+        if (eccmetric > 1.5):
+            # Weight the prev/new values based on speed.                
+            #alpha = 10.0/(10.0+speed)
+            #flipvalueMag = (alpha * N.abs(flipvaluePrev)) + ((1.0-alpha) * 1.0) 
+    
+            # Either use +-1, or use the previous value.
+            if (speed > self.speedThresholdForTravel):
+                flipvalueMag = 1.0
 
         
+        flipvalueUpdate = flipvalueSign * flipvalueMag
+        
         #if 'Fly1' in self.name:
-        #    rospy.logwarn('%s: flipValue %0.2f, %0.2f, %0.2f' % (self.name, flipValuePrev,flipValueWeighted,flipValueNew))
+        #    rospy.logwarn('%s: flipvalue %0.2f, %0.2f, %0.2f' % (self.name, flipvaluePrev,flipvalueWeighted,flipvalueNew))
 
 
-        return flipValueWeighted
+        return flipvalueUpdate
     
 
         
-    # SetFlipState()
+    # UpdateFlipState()
     #   Choose among the various possibilities:
-    #   flip==True  -->  angleResolved = (angle of contour)
+    #   lpFlip>0  -->  angleResolved = (angle of contour)
     #     OR
-    #   flip==False -->  angleResolved = (angle of contour + pi)
+    #   lpFlip<=0 -->  angleResolved = (angle of contour + pi)
     #
-    # Updates the flip status in self.flip
+    # Updates the flip state in self.lpFlip
     #   
-    def SetFlipState(self):
-        # Update the flip filter, and convert it to a flip state.
-        flipValuePre = self.GetNextFlipValue()
-        flipValuePost = self.lpFlip.Update(flipValuePre, self.contour.header.stamp.to_sec())
-        if flipValuePost > 0.0:
-            flipNew = True
-        else:
-            flipNew = False
-
+    def UpdateFlipState(self):
         speed = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
-        if speed > 3.0: # Deadband.
-            self.flip = flipNew    
-                
-        # contour angle only ranges on [-pi,-0].  If wrapped, then change the flip state.
-        #if 'Fly1' in self.name:
-        #    rospy.logwarn('self.flip=%s'%self.flip)
+
+        # Update the flip filter.
+        flipvaluePre = self.GetNextFlipUpdate()
+        flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contour.header.stamp.to_sec())
+            
+        # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
         if (self.contourPrev is not None) and (isinstance(self.contourPrev.angle,float)) and (self.contour is not None) and (isinstance(self.contour.angle,float)):
-            #rospy.logwarn('contour.angle=%s, contourPrev.angle=%s'%(self.contour.angle, self.contourPrev.angle))
             d = N.abs(CircleFunctions.circle_dist(self.contour.angle, self.contourPrev.angle))
             if (d > (N.pi/2.0)):
-                #if 'Fly1' in self.name:
-                #    rospy.logwarn('%s: wrap %0.2f, %0.2f, d=%0.2f'%(self.name, self.contour.angle, self.contourPrev.angle,d))
                 self.lpFlip.SetValue(-self.lpFlip.GetValue())
-                self.flip = not self.flip
-
                 
 
     def GetResolvedAngle(self):
         angleF = self.lpAngleF.GetValue()
                 
-        if self.flip and ('Robot' not in self.name):
+        if self.lpFlip.GetValue()<0 and ('Robot' not in self.name):
             angleResolved = (angleF + N.pi) % (2.0*N.pi)
         else:
             angleResolved = angleF
@@ -306,7 +299,7 @@ class Fly:
 
                 # Update the most recent angle of travel.
                 self.SetAngleOfTravel()
-                self.SetFlipState()
+                self.UpdateFlipState()
                 self.angle = self.GetResolvedAngle()
                 #if (self.contourPrev is not None):
                 #    if 'Fly1' in self.name:
@@ -357,24 +350,12 @@ class Fly:
 #                                          lifetime=rospy.Duration(1.0))
 #                    self.pubMarker.publish(marker)
 
-                    # PID control of the offset.
-                    ptP = Point()
-                    ptI = Point()
-                    ptD = Point()
-                    ptP.x = x-ptComputed.x
-                    ptP.y = y-ptComputed.y
-                    ptI.x = ptI.x + ptP.x
-                    ptI.y = ptI.y + ptP.y
-                    ptD.x = ptP.x - self.ptPPrev.x
-                    ptD.y = ptP.y - self.ptPPrev.y
-                    kP = rospy.get_param('tooloffset/kP', 1.0)
-                    kI = rospy.get_param('tooloffset/kI', 0.0)
-                    kD = rospy.get_param('tooloffset/kD', 0.0)
-                    xPID = kP*ptP.x + kI*ptI.x + kD*ptD.x
-                    yPID = kP*ptP.y + kI*ptI.y + kD*ptD.y
+                    # The offset.
+                    xOffset = x-ptComputed.x
+                    yOffset = y-ptComputed.y
                     
                     # Filter the offset as magnitude & angle.
-                    (mag,ang)=self.PolarFromXy(xPID,yPID)
+                    (mag,ang)=self.PolarFromXy(xOffset,yOffset)
                     #rospy.logwarn('ang=%0.2f' % ang)
                     ang += self.unwind
                     if ang-self.angPrev > N.pi:
@@ -389,8 +370,6 @@ class Fly:
                     #rospy.logwarn('ang=%0.2f, ang_filtered=%0.2f' % (ang,ang_filtered))
                     (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(mag, time), -self.maxOffset, self.maxOffset),
                                                                          ang_filtered)
-                    self.ptPPrev.x = ptP.x
-                    self.ptPPrev.y = ptP.y
                 else:
                     self.ptOffset = Point(x=0, y=0, z=0)
             

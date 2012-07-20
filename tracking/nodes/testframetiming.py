@@ -60,7 +60,7 @@ def main(args):
         ip.Main()
     except rospy.exceptions.ROSInterruptException:
         rospy.loginfo("Shutting down")
-    cv.DestroyAllWindows()
+    
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -47,6 +47,9 @@ class ExperimentRegressiveMotion():
         self.experimentparams.triggerEntry.timeHold = 0.1
         self.experimentparams.triggerEntry.timeout = -1
         
+
+        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # The first one to finish preempts the others.
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'relative'        
         self.experimentparams.move.relative.tracking = False

@@ -150,7 +150,7 @@ class PatternGenXY:
                        y=float(flylogo[k][1]) * pattern.size.y / ymax)
             points.append(pt)
            
-        return points
+        return self.InterpolatePoints(points, 0.2)
     
         
     def GetPointsSpiral (self, pattern):
@@ -411,74 +411,6 @@ class PatternGenXY:
         return peano.GetPoints(level, pattern.size.x, pattern.size.y)
     
 
-    # HilbertCurve() generates a fractal Hilbert curve.
-    # This code needs to be tweaked to take xSize,ySize, etc, as w/ Peano. 
-    class HilbertCurve:
-        points = []
-        
-        def HilbertMove (self, dx, dy):
-            self.x += dx
-            self.y += dy
-            self.points.append(Point(self.x, self.y, 0))
-            
-        
-        def HilbertA(self, level, d):
-            if level > 0:
-                self.HilbertB(level-1,d)
-                self.HilbertMove(0,d)
-                self.HilbertA(level-1,d)
-                self.HilbertMove(d,0)
-                self.HilbertA(level-1,d)
-                self.HilbertMove(0,-d)
-                self.HilbertC(level-1,d)
-    
-        def HilbertB(self, level, d):
-            if level > 0:
-                self.HilbertA(level-1,d)
-                self.HilbertMove(d,0)
-                self.HilbertB(level-1,d)
-                self.HilbertMove(0,d)
-                self.HilbertB(level-1,d)
-                self.HilbertMove(-d,0)
-                self.HilbertD(level-1,d)
-    
-        def HilbertC(self, level, d):
-            if level > 0:
-                self.HilbertD(level-1,d)
-                self.HilbertMove(-d,0)
-                self.HilbertC(level-1,d)
-                self.HilbertMove(0,-d)
-                self.HilbertC(level-1,d)
-                self.HilbertMove(d,0)
-                self.HilbertA(level-1,d)
-    
-        def HilbertD(self, level, d):
-            if level > 0:
-                self.HilbertC(level-1,d)
-                self.HilbertMove(0,-d)
-                self.HilbertD(level-1,d)
-                self.HilbertMove(-d,0)
-                self.HilbertD(level-1,d)
-                self.HilbertMove(0,d)
-                self.HilbertB(level-1,d)
-    
-        def GetPoints(self, level, d):
-            self.x = -(d * 2^level)
-            self.y = -(d * 2^level)
-            self.points = []
-            self.HilbertA(level, d)
-            
-            return self.points
-
-
-    def GetPointsGridHilbert(self, pattern):
-        hilbert = self.HilbertCurve()
-        level = int(pattern.param)
-        width = 10
-            
-        return hilbert.GetPoints(level, width)
-    
-
     def GetPointsGrid(self, pattern):
         return self.GetPointsGridPeano(pattern)
 
@@ -527,12 +459,37 @@ class PatternGenXY:
         if pattern.shape in points_bychar:
             xy_list = points_bychar[pattern.shape]
             for xy in xy_list:
-                point_list.append(Point(x=xy[0] * pattern.size.x / 10.0, 
+                point_list.append(Point(x=-xy[0] * pattern.size.x / 10.0, 
                                         y=xy[1] * pattern.size.y / 10.0))
+        #if pattern.shape=='4':
+        #    rospy.logwarn(self.InterpolatePoints(point_list, 0.2))
             
-        return point_list
+        return self.InterpolatePoints(point_list, 0.2)
 
-    
+
+    # Add intermediate points such that the point-point spacing is no greater than dr.
+    def InterpolatePoints (self, points, dr):
+        if dr>0.0:
+            points_new = []
+            for i in range(len(points)-1): # So we can interpolate from point i to point i+1.
+                r = N.linalg.norm([points[i+1].x-points[i].x, points[i+1].y-points[i].y])
+                n = N.ceil(r / dr)
+                dx = (points[i+1].x-points[i].x) / n
+                dy = (points[i+1].y-points[i].y) / n
+                x = 0.0
+                y = 0.0
+                for ni in range(int(n)):
+                    points_new.append(Point(x=points[i].x+x,y=points[i].y+y))
+                    x = x+dx
+                    y = y+dy
+            points_new.append(Point(x=points[-1].x,y=points[-1].y))
+            
+        else:
+            points_new = points
+            
+            
+        return points_new
+        
 
     def UpdatePatternPoints (self, pattern):        
         if pattern.mode == 'byshape':  # Create the point list.
@@ -552,8 +509,6 @@ class PatternGenXY:
                 pattern.points = self.GetPointsGrid(pattern)
             elif pattern.shape == 'raster':
                 pattern.points = self.GetPointsGridRaster(pattern)
-            elif pattern.shape == 'hilbert':
-                pattern.points = self.GetPointsGridHilbert(pattern)
             elif pattern.shape == 'peano':
                 pattern.points = self.GetPointsGridPeano(pattern)
             elif (len(pattern.shape)==1) and (pattern.shape.isalnum()):
@@ -598,25 +553,6 @@ class PatternGenXY:
             
     def GetPatternPoints_callback(self, reqGetPatternPoints):
         with self.lock:
-            
-#            pattern.mode       = reqGetPatternPoints.pattern.mode
-#            pattern.shape      = reqGetPatternPoints.pattern.shape
-#            pattern.frame_id   = reqGetPatternPoints.pattern.frame_id
-#            pattern.hzPattern  = reqGetPatternPoints.pattern.hzPattern
-#            pattern.hzPoint    = reqGetPatternPoints.pattern.hzPoint
-#            pattern.count      = reqGetPatternPoints.pattern.count
-#            pattern.size       = reqGetPatternPoints.pattern.size
-#    
-#            if pattern.count==-1:
-#                pattern.count = 2147483640 # MAX_INT
-#            
-#            if self.signal.mode=='bypoints':
-#                self.pattern.points = reqGetPatternPoints.pattern.points
-#                
-            #rospy.logwarn ('reqGetPatternPoints=%s' % reqGetPatternPoints)
-            #respGetPatternPoints = copy.copy(reqGetPatternPoints)
-            #rospy.logwarn ('respGetPatternPoints=%s' % respGetPatternPoints)
-            
             self.UpdatePatternPoints(reqGetPatternPoints.pattern)
             
         return SrvGetPatternPointsResponse(pattern=reqGetPatternPoints.pattern)

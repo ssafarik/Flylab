@@ -577,7 +577,6 @@ class ContourIdentifier:
 #        rospy.logwarn('ContourInfo_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
 #        self.timePrev = rospy.Time.now().to_sec()
 
-        #rospy.logwarn ('contourinfo callback, stamp=%s, initialized=%s' % (contourinfo.header.stamp, self.initialized))
         if self.initialized:
             try:
                 #rospy.logwarn ('CI contourinfo0 %s' % contourinfo)
@@ -593,7 +592,12 @@ class ContourIdentifier:
                     contour.header = contourinfo.header
                     contour.x      = contourinfo.x[i]
                     contour.y      = contourinfo.y[i]
-                    contour.angle  = contourinfo.angle[i]
+                    if not N.isnan(contourinfo.angle[i]):
+                        contour.angle = contourinfo.angle[i]
+                    else:
+                        contour.angle = self.contouranglePrev
+                    self.contouranglePrev = contour.angle
+                    
                     contour.area   = contourinfo.area[i]
                     contour.ecc    = contourinfo.ecc[i]
                     self.contours.append(contour)
@@ -645,11 +649,15 @@ class ContourIdentifier:
                         
                         #rospy.loginfo ('CI update robot    contour=%s' % contour)
                         
+#                    rospy.logwarn('contourinfo.angle[]=%s' % contourinfo.angle)
+#                    rospy.logwarn('map=%s' % self.mapContourFromObject)
                     
                     # Update the flies' states.
                     for iFly in self.iFly_list:
                         if self.mapContourFromObject[iFly] is not None:
                             #rospy.logwarn ('self.contours[self.mapContourFromObject[%d]]=%s' % (iFly, self.contours[self.mapContourFromObject[iFly]]))
+#                            if iFly==0:
+#                                rospy.logwarn('iFly=%d, contour.angle=%0.2f' % (iFly, self.contours[self.mapContourFromObject[iFly]].angle)) #TEST
                             try:
                                 self.objects[iFly].Update(self.contours[self.mapContourFromObject[iFly]], None)
                             except IndexError, e:

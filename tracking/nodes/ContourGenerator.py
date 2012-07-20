@@ -195,18 +195,18 @@ class ContourGenerator:
         return (ptsOut.point.x - ptsOrigin.point.x)
         
         
-    def FindAngleEcc(self, A, B, C, D):
+    def FindAngleEcc(self, Uu20, Uu11, Uu02):
         angle = float('NaN')
         ecc = 1.0
         
-        if C != 0: # Div by zero.
-            inside = A*A + 4*B*C - 2*A*D + D*D
+        if Uu11 != 0: # Div by zero.
+            inside = Uu20*Uu20 + 4*Uu11*Uu11 - 2*Uu20*Uu02 + Uu02*Uu02
             if inside >= 0: # Complex answer.
                 inside = N.sqrt(inside)
-                evalA = 0.5*(A+D-inside)
-                evalB = 0.5*(A+D+inside)
-                evecA1 = (-A+D+inside)/(-2*C)
-                evecB1 = (-A+D-inside)/(-2*C)
+                evalA = 0.5*(Uu20+Uu02-inside)
+                evalB = 0.5*(Uu20+Uu02+inside)
+                evecA1 = (-Uu20+Uu02+inside)/(-2*Uu11)
+                evecB1 = (-Uu20+Uu02-inside)/(-2*Uu11)
                 rise = 1
                 try:
                     if evalB < evalA:
@@ -224,8 +224,23 @@ class ContourGenerator:
                     rospy.logwarn ('Exception in FindAngleEcc()')
                     pass
         
-        if N.isnan(angle):
-            angle = 0.0
+        #if N.isnan(angle):
+        #    angle = 0.0
+            #rospy.logwarn('isnan(angle): %0.4f/%0.4f=%s' % (rise,run,angle))
+
+#        A = N.array([[Uu20, Uu11],[Uu11, Uu20]])
+#        (l,V) = N.linalg.eig(A)
+#        L = N.diag(l)
+#        iMinor = N.argmin(abs(l))
+#        iMajor = N.argmax(abs(l))
+#        axisMinor = V.T[iMinor]
+#        axisMajor = V.T[iMajor]
+#        rospy.logwarn('axisMajor=%s' % axisMajor)
+#        angleMajor = N.angle(N.complex(axisMajor[0],axisMajor[1]))
+#        angle = angleMajor
+#        
+#        ecc = N.sqrt(1-l[1]/l[0])
+#        #rospy.logwarn('ecc: %0.2f, %0.2f' % (ecc1,ecc))
               
         return angle, ecc
         
@@ -247,8 +262,9 @@ class ContourGenerator:
         Uu20 = cv.GetCentralMoment(moments,2,0)
         Uu02 = cv.GetCentralMoment(moments,0,2)
         area = Mu00
-        angle, ecc = self.FindAngleEcc(Uu20, Uu11, Uu11, Uu02)
-        
+        angle, ecc = self.FindAngleEcc(Uu20, Uu11, Uu02)
+        #rospy.logwarn('u: %s, %s, %s, %s' % (Mu00, Uu20, Uu11, Uu02))
+
         return x, y, area, angle, ecc
     
     

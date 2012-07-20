@@ -47,8 +47,9 @@ class ExperimentPassiveChase():
         self.experimentparams.triggerEntry.timeHold = 0.0
         self.experimentparams.triggerEntry.timeout = -1
         
-        self.experimentparams.lasertrack.enabled = False
-        
+
+        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # The first one to finish preempts the others.
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
@@ -58,6 +59,8 @@ class ExperimentPassiveChase():
         self.experimentparams.move.pattern.size.x = 20
         self.experimentparams.move.pattern.size.y = 20
         self.experimentparams.move.timeout = 600
+        
+        self.experimentparams.lasertrack.enabled = False
         
         self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.distanceMin = 0.0
