@@ -62,8 +62,6 @@ class ContourGenerator:
         if (1 < self.nContours_max):
             self.nContours_max -= 1
         
-        self.display_contours = rospy.get_param('display_contours', False)
-
         self.header = None
         self.cvimage = None
         
@@ -303,28 +301,25 @@ class ContourGenerator:
         
         
         # Save contour info
-        #rospy.loginfo ('IP area=%5.5f' % area)
-        if True: #area>0.0:
-            # Convert from ROI coordinates to Camera coordinates
-            ptContour = PointStamped()
-            ptContour.header.frame_id = "ImageRect"
-            ptContour.point.x = x
-            ptContour.point.y = y
-            if x is not None:
-                try:
-                    self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptContour)
-                    self.x0_list.append(self.ptsOutput.point.x)
-                    self.y0_list.append(self.ptsOutput.point.y)
-                    self.angle_list.append(angle)
-                    self.area_list.append(area)
-                    self.ecc_list.append(ecc)
-                    self.nContours += 1
-    
-                except tf.Exception, e:
-                    rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContour.header.frame_id, e))
-                    self.ptsOutput = PointStamped()
-                except TypeError, e:
-                    rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContour.header.frame_id, e))
+        ptContour = PointStamped()
+        ptContour.header.frame_id = "ImageRect"
+        ptContour.point.x = x
+        ptContour.point.y = y
+        if x is not None:
+            try:
+                self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptContour)
+                self.x0_list.append(self.ptsOutput.point.x)
+                self.y0_list.append(self.ptsOutput.point.y)
+                self.angle_list.append(angle)
+                self.area_list.append(area)
+                self.ecc_list.append(ecc)
+                self.nContours += 1
+
+            except tf.Exception, e:
+                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContour.header.frame_id, e))
+                self.ptsOutput = PointStamped()
+            except TypeError, e:
+                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContour.header.frame_id, e))
                 
         
 
@@ -404,18 +399,6 @@ class ContourGenerator:
                 contourinfo.area.append(contours[iContour][3])
                 contourinfo.ecc.append(contours[iContour][4])
             
-            
-        
-            # TESTING...
-        #       contourinfo.x = [0.0, 10.0]
-        #       contourinfo.y = [0.0, 20.0]
-        #       contourinfo.angle = [0.0, 0.0]
-        #       contourinfo.area = [100.0, 100.0]
-        #       contourinfo.ecc = [1.0, 1.0]
-        
-            #rospy.loginfo ('IP contourinfo.x,y = %s, %s' %  (contourinfo.x, contourinfo.y))      
-            
-        
         return contourinfo, cvseqContours    
         
 

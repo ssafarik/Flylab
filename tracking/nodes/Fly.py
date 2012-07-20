@@ -159,7 +159,7 @@ class Fly:
         #rospy.logwarn('%s: eccmetric=%0.2f' % (self.name, eccmetric))
 
 
-        flipvalueMag = N.abs(flipvaluePrev)
+        flipvalueMag = flipvaluePrev#N.abs(flipvaluePrev)
         if (eccmetric > 1.5):
             # Weight the prev/new values based on speed.                
             #alpha = 10.0/(10.0+speed)
@@ -218,11 +218,6 @@ class Fly:
     # Update()
     # Update the current state using the visual position and the computed position (if applicable)
     def Update(self, contour, ptComputed):
-#        if self.name=='Fly1':
-#            rospy.logwarn('Fly sendTransform(frame=%s, stamp=%s, now-prev=%s)' % (self.name, self.state.header.stamp, rospy.Time.now().to_sec()-self.timePrev))
-#            self.timePrev = rospy.Time.now().to_sec()
-
-        
         if self.initialized:
             if (contour is not None):
                 time = contour.header.stamp.to_sec()
@@ -356,7 +351,6 @@ class Fly:
                     
                     # Filter the offset as magnitude & angle.
                     (mag,ang)=self.PolarFromXy(xOffset,yOffset)
-                    #rospy.logwarn('ang=%0.2f' % ang)
                     ang += self.unwind
                     if ang-self.angPrev > N.pi:
                         self.unwind -= 2.0*N.pi
@@ -367,7 +361,6 @@ class Fly:
                     self.angPrev = ang
                     
                     ang_filtered = self.lpOffsetAng.Update(ang, time)
-                    #rospy.logwarn('ang=%0.2f, ang_filtered=%0.2f' % (ang,ang_filtered))
                     (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(mag, time), -self.maxOffset, self.maxOffset),
                                                                          ang_filtered)
                 else:
@@ -399,8 +392,6 @@ class Fly:
                                         self.state.header.stamp,
                                         self.name,
                                         self.state.header.frame_id)
-                #rospy.logwarn('sendTransform(frame=%s, stamp=%s, now-stamp=%s)' % (self.name, self.state.header.stamp, rospy.Time.now()-self.state.header.stamp))
-                #rospy.logwarn ('now,transform,%s,%s' % (rospy.Time.now(), self.state.header.stamp))
 
                 # Publish a 3D model marker for the robot.
                 if 'Robot' in self.name:

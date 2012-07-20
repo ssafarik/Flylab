@@ -461,8 +461,6 @@ class PatternGenXY:
             for xy in xy_list:
                 point_list.append(Point(x=xy[0] * pattern.size.x / 10.0, 
                                         y=-xy[1] * pattern.size.y / 10.0))
-        #if pattern.shape=='4':
-        #    rospy.logwarn(self.InterpolatePoints(point_list, 0.2))
             
         return self.InterpolatePoints(point_list, 0.2)
 
