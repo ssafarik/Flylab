@@ -323,7 +323,7 @@ class MotorArm:
             q1park = self.GetThetaFromXy(self.xPark, self.yPark)
 
         q1park = 0.0
-        q1origin = -N.pi/2#-0.3 # From the index switch
+        q1origin = -N.pi/2-0.3 # From the index switch
 
         rospy.loginfo ('MotorArm Calibrating: q1origin=%s, q1park=%s' % (q1origin, q1park))
         with self.lock:

@@ -144,7 +144,7 @@ class SaveVideo:
     #    Closes the log file if triggering state goes from True->False.
     #
     def Trigger_callback(self, reqTrigger):
-        #rospy.logwarn('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX %s' % reqTrigger)
+        rospy.logwarn('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX %s' % reqTrigger)
         if self.triggered != reqTrigger.triggered: # Change in trigger state.
             self.triggered = reqTrigger.triggered
             
