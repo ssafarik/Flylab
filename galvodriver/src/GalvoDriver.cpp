@@ -139,7 +139,7 @@ void UpdatePointsFromPointcloud(void)
 
 	nPointsPerCloud = MAX(1,g_pointcloud.points.size());
 	g_hzPointcloud = g_hzPoint / (double)nPointsPerCloud;					// Output rate of the given pointcloud.
-	g_nDuplicates = (int32)MAX(1.0, ceil(g_hzPointcloud/g_hzUSB) + 1.0);	// Number of point (or pointcloud) copies needed to stay within the USB update rate.
+	g_nDuplicates = (int32)MAX(1.0, ceil(g_hzPointcloud/g_hzUSB));// + 1.0);	// Number of point (or pointcloud) copies needed to stay within the USB update rate.
 	g_hzPointcloudEx = g_hzPointcloud / (double)g_nDuplicates;				// Output rate of the expanded pointcloud.
 	g_nPointsPointcloudEx = nPointsPerCloud * g_nDuplicates;				// Number of points in the "expanded" pointcloud.
 	g_nPointsBufferDaq = NCOPIES_POINTCLOUDEX * g_nPointsPointcloudEx; 		// Number of points in the PC buffer.

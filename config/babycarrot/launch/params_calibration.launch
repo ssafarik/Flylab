@@ -20,6 +20,8 @@
   <param name="camera/mask/y" type="double" value="299"/>
   <param name="camera/mask/radius" type="double" value="286"/>  <!-- pixels -->
 
+  <param name="calibration/checker_size" type="double" value="15.0" />
+
 
 
   <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->

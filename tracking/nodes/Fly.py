@@ -35,24 +35,28 @@ class Fly:
         
 
         self.kfState = filters.KalmanFilter()
-        self.lpAngleF = filters.LowPassHalfCircleFilter(RC=rospy.get_param('tracking/rcAngleFilter', 0.1))
-        #self.lpOffsetX = filters.LowPassFilter(RC=0.1)
-        #self.lpOffsetY = filters.LowPassFilter(RC=0.1)
+        self.lpAngleContour = filters.LowPassHalfCircleFilter(RC=rospy.get_param('tracking/rcAngleFilter', 0.1))
+        self.lpAngleContour.SetValue(0.0)
+        self.angleContourPrev = 0.0
         self.lpOffsetMag = filters.LowPassFilter(RC=1.0)
+        self.lpOffsetMag.SetValue(0.0)
         self.lpOffsetAng = filters.LowPassCircleFilter(RC=0.001)
+        self.lpOffsetAng.SetValue(0.0)
         self.maxOffset = 10.0
         self.ptOffset = Point(x=0, y=0, z=0)  # Vector from computed position to contour position (for robots only).
-        self.angPrev = 0.0
-        self.angle = 0.0
+        self.angleOffsetPrev = 0.0
         self.stampPrev = rospy.Time.now()
         self.unwind = 0.0
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
         
         # Orientation detection stuff.
-        self.angleOfTravelRecent = None
+        self.angleOfTravelRecent = 0.0
         self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFlipFilter', 3.0))
+        self.lpFlip.SetValue(0.0)
         self.contour = None
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
+        self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcSpeedFilter', 0.5))
+        self.lpSpeed.SetValue(0.0)
         
         self.isVisible = False
         self.isDead = False # TO DO: dead fly detection.
@@ -114,8 +118,7 @@ class Fly:
     # If the speed surpasses a threshold, then update the direction of travel.
     def SetAngleOfTravel(self):
         angleOfTravel = N.arctan2(self.state.velocity.linear.y, self.state.velocity.linear.x) % (2.0*N.pi)
-        speed = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
-        if speed > self.speedThresholdForTravel: 
+        if self.speed > self.speedThresholdForTravel: 
             self.angleOfTravelRecent = angleOfTravel
 
 
@@ -133,19 +136,12 @@ class Fly:
             flipvaluePrev = 0.0
 
 
-        angleContour         = self.contour.angle #self.YawFromQuaternion(self.state.pose.orientation)
+        angleContour         = self.lpAngleContour.GetValue()
         angleContour_flipped = angleContour + N.pi
         
-        # Most recent angle of travel.
-        if self.angleOfTravelRecent is not None:
-            angleOfTravel = self.angleOfTravelRecent
-        else:
-            angleOfTravel = angleContour
-            
-            
-        # Compare distances between angles of (travel - orientation) and (travel - flippedorientation)        
-        dist         = N.abs(CircleFunctions.circle_dist(angleContour,         angleOfTravel))
-        dist_flipped = N.abs(CircleFunctions.circle_dist(angleContour_flipped, angleOfTravel))
+        # Compare distances between angles of (travel - contour) and (travel - flippedcontour)        
+        dist         = N.abs(CircleFunctions.circle_dist(angleContour,         self.angleOfTravelRecent))
+        dist_flipped = N.abs(CircleFunctions.circle_dist(angleContour_flipped, self.angleOfTravelRecent))
         
         # Choose the better orientation.
         if dist < dist_flipped:
@@ -154,7 +150,6 @@ class Fly:
             flipvalueSign = -1.0 # Flipped
 
 
-        speed = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
         eccmetric = (self.contour.ecc + 1/self.contour.ecc) - 1 #self.contour.ecc#
         #rospy.logwarn('%s: eccmetric=%0.2f' % (self.name, eccmetric))
 
@@ -162,11 +157,11 @@ class Fly:
         flipvalueMag = flipvaluePrev#N.abs(flipvaluePrev)
         if (eccmetric > 1.5):
             # Weight the prev/new values based on speed.                
-            #alpha = 10.0/(10.0+speed)
+            #alpha = 10.0/(10.0+self.speed)
             #flipvalueMag = (alpha * N.abs(flipvaluePrev)) + ((1.0-alpha) * 1.0) 
     
             # Either use +-1, or use the previous value.
-            if (speed > self.speedThresholdForTravel):
+            if (self.speed > self.speedThresholdForTravel):
                 flipvalueMag = 1.0
 
         
@@ -189,21 +184,21 @@ class Fly:
     # Updates the flip state in self.lpFlip
     #   
     def UpdateFlipState(self):
-        speed = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
-
         # Update the flip filter.
         flipvaluePre = self.GetNextFlipUpdate()
-        flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contour.header.stamp.to_sec())
             
+        if (self.speed > self.speedThresholdForTravel):
+            flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contour.header.stamp.to_sec())
+                
         # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
-        if (self.contourPrev is not None) and (isinstance(self.contourPrev.angle,float)) and (self.contour is not None) and (isinstance(self.contour.angle,float)):
-            d = N.abs(CircleFunctions.circle_dist(self.contour.angle, self.contourPrev.angle))
+        if (self.contour is not None) and (isinstance(self.contour.angle,float)):
+            d = N.abs(CircleFunctions.circle_dist(self.lpAngleContour.GetValue(), self.angleContourPrev))
             if (d > (N.pi/2.0)):
                 self.lpFlip.SetValue(-self.lpFlip.GetValue())
-                
+
 
     def GetResolvedAngle(self):
-        angleF = self.lpAngleF.GetValue()
+        angleF = self.lpAngleContour.GetValue()
                 
         if self.lpFlip.GetValue()<0 and ('Robot' not in self.name):
             angleResolved = (angleF + N.pi) % (2.0*N.pi)
@@ -224,7 +219,7 @@ class Fly:
             else:
                 time = rospy.Time.now().to_sec()
                 
-            self.contourPrev = self.contour
+            self.angleContourPrev = self.lpAngleContour.GetValue()
             self.contour = contour
             
             # Update the position & orientation filters
@@ -249,7 +244,7 @@ class Fly:
                     (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), time)
                     (z, vz) = (0.0, 0.0)
                     #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
-                    angleF = self.lpAngleF.Update(self.contour.angle, time)#self.contour.header.stamp.to_sec())
+                    self.lpAngleContour.Update(self.contour.angle, time)#self.contour.header.stamp.to_sec())
                     
                     
                     if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
@@ -291,20 +286,19 @@ class Fly:
                 self.state.velocity.angular.x = wx
                 self.state.velocity.angular.y = wy
                 self.state.velocity.angular.z = wz
+                speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
+                self.speed = self.lpSpeed.Update(speedPre, self.state.header.stamp.to_sec())
+                
+#                if 'Fly1' in self.name:
+#                    rospy.logwarn('speed=%0.2f, flip=%0.2f' % (self.speed, self.lpFlip.GetValue()))
 
                 # Update the most recent angle of travel.
                 self.SetAngleOfTravel()
                 self.UpdateFlipState()
-                self.angle = self.GetResolvedAngle()
-                #if (self.contourPrev is not None):
-                #    if 'Fly1' in self.name:
-                #        rospy.logwarn('%s: angle=%0.2f %0.2f, %0.2f'%(self.name, self.angle, self.contourPrev.angle, self.contour.angle))
+                angle = self.GetResolvedAngle()
                 
                 (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = \
-                    tf.transformations.quaternion_about_axis(self.angle, (0,0,1))
-                #rospy.loginfo('angles=[%0.2f, %0.2f]' % (angleResolved, self.angle))
-
-                #rospy.loginfo ('CI %s ecc=%s,%s, area=%s,%s, speed=%0.3f' % (self.name, contour.ecc,[self.eccMin,self.eccMax], contour.area,[self.areaMin,self.areaMax], speed))
+                    tf.transformations.quaternion_about_axis(angle, (0,0,1))
                 
                 # Update the tool offset.
                 if ptComputed is not None:
@@ -350,19 +344,19 @@ class Fly:
                     yOffset = y-ptComputed.y
                     
                     # Filter the offset as magnitude & angle.
-                    (mag,ang)=self.PolarFromXy(xOffset,yOffset)
-                    ang += self.unwind
-                    if ang-self.angPrev > N.pi:
+                    (magOffset,angleOffset)=self.PolarFromXy(xOffset,yOffset)
+                    angleOffset += self.unwind
+                    if angleOffset-self.angleOffsetPrev > N.pi:
                         self.unwind -= 2.0*N.pi
-                        ang -= 2.0*N.pi
-                    elif ang-self.angPrev < -N.pi:
+                        angleOffset -= 2.0*N.pi
+                    elif angleOffset-self.angleOffsetPrev < -N.pi:
                         self.unwind += 2.0*N.pi
-                        ang += 2.0*N.pi
-                    self.angPrev = ang
+                        angleOffset += 2.0*N.pi
+                    self.angleOffsetPrev = angleOffset
                     
-                    ang_filtered = self.lpOffsetAng.Update(ang, time)
-                    (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(mag, time), -self.maxOffset, self.maxOffset),
-                                                                         ang_filtered)
+                    angleOffsetF = self.lpOffsetAng.Update(angleOffset, time)
+                    (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(magOffset, time), -self.maxOffset, self.maxOffset),
+                                                                         angleOffsetF)
                 else:
                     self.ptOffset = Point(x=0, y=0, z=0)
             
@@ -377,11 +371,6 @@ class Fly:
                                         self.name+"Contour",
                                         "Plate")
 
-                # TEST CODE
-#                self.state.pose.position.x = 30 * N.cos(self.theta)
-#                self.state.pose.position.y = 30 * N.sin(self.theta)
-#                self.theta += 0.05
-            
                 
                 # Send the Filtered transform.
                 q = self.state.pose.orientation

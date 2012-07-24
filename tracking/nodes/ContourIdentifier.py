@@ -81,7 +81,8 @@ class ContourIdentifier:
         self.xSave = []
         self.ySave = []
         self.iSave = 0
-
+        self.contouranglePrev = 0.0
+        
         self.pubMarker = rospy.Publisher('visualization_marker', Marker)
         self.markerArena = Marker(header=Header(stamp = rospy.Time.now(),
                                                 frame_id='/Plate'),
