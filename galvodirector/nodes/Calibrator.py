@@ -63,7 +63,7 @@ class GalvoCalibrator:
                             Point(x=2.5, y=2.0), 
                             Point(x=3.0, y=2.0), 
                             
-                            Point(x=-5.0, y=3.0),
+                            #Point(x=-5.0, y=3.0),
                             Point(x=-3.0, y=3.0),
                             Point(x=-2.0, y=3.0),
                             Point(x=-1.0, y=3.0),
@@ -74,8 +74,8 @@ class GalvoCalibrator:
                             Point(x=3.0, y=3.0), 
                             Point(x=3.5, y=3.0), 
                             
-                            Point(x=-5.0, y=4.0),
-                            Point(x=-4.5, y=4.0),
+                            #Point(x=-5.0, y=4.0),
+                            #Point(x=-4.5, y=4.0),
                             Point(x=-4.0, y=4.0),
                             Point(x=-3.5, y=4.0),
                             Point(x=-3.0, y=4.0),

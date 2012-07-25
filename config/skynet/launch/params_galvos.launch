@@ -11,10 +11,10 @@
 
 	<param name="galvodriver/hzPoint" type="double" value="262144.0"/>
 	
-	<param name="galvodirector/mx" type="double" value="0.05111587" />
-	<param name="galvodirector/bx" type="double" value="-0.90610801" />
-	<param name="galvodirector/my" type="double" value="-0.05003545" />
-	<param name="galvodirector/by" type="double" value="3.15307329" />
+	<param name="galvodirector/mx" type="double" value="-0.00157858" />
+	<param name="galvodirector/bx" type="double" value="-0.36469855" />
+	<param name="galvodirector/my" type="double" value="0.01458103" />
+	<param name="galvodirector/by" type="double" value="3.43674359" />
 
 </launch>
 	

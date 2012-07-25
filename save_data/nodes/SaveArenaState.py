@@ -63,7 +63,49 @@ class SaveArenaState:
         self.format_type = "f"
         
         self.headingsExperiment = 'date_time, description, maxTrials, trial, waitEntry, trigger1DistanceMin, trigger1DistanceMax, trigger1SpeedMin, trigger1SpeedMax, trigger1AngleMin, trigger1AngleMax, trigger1AngleTest, trigger1AngleTestBilateral, trigger1TimeHold, trigger2DistanceMin, trigger2DistanceMax, trigger2SpeedMin, trigger2SpeedMax, trigger2AngleMin, trigger2AngleMax, trigger2AngleTest, trigger2AngleTestBilateral, trigger2TimeHold, robot_width, robot_height, robot_visible, robot_paint, robot_scent, movePatternShape, movePatternHz, movePatternHzPoint, movePatternCount, movePatternSizeX, movePatternSizeY, moveRelTracking, moveRelOriginPosition, moveRelOriginAngle, moveRelDistance, moveRelAngle, moveRelAngleType, moveRelSpeed, moveRelSpeedType, moveRelTolerance\n'
-        self.templateExperiment = '{date_time:s}, {description:s}, {maxTrials:>4d}, {trial:>4d}, {waitEntry:> 7.4f}, {trigger1DistanceMin:> 7.4f}, {trigger1DistanceMax:> 7.4f}, {trigger1SpeedMin:> 7.4f}, {trigger1SpeedMax:> 7.4f}, {trigger1AngleMin:> 7.4f}, {trigger1AngleMax:> 7.4f}, {trigger1AngleTest:s}, {trigger1AngleTestBilateral:>d}, {trigger1TimeHold:> 7.4f}, {trigger2DistanceMin:> 7.4f}, {trigger2DistanceMax:> 7.4f}, {trigger2SpeedMin:> 7.4f}, {trigger2SpeedMax:> 7.4f}, {trigger2AngleMin:> 7.4f}, {trigger2AngleMax:> 7.4f}, {trigger2AngleTest:s}, {trigger2AngleTestBilateral:>d}, {trigger2TimeHold:> 7.4f}, {robot_width:>6.3f}, {robot_height:>6.3f}, {robot_visible:>d}, {robot_paint:s}, {robot_scent:s}, {movePatternShape:s}, {movePatternHz:> 7.4f}, {movePatternHzPoint:> 7.4f}, {movePatternCount:>d}, {movePatternSizeX:> 7.4f}, {movePatternSizeY:> 7.4f}, {moveRelTracking:>d}, {moveRelOriginPosition:s}, {moveRelOriginAngle:s}, {moveRelDistance:> 7.4f}, {moveRelAngle:> 7.4f}, {moveRelAngleType:s}, {moveRelSpeed:> 7.4f}, {moveRelSpeedType:s}, {moveRelTolerance:> 7.4f}\n\n'
+        self.templateExperiment = '{date_time:s}, '\
+                                  '{description:s}, '\
+                                  '{maxTrials:s}, '\
+                                  '{trial:s}, '\
+                                  '{waitEntry:s}, '\
+                                  '{trigger1DistanceMin:s}, '\
+                                  '{trigger1DistanceMax:s}, '\
+                                  '{trigger1SpeedMin:s}, '\
+                                  '{trigger1SpeedMax:s}, '\
+                                  '{trigger1AngleMin:s}, '\
+                                  '{trigger1AngleMax:s}, '\
+                                  '{trigger1AngleTest:s}, '\
+                                  '{trigger1AngleTestBilateral:s}, '\
+                                  '{trigger1TimeHold:s}, '\
+                                  '{trigger2DistanceMin:s}, '\
+                                  '{trigger2DistanceMax:s}, '\
+                                  '{trigger2SpeedMin:s}, '\
+                                  '{trigger2SpeedMax:s}, '\
+                                  '{trigger2AngleMin:s}, '\
+                                  '{trigger2AngleMax:s}, '\
+                                  '{trigger2AngleTest:s}, '\
+                                  '{trigger2AngleTestBilateral:s}, '\
+                                  '{trigger2TimeHold:s}, '\
+                                  '{robot_width:s}, '\
+                                  '{robot_height:s}, '\
+                                  '{robot_visible:s}, '\
+                                  '{robot_paint:s}, '\
+                                  '{robot_scent:s}, '\
+                                  '{movePatternShape:s}, '\
+                                  '{movePatternHz:s}, '\
+                                  '{movePatternHzPoint:s}, '\
+                                  '{movePatternCount:s}, '\
+                                  '{movePatternSizeX:s}, '\
+                                  '{movePatternSizeY:s}, '\
+                                  '{moveRelTracking:s}, '\
+                                  '{moveRelOriginPosition:s}, '\
+                                  '{moveRelOriginAngle:s}, '\
+                                  '{moveRelDistance:s}, '\
+                                  '{moveRelAngle:s}, '\
+                                  '{moveRelAngleType:s}, '\
+                                  '{moveRelSpeed:s}, '\
+                                  '{moveRelSpeedType:s}, '\
+                                  '{moveRelTolerance:s}\n\n'
 
         self.headingsAbsolute = 'time, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly, xRobotRel, yRobotRel, aRobotRel, dRobotRel\n'
         self.templateAbsolute = '{time:0.4f}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}, {xRobotRel:{align}{sign}{width}.{precision}{type}}, {yRobotRel:{align}{sign}{width}.{precision}{type}}, {aRobotRel:{align}{sign}{width}.{precision}{type}}, {dRobotRel:{align}{sign}{width}.{precision}{type}}\n'
@@ -128,48 +170,48 @@ class SaveArenaState:
                 with self.lock:
                     self.fid.write(self.headingsExperiment)
                 header_row = self.templateExperiment.format(date_time                  = str(rospy.Time.now().to_sec()),
-                                                            description                = experimentparamsReq.experiment.description,
-                                                            maxTrials                  = experimentparamsReq.experiment.maxTrials,
-                                                            trial                      = experimentparamsReq.experiment.trial,
-                                                            waitEntry                  = experimentparamsReq.waitEntry,
-                                                            trigger1DistanceMin        = experimentparamsReq.triggerEntry.distanceMin,
-                                                            trigger1DistanceMax        = experimentparamsReq.triggerEntry.distanceMax,
-                                                            trigger1SpeedMin           = experimentparamsReq.triggerEntry.speedMin,
-                                                            trigger1SpeedMax           = experimentparamsReq.triggerEntry.speedMax,
-                                                            trigger1AngleMin           = experimentparamsReq.triggerEntry.angleMin,
-                                                            trigger1AngleMax           = experimentparamsReq.triggerEntry.angleMax,
-                                                            trigger1AngleTest          = experimentparamsReq.triggerEntry.angleTest,
-                                                            trigger1AngleTestBilateral = experimentparamsReq.triggerEntry.angleTestBilateral,
-                                                            trigger1TimeHold           = experimentparamsReq.triggerEntry.timeHold,
-                                                            trigger2DistanceMin        = experimentparamsReq.triggerExit.distanceMin,
-                                                            trigger2DistanceMax        = experimentparamsReq.triggerExit.distanceMax,
-                                                            trigger2SpeedMin           = experimentparamsReq.triggerExit.speedMin,
-                                                            trigger2SpeedMax           = experimentparamsReq.triggerExit.speedMax,
-                                                            trigger2AngleMin           = experimentparamsReq.triggerExit.angleMin,
-                                                            trigger2AngleMax           = experimentparamsReq.triggerExit.angleMax,
-                                                            trigger2AngleTest          = experimentparamsReq.triggerExit.angleTest,
-                                                            trigger2AngleTestBilateral = experimentparamsReq.triggerExit.angleTestBilateral,
-                                                            trigger2TimeHold           = experimentparamsReq.triggerExit.timeHold,
-                                                            robot_width                = self.robot_width,
-                                                            robot_height               = self.robot_height,
-                                                            robot_visible              = self.robot_visible,
+                                                            description                = str(experimentparamsReq.experiment.description),
+                                                            maxTrials                  = str(experimentparamsReq.experiment.maxTrials),
+                                                            trial                      = str(experimentparamsReq.experiment.trial),
+                                                            waitEntry                  = str(experimentparamsReq.waitEntry),
+                                                            trigger1DistanceMin        = str(experimentparamsReq.triggerEntry.distanceMin),
+                                                            trigger1DistanceMax        = str(experimentparamsReq.triggerEntry.distanceMax),
+                                                            trigger1SpeedMin           = str(experimentparamsReq.triggerEntry.speedMin),
+                                                            trigger1SpeedMax           = str(experimentparamsReq.triggerEntry.speedMax),
+                                                            trigger1AngleMin           = str(experimentparamsReq.triggerEntry.angleMin),
+                                                            trigger1AngleMax           = str(experimentparamsReq.triggerEntry.angleMax),
+                                                            trigger1AngleTest          = str(experimentparamsReq.triggerEntry.angleTest),
+                                                            trigger1AngleTestBilateral = str(experimentparamsReq.triggerEntry.angleTestBilateral),
+                                                            trigger1TimeHold           = str(experimentparamsReq.triggerEntry.timeHold),
+                                                            trigger2DistanceMin        = str(experimentparamsReq.triggerExit.distanceMin),
+                                                            trigger2DistanceMax        = str(experimentparamsReq.triggerExit.distanceMax),
+                                                            trigger2SpeedMin           = str(experimentparamsReq.triggerExit.speedMin),
+                                                            trigger2SpeedMax           = str(experimentparamsReq.triggerExit.speedMax),
+                                                            trigger2AngleMin           = str(experimentparamsReq.triggerExit.angleMin),
+                                                            trigger2AngleMax           = str(experimentparamsReq.triggerExit.angleMax),
+                                                            trigger2AngleTest          = str(experimentparamsReq.triggerExit.angleTest),
+                                                            trigger2AngleTestBilateral = str(experimentparamsReq.triggerExit.angleTestBilateral),
+                                                            trigger2TimeHold           = str(experimentparamsReq.triggerExit.timeHold),
+                                                            robot_width                = str(self.robot_width),
+                                                            robot_height               = str(self.robot_height),
+                                                            robot_visible              = str(self.robot_visible),
                                                             robot_paint                = str(self.robot_paint),
                                                             robot_scent                = str(self.robot_scent),
-                                                            movePatternShape           = experimentparamsReq.move.pattern.shape,
-                                                            movePatternHz              = experimentparamsReq.move.pattern.hzPattern,
-                                                            movePatternHzPoint         = experimentparamsReq.move.pattern.hzPoint,
-                                                            movePatternCount           = experimentparamsReq.move.pattern.count,
-                                                            movePatternSizeX           = experimentparamsReq.move.pattern.size.x,
-                                                            movePatternSizeY           = experimentparamsReq.move.pattern.size.y,
-                                                            moveRelTracking            = experimentparamsReq.move.relative.tracking,
-                                                            moveRelOriginPosition      = experimentparamsReq.move.relative.frameidOriginPosition,
-                                                            moveRelOriginAngle         = experimentparamsReq.move.relative.frameidOriginAngle,
-                                                            moveRelDistance            = experimentparamsReq.move.relative.distance,
-                                                            moveRelAngle               = experimentparamsReq.move.relative.angle,
-                                                            moveRelAngleType           = experimentparamsReq.move.relative.angleType,
-                                                            moveRelSpeed               = experimentparamsReq.move.relative.speed,
-                                                            moveRelSpeedType           = experimentparamsReq.move.relative.speedType,
-                                                            moveRelTolerance           = experimentparamsReq.move.relative.tolerance,
+                                                            movePatternShape           = str(experimentparamsReq.move.pattern.shape),
+                                                            movePatternHz              = str(experimentparamsReq.move.pattern.hzPattern),
+                                                            movePatternHzPoint         = str(experimentparamsReq.move.pattern.hzPoint),
+                                                            movePatternCount           = str(experimentparamsReq.move.pattern.count),
+                                                            movePatternSizeX           = str(experimentparamsReq.move.pattern.size.x),
+                                                            movePatternSizeY           = str(experimentparamsReq.move.pattern.size.y),
+                                                            moveRelTracking            = str(experimentparamsReq.move.relative.tracking),
+                                                            moveRelOriginPosition      = str(experimentparamsReq.move.relative.frameidOriginPosition),
+                                                            moveRelOriginAngle         = str(experimentparamsReq.move.relative.frameidOriginAngle),
+                                                            moveRelDistance            = str(experimentparamsReq.move.relative.distance),
+                                                            moveRelAngle               = str(experimentparamsReq.move.relative.angle),
+                                                            moveRelAngleType           = str(experimentparamsReq.move.relative.angleType),
+                                                            moveRelSpeed               = str(experimentparamsReq.move.relative.speed),
+                                                            moveRelSpeedType           = str(experimentparamsReq.move.relative.speedType),
+                                                            moveRelTolerance           = str(experimentparamsReq.move.relative.tolerance),
                                                             )
 
                 with self.lock:

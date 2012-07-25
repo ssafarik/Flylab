@@ -247,7 +247,7 @@ class Fly:
                 self.lpAngleContour.Update(self.contour.angle, contour.header.stamp.to_sec())#self.contour.header.stamp.to_sec())
                 
                 
-                if N.abs(self.contour.x) > 9999 or N.abs(xKalman)>9999:
+                if N.abs(self.contour.x)>9999 or N.abs(xKalman)>9999:
                     rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check the parameter camera/diff_threshold.' % (self.contour.x, xKalman))
 
 
@@ -267,8 +267,8 @@ class Fly:
                 vz = vzKalman
             else: # Use the unfiltered data for the case where the filters return None results.
                 rospy.logwarn('FLY Kalman filter returned \'None\' at %s, %s' % ([self.contour.x, self.contour.y], contour.header.stamp.to_sec()))
-                x = self.contour.x
-                y = self.contour.y
+                x = 0.0#self.contour.x
+                y = 0.0#self.contour.y
                 z = 0.0
                 vx = 0.0
                 vy = 0.0
@@ -285,20 +285,19 @@ class Fly:
             self.state.velocity.linear.y = vy
             self.state.velocity.linear.z = vz
 
+            # Get the angular velocities.
             if self.isVisible:
                 try:
                     ((vx2,vy2,vz2),(wx,wy,wz)) = self.tfrx.lookupTwist(self.name, self.state.header.frame_id, self.state.header.stamp-self.dtVelocity, self.dtVelocity)
                 except (tf.Exception, AttributeError), e:
                     ((vx2,vy2,vz2),(wx,wy,wz)) = ((0,0,0),(0,0,0))
                     #rospy.logwarn('lookupTwist() Exception: %s' % e)
-                    
-                self.state.velocity.angular.x = wx
-                self.state.velocity.angular.y = wy
-                self.state.velocity.angular.z = wz
             else:
-                self.state.velocity.angular.x = 0.0
-                self.state.velocity.angular.y = 0.0
-                self.state.velocity.angular.z = 0.0
+                ((vx2,vy2,vz2),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+
+            self.state.velocity.angular.x = wx
+            self.state.velocity.angular.y = wy
+            self.state.velocity.angular.z = wz
                 
             speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
             self.speed = self.lpSpeed.Update(speedPre, self.state.header.stamp.to_sec())
@@ -375,7 +374,7 @@ class Fly:
             
 
                 
-                # Send the Raw transform.
+            # Send the Raw transform.
             if self.isVisible:
                 self.tfbx.sendTransform((self.contour.x, 
                                          self.contour.y, 
@@ -384,17 +383,17 @@ class Fly:
                                         self.contour.header.stamp,
                                         self.name+"Contour",
                                         "Plate")
-
             
             # Send the Filtered transform.
-            q = self.state.pose.orientation
-            self.tfbx.sendTransform((self.state.pose.position.x, 
-                                     self.state.pose.position.y, 
-                                     self.state.pose.position.z),
-                                    (q.x, q.y, q.z, q.w),
-                                    self.state.header.stamp,
-                                    self.name,
-                                    self.state.header.frame_id)
+            if self.state.pose.position.x is not None:
+                q = self.state.pose.orientation
+                self.tfbx.sendTransform((self.state.pose.position.x, 
+                                         self.state.pose.position.y, 
+                                         self.state.pose.position.z),
+                                        (q.x, q.y, q.z, q.w),
+                                        self.state.header.stamp,
+                                        self.name,
+                                        self.state.header.frame_id)
 
             # Publish a 3D model marker for the robot.
             if 'Robot' in self.name:

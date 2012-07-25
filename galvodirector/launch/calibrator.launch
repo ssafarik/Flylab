@@ -4,11 +4,10 @@
     <!--                                                              -->
     <!-- 1. rm /cameras/background.png                                -->
     <!-- 2. Turn off the backlight.                                   -->
-    <!-- 3. Set the hzPoint rate in params_galvos.launch to 240       -->
-    <!-- 4. roslaunch galvodirector calibrator.launch                 -->
-    <!-- 5. run the galvodriver on the galvobox.                      -->
-    <!-- 6. After the "Saving background" message, turn on the laser. -->
-    <!-- 7. Adjust laser power and/or param camera/diff_threshold     -->
+    <!-- 3. roslaunch galvodirector calibrator.launch                 -->
+    <!-- 4. run the galvodriver on the galvobox.                      -->
+    <!-- 5. After the "Saving background" message, turn on the laser. -->
+    <!-- 6. Adjust laser power and/or param camera/diff_threshold     -->
     <!--    to get good readings.                                     -->
 	<!-- ==========================================================   -->
 
@@ -18,7 +17,7 @@
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find robots)/launch/robots_0.launch" />
-	<include file="$(find flies)/launch/flies_3.launch" />
+	<include file="$(find flies)/launch/flies_1.launch" />
 
 	<param name="galvodriver/hzPoint" type="double" value="240.0"/>
 	<node pkg="galvodirector" type="Calibrator.py" name="GalvoCalibrator" />

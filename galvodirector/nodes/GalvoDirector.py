@@ -166,12 +166,13 @@ class GalvoDirector:
                     #t1 = rospy.Time.now().to_sec()
                     
                     # Use latest time.
-                    if ('Fly' in pointcloud_template.header.frame_id) and len(self.arenastate.flies)>0:
-                        pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp # BUG: Need to make this use the correct fly #.
-                    else:
-                        pointcloud_template.header.stamp = rospy.Time.now() 
+                    if False:
+                        if ('Fly' in pointcloud_template.header.frame_id) and len(self.arenastate.flies)>0:
+                            pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp # BUG: Need to make this use the correct fly #.
+                        else:
+                            pointcloud_template.header.stamp = rospy.Time.now() 
         
-                    if False: # Use latest common time.
+                    if True: # Use latest common time.
                         try:
                             pointcloud_template.header.stamp = self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id)
                         except tf.Exception:
@@ -196,6 +197,8 @@ class GalvoDirector:
                             rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
                         else:
                             self.pointcloud_list.append(pointcloud)
+                    else:
+                        rospy.logwarn ('Cannot transform from frame %s at %s' % (pointcloud_template.header.frame_id, pointcloud_template.header.stamp))
     
                     #t3 = rospy.Time.now().to_sec()
                     #rospy.logwarn('GalvoDirector, stamp=%s, wait dt=%0.5f, transform dt=%0.5f' % (pointcloud_template.header.stamp,(t2-t1),(t3-t2))) # BUG: Occasional 0.01 sec times.

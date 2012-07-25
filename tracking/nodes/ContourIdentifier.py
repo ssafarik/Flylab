@@ -495,11 +495,12 @@ class ContourIdentifier:
         # Match objects with contours.
         #rospy.logwarn ('GetDistanceMatrixFromContours()')
         for m in range(len(xyObjects)):
-            self.tfbx.sendTransform((xyObjects[m][0], xyObjects[m][1], 0.0),
-                                    (0,0,0,1),
-                                    stamp,
-                                    "xyObjects"+str(m),
-                                    "Plate")
+            if (xyObjects[m][0] is not None) and (xyObjects[m][1] is not None):
+                self.tfbx.sendTransform((xyObjects[m][0], xyObjects[m][1], 0.0),
+                                        (0,0,0,1),
+                                        stamp,
+                                        "xyObjects"+str(m),
+                                        "Plate")
             
 
         for n in range(len(contoursAug)):
@@ -693,8 +694,8 @@ class ContourIdentifier:
 		    #rospy.logwarn('iFly_list=%s, len(mapContourFromObject)=%d' % (self.iFly_list,len(self.mapContourFromObject)))
                     for iFly in self.iFly_list:
                         #rospy.logwarn ('iFly=%d, self.mapContourFromObject=%s, len(self.objects)=%d' % (iFly, self.mapContourFromObject, len(self.objects)))
-                        if iFly<len(self.mapContourFromObject):
-                            if (self.mapContourFromObject[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
+#                        if iFly<len(self.mapContourFromObject):
+#                            if (self.mapContourFromObject[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
                                 arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
                                                                       pose = self.objects[iFly].state.pose,
                                                                       velocity = self.objects[iFly].state.velocity))

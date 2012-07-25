@@ -3,5 +3,5 @@ float64 			hzPattern
 float64 			hzPoint
 int32 				count  # -1 means forever
 geometry_msgs/Point size
-float64                         param
+float64             param
 
