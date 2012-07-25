@@ -16,21 +16,21 @@
   <!-- =================================================================== -->
   
   <!-- The mask circle in camera coordinates (i.e. pixels).    -->
-  <param name="camera/mask/x" type="double" value="440"/>
-  <param name="camera/mask/y" type="double" value="299"/>
-  <param name="camera/mask/radius" type="double" value="168"/>  <!-- pixels -->
+  <param name="camera/mask/x" type="double" value="441"/>
+  <param name="camera/mask/y" type="double" value="312"/>
+  <param name="camera/mask/radius" type="double" value="288"/>  <!-- pixels -->
 
   <param name="calibration/checker_size" type="double" value="7.5" />
 
 
 
   <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
-  <param name="camera_plate_rvec_0" type="double" value="3.124"/>
-  <param name="camera_plate_rvec_1" type="double" value="0.016"/>
-  <param name="camera_plate_rvec_2" type="double" value="0.142"/>
-  <param name="camera_plate_tvec_0" type="double" value="124.5"/> <!-- 81 Adjust for camera/plate alignment here. -->
-  <param name="camera_plate_tvec_1" type="double" value="89.2"/> <!-- 56.3 Adjust for camera/plate alignment here. -->
-  <param name="camera_plate_tvec_2" type="double" value="275.6"/>
+  <param name="camera_plate_rvec_0" type="double" value="-3.14159"/>
+  <param name="camera_plate_rvec_1" type="double" value="0.000"/>
+  <param name="camera_plate_rvec_2" type="double" value="-0.000"/>
+  <param name="camera_plate_tvec_0" type="double" value="83.5"/> <!-- Adjust for camera/plate alignment here. -->
+  <param name="camera_plate_tvec_1" type="double" value = "58.5"/> <!-- 56.3 Adjust for camera/plate alignment here. -->
+  <param name="camera_plate_tvec_2" type="double" value="233.36"/>
   
 
   <!-- ================================================================== -->
