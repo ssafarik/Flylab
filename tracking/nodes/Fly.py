@@ -131,9 +131,9 @@ class Fly:
     #   
     def GetNextFlipUpdate(self):
         # Get the prior flip value.
-        flipvaluePrev = self.lpFlip.GetValue()
-        if flipvaluePrev is None:
-            flipvaluePrev = 0.0
+        flipvalueMagPrev = self.lpFlip.GetValue()
+        if flipvalueMagPrev is None:
+            flipvalueMagPrev = 0.0
 
 
         angleContour         = self.lpAngleContour.GetValue()
@@ -150,15 +150,18 @@ class Fly:
             flipvalueSign = -1.0 # Flipped
 
 
-        eccmetric = (self.contour.ecc + 1/self.contour.ecc) - 1 #self.contour.ecc#
+        if self.contour.ecc is not None:
+            eccmetric = (self.contour.ecc + 1/self.contour.ecc) - 1 #self.contour.ecc#
+        else:
+            eccmetric = 1.0
         #rospy.logwarn('%s: eccmetric=%0.2f' % (self.name, eccmetric))
 
 
-        flipvalueMag = flipvaluePrev#N.abs(flipvaluePrev)
+        flipvalueMag = flipvalueMagPrev#N.abs(flipvalueMagPrev)
         if (eccmetric > 1.5):
             # Weight the prev/new values based on speed.                
             #alpha = 10.0/(10.0+self.speed)
-            #flipvalueMag = (alpha * N.abs(flipvaluePrev)) + ((1.0-alpha) * 1.0) 
+            #flipvalueMag = (alpha * N.abs(flipvalueMagPrev)) + ((1.0-alpha) * 1.0) 
     
             # Either use +-1, or use the previous value.
             if (self.speed > self.speedThresholdForTravel):
@@ -168,7 +171,7 @@ class Fly:
         flipvalueUpdate = flipvalueSign * flipvalueMag
         
         #if 'Fly1' in self.name:
-        #    rospy.logwarn('%s: flipvalue %0.2f, %0.2f, %0.2f' % (self.name, flipvaluePrev,flipvalueWeighted,flipvalueNew))
+        #    rospy.logwarn('%s: flipvalue %0.2f, %0.2f, %0.2f' % (self.name, flipvalueMagPrev,flipvalueWeighted,flipvalueNew))
 
 
         return flipvalueUpdate
@@ -191,10 +194,9 @@ class Fly:
             flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contour.header.stamp.to_sec())
                 
         # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
-        if (self.contour is not None) and (isinstance(self.contour.angle,float)):
-            d = N.abs(CircleFunctions.circle_dist(self.lpAngleContour.GetValue(), self.angleContourPrev))
-            if (d > (N.pi/2.0)):
-                self.lpFlip.SetValue(-self.lpFlip.GetValue())
+        d = N.abs(CircleFunctions.circle_dist(self.lpAngleContour.GetValue(), self.angleContourPrev))
+        if (d > (N.pi/2.0)):
+            self.lpFlip.SetValue(-self.lpFlip.GetValue())
 
 
     def GetResolvedAngle(self):
@@ -214,17 +216,16 @@ class Fly:
     # Update the current state using the visual position and the computed position (if applicable)
     def Update(self, contour, ptComputed):
         if self.initialized:
-            if (contour is not None):
-                time = contour.header.stamp.to_sec()
-            else:
-                time = rospy.Time.now().to_sec()
-                
             self.angleContourPrev = self.lpAngleContour.GetValue()
             self.contour = contour
             
             # Update the position & orientation filters
             self.isVisible = False            
-            if (self.contour is not None):
+            if (self.contour.x is not None) and \
+               (self.contour.y is not None) and \
+               (self.contour.angle is not None) and \
+               (self.contour.area is not None) and \
+               (self.contour.ecc is not None):
                 # Update min/max ecc & area.
                 if contour.ecc < self.eccMin:
                     self.eccMin = contour.ecc
@@ -239,69 +240,81 @@ class Fly:
                 self.areaSum += contour.area
                 self.areaCount += 1
                 
-                if (self.contour.x is not None) and (self.contour.y is not None) and (self.contour.angle is not None):
-                    self.isVisible = True
-                    (x,y,vx,vy) = self.kfState.Update((self.contour.x, self.contour.y), time)
-                    (z, vz) = (0.0, 0.0)
-                    #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
-                    self.lpAngleContour.Update(self.contour.angle, time)#self.contour.header.stamp.to_sec())
-                    
-                    
-                    if N.abs(self.contour.x) > 9999 or N.abs(x)>9999:
-                        rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check the parameter camera/diff_threshold.' % (self.contour.x, x))
+                self.isVisible = True
+                (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contour.x, self.contour.y), contour.header.stamp.to_sec())
+                (zKalman, vzKalman) = (0.0, 0.0)
+                #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
+                self.lpAngleContour.Update(self.contour.angle, contour.header.stamp.to_sec())#self.contour.header.stamp.to_sec())
+                
+                
+                if N.abs(self.contour.x) > 9999 or N.abs(xKalman)>9999:
+                    rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check the parameter camera/diff_threshold.' % (self.contour.x, xKalman))
 
 
-                # Use the unfiltered data for the case where the filters return None results.
-                if self.isVisible and ((x is None) or (y is None)):
-                    rospy.logwarn('FLY Kalman filter returned \'None\' at %s, %s' % ([self.contour.x, self.contour.y], time))
-                    x = self.contour.x
-                    y = self.contour.y
-                    z = 0.0
-                    vx = 0.0
-                    vy = 0.0
-                    vz = 0.0
-
-            else: # self.contour is None
+            else: # We don't have a contour.
                 #rospy.logwarn('FLY No contour seen for %s; check your nFlies parameter.' % self.name)
-                (x,y,vx,vy) = self.kfState.Update(None, time)
-                (z, vz) = (0.0, 0.0)
+                (xKalman, yKalman, vxKalman, vyKalman) = self.kfState.Update(None, contour.header.stamp.to_sec())
+                (zKalman, vzKalman) = (0.0, 0.0)
+
                 
+            # If good data, then use it.
+            if (xKalman is not None) and (yKalman is not None):
+                x = xKalman
+                y = yKalman
+                z = zKalman
+                vx = vxKalman
+                vy = vyKalman
+                vz = vzKalman
+            else: # Use the unfiltered data for the case where the filters return None results.
+                rospy.logwarn('FLY Kalman filter returned \'None\' at %s, %s' % ([self.contour.x, self.contour.y], contour.header.stamp.to_sec()))
+                x = self.contour.x
+                y = self.contour.y
+                z = 0.0
+                vx = 0.0
+                vy = 0.0
+                vz = 0.0
+
                 
+            # Store the latest state.
+            self.state.header.stamp = self.contour.header.stamp
+            self.state.pose.position.x = x
+            self.state.pose.position.y = y
+            self.state.pose.position.z = z
+            #self.state.pose.orientation comes from self.GetResolvedAngle() later.
+            self.state.velocity.linear.x = vx
+            self.state.velocity.linear.y = vy
+            self.state.velocity.linear.z = vz
+
             if self.isVisible:
-                # Store the latest state.
-                self.state.header.stamp = self.contour.header.stamp
-                self.state.pose.position.x = x
-                self.state.pose.position.y = y
-                self.state.pose.position.z = z
-                #self.state.pose.orientation comes from self.ResolveOrientation() later.
                 try:
                     ((vx2,vy2,vz2),(wx,wy,wz)) = self.tfrx.lookupTwist(self.name, self.state.header.frame_id, self.state.header.stamp-self.dtVelocity, self.dtVelocity)
                 except (tf.Exception, AttributeError), e:
                     ((vx2,vy2,vz2),(wx,wy,wz)) = ((0,0,0),(0,0,0))
                     #rospy.logwarn('lookupTwist() Exception: %s' % e)
                     
-                self.state.velocity.linear.x = vx
-                self.state.velocity.linear.y = vy
-                self.state.velocity.linear.z = vz
                 self.state.velocity.angular.x = wx
                 self.state.velocity.angular.y = wy
                 self.state.velocity.angular.z = wz
-                speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
-                self.speed = self.lpSpeed.Update(speedPre, self.state.header.stamp.to_sec())
+            else:
+                self.state.velocity.angular.x = 0.0
+                self.state.velocity.angular.y = 0.0
+                self.state.velocity.angular.z = 0.0
                 
-#                if 'Fly1' in self.name:
-#                    rospy.logwarn('speed=%0.2f, flip=%0.2f' % (self.speed, self.lpFlip.GetValue()))
+            speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
+            self.speed = self.lpSpeed.Update(speedPre, self.state.header.stamp.to_sec())
+                
+#            if 'Fly1' in self.name:
+#                rospy.logwarn('speed=%0.2f, flip=%0.2f' % (self.speed, self.lpFlip.GetValue()))
 
-                # Update the most recent angle of travel.
-                self.SetAngleOfTravel()
-                self.UpdateFlipState()
-                angle = self.GetResolvedAngle()
+            # Update the most recent angle of travel.
+            self.SetAngleOfTravel()
+            self.UpdateFlipState()
+            angle = self.GetResolvedAngle()
+            
+            (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = tf.transformations.quaternion_about_axis(angle, (0,0,1))
                 
-                (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = \
-                    tf.transformations.quaternion_about_axis(angle, (0,0,1))
-                
-                # Update the tool offset.
-                if ptComputed is not None:
+            # Update the tool offset.
+            if ptComputed is not None:
 #                    marker = Marker(header=Header(stamp=rospy.Time.now(),
 #                                                        frame_id='Plate'),
 #                                          ns='kalman',
@@ -339,30 +352,31 @@ class Fly:
 #                                          lifetime=rospy.Duration(1.0))
 #                    self.pubMarker.publish(marker)
 
-                    # The offset.
-                    xOffset = x-ptComputed.x
-                    yOffset = y-ptComputed.y
-                    
-                    # Filter the offset as magnitude & angle.
-                    (magOffset,angleOffset)=self.PolarFromXy(xOffset,yOffset)
-                    angleOffset += self.unwind
-                    if angleOffset-self.angleOffsetPrev > N.pi:
-                        self.unwind -= 2.0*N.pi
-                        angleOffset -= 2.0*N.pi
-                    elif angleOffset-self.angleOffsetPrev < -N.pi:
-                        self.unwind += 2.0*N.pi
-                        angleOffset += 2.0*N.pi
-                    self.angleOffsetPrev = angleOffset
-                    
-                    angleOffsetF = self.lpOffsetAng.Update(angleOffset, time)
-                    (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(magOffset, time), -self.maxOffset, self.maxOffset),
-                                                                         angleOffsetF)
-                else:
-                    self.ptOffset = Point(x=0, y=0, z=0)
+                # The offset.
+                xOffset = x-ptComputed.x
+                yOffset = y-ptComputed.y
+                
+                # Filter the offset as magnitude & angle.
+                (magOffset,angleOffset)=self.PolarFromXy(xOffset,yOffset)
+                angleOffset += self.unwind
+                if angleOffset-self.angleOffsetPrev > N.pi:
+                    self.unwind -= 2.0*N.pi
+                    angleOffset -= 2.0*N.pi
+                elif angleOffset-self.angleOffsetPrev < -N.pi:
+                    self.unwind += 2.0*N.pi# Use the unfiltered data for the case where the filters return None results.
+                    angleOffset += 2.0*N.pi
+                self.angleOffsetPrev = angleOffset
+                
+                angleOffsetF = self.lpOffsetAng.Update(angleOffset, contour.header.stamp.to_sec())
+                (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(magOffset, contour.header.stamp.to_sec()), -self.maxOffset, self.maxOffset),
+                                                                     angleOffsetF)
+            else:
+                self.ptOffset = Point(x=0, y=0, z=0)
             
 
                 
                 # Send the Raw transform.
+            if self.isVisible:
                 self.tfbx.sendTransform((self.contour.x, 
                                          self.contour.y, 
                                          0.0),
@@ -371,38 +385,38 @@ class Fly:
                                         self.name+"Contour",
                                         "Plate")
 
-                
-                # Send the Filtered transform.
-                q = self.state.pose.orientation
-                self.tfbx.sendTransform((self.state.pose.position.x, 
-                                         self.state.pose.position.y, 
-                                         self.state.pose.position.z),
-                                        (q.x, q.y, q.z, q.w),
-                                        self.state.header.stamp,
-                                        self.name,
-                                        self.state.header.frame_id)
-
-                # Publish a 3D model marker for the robot.
-                if 'Robot' in self.name:
-                    markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
-                                                        frame_id='Plate'),
-                                          ns='robot',
-                                          id=1,
-                                          type=3, #cylinder,
-                                          action=0,
-                                          pose=Pose(position=Point(x=self.state.pose.position.x, 
-                                                                   y=self.state.pose.position.y, 
-                                                                   z=self.state.pose.position.z)),
-                                          scale=Vector3(x=self.robot_width,
-                                                        y=self.robot_length,
-                                                        z=self.robot_height),
-                                          color=ColorRGBA(a=0.7,
-                                                          r=0.5,
-                                                          g=0.5,
-                                                          b=0.5),
-                                          lifetime=rospy.Duration(0.5))
-                    self.pubMarker.publish(markerRobot)
-
             
+            # Send the Filtered transform.
+            q = self.state.pose.orientation
+            self.tfbx.sendTransform((self.state.pose.position.x, 
+                                     self.state.pose.position.y, 
+                                     self.state.pose.position.z),
+                                    (q.x, q.y, q.z, q.w),
+                                    self.state.header.stamp,
+                                    self.name,
+                                    self.state.header.frame_id)
+
+            # Publish a 3D model marker for the robot.
+            if 'Robot' in self.name:
+                markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
+                                                    frame_id='Plate'),
+                                      ns='robot',
+                                      id=1,
+                                      type=3, #cylinder,
+                                      action=0,
+                                      pose=Pose(position=Point(x=self.state.pose.position.x, 
+                                                               y=self.state.pose.position.y, 
+                                                               z=self.state.pose.position.z)),
+                                      scale=Vector3(x=self.robot_width,
+                                                    y=self.robot_length,
+                                                    z=self.robot_height),
+                                      color=ColorRGBA(a=0.7,
+                                                      r=0.5,
+                                                      g=0.5,
+                                                      b=0.5),
+                                      lifetime=rospy.Duration(0.5))
+                self.pubMarker.publish(markerRobot)
+
         
+    
 

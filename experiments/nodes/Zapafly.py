@@ -85,6 +85,22 @@ class ExperimentZapafly():
                                                                             preempt    = False,
                                                                             param      = 2), # Peano curve level.
                                                                  )
+
+#        # Draw a maze.
+#        self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+#                                                                        #shape      = '%s' % (iFly+1),
+#                                                                        #shape      = 'flylogo',
+#                                                                        shape      = 'grid',
+#                                                                        #shape      = 'constant',
+#                                                                        frame_id   = 'Plate',
+#                                                                        hzPattern  = 40.0,
+#                                                                        hzPoint    = 1000.0,
+#                                                                        count      = 1,
+#                                                                        size       = Point(x=120,
+#                                                                                           y=120),
+#                                                                        preempt    = False,
+#                                                                        param      = 2), # Peano curve level.
+#                                                             )
         self.experimentparams.lasertrack.timeout = -1
         
         self.experimentparams.triggerExit.enabled = True

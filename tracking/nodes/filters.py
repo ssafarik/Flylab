@@ -216,39 +216,31 @@ class KalmanFilter:
         
         self.measurement = cv.CreateMat(4,1,cv.GetElemType(self.kal.state_pre))
         self.t_previous = None
-        self.x_previous = None
-        self.y_previous = None
+        self.z_previous = None
 
 
     def Update(self, z, t=None):
+        # z=[x,y]
         if t is not None:
-            t_current = t
+            t_new = t
         else:
-            t_current = rospy.Time.now()
+            t_new = rospy.Time.now()
             
-        if z is not None:
-            x_current = z[0]
-            y_current = z[1]
-        #else:
-        #    x_current = 0.0
-        #    y_current = 0.0
-            
-
 
         if self.initialized:
             # Update the state transition matrix for dt.
-            self.dt = t_current - self.t_previous
+            self.dt = t_new - self.t_previous
             self.kal.transition_matrix[0,2] = self.dt
             self.kal.transition_matrix[1,3] = self.dt
                 
 
-            # Kalman Filtering                
-            state_pre = cv.KalmanPredict(self.kal)
-            if (z is not None) and (self.dt != 0):
-                self.measurement[0,0] = x_current
-                self.measurement[1,0] = y_current
-                self.measurement[2,0] = (x_current - self.x_previous) / self.dt
-                self.measurement[3,0] = (y_current - self.y_previous) / self.dt
+            # Kalman Filtering      
+            state_pre = cv.KalmanPredict(self.kal)          
+            if (z is not None) and (self.z_previous is not None) and (self.dt != 0):
+                self.measurement[0,0] = z[0]
+                self.measurement[1,0] = z[1]
+                self.measurement[2,0] = (z[0] - self.z_previous[0]) / self.dt
+                self.measurement[3,0] = (z[1] - self.z_previous[1]) / self.dt
     
                 state_post = cv.KalmanCorrect(self.kal, self.measurement)
                 x = state_post[0,0]
@@ -262,25 +254,24 @@ class KalmanFilter:
                 vy = state_pre[3,0]
                 rospy.loginfo('KF z==None -> x,y=%s' % [x,y])
                 
-            self.t_previous = t_current
-            self.x_previous = x
-            self.y_previous = y
-        else:
+            self.t_previous = t_new
+            self.z_previous = z
+
+        else: # not initialized.
             if (z is not None):
                 # Set initial conditions
-                x = x_current
-                y = y_current
+                x = z[0]
+                y = z[1]
                 vx = 0.0
                 vy = 0.0
-                cv.Set2D(self.kal.state_post, 0, 0, x_current)
-                cv.Set2D(self.kal.state_post, 1, 0, y_current)
+                cv.Set2D(self.kal.state_post, 0, 0, z[0])
+                cv.Set2D(self.kal.state_post, 1, 0, z[1])
                 cv.Set2D(self.kal.state_post, 2, 0, vx)
                 cv.Set2D(self.kal.state_post, 3, 0, vy)
-                rospy.loginfo ('FLT initialized kalman filter to %s' % [x_current, y_current, vx, vy])
+                rospy.loginfo ('FLT initialized kalman filter to %s' % [z[0], z[1], vx, vy])
 
-                self.t_previous = t_current
-                self.x_previous = x_current
-                self.y_previous = y_current
+                self.t_previous = t_new
+                self.z_previous = z
                 
                 self.initialized = True
             else:
