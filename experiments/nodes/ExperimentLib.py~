@@ -126,17 +126,17 @@ class TriggerService():
         
     def attach(self):
         for key in self.services:
-            #rospy.logwarn('Waiting for service: %s' % key)
+            rospy.logwarn('Waiting for service: %s' % key)
             rospy.wait_for_service(key)
             try:
                 self.services[key] = rospy.ServiceProxy(key, Trigger)
             except rospy.ServiceException, e:
                 rospy.logwarn ("FAILED %s: %s" % (key,e))
-	    #rospy.logwarn('Attached service: %s' % key)
+	    rospy.logwarn('Attached service: %s' % key)
             
         
     def notify(self, status):
-	#rospy.logwarn('Triggering: %s' % self.services)
+	rospy.logwarn('Triggering: %s' % self.services)
         for key,callback in self.services.iteritems():
             if callback is not None:
                 callback(status)
