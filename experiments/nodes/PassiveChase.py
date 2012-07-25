@@ -56,8 +56,8 @@ class ExperimentPassiveChase():
         self.experimentparams.move.pattern.hzPattern = 1/20
         self.experimentparams.move.pattern.hzPoint = 10
         self.experimentparams.move.pattern.count = -1
-        self.experimentparams.move.pattern.size.x = 20
-        self.experimentparams.move.pattern.size.y = 20
+        self.experimentparams.move.pattern.size.x = 33
+        self.experimentparams.move.pattern.size.y = 0
         self.experimentparams.move.timeout = 600
         
         self.experimentparams.lasertrack.enabled = False
