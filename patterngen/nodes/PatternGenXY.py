@@ -412,7 +412,8 @@ class PatternGenXY:
     
 
     def GetPointsGrid(self, pattern):
-        return self.GetPointsGridPeano(pattern)
+        points = self.GetPointsGridPeano(pattern)
+        return self.InterpolatePoints(points, 0.2)
 
 
     def GetPointsCharacter(self, pattern):
