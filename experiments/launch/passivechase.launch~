@@ -17,7 +17,7 @@
 	
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find robots)/launch/robot_3180h_1590w.launch" />
+	<include file="$(find robots)/launch/robot_0625h_0625w.launch" />
 	<include file="$(find robots)/launch/robots_1.launch" />
 	<include file="$(find flies)/launch/flies_1.launch" />
 
