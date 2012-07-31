@@ -248,7 +248,7 @@ class Fly:
                 
                 
                 if N.abs(self.contour.x)>9999 or N.abs(xKalman)>9999:
-                    rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check the parameter camera/diff_threshold.' % (self.contour.x, xKalman))
+                    rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check your background image, lighting, and the parameter camera/diff_threshold.' % (self.contour.x, xKalman))
 
 
             else: # We don't have a contour.

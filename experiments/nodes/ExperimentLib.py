@@ -98,7 +98,6 @@ def GetDistanceFlyToRobot (arenastate, iFly):
         dy = arenastate.robot.pose.position.y - arenastate.flies[iFly].pose.position.y
         distance = N.linalg.norm([dx,dy])
         
-    #rospy.loginfo('EL GetDistanceFlyToRobot()=%s' % distance)
     return distance
 
 
@@ -250,6 +249,7 @@ class TriggerOnStates (smach.State):
         self.arenastate = None
         self.rosrate = rospy.Rate(gRate)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
+        self.tfrx = tf.TransformListener()
 
         self.Trigger = TriggerService()
         self.Trigger.attach()
@@ -263,6 +263,21 @@ class TriggerOnStates (smach.State):
 
     def ArenaState_callback(self, arenastate):
         self.arenastate = arenastate
+
+
+    def GetDistanceFrameToFrame (self, frameid1, frameid2):
+        distance = None
+        try:
+            stamp = self.tfrx.getLatestCommonTime(frameid1, frameid2)
+            point2 = PointStamped(header=Header(frame_id=frameid2, stamp=stamp),
+                                  point=Point(x=0.0, y=0.0, z=0.0))
+            point1 = self.tfrx.transformPoint(frameid1, point2)
+        except tf.Exception:
+            pass
+        else:
+            distance = N.linalg.norm([point1.point.x, point1.point.y, point1.point.z])
+            
+        return distance
 
 
     def execute(self, userdata):
@@ -305,6 +320,7 @@ class TriggerOnStates (smach.State):
                         distance = None
                         if (dMin is not None) and (dMax is not None):
                             distance = GetDistanceFlyToRobot(self.arenastate, iFly)
+                            #distance = self.GetDistanceFrameToFrame('Fly1', 'Robot')
                             isDistanceInRange = False
                             if (dMin <= distance <= dMax):
                                 isDistanceInRange = True
@@ -787,6 +803,10 @@ class MoveRobot (smach.State):
 
 #######################################################################################################
 #######################################################################################################
+# Lasertrack()
+# 
+# Control the laser according to the experimentparams.  Turn off when done.
+#
 class Lasertrack (smach.State):
     def __init__(self):
 
@@ -814,6 +834,7 @@ class Lasertrack (smach.State):
     
             # Send the tracking command to the galvo director.
             command = MsgGalvoCommand()
+            command.enable_laser = True
             command.pattern_list = userdata.experimentparamsIn.lasertrack.pattern_list
             command.units = 'millimeters' # 'millimeters' or 'volts'
             self.pubGalvoCommand.publish(command)
@@ -830,6 +851,13 @@ class Lasertrack (smach.State):
                         break
                 
                 self.rosrate.sleep()
+
+                
+        # Turn off the laser.
+        command = MsgGalvoCommand()
+        command.enable_laser = False
+        self.pubGalvoCommand.publish(command)
+        
                 
         return rv
 

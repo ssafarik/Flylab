@@ -16,6 +16,8 @@
     <param name="galvodirector/my" type="double" value="-0.0498209" />
     <param name="galvodirector/by" type="double" value="3.3652245" />
     
+    <param name="galvodirector/xBeamDump" type="double" value="0.0" />  <!-- volts -->
+    <param name="galvodirector/yBeamDump" type="double" value="-10.0" />  <!-- volts -->
     
 </launch>
 	

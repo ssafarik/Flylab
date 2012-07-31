@@ -58,17 +58,31 @@ class GalvoDirector:
         rospy.core.add_client_shutdown_hook(self.Preshutdown_callback)
         rospy.on_shutdown(self.OnShutdown_callback)
         
+        # Calibration data (median values) to convert millimeters to volts, from "roslaunch galvodirector calibrator.launch".
+        self.mx = rospy.get_param('galvodirector/mx', 0.0) #0.05111587
+        self.bx = rospy.get_param('galvodirector/bx', 0.0) #-0.90610801
+        self.my = rospy.get_param('galvodirector/my', 0.0) #-0.05003545
+        self.by = rospy.get_param('galvodirector/by', 0.0) #3.15307329
+        
+        self.xBeamDump = rospy.get_param('galvodirector/xBeamDump', 0.0) # volts
+        self.yBeamDump = rospy.get_param('galvodirector/yBeamDump', 0.0) # volts
+
+        
         self.arenastate = ArenaState()
         self.pointcloudtemplate_list = []
         self.pointcloud_list = []
         self.frameid_list = []
         self.units = 'millimeters'
         
-        # Calibration data (median values) to convert millimeters to volts, from "roslaunch galvodirector calibrator.launch".
-        self.mx = rospy.get_param('galvodirector/mx', 0.0) #0.05111587
-        self.bx = rospy.get_param('galvodirector/bx', 0.0) #-0.90610801
-        self.my = rospy.get_param('galvodirector/my', 0.0) #-0.05003545
-        self.by = rospy.get_param('galvodirector/by', 0.0) #3.15307329
+        self.pointcloudBeamdump = PointCloud(header=Header(frame_id='Plate', 
+                                                           stamp=rospy.Time.now()),
+                                             points=[Point(x=self.xBeamDump, 
+                                                           y=self.yBeamDump, 
+                                                           z=0.0)],
+                                             channels=[ChannelFloat32(name='intensity',
+                                                                      values=[0.0])])
+                     
+        
         
         self.timePrev = rospy.Time.now().to_sec()
         
@@ -79,7 +93,7 @@ class GalvoDirector:
         # If any of the frames in frameid_list are updated, then publish the pointcloud.
         for x in tr.transforms:
             if (x.child_frame_id in self.frameid_list):
-                self.PublishPointcloud()  # BUG: Need to switch from using self.arenastate to something else.
+                self.PublishPointcloud()
                 break
             #rospy.logwarn ('Transform_callback() dt=%0.5f' % (rospy.Time.now().to_sec()-self.timePrev))  # Some of these are slow, e.g. 0.08, 0.1
             #self.timePrev = rospy.Time.now().to_sec()
@@ -92,22 +106,10 @@ class GalvoDirector:
         
     
     def Preshutdown_callback(self, reason=None):
-        self.ToBeamDump()
+        self.enable_laser = False
+        self.PublishPointcloud()
+        #self.MoveToBeamDump()
         
-        
-    def ToBeamDump(self):
-        pattern = MsgPattern()
-        pattern.mode = 'bypoints'
-        pattern.points = [Point(0,-10,0)] # volts
-        pattern.frame_id = 'Plate'
-        pattern.preempt = True
-
-        command = MsgGalvoCommand()
-        command.pattern_list = [pattern,]
-        command.units = 'volts' # 'millimeters' or 'volts'
-        self.GalvoCommand_callback(command)
-        
-
         
     def OnShutdown_callback(self):
         pass
@@ -119,25 +121,28 @@ class GalvoDirector:
     def GalvoCommand_callback(self, command):
         if (self.initialized):
             with self.lock:
-                # Regenerate all the patterns requested.  This "template" is the computed points centered at (0,0).
-                self.pointcloudtemplate_list = []
-                self.frameid_list = []
+                self.enable_laser = command.enable_laser
                 
-                for iPattern in range(len(command.pattern_list)):
-                    self.frameid_list.append(command.pattern_list[iPattern].frame_id) # Save all the target frames for the TF callback.
+                # If patterns were given, then load them into the pointcloudtemplates.
+                if len(command.pattern_list) > 0:
+                    # Regenerate all the patterns requested.  This "template" is the computed points centered at (0,0).
+                    self.pointcloudtemplate_list = []
+                    self.frameid_list = []
                     
-                    # If no pattern points, then compute them.
-                    if len(command.pattern_list[iPattern].points)==0:
-                        gpp = self.GetPatternPoints(SrvGetPatternPointsRequest(pattern=command.pattern_list[iPattern]))
-                        pattern = gpp.pattern
-                    else:
-                        pattern = command.pattern_list[iPattern]
+                    for iPattern in range(len(command.pattern_list)):
+                        self.frameid_list.append(command.pattern_list[iPattern].frame_id) # Save all the target frames for the TF callback.
+                        
+                        # Compute pattern points, if necessary.
+                        if len(command.pattern_list[iPattern].points)==0:
+                            gpp = self.GetPatternPoints(SrvGetPatternPointsRequest(pattern=command.pattern_list[iPattern]))
+                            pattern = gpp.pattern
+                        else:
+                            pattern = command.pattern_list[iPattern]
+                        
+                        # Store the pointcloud templates.
+                        self.pointcloudtemplate_list.append(self.PointCloudFromPoints(pattern.frame_id, pattern.points))
+                        self.units = command.units # Units apply to all the patterns.
                     
-                    # Store the pointcloud for later.
-                    self.pointcloudtemplate_list.append(self.PointCloudFromPoints(pattern.frame_id, pattern.points))
-                    self.units = command.units # Units apply to all the patterns.
-                
-                #rospy.logwarn('Galvocommand_callback()')
                 self.PublishPointcloud()
 
 
@@ -154,61 +159,69 @@ class GalvoDirector:
     
         
     # PublishPointcloud()
-    # Transform the pointcloudtemplates onto their respective frames,
-    # then post them to the driver.    
+    # If laser enabled, then transform the pointcloudtemplates to their respective frames,
+    # If laser disabled, then use the beamdump pointcloud.
     #
-    def PublishPointcloud(self):
-        if self.initialized and len(self.arenastate.flies)>0:
-            self.pointcloud_list = []
-            if len(self.pointcloudtemplate_list) > 0:
-                for i in range(len(self.pointcloudtemplate_list)):
-                    pointcloud_template = self.pointcloudtemplate_list[i]
-                    #t1 = rospy.Time.now().to_sec()
-                    
-                    # Use latest time.
-                    if False:
-                        if ('Fly' in pointcloud_template.header.frame_id) and len(self.arenastate.flies)>0:
-                            pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp # BUG: Need to make this use the correct fly #.
+    # Publish points to the galvo driver.    
+    #
+    def PublishPointcloud(self):        
+
+        if self.initialized:
+            if self.enable_laser:
+                self.pointcloud_list = []
+                if len(self.pointcloudtemplate_list)>0 and len(self.arenastate.flies)>0:
+                    for i in range(len(self.pointcloudtemplate_list)):
+                        pointcloud_template = self.pointcloudtemplate_list[i]
+                        #t1 = rospy.Time.now().to_sec()
+                        
+                        # Use latest time.
+                        if False:
+                            if ('Fly' in pointcloud_template.header.frame_id):
+                                pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp # BUG: Need to make this use the correct fly #.
+                            else:
+                                pointcloud_template.header.stamp = rospy.Time.now() 
+            
+                        if True: # Use latest common time.
+                            try:
+                                pointcloud_template.header.stamp = self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id)
+                            except tf.Exception:
+                                pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
+    
+                        if False: 
+                            try:
+                                self.tfrx.waitForTransform('Plate', 
+                                                           pointcloud_template.header.frame_id, 
+                                                           pointcloud_template.header.stamp, 
+                                                           rospy.Duration(0.1))
+                            except tf.Exception, e:
+                                rospy.logwarn('Exception waiting for transform pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
+                                
+                        #t2 = rospy.Time.now().to_sec()
+                        if self.tfrx.canTransform('Plate', 
+                                                  pointcloud_template.header.frame_id, 
+                                                  pointcloud_template.header.stamp):
+                            try:
+                                pointcloud = self.tfrx.transformPointCloud('Plate', pointcloud_template)
+                            except tf.Exception, e:
+                                rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
+                            else:
+                                self.pointcloud_list.append(pointcloud)
                         else:
-                            pointcloud_template.header.stamp = rospy.Time.now() 
+                            rospy.logwarn ('Cannot transform from frame %s at %s' % (pointcloud_template.header.frame_id, pointcloud_template.header.stamp))
         
-                    if True: # Use latest common time.
-                        try:
-                            pointcloud_template.header.stamp = self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id)
-                        except tf.Exception:
-                            pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
-
-                    if False: 
-                        try:
-                            self.tfrx.waitForTransform('Plate', 
-                                                       pointcloud_template.header.frame_id, 
-                                                       pointcloud_template.header.stamp, 
-                                                       rospy.Duration(0.1))
-                        except tf.Exception, e:
-                            rospy.logwarn('Exception waiting for transform pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
-                            
-                    #t2 = rospy.Time.now().to_sec()
-                    if self.tfrx.canTransform('Plate', 
-                                              pointcloud_template.header.frame_id, 
-                                              pointcloud_template.header.stamp):
-                        try:
-                            pointcloud = self.tfrx.transformPointCloud('Plate', pointcloud_template)
-                        except tf.Exception, e:
-                            rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
-                        else:
-                            self.pointcloud_list.append(pointcloud)
-                    else:
-                        rospy.logwarn ('Cannot transform from frame %s at %s' % (pointcloud_template.header.frame_id, pointcloud_template.header.stamp))
+                        #t3 = rospy.Time.now().to_sec()
+                        #rospy.logwarn('GalvoDirector, stamp=%s, wait dt=%0.5f, transform dt=%0.5f' % (pointcloud_template.header.stamp,(t2-t1),(t3-t2))) # BUG: Occasional 0.1 sec times.
+                        #rospy.logwarn ('now,pointcloud_template,%s,%s' % (rospy.Time.now(), pointcloud_template.header.stamp))
+        
+                        #rospy.logwarn('tfrx.getLatestCommonTime()=%s, stamp=%s' % (self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id),pointcloud_template.header.stamp))
     
-                    #t3 = rospy.Time.now().to_sec()
-                    #rospy.logwarn('GalvoDirector, stamp=%s, wait dt=%0.5f, transform dt=%0.5f' % (pointcloud_template.header.stamp,(t2-t1),(t3-t2))) # BUG: Occasional 0.01 sec times.
-                    #rospy.logwarn ('now,pointcloud_template,%s,%s' % (rospy.Time.now(), pointcloud_template.header.stamp))
     
-                    #rospy.logwarn('tfrx.getLatestCommonTime()=%s, stamp=%s' % (self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id),pointcloud_template.header.stamp))
-
-
-                    
-                self.pubGalvoPointCloud.publish(self.VoltsFromUnitsPointcloud(self.GetUnifiedPointcloud(self.pointcloud_list)))
+                        
+                    self.pubGalvoPointCloud.publish(self.VoltsFromUnitsPointcloud(self.GetUnifiedPointcloud(self.pointcloud_list)))
+            
+            else: # not self.enable_laser
+                self.pointcloudBeamdump.header.stamp=rospy.Time.now()
+                self.pubGalvoPointCloud.publish(self.pointcloudBeamdump)
         
 
     # GetUnifiedPointcloud()
