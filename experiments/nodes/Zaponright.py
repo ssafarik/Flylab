@@ -41,6 +41,8 @@ class ExperimentZaponright():
         self.experimentparams.waitEntry = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
+        self.experimentparams.triggerEntry.frameidParent = 'Plate'
+        self.experimentparams.triggerEntry.frameidChild = 'Fly1'
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
         self.experimentparams.triggerEntry.speedMin =   0.0
@@ -85,6 +87,8 @@ class ExperimentZaponright():
         self.experimentparams.lasertrack.timeout = -1
         
         self.experimentparams.triggerExit.enabled = True
+        self.experimentparams.triggerExit.frameidParent = 'Plate'
+        self.experimentparams.triggerExit.frameidChild = 'Fly1'
         self.experimentparams.triggerExit.distanceMin = 999.0
         self.experimentparams.triggerExit.distanceMax = 888.0 # i.e. never
         self.experimentparams.triggerExit.speedMin =  0.0

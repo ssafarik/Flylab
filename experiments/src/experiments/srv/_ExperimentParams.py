@@ -9,7 +9,7 @@ import experiments.msg
 import patterngen.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "0891a3da32b0fce37a0d3e9662abde2d"
+  _md5sum = "22e8739e7e0b31c73a1e3c18daf7e141"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings 	experiment
@@ -41,17 +41,19 @@ float64 timeout
 
 ================================================================================
 MSG: experiments/TriggerSettings
-bool enabled
-float64 distanceMin
-float64 distanceMax
-float64 speedMin
-float64 speedMax
-float64 angleMin
-float64 angleMax
-string  angleTest
-bool    angleTestBilateral
-float64 timeHold
-float64 timeout
+bool 		enabled
+string 		frameidParent 	# 'Plate', 'Robot', 'Fly1', 'Fly2' etc
+string 		frameidChild 	# 'Plate', 'Robot', 'Fly1', 'Fly2' etc
+float64 	distanceMin
+float64 	distanceMax
+float64 	speedMin
+float64 	speedMax
+float64 	angleMin
+float64 	angleMax
+string  	angleTest
+bool    	angleTestBilateral
+float64 	timeHold
+float64 	timeout
 
 
 
@@ -191,7 +193,21 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2iB6dB6d.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
+      buff.write(_struct_2iB6dB.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
+      _x = self.triggerEntry.frameidParent
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.triggerEntry.frameidChild
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_6d.pack(_x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
       _x = self.triggerEntry.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -277,7 +293,21 @@ bool onlyWhileTriggered
         _x = val1
         buff.write(_struct_Bd.pack(_x.preempt, _x.param))
       _x = self
-      buff.write(_struct_dB6d.pack(_x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_dB.pack(_x.lasertrack.timeout, _x.triggerExit.enabled))
+      _x = self.triggerExit.frameidParent
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.triggerExit.frameidChild
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_6d.pack(_x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -329,10 +359,32 @@ bool onlyWhileTriggered
         self.experiment.description = str[start:end]
       _x = self
       start = end
-      end += 106
-      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_2iB6dB6d.unpack(str[start:end])
+      end += 58
+      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_2iB6dB.unpack(str[start:end])
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.triggerEntry.frameidParent = str[start:end].decode('utf-8')
+      else:
+        self.triggerEntry.frameidParent = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.triggerEntry.frameidChild = str[start:end].decode('utf-8')
+      else:
+        self.triggerEntry.frameidChild = str[start:end]
+      _x = self
+      start = end
+      end += 48
+      (_x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_6d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -482,9 +534,31 @@ bool onlyWhileTriggered
         self.lasertrack.pattern_list.append(val1)
       _x = self
       start = end
-      end += 57
-      (_x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_dB6d.unpack(str[start:end])
+      end += 9
+      (_x.lasertrack.timeout, _x.triggerExit.enabled,) = _struct_dB.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.triggerExit.frameidParent = str[start:end].decode('utf-8')
+      else:
+        self.triggerExit.frameidParent = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.triggerExit.frameidChild = str[start:end].decode('utf-8')
+      else:
+        self.triggerExit.frameidChild = str[start:end]
+      _x = self
+      start = end
+      end += 48
+      (_x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_6d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -535,7 +609,21 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2iB6dB6d.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
+      buff.write(_struct_2iB6dB.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
+      _x = self.triggerEntry.frameidParent
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.triggerEntry.frameidChild
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_6d.pack(_x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
       _x = self.triggerEntry.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -621,7 +709,21 @@ bool onlyWhileTriggered
         _x = val1
         buff.write(_struct_Bd.pack(_x.preempt, _x.param))
       _x = self
-      buff.write(_struct_dB6d.pack(_x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_dB.pack(_x.lasertrack.timeout, _x.triggerExit.enabled))
+      _x = self.triggerExit.frameidParent
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.triggerExit.frameidChild
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_6d.pack(_x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -674,10 +776,32 @@ bool onlyWhileTriggered
         self.experiment.description = str[start:end]
       _x = self
       start = end
-      end += 106
-      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_2iB6dB6d.unpack(str[start:end])
+      end += 58
+      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_2iB6dB.unpack(str[start:end])
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.triggerEntry.frameidParent = str[start:end].decode('utf-8')
+      else:
+        self.triggerEntry.frameidParent = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.triggerEntry.frameidChild = str[start:end].decode('utf-8')
+      else:
+        self.triggerEntry.frameidChild = str[start:end]
+      _x = self
+      start = end
+      end += 48
+      (_x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.speedMin, _x.triggerEntry.speedMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_6d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -827,9 +951,31 @@ bool onlyWhileTriggered
         self.lasertrack.pattern_list.append(val1)
       _x = self
       start = end
-      end += 57
-      (_x.lasertrack.timeout, _x.triggerExit.enabled, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_dB6d.unpack(str[start:end])
+      end += 9
+      (_x.lasertrack.timeout, _x.triggerExit.enabled,) = _struct_dB.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.triggerExit.frameidParent = str[start:end].decode('utf-8')
+      else:
+        self.triggerExit.frameidParent = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.triggerExit.frameidChild = str[start:end].decode('utf-8')
+      else:
+        self.triggerExit.frameidChild = str[start:end]
+      _x = self
+      start = end
+      end += 48
+      (_x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.speedMin, _x.triggerExit.speedMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_6d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -869,15 +1015,16 @@ _struct_I = genpy.struct_I
 _struct_Bd = struct.Struct("<Bd")
 _struct_2di5dB = struct.Struct("<2di5dB")
 _struct_B = struct.Struct("<B")
+_struct_6d = struct.Struct("<6d")
 _struct_d = struct.Struct("<d")
 _struct_4B = struct.Struct("<4B")
+_struct_2iB6dB = struct.Struct("<2iB6dB")
+_struct_dB = struct.Struct("<dB")
 _struct_B2dB = struct.Struct("<B2dB")
 _struct_2d = struct.Struct("<2d")
 _struct_B2d = struct.Struct("<B2d")
-_struct_dB6d = struct.Struct("<dB6d")
-_struct_3d = struct.Struct("<3d")
 _struct_2di = struct.Struct("<2di")
-_struct_2iB6dB6d = struct.Struct("<2iB6dB6d")
+_struct_3d = struct.Struct("<3d")
 """autogenerated by genpy from experiments/ExperimentParamsResponse.msg. Do not edit."""
 import sys
 python3 = True if sys.hexversion > 0x03000000 else False
@@ -982,6 +1129,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '71a4fe056120e7ffb72be76bd9f6d505'
+  _md5sum = 'd7592f0d8199f49c7960f22dc5635200'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

@@ -41,6 +41,8 @@ class ExperimentZapafly():
         self.experimentparams.waitEntry = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
+        self.experimentparams.triggerEntry.frameidParent = 'Fly1'
+        self.experimentparams.triggerEntry.frameidChild = 'Robot'
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
         self.experimentparams.triggerEntry.speedMin =   0.0

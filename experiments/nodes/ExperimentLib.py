@@ -257,6 +257,7 @@ class TriggerOnStates (smach.State):
         self.Trigger.attach()
     
         self.nRobots = rospy.get_param('nRobots', 0)
+        self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
         
     
     def OnShutdown_callback(self):
@@ -267,19 +268,47 @@ class TriggerOnStates (smach.State):
         self.arenastate = arenastate
 
 
-    def GetDistanceFrameToFrame (self, frameid1, frameid2):
+    def GetDistanceFrameToFrame (self, frameidParent, frameidChild):
         distance = None
         try:
-            stamp = g_tfrx.getLatestCommonTime(frameid1, frameid2)
-            point2 = PointStamped(header=Header(frame_id=frameid2, stamp=stamp),
+            stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
+            pointC = PointStamped(header=Header(frame_id=frameidChild, stamp=stamp),
                                   point=Point(x=0.0, y=0.0, z=0.0))
-            point1 = g_tfrx.transformPoint(frameid1, point2)
+            pointP = g_tfrx.transformPoint(frameidParent, pointC)
         except tf.Exception:
             pass
         else:
-            distance = N.linalg.norm([point1.point.x, point1.point.y, point1.point.z])
+            distance = N.linalg.norm([pointP.point.x, pointP.point.y, pointP.point.z])
             
         return distance
+
+
+    def GetAngleFrameToFrame (self, frameidParent, frameidChild):
+        angleToChild = None
+        try:
+            stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
+            pointC = PointStamped(header=Header(frame_id=frameidChild, stamp=stamp),
+                                  point=Point(x=0.0, y=0.0, z=0.0))
+            pointP = g_tfrx.transformPoint(frameidParent, pointC)
+        except tf.Exception:
+            pass
+        else:
+            angleToChild = N.arctan2(pointP.point.y, pointP.point.x) % (2.0*N.pi)
+            
+        return angleToChild
+
+
+    def GetSpeedFrameToFrame (self, frameidParent, frameidChild):
+        speed = None
+        try:
+            stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
+            ((vx,vy,vz),(wx,wy,wz)) = self.tfrx.lookupTwist(frameidChild, frameidParent, stamp-self.dtVelocity, self.dtVelocity)
+        except (tf.Exception, AttributeError), e:
+            ((vx,vy,vz),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+        else:
+            speed = N.linalg.norm(N.array([vx,vy,vz]))
+            
+        return speed
 
 
     def execute(self, userdata):
@@ -310,69 +339,63 @@ class TriggerOnStates (smach.State):
         
                 rv = 'abort'
                 while not rospy.is_shutdown():
-                    if (len(self.arenastate.flies)>0) and (self.nRobots>0):
-                        iFly = GetNearestFly(self.arenastate)
-                        if iFly is None:
-                            continue
+                    if True: #(len(self.arenastate.flies)>0) and (self.nRobots>0):
+                        #iFly = GetNearestFly(self.arenastate)
+                        #if iFly is None:
+                        #    continue
         
                         # Test for distance.
                         isDistanceInRange = True
-                        dMin = trigger.distanceMin
-                        dMax = trigger.distanceMax
                         distance = None
-                        if (dMin is not None) and (dMax is not None):
-                            distance = GetDistanceFlyToRobot(self.arenastate, iFly)
-                            #distance = self.GetDistanceFrameToFrame('Fly1', 'Robot')
+                        if (trigger.distanceMin is not None) and (trigger.distanceMax is not None):
+                            #distance = GetDistanceFlyToRobot(self.arenastate, iFly)
+                            distance = self.GetDistanceFrameToFrame(trigger.frameidParent, trigger.frameidChild)
                             isDistanceInRange = False
-                            if (dMin <= distance <= dMax):
+                            if (distance is not None) and (trigger.distanceMin <= distance <= trigger.distanceMax):
                                 isDistanceInRange = True
                                 
                         # Test for angle.
                         isAngleInRange = True
-                        angleMin = trigger.angleMin
-                        angleMax = trigger.angleMax
-                        angleTest = trigger.angleTest
-                        angleTestBilateral = trigger.angleTestBilateral
-                        if (angleMin is not None) and (angleMax is not None):
-                            angle = GetAngleToRobotInFlyView(self.arenastate, iFly)
+                        if (trigger.angleMin is not None) and (trigger.angleMax is not None):
+                            #angle = GetAngleToRobotInFlyView(self.arenastate, iFly)
+                            angle = self.GetAngleFrameToFrame(trigger.frameidParent, trigger.frameidChild)
                             
-                            angleA1 = angleMin % (2.0*N.pi)
-                            angleA2 = angleMax % (2.0*N.pi)
+                            angleA1 = trigger.angleMin % (2.0*N.pi)
+                            angleA2 = trigger.angleMax % (2.0*N.pi)
                             angleB1 = (2.0*N.pi - angleA2) # % (2.0*N.pi)
                             angleB2 = (2.0*N.pi - angleA1) # % (2.0*N.pi)
             
                             if angle is not None:
                                 # Test for angle meeting the angle criteria.
                                 isAngleInRange = False
-                                if angleTestBilateral:
-                                    if angleTest=='inclusive':
+                                if trigger.angleTestBilateral:
+                                    if trigger.angleTest=='inclusive':
                                         #rospy.loginfo('EL angles %s' % [angleA1, angleA2, angleB1, angleB2, angle])
                                         if (angleA1 <= angle <= angleA2) or (angleB1 <= angle <= angleB2):
                                             isAngleInRange = True
                                             
-                                    elif angleTest=='exclusive':
+                                    elif trigger.angleTest=='exclusive':
                                         if (0.0 <= angle < angleA1) or (angleA2 < angle < angleB1) or (angleB2 < angle <= (2.0*N.pi)):
                                             isAngleInRange = True
                                 else:
-                                    if angleTest=='inclusive':
+                                    if trigger.angleTest=='inclusive':
                                         if (angleA1 <= angle <= angleA2):
                                             isAngleInRange = True
                                             
-                                    elif angleTest=='exclusive':
+                                    elif trigger.angleTest=='exclusive':
                                         if (angle < angleA1) or (angleA2 < angle):
                                             isAngleInRange = True
                             
                         
                         # Test for speed.
                         isSpeedInRange = True
-                        speedMin = trigger.speedMin
-                        speedMax = trigger.speedMax
-                        if (speedMin is not None) and (speedMax is not None):
-                            speed = GetSpeedFly(self.arenastate, iFly)
+                        if (trigger.speedMin is not None) and (trigger.speedMax is not None):
+                            #speed = GetSpeedFly(self.arenastate, iFly)
+                            speed = self.GetSpeedFrameToFrame('Plate', trigger.frameidParent)# Absolute speed of the parent frame (i.e. Fly1)
                             #rospy.loginfo ('EL speed=%s' % speed)
                             isSpeedInRange = False
                             if speed is not None:
-                                if (speedMin <= speed <= speedMax):
+                                if (trigger.speedMin <= speed <= trigger.speedMax):
                                     isSpeedInRange = True
         
                         # Test all the trigger criteria.
@@ -882,13 +905,13 @@ class Experiment():
         self.stateTop.userdata.experimentparams = experimentparams
         
         # Create the "action" concurrency state.
-        stateAction = smach.Concurrence(outcomes=['success','disabled','abort'],
-                                        default_outcome='abort',
-                                        child_termination_cb=self.child_term_callback,
-                                        outcome_cb=self.all_term_callback,
-                                        input_keys=['experimentparamsIn'])
+        stateActions = smach.Concurrence(outcomes=['success','disabled','abort'],
+                                         default_outcome='abort',
+                                         child_termination_cb=self.child_term_callback,
+                                         outcome_cb=self.all_term_callback,
+                                         input_keys=['experimentparamsIn'])
 
-        with stateAction:
+        with stateActions:
             smach.Concurrence.add('MOVEROBOT', 
                                   MoveRobot ())
             smach.Concurrence.add('LASERTRACK', 
@@ -929,13 +952,13 @@ class Experiment():
 
             smach.StateMachine.add('ENTRYTRIGGER', 
                                    TriggerOnStates(type='entry'),
-                                   transitions={'success':'ACTION',
-                                                'disabled':'ACTION',
-                                                'timeout':'ACTION',
+                                   transitions={'success':'ACTIONS',
+                                                'disabled':'ACTIONS',
+                                                'timeout':'ACTIONS',
                                                 'abort':'abort'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
-            smach.StateMachine.add('ACTION', stateAction,
+            smach.StateMachine.add('ACTIONS', stateActions,
                                    transitions={'success':'RESETHARDWARE',
                                                 'disabled':'RESETHARDWARE',
                                                 'abort':'abort'},

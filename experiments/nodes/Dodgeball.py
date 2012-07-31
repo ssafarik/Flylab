@@ -36,6 +36,8 @@ class ExperimentDodgeball():
         self.experimentparams.waitEntry = 0.0
         
         self.experimentparams.triggerEntry.enabled = True
+        self.experimentparams.triggerEntry.frameidParent = 'Fly1'
+        self.experimentparams.triggerEntry.frameidChild = 'Robot'
         self.experimentparams.triggerEntry.distanceMin = 20.0
         self.experimentparams.triggerEntry.distanceMax = 50.0
         self.experimentparams.triggerEntry.speedMin =  3.0
@@ -66,6 +68,8 @@ class ExperimentDodgeball():
         self.experimentparams.lasertrack.enabled = False
         
         self.experimentparams.triggerExit.enabled = False
+        self.experimentparams.triggerExit.frameidParent = 'Fly1'
+        self.experimentparams.triggerExit.frameidChild = 'Robot'
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0
         self.experimentparams.triggerExit.speedMin =  0.0
