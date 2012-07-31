@@ -18,7 +18,7 @@ from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
 
 gRate = 100
-
+g_tfrx = None
 
 #######################################################################################################
 #######################################################################################################
@@ -235,6 +235,7 @@ class NewTrial (smach.State):
 #######################################################################################################
 class TriggerOnStates (smach.State):
     def __init__(self, type='entry'):
+        global g_tfrx
         
         self.type               = type
         
@@ -249,7 +250,8 @@ class TriggerOnStates (smach.State):
         self.arenastate = None
         self.rosrate = rospy.Rate(gRate)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
-        self.tfrx = tf.TransformListener()
+        if g_tfrx is None:
+            g_tfrx = tf.TransformListener()
 
         self.Trigger = TriggerService()
         self.Trigger.attach()
@@ -268,10 +270,10 @@ class TriggerOnStates (smach.State):
     def GetDistanceFrameToFrame (self, frameid1, frameid2):
         distance = None
         try:
-            stamp = self.tfrx.getLatestCommonTime(frameid1, frameid2)
+            stamp = g_tfrx.getLatestCommonTime(frameid1, frameid2)
             point2 = PointStamped(header=Header(frame_id=frameid2, stamp=stamp),
                                   point=Point(x=0.0, y=0.0, z=0.0))
-            point1 = self.tfrx.transformPoint(frameid1, point2)
+            point1 = g_tfrx.transformPoint(frameid1, point2)
         except tf.Exception:
             pass
         else:
