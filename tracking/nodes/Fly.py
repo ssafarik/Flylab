@@ -266,7 +266,7 @@ class Fly:
                 vy = vyKalman
                 vz = vzKalman
             else: # Use the unfiltered data for the case where the filters return None results.
-                rospy.logwarn('FLY Kalman filter returned \'None\' at %s, %s' % ([self.contour.x, self.contour.y], contour.header.stamp.to_sec()))
+                rospy.logwarn('Object %s not yet initialized at %s, %s' % (self.name, contour.header.stamp.to_sec(), [self.contour.x, self.contour.y]))
                 x = 0.0#self.contour.x
                 y = 0.0#self.contour.y
                 z = 0.0
@@ -384,7 +384,7 @@ class Fly:
                                         self.name+"Contour",
                                         "Plate")
             
-            # Send the Filtered transform.
+            # Send the Filtered transform.self.pointInput
             if self.state.pose.position.x is not None:
                 q = self.state.pose.orientation
                 self.tfbx.sendTransform((self.state.pose.position.x, 

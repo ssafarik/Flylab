@@ -2,9 +2,11 @@
 from __future__ import division
 import roslib; roslib.load_manifest('galvodirector')
 import rospy
+import copy
 import numpy as N
 import threading
 import matplotlib.pyplot as plt
+import pylab
 
 from galvodirector.msg import MsgGalvoCommand
 from tracking.msg import ArenaState
@@ -59,7 +61,7 @@ class GalvoCalibrator:
                             
                             Point(x=-4.0, y=2.0),
                             Point(x=-3.5, y=2.0),
-                            Point(x=0.0, y=2.0),
+                            #Point(x=0.0, y=2.0),
                             Point(x=2.5, y=2.0), 
                             Point(x=3.0, y=2.0), 
                             
@@ -113,11 +115,11 @@ class GalvoCalibrator:
                             Point(x=-1.0, y=7.0),
                             ]
         self.caldata = {}
+        pylab.ion()
+        self.pointInput = None
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
-        self.initialized = True
-
 
 
     def OnShutdown_callback(self):
@@ -126,12 +128,14 @@ class GalvoCalibrator:
 
     # Append the input/output pairs to the calibration data.
     def ArenaState_callback(self, arenastate):
-        with self.lock:
-            if len(arenastate.flies)>0:
-                if self.caldata.has_key(self.pointInput):
-                    self.caldata[self.pointInput].append(arenastate.flies[0].pose.position)
-                else:
-                    self.caldata[self.pointInput] = [arenastate.flies[0].pose.position,]
+        if self.initialized:
+            with self.lock:
+                if (self.pointInput is not None) and len(arenastate.flies)>0:
+                    if self.pointInput not in self.caldata:
+                        self.caldata[self.pointInput] = []
+
+                    self.caldata[self.pointInput].append(Point(x=arenastate.flies[0].pose.position.x,
+                                                               y=arenastate.flies[0].pose.position.y))
         
         
     
@@ -174,7 +178,10 @@ class GalvoCalibrator:
         command.units = 'volts' #'millimeters' # 'volts' #
         self.pubGalvoCommand.publish(command)
         
-        
+    
+    # For each input point, find the median value of the output points.
+    # Return a dict[input]=output
+    #
     def GetInputOutputMedian(self):
         with self.lock:
             rv = {}
@@ -186,69 +193,91 @@ class GalvoCalibrator:
                     x_list.append(output.x)
                     y_list.append(output.y)
                     
-                x = N.median(x_list)
-                y = N.median(y_list)
-                rv[input] = Point(x=x, y=y, z=len(output_list))
+                xMedian = N.median(x_list)
+                yMedian = N.median(y_list)
+                rv[input] = [Point(x=xMedian, y=yMedian, z=len(output_list)),]
             
         return rv
             
 
     def Main(self):
-        rosRate = rospy.Rate(1.0)
+        rosRate = rospy.Rate(1)
     
+        rospy.sleep(5)
+        self.initialized = True
+
         rospy.logwarn ('Find the median values, and enter them in params_galvos.launch')
         rospy.logwarn ('mx, bx, my, by:')
-
-        self.iPoint = 0
+        plt.figure(1)
+        
         while not rospy.is_shutdown():
-            self.pointInput = self.pointsInput[self.iPoint]
-            self.SendPoint(self.pointInput)
-            self.iPoint = (self.iPoint+1) % len(self.pointsInput)
-            
-            output_byinput = self.GetInputOutputMedian()
+            # Send all the input points.  The arenastate callback collects the output points into self.caldata.
+            for pointInput in self.pointsInput:
+                with self.lock:
+                    self.pointInput = pointInput
+                    self.SendPoint(pointInput)
+                rosRate.sleep()
+                
+            outputlist_byinput = self.GetInputOutputMedian() #self.caldata#
+            #rospy.logwarn(outputlist_byinput)
 
             # Compute the linear relationship between volts and arenastate units.
-            if len(output_byinput)>1:
+            if len(outputlist_byinput)>1:
                 # Convert galvo axis(1,2) in/out pairs to x/y pairs.
                 x1 = [] # galvo axis 1
                 y1 = [] # galvo axis 1
                 x2 = [] # galvo axis 2
                 y2 = [] # galvo axis 2
                 n = 9999999999
-                for input,output in output_byinput.iteritems():
-                    x1.append(input.x)
-                    y1.append(output.x)
-                    x2.append(input.y)
-                    y2.append(output.y)
-                    n = min(n,output.z)
+                for input,output_list in outputlist_byinput.iteritems():
+                    for output in output_list:
+                        x1.append(input.x)
+                        y1.append(output.x)
+                        
+                    for output in output_list:
+                        x2.append(input.y)
+                        y2.append(output.y)
+                    
+                    n = min(n,len(self.caldata[input]))#output_list))
                 
                 
                 # Find least squares line for axis 1.
-                x = N.array(y1)
-                y = N.array(x1)
+                x = N.array(y1) # Millimeters
+                y = N.array(x1) # to Volts
                 A = N.vstack([x, N.ones(len(x))]).T
                 m1, b1 = N.linalg.lstsq(A, y)[0]
     
+                plt.subplot(1,2,1)
+                plt.cla()
+                plt.scatter(x, y, 4)
+                plt.plot(x, m1*x + b1)
+                plt.title('axis 1')
+                plt.draw()    
+    
                 # Find least squares line for axis 2.
-                x = N.array(y2)
-                y = N.array(x2)
+                x = N.array(y2) # Millimeters
+                y = N.array(x2) # to Volts
                 A = N.vstack([x, N.ones(len(x))]).T
                 m2, b2 = N.linalg.lstsq(A, y)[0]
                 
-                rospy.logwarn ('I/O point pairs: %d' % len(output_byinput))
+                plt.subplot(1,2,2)
+                plt.cla()
+                plt.scatter(x, y, 4)
+                plt.plot(x, m2*x + b2)
+                plt.title('axis 2')
+                plt.draw()    
+    
+                rospy.logwarn ('I/O point pairs: %d' % len(outputlist_byinput))
                 rospy.logwarn ('Samples per input point: %d' % n)
                 rospy.logwarn ('Least Squares.  Millimeters -> Volts:')
-                rospy.logwarn ('mx=%0.8f, bx=%0.8f, my=%0.8f, by=%0.8f' % (m1,b1,m2,b2))
+                rospy.logwarn ('    <param name="galvodirector/mx" type="double" value="%0.7f" />' % m1)
+                rospy.logwarn ('    <param name="galvodirector/bx" type="double" value="%0.7f" />' % b1)
+                rospy.logwarn ('    <param name="galvodirector/my" type="double" value="%0.7f" />' % m2)
+                rospy.logwarn ('    <param name="galvodirector/by" type="double" value="%0.7f" />' % b2)
+                #rospy.logwarn ('mx=%0.8f, bx=%0.8f, my=%0.8f, by=%0.8f' % (m1,b1,m2,b2))
 
-                if (n>500):
-                    plt.scatter(x, y, 4)
-                    plt.plot(x, m*x + c, 'r', label='Fitted line')
-                    #plt.legend()
-                    plt.show()    
-    
                 rospy.logwarn('-------------------')
-            rosRate.sleep()
-            
+        
     
         
 

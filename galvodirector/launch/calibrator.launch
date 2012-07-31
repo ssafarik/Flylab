@@ -1,15 +1,23 @@
 <launch>
-	<!-- ==========================================================   -->
-	<!-- Run the galvo calibration.                                   -->
-    <!--                                                              -->
-    <!-- 1. rm /cameras/background.png                                -->
-    <!-- 2. Turn off the backlight.                                   -->
-    <!-- 3. roslaunch galvodirector calibrator.launch                 -->
-    <!-- 4. run the galvodriver on the galvobox.                      -->
-    <!-- 5. After the "Saving background" message, turn on the laser. -->
-    <!-- 6. Adjust laser power and/or param camera/diff_threshold     -->
-    <!--    to get good readings.                                     -->
-	<!-- ==========================================================   -->
+	<!-- ==========================================================    -->
+	<!-- To run the galvo calibration:                                 -->
+    <!--                                                               -->
+    <!--  1. Remove all flies.                                         -->
+    <!--  2. rm /cameras/background.png                                -->
+    <!--  3. Turn off the backlight.                                   -->
+    <!--  4. Remove the lens filter.                                   -->
+    <!--  5. roslaunch galvodirector calibrator.launch                 -->
+    <!--  6. run the galvodriver on the galvobox.                      -->
+    <!--  7. After the "Saving background" message, turn on the laser. -->
+    <!--  8. Adjust laser power and/or param camera/diff_threshold     -->
+    <!--     to get good readings.                                     -->
+    <!--                                                               -->
+    <!--  9. Ctrl+c                                                    -->
+    <!-- 10. Install the lens filter.                                  -->
+    <!-- 11. rm /cameras/background.png                                -->
+    <!-- 12. Turn on the backlight.                                    -->
+    <!--                                                               -->
+	<!-- ==========================================================    -->
 
 	<!-- ***  Core stuff  *** -->
 	<include file="$(find flycore)/launch/flycore.launch" />
@@ -19,7 +27,9 @@
 	<include file="$(find robots)/launch/robots_0.launch" />
 	<include file="$(find flies)/launch/flies_1.launch" />
 
-	<param name="galvodriver/hzPoint" type="double" value="240.0"/>
+	<param name="galvodriver/hzPoint" type="double" value="262144.0"/>
+	<param name="camera/diff_threshold" type="double" value="200.0"/>
+	
 	<node pkg="galvodirector" type="Calibrator.py" name="GalvoCalibrator" />
 
 	

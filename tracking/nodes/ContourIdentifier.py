@@ -96,7 +96,7 @@ class ContourIdentifier:
                                   scale=Vector3(x=self.radiusArenaOuter*2.0,
                                                 y=self.radiusArenaOuter*2.0,
                                                 z=0.01),
-                                  color=ColorRGBA(a=0.05,
+                                  color=ColorRGBA(a=0.1,
                                                   r=1.0,
                                                   g=1.0,
                                                   b=1.0),
@@ -593,7 +593,7 @@ class ContourIdentifier:
                     contour.header = contourinfo.header
                     contour.x      = contourinfo.x[i]
                     contour.y      = contourinfo.y[i]
-                    if not N.isnan(contourinfo.angle[i]):
+                    if (contourinfo.angle[i] != 99.9) and (not N.isnan(contourinfo.angle[i])):
                         contour.angle = contourinfo.angle[i]
                     else:
                         contour.angle = self.contouranglePrev
@@ -662,6 +662,7 @@ class ContourIdentifier:
                             contour = self.contours[self.mapContourFromObject[iFly]]
                         else:
                             contour = contourNone
+                            rospy.logwarn ('No contour for fly %d' % iFly)
                         
                         self.objects[iFly].Update(contour, None)
         
@@ -711,7 +712,7 @@ class ContourIdentifier:
                         self.pubEndEffectorOffset.publish(self.objects[0].ptOffset)
                     
                     
-                    # Publish a disc to indicate the arena extent.
+                    # Publish a marker to indicate the size of the arena.
                     self.markerArena.header.stamp = contourinfo.header.stamp
                     self.pubMarker.publish(self.markerArena)
             except rospy.ServiceException, e:
