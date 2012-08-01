@@ -8,7 +8,8 @@ import smach
 import smach_ros
 import tf
 
-from geometry_msgs.msg import Pose, Point, Quaternion
+from geometry_msgs.msg import Pose, Point, PointStamped, Quaternion
+from std_msgs.msg import Header
 from stage_action_server.msg import *
 from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
@@ -302,11 +303,11 @@ class TriggerOnStates (smach.State):
         speed = None
         try:
             stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
-            ((vx,vy,vz),(wx,wy,wz)) = self.tfrx.lookupTwist(frameidChild, frameidParent, stamp-self.dtVelocity, self.dtVelocity)
+            ((vx,vy,vz),(wx,wy,wz)) = g_tfrx.lookupTwist(frameidChild, frameidParent, stamp-self.dtVelocity, self.dtVelocity)
         except (tf.Exception, AttributeError), e:
             ((vx,vy,vz),(wx,wy,wz)) = ((0,0,0),(0,0,0))
-        else:
-            speed = N.linalg.norm(N.array([vx,vy,vz]))
+
+        speed = N.linalg.norm(N.array([vx,vy,vz]))
             
         return speed
 
@@ -387,19 +388,28 @@ class TriggerOnStates (smach.State):
                                             isAngleInRange = True
                             
                         
-                        # Test for speed.
-                        isSpeedInRange = True
-                        if (trigger.speedMin is not None) and (trigger.speedMax is not None):
-                            #speed = GetSpeedFly(self.arenastate, iFly)
-                            speed = self.GetSpeedFrameToFrame('Plate', trigger.frameidParent)# Absolute speed of the parent frame (i.e. Fly1)
+                        # Test for speed of parent.
+                        isSpeedParentInRange = True
+                        if (trigger.speedParentMin is not None) and (trigger.speedParentMax is not None):
+                            isSpeedParentInRange = False
+                            speedParent = self.GetSpeedFrameToFrame('Plate', trigger.frameidParent)# Absolute speed of the parent frame.
                             #rospy.loginfo ('EL speed=%s' % speed)
-                            isSpeedInRange = False
-                            if speed is not None:
-                                if (trigger.speedMin <= speed <= trigger.speedMax):
-                                    isSpeedInRange = True
+                            if speedParent is not None:
+                                if (trigger.speedParentMin <= speedParent <= trigger.speedParentMax):
+                                    isSpeedParentInRange = True
+        
+                        # Test for speed of child.
+                        isSpeedChildInRange = True
+                        if (trigger.speedChildMin is not None) and (trigger.speedChildMax is not None):
+                            isSpeedChildInRange = False
+                            speedChild = self.GetSpeedFrameToFrame('Plate', trigger.frameidChild)# Absolute speed of the child frame.
+                            #rospy.loginfo ('EL speed=%s' % speed)
+                            if speedChild is not None:
+                                if (trigger.speedChildMin <= speedChild <= trigger.speedChildMax):
+                                    isSpeedChildInRange = True
         
                         # Test all the trigger criteria.
-                        if isDistanceInRange and isAngleInRange and isSpeedInRange:
+                        if isDistanceInRange and isAngleInRange and isSpeedParentInRange and isSpeedChildInRange:
                             
                             # Set the pending trigger start time.
                             if not self.isTriggered:
@@ -410,8 +420,10 @@ class TriggerOnStates (smach.State):
                             self.isTriggered = False
                             self.timeTriggered = None
         
-                        #if (distance is not None) and (angle is not None) and (speed is not None):
-                        #    rospy.loginfo ('EL triggers=distance=%0.3f, speed=%0.3f, angle=%0.3f, bools=%s' % (distance, speed, angle, [isDistanceInRange, isSpeedInRange, isAngleInRange]))
+                        if (distance is not None) and (angle is not None) and (speedParent is not None) and (speedChild is not None):
+                            rospy.loginfo ('EL triggers=distance=%0.3f, speed=%0.3f,%0.3f, angle=%0.3f, bools=%s' % (distance, speedParent, speedChild, angle, [isDistanceInRange, isSpeedParentInRange, isSpeedChildInRange, isAngleInRange]))
+                        else:
+                            rospy.loginfo ('EL triggers=distance=%s, speed=%s,%s, angle=%s, bools=%s' % (distance, speedParent, speedChild, angle, [isDistanceInRange, isSpeedParentInRange, isSpeedChildInRange, isAngleInRange]))
         
                         # If pending trigger has lasted longer than requested duration, then set trigger.
                         if (self.isTriggered):
@@ -867,6 +879,7 @@ class Lasertrack (smach.State):
             # Move galvos until preempt or timeout.        
             while not rospy.is_shutdown():
                 if self.preempt_requested():
+                    self.recall_preempt()
                     rv = 'preempt'
                     break
     

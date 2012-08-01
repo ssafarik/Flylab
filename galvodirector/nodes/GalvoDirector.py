@@ -66,7 +66,7 @@ class GalvoDirector:
         
         self.xBeamDump = rospy.get_param('galvodirector/xBeamDump', 0.0) # volts
         self.yBeamDump = rospy.get_param('galvodirector/yBeamDump', 0.0) # volts
-
+        self.enable_laser = False
         
         self.arenastate = ArenaState()
         self.pointcloudtemplate_list = []
@@ -122,6 +122,7 @@ class GalvoDirector:
         if (self.initialized):
             with self.lock:
                 self.enable_laser = command.enable_laser
+                rospy.logwarn('enable_laser: %s' % self.enable_laser)
                 
                 # If patterns were given, then load them into the pointcloudtemplates.
                 if len(command.pattern_list) > 0:

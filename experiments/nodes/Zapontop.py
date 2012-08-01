@@ -14,18 +14,18 @@ from tracking.msg import ArenaState
 
 
 #######################################################################################################
-class ExperimentZaponright():
+class ExperimentZapontop():
     def __init__(self):
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "When fly x>0 then laser"
+        self.experimentparams.experiment.description = "When fly y>0 then laser"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zaponright"
+        self.experimentparams.save.filenamebase = "zapontop"
         self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
@@ -38,19 +38,21 @@ class ExperimentZaponright():
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         
-        self.experimentparams.waitEntry = 0.0
+        self.experimentparams.waitEntry = 5.0 # laser off for at least 5 sec
         
-        self.experimentparams.triggerEntry.enabled = False
+        self.experimentparams.triggerEntry.enabled = True
         self.experimentparams.triggerEntry.frameidParent = 'Plate'
         self.experimentparams.triggerEntry.frameidChild = 'Fly1'
+        self.experimentparams.triggerEntry.speedParentMin =   0.0
+        self.experimentparams.triggerEntry.speedParentMax = 999.0
+        self.experimentparams.triggerEntry.speedChildMin =   0.0
+        self.experimentparams.triggerEntry.speedChildMax = 999.0
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
-        self.experimentparams.triggerEntry.speedMin =   0.0
-        self.experimentparams.triggerEntry.speedMax = 999.0
         self.experimentparams.triggerEntry.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleTest = 'inclusive'
-        self.experimentparams.triggerEntry.angleTestBilateral = True
+        self.experimentparams.triggerEntry.angleTestBilateral = False
         self.experimentparams.triggerEntry.timeHold = 0.0
         self.experimentparams.triggerEntry.timeout = -1
         
@@ -89,16 +91,18 @@ class ExperimentZaponright():
         self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.frameidParent = 'Plate'
         self.experimentparams.triggerExit.frameidChild = 'Fly1'
-        self.experimentparams.triggerExit.distanceMin = 999.0
-        self.experimentparams.triggerExit.distanceMax = 888.0 # i.e. never
-        self.experimentparams.triggerExit.speedMin =  0.0
-        self.experimentparams.triggerExit.speedMax = 999.0
-        self.experimentparams.triggerExit.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.triggerExit.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.triggerExit.speedParentMin =   0.0
+        self.experimentparams.triggerExit.speedParentMax = 999.0
+        self.experimentparams.triggerExit.speedChildMin =   0.0
+        self.experimentparams.triggerExit.speedChildMax = 999.0
+        self.experimentparams.triggerExit.distanceMin = 0.0
+        self.experimentparams.triggerExit.distanceMax = 999.0
+        self.experimentparams.triggerExit.angleMin =180.0 * N.pi / 180.0
+        self.experimentparams.triggerExit.angleMax =359.99 * N.pi / 180.0
         self.experimentparams.triggerExit.angleTest = 'inclusive'
-        self.experimentparams.triggerExit.angleTestBilateral = True
+        self.experimentparams.triggerExit.angleTestBilateral = False
         self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = 660
+        self.experimentparams.triggerExit.timeout = 5 # laser on for 5 sec
 
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 
@@ -111,7 +115,7 @@ class ExperimentZaponright():
 
 
 if __name__ == '__main__':
-    experiment = ExperimentZaponright()
+    experiment = ExperimentZapontop()
     experiment.Run()
         
 
