@@ -2,6 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('galvodirector')
 import rospy
+import copy
 import numpy as N
 import tf
 import threading
@@ -46,6 +47,7 @@ class GalvoDirector:
 
         self.subGalvoCommand = rospy.Subscriber('GalvoDirector/command', MsgGalvoCommand, self.GalvoCommand_callback, queue_size=2)
         self.pubGalvoPointCloud = rospy.Publisher('GalvoDriver/pointcloud', PointCloud, latch=True)
+        self.pubGalvoPointCloudMm = rospy.Publisher('GalvoDriver/pointcloudmm', PointCloud, latch=True)
 
         # Attach to services.
         try:
@@ -81,6 +83,7 @@ class GalvoDirector:
                                                            z=0.0)],
                                              channels=[ChannelFloat32(name='intensity',
                                                                       values=[0.0])])
+        self.pointcloudBeamdumpMm = self.UnitsFromVoltsPointcloud(copy.deepcopy(self.pointcloudBeamdump))
                      
         
         
@@ -122,7 +125,8 @@ class GalvoDirector:
         if (self.initialized):
             with self.lock:
                 self.enable_laser = command.enable_laser
-                rospy.logwarn('enable_laser: %s' % self.enable_laser)
+                self.units = command.units # Units apply to all the patterns.
+                #rospy.logwarn('enable_laser: %s' % self.enable_laser)
                 
                 # If patterns were given, then load them into the pointcloudtemplates.
                 if len(command.pattern_list) > 0:
@@ -142,7 +146,6 @@ class GalvoDirector:
                         
                         # Store the pointcloud templates.
                         self.pointcloudtemplate_list.append(self.PointCloudFromPoints(pattern.frame_id, pattern.points))
-                        self.units = command.units # Units apply to all the patterns.
                     
                 self.PublishPointcloud()
 
@@ -217,12 +220,19 @@ class GalvoDirector:
                         #rospy.logwarn('tfrx.getLatestCommonTime()=%s, stamp=%s' % (self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id),pointcloud_template.header.stamp))
     
     
-                        
-                    self.pubGalvoPointCloud.publish(self.VoltsFromUnitsPointcloud(self.GetUnifiedPointcloud(self.pointcloud_list)))
+                    # Publish a pointcloud in volts and mm.
+                    pointcloudmm = self.GetUnifiedPointcloud(self.pointcloud_list)
+                    pointcloudv = self.VoltsFromUnitsPointcloud(copy.deepcopy(pointcloudmm))
+                    self.pubGalvoPointCloud.publish(pointcloudv)
+                    self.pubGalvoPointCloudMm.publish(pointcloudmm)
             
             else: # not self.enable_laser
+                
+                # Publish a pointcloud in volts and mm.
                 self.pointcloudBeamdump.header.stamp=rospy.Time.now()
                 self.pubGalvoPointCloud.publish(self.pointcloudBeamdump)
+                self.pointcloudBeamdumpMm.header.stamp=rospy.Time.now()
+                self.pubGalvoPointCloudMm.publish(self.pointcloudBeamdumpMm)
         
 
     # GetUnifiedPointcloud()
@@ -256,7 +266,7 @@ class GalvoDirector:
 
 
     # VoltsFromUnitsPointcloud()
-    # Convert the pointcloud units to volts.
+    # Inplace convert the pointcloud units to volts.
     #
     def VoltsFromUnitsPointcloud(self, pointcloud):
         if self.units == 'millimeters':
@@ -273,6 +283,25 @@ class GalvoDirector:
                 point.y = min(point.y,+10.0)
                 point.y = max(point.y,-10.0)
     
+        elif self.units=='volts':
+            pass
+
+            
+        return pointcloud
+    
+
+    # UnitsFromVoltsPointcloud()
+    # Inplace convert the pointcloud units to volts.
+    #
+    def UnitsFromVoltsPointcloud(self, pointcloud):
+        if self.units == 'millimeters':
+            for point in pointcloud.points:
+                point.x -= self.bx
+                point.x /= self.mx
+
+                point.y -= self.by
+                point.y /= self.my
+                
         elif self.units=='volts':
             pass
 

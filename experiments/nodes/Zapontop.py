@@ -4,8 +4,9 @@ import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
 import ExperimentLib
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
+from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from patterngen.msg import MsgPattern
 from tracking.msg import ArenaState
@@ -38,7 +39,7 @@ class ExperimentZapontop():
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         
-        self.experimentparams.waitEntry = 5.0 # laser off for at least 5 sec
+        self.experimentparams.waitEntry = 0.0
         
         self.experimentparams.triggerEntry.enabled = True
         self.experimentparams.triggerEntry.frameidParent = 'Plate'
@@ -75,17 +76,25 @@ class ExperimentZapontop():
         
         self.experimentparams.lasertrack.enabled = True
         self.experimentparams.lasertrack.pattern_list = []
-        self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
-                                                                        shape      = 'grid',
-                                                                        frame_id   = 'Fly1',
-                                                                        hzPattern  = 40.0,
-                                                                        hzPoint    = 1000.0,
-                                                                        count      = 1,
-                                                                        size       = Point(x=3,
-                                                                                           y=3),
-                                                                        preempt    = False,
-                                                                        param      = 2), # Peano curve level.
-                                                             )
+        self.experimentparams.lasertrack.stateFilterLo_list = []
+        self.experimentparams.lasertrack.stateFilterHi_list = []
+        for iFly in range(rospy.get_param('nFlies', 0)):
+            self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+                                                                            shape      = 'grid',
+                                                                            frame_id   = 'Fly%d' % (iFly+1),
+                                                                            hzPattern  = 40.0,
+                                                                            hzPoint    = 1000.0,
+                                                                            count      = 1,
+                                                                            size       = Point(x=3,
+                                                                                               y=3),
+                                                                            preempt    = False,
+                                                                            param      = 2), # Peano curve level.
+                                                                 )
+            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'velocity':{'angular':{'z':0}}}")
+            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'velocity':{'angular':{'z':99}}}")
+            self.experimentparams.lasertrack.stateFilterLo_list.append("{'pose':{'orientation':{'w':0}}}")
+            self.experimentparams.lasertrack.stateFilterHi_list.append("{'pose':{'orientation':{'w':1}}}")
+        
         self.experimentparams.lasertrack.timeout = -1
         
         self.experimentparams.triggerExit.enabled = True
@@ -95,14 +104,14 @@ class ExperimentZapontop():
         self.experimentparams.triggerExit.speedParentMax = 999.0
         self.experimentparams.triggerExit.speedChildMin =   0.0
         self.experimentparams.triggerExit.speedChildMax = 999.0
-        self.experimentparams.triggerExit.distanceMin = 0.0
-        self.experimentparams.triggerExit.distanceMax = 999.0
-        self.experimentparams.triggerExit.angleMin =180.0 * N.pi / 180.0
-        self.experimentparams.triggerExit.angleMax =359.99 * N.pi / 180.0
+        self.experimentparams.triggerExit.distanceMin = 999.0
+        self.experimentparams.triggerExit.distanceMax = 111.0 # i.e. never
+        self.experimentparams.triggerExit.angleMin =  0.0000 * N.pi / 180.0
+        self.experimentparams.triggerExit.angleMax =359.9999 * N.pi / 180.0
         self.experimentparams.triggerExit.angleTest = 'inclusive'
         self.experimentparams.triggerExit.angleTestBilateral = False
         self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = 5 # laser on for 5 sec
+        self.experimentparams.triggerExit.timeout = 60
 
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 

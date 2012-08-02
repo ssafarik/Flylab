@@ -8,7 +8,7 @@ import smach
 import smach_ros
 import tf
 
-from geometry_msgs.msg import Pose, Point, PointStamped, Quaternion
+from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist
 from std_msgs.msg import Header
 from stage_action_server.msg import *
 from flycore.msg import MsgFrameState
@@ -333,6 +333,7 @@ class TriggerOnStates (smach.State):
                         if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > trigger.timeout:
                             return 'timeout'
                     #if self.preempt_requested():
+                    #    self.recall_preempt()
                     #    self.Trigger.notify(False)
                     #    return 'preempt'
                     rospy.sleep(1.0)
@@ -437,6 +438,7 @@ class TriggerOnStates (smach.State):
                             
                         
                     #if self.preempt_requested():
+                    #    self.recall_preempt()
                     #    rv = 'preempt'
                     #    break
                     
@@ -542,6 +544,7 @@ class ResetRobot (smach.State):
                     if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.home.timeout:
                         return 'timeout'
                 #if self.preempt_requested():
+                #    self.recall_preempt()
                 #    return 'preempt'
                 rospy.sleep(1.0)
     
@@ -575,6 +578,7 @@ class ResetRobot (smach.State):
                 
                 
                 #if self.preempt_requested():
+                #    self.recall_preempt()
                 #    rv = 'preempt'
                 #    break
                 
@@ -647,6 +651,7 @@ class MoveRobot (smach.State):
                         return 'timeout'
                 
                 if self.preempt_requested():
+                    self.recall_preempt()
                     return 'preempt'
                 
                 rospy.sleep(1.0)
@@ -772,6 +777,7 @@ class MoveRobot (smach.State):
 
             
             if self.preempt_requested():
+                self.recall_preempt()
                 rv = 'preempt'
                 break
 
@@ -810,6 +816,7 @@ class MoveRobot (smach.State):
         rv = 'abort'
         while not rospy.is_shutdown():
             if self.preempt_requested():
+                self.recall_preempt()
                 rv = 'preempt'
                 break
 
@@ -853,6 +860,7 @@ class Lasertrack (smach.State):
 
         self.rosrate = rospy.Rate(gRate)
         self.pubGalvoCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
+        self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -860,6 +868,104 @@ class Lasertrack (smach.State):
     def OnShutdown_callback(self):
         pass
         
+    
+    # InStateFilterRange()
+    # Check if the given state falls in the intersection of the given bounds.
+    #  
+    def InStateFilterRange(self, state, stateFilterLo_dict, stateFilterHi_dict):
+        rv = True
+        if 'pose' in stateFilterLo_dict:
+            poseLo_dict = stateFilterLo_dict['pose'] 
+            poseHi_dict = stateFilterHi_dict['pose']
+             
+            if 'position' in poseLo_dict:
+                 positionLo_dict = poseLo_dict['position']
+                 positionHi_dict = poseHi_dict['position']
+                 if 'x' in positionLo_dict:
+                     xLo = positionLo_dict['x'] 
+                     xHi = positionHi_dict['x']
+                     if (state.pose.position.x < xLo) or (xHi < state.pose.position.x):
+                         rv = False   
+                 if 'y' in positionLo_dict:
+                     yLo = positionLo_dict['y'] 
+                     yHi = positionHi_dict['y']
+                     if (state.pose.position.y < yLo) or (yHi < state.pose.position.y):
+                         rv = False   
+                 if 'z' in positionLo_dict:
+                     zLo = positionLo_dict['z'] 
+                     zHi = positionHi_dict['z']
+                     if (state.pose.position.z < zLo) or (zHi < state.pose.position.z):
+                         rv = False   
+                         
+            if 'orientation' in poseLo_dict:
+                 orientationLo_dict = poseLo_dict['orientation']
+                 orientationHi_dict = poseHi_dict['orientation']
+                 if 'x' in orientationLo_dict:
+                     xLo = orientationLo_dict['x'] 
+                     xHi = orientationHi_dict['x']
+                     if (state.pose.orientation.x < xLo) or (xHi < state.pose.orientation.x):
+                         rv = False   
+                 if 'y' in orientationLo_dict:
+                     yLo = orientationLo_dict['y'] 
+                     yHi = orientationHi_dict['y']
+                     if (state.pose.orientation.y < yLo) or (yHi < state.pose.orientation.y):
+                         rv = False   
+                 if 'z' in orientationLo_dict:
+                     zLo = orientationLo_dict['z'] 
+                     zHi = orientationHi_dict['z']
+                     if (state.pose.orientation.z < zLo) or (zHi < state.pose.orientation.z):
+                         rv = False   
+                 if 'w' in orientationLo_dict:
+                     wLo = orientationLo_dict['w'] 
+                     wHi = orientationHi_dict['w']
+                     if (state.pose.orientation.w < wLo) or (wHi < state.pose.orientation.w):
+                         rv = False   
+
+        if 'velocity' in stateFilterLo_dict:
+            velocityLo_dict = stateFilterLo_dict['velocity'] 
+            velocityHi_dict = stateFilterHi_dict['velocity']
+             
+            if 'linear' in velocityLo_dict:
+                 linearLo_dict = velocityLo_dict['linear']
+                 linearHi_dict = velocityHi_dict['linear']
+                 if 'x' in linearLo_dict:
+                     xLo = linearLo_dict['x'] 
+                     xHi = linearHi_dict['x']
+                     if (state.velocity.linear.x < xLo) or (xHi < state.velocity.linear.x):
+                         rv = False   
+                 if 'y' in linearLo_dict:
+                     yLo = linearLo_dict['y'] 
+                     yHi = linearHi_dict['y']
+                     if (state.velocity.linear.y < yLo) or (yHi < state.velocity.linear.y):
+                         rv = False   
+                 if 'z' in linearLo_dict:
+                     zLo = linearLo_dict['z'] 
+                     zHi = linearHi_dict['z']
+                     if (state.velocity.linear.z < zLo) or (zHi < state.velocity.linear.z):
+                         rv = False   
+                         
+            if 'angular' in velocityLo_dict:
+                 angularLo_dict = velocityLo_dict['angular']
+                 angularHi_dict = velocityHi_dict['angular']
+                 if 'x' in angularLo_dict:
+                     xLo = angularLo_dict['x'] 
+                     xHi = angularHi_dict['x']
+                     if (state.velocity.angular.x < xLo) or (xHi < state.velocity.angular.x):
+                         rv = False   
+                 if 'y' in angularLo_dict:
+                     yLo = angularLo_dict['y'] 
+                     yHi = angularHi_dict['y']
+                     if (state.velocity.angular.y < yLo) or (yHi < state.velocity.angular.y):
+                         rv = False   
+                 if 'z' in angularLo_dict:
+                     zLo = angularLo_dict['z'] 
+                     zHi = angularHi_dict['z']
+                     if (state.velocity.angular.z < zLo) or (zHi < state.velocity.angular.z):
+                         rv = False   
+        
+        return rv
+    
+    
         
     def execute(self, userdata):
         for pattern in userdata.experimentparamsIn.lasertrack.pattern_list:
@@ -872,12 +978,84 @@ class Lasertrack (smach.State):
             # Send the tracking command to the galvo director.
             command = MsgGalvoCommand()
             command.enable_laser = True
-            command.pattern_list = userdata.experimentparamsIn.lasertrack.pattern_list
             command.units = 'millimeters' # 'millimeters' or 'volts'
-            self.pubGalvoCommand.publish(command)
+            command.pattern_list = userdata.experimentparamsIn.lasertrack.pattern_list
+
+            # Determine if we're showing patterns only for certain states.            
+            nPatterns = len(userdata.experimentparamsIn.lasertrack.pattern_list)
+            if len(userdata.experimentparamsIn.lasertrack.stateFilterLo_list) == nPatterns and \
+               len(userdata.experimentparamsIn.lasertrack.stateFilterHi_list) == nPatterns:
+                isStateFiltered = True
+            else:
+                isStateFiltered = False
+                
+            bInStateFilterRangePrev = [False for i in range(nPatterns)]
+            bInStateFilterRange     = [False for i in range(nPatterns)]
+                             
+            # Publish the command, if unfiltered.
+            if not isStateFiltered:
+                self.pubGalvoCommand.publish(command)
+    
     
             # Move galvos until preempt or timeout.        
             while not rospy.is_shutdown():
+                
+                # If filtered, then check if any filter states have changed.
+                if isStateFiltered:
+                    bFilterStateChanged = False
+                    for iPattern in range(nPatterns):
+                        stateFilterLo_dict = eval(userdata.experimentparamsIn.lasertrack.stateFilterLo_list[iPattern])
+                        stateFilterHi_dict = eval(userdata.experimentparamsIn.lasertrack.stateFilterHi_list[iPattern])
+                        pattern = userdata.experimentparamsIn.lasertrack.pattern_list[iPattern]
+                        
+                        # Get the state of the frame of interest.
+                        stamp = g_tfrx.getLatestCommonTime('Plate', pattern.frame_id)
+                        if g_tfrx.canTransform('Plate', pattern.frame_id, stamp):
+                            try:
+                                pose = g_tfrx.transformPose('Plate', PoseStamped(header=Header(stamp=stamp,
+                                                                                               frame_id=pattern.frame_id),
+                                                                                 pose=Pose(position=Point(0,0,0),
+                                                                                           orientation=Quaternion(0,0,0,1)
+                                                                                           )
+                                                                                 )
+                                                            )
+                                velocity_tuple = g_tfrx.lookupTwist(pattern.frame_id, 'Plate', stamp-self.dtVelocity, self.dtVelocity)
+                            except tf.Exception:
+                                pass
+                            else:
+                                velocity = Twist(linear=Point(x=velocity_tuple[0][0],
+                                                              y=velocity_tuple[0][1],
+                                                              z=velocity_tuple[0][2]), 
+                                                 angular=Point(x=velocity_tuple[1][0],
+                                                               y=velocity_tuple[1][1],
+                                                               z=velocity_tuple[1][2]))
+                                state = MsgFrameState(pose=pose.pose, velocity=velocity)
+        
+                                bInStateFilterRangePrev[iPattern] = bInStateFilterRange[iPattern]
+                                bInStateFilterRange[iPattern] = self.InStateFilterRange(state, stateFilterLo_dict, stateFilterHi_dict)
+                                
+                                # If any of the filter states have changed, then we need to update them all.
+                                if bInStateFilterRangePrev[iPattern] != bInStateFilterRange[iPattern]:
+                                    bFilterStateChanged = True
+
+
+                    # If filter state has changed, then republish the command                    
+                    if bFilterStateChanged:
+                        command.pattern_list = []
+                        for iPattern in range(nPatterns):
+                            if bInStateFilterRange[iPattern]:
+                                command.pattern_list.append(pattern)
+    
+                        if len(command.pattern_list)>0:
+                            command.enable_laser = True
+                        else:
+                            command.enable_laser = False
+                            
+                        self.pubGalvoCommand.publish(command)
+
+                # else command.pattern_list already contains all patterns, and has been published.
+                
+                
                 if self.preempt_requested():
                     self.recall_preempt()
                     rv = 'preempt'
@@ -917,6 +1095,12 @@ class Experiment():
         self.stateTop = smach.StateMachine(['success','abort'])
         self.stateTop.userdata.experimentparams = experimentparams
         
+        # Create the iterator state.
+#        stateIterator = smach.Iterator(outcomes=['success','disabled','abort'],
+#                                         exhausted_outcome='success',
+#                                         it = lambda: range(3),
+#                                         input_keys=['experimentparamsIn'])
+
         # Create the "action" concurrency state.
         stateActions = smach.Concurrence(outcomes=['success','disabled','abort'],
                                          default_outcome='abort',

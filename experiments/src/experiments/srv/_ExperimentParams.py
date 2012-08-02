@@ -9,7 +9,7 @@ import experiments.msg
 import patterngen.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "59c40d3da11e329d200a4cced08fa7c6"
+  _md5sum = "d0cf2735773f9015b6aab48a9409307a"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings 	experiment
@@ -43,16 +43,16 @@ float64 timeout
 MSG: experiments/TriggerSettings
 bool 		enabled
 string 		frameidParent 	# 'Plate', 'Robot', 'Fly1', 'Fly2' etc
-string 		frameidChild 	# 'Plate', 'Robot', 'Fly1', 'Fly2' etc
-float64 	speedParentMin
+string 		frameidChild 	
+float64 	speedParentMin  # Absolute speed of parent frame.
 float64 	speedParentMax
-float64 	speedChildMin
+float64 	speedChildMin   # Absolute speed of child frame.
 float64 	speedChildMax
-float64 	distanceMin
+float64 	distanceMin     # Distance from parent to child.
 float64 	distanceMax
-float64 	angleMin
+float64 	angleMin		# Angle to child in parent frame.
 float64 	angleMax
-string  	angleTest
+string  	angleTest		# 'inclusive' or 'exclusive'
 bool    	angleTestBilateral
 float64 	timeHold
 float64 	timeout
@@ -100,9 +100,11 @@ float64 z
 
 ================================================================================
 MSG: experiments/LasertrackSettings
-bool 					enabled
-patterngen/MsgPattern[] pattern_list
-float64 				timeout
+bool 						enabled
+patterngen/MsgPattern[] 	pattern_list
+string[]                    stateFilterLo_list	# Contains strings to be interpreted as dicts.  Pattern will only be enabled for fly states between these two entries.
+string[]                    stateFilterHi_list	# These lists should either be empty, or contain as many entries as patterns.
+float64 					timeout
 
 
 ================================================================================
@@ -294,6 +296,22 @@ bool onlyWhileTriggered
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
         buff.write(_struct_Bd.pack(_x.preempt, _x.param))
+      length = len(self.lasertrack.stateFilterLo_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.lasertrack.stateFilterLo_list:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
+      length = len(self.lasertrack.stateFilterHi_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.lasertrack.stateFilterHi_list:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
       _x = self
       buff.write(_struct_dB.pack(_x.lasertrack.timeout, _x.triggerExit.enabled))
       _x = self.triggerExit.frameidParent
@@ -534,6 +552,36 @@ bool onlyWhileTriggered
         (_x.preempt, _x.param,) = _struct_Bd.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
         self.lasertrack.pattern_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.lasertrack.stateFilterLo_list = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.lasertrack.stateFilterLo_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.lasertrack.stateFilterHi_list = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.lasertrack.stateFilterHi_list.append(val1)
       _x = self
       start = end
       end += 9
@@ -710,6 +758,22 @@ bool onlyWhileTriggered
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
         buff.write(_struct_Bd.pack(_x.preempt, _x.param))
+      length = len(self.lasertrack.stateFilterLo_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.lasertrack.stateFilterLo_list:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
+      length = len(self.lasertrack.stateFilterHi_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.lasertrack.stateFilterHi_list:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
       _x = self
       buff.write(_struct_dB.pack(_x.lasertrack.timeout, _x.triggerExit.enabled))
       _x = self.triggerExit.frameidParent
@@ -951,6 +1015,36 @@ bool onlyWhileTriggered
         (_x.preempt, _x.param,) = _struct_Bd.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
         self.lasertrack.pattern_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.lasertrack.stateFilterLo_list = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.lasertrack.stateFilterLo_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.lasertrack.stateFilterHi_list = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.lasertrack.stateFilterHi_list.append(val1)
       _x = self
       start = end
       end += 9
@@ -1131,6 +1225,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '2af9125f13bb60dc5580da402ff7c01e'
+  _md5sum = '8af75d4485f72f4c45682f9ad344760e'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

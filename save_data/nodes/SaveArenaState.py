@@ -180,10 +180,10 @@ class SaveArenaState:
 
 
     def OnShutdown_callback(self):
-        if (self.fid is not None) and (not self.fid.closed):
-            with self.lock:
+        with self.lock:
+            if (self.fid is not None) and (not self.fid.closed):
                 self.fid.close()
-            rospy.logwarn('SA logfile close()')
+                rospy.loginfo('SA logfile close()')
             
         
 
@@ -198,10 +198,10 @@ class SaveArenaState:
             
             # Close the file is we're no longer saving.
             if (self.saveOnlyWhileTriggered) and (not self.triggered):
-                if self.fid is not None and not self.fid.closed:
-                    with self.lock:
+                with self.lock:
+                    if self.fid is not None and not self.fid.closed:
                         self.fid.close()
-                    rospy.logwarn('SA logfile close()')
+                        rospy.loginfo('SA logfile close()')
             
         return self.triggered
         
@@ -212,11 +212,11 @@ class SaveArenaState:
             self.saveArenastate = experimentparamsReq.save.arenastate
             
             if experimentparamsReq.save.arenastate:
-                if self.fid is not None:
-                    if not self.fid.closed:
-                        with self.lock:
+                with self.lock:
+                    if self.fid is not None:
+                        if not self.fid.closed:
                             self.fid.close()
-                        rospy.logwarn('SA logfile close()')
+                            rospy.loginfo('SA logfile close()')
 
                 #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
                 now = rospy.Time.now().to_sec()
@@ -229,7 +229,8 @@ class SaveArenaState:
                                                                     time.localtime(now).tm_sec)
                 with self.lock:
                     self.fid = open(self.filename, 'w')
-                rospy.logwarn('SA logfile open(%s)' % self.filename)
+                rospy.loginfo('SA logfile open(%s)' % self.filename)
+                
                 with self.lock:
                     self.fid.write(self.headingsExperiment)
                 header_row = self.templateExperiment.format(date_time                  = str(rospy.Time.now().to_sec()),
@@ -304,10 +305,10 @@ class SaveArenaState:
 
             #rospy.logwarn ('SAVE %s' % [self.saveOnlyWhileTriggered,self.triggered,self.saveArenastate,bSave])
             if bSave:                    
-                if self.fid.closed:
-                    with self.lock:
+                with self.lock:
+                    if self.fid.closed:
                         self.fid = open(self.filename, 'wa')
-                    rospy.logwarn('SA logfile open2(%s)' % self.filename)
+                        rospy.loginfo('SA logfile open2(%s)' % self.filename)
                     
                 # Get the state of the robot.
                 stateRobot = arenastate.robot

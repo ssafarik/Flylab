@@ -11,16 +11,16 @@ class TriggerSettings(genpy.Message):
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool 		enabled
 string 		frameidParent 	# 'Plate', 'Robot', 'Fly1', 'Fly2' etc
-string 		frameidChild 	# 'Plate', 'Robot', 'Fly1', 'Fly2' etc
-float64 	speedParentMin
+string 		frameidChild 	
+float64 	speedParentMin  # Absolute speed of parent frame.
 float64 	speedParentMax
-float64 	speedChildMin
+float64 	speedChildMin   # Absolute speed of child frame.
 float64 	speedChildMax
-float64 	distanceMin
+float64 	distanceMin     # Distance from parent to child.
 float64 	distanceMax
-float64 	angleMin
+float64 	angleMin		# Angle to child in parent frame.
 float64 	angleMax
-string  	angleTest
+string  	angleTest		# 'inclusive' or 'exclusive'
 bool    	angleTestBilateral
 float64 	timeHold
 float64 	timeout

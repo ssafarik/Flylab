@@ -662,7 +662,7 @@ class ContourIdentifier:
                             contour = self.contours[self.mapContourFromObject[iFly]]
                         else:
                             contour = contourNone
-                            rospy.logwarn ('No contour for fly %d' % iFly)
+                            #rospy.logwarn ('No contour for fly %d' % iFly)
                         
                         self.objects[iFly].Update(contour, None)
         
