@@ -16,10 +16,10 @@
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find robots)/launch/robots_0.launch" />
-	<include file="$(find flies)/launch/flies_1.launch" />
+	<include file="$(find flies)/launch/flies_4.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="Zapontop.py" name="Experiment" />
+	<node pkg="experiments" type="Zaptrain.py" name="Experiment" />
 
 	
   

@@ -12,7 +12,7 @@ from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped,
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
 from flycore.msg import MsgFrameState
-import filters
+from pythonmodules import filters
 from pythonmodules import CircleFunctions
 import Fly
 from munkres import Munkres
@@ -685,8 +685,10 @@ class ContourIdentifier:
                     for iRobot in self.iRobot_list:
                         arenastate.robot.header.stamp    = self.objects[iRobot].state.header.stamp
                         arenastate.robot.header.frame_id = self.objects[iRobot].state.header.frame_id
+                        arenastate.robot.name            = self.objects[iRobot].name
                         arenastate.robot.pose            = self.objects[iRobot].state.pose
                         arenastate.robot.velocity        = self.objects[iRobot].state.velocity
+                        arenastate.robot.speed           = self.objects[iRobot].speed
                         #rospy.logwarn ('CI robot.position=%s, ptOffset=%s' % ([self.objects[iRobot].state.pose.position.x,
                         #                                                            self.objects[iRobot].state.pose.position.y],
                         #                                                           [self.objects[iRobot].ptOffset.x,
@@ -698,8 +700,10 @@ class ContourIdentifier:
 #                        if iFly<len(self.mapContourFromObject):
 #                            if (self.mapContourFromObject[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
                                 arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
+                                                                      name = self.objects[iFly].name,
                                                                       pose = self.objects[iFly].state.pose,
-                                                                      velocity = self.objects[iFly].state.velocity))
+                                                                      velocity = self.objects[iFly].state.velocity,#))
+                                                                      speed = min(50.0, self.objects[iFly].speed)))
                                 #rospy.logwarn('arenastate.flies.append(%s)' % self.objects[iFly].name)
 
                     

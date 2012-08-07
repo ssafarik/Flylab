@@ -9,7 +9,7 @@ import geometry_msgs.msg
 import std_msgs.msg
 
 class ArenaState(genpy.Message):
-  _md5sum = "9f7ee9ebaa8f8ddbe0d1e79f64216360"
+  _md5sum = "11b5b4f31e8db813f50a89b5a8f9b076"
   _type = "tracking/ArenaState"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """flycore/MsgFrameState robot
@@ -18,9 +18,11 @@ flycore/MsgFrameState[] flies
 
 ================================================================================
 MSG: flycore/MsgFrameState
-Header header
-geometry_msgs/Pose pose
+Header              header
+string              name
+geometry_msgs/Pose  pose
 geometry_msgs/Twist velocity
+float64             speed
 
 
 ================================================================================
@@ -125,8 +127,14 @@ float64 z
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.robot.name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_13d.pack(_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z))
+      buff.write(_struct_14d.pack(_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed))
       length = len(self.flies)
       buff.write(_struct_I.pack(length))
       for val1 in self.flies:
@@ -136,6 +144,12 @@ float64 z
         _x = _v2
         buff.write(_struct_2I.pack(_x.secs, _x.nsecs))
         _x = _v1.frame_id
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
+        _x = val1.name
         length = len(_x)
         if python3 or type(_x) == unicode:
           _x = _x.encode('utf-8')
@@ -155,6 +169,7 @@ float64 z
         _v8 = _v6.angular
         _x = _v8
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+        buff.write(_struct_d.pack(val1.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -182,10 +197,19 @@ float64 z
         self.robot.header.frame_id = str[start:end].decode('utf-8')
       else:
         self.robot.header.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.robot.name = str[start:end].decode('utf-8')
+      else:
+        self.robot.name = str[start:end]
       _x = self
       start = end
-      end += 104
-      (_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z,) = _struct_13d.unpack(str[start:end])
+      end += 112
+      (_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed,) = _struct_14d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -210,6 +234,15 @@ float64 z
           _v9.frame_id = str[start:end].decode('utf-8')
         else:
           _v9.frame_id = str[start:end]
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.name = str[start:end].decode('utf-8')
+        else:
+          val1.name = str[start:end]
         _v11 = val1.pose
         _v12 = _v11.position
         _x = _v12
@@ -232,6 +265,9 @@ float64 z
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+        start = end
+        end += 8
+        (val1.speed,) = _struct_d.unpack(str[start:end])
         self.flies.append(val1)
       return self
     except struct.error as e:
@@ -253,8 +289,14 @@ float64 z
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.robot.name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_13d.pack(_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z))
+      buff.write(_struct_14d.pack(_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed))
       length = len(self.flies)
       buff.write(_struct_I.pack(length))
       for val1 in self.flies:
@@ -264,6 +306,12 @@ float64 z
         _x = _v18
         buff.write(_struct_2I.pack(_x.secs, _x.nsecs))
         _x = _v17.frame_id
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
+        _x = val1.name
         length = len(_x)
         if python3 or type(_x) == unicode:
           _x = _x.encode('utf-8')
@@ -283,6 +331,7 @@ float64 z
         _v24 = _v22.angular
         _x = _v24
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+        buff.write(_struct_d.pack(val1.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -311,10 +360,19 @@ float64 z
         self.robot.header.frame_id = str[start:end].decode('utf-8')
       else:
         self.robot.header.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.robot.name = str[start:end].decode('utf-8')
+      else:
+        self.robot.name = str[start:end]
       _x = self
       start = end
-      end += 104
-      (_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z,) = _struct_13d.unpack(str[start:end])
+      end += 112
+      (_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed,) = _struct_14d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -339,6 +397,15 @@ float64 z
           _v25.frame_id = str[start:end].decode('utf-8')
         else:
           _v25.frame_id = str[start:end]
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.name = str[start:end].decode('utf-8')
+        else:
+          val1.name = str[start:end]
         _v27 = val1.pose
         _v28 = _v27.position
         _x = _v28
@@ -361,13 +428,17 @@ float64 z
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+        start = end
+        end += 8
+        (val1.speed,) = _struct_d.unpack(str[start:end])
         self.flies.append(val1)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_13d = struct.Struct("<13d")
+_struct_d = struct.Struct("<d")
+_struct_14d = struct.Struct("<14d")
 _struct_3I = struct.Struct("<3I")
 _struct_4d = struct.Struct("<4d")
 _struct_2I = struct.Struct("<2I")

@@ -13,7 +13,7 @@
 	<param name="tracking/nContoursMax"					type="int" value="20"/>
 	<param name="tracking/distanceDuplicateContour"		type="double" value="0.1"/>
 	<param name="tracking/speedThresholdForTravel" 		type="double" value="5.0"/>
-	<param name="tracking/dtVelocity"              		type="double" value="0.2"/>
+	<param name="tracking/dtVelocity"              		type="double" value="0.5"/>
 	<param name="tracking/rcAngleFilter"           		type="double" value="0.1"/>
 	<param name="tracking/rcSpeedFilter"           		type="double" value="0.2"/>
 	<param name="tracking/rcFlipFilter"            		type="double" value="4.0"/>
@@ -22,6 +22,4 @@
 	<node pkg="tracking" type="ContourGenerator.py" name="ContourGenerator" />
 	<node pkg="tracking" type="ContourIdentifier.py" name="ContourIdentifier" />
 	
-	<!-- Causes ContourIdentifier to hang when run w/ no Stage:  -->
-	<!-- <node pkg="tracking" type="PublishFlyView.py" name="PublishFlyView" /> --> 
 </launch>

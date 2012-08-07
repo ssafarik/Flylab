@@ -12,7 +12,7 @@ from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped,
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
 from flycore.msg import MsgFrameState
-import filters
+from pythonmodules import filters
 from pythonmodules import CircleFunctions
 
 
@@ -299,11 +299,13 @@ class Fly:
             self.state.velocity.angular.y = wy
             self.state.velocity.angular.z = wz
                 
-            speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
+            speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y, self.state.velocity.linear.z])
             self.speed = self.lpSpeed.Update(speedPre, self.state.header.stamp.to_sec())
                 
 #            if 'Fly1' in self.name:
-#                rospy.logwarn('speed=%0.2f, flip=%0.2f' % (self.speed, self.lpFlip.GetValue()))
+#                #rospy.logwarn ('FLY vel=%s' % [((vx2,vy2,vz2),(wx,wy,wz))])
+#                rospy.logwarn ('FLY speed=%0.2f, vel=(%0.2f,%0.2f,%0.2f)' % (self.speed, self.state.velocity.linear.x, self.state.velocity.linear.y, self.state.velocity.linear.z))
+#                #rospy.logwarn('speed=%0.2f, flip=%0.2f, stamp=%s' % (self.speed, self.lpFlip.GetValue(), self.state.header.stamp))
 
             # Update the most recent angle of travel.
             self.SetAngleOfTravel()

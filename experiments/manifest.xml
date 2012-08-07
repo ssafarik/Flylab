@@ -16,12 +16,12 @@
   <depend package="smach_ros"/>
   <depend package="actionlib"/>
 
-  <depend package="config"/>
-  <depend package="flycore"/>
-  <depend package="galvodirector"/>
-  <depend package="patterngen"/>
-  <depend package="stage_action_server"/>
-  <depend package="tracking"/>
+  <depend package="config" />
+  <depend package="flycore" />
+  <depend package="galvodirector" />
+  <depend package="patterngen" />
+  <depend package="stage_action_server" />
+  <depend package="tracking" />
  
 </package>
 

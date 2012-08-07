@@ -15,7 +15,7 @@ from tracking.msg import ArenaState
 
 
 #######################################################################################################
-class ExperimentZapontop():
+class ExperimentZaptrain():
     def __init__(self):
         rospy.init_node('Experiment')
         
@@ -26,7 +26,7 @@ class ExperimentZapontop():
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zapontop"
+        self.experimentparams.save.filenamebase = "zaptrain"
         self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
@@ -41,7 +41,7 @@ class ExperimentZapontop():
         
         self.experimentparams.waitEntry = 0.0
         
-        self.experimentparams.triggerEntry.enabled = True
+        self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.frameidParent = 'Plate'
         self.experimentparams.triggerEntry.frameidChild = 'Fly1'
         self.experimentparams.triggerEntry.speedParentMin =   0.0
@@ -78,7 +78,7 @@ class ExperimentZapontop():
         self.experimentparams.lasertrack.pattern_list = []
         self.experimentparams.lasertrack.stateFilterLo_list = []
         self.experimentparams.lasertrack.stateFilterHi_list = []
-        for iFly in range(rospy.get_param('nFlies', 0)):
+        for iFly in range(2):#rospy.get_param('nFlies', 0)):
             self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             shape      = 'grid',
                                                                             frame_id   = 'Fly%d' % (iFly+1),
@@ -90,10 +90,14 @@ class ExperimentZapontop():
                                                                             preempt    = False,
                                                                             param      = 2), # Peano curve level.
                                                                  )
-            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'velocity':{'angular':{'z':0}}}")
-            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'velocity':{'angular':{'z':99}}}")
-            self.experimentparams.lasertrack.stateFilterLo_list.append("{'pose':{'orientation':{'w':0}}}")
-            self.experimentparams.lasertrack.stateFilterHi_list.append("{'pose':{'orientation':{'w':1}}}")
+            self.experimentparams.lasertrack.stateFilterHi_list.append("{'speed':5.0}")
+            self.experimentparams.lasertrack.stateFilterLo_list.append("{'speed':0.0}")
+            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'velocity':{'linear':{'x':+6,'y':+6}}}")
+            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
+            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'velocity':{'angular':{'z':-1}}}")
+            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'velocity':{'angular':{'z':-999}}}")
+            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'pose':{'position':{'x':+999, 'y':999}}}")
+            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'pose':{'position':{'x':-999, 'y':0}}}")
         
         self.experimentparams.lasertrack.timeout = -1
         
@@ -111,7 +115,7 @@ class ExperimentZapontop():
         self.experimentparams.triggerExit.angleTest = 'inclusive'
         self.experimentparams.triggerExit.angleTestBilateral = False
         self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = 60
+        self.experimentparams.triggerExit.timeout = 3600
 
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 
@@ -124,7 +128,7 @@ class ExperimentZapontop():
 
 
 if __name__ == '__main__':
-    experiment = ExperimentZapontop()
+    experiment = ExperimentZaptrain()
     experiment.Run()
         
 

@@ -175,11 +175,12 @@ class SaveVideo:
                                                             time.localtime(now).tm_hour,
                                                             time.localtime(now).tm_min,
                                                             time.localtime(now).tm_sec)
-            try:
-                os.mkdir(self.dirFrames)
-            except OSError, e:
-		rospy.logwarn ('Cannot create directory %s: %s' % (self.dirFrames,e))
-                pass
+            if (self.saveVideo):
+                try:
+                    os.mkdir(self.dirFrames)
+                except OSError, e:
+                    rospy.logwarn ('Cannot create directory %s: %s' % (self.dirFrames,e))
+
             
             self.filenameVideo = "%s/%s%04d%02d%02d%02d%02d%02d.mov" % (self.dirVideo,
                                                             self.experimentparams.save.filenamebase, 

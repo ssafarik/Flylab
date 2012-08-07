@@ -8,12 +8,14 @@ import geometry_msgs.msg
 import std_msgs.msg
 
 class MsgFrameState(genpy.Message):
-  _md5sum = "b3dff8faff5245565795cc8a6e908f1f"
+  _md5sum = "3170dd2479342d605cab9df7bac33672"
   _type = "flycore/MsgFrameState"
   _has_header = True #flag to mark the presence of a Header object
-  _full_text = """Header header
-geometry_msgs/Pose pose
+  _full_text = """Header              header
+string              name
+geometry_msgs/Pose  pose
 geometry_msgs/Twist velocity
+float64             speed
 
 
 ================================================================================
@@ -70,8 +72,8 @@ float64 x
 float64 y
 float64 z
 """
-  __slots__ = ['header','pose','velocity']
-  _slot_types = ['std_msgs/Header','geometry_msgs/Pose','geometry_msgs/Twist']
+  __slots__ = ['header','name','pose','velocity','speed']
+  _slot_types = ['std_msgs/Header','string','geometry_msgs/Pose','geometry_msgs/Twist','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -81,7 +83,7 @@ float64 z
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       header,pose,velocity
+       header,name,pose,velocity,speed
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -92,14 +94,20 @@ float64 z
       #message fields cannot be None, assign default values for those that are
       if self.header is None:
         self.header = std_msgs.msg.Header()
+      if self.name is None:
+        self.name = ''
       if self.pose is None:
         self.pose = geometry_msgs.msg.Pose()
       if self.velocity is None:
         self.velocity = geometry_msgs.msg.Twist()
+      if self.speed is None:
+        self.speed = 0.
     else:
       self.header = std_msgs.msg.Header()
+      self.name = ''
       self.pose = geometry_msgs.msg.Pose()
       self.velocity = geometry_msgs.msg.Twist()
+      self.speed = 0.
 
   def _get_types(self):
     """
@@ -121,8 +129,14 @@ float64 z
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_13d.pack(_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z))
+      buff.write(_struct_14d.pack(_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -152,10 +166,19 @@ float64 z
         self.header.frame_id = str[start:end].decode('utf-8')
       else:
         self.header.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.name = str[start:end].decode('utf-8')
+      else:
+        self.name = str[start:end]
       _x = self
       start = end
-      end += 104
-      (_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z,) = _struct_13d.unpack(str[start:end])
+      end += 112
+      (_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed,) = _struct_14d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -176,8 +199,14 @@ float64 z
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_13d.pack(_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z))
+      buff.write(_struct_14d.pack(_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -208,14 +237,23 @@ float64 z
         self.header.frame_id = str[start:end].decode('utf-8')
       else:
         self.header.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.name = str[start:end].decode('utf-8')
+      else:
+        self.name = str[start:end]
       _x = self
       start = end
-      end += 104
-      (_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z,) = _struct_13d.unpack(str[start:end])
+      end += 112
+      (_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed,) = _struct_14d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
 _struct_3I = struct.Struct("<3I")
-_struct_13d = struct.Struct("<13d")
+_struct_14d = struct.Struct("<14d")

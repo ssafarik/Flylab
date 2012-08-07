@@ -3,6 +3,7 @@ from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
 import actionlib
+import copy
 import numpy as N
 import smach
 import smach_ros
@@ -11,6 +12,7 @@ import tf
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist
 from std_msgs.msg import Header
 from stage_action_server.msg import *
+from pythonmodules import filters
 from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from experiments.srv import Trigger, ExperimentParams
@@ -18,7 +20,7 @@ from galvodirector.msg import MsgGalvoCommand
 from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
 
-gRate = 100
+gRate = 100  # This is the loop rate at which the experiment states run.
 g_tfrx = None
 
 #######################################################################################################
@@ -173,7 +175,7 @@ class NewTrialService():
 class NewExperiment (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['success','abort'],
+                             outcomes=['success','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         
@@ -197,7 +199,7 @@ class NewExperiment (smach.State):
 class NewTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['continue','stop','abort'],
+                             outcomes=['continue','stop','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         #self.pub_experimentparams = rospy.Publisher('ExperimentParams', ExperimentParams)
@@ -225,7 +227,7 @@ class NewTrial (smach.State):
             self.NewTrial.notify(experimentparams)
             rv = 'continue'
         except rospy.ServiceException:
-            rv = 'abort'
+            rv = 'aborted'
 
         #rospy.loginfo ('EL Exiting NewTrial()')
         return rv
@@ -245,7 +247,7 @@ class TriggerOnStates (smach.State):
         
         
         smach.State.__init__(self, 
-                             outcomes=['success','disabled','timeout','abort'],
+                             outcomes=['success','disabled','timeout','aborted'],
                              input_keys=['experimentparamsIn'])
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
@@ -339,7 +341,7 @@ class TriggerOnStates (smach.State):
                     rospy.sleep(1.0)
         
         
-                rv = 'abort'
+                rv = 'aborted'
                 while not rospy.is_shutdown():
                     if True: #(len(self.arenastate.flies)>0) and (self.nRobots>0):
                         #iFly = GetNearestFly(self.arenastate)
@@ -451,13 +453,13 @@ class TriggerOnStates (smach.State):
 
             #rospy.logwarn ('rv=%s', rv)
             #rospy.logwarn ('self.type=%s', self.type)
-            if rv!='abort' and self.type=='entry':
+            if rv!='aborted' and self.type=='entry':
                 self.Trigger.notify(True)
             #else:
             #    self.Trigger.notify(False)
                 
         except rospy.ServiceException:
-            rv = 'abort'
+            rv = 'aborted'
             
         #rospy.loginfo ('EL Exiting TriggerOnStates()')
         return rv
@@ -470,7 +472,7 @@ class TriggerOnTime (smach.State):
     def __init__(self, type='entry'):
         self.type = type
         smach.State.__init__(self, 
-                             outcomes=['success','abort'],
+                             outcomes=['success','aborted'],
                              input_keys=['experimentparamsIn'])
 
         self.Trigger = TriggerService()
@@ -483,9 +485,9 @@ class TriggerOnTime (smach.State):
         try:
             rospy.sleep(userdata.experimentparamsIn.waitEntry)
         except rospy.ServiceException:
-            rv = 'abort'
+            rv = 'aborted'
 
-        if rv!='abort' and self.type=='entry':
+        if rv!='aborted' and self.type=='entry':
             self.Trigger.notify(True)
         #else:
         #    self.Trigger.notify(False)
@@ -501,7 +503,7 @@ class ResetRobot (smach.State):
     def __init__(self):
 
         smach.State.__init__(self, 
-                             outcomes=['success','disabled','timeout','abort'],
+                             outcomes=['success','disabled','timeout','aborted'],
                              input_keys=['experimentparamsIn'])
 
         self.arenastate = None
@@ -559,7 +561,7 @@ class ResetRobot (smach.State):
                                                                           pose=self.goal.state.pose),
                                                       speed = userdata.experimentparamsIn.home.speed))
 
-            rv = 'abort'
+            rv = 'aborted'
             while not rospy.is_shutdown():
                 # Are we there yet?
                 
@@ -602,7 +604,7 @@ class MoveRobot (smach.State):
     def __init__(self):
 
         smach.State.__init__(self, 
-                             outcomes=['success','disabled','timeout','preempt','abort'],
+                             outcomes=['success','disabled','timeout','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
 
         self.arenastate = None
@@ -668,7 +670,7 @@ class MoveRobot (smach.State):
             
     def MoveRelative (self, userdata):            
         self.ptTarget = None
-        rv = 'abort'
+        rv = 'aborted'
 
         while not rospy.is_shutdown():
             posRobot = self.arenastate.robot.pose.position # Assumed in the "Plate" frame.
@@ -762,7 +764,7 @@ class MoveRobot (smach.State):
 
             # If no flies and no target, then abort.
             #if (len(self.arenastate.flies)==0) and (self.ptTarget is None):
-            #    rv = 'abort'
+            #    rv = 'aborted'
             #    rospy.logwarn ('No flies and no target.')
             #    break
 
@@ -813,7 +815,7 @@ class MoveRobot (smach.State):
         self.pubPatternGen.publish (msgPattern)
                 
 
-        rv = 'abort'
+        rv = 'aborted'
         while not rospy.is_shutdown():
             if self.preempt_requested():
                 self.recall_preempt()
@@ -850,16 +852,20 @@ class MoveRobot (smach.State):
 # Lasertrack()
 # 
 # Control the laser according to the experimentparams.  Turn off when done.
+# This state allows enabling the laser only when the given object's state (i.e. Fly state) is in a restricted domain of states.
 #
 class Lasertrack (smach.State):
     def __init__(self):
 
         smach.State.__init__(self, 
-                             outcomes=['disabled','timeout','preempt','abort'],
+                             outcomes=['disabled','timeout','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
 
         self.rosrate = rospy.Rate(gRate)
         self.pubGalvoCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
+        self.arenastate = None
+
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
 
         rospy.on_shutdown(self.OnShutdown_callback)
@@ -867,10 +873,19 @@ class Lasertrack (smach.State):
         
     def OnShutdown_callback(self):
         pass
+
+
+    def ArenaState_callback(self, arenastate):
+        self.arenastate = arenastate
         
     
     # InStateFilterRange()
     # Check if the given state falls in the intersection of the given bounds.
+    # If any of the terms are violated, then the filter returns False.
+    #
+    # We have to manually go through each of the entries in the dict, rather than
+    # using a MsgFrameState, since we need the dict to only contain the entries
+    # we care about, and the MsgFrameState always contains them all.
     #  
     def InStateFilterRange(self, state, stateFilterLo_dict, stateFilterHi_dict):
         rv = True
@@ -961,8 +976,15 @@ class Lasertrack (smach.State):
                      zLo = angularLo_dict['z'] 
                      zHi = angularHi_dict['z']
                      if (state.velocity.angular.z < zLo) or (zHi < state.velocity.angular.z):
-                         rv = False   
-        
+                         rv = False
+                     
+        if 'speed' in stateFilterLo_dict:
+            speedLo = stateFilterLo_dict['speed'] 
+            speedHi = stateFilterHi_dict['speed']
+            #speed = N.linalg.norm([state.velocity.linear.x, state.velocity.linear.y, state.velocity.linear.z])
+            if (state.speed < speedLo) or (speedHi < state.speed):
+                rv = False   
+
         return rv
     
     
@@ -975,7 +997,7 @@ class Lasertrack (smach.State):
         if userdata.experimentparamsIn.lasertrack.enabled:
             self.timeStart = rospy.Time.now()
     
-            # Send the tracking command to the galvo director.
+            # Create the tracking command for the galvo director.
             command = MsgGalvoCommand()
             command.enable_laser = True
             command.units = 'millimeters' # 'millimeters' or 'volts'
@@ -988,40 +1010,79 @@ class Lasertrack (smach.State):
                 isStateFiltered = True
             else:
                 isStateFiltered = False
-                
+
+            # Initialize statefilter vars.                
             bInStateFilterRangePrev = [False for i in range(nPatterns)]
             bInStateFilterRange     = [False for i in range(nPatterns)]
+
                              
-            # Publish the command, if unfiltered.
+            # If unfiltered, publish the command.
             if not isStateFiltered:
                 self.pubGalvoCommand.publish(command)
-    
     
             # Move galvos until preempt or timeout.        
             while not rospy.is_shutdown():
                 
-                # If filtered, then check if any filter states have changed.
+                # If state is used to determine when pattern is shown.
                 if isStateFiltered:
+                    # Check if any filterstates have changed.
                     bFilterStateChanged = False
                     for iPattern in range(nPatterns):
+                        # Get the pattern.
+                        pattern = userdata.experimentparamsIn.lasertrack.pattern_list[iPattern]
+
+                        # Convert strings to dicts.
                         stateFilterLo_dict = eval(userdata.experimentparamsIn.lasertrack.stateFilterLo_list[iPattern])
                         stateFilterHi_dict = eval(userdata.experimentparamsIn.lasertrack.stateFilterHi_list[iPattern])
-                        pattern = userdata.experimentparamsIn.lasertrack.pattern_list[iPattern]
-                        
-                        # Get the state of the frame of interest.
-                        stamp = g_tfrx.getLatestCommonTime('Plate', pattern.frame_id)
-                        if g_tfrx.canTransform('Plate', pattern.frame_id, stamp):
+                
+                        # If possible, take the pose &/or velocity &/or speed from arenastate, else use transform via ROS.
+                        pose = None
+                        velocity = None     
+                        speed = None   
+                        if self.arenastate is not None:
+                            if ('Robot' in pattern.frame_id):
+                                #pose = self.arenastate.robot.pose  # For consistency w/ galvodirector, we'll get pose via transform.
+                                velocity = self.arenastate.robot.velocity
+                                speed = self.arenastate.robot.speed
+                                
+                            elif ('Fly' in pattern.frame_id):
+                                for iFly in range(len(self.arenastate.flies)):
+                                    if pattern.frame_id == self.arenastate.flies[iFly].name:
+                                        #pose = self.arenastate.flies[iFly].pose  # For consistency w/ galvodirector, we'll get pose via transform.
+                                        velocity = self.arenastate.flies[iFly].velocity
+                                        speed = self.arenastate.flies[iFly].speed
+                                        break
+
+                        # Get the timestamp for transforms.
+                        stamp=None
+                        if (pose is None) or (velocity is None) or (speed is None):
                             try:
-                                pose = g_tfrx.transformPose('Plate', PoseStamped(header=Header(stamp=stamp,
-                                                                                               frame_id=pattern.frame_id),
-                                                                                 pose=Pose(position=Point(0,0,0),
-                                                                                           orientation=Quaternion(0,0,0,1)
-                                                                                           )
-                                                                                 )
-                                                            )
-                                velocity_tuple = g_tfrx.lookupTwist(pattern.frame_id, 'Plate', stamp-self.dtVelocity, self.dtVelocity)
+                                stamp = g_tfrx.getLatestCommonTime('Plate', pattern.frame_id)
                             except tf.Exception:
                                 pass
+
+                            
+                        # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
+                        if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Plate', pattern.frame_id, stamp):
+                            try:
+                                poseStamped = g_tfrx.transformPose('Plate', PoseStamped(header=Header(stamp=stamp,
+                                                                                                      frame_id=pattern.frame_id),
+                                                                                        pose=Pose(position=Point(0,0,0),
+                                                                                                  orientation=Quaternion(0,0,0,1)
+                                                                                                  )
+                                                                                        )
+                                                                   )
+                                pose = poseStamped.pose
+                            except tf.Exception:
+                                pose = None
+
+                                
+                        # If we still need the velocity, then get it from ROS.
+                        if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Plate', pattern.frame_id, stamp):
+                            try:
+                                velocity_tuple = g_tfrx.lookupTwist('Plate', pattern.frame_id, stamp, self.dtVelocity)
+                            except tf.Exception:
+                                velocity = None
                             else:
                                 velocity = Twist(linear=Point(x=velocity_tuple[0][0],
                                                               y=velocity_tuple[0][1],
@@ -1029,23 +1090,36 @@ class Lasertrack (smach.State):
                                                  angular=Point(x=velocity_tuple[1][0],
                                                                y=velocity_tuple[1][1],
                                                                z=velocity_tuple[1][2]))
-                                state = MsgFrameState(pose=pose.pose, velocity=velocity)
-        
-                                bInStateFilterRangePrev[iPattern] = bInStateFilterRange[iPattern]
-                                bInStateFilterRange[iPattern] = self.InStateFilterRange(state, stateFilterLo_dict, stateFilterHi_dict)
-                                
-                                # If any of the filter states have changed, then we need to update them all.
-                                if bInStateFilterRangePrev[iPattern] != bInStateFilterRange[iPattern]:
-                                    bFilterStateChanged = True
 
+                        # If we still need the speed, then get it from velocity.
+                        if (speed is None) and (velocity is not None):
+                            speed = N.linalg.norm([velocity.linear.x, velocity.linear.y, velocity.linear.z])
 
-                    # If filter state has changed, then republish the command                    
+                                                        
+                        # See if any of the states are in range.
+                        if (pose is not None) and (velocity is not None) and (speed is not None):
+                            state = MsgFrameState(pose = pose, 
+                                                  velocity = velocity,
+                                                  speed = speed)
+    
+                            bInStateFilterRangePrev[iPattern] = bInStateFilterRange[iPattern]
+                            bInStateFilterRange[iPattern] = self.InStateFilterRange(state, stateFilterLo_dict, stateFilterHi_dict)
+                            
+                            # If any of the filter states have changed, then we need to update them all.
+                            if bInStateFilterRangePrev[iPattern] != bInStateFilterRange[iPattern]:
+                                bFilterStateChanged = True
+                    # end for iPattern in range(nPatterns)
+                    
+                    #rospy.logwarn ('%s: %s' % (bFilterStateChanged, bInStateFilterRange))
+                    
+                    # If filter state has changed, then publish the new command                    
                     if bFilterStateChanged:
                         command.pattern_list = []
                         for iPattern in range(nPatterns):
                             if bInStateFilterRange[iPattern]:
+                                pattern = userdata.experimentparamsIn.lasertrack.pattern_list[iPattern]
                                 command.pattern_list.append(pattern)
-    
+                    
                         if len(command.pattern_list)>0:
                             command.enable_laser = True
                         else:
@@ -1053,7 +1127,7 @@ class Lasertrack (smach.State):
                             
                         self.pubGalvoCommand.publish(command)
 
-                # else command.pattern_list already contains all patterns, and has been published.
+                # else command.pattern_list contains all patterns, and has already been published.
                 
                 
                 if self.preempt_requested():
@@ -1092,21 +1166,15 @@ class Experiment():
         self.Trigger.attach()
         
         # Create the state machine.
-        self.stateTop = smach.StateMachine(['success','abort'])
+        self.stateTop = smach.StateMachine(outcomes = ['success','aborted'])
         self.stateTop.userdata.experimentparams = experimentparams
         
-        # Create the iterator state.
-#        stateIterator = smach.Iterator(outcomes=['success','disabled','abort'],
-#                                         exhausted_outcome='success',
-#                                         it = lambda: range(3),
-#                                         input_keys=['experimentparamsIn'])
-
-        # Create the "action" concurrency state.
-        stateActions = smach.Concurrence(outcomes=['success','disabled','abort'],
-                                         default_outcome='abort',
-                                         child_termination_cb=self.child_term_callback,
-                                         outcome_cb=self.all_term_callback,
-                                         input_keys=['experimentparamsIn'])
+        # Create the "actions" concurrency state.
+        stateActions = smach.Concurrence(outcomes = ['success','disabled','aborted'],
+                                         default_outcome = 'aborted',
+                                         child_termination_cb = self.child_term_callback,
+                                         outcome_cb = self.all_term_callback,
+                                         input_keys = ['experimentparamsIn'])
 
         with stateActions:
             smach.Concurrence.add('MOVEROBOT', 
@@ -1121,7 +1189,7 @@ class Experiment():
             smach.StateMachine.add('NEWEXPERIMENT',
                                    NewExperiment(),
                                    transitions={'success':'RESETHARDWARE',
-                                                'abort':'abort'},
+                                                'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
@@ -1130,21 +1198,21 @@ class Experiment():
                                    transitions={'success':'NEWTRIAL',
                                                 'disabled':'NEWTRIAL',
                                                 'timeout':'NEWTRIAL',
-                                                'abort':'abort'},
+                                                'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
             smach.StateMachine.add('NEWTRIAL',
                                    NewTrial(),
                                    transitions={'continue':'ENTRYWAIT',
                                                 'stop':'success',
-                                                'abort':'abort'},
+                                                'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
             smach.StateMachine.add('ENTRYWAIT', 
                                    TriggerOnTime(type='none'),
                                    transitions={'success':'ENTRYTRIGGER',
-                                                'abort':'abort'},
+                                                'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
             smach.StateMachine.add('ENTRYTRIGGER', 
@@ -1152,19 +1220,20 @@ class Experiment():
                                    transitions={'success':'ACTIONS',
                                                 'disabled':'ACTIONS',
                                                 'timeout':'ACTIONS',
-                                                'abort':'abort'},
+                                                'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
             smach.StateMachine.add('ACTIONS', stateActions,
                                    transitions={'success':'RESETHARDWARE',
                                                 'disabled':'RESETHARDWARE',
-                                                'abort':'abort'},
+                                                'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
 
         self.sis = smach_ros.IntrospectionServer('sis_experiment',
                                                  self.stateTop,
                                                  '/EXPERIMENT')
+        
         
     # Gets called upon ANY child state termination.
     def child_term_callback(self, outcome_map):
@@ -1182,15 +1251,12 @@ class Experiment():
                 rv = True 
         
             
-        #rospy.logwarn('child_term_callback outcome_map=%s, rv=%s' % (outcome_map,rv))
-        # True:  Preempt remaining states.
-        # False: Let remaining states keep going.
         return rv
     
 
     # Gets called after all child states are terminated.
     def all_term_callback(self, outcome_map):
-        rv = 'abort'
+        rv = 'aborted'
         if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map):
             if (outcome_map['EXITTRIGGER']=='timeout') or \
                (outcome_map['EXITTRIGGER']=='success') or \
@@ -1214,7 +1280,7 @@ class Experiment():
 
 
         self.Trigger.notify(False)
-
+        
         return rv
 
         
@@ -1223,8 +1289,8 @@ class Experiment():
         self.sis.start()
         try:
             outcome = self.stateTop.execute()
-        except smach.exceptions.InvalidUserCodeError, e:
-            rospy.logwarn('Exception InvalidUserCodeError executing state machine: %s' % e)
+        except Exception, e: #smach.exceptions.InvalidUserCodeError, e:
+            rospy.logwarn('Exception executing state machine: %s' % e)
         
         rospy.logwarn ('Experiment state machine finished with outcome=%s' % outcome)
         self.sis.stop()
