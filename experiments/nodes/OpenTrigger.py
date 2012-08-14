@@ -81,6 +81,8 @@ class ExperimentOpenTrigger():
         self.experimentparams.triggerExit.timeHold = 0.0
         self.experimentparams.triggerExit.timeout = -1
 
+        self.experimentparams.waitExit = 0.0
+        
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 
 

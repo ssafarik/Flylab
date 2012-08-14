@@ -480,10 +480,16 @@ class TriggerOnTime (smach.State):
         
 
     def execute(self, userdata):
-        rospy.loginfo("EL State TriggerOnTime(%s)" % (userdata.experimentparamsIn.waitEntry))
+        if self.type=='entry':
+            duration = userdata.experimentparamsIn.waitEntry
+        else:
+            duration = userdata.experimentparamsIn.waitExit
+
+        rospy.loginfo("EL State TriggerOnTime(%s, %s)" % (self.type, duration))
+            
         rv = 'success'
         try:
-            rospy.sleep(userdata.experimentparamsIn.waitEntry)
+            rospy.sleep(duration)
         except rospy.ServiceException:
             rv = 'aborted'
 
@@ -1055,7 +1061,7 @@ class Lasertrack (smach.State):
 
                         # Get the timestamp for transforms.
                         stamp=None
-                        if (pose is None) or (velocity is None) or (speed is None):
+                        if (pose is None) or (velocity is None):
                             try:
                                 stamp = g_tfrx.getLatestCommonTime('Plate', pattern.frame_id)
                             except tf.Exception:
@@ -1096,7 +1102,7 @@ class Lasertrack (smach.State):
                             speed = N.linalg.norm([velocity.linear.x, velocity.linear.y, velocity.linear.z])
 
                                                         
-                        # See if any of the states are in range.
+                        # See if any of the states are in range of the filter.
                         if (pose is not None) and (velocity is not None) and (speed is not None):
                             state = MsgFrameState(pose = pose, 
                                                   velocity = velocity,
@@ -1166,17 +1172,17 @@ class Experiment():
         self.Trigger.attach()
         
         # Create the state machine.
-        self.stateTop = smach.StateMachine(outcomes = ['success','aborted'])
-        self.stateTop.userdata.experimentparams = experimentparams
+        self.smachTop = smach.StateMachine(outcomes = ['success','aborted'])
+        self.smachTop.userdata.experimentparams = experimentparams
         
         # Create the "actions" concurrency state.
-        stateActions = smach.Concurrence(outcomes = ['success','disabled','aborted'],
+        smachActions = smach.Concurrence(outcomes = ['success','disabled','aborted'],
                                          default_outcome = 'aborted',
                                          child_termination_cb = self.child_term_callback,
                                          outcome_cb = self.all_term_callback,
                                          input_keys = ['experimentparamsIn'])
 
-        with stateActions:
+        with smachActions:
             smach.Concurrence.add('MOVEROBOT', 
                                   MoveRobot ())
             smach.Concurrence.add('LASERTRACK', 
@@ -1185,7 +1191,7 @@ class Experiment():
                                   TriggerOnStates(type='exit'))
 
         
-        with self.stateTop:
+        with self.smachTop:
             smach.StateMachine.add('NEWEXPERIMENT',
                                    NewExperiment(),
                                    transitions={'success':'RESETHARDWARE',
@@ -1201,37 +1207,44 @@ class Experiment():
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
-            smach.StateMachine.add('NEWTRIAL',
+            smach.StateMachine.add('NEWTRIAL',                         
                                    NewTrial(),
-                                   transitions={'continue':'ENTRYWAIT',
-                                                'stop':'success',
-                                                'aborted':'aborted'},
+                                   transitions={'continue':'WAITENTRY',     # Trigger service signal goes False.
+                                                'stop':'success',           # Trigger service signal goes False.
+                                                'aborted':'aborted'},       # Trigger service signal goes False.
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
-            smach.StateMachine.add('ENTRYWAIT', 
-                                   TriggerOnTime(type='none'),
-                                   transitions={'success':'ENTRYTRIGGER',
+            smach.StateMachine.add('WAITENTRY', 
+                                   TriggerOnTime(type='entry'),
+                                   transitions={'success':'ENTRYTRIGGER',   # Trigger service signal goes True.
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
             smach.StateMachine.add('ENTRYTRIGGER', 
                                    TriggerOnStates(type='entry'),
-                                   transitions={'success':'ACTIONS',
-                                                'disabled':'ACTIONS',
-                                                'timeout':'ACTIONS',
+                                   transitions={'success':'ACTIONS',        # Trigger service signal goes True.
+                                                'disabled':'ACTIONS',       # Trigger service signal goes True.
+                                                'timeout':'ACTIONS',        # Trigger service signal goes True.
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
-            smach.StateMachine.add('ACTIONS', stateActions,
+            smach.StateMachine.add('ACTIONS', 
+                                   smachActions,
+                                   transitions={'success':'WAITEXIT',
+                                                'disabled':'WAITEXIT',
+                                                'aborted':'aborted'},
+                                   remapping={'experimentparamsIn':'experimentparams'})
+
+            smach.StateMachine.add('WAITEXIT', 
+                                   TriggerOnTime(type='exit'),
                                    transitions={'success':'RESETHARDWARE',
-                                                'disabled':'RESETHARDWARE',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
 
         self.sis = smach_ros.IntrospectionServer('sis_experiment',
-                                                 self.stateTop,
+                                                 self.smachTop,
                                                  '/EXPERIMENT')
         
         
@@ -1288,7 +1301,7 @@ class Experiment():
     def Run(self):
         self.sis.start()
         try:
-            outcome = self.stateTop.execute()
+            outcome = self.smachTop.execute()
         except Exception, e: #smach.exceptions.InvalidUserCodeError, e:
             rospy.logwarn('Exception executing state machine: %s' % e)
         

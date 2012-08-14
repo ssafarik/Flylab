@@ -1,12 +1,9 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the ZAP-ON-TOP learning experiment.       -->
-    <!--                                                            -->
-    <!-- Edit this file to contain the elements of the particular   -->
-    <!-- experiment.                                                -->
+	<!-- Configuration to measure the temperature of a fly.         -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments chase.launch                         -->
+    <!-- roslaunch experiments zaptemperature.launch                -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 
@@ -16,10 +13,15 @@
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find robots)/launch/robots_0.launch" />
-	<include file="$(find flies)/launch/flies_4.launch" />
+	<include file="$(find flies)/launch/flies_1.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="Zaptrain.py" name="Experiment" />
+    <param name="camera/mask/x" type="double" value="309"/>
+    <param name="camera/mask/y" type="double" value="221"/>
+    <param name="camera/mask/radius" type="double" value="9"/>  <!-- pixels -->
+    <param name="camera/shutter" type="double" value="256"/>
+    
+	<node pkg="experiments" type="ZapTemperature.py" name="Experiment" />
 
 	
   

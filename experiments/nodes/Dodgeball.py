@@ -81,6 +81,8 @@ class ExperimentDodgeball():
         self.experimentparams.triggerExit.timeHold = 1.0
         self.experimentparams.triggerExit.timeout = -1
 
+        self.experimentparams.waitExit = 0.0
+        
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 
 

@@ -15,29 +15,24 @@ from tracking.msg import ArenaState
 
 
 #######################################################################################################
-class ExperimentZaptrain():
+class ExperimentZapOnTurn():
     def __init__(self):
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "When fly y>0 then laser"
+        self.experimentparams.experiment.description = "When fly turns then laser"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zaptrain"
+        self.experimentparams.save.filenamebase = "zaponturn"
         self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = False # Saves always.
         
         self.experimentparams.home.enabled = False
-        self.experimentparams.home.x = 0.0
-        self.experimentparams.home.y = 0.0
-        self.experimentparams.home.speed = 20
-        self.experimentparams.home.timeout = -1
-        self.experimentparams.home.tolerance = 2
         
         self.experimentparams.waitEntry = 0.0
         
@@ -61,24 +56,13 @@ class ExperimentZaptrain():
         # .move, .lasertrack, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.move.enabled = False
-        self.experimentparams.move.mode = 'relative'        
-        self.experimentparams.move.relative.tracking = True
-        self.experimentparams.move.relative.frameidOriginPosition = "Fly1"
-        self.experimentparams.move.relative.frameidOriginAngle = "Fly1"
-        self.experimentparams.move.relative.distance = 5
-        self.experimentparams.move.relative.angle = 180.0 * N.pi / 180.0
-        self.experimentparams.move.relative.angleType = 'constant'
-        self.experimentparams.move.relative.speed = 200
-        self.experimentparams.move.relative.speedType = 'constant'
-        self.experimentparams.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.move.timeout = -1
         
         
         self.experimentparams.lasertrack.enabled = True
         self.experimentparams.lasertrack.pattern_list = []
         self.experimentparams.lasertrack.stateFilterLo_list = []
         self.experimentparams.lasertrack.stateFilterHi_list = []
-        for iFly in range(2):#rospy.get_param('nFlies', 0)):
+        for iFly in range(3):#rospy.get_param('nFlies', 0)):#2):#
             self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             shape      = 'grid',
                                                                             frame_id   = 'Fly%d' % (iFly+1),
@@ -88,14 +72,14 @@ class ExperimentZaptrain():
                                                                             size       = Point(x=3,
                                                                                                y=3),
                                                                             preempt    = False,
-                                                                            param      = 2), # Peano curve level.
+                                                                            param      = 3), # Peano curve level.
                                                                  )
-            self.experimentparams.lasertrack.stateFilterHi_list.append("{'speed':5.0}")
-            self.experimentparams.lasertrack.stateFilterLo_list.append("{'speed':0.0}")
+            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'speed':5.0}")
+            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'speed':0.0}")
             #self.experimentparams.lasertrack.stateFilterHi_list.append("{'velocity':{'linear':{'x':+6,'y':+6}}}")
             #self.experimentparams.lasertrack.stateFilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
-            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'velocity':{'angular':{'z':-1}}}")
-            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'velocity':{'angular':{'z':-999}}}")
+            self.experimentparams.lasertrack.stateFilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
+            self.experimentparams.lasertrack.stateFilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
             #self.experimentparams.lasertrack.stateFilterHi_list.append("{'pose':{'position':{'x':+999, 'y':999}}}")
             #self.experimentparams.lasertrack.stateFilterLo_list.append("{'pose':{'position':{'x':-999, 'y':0}}}")
         
@@ -117,6 +101,8 @@ class ExperimentZaptrain():
         self.experimentparams.triggerExit.timeHold = 0.0
         self.experimentparams.triggerExit.timeout = 3600
 
+        self.experimentparams.waitExit = 0.0
+        
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 
 
@@ -128,7 +114,7 @@ class ExperimentZaptrain():
 
 
 if __name__ == '__main__':
-    experiment = ExperimentZaptrain()
+    experiment = ExperimentZapOnTurn()
     experiment.Run()
         
 

@@ -81,6 +81,8 @@ class ExperimentRecord10MinTrials():
         self.experimentparams.triggerExit.timeHold = 0.0
         self.experimentparams.triggerExit.timeout = 600
 
+        self.experimentparams.waitExit = 0.0
+        
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 
 

@@ -35,7 +35,7 @@ class Fly:
         
 
         self.kfState = filters.KalmanFilter()
-        self.lpAngleContour = filters.LowPassHalfCircleFilter(RC=rospy.get_param('tracking/rcAngleFilter', 0.1))
+        self.lpAngleContour = filters.LowPassHalfCircleFilter(RC=rospy.get_param('tracking/rcFilterAngle', 0.1))
         self.lpAngleContour.SetValue(0.0)
         self.angleContourPrev = 0.0
         self.lpOffsetMag = filters.LowPassFilter(RC=1.0)
@@ -51,12 +51,19 @@ class Fly:
         
         # Orientation detection stuff.
         self.angleOfTravelRecent = 0.0
-        self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFlipFilter', 3.0))
+        self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterFlip', 3.0))
         self.lpFlip.SetValue(0.0)
         self.contour = None
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
-        self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcSpeedFilter', 0.5))
+        self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterSpeed', 0.2))
         self.lpSpeed.SetValue(0.0)
+        
+        self.lpWx = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
+        self.lpWy = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
+        self.lpWz = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
+        self.lpWx.SetValue(0.0)
+        self.lpWy.SetValue(0.0)
+        self.lpWz.SetValue(0.0)
         
         self.isVisible = False
         self.isDead = False # TO DO: dead fly detection.
@@ -290,14 +297,18 @@ class Fly:
                 try:
                     ((vx2,vy2,vz2),(wx,wy,wz)) = self.tfrx.lookupTwist(self.name, self.state.header.frame_id, self.state.header.stamp-self.dtVelocity, self.dtVelocity)
                 except (tf.Exception, AttributeError), e:
-                    ((vx2,vy2,vz2),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+                    ((vx2,vy2,vz2),(wx,wy,wz)) = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
                     #rospy.logwarn('lookupTwist() Exception: %s' % e)
             else:
-                ((vx2,vy2,vz2),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+                ((vx2,vy2,vz2),(wx,wy,wz)) = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
 
-            self.state.velocity.angular.x = wx
-            self.state.velocity.angular.y = wy
-            self.state.velocity.angular.z = wz
+            # Fix glitches due to flip orientation.
+            if wz>6.27:
+                wz = self.lpWz.GetValue()
+                
+            self.state.velocity.angular.x = self.lpWx.Update(wx, self.state.header.stamp.to_sec())
+            self.state.velocity.angular.y = self.lpWy.Update(wy, self.state.header.stamp.to_sec())
+            self.state.velocity.angular.z = self.lpWz.Update(wz, self.state.header.stamp.to_sec())
                 
             speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y, self.state.velocity.linear.z])
             self.speed = self.lpSpeed.Update(speedPre, self.state.header.stamp.to_sec())

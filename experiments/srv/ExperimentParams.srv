@@ -1,11 +1,12 @@
 ExperimentSettings 	experiment
+SaveSettings 		save
 HomeSettings 		home
 float64 			waitEntry
 TriggerSettings 	triggerEntry
 MoveSettings 		move
 LasertrackSettings 	lasertrack
 TriggerSettings 	triggerExit
-SaveSettings 		save
+float64 			waitExit
 ---
 bool 				succeeded
 

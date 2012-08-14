@@ -1,0 +1,26 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the ZAP-ON-STOP learning experiment.      -->
+    <!--                                                            -->
+    <!-- Edit this file to contain the elements of the particular   -->
+    <!-- experiment.                                                -->
+    <!--                                                            -->
+    <!-- Launch this file to run the experiment, as in:             -->
+    <!-- roslaunch experiments chase.launch                         -->
+    <!--                                                            -->
+	<!-- ========================================================== -->
+
+	<!-- ***  Core stuff  *** -->
+	<include file="$(find flycore)/launch/flycore.launch" />
+	
+	<!-- ***  Hardware, Flies, and Robot  *** -->
+	<include file="$(find config)/launch/hardware.launch" />
+	<include file="$(find robots)/launch/robots_0.launch" />
+	<include file="$(find flies)/launch/flies_4.launch" />
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="experiments" type="ZapOnStop.py" name="Experiment" />
+
+	
+  
+</launch>

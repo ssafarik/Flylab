@@ -50,6 +50,8 @@ class SaveArenaState:
 
         self.robot_move_commanded = False
 
+        self.nFlies = rospy.get_param("nFlies",0)
+        self.nRobots = rospy.get_param("nRobots",0)
         self.robot_width = rospy.get_param("robot/width","3.175") # mm
         self.robot_height = rospy.get_param("robot/height","3.175") # mm
         self.robot_visible = bool(rospy.get_param("robot/visible","true"))
@@ -62,117 +64,140 @@ class SaveArenaState:
         self.format_precision = "2"
         self.format_type = "f"
         
-        self.headingsExperiment = 'date_time, '\
-                                  'description, '\
-                                  'maxTrials, '\
-                                  'trial, '\
-                                  'robot_width, '\
-                                  'robot_height, '\
-                                  'robot_visible, '\
-                                  'robot_paint, '\
-                                  'robot_scent, '\
-                                  'waitEntry, '\
-                                  'trigger1FrameidParent, '\
-                                  'trigger1FrameidChild, '\
-                                  'trigger1SpeedParentMin, '\
-                                  'trigger1SpeedParentMax, '\
-                                  'trigger1SpeedChildMin, '\
-                                  'trigger1SpeedChildMax, '\
-                                  'trigger1DistanceMin, '\
-                                  'trigger1DistanceMax, '\
-                                  'trigger1AngleMin, '\
-                                  'trigger1AngleMax, '\
-                                  'trigger1AngleTest, '\
-                                  'trigger1AngleTestBilateral, '\
-                                  'trigger1TimeHold, '\
-                                  'movePatternShape, '\
-                                  'movePatternHz, '\
-                                  'movePatternHzPoint, '\
-                                  'movePatternCount, '\
-                                  'movePatternSizeX, '\
-                                  'movePatternSizeY, '\
-                                  'moveRelTracking, '\
-                                  'moveRelOriginPosition, '\
-                                  'moveRelOriginAngle, '\
-                                  'moveRelDistance, '\
-                                  'moveRelAngle, '\
-                                  'moveRelAngleType, '\
-                                  'moveRelSpeed, '\
-                                  'moveRelSpeedType, '\
-                                  'moveRelTolerance, '\
-                                  'laserEnabled, '\
-                                  'trigger2FrameidParent, '\
-                                  'trigger2FrameidChild, '\
-                                  'trigger2SpeedParentMin, '\
-                                  'trigger2SpeedParentMax, '\
-                                  'trigger2SpeedChildMin, '\
-                                  'trigger2SpeedChildMax, '\
-                                  'trigger2DistanceMin, '\
-                                  'trigger2DistanceMax, '\
-                                  'trigger2AngleMin, '\
-                                  'trigger2AngleMax, '\
-                                  'trigger2AngleTest, '\
-                                  'trigger2AngleTestBilateral, '\
-                                  'trigger2TimeHold\n'
+        self.headingsExperiment =   'date_time, '\
+                                    'description, '\
+                                    'maxTrials, '\
+                                    'trial\n'
                                   
-        self.templateExperiment = '{date_time:s}, '\
-                                  '{description:s}, '\
-                                  '{maxTrials:s}, '\
-                                  '{trial:s}, '\
-                                  '{robot_width:s}, '\
-                                  '{robot_height:s}, '\
-                                  '{robot_visible:s}, '\
-                                  '{robot_paint:s}, '\
-                                  '{robot_scent:s}, '\
-                                  '{waitEntry:s}, '\
-                                  '{trigger1FrameidParent:s}, '\
-                                  '{trigger1FrameidChild:s}, '\
-                                  '{trigger1SpeedParentMin:s}, '\
-                                  '{trigger1SpeedParentMax:s}, '\
-                                  '{trigger1SpeedChildMin:s}, '\
-                                  '{trigger1SpeedChildMax:s}, '\
-                                  '{trigger1DistanceMin:s}, '\
-                                  '{trigger1DistanceMax:s}, '\
-                                  '{trigger1AngleMin:s}, '\
-                                  '{trigger1AngleMax:s}, '\
-                                  '{trigger1AngleTest:s}, '\
-                                  '{trigger1AngleTestBilateral:s}, '\
-                                  '{trigger1TimeHold:s}, '\
-                                  '{trigger1Timeout:s}, '\
-                                  '{movePatternShape:s}, '\
-                                  '{movePatternHz:s}, '\
-                                  '{movePatternHzPoint:s}, '\
-                                  '{movePatternCount:s}, '\
-                                  '{movePatternSizeX:s}, '\
-                                  '{movePatternSizeY:s}, '\
-                                  '{moveRelTracking:s}, '\
-                                  '{moveRelOriginPosition:s}, '\
-                                  '{moveRelOriginAngle:s}, '\
-                                  '{moveRelDistance:s}, '\
-                                  '{moveRelAngle:s}, '\
-                                  '{moveRelAngleType:s}, '\
-                                  '{moveRelSpeed:s}, '\
-                                  '{moveRelSpeedType:s}, '\
-                                  '{moveRelTolerance:s}, '\
-                                  '{laserEnabled:s}, '\
-                                  '{trigger2FrameidParent:s}, '\
-                                  '{trigger2FrameidChild:s}, '\
-                                  '{trigger2SpeedParentMin:s}, '\
-                                  '{trigger2SpeedParentMax:s}, '\
-                                  '{trigger2SpeedChildMin:s}, '\
-                                  '{trigger2SpeedChildMax:s}, '\
-                                  '{trigger2DistanceMin:s}, '\
-                                  '{trigger2DistanceMax:s}, '\
-                                  '{trigger2AngleMin:s}, '\
-                                  '{trigger2AngleMax:s}, '\
-                                  '{trigger2AngleTest:s}, '\
-                                  '{trigger2AngleTestBilateral:s}, '\
-                                  '{trigger2TimeHold:s}, '\
-                                  '{trigger2Timeout:s}\n\n'
+        self.headingsRobot =        'nRobots, '\
+                                    'robot_width, '\
+                                    'robot_height, '\
+                                    'robot_visible, '\
+                                    'robot_paint, '\
+                                    'robot_scent\n'
+                                  
+        self.headingsFlies =        'nFlies\n'
+                                  
+        self.headingsWaitEntry =    'waitEntry\n'
+        
+        self.headingsTriggerEntry = 'trigger1Enabled, '\
+                                    'trigger1FrameidParent, '\
+                                    'trigger1FrameidChild, '\
+                                    'trigger1SpeedParentMin, '\
+                                    'trigger1SpeedParentMax, '\
+                                    'trigger1SpeedChildMin, '\
+                                    'trigger1SpeedChildMax, '\
+                                    'trigger1DistanceMin, '\
+                                    'trigger1DistanceMax, '\
+                                    'trigger1AngleMin, '\
+                                    'trigger1AngleMax, '\
+                                    'trigger1AngleTest, '\
+                                    'trigger1AngleTestBilateral, '\
+                                    'trigger1TimeHold, '\
+                                    'trigger1Timeout\n'
+                                    
+        self.headingsMoveRobot =    'moverobotEnabled, '\
+                                    'moverobotPatternShape, '\
+                                    'moverobotPatternHz, '\
+                                    'moverobotPatternHzPoint, '\
+                                    'moverobotPatternCount, '\
+                                    'moverobotPatternSizeX, '\
+                                    'moverobotPatternSizeY, '\
+                                    'moverobotRelTracking, '\
+                                    'moverobotRelOriginPosition, '\
+                                    'moverobotRelOriginAngle, '\
+                                    'moverobotRelDistance, '\
+                                    'moverobotRelAngle, '\
+                                    'moverobotRelAngleType, '\
+                                    'moverobotRelSpeed, '\
+                                    'moverobotRelSpeedType, '\
+                                    'moverobotRelTolerance\n'
+                                    
+        self.headingsLasertrack =   'laserEnabled\n'
+        
+        self.headingsTriggerExit =  'trigger2Enabled, '\
+                                    'trigger2FrameidParent, '\
+                                    'trigger2FrameidChild, '\
+                                    'trigger2SpeedParentMin, '\
+                                    'trigger2SpeedParentMax, '\
+                                    'trigger2SpeedChildMin, '\
+                                    'trigger2SpeedChildMax, '\
+                                    'trigger2DistanceMin, '\
+                                    'trigger2DistanceMax, '\
+                                    'trigger2AngleMin, '\
+                                    'trigger2AngleMax, '\
+                                    'trigger2AngleTest, '\
+                                    'trigger2AngleTestBilateral, '\
+                                    'trigger2TimeHold, '\
+                                    'trigger2Timeout\n'
+                                  
+        self.headingsWaitExit =     'waitExit\n'
+        
+        
+        self.templateExperiment =   '{date_time:s}, '\
+                                    '{description:s}, '\
+                                    '{maxTrials:s}, '\
+                                    '{trial:s}\n'
+        self.templateRobot =        '{n_robots:s}, '\
+                                    '{robot_width:s}, '\
+                                    '{robot_height:s}, '\
+                                    '{robot_visible:s}, '\
+                                    '{robot_paint:s}, '\
+                                    '{robot_scent:s}\n'
+        self.templateFlies =        '{n_flies:s}\n'
+        self.templateWaitEntry =    '{waitEntry:s}\n'
+        self.templateTriggerEntry = '{trigger1Enabled:s}, '\
+                                    '{trigger1FrameidParent:s}, '\
+                                    '{trigger1FrameidChild:s}, '\
+                                    '{trigger1SpeedParentMin:s}, '\
+                                    '{trigger1SpeedParentMax:s}, '\
+                                    '{trigger1SpeedChildMin:s}, '\
+                                    '{trigger1SpeedChildMax:s}, '\
+                                    '{trigger1DistanceMin:s}, '\
+                                    '{trigger1DistanceMax:s}, '\
+                                    '{trigger1AngleMin:s}, '\
+                                    '{trigger1AngleMax:s}, '\
+                                    '{trigger1AngleTest:s}, '\
+                                    '{trigger1AngleTestBilateral:s}, '\
+                                    '{trigger1TimeHold:s}, '\
+                                    '{trigger1Timeout:s}\n'
+        self.templateMoveRobot =    '{moverobotEnabled:s}, '\
+                                    '{moverobotPatternShape:s}, '\
+                                    '{moverobotPatternHz:s}, '\
+                                    '{moverobotPatternHzPoint:s}, '\
+                                    '{moverobotPatternCount:s}, '\
+                                    '{moverobotPatternSizeX:s}, '\
+                                    '{moverobotPatternSizeY:s}, '\
+                                    '{moverobotRelTracking:s}, '\
+                                    '{moverobotRelOriginPosition:s}, '\
+                                    '{moverobotRelOriginAngle:s}, '\
+                                    '{moverobotRelDistance:s}, '\
+                                    '{moverobotRelAngle:s}, '\
+                                    '{moverobotRelAngleType:s}, '\
+                                    '{moverobotRelSpeed:s}, '\
+                                    '{moverobotRelSpeedType:s}, '\
+                                    '{moverobotRelTolerance:s}\n'
+        self.templateLasertrack =   '{laserEnabled:s}\n'
+        self.templateTriggerExit =  '{trigger2Enabled:s}, '\
+                                    '{trigger2FrameidParent:s}, '\
+                                    '{trigger2FrameidChild:s}, '\
+                                    '{trigger2SpeedParentMin:s}, '\
+                                    '{trigger2SpeedParentMax:s}, '\
+                                    '{trigger2SpeedChildMin:s}, '\
+                                    '{trigger2SpeedChildMax:s}, '\
+                                    '{trigger2DistanceMin:s}, '\
+                                    '{trigger2DistanceMax:s}, '\
+                                    '{trigger2AngleMin:s}, '\
+                                    '{trigger2AngleMax:s}, '\
+                                    '{trigger2AngleTest:s}, '\
+                                    '{trigger2AngleTestBilateral:s}, '\
+                                    '{trigger2TimeHold:s}, '\
+                                    '{trigger2Timeout:s}\n'
+        self.templateWaitExit =     '{waitExit:s}\n'
 
-        self.headingsAbsolute = 'time, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly, xRobotRel, yRobotRel, aRobotRel, dRobotRel\n'
-        self.templateAbsolute   = '{time:0.4f}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}, {xRobotRel:{align}{sign}{width}.{precision}{type}}, {yRobotRel:{align}{sign}{width}.{precision}{type}}, {aRobotRel:{align}{sign}{width}.{precision}{type}}, {dRobotRel:{align}{sign}{width}.{precision}{type}}\n'
-        self.templateAbsoluteNR = '{time:0.4f}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}\n'
+        self.headingsData = 'time, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly, xRobotRel, yRobotRel, aRobotRel, dRobotRel\n'
+        self.templateData   = '{time:0.4f}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}, {xRobotRel:{align}{sign}{width}.{precision}{type}}, {yRobotRel:{align}{sign}{width}.{precision}{type}}, {aRobotRel:{align}{sign}{width}.{precision}{type}}, {dRobotRel:{align}{sign}{width}.{precision}{type}}\n'
+        self.templateDataNR = '{time:0.4f}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}\n'
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -183,7 +208,7 @@ class SaveArenaState:
         with self.lock:
             if (self.fid is not None) and (not self.fid.closed):
                 self.fid.close()
-                rospy.loginfo('SA logfile close()')
+                rospy.logwarn('SA logfile close()')
             
         
 
@@ -201,7 +226,7 @@ class SaveArenaState:
                 with self.lock:
                     if self.fid is not None and not self.fid.closed:
                         self.fid.close()
-                        rospy.loginfo('SA logfile close()')
+                        rospy.logwarn('SA logfile close()')
             
         return self.triggered
         
@@ -216,7 +241,7 @@ class SaveArenaState:
                     if self.fid is not None:
                         if not self.fid.closed:
                             self.fid.close()
-                            rospy.loginfo('SA logfile close()')
+                            rospy.logwarn('SA logfile close()')
 
                 #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
                 now = rospy.Time.now().to_sec()
@@ -229,69 +254,135 @@ class SaveArenaState:
                                                                     time.localtime(now).tm_sec)
                 with self.lock:
                     self.fid = open(self.filename, 'w')
-                rospy.loginfo('SA logfile open(%s)' % self.filename)
+                rospy.logwarn('SA logfile open(%s)' % self.filename)
                 
-                with self.lock:
-                    self.fid.write(self.headingsExperiment)
-                header_row = self.templateExperiment.format(date_time                  = str(rospy.Time.now().to_sec()),
-                                                            description                = str(experimentparamsReq.experiment.description),
-                                                            maxTrials                  = str(experimentparamsReq.experiment.maxTrials),
-                                                            trial                      = str(experimentparamsReq.experiment.trial),
-                                                            robot_width                = str(self.robot_width),
-                                                            robot_height               = str(self.robot_height),
-                                                            robot_visible              = str(self.robot_visible),
-                                                            robot_paint                = str(self.robot_paint),
-                                                            robot_scent                = str(self.robot_scent),
-                                                            waitEntry                  = str(experimentparamsReq.waitEntry),
-                                                            trigger1FrameidParent      = str(experimentparamsReq.triggerEntry.frameidParent),
-                                                            trigger1FrameidChild       = str(experimentparamsReq.triggerEntry.frameidChild),
-                                                            trigger1SpeedParentMin     = str(experimentparamsReq.triggerEntry.speedParentMin),
-                                                            trigger1SpeedParentMax     = str(experimentparamsReq.triggerEntry.speedParentMax),
-                                                            trigger1SpeedChildMin      = str(experimentparamsReq.triggerEntry.speedChildMin),
-                                                            trigger1SpeedChildMax      = str(experimentparamsReq.triggerEntry.speedChildMax),
-                                                            trigger1DistanceMin        = str(experimentparamsReq.triggerEntry.distanceMin),
-                                                            trigger1DistanceMax        = str(experimentparamsReq.triggerEntry.distanceMax),
-                                                            trigger1AngleMin           = str(experimentparamsReq.triggerEntry.angleMin),
-                                                            trigger1AngleMax           = str(experimentparamsReq.triggerEntry.angleMax),
-                                                            trigger1AngleTest          = str(experimentparamsReq.triggerEntry.angleTest),
-                                                            trigger1AngleTestBilateral = str(experimentparamsReq.triggerEntry.angleTestBilateral),
-                                                            trigger1TimeHold           = str(experimentparamsReq.triggerEntry.timeHold),
-                                                            trigger1Timeout            = str(experimentparamsReq.triggerEntry.timeout),
-                                                            movePatternShape           = str(experimentparamsReq.move.pattern.shape),
-                                                            movePatternHz              = str(experimentparamsReq.move.pattern.hzPattern),
-                                                            movePatternHzPoint         = str(experimentparamsReq.move.pattern.hzPoint),
-                                                            movePatternCount           = str(experimentparamsReq.move.pattern.count),
-                                                            movePatternSizeX           = str(experimentparamsReq.move.pattern.size.x),
-                                                            movePatternSizeY           = str(experimentparamsReq.move.pattern.size.y),
-                                                            moveRelTracking            = str(experimentparamsReq.move.relative.tracking),
-                                                            moveRelOriginPosition      = str(experimentparamsReq.move.relative.frameidOriginPosition),
-                                                            moveRelOriginAngle         = str(experimentparamsReq.move.relative.frameidOriginAngle),
-                                                            moveRelDistance            = str(experimentparamsReq.move.relative.distance),
-                                                            moveRelAngle               = str(experimentparamsReq.move.relative.angle),
-                                                            moveRelAngleType           = str(experimentparamsReq.move.relative.angleType),
-                                                            moveRelSpeed               = str(experimentparamsReq.move.relative.speed),
-                                                            moveRelSpeedType           = str(experimentparamsReq.move.relative.speedType),
-                                                            moveRelTolerance           = str(experimentparamsReq.move.relative.tolerance),
-                                                            laserEnabled               = str(experimentparamsReq.lasertrack.enabled),
-                                                            trigger2FrameidParent      = str(experimentparamsReq.triggerExit.frameidParent),
-                                                            trigger2FrameidChild       = str(experimentparamsReq.triggerExit.frameidChild),
-                                                            trigger2SpeedParentMin     = str(experimentparamsReq.triggerExit.speedParentMin),
-                                                            trigger2SpeedParentMax     = str(experimentparamsReq.triggerExit.speedParentMax),
-                                                            trigger2SpeedChildMin      = str(experimentparamsReq.triggerExit.speedChildMin),
-                                                            trigger2SpeedChildMax      = str(experimentparamsReq.triggerExit.speedChildMax),
-                                                            trigger2DistanceMin        = str(experimentparamsReq.triggerExit.distanceMin),
-                                                            trigger2DistanceMax        = str(experimentparamsReq.triggerExit.distanceMax),
-                                                            trigger2AngleMin           = str(experimentparamsReq.triggerExit.angleMin),
-                                                            trigger2AngleMax           = str(experimentparamsReq.triggerExit.angleMax),
-                                                            trigger2AngleTest          = str(experimentparamsReq.triggerExit.angleTest),
-                                                            trigger2AngleTestBilateral = str(experimentparamsReq.triggerExit.angleTestBilateral),
-                                                            trigger2TimeHold           = str(experimentparamsReq.triggerExit.timeHold),
-                                                            trigger2Timeout            = str(experimentparamsReq.triggerExit.timeout),
-                                                            )
+                paramsExperiment = self.templateExperiment.format(
+                                                        date_time                  = str(rospy.Time.now().to_sec()),
+                                                        description                = str(experimentparamsReq.experiment.description),
+                                                        maxTrials                  = str(experimentparamsReq.experiment.maxTrials),
+                                                        trial                      = str(experimentparamsReq.experiment.trial),
+                                                        )
+                paramsRobot = self.templateRobot.format(
+                                                        n_robots                   = str(self.nRobots),
+                                                        robot_width                = str(self.robot_width),
+                                                        robot_height               = str(self.robot_height),
+                                                        robot_visible              = str(self.robot_visible),
+                                                        robot_paint                = str(self.robot_paint),
+                                                        robot_scent                = str(self.robot_scent),
+                                                        )
+                paramsFlies = self.templateFlies.format(
+                                                        n_flies                   = str(self.nFlies),
+                                                        )
+                paramsWaitEntry = self.templateWaitEntry.format(
+                                                        waitEntry                  = str(experimentparamsReq.waitEntry),
+                                                        )
+                paramsTriggerEntry = self.templateTriggerEntry.format(
+                                                        trigger1Enabled            = str(experimentparamsReq.triggerEntry.enabled),
+                                                        trigger1FrameidParent      = str(experimentparamsReq.triggerEntry.frameidParent),
+                                                        trigger1FrameidChild       = str(experimentparamsReq.triggerEntry.frameidChild),
+                                                        trigger1SpeedParentMin     = str(experimentparamsReq.triggerEntry.speedParentMin),
+                                                        trigger1SpeedParentMax     = str(experimentparamsReq.triggerEntry.speedParentMax),
+                                                        trigger1SpeedChildMin      = str(experimentparamsReq.triggerEntry.speedChildMin),
+                                                        trigger1SpeedChildMax      = str(experimentparamsReq.triggerEntry.speedChildMax),
+                                                        trigger1DistanceMin        = str(experimentparamsReq.triggerEntry.distanceMin),
+                                                        trigger1DistanceMax        = str(experimentparamsReq.triggerEntry.distanceMax),
+                                                        trigger1AngleMin           = str(experimentparamsReq.triggerEntry.angleMin),
+                                                        trigger1AngleMax           = str(experimentparamsReq.triggerEntry.angleMax),
+                                                        trigger1AngleTest          = str(experimentparamsReq.triggerEntry.angleTest),
+                                                        trigger1AngleTestBilateral = str(experimentparamsReq.triggerEntry.angleTestBilateral),
+                                                        trigger1TimeHold           = str(experimentparamsReq.triggerEntry.timeHold),
+                                                        trigger1Timeout            = str(experimentparamsReq.triggerEntry.timeout),
+                                                        )
+                paramsMoveRobot = self.templateMoveRobot.format(
+                                                        moverobotEnabled                = str(experimentparamsReq.move.enabled),
+                                                        moverobotPatternShape           = str(experimentparamsReq.move.pattern.shape),
+                                                        moverobotPatternHz              = str(experimentparamsReq.move.pattern.hzPattern),
+                                                        moverobotPatternHzPoint         = str(experimentparamsReq.move.pattern.hzPoint),
+                                                        moverobotPatternCount           = str(experimentparamsReq.move.pattern.count),
+                                                        moverobotPatternSizeX           = str(experimentparamsReq.move.pattern.size.x),
+                                                        moverobotPatternSizeY           = str(experimentparamsReq.move.pattern.size.y),
+                                                        moverobotRelTracking            = str(experimentparamsReq.move.relative.tracking),
+                                                        moverobotRelOriginPosition      = str(experimentparamsReq.move.relative.frameidOriginPosition),
+                                                        moverobotRelOriginAngle         = str(experimentparamsReq.move.relative.frameidOriginAngle),
+                                                        moverobotRelDistance            = str(experimentparamsReq.move.relative.distance),
+                                                        moverobotRelAngle               = str(experimentparamsReq.move.relative.angle),
+                                                        moverobotRelAngleType           = str(experimentparamsReq.move.relative.angleType),
+                                                        moverobotRelSpeed               = str(experimentparamsReq.move.relative.speed),
+                                                        moverobotRelSpeedType           = str(experimentparamsReq.move.relative.speedType),
+                                                        moverobotRelTolerance           = str(experimentparamsReq.move.relative.tolerance),
+                                                        )
+                paramsLasertrack = self.templateLasertrack.format(
+                                                        laserEnabled               = str(experimentparamsReq.lasertrack.enabled),
+                                                        )
+                paramsTriggerExit = self.templateTriggerExit.format(
+                                                        trigger2Enabled            = str(experimentparamsReq.triggerExit.enabled),
+                                                        trigger2FrameidParent      = str(experimentparamsReq.triggerExit.frameidParent),
+                                                        trigger2FrameidChild       = str(experimentparamsReq.triggerExit.frameidChild),
+                                                        trigger2SpeedParentMin     = str(experimentparamsReq.triggerExit.speedParentMin),
+                                                        trigger2SpeedParentMax     = str(experimentparamsReq.triggerExit.speedParentMax),
+                                                        trigger2SpeedChildMin      = str(experimentparamsReq.triggerExit.speedChildMin),
+                                                        trigger2SpeedChildMax      = str(experimentparamsReq.triggerExit.speedChildMax),
+                                                        trigger2DistanceMin        = str(experimentparamsReq.triggerExit.distanceMin),
+                                                        trigger2DistanceMax        = str(experimentparamsReq.triggerExit.distanceMax),
+                                                        trigger2AngleMin           = str(experimentparamsReq.triggerExit.angleMin),
+                                                        trigger2AngleMax           = str(experimentparamsReq.triggerExit.angleMax),
+                                                        trigger2AngleTest          = str(experimentparamsReq.triggerExit.angleTest),
+                                                        trigger2AngleTestBilateral = str(experimentparamsReq.triggerExit.angleTestBilateral),
+                                                        trigger2TimeHold           = str(experimentparamsReq.triggerExit.timeHold),
+                                                        trigger2Timeout            = str(experimentparamsReq.triggerExit.timeout),
+                                                        )
+                paramsWaitExit = self.templateWaitExit.format(
+                                                        waitExit                   = str(experimentparamsReq.waitExit),
+                                                        )
 
                 with self.lock:
-                    self.fid.write(header_row)
-                    self.fid.write(self.headingsAbsolute)
+                    self.fid.write(self.headingsExperiment)
+                    self.fid.write(paramsExperiment)
+                    self.fid.write('\n')
+
+                    self.fid.write(self.headingsRobot)
+                    self.fid.write(paramsRobot)
+                    self.fid.write('\n')
+
+                    self.fid.write(self.headingsFlies)
+                    self.fid.write(paramsFlies)
+                    self.fid.write('\n')
+
+                    self.fid.write(self.headingsWaitEntry)
+                    self.fid.write(paramsWaitEntry)
+                    self.fid.write('\n')
+
+                    self.fid.write(self.headingsTriggerEntry)
+                    self.fid.write(paramsTriggerEntry)
+                    self.fid.write('\n')
+
+                    self.fid.write(self.headingsMoveRobot)
+                    self.fid.write(paramsMoveRobot)
+                    self.fid.write('\n')
+
+                    self.fid.write(self.headingsLasertrack)
+                    self.fid.write(paramsLasertrack)
+                    self.fid.write('\n')
+
+                    self.fid.write(self.headingsTriggerExit)
+                    self.fid.write(paramsTriggerExit)
+                    self.fid.write('\n')
+
+                    self.fid.write(self.headingsWaitExit)
+                    self.fid.write(paramsWaitExit)
+                    self.fid.write('\n')
+                    
+                    self.fid.write('\n')
+                    self.fid.write('\n')
+                    self.fid.write('\n')
+                    
+                    self.fid.write('\n')
+                    self.fid.write('\n')
+                    self.fid.write('\n')
+
+                    
+                with self.lock:
+                    self.fid.write(self.headingsData)
 
         return True
     
@@ -308,7 +399,7 @@ class SaveArenaState:
                 with self.lock:
                     if self.fid.closed:
                         self.fid = open(self.filename, 'wa')
-                        rospy.loginfo('SA logfile open2(%s)' % self.filename)
+                        rospy.logwarn('SA logfile open2(%s)' % self.filename)
                     
                 # Get the state of the robot.
                 stateRobot = arenastate.robot
@@ -347,49 +438,49 @@ class SaveArenaState:
                 
                 # Write the robot & fly data to the file.
                 if isGoodRelative:
-                    data_row = self.templateAbsolute.format(align   = self.format_align,
-                                                            sign    = self.format_sign,
-                                                            width   = self.format_width,
-                                                            precision = self.format_precision,
-                                                            type    = self.format_type,
-                                                            time    = rospy.Time.now().to_sec(), #stateRobot.header.stamp,
-                                                            xRobot  = stateRobot.pose.position.x,
-                                                            yRobot  = stateRobot.pose.position.y,
-                                                            aRobot  = angleRobot,
-                                                            vxRobot = stateRobot.velocity.linear.x,
-                                                            vyRobot = stateRobot.velocity.linear.y,
-                                                            vaRobot = stateRobot.velocity.angular.z,
-                                                            xFly    = stateFly.pose.position.x,
-                                                            yFly    = stateFly.pose.position.y,
-                                                            aFly    = angleFly,
-                                                            vxFly   = stateFly.velocity.linear.x,
-                                                            vyFly   = stateFly.velocity.linear.y,
-                                                            vaFly   = stateFly.velocity.angular.z,
-                                                            xRobotRel = xRobotRel,
-                                                            yRobotRel = yRobotRel,
-                                                            aRobotRel = aRobotRel,
-                                                            dRobotRel = dRobotRel
-                                                            )
+                    data_row = self.templateData.format(align   = self.format_align,
+                                                        sign    = self.format_sign,
+                                                        width   = self.format_width,
+                                                        precision = self.format_precision,
+                                                        type    = self.format_type,
+                                                        time    = rospy.Time.now().to_sec(), #stateRobot.header.stamp,
+                                                        xRobot  = stateRobot.pose.position.x,
+                                                        yRobot  = stateRobot.pose.position.y,
+                                                        aRobot  = angleRobot,
+                                                        vxRobot = stateRobot.velocity.linear.x,
+                                                        vyRobot = stateRobot.velocity.linear.y,
+                                                        vaRobot = stateRobot.velocity.angular.z,
+                                                        xFly    = stateFly.pose.position.x,
+                                                        yFly    = stateFly.pose.position.y,
+                                                        aFly    = angleFly,
+                                                        vxFly   = stateFly.velocity.linear.x,
+                                                        vyFly   = stateFly.velocity.linear.y,
+                                                        vaFly   = stateFly.velocity.angular.z,
+                                                        xRobotRel = xRobotRel,
+                                                        yRobotRel = yRobotRel,
+                                                        aRobotRel = aRobotRel,
+                                                        dRobotRel = dRobotRel
+                                                        )
                 else:
-                    data_row = self.templateAbsoluteNR.format(align   = self.format_align,
-                                                            sign    = self.format_sign,
-                                                            width   = self.format_width,
-                                                            precision = self.format_precision,
-                                                            type    = self.format_type,
-                                                            time    = rospy.Time.now().to_sec(), #stateRobot.header.stamp,
-                                                            xRobot  = stateRobot.pose.position.x,
-                                                            yRobot  = stateRobot.pose.position.y,
-                                                            aRobot  = angleRobot,
-                                                            vxRobot = stateRobot.velocity.linear.x,
-                                                            vyRobot = stateRobot.velocity.linear.y,
-                                                            vaRobot = stateRobot.velocity.angular.z,
-                                                            xFly    = stateFly.pose.position.x,
-                                                            yFly    = stateFly.pose.position.y,
-                                                            aFly    = angleFly,
-                                                            vxFly   = stateFly.velocity.linear.x,
-                                                            vyFly   = stateFly.velocity.linear.y,
-                                                            vaFly   = stateFly.velocity.angular.z
-                                                            )
+                    data_row = self.templateDataNR.format(align   = self.format_align,
+                                                          sign    = self.format_sign,
+                                                          width   = self.format_width,
+                                                          precision = self.format_precision,
+                                                          type    = self.format_type,
+                                                          time    = rospy.Time.now().to_sec(), #stateRobot.header.stamp,
+                                                          xRobot  = stateRobot.pose.position.x,
+                                                          yRobot  = stateRobot.pose.position.y,
+                                                          aRobot  = angleRobot,
+                                                          vxRobot = stateRobot.velocity.linear.x,
+                                                          vyRobot = stateRobot.velocity.linear.y,
+                                                          vaRobot = stateRobot.velocity.angular.z,
+                                                          xFly    = stateFly.pose.position.x,
+                                                          yFly    = stateFly.pose.position.y,
+                                                          aFly    = angleFly,
+                                                          vxFly   = stateFly.velocity.linear.x,
+                                                          vyFly   = stateFly.velocity.linear.y,
+                                                          vaFly   = stateFly.velocity.angular.z
+                                                          )
                     
     
                 with self.lock:

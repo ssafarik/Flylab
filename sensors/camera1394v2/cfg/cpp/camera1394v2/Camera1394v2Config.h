@@ -333,63 +333,63 @@ double white_balance_RV;
 
 
 
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       std::string guid;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       std::string video_mode;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       std::string frame_id;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double frame_rate;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int iso_speed;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       std::string camera_info_url;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       std::string bayer_pattern;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       std::string bayer_method;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_brightness;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double brightness;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_exposure;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double exposure;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_gain;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double gain;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_gamma;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double gamma;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_hue;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double hue;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_iris;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double iris;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_saturation;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double saturation;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_sharpness;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double sharpness;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_shutter;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double shutter;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       int auto_white_balance;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double white_balance_BU;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       double white_balance_RV;
 //#line 255 "/opt/ros/fuerte/stacks/dynamic_reconfigure/templates/ConfigType.h"
 
@@ -526,299 +526,299 @@ double white_balance_RV;
     Camera1394v2ConfigStatics()
     {
 Camera1394v2Config::GroupDescription<Camera1394v2Config::DEFAULT, Camera1394v2Config> Default("Default", "", 0, 0, true, &Camera1394v2Config::groups);
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.guid = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.guid = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.guid = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("guid", "str", 3, "Global Unique ID of camera, 16 hex digits (use first camera if null).", "", &Camera1394v2Config::guid)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("guid", "str", 3, "Global Unique ID of camera, 16 hex digits (use first camera if null).", "", &Camera1394v2Config::guid)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.video_mode = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.video_mode = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.video_mode = "640x480_mono8";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("video_mode", "str", 3, "IIDC video mode.", "{'enum_description': 'Video mode for camera.', 'enum': [{'srcline': 53, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '160x120_yuv444', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode0'}, {'srcline': 54, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '320x240_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode1'}, {'srcline': 55, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '640x480_yuv411', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode2'}, {'srcline': 56, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '640x480_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode3'}, {'srcline': 57, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '640x480_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode4'}, {'srcline': 58, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '640x480_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode5'}, {'srcline': 60, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '800x600_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode0'}, {'srcline': 61, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '800x600_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode1'}, {'srcline': 62, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '800x600_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode2'}, {'srcline': 64, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1024x768_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode3'}, {'srcline': 65, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1024x768_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode4'}, {'srcline': 66, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1024x768_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode5'}, {'srcline': 68, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1280x960_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode0'}, {'srcline': 69, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1280x960_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode1'}, {'srcline': 70, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1280x960_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode2'}, {'srcline': 72, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1600x1200_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode3'}, {'srcline': 73, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1600x1200_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode4'}, {'srcline': 74, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1600x1200_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode5'}, {'srcline': 76, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'format7_mode0', 'ctype': 'std::string', 'type': 'str', 'name': 'Format7_Mode0'}]}", &Camera1394v2Config::video_mode)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("video_mode", "str", 3, "IIDC video mode.", "{'enum_description': 'Video mode for camera.', 'enum': [{'srcline': 53, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '160x120_yuv444', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode0'}, {'srcline': 54, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '320x240_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode1'}, {'srcline': 55, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '640x480_yuv411', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode2'}, {'srcline': 56, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '640x480_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode3'}, {'srcline': 57, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '640x480_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode4'}, {'srcline': 58, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '640x480_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format0_Mode5'}, {'srcline': 60, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '800x600_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode0'}, {'srcline': 61, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '800x600_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode1'}, {'srcline': 62, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '800x600_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode2'}, {'srcline': 64, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1024x768_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode3'}, {'srcline': 65, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1024x768_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode4'}, {'srcline': 66, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1024x768_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format1_Mode5'}, {'srcline': 68, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1280x960_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode0'}, {'srcline': 69, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1280x960_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode1'}, {'srcline': 70, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1280x960_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode2'}, {'srcline': 72, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1600x1200_yuv422', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode3'}, {'srcline': 73, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1600x1200_rgb8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode4'}, {'srcline': 74, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '1600x1200_mono8', 'ctype': 'std::string', 'type': 'str', 'name': 'Format2_Mode5'}, {'srcline': 76, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'format7_mode0', 'ctype': 'std::string', 'type': 'str', 'name': 'Format7_Mode0'}]}", &Camera1394v2Config::video_mode)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.frame_id = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.frame_id = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.frame_id = "camera";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("frame_id", "str", 3, "ROS tf frame of reference, resolved with tf_prefix unless absolute.", "", &Camera1394v2Config::frame_id)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("frame_id", "str", 3, "ROS tf frame of reference, resolved with tf_prefix unless absolute.", "", &Camera1394v2Config::frame_id)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.frame_rate = 1.875;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.frame_rate = 240.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.frame_rate = 15.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("frame_rate", "double", 3, "Camera speed (frames per second).", "", &Camera1394v2Config::frame_rate)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("frame_rate", "double", 3, "Camera speed (frames per second).", "", &Camera1394v2Config::frame_rate)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.iso_speed = 100;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.iso_speed = 3200;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.iso_speed = 400;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("iso_speed", "int", 3, "Total IEEE 1394 bus bandwidth (Megabits/second).", "", &Camera1394v2Config::iso_speed)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("iso_speed", "int", 3, "Total IEEE 1394 bus bandwidth (Megabits/second).", "", &Camera1394v2Config::iso_speed)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.camera_info_url = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.camera_info_url = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.camera_info_url = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("camera_info_url", "str", 0, "Camera calibration URL for this video_mode (uncalibrated if null).", "", &Camera1394v2Config::camera_info_url)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("camera_info_url", "str", 0, "Camera calibration URL for this video_mode (uncalibrated if null).", "", &Camera1394v2Config::camera_info_url)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.bayer_pattern = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.bayer_pattern = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.bayer_pattern = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("bayer_pattern", "str", 3, "Bayer color encoding pattern (default: none).", "{'enum_description': 'Bayer color encoding patterns', 'enum': [{'srcline': 98, 'description': 'No Bayer encoding', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '', 'ctype': 'std::string', 'type': 'str', 'name': 'none'}, {'srcline': 99, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'rggb', 'ctype': 'std::string', 'type': 'str', 'name': 'rggb'}, {'srcline': 100, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'gbrg', 'ctype': 'std::string', 'type': 'str', 'name': 'gbrg'}, {'srcline': 101, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'grbg', 'ctype': 'std::string', 'type': 'str', 'name': 'grbg'}, {'srcline': 102, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'bggr', 'ctype': 'std::string', 'type': 'str', 'name': 'bggr'}]}", &Camera1394v2Config::bayer_pattern)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("bayer_pattern", "str", 3, "Bayer color encoding pattern (default: none).", "{'enum_description': 'Bayer color encoding patterns', 'enum': [{'srcline': 98, 'description': 'No Bayer encoding', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '', 'ctype': 'std::string', 'type': 'str', 'name': 'none'}, {'srcline': 99, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'rggb', 'ctype': 'std::string', 'type': 'str', 'name': 'rggb'}, {'srcline': 100, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'gbrg', 'ctype': 'std::string', 'type': 'str', 'name': 'gbrg'}, {'srcline': 101, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'grbg', 'ctype': 'std::string', 'type': 'str', 'name': 'grbg'}, {'srcline': 102, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'bggr', 'ctype': 'std::string', 'type': 'str', 'name': 'bggr'}]}", &Camera1394v2Config::bayer_pattern)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.bayer_method = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.bayer_method = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.bayer_method = "";
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("bayer_method", "str", 3, "Bayer decoding method (default: ROS image_proc).", "{'enum_description': 'Bayer method', 'enum': [{'srcline': 110, 'description': 'Decode via ROS image_proc', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '', 'ctype': 'std::string', 'type': 'str', 'name': 'image_proc'}, {'srcline': 111, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'DownSample', 'ctype': 'std::string', 'type': 'str', 'name': 'DownSample'}, {'srcline': 112, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'Simple', 'ctype': 'std::string', 'type': 'str', 'name': 'Simple'}, {'srcline': 114, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'Bilinear', 'ctype': 'std::string', 'type': 'str', 'name': 'Bilinear'}, {'srcline': 115, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'HQ', 'ctype': 'std::string', 'type': 'str', 'name': 'HQ'}, {'srcline': 116, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'VNG', 'ctype': 'std::string', 'type': 'str', 'name': 'VNG'}, {'srcline': 117, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'AHD', 'ctype': 'std::string', 'type': 'str', 'name': 'AHD'}]}", &Camera1394v2Config::bayer_method)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<std::string>("bayer_method", "str", 3, "Bayer decoding method (default: ROS image_proc).", "{'enum_description': 'Bayer method', 'enum': [{'srcline': 110, 'description': 'Decode via ROS image_proc', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': '', 'ctype': 'std::string', 'type': 'str', 'name': 'image_proc'}, {'srcline': 111, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'DownSample', 'ctype': 'std::string', 'type': 'str', 'name': 'DownSample'}, {'srcline': 112, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'Simple', 'ctype': 'std::string', 'type': 'str', 'name': 'Simple'}, {'srcline': 114, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'Bilinear', 'ctype': 'std::string', 'type': 'str', 'name': 'Bilinear'}, {'srcline': 115, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'HQ', 'ctype': 'std::string', 'type': 'str', 'name': 'HQ'}, {'srcline': 116, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'VNG', 'ctype': 'std::string', 'type': 'str', 'name': 'VNG'}, {'srcline': 117, 'description': '', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const char * const', 'value': 'AHD', 'ctype': 'std::string', 'type': 'str', 'name': 'AHD'}]}", &Camera1394v2Config::bayer_method)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_brightness = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_brightness = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_brightness = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_brightness", "int", 0, "Brightness control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_brightness)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_brightness", "int", 0, "Brightness control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_brightness)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.brightness = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.brightness = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.brightness = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("brightness", "double", 0, "Black level offset.", "", &Camera1394v2Config::brightness)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("brightness", "double", 0, "Black level offset.", "", &Camera1394v2Config::brightness)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_exposure = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_exposure = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_exposure = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_exposure", "int", 0, "Combined Gain, Iris & Shutter control.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_exposure)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_exposure", "int", 0, "Combined Gain, Iris & Shutter control.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_exposure)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.exposure = -10.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.exposure = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.exposure = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("exposure", "double", 0, "Auto exposure value (like contrast).", "", &Camera1394v2Config::exposure)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("exposure", "double", 0, "Auto exposure value (like contrast).", "", &Camera1394v2Config::exposure)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_gain = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_gain = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_gain = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_gain", "int", 0, "Gain control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_gain)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_gain", "int", 0, "Gain control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_gain)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.gain = -10.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.gain = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.gain = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("gain", "double", 0, "Relative circuit gain.", "", &Camera1394v2Config::gain)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("gain", "double", 0, "Relative circuit gain.", "", &Camera1394v2Config::gain)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_gamma = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_gamma = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_gamma = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_gamma", "int", 0, "Gamma control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_gamma)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_gamma", "int", 0, "Gamma control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_gamma)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.gamma = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.gamma = 10.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.gamma = 2.2;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("gamma", "double", 0, "Gamma expansion exponent.", "", &Camera1394v2Config::gamma)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("gamma", "double", 0, "Gamma expansion exponent.", "", &Camera1394v2Config::gamma)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_hue = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_hue = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_hue = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_hue", "int", 0, "Hue control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_hue)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_hue", "int", 0, "Hue control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_hue)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.hue = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.hue = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.hue = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("hue", "double", 0, "Color phase.", "", &Camera1394v2Config::hue)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("hue", "double", 0, "Color phase.", "", &Camera1394v2Config::hue)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_iris = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_iris = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_iris = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_iris", "int", 0, "Iris control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_iris)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_iris", "int", 0, "Iris control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_iris)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.iris = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.iris = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.iris = 8.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("iris", "double", 0, "Iris control.", "", &Camera1394v2Config::iris)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("iris", "double", 0, "Iris control.", "", &Camera1394v2Config::iris)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_saturation = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_saturation = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_saturation = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_saturation", "int", 0, "Saturation control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_saturation)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_saturation", "int", 0, "Saturation control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_saturation)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.saturation = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.saturation = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.saturation = 1.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("saturation", "double", 0, "Color saturation.", "", &Camera1394v2Config::saturation)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("saturation", "double", 0, "Color saturation.", "", &Camera1394v2Config::saturation)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_sharpness = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_sharpness = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_sharpness = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_sharpness", "int", 0, "Sharpness control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_sharpness)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_sharpness", "int", 0, "Sharpness control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_sharpness)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.sharpness = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.sharpness = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.sharpness = 1.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("sharpness", "double", 0, "Image sharpness.", "", &Camera1394v2Config::sharpness)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("sharpness", "double", 0, "Image sharpness.", "", &Camera1394v2Config::sharpness)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_shutter = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_shutter = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_shutter = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_shutter", "int", 0, "Shutter control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_shutter)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_shutter", "int", 0, "Shutter control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_shutter)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.shutter = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.shutter = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.shutter = 1.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("shutter", "double", 0, "Shutter speed.", "", &Camera1394v2Config::shutter)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("shutter", "double", 0, "Shutter speed.", "", &Camera1394v2Config::shutter)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.auto_white_balance = 0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.auto_white_balance = 4;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.auto_white_balance = 1;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_white_balance", "int", 0, "White balance control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_white_balance)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<int>("auto_white_balance", "int", 0, "White balance control state.", "{'enum_description': 'Feature control states', 'enum': [{'srcline': 125, 'description': 'Use fixed value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 0, 'ctype': 'int', 'type': 'int', 'name': 'Off'}, {'srcline': 126, 'description': 'Query current values', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 1, 'ctype': 'int', 'type': 'int', 'name': 'Query'}, {'srcline': 127, 'description': 'Camera sets continuously', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 2, 'ctype': 'int', 'type': 'int', 'name': 'Auto'}, {'srcline': 128, 'description': 'Use explicit value', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 3, 'ctype': 'int', 'type': 'int', 'name': 'Manual'}, {'srcline': 129, 'description': 'Camera sets once', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 4, 'ctype': 'int', 'type': 'int', 'name': 'OnePush'}, {'srcline': 130, 'description': 'Feature not available', 'srcfile': '../cfg/camera1394v2.cfg', 'cconsttype': 'const int', 'value': 5, 'ctype': 'int', 'type': 'int', 'name': 'None'}]}", &Camera1394v2Config::auto_white_balance)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.white_balance_BU = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.white_balance_BU = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.white_balance_BU = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("white_balance_BU", "double", 0, "Blue or U component of white balance.", "", &Camera1394v2Config::white_balance_BU)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("white_balance_BU", "double", 0, "Blue or U component of white balance.", "", &Camera1394v2Config::white_balance_BU)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __min__.white_balance_RV = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __max__.white_balance_RV = 4095.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __default__.white_balance_RV = 0.0;
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.abstract_parameters.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("white_balance_RV", "double", 0, "Red or V component of white balance.", "", &Camera1394v2Config::white_balance_RV)));
-//#line 254 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 259 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __param_descriptions__.push_back(Camera1394v2Config::AbstractParamDescriptionConstPtr(new Camera1394v2Config::ParamDescription<double>("white_balance_RV", "double", 0, "Red or V component of white balance.", "", &Camera1394v2Config::white_balance_RV)));
-//#line 228 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 233 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       Default.convertParams();
-//#line 228 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
+//#line 233 "/opt/ros/fuerte/stacks/dynamic_reconfigure/src/dynamic_reconfigure/parameter_generator.py"
       __group_descriptions__.push_back(Camera1394v2Config::AbstractGroupDescriptionConstPtr(new Camera1394v2Config::GroupDescription<Camera1394v2Config::DEFAULT, Camera1394v2Config>(Default)));
 //#line 390 "/opt/ros/fuerte/stacks/dynamic_reconfigure/templates/ConfigType.h"
     

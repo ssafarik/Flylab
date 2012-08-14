@@ -9,23 +9,33 @@ import experiments.msg
 import patterngen.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "d0cf2735773f9015b6aab48a9409307a"
+  _md5sum = "c1b3e3e3f25209b0a18b9f4950b33129"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings 	experiment
+SaveSettings 		save
 HomeSettings 		home
 float64 			waitEntry
 TriggerSettings 	triggerEntry
 MoveSettings 		move
 LasertrackSettings 	lasertrack
 TriggerSettings 	triggerExit
-SaveSettings 		save
+float64 			waitExit
 
 ================================================================================
 MSG: experiments/ExperimentSettings
 string description
 int32 maxTrials
 int32 trial 
+
+
+================================================================================
+MSG: experiments/SaveSettings
+string filenamebase
+bool arenastate
+bool video
+bool bag
+bool onlyWhileTriggered
 
 
 ================================================================================
@@ -122,18 +132,9 @@ float64               param     # An extra shape-dependent parameter, if needed 
  
 
 
-================================================================================
-MSG: experiments/SaveSettings
-string filenamebase
-bool arenastate
-bool video
-bool bag
-bool onlyWhileTriggered
-
-
 """
-  __slots__ = ['experiment','home','waitEntry','triggerEntry','move','lasertrack','triggerExit','save']
-  _slot_types = ['experiments/ExperimentSettings','experiments/HomeSettings','float64','experiments/TriggerSettings','experiments/MoveSettings','experiments/LasertrackSettings','experiments/TriggerSettings','experiments/SaveSettings']
+  __slots__ = ['experiment','save','home','waitEntry','triggerEntry','move','lasertrack','triggerExit','waitExit']
+  _slot_types = ['experiments/ExperimentSettings','experiments/SaveSettings','experiments/HomeSettings','float64','experiments/TriggerSettings','experiments/MoveSettings','experiments/LasertrackSettings','experiments/TriggerSettings','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -143,7 +144,7 @@ bool onlyWhileTriggered
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       experiment,home,waitEntry,triggerEntry,move,lasertrack,triggerExit,save
+       experiment,save,home,waitEntry,triggerEntry,move,lasertrack,triggerExit,waitExit
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -154,6 +155,8 @@ bool onlyWhileTriggered
       #message fields cannot be None, assign default values for those that are
       if self.experiment is None:
         self.experiment = experiments.msg.ExperimentSettings()
+      if self.save is None:
+        self.save = experiments.msg.SaveSettings()
       if self.home is None:
         self.home = experiments.msg.HomeSettings()
       if self.waitEntry is None:
@@ -166,17 +169,18 @@ bool onlyWhileTriggered
         self.lasertrack = experiments.msg.LasertrackSettings()
       if self.triggerExit is None:
         self.triggerExit = experiments.msg.TriggerSettings()
-      if self.save is None:
-        self.save = experiments.msg.SaveSettings()
+      if self.waitExit is None:
+        self.waitExit = 0.
     else:
       self.experiment = experiments.msg.ExperimentSettings()
+      self.save = experiments.msg.SaveSettings()
       self.home = experiments.msg.HomeSettings()
       self.waitEntry = 0.
       self.triggerEntry = experiments.msg.TriggerSettings()
       self.move = experiments.msg.MoveSettings()
       self.lasertrack = experiments.msg.LasertrackSettings()
       self.triggerExit = experiments.msg.TriggerSettings()
-      self.save = experiments.msg.SaveSettings()
+      self.waitExit = 0.
 
   def _get_types(self):
     """
@@ -197,7 +201,15 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2iB6dB.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
+      buff.write(_struct_2i.pack(_x.experiment.maxTrials, _x.experiment.trial))
+      _x = self.save.filenamebase
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_5B6dB.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
       _x = self.triggerEntry.frameidParent
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -335,15 +347,7 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_B2d.pack(_x.triggerExit.angleTestBilateral, _x.triggerExit.timeHold, _x.triggerExit.timeout))
-      _x = self.save.filenamebase
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_4B.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered))
+      buff.write(_struct_B3d.pack(_x.triggerExit.angleTestBilateral, _x.triggerExit.timeHold, _x.triggerExit.timeout, _x.waitExit))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -355,6 +359,8 @@ bool onlyWhileTriggered
     try:
       if self.experiment is None:
         self.experiment = experiments.msg.ExperimentSettings()
+      if self.save is None:
+        self.save = experiments.msg.SaveSettings()
       if self.home is None:
         self.home = experiments.msg.HomeSettings()
       if self.triggerEntry is None:
@@ -365,8 +371,6 @@ bool onlyWhileTriggered
         self.lasertrack = experiments.msg.LasertrackSettings()
       if self.triggerExit is None:
         self.triggerExit = experiments.msg.TriggerSettings()
-      if self.save is None:
-        self.save = experiments.msg.SaveSettings()
       end = 0
       start = end
       end += 4
@@ -379,8 +383,25 @@ bool onlyWhileTriggered
         self.experiment.description = str[start:end]
       _x = self
       start = end
-      end += 58
-      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_2iB6dB.unpack(str[start:end])
+      end += 8
+      (_x.experiment.maxTrials, _x.experiment.trial,) = _struct_2i.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.save.filenamebase = str[start:end].decode('utf-8')
+      else:
+        self.save.filenamebase = str[start:end]
+      _x = self
+      start = end
+      end += 54
+      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_5B6dB.unpack(str[start:end])
+      self.save.arenastate = bool(self.save.arenastate)
+      self.save.video = bool(self.save.video)
+      self.save.bag = bool(self.save.bag)
+      self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
       start = end
@@ -620,26 +641,9 @@ bool onlyWhileTriggered
         self.triggerExit.angleTest = str[start:end]
       _x = self
       start = end
-      end += 17
-      (_x.triggerExit.angleTestBilateral, _x.triggerExit.timeHold, _x.triggerExit.timeout,) = _struct_B2d.unpack(str[start:end])
+      end += 25
+      (_x.triggerExit.angleTestBilateral, _x.triggerExit.timeHold, _x.triggerExit.timeout, _x.waitExit,) = _struct_B3d.unpack(str[start:end])
       self.triggerExit.angleTestBilateral = bool(self.triggerExit.angleTestBilateral)
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.save.filenamebase = str[start:end].decode('utf-8')
-      else:
-        self.save.filenamebase = str[start:end]
-      _x = self
-      start = end
-      end += 4
-      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered,) = _struct_4B.unpack(str[start:end])
-      self.save.arenastate = bool(self.save.arenastate)
-      self.save.video = bool(self.save.video)
-      self.save.bag = bool(self.save.bag)
-      self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -659,7 +663,15 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2iB6dB.pack(_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
+      buff.write(_struct_2i.pack(_x.experiment.maxTrials, _x.experiment.trial))
+      _x = self.save.filenamebase
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_5B6dB.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
       _x = self.triggerEntry.frameidParent
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -797,15 +809,7 @@ bool onlyWhileTriggered
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_B2d.pack(_x.triggerExit.angleTestBilateral, _x.triggerExit.timeHold, _x.triggerExit.timeout))
-      _x = self.save.filenamebase
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_4B.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered))
+      buff.write(_struct_B3d.pack(_x.triggerExit.angleTestBilateral, _x.triggerExit.timeHold, _x.triggerExit.timeout, _x.waitExit))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -818,6 +822,8 @@ bool onlyWhileTriggered
     try:
       if self.experiment is None:
         self.experiment = experiments.msg.ExperimentSettings()
+      if self.save is None:
+        self.save = experiments.msg.SaveSettings()
       if self.home is None:
         self.home = experiments.msg.HomeSettings()
       if self.triggerEntry is None:
@@ -828,8 +834,6 @@ bool onlyWhileTriggered
         self.lasertrack = experiments.msg.LasertrackSettings()
       if self.triggerExit is None:
         self.triggerExit = experiments.msg.TriggerSettings()
-      if self.save is None:
-        self.save = experiments.msg.SaveSettings()
       end = 0
       start = end
       end += 4
@@ -842,8 +846,25 @@ bool onlyWhileTriggered
         self.experiment.description = str[start:end]
       _x = self
       start = end
-      end += 58
-      (_x.experiment.maxTrials, _x.experiment.trial, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_2iB6dB.unpack(str[start:end])
+      end += 8
+      (_x.experiment.maxTrials, _x.experiment.trial,) = _struct_2i.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.save.filenamebase = str[start:end].decode('utf-8')
+      else:
+        self.save.filenamebase = str[start:end]
+      _x = self
+      start = end
+      end += 54
+      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_5B6dB.unpack(str[start:end])
+      self.save.arenastate = bool(self.save.arenastate)
+      self.save.video = bool(self.save.video)
+      self.save.bag = bool(self.save.bag)
+      self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
       start = end
@@ -1083,26 +1104,9 @@ bool onlyWhileTriggered
         self.triggerExit.angleTest = str[start:end]
       _x = self
       start = end
-      end += 17
-      (_x.triggerExit.angleTestBilateral, _x.triggerExit.timeHold, _x.triggerExit.timeout,) = _struct_B2d.unpack(str[start:end])
+      end += 25
+      (_x.triggerExit.angleTestBilateral, _x.triggerExit.timeHold, _x.triggerExit.timeout, _x.waitExit,) = _struct_B3d.unpack(str[start:end])
       self.triggerExit.angleTestBilateral = bool(self.triggerExit.angleTestBilateral)
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.save.filenamebase = str[start:end].decode('utf-8')
-      else:
-        self.save.filenamebase = str[start:end]
-      _x = self
-      start = end
-      end += 4
-      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered,) = _struct_4B.unpack(str[start:end])
-      self.save.arenastate = bool(self.save.arenastate)
-      self.save.video = bool(self.save.video)
-      self.save.bag = bool(self.save.bag)
-      self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -1112,14 +1116,14 @@ _struct_Bd = struct.Struct("<Bd")
 _struct_2di5dB = struct.Struct("<2di5dB")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
-_struct_4B = struct.Struct("<4B")
-_struct_2iB6dB = struct.Struct("<2iB6dB")
 _struct_dB = struct.Struct("<dB")
 _struct_B2dB = struct.Struct("<B2dB")
 _struct_2d = struct.Struct("<2d")
+_struct_5B6dB = struct.Struct("<5B6dB")
 _struct_8d = struct.Struct("<8d")
-_struct_B2d = struct.Struct("<B2d")
+_struct_B3d = struct.Struct("<B3d")
 _struct_2di = struct.Struct("<2di")
+_struct_2i = struct.Struct("<2i")
 _struct_3d = struct.Struct("<3d")
 """autogenerated by genpy from experiments/ExperimentParamsResponse.msg. Do not edit."""
 import sys
@@ -1225,6 +1229,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '8af75d4485f72f4c45682f9ad344760e'
+  _md5sum = '06720d35bd298370c6415204c3a6d3d8'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

@@ -171,7 +171,7 @@ void UpdatePointsFromPointcloud(void)
 	}
 	else // if a single-point cloud, make it the same size as the prior multi-point cloud so we don't have to reregister the DAQ buffer, etc.
 	{
-		g_nDuplicates = g_nPointsPerCloud;											// Make same size as prior cloud, but using duplicates instead of unique points.
+		g_nDuplicates = g_nPointsPointcloudEx;										// Make same size as prior cloud, but by way of using duplicates instead of unique points.
 		g_nPointsPerCloud = 1;
 		g_hzPointcloud = g_hzPoint / (double)g_nPointsPerCloud;						// Output rate of the given pointcloud.
 		g_hzPointcloudEx = g_hzPointcloud / (double)g_nDuplicates;					// Output rate of the expanded pointcloud.
