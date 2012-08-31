@@ -12,7 +12,8 @@
 
 	<param name="tracking/nContoursMax"					type="int" value="20"/>
 	<param name="tracking/distanceDuplicateContour"		type="double" value="0.1"/>
-	<param name="tracking/speedThresholdForTravel" 		type="double" value="5.0"/>
+	<param name="tracking/areaContourMin"				type="double" value="0.99"/>
+	<param name="tracking/speedThresholdForTravel" 		type="double" value="4.0"/>
 	<param name="tracking/dtVelocity"              		type="double" value="0.2"/>
 	<param name="tracking/rcFilterAngle"           		type="double" value="0.1"/>
 	<param name="tracking/rcFilterSpeed"           		type="double" value="0.2"/>

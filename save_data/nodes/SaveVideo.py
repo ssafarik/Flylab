@@ -26,13 +26,6 @@ class SaveVideo:
     def __init__(self):
         self.initialized = False
         self.triggered = False
-        self.dirBase = os.path.expanduser("~/FlylabData")
-        chdir(self.dirBase)
-        self.dirVideo = self.dirBase + "/" + time.strftime("%Y_%m_%d")
-        chdir(self.dirVideo)
-        #self.dirFrames = self.dirVideo + "/frames"
-        #chdir(self.dirFrames)
-        # At this point we should be in ~/FlylabData/YYYYmmdd/images
 
         self.fileNull = open('/dev/null', 'w')
         self.lock = threading.Lock()
@@ -167,29 +160,38 @@ class SaveVideo:
             self.saveVideo = self.experimentparams.save.video
             
             #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
-            now = rospy.Time.now().to_sec()
-            self.dirFrames = "%s%04d%02d%02d%02d%02d%02d" % (self.experimentparams.save.filenamebase, 
-                                                            time.localtime(now).tm_year,
-                                                            time.localtime(now).tm_mon,
-                                                            time.localtime(now).tm_mday,
-                                                            time.localtime(now).tm_hour,
-                                                            time.localtime(now).tm_min,
-                                                            time.localtime(now).tm_sec)
             if (self.saveVideo):
+                now = rospy.Time.now().to_sec()
+                self.dirFrames = "%s%04d%02d%02d%02d%02d%02d" % (self.experimentparams.save.filenamebase, 
+                                                                time.localtime(now).tm_year,
+                                                                time.localtime(now).tm_mon,
+                                                                time.localtime(now).tm_mday,
+                                                                time.localtime(now).tm_hour,
+                                                                time.localtime(now).tm_min,
+                                                                time.localtime(now).tm_sec)
+
+                self.dirBase = os.path.expanduser("~/FlylabData")
+                chdir(self.dirBase)
+                self.dirVideo = self.dirBase + "/" + time.strftime("%Y_%m_%d")
+                chdir(self.dirVideo)
+                #self.dirFrames = self.dirVideo + "/frames"
+                #chdir(self.dirFrames)
+                # At this point we should be in ~/FlylabData/YYYYmmdd/images
+                
                 try:
                     os.mkdir(self.dirFrames)
                 except OSError, e:
                     rospy.logwarn ('Cannot create directory %s: %s' % (self.dirFrames,e))
 
             
-            self.filenameVideo = "%s/%s%04d%02d%02d%02d%02d%02d.mov" % (self.dirVideo,
-                                                            self.experimentparams.save.filenamebase, 
-                                                            time.localtime(now).tm_year,
-                                                            time.localtime(now).tm_mon,
-                                                            time.localtime(now).tm_mday,
-                                                            time.localtime(now).tm_hour,
-                                                            time.localtime(now).tm_min,
-                                                            time.localtime(now).tm_sec)
+                self.filenameVideo = "%s/%s%04d%02d%02d%02d%02d%02d.mov" % (self.dirVideo,
+                                                                self.experimentparams.save.filenamebase, 
+                                                                time.localtime(now).tm_year,
+                                                                time.localtime(now).tm_mon,
+                                                                time.localtime(now).tm_mday,
+                                                                time.localtime(now).tm_hour,
+                                                                time.localtime(now).tm_min,
+                                                                time.localtime(now).tm_sec)
         return True
     
     

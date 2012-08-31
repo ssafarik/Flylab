@@ -1,0 +1,14 @@
+<package>
+  <description brief="panels">
+
+     panels
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/panels</url>
+
+</package>
+
+

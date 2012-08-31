@@ -1,0 +1,8 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the FLIES (i.e. how many, etc).           -->
+	<!-- ========================================================== -->
+
+	<param name="fly/gender" type="string" value="unspecified" />
+    
+</launch>

@@ -11,7 +11,7 @@ from plate_tf.srv import PlateCameraConversion
 from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
-from flycore.msg import MsgFrameState
+from flycore.msg import MsgFrameState, TrackingCommand
 from pythonmodules import filters
 from pythonmodules import CircleFunctions
 import Fly
@@ -56,6 +56,7 @@ class ContourIdentifier:
         
         
         # Messages
+        self.subTrackingCommand = rospy.Subscriber("TrackingCommand", TrackingCommand, self.TrackingCommand_callback)
         self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback, queue_size=2)
         self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback, queue_size=2)
         
@@ -77,7 +78,11 @@ class ContourIdentifier:
         self.radiusMask = rospy.get_param("camera/mask/radius", 25) # Pixels
         self.radiusArenaInner = rospy.get_param("arena/radius_inner", 25) # Millimeters
         self.radiusArenaOuter = rospy.get_param("arena/radius_outer", 30) # Millimeters
-
+        
+        self.enabledExclusionzone = False
+        self.pointExclusionzone_list = [Point(x=0.0, y=0.0)]
+        self.radiusExclusionzone_list = [0.0]
+        
         self.xSave = []
         self.ySave = []
         self.iSave = 0
@@ -125,6 +130,39 @@ class ContourIdentifier:
     def OnShutdown_callback(self):
         self.fidRobot.close()
         self.fidFly.close()
+        
+
+    def TrackingCommand_callback(self, trackingcommand):
+        self.enabledExclusionzone = trackingcommand.exclusionzone.enabled
+        self.pointExclusionzone_list = trackingcommand.exclusionzone.point_list
+        self.radiusExclusionzone_list = trackingcommand.exclusionzone.radius_list
+        for i in range(len(self.pointExclusionzone_list)):
+            rospy.loginfo ('Tracking exclusion zone %s at (%0.2f,%0.2f) radius=%0.2f' % (['disabled','enabled'][self.enabledExclusionzone],
+                                                                                         self.pointExclusionzone_list[i].x,
+                                                                                         self.pointExclusionzone_list[i].y,
+                                                                                         self.radiusExclusionzone_list[i]))
+        if self.enabledExclusionzone:
+            self.markerExclusionzone_list = []
+            for i in range(len(self.pointExclusionzone_list)):
+                self.markerExclusionzone_list.append(Marker(header=Header(stamp = rospy.Time.now(),
+                                                                          frame_id='/Plate'),
+                                                            ns='exclusionzone',
+                                                            id=0,
+                                                            type=3, #CYLINDER,
+                                                            action=0,
+                                                            pose=Pose(position=Point(x=self.pointExclusionzone_list[i].x, 
+                                                                                     y=self.pointExclusionzone_list[i].y, 
+                                                                                     z=0)),
+                                                            scale=Vector3(x=self.radiusExclusionzone_list[i]*2.0,
+                                                                          y=self.radiusExclusionzone_list[i]*2.0,
+                                                                          z=0.01),
+                                                            color=ColorRGBA(a=0.1,
+                                                                            r=1.0,
+                                                                            g=1.0,
+                                                                            b=1.0),
+                                                            lifetime=rospy.Duration(1.0))
+                                                     )
+
         
 
     def EndEffector_callback(self, state):
@@ -586,34 +624,31 @@ class ContourIdentifier:
                 contourNone.area = None
                 contourNone.ecc = None
 
-                # Repackage the contourinfo into a list of contours
+                # Repackage the contourinfo into a list of contours, ignoring any that are in the exclusion zone.
                 self.contours = []            
                 for i in range(len(contourinfo.x)):
-                    contour = Contour()
-                    contour.header = contourinfo.header
-                    contour.x      = contourinfo.x[i]
-                    contour.y      = contourinfo.y[i]
-                    if (contourinfo.angle[i] != 99.9) and (not N.isnan(contourinfo.angle[i])):
-                        contour.angle = contourinfo.angle[i]
-                    else:
-                        contour.angle = self.contouranglePrev
-                    self.contouranglePrev = contour.angle
-                    
-                    contour.area   = contourinfo.area[i]
-                    contour.ecc    = contourinfo.ecc[i]
-                    self.contours.append(contour)
-                    #rospy.logwarn('contour.angle=%0.2f' % (contour.angle))
-    
-                    # Send the contour transforms.
-#                    try:
-#                        self.tfbx.sendTransform((contour.x, contour.y, 0.0),
-#                                                tf.transformations.quaternion_about_axis(contour.angle, (0,0,1)),
-#                                                contour.header.stamp,
-#                                                "contour"+str(i),
-#                                                "ImageRect")
-#                    except tf.Exception, e:
-#                        rospy.logwarn ('Exception in sendTransform(%s->%s): %s' % ("contour"+str(i),"ImageRect",e))
-                    
+                    inExclusionzone = False
+                    if (self.enabledExclusionzone):
+                        # See if the contour is in any of the exclusionzones.
+                        for k in range(len(self.pointExclusionzone_list)):
+                            inExclusionzone = inExclusionzone or (N.linalg.norm([contourinfo.x[i]-self.pointExclusionzone_list[k].x, 
+                                                                                 contourinfo.y[i]-self.pointExclusionzone_list[k].y]) < self.radiusExclusionzone_list[k])
+                        
+                    if (not inExclusionzone): 
+                        contour = Contour()
+                        contour.header = contourinfo.header
+                        contour.x      = contourinfo.x[i]
+                        contour.y      = contourinfo.y[i]
+                        if (contourinfo.angle[i] != 99.9) and (not N.isnan(contourinfo.angle[i])):
+                            contour.angle = contourinfo.angle[i]
+                        else:
+                            contour.angle = self.contouranglePrev
+                        self.contouranglePrev = contour.angle
+                        
+                        contour.area   = contourinfo.area[i]
+                        contour.ecc    = contourinfo.ecc[i]
+                        self.contours.append(contour)
+        
     
                 # Figure out who is who in the camera image.
                 try:
@@ -699,9 +734,14 @@ class ContourIdentifier:
                         #rospy.logwarn ('iFly=%d, self.mapContourFromObject=%s, len(self.objects)=%d' % (iFly, self.mapContourFromObject, len(self.objects)))
 #                        if iFly<len(self.mapContourFromObject):
 #                            if (self.mapContourFromObject[iFly] is not None) and (self.objects[iFly].state.pose.position.x is not None):
+                                dtForecast = 1/30
+                                poseForecast = copy.copy(self.objects[iFly].state.pose)
+                                poseForecast.position.x += self.objects[iFly].state.velocity.linear.x * dtForecast
+                                poseForecast.position.y += self.objects[iFly].state.velocity.linear.y * dtForecast
+                                poseForecast.position.z += self.objects[iFly].state.velocity.linear.z * dtForecast
                                 arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
                                                                       name = self.objects[iFly].name,
-                                                                      pose = self.objects[iFly].state.pose,
+                                                                      pose = poseForecast,#self.objects[iFly].state.pose,
                                                                       velocity = self.objects[iFly].state.velocity,#))
                                                                       speed = min(50.0, self.objects[iFly].speed)))
                                 #rospy.logwarn('arenastate.flies.append(%s)' % self.objects[iFly].name)
@@ -719,6 +759,13 @@ class ContourIdentifier:
                     # Publish a marker to indicate the size of the arena.
                     self.markerArena.header.stamp = contourinfo.header.stamp
                     self.pubMarker.publish(self.markerArena)
+                    
+                    # Publish markers for all the exclusionzones.
+                    if self.enabledExclusionzone:
+                        for marker in self.markerExclusionzone_list:
+                            marker.header.stamp = contourinfo.header.stamp
+                            self.pubMarker.publish(marker)
+                        
             except rospy.ServiceException, e:
                 rospy.logwarn ('Exception in contourinfo_callback(): %s' % e)
 

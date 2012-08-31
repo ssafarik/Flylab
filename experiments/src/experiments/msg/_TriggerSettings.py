@@ -6,16 +6,18 @@ import struct
 
 
 class TriggerSettings(genpy.Message):
-  _md5sum = "9a6e1dc1d9a86df9b170fb7851a25db1"
+  _md5sum = "72bd7bd9a67191c4e22d195852f33f99"
   _type = "experiments/TriggerSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool 		enabled
 string 		frameidParent 	# 'Plate', 'Robot', 'Fly1', 'Fly2' etc
 string 		frameidChild 	
-float64 	speedParentMin  # Absolute speed of parent frame.
-float64 	speedParentMax
-float64 	speedChildMin   # Absolute speed of child frame.
-float64 	speedChildMax
+float64 	speedAbsParentMin  # Absolute speed of parent frame.
+float64 	speedAbsParentMax
+float64 	speedAbsChildMin   # Absolute speed of child frame.
+float64 	speedAbsChildMax
+float64 	speedRelMin  	# Relative speed between frames.
+float64 	speedRelMax
 float64 	distanceMin     # Distance from parent to child.
 float64 	distanceMax
 float64 	angleMin		# Angle to child in parent frame.
@@ -28,8 +30,8 @@ float64 	timeout
 
 
 """
-  __slots__ = ['enabled','frameidParent','frameidChild','speedParentMin','speedParentMax','speedChildMin','speedChildMax','distanceMin','distanceMax','angleMin','angleMax','angleTest','angleTestBilateral','timeHold','timeout']
-  _slot_types = ['bool','string','string','float64','float64','float64','float64','float64','float64','float64','float64','string','bool','float64','float64']
+  __slots__ = ['enabled','frameidParent','frameidChild','speedAbsParentMin','speedAbsParentMax','speedAbsChildMin','speedAbsChildMax','speedRelMin','speedRelMax','distanceMin','distanceMax','angleMin','angleMax','angleTest','angleTestBilateral','timeHold','timeout']
+  _slot_types = ['bool','string','string','float64','float64','float64','float64','float64','float64','float64','float64','float64','float64','string','bool','float64','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -39,7 +41,7 @@ float64 	timeout
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       enabled,frameidParent,frameidChild,speedParentMin,speedParentMax,speedChildMin,speedChildMax,distanceMin,distanceMax,angleMin,angleMax,angleTest,angleTestBilateral,timeHold,timeout
+       enabled,frameidParent,frameidChild,speedAbsParentMin,speedAbsParentMax,speedAbsChildMin,speedAbsChildMax,speedRelMin,speedRelMax,distanceMin,distanceMax,angleMin,angleMax,angleTest,angleTestBilateral,timeHold,timeout
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -54,14 +56,18 @@ float64 	timeout
         self.frameidParent = ''
       if self.frameidChild is None:
         self.frameidChild = ''
-      if self.speedParentMin is None:
-        self.speedParentMin = 0.
-      if self.speedParentMax is None:
-        self.speedParentMax = 0.
-      if self.speedChildMin is None:
-        self.speedChildMin = 0.
-      if self.speedChildMax is None:
-        self.speedChildMax = 0.
+      if self.speedAbsParentMin is None:
+        self.speedAbsParentMin = 0.
+      if self.speedAbsParentMax is None:
+        self.speedAbsParentMax = 0.
+      if self.speedAbsChildMin is None:
+        self.speedAbsChildMin = 0.
+      if self.speedAbsChildMax is None:
+        self.speedAbsChildMax = 0.
+      if self.speedRelMin is None:
+        self.speedRelMin = 0.
+      if self.speedRelMax is None:
+        self.speedRelMax = 0.
       if self.distanceMin is None:
         self.distanceMin = 0.
       if self.distanceMax is None:
@@ -82,10 +88,12 @@ float64 	timeout
       self.enabled = False
       self.frameidParent = ''
       self.frameidChild = ''
-      self.speedParentMin = 0.
-      self.speedParentMax = 0.
-      self.speedChildMin = 0.
-      self.speedChildMax = 0.
+      self.speedAbsParentMin = 0.
+      self.speedAbsParentMax = 0.
+      self.speedAbsChildMin = 0.
+      self.speedAbsChildMax = 0.
+      self.speedRelMin = 0.
+      self.speedRelMax = 0.
       self.distanceMin = 0.
       self.distanceMax = 0.
       self.angleMin = 0.
@@ -121,7 +129,7 @@ float64 	timeout
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_8d.pack(_x.speedParentMin, _x.speedParentMax, _x.speedChildMin, _x.speedChildMax, _x.distanceMin, _x.distanceMax, _x.angleMin, _x.angleMax))
+      buff.write(_struct_10d.pack(_x.speedAbsParentMin, _x.speedAbsParentMax, _x.speedAbsChildMin, _x.speedAbsChildMax, _x.speedRelMin, _x.speedRelMax, _x.distanceMin, _x.distanceMax, _x.angleMin, _x.angleMax))
       _x = self.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -164,8 +172,8 @@ float64 	timeout
         self.frameidChild = str[start:end]
       _x = self
       start = end
-      end += 64
-      (_x.speedParentMin, _x.speedParentMax, _x.speedChildMin, _x.speedChildMax, _x.distanceMin, _x.distanceMax, _x.angleMin, _x.angleMax,) = _struct_8d.unpack(str[start:end])
+      end += 80
+      (_x.speedAbsParentMin, _x.speedAbsParentMax, _x.speedAbsChildMin, _x.speedAbsChildMax, _x.speedRelMin, _x.speedRelMax, _x.distanceMin, _x.distanceMax, _x.angleMin, _x.angleMax,) = _struct_10d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -206,7 +214,7 @@ float64 	timeout
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_8d.pack(_x.speedParentMin, _x.speedParentMax, _x.speedChildMin, _x.speedChildMax, _x.distanceMin, _x.distanceMax, _x.angleMin, _x.angleMax))
+      buff.write(_struct_10d.pack(_x.speedAbsParentMin, _x.speedAbsParentMax, _x.speedAbsChildMin, _x.speedAbsChildMax, _x.speedRelMin, _x.speedRelMax, _x.distanceMin, _x.distanceMax, _x.angleMin, _x.angleMax))
       _x = self.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -250,8 +258,8 @@ float64 	timeout
         self.frameidChild = str[start:end]
       _x = self
       start = end
-      end += 64
-      (_x.speedParentMin, _x.speedParentMax, _x.speedChildMin, _x.speedChildMax, _x.distanceMin, _x.distanceMax, _x.angleMin, _x.angleMax,) = _struct_8d.unpack(str[start:end])
+      end += 80
+      (_x.speedAbsParentMin, _x.speedAbsParentMax, _x.speedAbsChildMin, _x.speedAbsChildMax, _x.speedRelMin, _x.speedRelMax, _x.distanceMin, _x.distanceMax, _x.angleMin, _x.angleMax,) = _struct_10d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -273,4 +281,4 @@ float64 	timeout
 _struct_I = genpy.struct_I
 _struct_B2d = struct.Struct("<B2d")
 _struct_B = struct.Struct("<B")
-_struct_8d = struct.Struct("<8d")
+_struct_10d = struct.Struct("<10d")

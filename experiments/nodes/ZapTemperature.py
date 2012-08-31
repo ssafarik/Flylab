@@ -32,6 +32,10 @@ class ExperimentZapafly():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
+        self.experimentparams.tracking.exclusionzone.enabled = False
+        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
+        self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
+        
         self.experimentparams.home.enabled = False
         
         self.experimentparams.waitEntry = 0.0
@@ -39,10 +43,12 @@ class ExperimentZapafly():
         self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.frameidParent = 'Plate'
         self.experimentparams.triggerEntry.frameidChild = 'Fly1'
-        self.experimentparams.triggerEntry.speedParentMin =   0.0
-        self.experimentparams.triggerEntry.speedParentMax = 999.0
-        self.experimentparams.triggerEntry.speedChildMin =   0.0
-        self.experimentparams.triggerEntry.speedChildMax = 999.0
+        self.experimentparams.triggerEntry.speedAbsParentMin =   0.0
+        self.experimentparams.triggerEntry.speedAbsParentMax = 999.0
+        self.experimentparams.triggerEntry.speedAbsChildMin  =   0.0
+        self.experimentparams.triggerEntry.speedAbsChildMax  = 999.0
+        self.experimentparams.triggerEntry.speedRelMin       =   0.0
+        self.experimentparams.triggerEntry.speedRelMax       = 999.0
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
         self.experimentparams.triggerEntry.angleMin =  0.0 * N.pi / 180.0
@@ -176,10 +182,12 @@ class ExperimentZapafly():
         self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.distanceMin = 999.0
         self.experimentparams.triggerExit.distanceMax = 888.0 # i.e. never
-        self.experimentparams.triggerExit.speedParentMin =   0.0
-        self.experimentparams.triggerExit.speedParentMax = 999.0
-        self.experimentparams.triggerExit.speedChildMin =   0.0
-        self.experimentparams.triggerExit.speedChildMax = 999.0
+        self.experimentparams.triggerExit.speedAbsParentMin =   0.0
+        self.experimentparams.triggerExit.speedAbsParentMax = 999.0
+        self.experimentparams.triggerExit.speedAbsChildMin =   0.0
+        self.experimentparams.triggerExit.speedAbsChildMax = 999.0
+        self.experimentparams.triggerExit.speedRelMin =   0.0
+        self.experimentparams.triggerExit.speedRelMax = 999.0
         self.experimentparams.triggerExit.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.triggerExit.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerExit.angleTest = 'inclusive'

@@ -4,29 +4,31 @@ python3 = True if sys.hexversion > 0x03000000 else False
 import genpy
 import struct
 
+import flycore.msg
 import geometry_msgs.msg
 import experiments.msg
 import patterngen.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "c1b3e3e3f25209b0a18b9f4950b33129"
+  _md5sum = "0785a5533f04ca2ffcc2e0d790b434c4"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """ExperimentSettings 	experiment
-SaveSettings 		save
-HomeSettings 		home
-float64 			waitEntry
-TriggerSettings 	triggerEntry
-MoveSettings 		move
-LasertrackSettings 	lasertrack
-TriggerSettings 	triggerExit
-float64 			waitExit
+  _full_text = """ExperimentSettings 	       experiment
+SaveSettings 		       save
+flycore/TrackingCommand    tracking
+HomeSettings 		       home
+float64 			       waitEntry
+TriggerSettings 	       triggerEntry
+MoveSettings 		       move
+LasertrackSettings 	       lasertrack
+TriggerSettings 	       triggerExit
+float64 			       waitExit
 
 ================================================================================
 MSG: experiments/ExperimentSettings
-string description
-int32 maxTrials
-int32 trial 
+string  description
+int32   maxTrials
+int32   trial
 
 
 ================================================================================
@@ -37,6 +39,25 @@ bool video
 bool bag
 bool onlyWhileTriggered
 
+
+================================================================================
+MSG: flycore/TrackingCommand
+flycore/Zone    exclusionzone
+
+================================================================================
+MSG: flycore/Zone
+bool                        enabled
+geometry_msgs/Point[]       point_list
+float64[]                   radius_list
+
+
+
+================================================================================
+MSG: geometry_msgs/Point
+# This contains the position of a point in free space
+float64 x
+float64 y
+float64 z
 
 ================================================================================
 MSG: experiments/HomeSettings
@@ -54,10 +75,12 @@ MSG: experiments/TriggerSettings
 bool 		enabled
 string 		frameidParent 	# 'Plate', 'Robot', 'Fly1', 'Fly2' etc
 string 		frameidChild 	
-float64 	speedParentMin  # Absolute speed of parent frame.
-float64 	speedParentMax
-float64 	speedChildMin   # Absolute speed of child frame.
-float64 	speedChildMax
+float64 	speedAbsParentMin  # Absolute speed of parent frame.
+float64 	speedAbsParentMax
+float64 	speedAbsChildMin   # Absolute speed of child frame.
+float64 	speedAbsChildMax
+float64 	speedRelMin  	# Relative speed between frames.
+float64 	speedRelMax
 float64 	distanceMin     # Distance from parent to child.
 float64 	distanceMax
 float64 	angleMin		# Angle to child in parent frame.
@@ -102,18 +125,13 @@ float64             param
 
 
 ================================================================================
-MSG: geometry_msgs/Point
-# This contains the position of a point in free space
-float64 x
-float64 y
-float64 z
-
-================================================================================
 MSG: experiments/LasertrackSettings
 bool 						enabled
 patterngen/MsgPattern[] 	pattern_list
-string[]                    stateFilterLo_list	# Contains strings to be interpreted as dicts.  Pattern will only be enabled for fly states between these two entries.
-string[]                    stateFilterHi_list	# These lists should either be empty, or contain as many entries as patterns.
+string[]                    statefilterHi_list   		# These lists should either be empty, or contain as many entries as patterns.
+string[]                    statefilterLo_list	 		# Contains strings to be interpreted as dicts.  Pattern will only be enabled for fly states between these two entries.
+string[]                    statefilterCriteria_list	# "inclusive" or "exclusive"
+#ZoneSettings                exclusionzone
 float64 					timeout
 
 
@@ -133,8 +151,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
 
 
 """
-  __slots__ = ['experiment','save','home','waitEntry','triggerEntry','move','lasertrack','triggerExit','waitExit']
-  _slot_types = ['experiments/ExperimentSettings','experiments/SaveSettings','experiments/HomeSettings','float64','experiments/TriggerSettings','experiments/MoveSettings','experiments/LasertrackSettings','experiments/TriggerSettings','float64']
+  __slots__ = ['experiment','save','tracking','home','waitEntry','triggerEntry','move','lasertrack','triggerExit','waitExit']
+  _slot_types = ['experiments/ExperimentSettings','experiments/SaveSettings','flycore/TrackingCommand','experiments/HomeSettings','float64','experiments/TriggerSettings','experiments/MoveSettings','experiments/LasertrackSettings','experiments/TriggerSettings','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -144,7 +162,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       experiment,save,home,waitEntry,triggerEntry,move,lasertrack,triggerExit,waitExit
+       experiment,save,tracking,home,waitEntry,triggerEntry,move,lasertrack,triggerExit,waitExit
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -157,6 +175,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.experiment = experiments.msg.ExperimentSettings()
       if self.save is None:
         self.save = experiments.msg.SaveSettings()
+      if self.tracking is None:
+        self.tracking = flycore.msg.TrackingCommand()
       if self.home is None:
         self.home = experiments.msg.HomeSettings()
       if self.waitEntry is None:
@@ -174,6 +194,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
     else:
       self.experiment = experiments.msg.ExperimentSettings()
       self.save = experiments.msg.SaveSettings()
+      self.tracking = flycore.msg.TrackingCommand()
       self.home = experiments.msg.HomeSettings()
       self.waitEntry = 0.
       self.triggerEntry = experiments.msg.TriggerSettings()
@@ -209,7 +230,18 @@ float64               param     # An extra shape-dependent parameter, if needed 
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_5B6dB.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
+      buff.write(_struct_5B.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.tracking.exclusionzone.enabled))
+      length = len(self.tracking.exclusionzone.point_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.tracking.exclusionzone.point_list:
+        _x = val1
+        buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+      length = len(self.tracking.exclusionzone.radius_list)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sd'%length
+      buff.write(struct.pack(pattern, *self.tracking.exclusionzone.radius_list))
+      _x = self
+      buff.write(_struct_B6dB.pack(_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
       _x = self.triggerEntry.frameidParent
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -223,7 +255,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_8d.pack(_x.triggerEntry.speedParentMin, _x.triggerEntry.speedParentMax, _x.triggerEntry.speedChildMin, _x.triggerEntry.speedChildMax, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
+      buff.write(_struct_10d.pack(_x.triggerEntry.speedAbsParentMin, _x.triggerEntry.speedAbsParentMax, _x.triggerEntry.speedAbsChildMin, _x.triggerEntry.speedAbsChildMax, _x.triggerEntry.speedRelMin, _x.triggerEntry.speedRelMax, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
       _x = self.triggerEntry.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -308,17 +340,25 @@ float64               param     # An extra shape-dependent parameter, if needed 
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
         buff.write(_struct_Bd.pack(_x.preempt, _x.param))
-      length = len(self.lasertrack.stateFilterLo_list)
+      length = len(self.lasertrack.statefilterHi_list)
       buff.write(_struct_I.pack(length))
-      for val1 in self.lasertrack.stateFilterLo_list:
+      for val1 in self.lasertrack.statefilterHi_list:
         length = len(val1)
         if python3 or type(val1) == unicode:
           val1 = val1.encode('utf-8')
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
-      length = len(self.lasertrack.stateFilterHi_list)
+      length = len(self.lasertrack.statefilterLo_list)
       buff.write(_struct_I.pack(length))
-      for val1 in self.lasertrack.stateFilterHi_list:
+      for val1 in self.lasertrack.statefilterLo_list:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
+      length = len(self.lasertrack.statefilterCriteria_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.lasertrack.statefilterCriteria_list:
         length = len(val1)
         if python3 or type(val1) == unicode:
           val1 = val1.encode('utf-8')
@@ -339,7 +379,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_8d.pack(_x.triggerExit.speedParentMin, _x.triggerExit.speedParentMax, _x.triggerExit.speedChildMin, _x.triggerExit.speedChildMax, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_10d.pack(_x.triggerExit.speedAbsParentMin, _x.triggerExit.speedAbsParentMax, _x.triggerExit.speedAbsChildMin, _x.triggerExit.speedAbsChildMax, _x.triggerExit.speedRelMin, _x.triggerExit.speedRelMax, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -361,6 +401,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.experiment = experiments.msg.ExperimentSettings()
       if self.save is None:
         self.save = experiments.msg.SaveSettings()
+      if self.tracking is None:
+        self.tracking = flycore.msg.TrackingCommand()
       if self.home is None:
         self.home = experiments.msg.HomeSettings()
       if self.triggerEntry is None:
@@ -396,12 +438,35 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.save.filenamebase = str[start:end]
       _x = self
       start = end
-      end += 54
-      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_5B6dB.unpack(str[start:end])
+      end += 5
+      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.tracking.exclusionzone.enabled,) = _struct_5B.unpack(str[start:end])
       self.save.arenastate = bool(self.save.arenastate)
       self.save.video = bool(self.save.video)
       self.save.bag = bool(self.save.bag)
       self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
+      self.tracking.exclusionzone.enabled = bool(self.tracking.exclusionzone.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.tracking.exclusionzone.point_list = []
+      for i in range(0, length):
+        val1 = geometry_msgs.msg.Point()
+        _x = val1
+        start = end
+        end += 24
+        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+        self.tracking.exclusionzone.point_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sd'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.tracking.exclusionzone.radius_list = struct.unpack(pattern, str[start:end])
+      _x = self
+      start = end
+      end += 50
+      (_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_B6dB.unpack(str[start:end])
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
       start = end
@@ -424,8 +489,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.triggerEntry.frameidChild = str[start:end]
       _x = self
       start = end
-      end += 64
-      (_x.triggerEntry.speedParentMin, _x.triggerEntry.speedParentMax, _x.triggerEntry.speedChildMin, _x.triggerEntry.speedChildMax, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_8d.unpack(str[start:end])
+      end += 80
+      (_x.triggerEntry.speedAbsParentMin, _x.triggerEntry.speedAbsParentMax, _x.triggerEntry.speedAbsChildMin, _x.triggerEntry.speedAbsChildMax, _x.triggerEntry.speedRelMin, _x.triggerEntry.speedRelMax, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_10d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -576,7 +641,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      self.lasertrack.stateFilterLo_list = []
+      self.lasertrack.statefilterHi_list = []
       for i in range(0, length):
         start = end
         end += 4
@@ -587,11 +652,11 @@ float64               param     # An extra shape-dependent parameter, if needed 
           val1 = str[start:end].decode('utf-8')
         else:
           val1 = str[start:end]
-        self.lasertrack.stateFilterLo_list.append(val1)
+        self.lasertrack.statefilterHi_list.append(val1)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      self.lasertrack.stateFilterHi_list = []
+      self.lasertrack.statefilterLo_list = []
       for i in range(0, length):
         start = end
         end += 4
@@ -602,7 +667,22 @@ float64               param     # An extra shape-dependent parameter, if needed 
           val1 = str[start:end].decode('utf-8')
         else:
           val1 = str[start:end]
-        self.lasertrack.stateFilterHi_list.append(val1)
+        self.lasertrack.statefilterLo_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.lasertrack.statefilterCriteria_list = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.lasertrack.statefilterCriteria_list.append(val1)
       _x = self
       start = end
       end += 9
@@ -628,8 +708,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.triggerExit.frameidChild = str[start:end]
       _x = self
       start = end
-      end += 64
-      (_x.triggerExit.speedParentMin, _x.triggerExit.speedParentMax, _x.triggerExit.speedChildMin, _x.triggerExit.speedChildMax, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_8d.unpack(str[start:end])
+      end += 80
+      (_x.triggerExit.speedAbsParentMin, _x.triggerExit.speedAbsParentMax, _x.triggerExit.speedAbsChildMin, _x.triggerExit.speedAbsChildMax, _x.triggerExit.speedRelMin, _x.triggerExit.speedRelMax, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_10d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -671,7 +751,18 @@ float64               param     # An extra shape-dependent parameter, if needed 
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_5B6dB.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
+      buff.write(_struct_5B.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.tracking.exclusionzone.enabled))
+      length = len(self.tracking.exclusionzone.point_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.tracking.exclusionzone.point_list:
+        _x = val1
+        buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+      length = len(self.tracking.exclusionzone.radius_list)
+      buff.write(_struct_I.pack(length))
+      pattern = '<%sd'%length
+      buff.write(self.tracking.exclusionzone.radius_list.tostring())
+      _x = self
+      buff.write(_struct_B6dB.pack(_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
       _x = self.triggerEntry.frameidParent
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -685,7 +776,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_8d.pack(_x.triggerEntry.speedParentMin, _x.triggerEntry.speedParentMax, _x.triggerEntry.speedChildMin, _x.triggerEntry.speedChildMax, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
+      buff.write(_struct_10d.pack(_x.triggerEntry.speedAbsParentMin, _x.triggerEntry.speedAbsParentMax, _x.triggerEntry.speedAbsChildMin, _x.triggerEntry.speedAbsChildMax, _x.triggerEntry.speedRelMin, _x.triggerEntry.speedRelMax, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax))
       _x = self.triggerEntry.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -770,17 +861,25 @@ float64               param     # An extra shape-dependent parameter, if needed 
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
         buff.write(_struct_Bd.pack(_x.preempt, _x.param))
-      length = len(self.lasertrack.stateFilterLo_list)
+      length = len(self.lasertrack.statefilterHi_list)
       buff.write(_struct_I.pack(length))
-      for val1 in self.lasertrack.stateFilterLo_list:
+      for val1 in self.lasertrack.statefilterHi_list:
         length = len(val1)
         if python3 or type(val1) == unicode:
           val1 = val1.encode('utf-8')
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
-      length = len(self.lasertrack.stateFilterHi_list)
+      length = len(self.lasertrack.statefilterLo_list)
       buff.write(_struct_I.pack(length))
-      for val1 in self.lasertrack.stateFilterHi_list:
+      for val1 in self.lasertrack.statefilterLo_list:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
+      length = len(self.lasertrack.statefilterCriteria_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.lasertrack.statefilterCriteria_list:
         length = len(val1)
         if python3 or type(val1) == unicode:
           val1 = val1.encode('utf-8')
@@ -801,7 +900,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_8d.pack(_x.triggerExit.speedParentMin, _x.triggerExit.speedParentMax, _x.triggerExit.speedChildMin, _x.triggerExit.speedChildMax, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
+      buff.write(_struct_10d.pack(_x.triggerExit.speedAbsParentMin, _x.triggerExit.speedAbsParentMax, _x.triggerExit.speedAbsChildMin, _x.triggerExit.speedAbsChildMax, _x.triggerExit.speedRelMin, _x.triggerExit.speedRelMax, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax))
       _x = self.triggerExit.angleTest
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -824,6 +923,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.experiment = experiments.msg.ExperimentSettings()
       if self.save is None:
         self.save = experiments.msg.SaveSettings()
+      if self.tracking is None:
+        self.tracking = flycore.msg.TrackingCommand()
       if self.home is None:
         self.home = experiments.msg.HomeSettings()
       if self.triggerEntry is None:
@@ -859,12 +960,35 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.save.filenamebase = str[start:end]
       _x = self
       start = end
-      end += 54
-      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_5B6dB.unpack(str[start:end])
+      end += 5
+      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.tracking.exclusionzone.enabled,) = _struct_5B.unpack(str[start:end])
       self.save.arenastate = bool(self.save.arenastate)
       self.save.video = bool(self.save.video)
       self.save.bag = bool(self.save.bag)
       self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
+      self.tracking.exclusionzone.enabled = bool(self.tracking.exclusionzone.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.tracking.exclusionzone.point_list = []
+      for i in range(0, length):
+        val1 = geometry_msgs.msg.Point()
+        _x = val1
+        start = end
+        end += 24
+        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+        self.tracking.exclusionzone.point_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      pattern = '<%sd'%length
+      start = end
+      end += struct.calcsize(pattern)
+      self.tracking.exclusionzone.radius_list = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
+      _x = self
+      start = end
+      end += 50
+      (_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_B6dB.unpack(str[start:end])
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
       start = end
@@ -887,8 +1011,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.triggerEntry.frameidChild = str[start:end]
       _x = self
       start = end
-      end += 64
-      (_x.triggerEntry.speedParentMin, _x.triggerEntry.speedParentMax, _x.triggerEntry.speedChildMin, _x.triggerEntry.speedChildMax, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_8d.unpack(str[start:end])
+      end += 80
+      (_x.triggerEntry.speedAbsParentMin, _x.triggerEntry.speedAbsParentMax, _x.triggerEntry.speedAbsChildMin, _x.triggerEntry.speedAbsChildMax, _x.triggerEntry.speedRelMin, _x.triggerEntry.speedRelMax, _x.triggerEntry.distanceMin, _x.triggerEntry.distanceMax, _x.triggerEntry.angleMin, _x.triggerEntry.angleMax,) = _struct_10d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -1039,7 +1163,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      self.lasertrack.stateFilterLo_list = []
+      self.lasertrack.statefilterHi_list = []
       for i in range(0, length):
         start = end
         end += 4
@@ -1050,11 +1174,11 @@ float64               param     # An extra shape-dependent parameter, if needed 
           val1 = str[start:end].decode('utf-8')
         else:
           val1 = str[start:end]
-        self.lasertrack.stateFilterLo_list.append(val1)
+        self.lasertrack.statefilterHi_list.append(val1)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      self.lasertrack.stateFilterHi_list = []
+      self.lasertrack.statefilterLo_list = []
       for i in range(0, length):
         start = end
         end += 4
@@ -1065,7 +1189,22 @@ float64               param     # An extra shape-dependent parameter, if needed 
           val1 = str[start:end].decode('utf-8')
         else:
           val1 = str[start:end]
-        self.lasertrack.stateFilterHi_list.append(val1)
+        self.lasertrack.statefilterLo_list.append(val1)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.lasertrack.statefilterCriteria_list = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.lasertrack.statefilterCriteria_list.append(val1)
       _x = self
       start = end
       end += 9
@@ -1091,8 +1230,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.triggerExit.frameidChild = str[start:end]
       _x = self
       start = end
-      end += 64
-      (_x.triggerExit.speedParentMin, _x.triggerExit.speedParentMax, _x.triggerExit.speedChildMin, _x.triggerExit.speedChildMax, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_8d.unpack(str[start:end])
+      end += 80
+      (_x.triggerExit.speedAbsParentMin, _x.triggerExit.speedAbsParentMax, _x.triggerExit.speedAbsChildMin, _x.triggerExit.speedAbsChildMax, _x.triggerExit.speedRelMin, _x.triggerExit.speedRelMax, _x.triggerExit.distanceMin, _x.triggerExit.distanceMax, _x.triggerExit.angleMin, _x.triggerExit.angleMax,) = _struct_10d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -1119,9 +1258,10 @@ _struct_d = struct.Struct("<d")
 _struct_dB = struct.Struct("<dB")
 _struct_B2dB = struct.Struct("<B2dB")
 _struct_2d = struct.Struct("<2d")
-_struct_5B6dB = struct.Struct("<5B6dB")
-_struct_8d = struct.Struct("<8d")
+_struct_10d = struct.Struct("<10d")
 _struct_B3d = struct.Struct("<B3d")
+_struct_B6dB = struct.Struct("<B6dB")
+_struct_5B = struct.Struct("<5B")
 _struct_2di = struct.Struct("<2di")
 _struct_2i = struct.Struct("<2i")
 _struct_3d = struct.Struct("<3d")
@@ -1136,7 +1276,7 @@ class ExperimentParamsResponse(genpy.Message):
   _md5sum = "95e696a0d10686913abb262e0b4cbbcf"
   _type = "experiments/ExperimentParamsResponse"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """bool 				succeeded
+  _full_text = """bool 				       succeeded
 
 
 
@@ -1229,6 +1369,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '06720d35bd298370c6415204c3a6d3d8'
+  _md5sum = '339b7d5b1e094bfebab6b38ef72a3eaa'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

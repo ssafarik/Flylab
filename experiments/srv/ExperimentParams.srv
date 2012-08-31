@@ -1,12 +1,13 @@
-ExperimentSettings 	experiment
-SaveSettings 		save
-HomeSettings 		home
-float64 			waitEntry
-TriggerSettings 	triggerEntry
-MoveSettings 		move
-LasertrackSettings 	lasertrack
-TriggerSettings 	triggerExit
-float64 			waitExit
+ExperimentSettings 	       experiment
+SaveSettings 		       save
+flycore/TrackingCommand    tracking
+HomeSettings 		       home
+float64 			       waitEntry
+TriggerSettings 	       triggerEntry
+MoveSettings 		       move
+LasertrackSettings 	       lasertrack
+TriggerSettings 	       triggerExit
+float64 			       waitExit
 ---
-bool 				succeeded
+bool 				       succeeded
 

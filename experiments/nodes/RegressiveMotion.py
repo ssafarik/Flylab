@@ -26,6 +26,10 @@ class ExperimentRegressiveMotion():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
+        self.experimentparams.tracking.exclusionzone.enabled = False
+        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
+        self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
+        
         self.experimentparams.home.enabled = True
         self.experimentparams.home.x = 0.0
         self.experimentparams.home.y = 0.0
@@ -38,15 +42,19 @@ class ExperimentRegressiveMotion():
         self.experimentparams.triggerEntry.enabled = True
         self.experimentparams.triggerEntry.frameidParent = 'Fly1'
         self.experimentparams.triggerEntry.frameidChild = 'Robot'
+        self.experimentparams.triggerEntry.speedAbsParentMin =   4.0
+        self.experimentparams.triggerEntry.speedAbsParentMax =  40.0
+        self.experimentparams.triggerEntry.speedAbsChildMin  =   0.0
+        self.experimentparams.triggerEntry.speedAbsChildMax  = 999.0
+        self.experimentparams.triggerEntry.speedRelMin       =   0.0
+        self.experimentparams.triggerEntry.speedRelMax       = 999.0
         self.experimentparams.triggerEntry.distanceMin =  5.0
         self.experimentparams.triggerEntry.distanceMax = 60.0
-        self.experimentparams.triggerEntry.speedMin =  5.0
-        self.experimentparams.triggerEntry.speedMax = 50.0
         self.experimentparams.triggerEntry.angleMin = 85.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleMax =95.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleTest = 'inclusive'
         self.experimentparams.triggerEntry.angleTestBilateral = True
-        self.experimentparams.triggerEntry.timeHold = 0.1
+        self.experimentparams.triggerEntry.timeHold = 0.2
         self.experimentparams.triggerEntry.timeout = -1
         
 
@@ -72,8 +80,12 @@ class ExperimentRegressiveMotion():
         self.experimentparams.triggerExit.frameidChild = 'Robot'
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0
-        self.experimentparams.triggerExit.speedMin =  0.0
-        self.experimentparams.triggerExit.speedMax = 999.0
+        self.experimentparams.triggerExit.speedAbsParentMin =   0.0
+        self.experimentparams.triggerExit.speedAbsParentMax = 999.0
+        self.experimentparams.triggerExit.speedAbsChildMin  =   0.0
+        self.experimentparams.triggerExit.speedAbsChildMax  = 999.0
+        self.experimentparams.triggerExit.speedRelMin       =   0.0
+        self.experimentparams.triggerExit.speedRelMax       = 999.0
         self.experimentparams.triggerExit.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.triggerExit.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerExit.angleTest = 'inclusive'

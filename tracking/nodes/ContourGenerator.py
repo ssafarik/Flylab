@@ -4,6 +4,7 @@ import roslib; roslib.load_manifest('tracking')
 import sys
 import rospy
 import cv
+import copy
 import tf
 import numpy as N
 from cv_bridge import CvBridge, CvBridgeError
@@ -41,6 +42,8 @@ class ContourGenerator:
         self.pubImageBackground  = rospy.Publisher("camera/image_background", Image)
         self.pubImageForeground  = rospy.Publisher("camera/image_foreground", Image)
         self.pubImageThreshold   = rospy.Publisher("camera/image_threshold", Image)
+        self.pubImageRviz        = rospy.Publisher("camera_rviz/image_rect", Image)
+        self.pubCamerainfoRviz   = rospy.Publisher("camera_rviz/camera_info", CameraInfo)
         self.pubContourInfo      = rospy.Publisher("ContourInfo", ContourInfo)
         
         self.tfrx = tf.TransformListener()
@@ -54,7 +57,8 @@ class ContourGenerator:
         self.ecc_list = []
         self.nContours = 0
         self.nContoursMax = rospy.get_param("tracking/nContoursMax", 20)
-        self.min_ecc = 1.75
+        self.areaContourMin = rospy.get_param("tracking/areaContourMin", 0.0)
+        self.minEccForDisplay = 1.75
         self.minSumImage = 100
         self.distanceDuplicateContour = rospy.get_param('tracking/distanceDuplicateContour', 0.1)        
         # Robot Info
@@ -109,6 +113,7 @@ class ContourGenerator:
             self.cvimageProcessed         = cv.CreateImage(self.sizeImageRect, cv.IPL_DEPTH_8U,3)
             cv.SetImageROI(self.cvimageProcessed, self.rectImage)
             self.cvimageProcessed2        = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,3)
+            self.cvimageProcessedFlip     = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,3)
             self.cvimageMask              = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,1)
             self.cvimageBackground        = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,1)
             self.cvimageForeground        = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,1)
@@ -194,7 +199,7 @@ class ContourGenerator:
         
         
     def DrawAngleLine(self, cvimage, x0, y0, angle, ecc, length):
-        if (not N.isnan(angle)) and (self.min_ecc < ecc):
+        if (not N.isnan(angle)) and (self.minEccForDisplay < ecc):
             height, width = cv.GetSize(cvimage)
             y0 = height-y0
             
@@ -391,16 +396,17 @@ class ContourGenerator:
             contourinfo.ecc = self.ecc_list
         
             
-        # Remove duplicates
+        # Remove duplicates and too-small contours.
         if self.nContours > 0:
             # Repackage the data.
             contours = []
             for iContour in range(self.nContours):
-                contours.append([contourinfo.x[iContour], 
-                                 contourinfo.y[iContour], 
-                                 contourinfo.angle[iContour], 
-                                 contourinfo.area[iContour], 
-                                 contourinfo.ecc[iContour]])
+                if (self.areaContourMin <= contourinfo.area[iContour]):
+                    contours.append([contourinfo.x[iContour], 
+                                     contourinfo.y[iContour], 
+                                     contourinfo.angle[iContour], 
+                                     contourinfo.area[iContour], 
+                                     contourinfo.ecc[iContour]])
             
             # Remove the dups.
             contours = sorted(tuple(contours))
@@ -541,6 +547,36 @@ class ContourGenerator:
                 except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
                     rospy.logwarn ('Exception %s' % e)
               
+            # Publish a special image for use in rviz.
+            cv.Flip(self.cvimageProcessed,self.cvimageProcessedFlip,0)
+            image2 = self.cvbridge.cv_to_imgmsg(self.cvimageProcessedFlip, "passthrough")
+            image2.header = image.header
+            image2.header.frame_id = 'Plate'
+            camerainfo2 = copy.copy(self.camerainfo)
+            camerainfo2.header.frame_id = 'Plate'
+            k11=rospy.get_param('/k11', 1.0)
+            k13=rospy.get_param('/k13', 0.0)
+            k22=rospy.get_param('/k22', 1.0)
+            k23=rospy.get_param('/k23', 0.0)
+            k33=rospy.get_param('/k33', 1.0)
+            p11=rospy.get_param('/p11', -0.023)
+            p13=rospy.get_param('/p13', 0.0)
+            p22=rospy.get_param('/p22', +0.023)
+            p23=rospy.get_param('/p23', 0.0)
+            p33=rospy.get_param('/p33', 1.0)
+            camerainfo2.D = (0.0, 0.0, 0.0, 0.0, 0.0)
+            camerainfo2.K = (k11, 0.0, k13, \
+                             0.0, k22, k23, \
+                             0.0, 0.0, k33)
+            camerainfo2.R = (1.0, 0.0, 0.0, \
+                             0.0, 1.0, 0.0, \
+                             0.0, 0.0, 1.0)
+            camerainfo2.P = (p11, 0.0,                    self.ptsOriginMask.point.x, 0.0, \
+                             0.0, p22, camerainfo2.height-self.ptsOriginMask.point.y, 0.0, \
+                             0.0, 0.0,                                           1.0, 0.0)
+            self.pubCamerainfoRviz.publish(camerainfo2)
+            self.pubImageRviz.publish(image2)
+            del image2
 
 
     def Main(self):

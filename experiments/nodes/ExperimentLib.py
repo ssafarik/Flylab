@@ -13,7 +13,7 @@ from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion
 from std_msgs.msg import Header
 from stage_action_server.msg import *
 from pythonmodules import filters
-from flycore.msg import MsgFrameState
+from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from experiments.srv import Trigger, ExperimentParams
 from galvodirector.msg import MsgGalvoCommand
@@ -202,7 +202,7 @@ class NewTrial (smach.State):
                              outcomes=['continue','stop','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
-        #self.pub_experimentparams = rospy.Publisher('ExperimentParams', ExperimentParams)
+        self.pubTrackingCommand = rospy.Publisher('TrackingCommand', TrackingCommand, latch=True)
         self.Trigger = TriggerService()
         self.Trigger.attach()
         
@@ -222,7 +222,7 @@ class NewTrial (smach.State):
 
         self.Trigger.notify(False)
         userdata.experimentparamsOut = experimentparams
-        #self.pub_experimentparams.publish(experimentparams)
+        self.pubTrackingCommand.publish(experimentparams.tracking)
         try:
             self.NewTrial.notify(experimentparams)
             rv = 'continue'
@@ -391,28 +391,38 @@ class TriggerOnStates (smach.State):
                                             isAngleInRange = True
                             
                         
-                        # Test for speed of parent.
-                        isSpeedParentInRange = True
-                        if (trigger.speedParentMin is not None) and (trigger.speedParentMax is not None):
-                            isSpeedParentInRange = False
-                            speedParent = self.GetSpeedFrameToFrame('Plate', trigger.frameidParent)# Absolute speed of the parent frame.
+                        # Test for absolute speed of parent.
+                        isSpeedAbsParentInRange = True
+                        if (trigger.speedAbsParentMin is not None) and (trigger.speedAbsParentMax is not None):
+                            isSpeedAbsParentInRange = False
+                            speedAbsParent = self.GetSpeedFrameToFrame('Plate', trigger.frameidParent)# Absolute speed of the parent frame.
                             #rospy.loginfo ('EL speed=%s' % speed)
-                            if speedParent is not None:
-                                if (trigger.speedParentMin <= speedParent <= trigger.speedParentMax):
-                                    isSpeedParentInRange = True
+                            if speedAbsParent is not None:
+                                if (trigger.speedAbsParentMin <= speedAbsParent <= trigger.speedAbsParentMax):
+                                    isSpeedAbsParentInRange = True
         
-                        # Test for speed of child.
-                        isSpeedChildInRange = True
-                        if (trigger.speedChildMin is not None) and (trigger.speedChildMax is not None):
-                            isSpeedChildInRange = False
-                            speedChild = self.GetSpeedFrameToFrame('Plate', trigger.frameidChild)# Absolute speed of the child frame.
+                        # Test for absolute speed of child.
+                        isSpeedAbsChildInRange = True
+                        if (trigger.speedAbsChildMin is not None) and (trigger.speedAbsChildMax is not None):
+                            isSpeedAbsChildInRange = False
+                            speedAbsChild = self.GetSpeedFrameToFrame('Plate', trigger.frameidChild)# Absolute speed of the child frame.
                             #rospy.loginfo ('EL speed=%s' % speed)
-                            if speedChild is not None:
-                                if (trigger.speedChildMin <= speedChild <= trigger.speedChildMax):
-                                    isSpeedChildInRange = True
+                            if speedAbsChild is not None:
+                                if (trigger.speedAbsChildMin <= speedAbsChild <= trigger.speedAbsChildMax):
+                                    isSpeedAbsChildInRange = True
+        
+                        # Test for relative speed between parent & child.
+                        isSpeedRelInRange = True
+                        if (trigger.speedRelMin is not None) and (trigger.speedRelMax is not None):
+                            isSpeedRelInRange = False
+                            speedRel = self.GetSpeedFrameToFrame(trigger.frameidParent, trigger.frameidChild)# Relative speed parent to child.
+                            #rospy.loginfo ('EL speed=%s' % speed)
+                            if speedRel is not None:
+                                if (trigger.speedRelMin <= speedRel <= trigger.speedRelMax):
+                                    isSpeedRelInRange = True
         
                         # Test all the trigger criteria.
-                        if isDistanceInRange and isAngleInRange and isSpeedParentInRange and isSpeedChildInRange:
+                        if isDistanceInRange and isAngleInRange and isSpeedAbsParentInRange and isSpeedAbsChildInRange and isSpeedRelInRange:
                             
                             # Set the pending trigger start time.
                             if not self.isTriggered:
@@ -423,10 +433,10 @@ class TriggerOnStates (smach.State):
                             self.isTriggered = False
                             self.timeTriggered = None
         
-                        if (distance is not None) and (angle is not None) and (speedParent is not None) and (speedChild is not None):
-                            rospy.loginfo ('EL triggers=distance=%0.3f, speed=%0.3f,%0.3f, angle=%0.3f, bools=%s' % (distance, speedParent, speedChild, angle, [isDistanceInRange, isSpeedParentInRange, isSpeedChildInRange, isAngleInRange]))
-                        else:
-                            rospy.loginfo ('EL triggers=distance=%s, speed=%s,%s, angle=%s, bools=%s' % (distance, speedParent, speedChild, angle, [isDistanceInRange, isSpeedParentInRange, isSpeedChildInRange, isAngleInRange]))
+                        #if (distance is not None) and (angle is not None) and (speedAbsParent is not None) and (speedAbsChild is not None) and (speedRel is not None):
+                        #    rospy.loginfo ('EL triggers=distance=%0.3f, speed=%0.3f,%0.3f, angle=%0.3f, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
+                        #else:
+                        #    rospy.loginfo ('EL triggers=distance=%s, speed=%s,%s, angle=%s, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeecRelInRange, isAngleInRange]))
         
                         # If pending trigger has lasted longer than requested duration, then set trigger.
                         if (self.isTriggered):
@@ -857,8 +867,9 @@ class MoveRobot (smach.State):
 #######################################################################################################
 # Lasertrack()
 # 
-# Control the laser according to the experimentparams.  Turn off when done.
-# This state allows enabling the laser only when the given object's state (i.e. Fly state) is in a restricted domain of states.
+# Control the laser according to the experimentparams.  Turns off when done.
+# This state allows enabling the laser only when the given object's state (i.e. Fly state) is 
+# in a restricted domain of states.
 #
 class Lasertrack (smach.State):
     def __init__(self):
@@ -885,19 +896,20 @@ class Lasertrack (smach.State):
         self.arenastate = arenastate
         
     
-    # InStateFilterRange()
-    # Check if the given state falls in the intersection of the given bounds.
-    # If any of the terms are violated, then the filter returns False.
+    # InStatefilterRange()
+    # Check if the given state falls in the given region.
+    # For statefilterCriteria=="inclusive", if the given state is within all the terms, then the filter returns True.
+    # For statefilterCriteria=="exclusive", if the given state is within all the terms, then the filter returns False.
     #
     # We have to manually go through each of the entries in the dict, rather than
     # using a MsgFrameState, since we need the dict to only contain the entries
     # we care about, and the MsgFrameState always contains them all.
     #  
-    def InStateFilterRange(self, state, stateFilterLo_dict, stateFilterHi_dict):
+    def InStatefilterRange(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
         rv = True
-        if 'pose' in stateFilterLo_dict:
-            poseLo_dict = stateFilterLo_dict['pose'] 
-            poseHi_dict = stateFilterHi_dict['pose']
+        if 'pose' in statefilterLo_dict:
+            poseLo_dict = statefilterLo_dict['pose'] 
+            poseHi_dict = statefilterHi_dict['pose']
              
             if 'position' in poseLo_dict:
                  positionLo_dict = poseLo_dict['position']
@@ -942,9 +954,9 @@ class Lasertrack (smach.State):
                      if (state.pose.orientation.w < wLo) or (wHi < state.pose.orientation.w):
                          rv = False   
 
-        if 'velocity' in stateFilterLo_dict:
-            velocityLo_dict = stateFilterLo_dict['velocity'] 
-            velocityHi_dict = stateFilterHi_dict['velocity']
+        if 'velocity' in statefilterLo_dict:
+            velocityLo_dict = statefilterLo_dict['velocity'] 
+            velocityHi_dict = statefilterHi_dict['velocity']
              
             if 'linear' in velocityLo_dict:
                  linearLo_dict = velocityLo_dict['linear']
@@ -984,13 +996,16 @@ class Lasertrack (smach.State):
                      if (state.velocity.angular.z < zLo) or (zHi < state.velocity.angular.z):
                          rv = False
                      
-        if 'speed' in stateFilterLo_dict:
-            speedLo = stateFilterLo_dict['speed'] 
-            speedHi = stateFilterHi_dict['speed']
+        if 'speed' in statefilterLo_dict:
+            speedLo = statefilterLo_dict['speed'] 
+            speedHi = statefilterHi_dict['speed']
             #speed = N.linalg.norm([state.velocity.linear.x, state.velocity.linear.y, state.velocity.linear.z])
             if (state.speed < speedLo) or (speedHi < state.speed):
                 rv = False   
 
+        if (statefilterCriteria=="exclusive"):
+            rv = not rv
+            
         return rv
     
     
@@ -1011,26 +1026,26 @@ class Lasertrack (smach.State):
 
             # Determine if we're showing patterns only for certain states.            
             nPatterns = len(userdata.experimentparamsIn.lasertrack.pattern_list)
-            if len(userdata.experimentparamsIn.lasertrack.stateFilterLo_list) == nPatterns and \
-               len(userdata.experimentparamsIn.lasertrack.stateFilterHi_list) == nPatterns:
-                isStateFiltered = True
+            if len(userdata.experimentparamsIn.lasertrack.statefilterLo_list) == nPatterns and \
+               len(userdata.experimentparamsIn.lasertrack.statefilterHi_list) == nPatterns:
+                isStatefiltered = True
             else:
-                isStateFiltered = False
+                isStatefiltered = False
 
             # Initialize statefilter vars.                
-            bInStateFilterRangePrev = [False for i in range(nPatterns)]
-            bInStateFilterRange     = [False for i in range(nPatterns)]
+            bInStatefilterRangePrev = [False for i in range(nPatterns)]
+            bInStatefilterRange     = [False for i in range(nPatterns)]
 
                              
             # If unfiltered, publish the command.
-            if not isStateFiltered:
+            if not isStatefiltered:
                 self.pubGalvoCommand.publish(command)
     
             # Move galvos until preempt or timeout.        
             while not rospy.is_shutdown():
                 
                 # If state is used to determine when pattern is shown.
-                if isStateFiltered:
+                if isStatefiltered:
                     # Check if any filterstates have changed.
                     bFilterStateChanged = False
                     for iPattern in range(nPatterns):
@@ -1038,8 +1053,9 @@ class Lasertrack (smach.State):
                         pattern = userdata.experimentparamsIn.lasertrack.pattern_list[iPattern]
 
                         # Convert strings to dicts.
-                        stateFilterLo_dict = eval(userdata.experimentparamsIn.lasertrack.stateFilterLo_list[iPattern])
-                        stateFilterHi_dict = eval(userdata.experimentparamsIn.lasertrack.stateFilterHi_list[iPattern])
+                        statefilterLo_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterLo_list[iPattern])
+                        statefilterHi_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterHi_list[iPattern])
+                        statefilterCriteria = userdata.experimentparamsIn.lasertrack.statefilterCriteria_list[iPattern]
                 
                         # If possible, take the pose &/or velocity &/or speed from arenastate, else use transform via ROS.
                         pose = None
@@ -1108,21 +1124,21 @@ class Lasertrack (smach.State):
                                                   velocity = velocity,
                                                   speed = speed)
     
-                            bInStateFilterRangePrev[iPattern] = bInStateFilterRange[iPattern]
-                            bInStateFilterRange[iPattern] = self.InStateFilterRange(state, stateFilterLo_dict, stateFilterHi_dict)
+                            bInStatefilterRangePrev[iPattern] = bInStatefilterRange[iPattern]
+                            bInStatefilterRange[iPattern] = self.InStatefilterRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
                             
                             # If any of the filter states have changed, then we need to update them all.
-                            if bInStateFilterRangePrev[iPattern] != bInStateFilterRange[iPattern]:
+                            if bInStatefilterRangePrev[iPattern] != bInStatefilterRange[iPattern]:
                                 bFilterStateChanged = True
                     # end for iPattern in range(nPatterns)
                     
-                    #rospy.logwarn ('%s: %s' % (bFilterStateChanged, bInStateFilterRange))
+                    #rospy.logwarn ('%s: %s' % (bFilterStateChanged, bInStatefilterRange))
                     
                     # If filter state has changed, then publish the new command                    
                     if bFilterStateChanged:
                         command.pattern_list = []
                         for iPattern in range(nPatterns):
-                            if bInStateFilterRange[iPattern]:
+                            if bInStatefilterRange[iPattern]:
                                 pattern = userdata.experimentparamsIn.lasertrack.pattern_list[iPattern]
                                 command.pattern_list.append(pattern)
                     

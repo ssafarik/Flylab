@@ -32,6 +32,10 @@ class ExperimentZapOnTurn():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = False # Saves always.
         
+        self.experimentparams.tracking.exclusionzone.enabled = False
+        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
+        self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
+        
         self.experimentparams.home.enabled = False
         
         self.experimentparams.waitEntry = 0.0
@@ -39,10 +43,12 @@ class ExperimentZapOnTurn():
         self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.frameidParent = 'Plate'
         self.experimentparams.triggerEntry.frameidChild = 'Fly1'
-        self.experimentparams.triggerEntry.speedParentMin =   0.0
-        self.experimentparams.triggerEntry.speedParentMax = 999.0
-        self.experimentparams.triggerEntry.speedChildMin =   0.0
-        self.experimentparams.triggerEntry.speedChildMax = 999.0
+        self.experimentparams.triggerEntry.speedAbsParentMin =   0.0
+        self.experimentparams.triggerEntry.speedAbsParentMax = 999.0
+        self.experimentparams.triggerEntry.speedAbsChildMin =   0.0
+        self.experimentparams.triggerEntry.speedAbsChildMax = 999.0
+        self.experimentparams.triggerEntry.speedRelMin =   0.0
+        self.experimentparams.triggerEntry.speedRelMax = 999.0
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
         self.experimentparams.triggerEntry.angleMin =  0.0 * N.pi / 180.0
@@ -60,8 +66,9 @@ class ExperimentZapOnTurn():
         
         self.experimentparams.lasertrack.enabled = True
         self.experimentparams.lasertrack.pattern_list = []
-        self.experimentparams.lasertrack.stateFilterLo_list = []
-        self.experimentparams.lasertrack.stateFilterHi_list = []
+        self.experimentparams.lasertrack.statefilterLo_list = []
+        self.experimentparams.lasertrack.statefilterHi_list = []
+        self.experimentparams.lasertrack.statefilterCriteria_list = []
         for iFly in range(3):#rospy.get_param('nFlies', 0)):#2):#
             self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             shape      = 'grid',
@@ -74,24 +81,26 @@ class ExperimentZapOnTurn():
                                                                             preempt    = False,
                                                                             param      = 3), # Peano curve level.
                                                                  )
-            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'speed':5.0}")
-            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'speed':0.0}")
-            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'velocity':{'linear':{'x':+6,'y':+6}}}")
-            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
-            self.experimentparams.lasertrack.stateFilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
-            self.experimentparams.lasertrack.stateFilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
-            #self.experimentparams.lasertrack.stateFilterHi_list.append("{'pose':{'position':{'x':+999, 'y':999}}}")
-            #self.experimentparams.lasertrack.stateFilterLo_list.append("{'pose':{'position':{'x':-999, 'y':0}}}")
-        
+            #self.experimentparams.lasertrack.statefilterHi_list.append("{'speed':5.0}")
+            #self.experimentparams.lasertrack.statefilterLo_list.append("{'speed':0.0}")
+            #self.experimentparams.lasertrack.statefilterHi_list.append("{'velocity':{'linear':{'x':+6,'y':+6}}}")
+            #self.experimentparams.lasertrack.statefilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
+            self.experimentparams.lasertrack.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
+            self.experimentparams.lasertrack.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
+            #self.experimentparams.lasertrack.statefilterHi_list.append("{'pose':{'position':{'x':+999, 'y':999}}}")
+            #self.experimentparams.lasertrack.statefilterLo_list.append("{'pose':{'position':{'x':-999, 'y':0}}}")
+            self.experimentparams.lasertrack.statefilterCriteria_list.append("inclusive")
         self.experimentparams.lasertrack.timeout = -1
         
         self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.frameidParent = 'Plate'
         self.experimentparams.triggerExit.frameidChild = 'Fly1'
-        self.experimentparams.triggerExit.speedParentMin =   0.0
-        self.experimentparams.triggerExit.speedParentMax = 999.0
-        self.experimentparams.triggerExit.speedChildMin =   0.0
-        self.experimentparams.triggerExit.speedChildMax = 999.0
+        self.experimentparams.triggerExit.speedAbsParentMin =   0.0
+        self.experimentparams.triggerExit.speedAbsParentMax = 999.0
+        self.experimentparams.triggerExit.speedAbsChildMin =   0.0
+        self.experimentparams.triggerExit.speedAbsChildMax = 999.0
+        self.experimentparams.triggerExit.speedRelMin =   0.0
+        self.experimentparams.triggerExit.speedRelMax = 999.0
         self.experimentparams.triggerExit.distanceMin = 999.0
         self.experimentparams.triggerExit.distanceMax = 111.0 # i.e. never
         self.experimentparams.triggerExit.angleMin =  0.0000 * N.pi / 180.0

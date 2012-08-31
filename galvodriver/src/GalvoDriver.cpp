@@ -28,8 +28,8 @@ using namespace std;
 
 #define NCOPIES_POINTCLOUDEX 2
 
-#define LENERR			2048
-char    				szErr[LENERR]={'\0'};
+#define LENERR			4096
+char                   *g_pszError=NULL;
 int32   				e=0;
 
 TaskHandle 	 			g_hTask=NULL;
@@ -54,7 +54,7 @@ double					g_hzPointcloud = 0.0;
 double					g_hzPointcloudEx = 0.0;
 double					g_hzUSB = 40.0;
 
-double					g_timeHeartbeat=0.0;
+double					g_timeHeartbeat=0.0;	// This time should get updated at regular intervals.  Checked in main().
 
 int 					g_bNeedToReset=FALSE;	// If true, then reset the DAQ.  Checked periodically.
 
@@ -77,10 +77,16 @@ void HandleDAQError(int32 e)
 	if (DAQmxFailed(e))
 	{
 		g_bNeedToReset = TRUE;
-		DAQmxGetExtendedErrorInfo(szErr,LENERR);
-		ROS_WARN(szErr);
+		if (g_pszError)
+		{
+			DAQmxGetExtendedErrorInfo(g_pszError,LENERR);
+			ROS_WARN(g_pszError);
+			ROS_WARN("g_hTask=0x%0X", g_hTask);
+		}
+		else
+			ROS_WARN("g_pszError buffer not initialized.");
 	}
-}
+} // HandleDAQError()
 
 
 // ************************************
@@ -91,11 +97,13 @@ void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointclou
 {
 	double	hzPoint = 0.0;
 	
-	boost::lock_guard<boost::mutex> lock(g_lockPointcloud);
 
 	// Copy the given pointcloud, if it contains points.
+	g_lockPointcloud.lock();
 	if (pointcloud->points.size()>0)
 		g_pointcloud = sensor_msgs::PointCloud(*pointcloud); 
+
+	g_lockPointcloud.unlock();
 
 	ros::param::get("galvodriver/hzPoint", hzPoint);
 	if (g_hzPoint != hzPoint)
@@ -105,7 +113,7 @@ void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointclou
 	}
 	//cout << g_nPointsBufferDaq << " ";
 
-}
+} // GalvoPointCloud_callback()
 
 
 //*********************************************
@@ -114,9 +122,6 @@ void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointclou
 //
 int32 CVICALLBACK OnEveryNSamples_callback (TaskHandle hTask, int32 eventType, uInt32 nSamples, void *callbackData)
 {
-	boost::lock_guard<boost::mutex> lock1(g_lockDAQ);
-	boost::lock_guard<boost::mutex> lock2(g_lockPointcloud);
-	
 	g_timeHeartbeat = ros::Time::now().toSec();
 	
 	
@@ -144,7 +149,7 @@ int32 CVICALLBACK OnEveryNSamples_callback (TaskHandle hTask, int32 eventType, u
 	}
 
 	return 0;	
-}
+} // OnEveryNSamples_callback()
 
 
 // ************************************
@@ -159,6 +164,8 @@ void UpdatePointsFromPointcloud(void)
 	int			iDuplicate=0;
 	
 
+	g_lockPointcloud.lock();
+	
 	// If a multi-point cloud, then duplicate its points to bring it to down the USB rate, etc.
 	if (g_pointcloud.points.size()>1 || g_nPointsPerCloud == 0)
 	{
@@ -197,6 +204,7 @@ void UpdatePointsFromPointcloud(void)
 	// Copy the pointcloud points to global point buffer.
 	iPoint = 0;		// The cumulative point in the buffer.
 	if (g_pointcloud.points.size()>0)
+	{
 		for (i=0; i<g_nPointsPerCloud; i++)
 		{
 			for (iDuplicate=0; iDuplicate<g_nDuplicates; iDuplicate++)
@@ -211,15 +219,16 @@ void UpdatePointsFromPointcloud(void)
 				iPoint++;
 			}
 		}
-	else // Empty pointcloud -- use point (0,0)
+	}
+	else // Empty pointcloud -- use beamsink point (-10,-10)
 	{
 		for (i=0; i<g_nPointsPerCloud; i++)
 		{
 			for (iDuplicate=0; iDuplicate<g_nDuplicates; iDuplicate++)
 			{
-				// Copy the (0,0) values.
-				g_pPointcloudExPoints[iPoint*2] = 0.0;
-				g_pPointcloudExPoints[iPoint*2+1] = 0.0;
+				// Copy the beamsink values.
+				g_pPointcloudExPoints[iPoint*2]   = -10.0;
+				g_pPointcloudExPoints[iPoint*2+1] = -10.0;
 			
 				// Copy the z-blanking value.
 				g_pPointcloudExIntensity[iPoint] = LASERON;
@@ -228,6 +237,8 @@ void UpdatePointsFromPointcloud(void)
 			}
 		}
 	}
+	g_lockPointcloud.unlock();
+
 } // UpdatePointsFromPointcloud()
 
 
@@ -258,6 +269,7 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 	{
 		if (g_bStarted)
 		{
+			DAQmxWaitUntilTaskDone (g_hTask, 1.0);
 			e = DAQmxStopTask (hTask);
 			HandleDAQError(e);
 			if (!DAQmxFailed(e))
@@ -267,8 +279,9 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 		// Unregister.
 		e = DAQmxRegisterEveryNSamplesEvent (hTask, DAQmx_Val_Transferred_From_Buffer, g_nPointsPointcloudExRegistered, 0, NULL,                     NULL);
 		HandleDAQError(e);
+		g_nPointsPointcloudExRegistered = 0;
 
-		// Resize the output buffer.
+		// Configure the output buffer.
 		e = DAQmxCfgOutputBuffer (hTask, g_nPointsBufferDaq);
 		HandleDAQError(e);
 
@@ -280,18 +293,20 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 		e = DAQmxRegisterEveryNSamplesEvent (hTask, DAQmx_Val_Transferred_From_Buffer, g_nPointsPointcloudEx, 0, OnEveryNSamples_callback, NULL);
 		HandleDAQError(e);
 		
+		if (!g_bNeedToReset)
+		{
+			g_nPointsBufferDaqRegistered = g_nPointsBufferDaq;
+			g_nPointsPointcloudExRegistered = g_nPointsPointcloudEx;
+		}
+
+		g_lockPointcloud.lock();
 		ROS_WARN("hzPre=%9.2f, hzPost=%6.2f, offbdBufsz=%6lu, nPtsPerCloud=%6lu, nDups=%6lu", 
 				g_hzPointcloud, 
 				g_hzPointcloudEx, 
 				g_nPointsPointcloudEx,
 				MAX(1,g_pointcloud.points.size()),
 				g_nDuplicates);
-
-		if (!g_bNeedToReset)
-		{
-			g_nPointsBufferDaqRegistered = g_nPointsBufferDaq;
-			g_nPointsPointcloudExRegistered = g_nPointsPointcloudEx;
-		}
+		g_lockPointcloud.lock();
 
 		rv = TRUE;
 	}
@@ -312,7 +327,17 @@ void ResetDAQ(void)
 	
 	if (g_hTask)
 	{
-		e = DAQmxStopTask (g_hTask);
+		if (g_bStarted)
+		{
+			DAQmxWaitUntilTaskDone (g_hTask, 1.0);
+			e = DAQmxStopTask (g_hTask);
+			HandleDAQError(e);
+			if (!DAQmxFailed(e))
+				g_bStarted = FALSE;
+		}
+		
+		// Unregister.
+		e = DAQmxRegisterEveryNSamplesEvent (g_hTask, DAQmx_Val_Transferred_From_Buffer, g_nPointsPointcloudExRegistered, 0, NULL, NULL);
 		HandleDAQError(e);
 		
 		e = DAQmxClearTask (g_hTask);
@@ -328,37 +353,52 @@ void ResetDAQ(void)
 		e = DAQmxCreateTask (szTask, &g_hTask);
 		HandleDAQError(e);
 		
-		// Set up the output channels.
-		e = DAQmxCreateAOVoltageChan (g_hTask, szPhysicalChannel, NULL, -10.0, +10.0, DAQmx_Val_Volts, NULL);
-		HandleDAQError(e);
-		
-		e = DAQmxCfgSampClkTiming (g_hTask, "OnboardClock", (float64)g_hzPoint, DAQmx_Val_Rising, DAQmx_Val_ContSamps, g_nPointsPointcloudEx);
-		HandleDAQError(e);
-		
-		e = DAQmxSetWriteAttribute (g_hTask, DAQmx_Write_RegenMode, DAQmx_Val_DoNotAllowRegen);
-		HandleDAQError(e);
-		
-		
-		// Set/Get the onboard DAQ buffer size.
-		//e = DAQmxSetBufOutputOnbrdBufSize(g_hTask, 4095);  // The only allowed value for NI USB-6211 is 4095.
-		//HandleDAQError(e);
-		
-		
-		// Initialize the offboard buffer.
-		UpdatePointsFromPointcloud();
-		e = DAQmxCfgOutputBuffer (g_hTask, g_nPointsBufferDaq);
-		HandleDAQError(e);
-		
-		RegisterCallbackDAQBuffer(g_hTask);
-		
-		
-		// Start the DAQ output.
-		if (!g_bStarted)
+		if (g_hTask)
 		{
-			e = DAQmxStartTask (g_hTask);
+			// Set up the output channels.
+			e = DAQmxCreateAOVoltageChan (g_hTask, szPhysicalChannel, NULL, -10.0, +10.0, DAQmx_Val_Volts, NULL);
 			HandleDAQError(e);
-			if (!DAQmxFailed(e))
-				g_bStarted = TRUE;
+			
+			e = DAQmxCfgSampClkTiming (g_hTask, "OnboardClock", (float64)g_hzPoint, DAQmx_Val_Rising, DAQmx_Val_ContSamps, g_nPointsPointcloudEx);
+			HandleDAQError(e);
+			
+			e = DAQmxSetWriteAttribute (g_hTask, DAQmx_Write_RegenMode, DAQmx_Val_DoNotAllowRegen);
+			HandleDAQError(e);
+			
+			
+			// Set/Get the onboard DAQ buffer size.
+			//e = DAQmxSetBufOutputOnbrdBufSize(g_hTask, 4095);  // The only allowed value for NI USB-6211 is 4095.
+			//HandleDAQError(e);
+			
+			
+			// Initialize the offboard buffer.
+			UpdatePointsFromPointcloud();
+			e = DAQmxCfgOutputBuffer (g_hTask, g_nPointsBufferDaq);
+			HandleDAQError(e);
+
+			// Fill the buffer.
+			for (int i=0; i<NCOPIES_POINTCLOUDEX; i++)
+				WritePoints(g_hTask);
+			
+			// Reregister.
+			//RegisterCallbackDAQBuffer(g_hTask);
+			e = DAQmxRegisterEveryNSamplesEvent (g_hTask, DAQmx_Val_Transferred_From_Buffer, g_nPointsPointcloudEx, 0, OnEveryNSamples_callback, NULL);
+			HandleDAQError(e);
+			if (!g_bNeedToReset)
+			{
+				g_nPointsBufferDaqRegistered = g_nPointsBufferDaq;
+				g_nPointsPointcloudExRegistered = g_nPointsPointcloudEx;
+			}
+			
+			
+			// Start the DAQ output.
+			if (!g_bStarted)
+			{
+				e = DAQmxStartTask (g_hTask);
+				HandleDAQError(e);
+				if (!DAQmxFailed(e))
+					g_bStarted = TRUE;
+			}
 		}
 	}
 	
@@ -383,6 +423,8 @@ int main(int argc, char **argv)
 	uInt32 				data;
 
 	
+	g_pszError = new char[LENERR];
+	
 	node.getParam("galvodriver/hzPoint", g_hzPoint);
 	node.getParam("galvodriver/hzUSB", g_hzUSB);
 	
@@ -398,7 +440,7 @@ int main(int argc, char **argv)
 	ROS_WARN("Onboard buffer size=%u", data);
 	
 	//ros::spin();
-	double timeAllowed = ros::Duration(1.0).toSec();
+	double timeAllowed = ros::Duration(5.0).toSec();
 	double timeTaken;
 	while (ros::ok())
 	{

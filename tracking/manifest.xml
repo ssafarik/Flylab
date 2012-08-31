@@ -10,10 +10,10 @@
   <url></url>
   
   <depend package="rospy"/>
-  <depend package="tf"/>
-  <depend package="std_msgs"/>
   <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
   <depend package="sensor_msgs"/>
+  <depend package="tf"/>
   <depend package="visualization_msgs"/>
   <depend package="opencv2"/>
   <depend package="cv_bridge"/> 

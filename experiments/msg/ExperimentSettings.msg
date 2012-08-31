@@ -1,4 +1,4 @@
-string description
-int32 maxTrials
-int32 trial 
+string  description
+int32   maxTrials
+int32   trial
 
