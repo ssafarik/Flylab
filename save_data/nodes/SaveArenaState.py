@@ -110,10 +110,12 @@ class SaveArenaState:
         self.headingsTriggerEntry = 'trigger1Enabled, '\
                                     'trigger1FrameidParent, '\
                                     'trigger1FrameidChild, '\
-                                    'trigger1SpeedParentMin, '\
-                                    'trigger1SpeedParentMax, '\
-                                    'trigger1SpeedChildMin, '\
-                                    'trigger1SpeedChildMax, '\
+                                    'trigger1SpeedAbsParentMin, '\
+                                    'trigger1SpeedAbsParentMax, '\
+                                    'trigger1SpeedAbsChildMin, '\
+                                    'trigger1SpeedAbsChildMax, '\
+                                    'trigger1SpeedRelMin, '\
+                                    'trigger1SpeedRelMax, '\
                                     'trigger1DistanceMin, '\
                                     'trigger1DistanceMax, '\
                                     'trigger1AngleMin, '\
@@ -125,10 +127,12 @@ class SaveArenaState:
         self.templateTriggerEntry = '{trigger1Enabled:s}, '\
                                     '{trigger1FrameidParent:s}, '\
                                     '{trigger1FrameidChild:s}, '\
-                                    '{trigger1SpeedParentMin:s}, '\
-                                    '{trigger1SpeedParentMax:s}, '\
-                                    '{trigger1SpeedChildMin:s}, '\
-                                    '{trigger1SpeedChildMax:s}, '\
+                                    '{trigger1SpeedAbsParentMin:s}, '\
+                                    '{trigger1SpeedAbsParentMax:s}, '\
+                                    '{trigger1SpeedAbsChildMin:s}, '\
+                                    '{trigger1SpeedAbsChildMax:s}, '\
+                                    '{trigger1SpeedRelMin:s}, '\
+                                    '{trigger1SpeedRelMax:s}, '\
                                     '{trigger1DistanceMin:s}, '\
                                     '{trigger1DistanceMax:s}, '\
                                     '{trigger1AngleMin:s}, '\
@@ -199,10 +203,12 @@ class SaveArenaState:
         self.headingsTriggerExit =  'trigger2Enabled, '\
                                     'trigger2FrameidParent, '\
                                     'trigger2FrameidChild, '\
-                                    'trigger2SpeedParentMin, '\
-                                    'trigger2SpeedParentMax, '\
-                                    'trigger2SpeedChildMin, '\
-                                    'trigger2SpeedChildMax, '\
+                                    'trigger2SpeedAbsParentMin, '\
+                                    'trigger2SpeedAbsParentMax, '\
+                                    'trigger2SpeedAbsChildMin, '\
+                                    'trigger2SpeedAbsChildMax, '\
+                                    'trigger2SpeedRelMin, '\
+                                    'trigger2SpeedRelMax, '\
                                     'trigger2DistanceMin, '\
                                     'trigger2DistanceMax, '\
                                     'trigger2AngleMin, '\
@@ -214,10 +220,12 @@ class SaveArenaState:
         self.templateTriggerExit =  '{trigger2Enabled:s}, '\
                                     '{trigger2FrameidParent:s}, '\
                                     '{trigger2FrameidChild:s}, '\
-                                    '{trigger2SpeedParentMin:s}, '\
-                                    '{trigger2SpeedParentMax:s}, '\
-                                    '{trigger2SpeedChildMin:s}, '\
-                                    '{trigger2SpeedChildMax:s}, '\
+                                    '{trigger2SpeedAbsParentMin:s}, '\
+                                    '{trigger2SpeedAbsParentMax:s}, '\
+                                    '{trigger2SpeedAbsChildMin:s}, '\
+                                    '{trigger2SpeedAbsChildMax:s}, '\
+                                    '{trigger2SpeedRelMin:s}, '\
+                                    '{trigger2SpeedRelMax:s}, '\
                                     '{trigger2DistanceMin:s}, '\
                                     '{trigger2DistanceMax:s}, '\
                                     '{trigger2AngleMin:s}, '\
@@ -320,10 +328,12 @@ class SaveArenaState:
                                                         trigger1Enabled            = str(experimentparamsReq.triggerEntry.enabled),
                                                         trigger1FrameidParent      = str(experimentparamsReq.triggerEntry.frameidParent),
                                                         trigger1FrameidChild       = str(experimentparamsReq.triggerEntry.frameidChild),
-                                                        trigger1SpeedParentMin     = str(experimentparamsReq.triggerEntry.speedParentMin),
-                                                        trigger1SpeedParentMax     = str(experimentparamsReq.triggerEntry.speedParentMax),
-                                                        trigger1SpeedChildMin      = str(experimentparamsReq.triggerEntry.speedChildMin),
-                                                        trigger1SpeedChildMax      = str(experimentparamsReq.triggerEntry.speedChildMax),
+                                                        trigger1SpeedAbsParentMin  = str(experimentparamsReq.triggerEntry.speedAbsParentMin),
+                                                        trigger1SpeedAbsParentMax  = str(experimentparamsReq.triggerEntry.speedAbsParentMax),
+                                                        trigger1SpeedAbsChildMin   = str(experimentparamsReq.triggerEntry.speedAbsChildMin),
+                                                        trigger1SpeedAbsChildMax   = str(experimentparamsReq.triggerEntry.speedAbsChildMax),
+                                                        trigger1SpeedRelMin        = str(experimentparamsReq.triggerEntry.speedRelMin),
+                                                        trigger1SpeedRelMax        = str(experimentparamsReq.triggerEntry.speedRelMax),
                                                         trigger1DistanceMin        = str(experimentparamsReq.triggerEntry.distanceMin),
                                                         trigger1DistanceMax        = str(experimentparamsReq.triggerEntry.distanceMax),
                                                         trigger1AngleMin           = str(experimentparamsReq.triggerEntry.angleMin),
@@ -397,10 +407,12 @@ class SaveArenaState:
                                                         trigger2Enabled            = str(experimentparamsReq.triggerExit.enabled),
                                                         trigger2FrameidParent      = str(experimentparamsReq.triggerExit.frameidParent),
                                                         trigger2FrameidChild       = str(experimentparamsReq.triggerExit.frameidChild),
-                                                        trigger2SpeedParentMin     = str(experimentparamsReq.triggerExit.speedParentMin),
-                                                        trigger2SpeedParentMax     = str(experimentparamsReq.triggerExit.speedParentMax),
-                                                        trigger2SpeedChildMin      = str(experimentparamsReq.triggerExit.speedChildMin),
-                                                        trigger2SpeedChildMax      = str(experimentparamsReq.triggerExit.speedChildMax),
+                                                        trigger2SpeedAbsParentMin  = str(experimentparamsReq.triggerExit.speedAbsParentMin),
+                                                        trigger2SpeedAbsParentMax  = str(experimentparamsReq.triggerExit.speedAbsParentMax),
+                                                        trigger2SpeedAbsChildMin   = str(experimentparamsReq.triggerExit.speedAbsChildMin),
+                                                        trigger2SpeedAbsChildMax   = str(experimentparamsReq.triggerExit.speedAbsChildMax),
+                                                        trigger2SpeedRelMin        = str(experimentparamsReq.triggerExit.speedRelMin),
+                                                        trigger2SpeedRelMax        = str(experimentparamsReq.triggerExit.speedRelMax),
                                                         trigger2DistanceMin        = str(experimentparamsReq.triggerExit.distanceMin),
                                                         trigger2DistanceMax        = str(experimentparamsReq.triggerExit.distanceMax),
                                                         trigger2AngleMin           = str(experimentparamsReq.triggerExit.angleMin),
