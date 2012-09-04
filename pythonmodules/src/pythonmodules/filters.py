@@ -198,20 +198,20 @@ class KalmanFilter:
 #        self.kal.measurement_noise_cov[0,2] = -1.433
 #        self.kal.measurement_noise_cov[0,3] = -0.10971
 #        
-        self.kal.measurement_noise_cov[1,0] = 1E-2 # 2.354
-        self.kal.measurement_noise_cov[1,1] = 1E-2 #20.038
+        self.kal.measurement_noise_cov[1,0] = 8E-6 #1E-2 # 2.354
+        self.kal.measurement_noise_cov[1,1] = 5E-5 # Likely to be similar to the x value.
 #        self.kal.measurement_noise_cov[1,2] = -0.097233
 #        self.kal.measurement_noise_cov[1,3] = -1.6238
 #        
 #        self.kal.measurement_noise_cov[2,0] = -1.433
 #        self.kal.measurement_noise_cov[2,1] = -0.097233
-        self.kal.measurement_noise_cov[2,2] =  0.22291
+        self.kal.measurement_noise_cov[2,2] =  40.0#0.22291
 #        self.kal.measurement_noise_cov[2,3] =  0.0055711
 #        
 #        self.kal.measurement_noise_cov[3,0] = -0.10971
 #        self.kal.measurement_noise_cov[3,1] = -1.6238
 #        self.kal.measurement_noise_cov[3,2] =  0.0055711
-        self.kal.measurement_noise_cov[3,3] =  0.21742
+        self.kal.measurement_noise_cov[3,3] =  40.0#0.21742
         
         
         self.measurement = cv.CreateMat(4,1,cv.GetElemType(self.kal.state_pre))

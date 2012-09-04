@@ -174,6 +174,7 @@ class GalvoCalibrator:
         pattern.param      = 0.0
     
         command = MsgGalvoCommand()
+        command.enable_laser = True
         command.pattern_list = [pattern,]
         command.units = 'volts' #'millimeters' # 'volts' #
         self.pubGalvoCommand.publish(command)

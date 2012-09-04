@@ -67,8 +67,8 @@ class ExperimentZapafly():
         #mode='fixedpointlist'    # Laser to specific locations.
         #mode='fixedcircle'
         #mode='fixedmaze' 
-        mode='trackgrid'        # Small grid tracks flies.
-        #mode='tracknumber'      # Draw a numeral on flies.
+        #mode='trackgrid'        # Small grid tracks flies.
+        mode='tracknumber'      # Draw a numeral on flies.
         #mode='trackflylogo'
         flies_list = range(1,1+rospy.get_param('nFlies', 0))
         
@@ -104,8 +104,8 @@ class ExperimentZapafly():
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
-                                                                            size       = Point(x=34,
-                                                                                               y=35),
+                                                                            size       = Point(x=80,
+                                                                                               y= 0),
                                                                             preempt    = False,
                                                                             param      = 3), # Peano curve level.
                                                                  )
@@ -126,8 +126,8 @@ class ExperimentZapafly():
             for iFly in flies_list:
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = '%s' % iFly,
-                                                                                frame_id   = 'Fly%d' % iFly,
-                                                                                hzPattern  = 40.0,
+                                                                                frame_id   = 'Fly%dForecast' % iFly,
+                                                                                hzPattern  = 10.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
                                                                                 size       = Point(x=6,

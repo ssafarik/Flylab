@@ -80,11 +80,10 @@ void HandleDAQError(int32 e)
 		if (g_pszError)
 		{
 			DAQmxGetExtendedErrorInfo(g_pszError,LENERR);
-			ROS_WARN(g_pszError);
-			ROS_WARN("g_hTask=0x%0X", g_hTask);
+			ROS_WARN("DAQ Error.  g_hTask=0x%0X: %s", g_hTask, g_pszError);
 		}
 		else
-			ROS_WARN("g_pszError buffer not initialized.");
+			ROS_WARN("Error while initializing.  g_pszError not initialized.");
 	}
 } // HandleDAQError()
 
@@ -99,11 +98,11 @@ void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointclou
 	
 
 	// Copy the given pointcloud, if it contains points.
-	g_lockPointcloud.lock();
+	//g_lockPointcloud.lock();
 	if (pointcloud->points.size()>0)
 		g_pointcloud = sensor_msgs::PointCloud(*pointcloud); 
 
-	g_lockPointcloud.unlock();
+	//g_lockPointcloud.unlock();
 
 	ros::param::get("galvodriver/hzPoint", hzPoint);
 	if (g_hzPoint != hzPoint)
@@ -141,6 +140,7 @@ int32 CVICALLBACK OnEveryNSamples_callback (TaskHandle hTask, int32 eventType, u
 			if (!g_bStarted)
 			{
 				e = DAQmxStartTask (hTask);
+				//ROS_WARN("StartTask");
 				HandleDAQError(e);
 				if (!DAQmxFailed(e))
 					g_bStarted = TRUE;
@@ -164,7 +164,7 @@ void UpdatePointsFromPointcloud(void)
 	int			iDuplicate=0;
 	
 
-	g_lockPointcloud.lock();
+	//g_lockPointcloud.lock();
 	
 	// If a multi-point cloud, then duplicate its points to bring it to down the USB rate, etc.
 	if (g_pointcloud.points.size()>1 || g_nPointsPerCloud == 0)
@@ -205,6 +205,7 @@ void UpdatePointsFromPointcloud(void)
 	iPoint = 0;		// The cumulative point in the buffer.
 	if (g_pointcloud.points.size()>0)
 	{
+		//ROS_WARN("Nonempty pointcloud.");
 		for (i=0; i<g_nPointsPerCloud; i++)
 		{
 			for (iDuplicate=0; iDuplicate<g_nDuplicates; iDuplicate++)
@@ -220,14 +221,15 @@ void UpdatePointsFromPointcloud(void)
 			}
 		}
 	}
-	else // Empty pointcloud -- use beamsink point (-10,-10)
+	else // Empty pointcloud -- use beamsink point (0,-10)
 	{
+		//ROS_WARN("Empty pointcloud.");
 		for (i=0; i<g_nPointsPerCloud; i++)
 		{
 			for (iDuplicate=0; iDuplicate<g_nDuplicates; iDuplicate++)
 			{
 				// Copy the beamsink values.
-				g_pPointcloudExPoints[iPoint*2]   = -10.0;
+				g_pPointcloudExPoints[iPoint*2]   =   0.0;
 				g_pPointcloudExPoints[iPoint*2+1] = -10.0;
 			
 				// Copy the z-blanking value.
@@ -237,7 +239,7 @@ void UpdatePointsFromPointcloud(void)
 			}
 		}
 	}
-	g_lockPointcloud.unlock();
+	//g_lockPointcloud.unlock();
 
 } // UpdatePointsFromPointcloud()
 
@@ -251,6 +253,7 @@ void WritePoints(TaskHandle hTask)
 	
 	// Write to the (offboard) buffer.
 	e = DAQmxWriteAnalogF64 (hTask, g_nPointsPointcloudEx, FALSE, 0.0, DAQmx_Val_GroupByScanNumber, g_pPointcloudExPoints, &nPointsWritten, NULL);
+	//ROS_WARN("WriteAnalogF64");
 	HandleDAQError(e);
 } // WritePoints()
 
@@ -262,27 +265,40 @@ void WritePoints(TaskHandle hTask)
 //
 int RegisterCallbackDAQBuffer (TaskHandle hTask)
 {
-	int rv=FALSE;
+	int		rv=FALSE;
+	bool32	bTaskDone;
 	
 	if (g_nPointsBufferDaq != g_nPointsBufferDaqRegistered)
 	//if (g_nPointsBufferDaqRegistered < g_nPointsBufferDaq)
 	{
 		if (g_bStarted)
 		{
-			DAQmxWaitUntilTaskDone (g_hTask, 1.0);
+			e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
+			ROS_WARN("IsTaskDone A");
+			while (!bTaskDone)
+			{
+				e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
+				HandleDAQError(e);
+				ROS_WARN("IsTaskDone A");
+			}
+
 			e = DAQmxStopTask (hTask);
+			//ROS_WARN("StopTask A");
 			HandleDAQError(e);
-			if (!DAQmxFailed(e))
+
+			if (!g_bNeedToReset)
 				g_bStarted = FALSE;
 		}
 
 		// Unregister.
 		e = DAQmxRegisterEveryNSamplesEvent (hTask, DAQmx_Val_Transferred_From_Buffer, g_nPointsPointcloudExRegistered, 0, NULL,                     NULL);
+		//ROS_WARN("RegisterEveryNSamplesEvent1");
 		HandleDAQError(e);
 		g_nPointsPointcloudExRegistered = 0;
 
 		// Configure the output buffer.
 		e = DAQmxCfgOutputBuffer (hTask, g_nPointsBufferDaq);
+		//ROS_WARN("CfgOutputBuffer");
 		HandleDAQError(e);
 
 		// Fill the buffer.
@@ -291,6 +307,7 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 
 		// Reregister.
 		e = DAQmxRegisterEveryNSamplesEvent (hTask, DAQmx_Val_Transferred_From_Buffer, g_nPointsPointcloudEx, 0, OnEveryNSamples_callback, NULL);
+		//ROS_WARN("RegisterEveryNSamplesEvent2");
 		HandleDAQError(e);
 		
 		if (!g_bNeedToReset)
@@ -299,14 +316,14 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 			g_nPointsPointcloudExRegistered = g_nPointsPointcloudEx;
 		}
 
-		g_lockPointcloud.lock();
+		//g_lockPointcloud.lock();
 		ROS_WARN("hzPre=%9.2f, hzPost=%6.2f, offbdBufsz=%6lu, nPtsPerCloud=%6lu, nDups=%6lu", 
 				g_hzPointcloud, 
 				g_hzPointcloudEx, 
 				g_nPointsPointcloudEx,
 				MAX(1,g_pointcloud.points.size()),
 				g_nDuplicates);
-		g_lockPointcloud.lock();
+		//g_lockPointcloud.lock();
 
 		rv = TRUE;
 	}
@@ -320,8 +337,10 @@ void ResetDAQ(void)
 {
 	char 				szTask[]="OutputPointList";
 	char				szPhysicalChannel[]=DEVICE "/" CHANNELS;
+	bool32				bTaskDone;
 
-	
+	ROS_WARN("****************Resetting...");
+	g_lockDAQ.lock();
 	g_bNeedToReset = FALSE;
 	g_nPointsBufferDaqRegistered = -1;
 	
@@ -329,40 +348,57 @@ void ResetDAQ(void)
 	{
 		if (g_bStarted)
 		{
-			DAQmxWaitUntilTaskDone (g_hTask, 1.0);
+			e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
+			ROS_WARN("IsTaskDone B");
+			while (!bTaskDone)
+			{
+				e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
+				HandleDAQError(e);
+				ROS_WARN("IsTaskDone B");
+			}
+
 			e = DAQmxStopTask (g_hTask);
+			//ROS_WARN("StopTask B");
 			HandleDAQError(e);
-			if (!DAQmxFailed(e))
+
+			if (!g_bNeedToReset)
 				g_bStarted = FALSE;
 		}
 		
 		// Unregister.
 		e = DAQmxRegisterEveryNSamplesEvent (g_hTask, DAQmx_Val_Transferred_From_Buffer, g_nPointsPointcloudExRegistered, 0, NULL, NULL);
+		//ROS_WARN("RegisterEveryNSamplesEvent3");
 		HandleDAQError(e);
 		
 		e = DAQmxClearTask (g_hTask);
+		//ROS_WARN("ClearTask");
 		HandleDAQError(e);
 		
 		g_hTask = NULL;
 	}
 	
 	e = DAQmxResetDevice(DEVICE);
+	//ROS_WARN("ResetDevice");
 	HandleDAQError(e);
 	if (!DAQmxFailed(e))
 	{
 		e = DAQmxCreateTask (szTask, &g_hTask);
+		//ROS_WARN("CreateTask");
 		HandleDAQError(e);
 		
 		if (g_hTask)
 		{
 			// Set up the output channels.
 			e = DAQmxCreateAOVoltageChan (g_hTask, szPhysicalChannel, NULL, -10.0, +10.0, DAQmx_Val_Volts, NULL);
+			//ROS_WARN("CreateAOVoltageChan");
 			HandleDAQError(e);
 			
 			e = DAQmxCfgSampClkTiming (g_hTask, "OnboardClock", (float64)g_hzPoint, DAQmx_Val_Rising, DAQmx_Val_ContSamps, g_nPointsPointcloudEx);
+			//ROS_WARN("CfgSampClkTiming");
 			HandleDAQError(e);
 			
 			e = DAQmxSetWriteAttribute (g_hTask, DAQmx_Write_RegenMode, DAQmx_Val_DoNotAllowRegen);
+			//ROS_WARN("SetWriteAttribute");
 			HandleDAQError(e);
 			
 			
@@ -374,6 +410,7 @@ void ResetDAQ(void)
 			// Initialize the offboard buffer.
 			UpdatePointsFromPointcloud();
 			e = DAQmxCfgOutputBuffer (g_hTask, g_nPointsBufferDaq);
+			//ROS_WARN("CfgOutputBuffer");
 			HandleDAQError(e);
 
 			// Fill the buffer.
@@ -383,6 +420,7 @@ void ResetDAQ(void)
 			// Reregister.
 			//RegisterCallbackDAQBuffer(g_hTask);
 			e = DAQmxRegisterEveryNSamplesEvent (g_hTask, DAQmx_Val_Transferred_From_Buffer, g_nPointsPointcloudEx, 0, OnEveryNSamples_callback, NULL);
+			//ROS_WARN("RegisterEveryNSamplesEvent4");
 			HandleDAQError(e);
 			if (!g_bNeedToReset)
 			{
@@ -395,6 +433,7 @@ void ResetDAQ(void)
 			if (!g_bStarted)
 			{
 				e = DAQmxStartTask (g_hTask);
+				//ROS_WARN("StartTask");
 				HandleDAQError(e);
 				if (!DAQmxFailed(e))
 					g_bStarted = TRUE;
@@ -404,12 +443,13 @@ void ResetDAQ(void)
 	
 	
 	if (!g_bNeedToReset)
-		ROS_WARN("Reset DAQ Succeeded.");
+		ROS_WARN("****************Reset DAQ Succeeded.");
 	else
-		ROS_WARN("Reset DAQ Failed.");
+		ROS_WARN("****************Reset DAQ Failed.");
 
 	
 	g_timeHeartbeat = ros::Time::now().toSec();
+	g_lockDAQ.unlock();
 
 } // ResetDAQ()
 
@@ -420,7 +460,11 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "GalvoDriver");
 	
 	ros::NodeHandle 	node;
-	uInt32 				data;
+	uInt32 				udata;
+	int32 				data;
+	float64				fdata;
+	char 				szTask[]="OutputPointList";
+	char				szPhysicalChannel[]=DEVICE "/" CHANNELS;
 
 	
 	g_pszError = new char[LENERR];
@@ -435,9 +479,27 @@ int main(int argc, char **argv)
 
 	ResetDAQ();
 
-	e = DAQmxGetBufOutputOnbrdBufSize(g_hTask, &data);
+	e = DAQmxGetDevAOMaxRate(DEVICE, &fdata);
 	HandleDAQError(e);
-	ROS_WARN("Onboard buffer size=%u", data);
+	ROS_WARN("Max output rate=%f", fdata);
+	e = DAQmxGetBufOutputOnbrdBufSize(g_hTask, &udata);
+	HandleDAQError(e);
+	ROS_WARN("Onboard buffer size=%u", udata);
+	e = DAQmxGetAOUseOnlyOnBrdMem(g_hTask, szPhysicalChannel, &udata);
+	HandleDAQError(e);
+	ROS_WARN("Use only onboard memory=%u", udata);
+	e = DAQmxGetAODataXferMech(g_hTask, szPhysicalChannel, &data);
+	HandleDAQError(e);
+	ROS_WARN("Data transfer mechanism=%d", data);
+	e = DAQmxGetAODataXferReqCond(g_hTask, szPhysicalChannel, &data);
+	HandleDAQError(e);
+	ROS_WARN("Data transfer request condition=%d", data);
+	e = DAQmxGetAOUsbXferReqSize(g_hTask, szPhysicalChannel, &udata);
+	HandleDAQError(e);
+	ROS_WARN("USB transfer request size=%u", udata);
+	e = DAQmxGetAOUsbXferReqCount(g_hTask, szPhysicalChannel, &udata);
+	HandleDAQError(e);
+	ROS_WARN("USB transfer request count=%u", udata);
 	
 	//ros::spin();
 	double timeAllowed = ros::Duration(5.0).toSec();

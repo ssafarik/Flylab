@@ -13,9 +13,10 @@
     <!--     to get good readings.                                     -->
     <!--                                                               -->
     <!--  9. Ctrl+c                                                    -->
-    <!-- 10. Install the lens filter.                                  -->
-    <!-- 11. rm /cameras/background.png                                -->
-    <!-- 12. Turn on the backlight.                                    -->
+    <!-- 10. Enter the given values into params_galvos.launch          -->
+    <!-- 11. Install the lens filter.                                  -->
+    <!-- 12. rm /cameras/background.png                                -->
+    <!-- 13. Turn on the backlight.                                    -->
     <!--                                                               -->
 	<!-- ==========================================================    -->
 
@@ -28,7 +29,7 @@
 	<include file="$(find flies)/launch/flies_1.launch" />
 
 	<param name="galvodriver/hzPoint" type="double" value="262144.0"/>
-	<param name="camera/diff_threshold" type="double" value="200.0"/>
+	<param name="camera/diff_threshold" type="double" value="2100.0"/>
 	
 	<node pkg="galvodirector" type="Calibrator.py" name="GalvoCalibrator" />
 

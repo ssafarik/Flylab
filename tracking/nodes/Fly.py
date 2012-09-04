@@ -48,6 +48,7 @@ class Fly:
         self.stampPrev = rospy.Time.now()
         self.unwind = 0.0
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
+        self.dtForecast = rospy.get_param('tracking/dtForecast',0.25)
         
         # Orientation detection stuff.
         self.angleOfTravelRecent = 0.0
@@ -84,6 +85,7 @@ class Fly:
         self.state.velocity.angular.x = 0.0
         self.state.velocity.angular.y = 0.0
         self.state.velocity.angular.z = 0.0
+
 
         self.eccMin = 999.9
         self.eccMax = 0.0
@@ -397,7 +399,7 @@ class Fly:
                                         self.name+"Contour",
                                         "Plate")
             
-            # Send the Filtered transform.self.pointInput
+            # Send the Filtered transform.
             if self.state.pose.position.x is not None:
                 q = self.state.pose.orientation
                 self.tfbx.sendTransform((self.state.pose.position.x, 
@@ -407,6 +409,23 @@ class Fly:
                                         self.state.header.stamp,
                                         self.name,
                                         self.state.header.frame_id)
+                
+
+            # Send the Forecast transform.
+            if self.state.pose.position.x is not None:
+                poseForecast = copy.copy(self.state.pose)
+                poseForecast.position.x += self.state.velocity.linear.x * self.dtForecast
+                poseForecast.position.y += self.state.velocity.linear.y * self.dtForecast
+                poseForecast.position.z += self.state.velocity.linear.z * self.dtForecast
+                q = self.state.pose.orientation
+                self.tfbx.sendTransform((poseForecast.position.x, 
+                                         poseForecast.position.y, 
+                                         poseForecast.position.z),
+                                        (q.x, q.y, q.z, q.w),
+                                        self.state.header.stamp,
+                                        self.name+'Forecast',
+                                        self.state.header.frame_id)
+                
 
             # Publish a 3D model marker for the robot.
             if 'Robot' in self.name:
