@@ -145,19 +145,19 @@ class RosFivebar:
         self.ptsToolRefExternal = None #Point(0,0,0) # Where we want the "tool".
         self.ptsToolRef = None
         self.ptToolRefClipped = Point(0,0,0) 
-        self.ptContourSense = Point(0,0,0)
-        self.ptContourError = Point(0,0,0)
-        self.ptToolRefError = Point(0,0,0)
-        self.ptOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
-        self.ptEeRef = Point(0,0,0)
-        self.ptEeError = Point(0,0,0)
-        self.ptEeErrorPrev = Point(0,0,0)
-        self.ptEeDerror = Point(0,0,0)
-        self.ptEeIerror = Point(0,0,0)
-        self.ptEeIerrorClipped = Point(0,0,0)
         self.ptEeSense = Point(0,0,0)
         self.ptEeCommand = Point(0,0,0) # Where to command the end-effector.
-        self.ptAntiwindup = Point(0,0,0)
+        self.ptEeRef = Point(0,0,0)
+        self.ptContourSense = Point(0,0,0)
+        self.vecOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
+        self.vecContourError = Point(0,0,0)
+        self.vecToolRefError = Point(0,0,0)
+        self.vecEeError = Point(0,0,0)
+        self.vecEeErrorPrev = Point(0,0,0)
+        self.vecEeDError = Point(0,0,0)
+        self.vecEeIerror = Point(0,0,0)
+        self.vecEeIerrorClipped = Point(0,0,0)
+        self.vecAntiwindup = Point(0,0,0)
         
         self.speedCommandTool = None 
         self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
@@ -528,9 +528,9 @@ class RosFivebar:
             
             # Transform the point into the requested frame.
             pt = Point()
-            pt.x = self.ptEeSense.x + self.ptOffsetSense.x 
-            pt.y = self.ptEeSense.y + self.ptOffsetSense.y 
-            pt.z = self.ptEeSense.z + self.ptOffsetSense.z 
+            pt.x = self.ptEeSense.x + self.vecOffsetSense.x 
+            pt.y = self.ptEeSense.y + self.vecOffsetSense.y 
+            pt.z = self.ptEeSense.z + self.vecOffsetSense.z 
             pt.point = self.ClipPtToRadius(pt.point)
             
             rvStageState.state.header.stamp = self.time
@@ -638,7 +638,7 @@ class RosFivebar:
             
         
     def EndEffectorOffset_callback(self, ptOffset):
-        self.ptOffsetSense = ptOffset #Point(0,0,0)#
+        self.vecOffsetSense = ptOffset #Point(0,0,0)#
         #rospy.logwarn ('5B ptOffset=%s' % ptOffset)
         
         
@@ -813,9 +813,9 @@ class RosFivebar:
 #                                          id=1,
 #                                          type=2, #SPHERE,
 #                                          action=0,
-#                                          pose=Pose(position=Point(x=state.pose.position.x+self.ptOffsetSense.x, 
-#                                                                   y=state.pose.position.y+self.ptOffsetSense.y, 
-#                                                                   z=state.pose.position.z+self.ptOffsetSense.z)),
+#                                          pose=Pose(position=Point(x=state.pose.position.x+self.vecOffsetSense.x, 
+#                                                                   y=state.pose.position.y+self.vecOffsetSense.y, 
+#                                                                   z=state.pose.position.z+self.vecOffsetSense.z)),
 #                                          scale=Vector3(x=6.0,
 #                                                        y=6.0,
 #                                                        z=6.0),
@@ -840,9 +840,9 @@ class RosFivebar:
                                                 points=[Point(x=state.pose.position.x, 
                                                               y=state.pose.position.y, 
                                                               z=state.pose.position.z),
-                                                        Point(x=state.pose.position.x+self.ptOffsetSense.x, 
-                                                              y=state.pose.position.y+self.ptOffsetSense.y, 
-                                                              z=state.pose.position.z+self.ptOffsetSense.z)])
+                                                        Point(x=state.pose.position.x+self.vecOffsetSense.x, 
+                                                              y=state.pose.position.y+self.vecOffsetSense.y, 
+                                                              z=state.pose.position.z+self.vecOffsetSense.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -860,68 +860,88 @@ class RosFivebar:
             #self.ptToolRefClipped = self.ClipPtToRadius(self.ptsToolRefExternal.point)
 
             # Compute various vectors.
-            self.ptContourSense.x = self.ptEeSense.x + self.ptOffsetSense.x
-            self.ptContourSense.y = self.ptEeSense.y + self.ptOffsetSense.y
-            self.ptContourError.x = self.ptsToolRef.point.x - self.ptContourSense.x #- self.ptOffsetSense.x
-            self.ptContourError.y = self.ptsToolRef.point.y - self.ptContourSense.y #- self.ptOffsetSense.y
-            self.ptToolRefError.x = self.ptsToolRef.point.x - self.ptEeSense.x
-            self.ptToolRefError.y = self.ptsToolRef.point.y - self.ptEeSense.y
+            self.ptContourSense.x = self.ptEeSense.x + self.vecOffsetSense.x
+            self.ptContourSense.y = self.ptEeSense.y + self.vecOffsetSense.y
+            self.vecContourError.x = self.ptsToolRef.point.x - self.ptContourSense.x #- self.vecOffsetSense.x
+            self.vecContourError.y = self.ptsToolRef.point.y - self.ptContourSense.y #- self.vecOffsetSense.y
+            #self.vecToolRefError.x = self.ptsToolRef.point.x - self.ptEeSense.x
+            #self.vecToolRefError.y = self.ptsToolRef.point.y - self.ptEeSense.y
 
             # Get the end-effector ref coordinates.
             # Option A:
-            #ptRef = self.ScaleVecToMag(self.ptToolRefError, self.ptOffsetSense)
+            #ptRef = self.ScaleVecToMag(self.vecToolRefError, self.vecOffsetSense)
             #self.ptEeRef.x = self.ptsToolRef.point.x+ptRef.x
             #self.ptEeRef.y = self.ptsToolRef.point.y+ptRef.y
 
             # Option B: works ok.
             #kTest = rospy.get_param('fivebar/kTest', 0.0)
-            #self.ptEeRef.x = self.ptsToolRef.point.x - self.ptOffsetSense.x + kTest*self.ptContourError.x
-            #self.ptEeRef.y = self.ptsToolRef.point.y - self.ptOffsetSense.y + kTest*self.ptContourError.y
+            #self.ptEeRef.x = self.ptsToolRef.point.x - self.vecOffsetSense.x + kTest*self.vecContourError.x
+            #self.ptEeRef.y = self.ptsToolRef.point.y - self.vecOffsetSense.y + kTest*self.vecContourError.y
 
-            # Option C: best so far.
-            ptRef = self.ScaleVecToMag(self.ptContourError, self.ptOffsetSense)
-            self.ptEeRef.x = self.ptsToolRef.point.x + ptRef.x
-            self.ptEeRef.y = self.ptsToolRef.point.y + ptRef.y
+            # Option C:
+            #ptRef = self.ScaleVecToMag(self.vecContourError, self.vecOffsetSense)
+            #self.ptEeRef.x = self.ptsToolRef.point.x + ptRef.x
+            #self.ptEeRef.y = self.ptsToolRef.point.y + ptRef.y
+
+            # Option D:
+            self.ptEeRef.x = self.ptsToolRef.point.x + self.vecOffsetSense.x# + vecRef.x
+            self.ptEeRef.y = self.ptsToolRef.point.y + self.vecOffsetSense.x# + vecRef.y
             
             
             # PID Gains & Parameters.
-            #self.kP = rospy.get_param('fivebar/kP', 0.1)
-            #self.kI = rospy.get_param('fivebar/kI', 0.0)
-            #self.kD = rospy.get_param('fivebar/kD', 0.0)
-            #self.maxI = rospy.get_param('fivebar/maxI', 40.0)
-            #self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+            self.kP = rospy.get_param('fivebar/kP', 1.0)
+            self.kI = rospy.get_param('fivebar/kI', 0.0)
+            self.kD = rospy.get_param('fivebar/kD', 0.0)
+            self.maxI = rospy.get_param('fivebar/maxI', 40.0)
+            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
 
             # PID control of the end-effector error.
-            self.ptEeError.x = self.ptEeRef.x - self.ptEeSense.x
-            self.ptEeError.y = self.ptEeRef.y - self.ptEeSense.y
-            self.ptEeIerror.x = self.ptEeIerror.x + self.ptEeError.x
-            self.ptEeIerror.y = self.ptEeIerror.y + self.ptEeError.y
-            self.ptEeDerror.x = self.ptEeError.x - self.ptEeErrorPrev.x
-            self.ptEeDerror.y = self.ptEeError.y - self.ptEeErrorPrev.y
-            ptPID = Point(self.kP*self.ptEeError.x + self.kI*self.ptEeIerror.x + self.kD*self.ptEeDerror.x,
-                          self.kP*self.ptEeError.y + self.kI*self.ptEeIerror.y + self.kD*self.ptEeDerror.y,
-                          0.0)
+            #self.vecEeError.x = self.ptEeRef.x - self.ptEeSense.x
+            #self.vecEeError.y = self.ptEeRef.y - self.ptEeSense.y
+            #self.vecEeIerror.x = self.vecEeIerror.x + self.vecEeError.x
+            #self.vecEeIerror.y = self.vecEeIerror.y + self.vecEeError.y
+            #self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
+            #self.vecEeDError.y = self.vecEeError.y - self.vecEeErrorPrev.y
+            #ptPID = Point(self.kP*self.vecEeError.x + self.kI*self.vecEeIerror.x + self.kD*self.vecEeDError.x,
+            #              self.kP*self.vecEeError.y + self.kI*self.vecEeIerror.y + self.kD*self.vecEeDError.y,
+            #              0.0)
+            # PID control of the error. (from motorarm)
+            self.vecEeError.x = self.vecContourError.x
+            self.vecEeError.y = self.vecContourError.y
+            self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
+            self.vecEeIError.y = self.vecEeIError.y + self.vecEeError.y
+            self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
+            self.vecEeDError.y = self.vecEeError.y - self.vecEeErrorPrev.y
+            vecPID = Point(self.kP*self.vecEeError.x + self.kI*self.vecEeIError.x + self.kD*self.vecEeDError.x,
+                           self.kP*self.vecEeError.y + self.kI*self.vecEeIError.y + self.kD*self.vecEeDError.y,
+                           0.0)
             
             # Anti-windup
-            self.ptEeIerrorClipped = self.ClipPtMag (self.ptEeIerror, self.maxI)
-            self.ptAntiwindup = Point(self.kWindup * (self.ptEeIerror.x - self.ptEeIerrorClipped.x),
-                                      self.kWindup * (self.ptEeIerror.y - self.ptEeIerrorClipped.y),
-                                      self.kWindup * (self.ptEeIerror.z - self.ptEeIerrorClipped.z))
-            magP = N.linalg.norm([self.ptEeError.x, self.ptEeError.y])
-            magI = N.linalg.norm([self.ptEeIerror.x, self.ptEeIerror.y])
-            magD = N.linalg.norm([self.ptEeDerror.x, self.ptEeDerror.y])
-            magPID = N.linalg.norm([ptPID.x, ptPID.y])
-            #magPIDRaw = N.linalg.norm([ptPIDRaw.x, ptPIDRaw.y])
+            self.vecEeIErrorClipped = self.ClipPtMag (self.vecEeIError, self.maxI)
+            self.vecAntiwindup = Point(self.kWindup * (self.vecEeIError.x - self.vecEeIErrorClipped.x),
+                                       self.kWindup * (self.vecEeIError.y - self.vecEeIErrorClipped.y),
+                                       self.kWindup * (self.vecEeIError.z - self.vecEeIErrorClipped.z))
+            magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
+            magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
+            magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
+            magPID = N.linalg.norm([vecPID.x, vecPID.y])
+            #magPIDRaw = N.linalg.norm([vecPIDRaw.x, vecPIDRaw.y])
             #rospy.logwarn('[P,I,D]=[%0.2f,%0.2f,%0.2f], PID=%0.4f' % (magP,magI,magD, magPID))
-            self.ptEeIerror.x -= self.ptAntiwindup.x
-            self.ptEeIerror.y -= self.ptAntiwindup.y
+            self.vecEeIError.x -= self.vecAntiwindup.x
+            self.vecEeIError.y -= self.vecAntiwindup.y
 
             # Get the command for the hardware.            
-            self.ptEeCommand.x = ptPID.x + self.ptEeSense.x
-            self.ptEeCommand.y = ptPID.y + self.ptEeSense.y
+            #self.ptEeCommand.x = ptPID.x + self.ptEeSense.x
+            #self.ptEeCommand.y = ptPID.y + self.ptEeSense.y
+            #self.vecEeErrorPrev.x = self.vecEeError.x 
+            #self.vecEeErrorPrev.y = self.vecEeError.y 
             
-            self.ptEeErrorPrev.x = self.ptEeError.x 
-            self.ptEeErrorPrev.y = self.ptEeError.y 
+            # Get the command for the hardware.            
+            self.ptEeCommand.x = self.ptEeSense.x + vecPID.x #+ self.vecOffsetSense.x
+            self.ptEeCommand.y = self.ptEeSense.y + vecPID.y #+ self.vecOffsetSense.y
+            
+            self.vecEeErrorPrev.x = self.vecEeError.x 
+            self.vecEeErrorPrev.y = self.vecEeError.y 
             
             #rospy.logwarn ('5B ptEeCommand=%s' % [self.ptEeCommand.x, self.ptEeCommand.y])
 
@@ -942,12 +962,6 @@ class RosFivebar:
                                                   g=1.0,
                                                   b=0.5),
                                   lifetime=rospy.Duration(1.0),
-#                                      points=[Point(x=self.ptEeSense.x +self.ptsToolRef.point.x-self.ptEeSense.x-self.ptEeError.x-self.ptOffsetSense.x, 
-#                                                    y=self.ptEeSense.y +self.ptsToolRef.point.y-self.ptEeSense.y-self.ptEeError.y-self.ptOffsetSense.y, 
-#                                                    z=self.ptEeSense.z +self.ptsToolRef.point.z-self.ptEeSense.z-self.ptEeError.z-self.ptOffsetSense.z),
-#                                              Point(x=self.ptEeCommand.x +self.ptsToolRef.point.x-self.ptEeSense.x-self.ptEeError.x-self.ptOffsetSense.x, 
-#                                                    y=self.ptEeCommand.y +self.ptsToolRef.point.y-self.ptEeSense.y-self.ptEeError.y-self.ptOffsetSense.y, 
-#                                                    z=self.ptEeCommand.z +self.ptsToolRef.point.z-self.ptEeSense.z-self.ptEeError.z-self.ptOffsetSense.z)])
                                   points=[ptBase, ptEnd])
             self.pubMarker.publish(markerCommand)
 
@@ -962,12 +976,12 @@ class RosFivebar:
                 speedMax = self.speedCommandTool * 0.0120 
 
                 # Distribute the velocity over the two joints.
-                dangle1 = N.abs(angle1-self.jointstate1.position) # Delta theta
-                dangle2 = N.abs(angle2-self.jointstate2.position)
-                dist = N.linalg.norm([dangle1,dangle2])
+                dAngle1 = N.abs(angle1-self.jointstate1.position) # Delta theta
+                dAngle2 = N.abs(angle2-self.jointstate2.position)
+                dist = N.linalg.norm([dAngle1,dAngle2])
                 if dist != 0.0:
-                    scale1 = dangle1/dist
-                    scale2 = dangle2/dist
+                    scale1 = dAngle1/dist
+                    scale2 = dAngle2/dist
                 else:
                     scale1 = 0.5
                     scale2 = 0.5
