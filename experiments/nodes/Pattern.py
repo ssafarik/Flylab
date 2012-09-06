@@ -5,6 +5,7 @@ import rospy
 import numpy as N
 import ExperimentLib
 from experiments.srv import *
+from geometry_msgs.msg import Point
 
 
 

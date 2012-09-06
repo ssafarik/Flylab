@@ -3,6 +3,7 @@ from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
+from geometry_msgs.msg import Point
 import ExperimentLib
 from experiments.srv import *
 

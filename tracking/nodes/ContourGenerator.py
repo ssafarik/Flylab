@@ -110,8 +110,7 @@ class ContourGenerator:
                               int(self.camerainfo.height))
             
             
-            self.cvimageProcessed         = cv.CreateImage(self.sizeImageRect, cv.IPL_DEPTH_8U,3)
-            cv.SetImageROI(self.cvimageProcessed, self.rectImage)
+            self.cvimageProcessed         = cv.CreateImage(self.sizeImageRect,                              cv.IPL_DEPTH_8U,3)
             self.cvimageProcessed2        = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,3)
             self.cvimageProcessedFlip     = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,3)
             self.cvimageMask              = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,1)
@@ -124,6 +123,8 @@ class ContourGenerator:
             self.cvimageZeros             = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,1)
             self.cvimageContour           = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,1)
             self.cvimageContourDisplay    = cv.CreateImage((self.camerainfo.width, self.camerainfo.height), cv.IPL_DEPTH_8U,3)
+
+            cv.SetImageROI(self.cvimageProcessed, self.rectImage)
             cv.Zero(self.cvimageZeros)
             
             b = False
@@ -466,7 +467,7 @@ class ContourGenerator:
             cv.SetImageROI(self.cvimage, self.rectImage)
     
             
-            # Look for new diff_threshold value
+            # Check for new diff_threshold value
             self.diff_threshold = rospy.get_param("camera/diff_threshold", 50)
             
             # Apply mask and Subtract background
@@ -506,6 +507,8 @@ class ContourGenerator:
                     cv.Copy(self.cvimageProcessed, self.cvimageProcessed2)
                     image2 = self.cvbridge.cv_to_imgmsg(self.cvimageProcessed2, "passthrough")
                     image2.header = image.header
+                    image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
+                    #rospy.logwarn(image2.encoding)
                     self.pubImageProcessed.publish(image2)
                     del image2
                 except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
@@ -552,6 +555,7 @@ class ContourGenerator:
             image2 = self.cvbridge.cv_to_imgmsg(self.cvimageProcessedFlip, "passthrough")
             image2.header = image.header
             image2.header.frame_id = 'Plate'
+            image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
             camerainfo2 = copy.copy(self.camerainfo)
             camerainfo2.header.frame_id = 'Plate'
             k11=rospy.get_param('/k11', 1.0)

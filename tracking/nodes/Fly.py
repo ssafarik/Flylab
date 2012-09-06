@@ -58,6 +58,7 @@ class Fly:
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
         self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterSpeed', 0.2))
         self.lpSpeed.SetValue(0.0)
+        self.speed = 0.0
         
         self.lpWx = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
         self.lpWy = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
