@@ -155,8 +155,8 @@ class RosFivebar:
         self.vecEeError = Point(0,0,0)
         self.vecEeErrorPrev = Point(0,0,0)
         self.vecEeDError = Point(0,0,0)
-        self.vecEeIerror = Point(0,0,0)
-        self.vecEeIerrorClipped = Point(0,0,0)
+        self.vecEeIError = Point(0,0,0)
+        self.vecEeIErrorClipped = Point(0,0,0)
         self.vecAntiwindup = Point(0,0,0)
         
         self.speedCommandTool = None 
@@ -898,12 +898,12 @@ class RosFivebar:
             # PID control of the end-effector error.
             #self.vecEeError.x = self.ptEeRef.x - self.ptEeSense.x
             #self.vecEeError.y = self.ptEeRef.y - self.ptEeSense.y
-            #self.vecEeIerror.x = self.vecEeIerror.x + self.vecEeError.x
-            #self.vecEeIerror.y = self.vecEeIerror.y + self.vecEeError.y
+            #self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
+            #self.vecEeIError.y = self.vecEeIError.y + self.vecEeError.y
             #self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
             #self.vecEeDError.y = self.vecEeError.y - self.vecEeErrorPrev.y
-            #ptPID = Point(self.kP*self.vecEeError.x + self.kI*self.vecEeIerror.x + self.kD*self.vecEeDError.x,
-            #              self.kP*self.vecEeError.y + self.kI*self.vecEeIerror.y + self.kD*self.vecEeDError.y,
+            #ptPID = Point(self.kP*self.vecEeError.x + self.kI*self.vecEeIError.x + self.kD*self.vecEeDError.x,
+            #              self.kP*self.vecEeError.y + self.kI*self.vecEeIError.y + self.kD*self.vecEeDError.y,
             #              0.0)
             # PID control of the error. (from motorarm)
             self.vecEeError.x = self.vecContourError.x
