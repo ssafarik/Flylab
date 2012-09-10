@@ -414,10 +414,10 @@ class Fly:
 
             # Send the Forecast transform.
             if self.state.pose.position.x is not None:
-                poseForecast = copy.copy(self.state.pose)
-                poseForecast.position.x += self.state.velocity.linear.x * self.dtForecast
-                poseForecast.position.y += self.state.velocity.linear.y * self.dtForecast
-                poseForecast.position.z += self.state.velocity.linear.z * self.dtForecast
+                poseForecast = Pose()#copy.copy(self.state.pose)
+                poseForecast.position.x = self.state.pose.position.x + self.state.velocity.linear.x * self.dtForecast
+                poseForecast.position.y = self.state.pose.position.y + self.state.velocity.linear.y * self.dtForecast
+                poseForecast.position.z = self.state.pose.position.z + self.state.velocity.linear.z * self.dtForecast
                 q = self.state.pose.orientation
                 self.tfbx.sendTransform((poseForecast.position.x, 
                                          poseForecast.position.y, 

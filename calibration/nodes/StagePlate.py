@@ -8,7 +8,7 @@ import tf
 from cv_bridge import CvBridge, CvBridgeError
 from pythonmodules import cvNumpy,CameraParameters
 from sensor_msgs.msg import Image, CameraInfo
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Point, PoseStamped
 from plate_tf.srv import *
 from tracking.msg import ContourInfo
 from patterngen.msg import MsgPattern
@@ -100,8 +100,9 @@ class CalibrateStagePlate():
             msgPattern.hzPattern = 1.0
             msgPattern.hzPoint = 100
             msgPattern.count = 1
-            msgPattern.radius = 0.0
+            msgPattern.size = Point(x=0,y=0)
             msgPattern.preempt = True
+            msgPattern.param = 0
             self.pubPatternGen.publish (msgPattern)
         
     
@@ -493,6 +494,7 @@ class CalibrateStagePlate():
         return posePlate
     
     def Main(self):
+        rospy.sleep(2)
         msgPattern = MsgPattern()
 
         # Publish a goto(0,0) pattern message, and wait for the end effector to initialize.
@@ -503,8 +505,9 @@ class CalibrateStagePlate():
         msgPattern.hzPattern = 1.0
         msgPattern.hzPoint = rospy.get_param('actuator/hzPoint', 100.0)
         msgPattern.count = 1
-        msgPattern.radius = 0.0
+        msgPattern.size = Point(x=0,y=0)
         msgPattern.preempt = True
+        msgPattern.param = 0
         self.pubPatternGen.publish (msgPattern)
         while not self.initialized_endeffector:
             rospy.sleep(0.5)
@@ -517,8 +520,10 @@ class CalibrateStagePlate():
         msgPattern.points = []
         msgPattern.frame_id = 'Stage'
         msgPattern.count = -1
-        msgPattern.radius = 0.8 * rospy.get_param('arena/radius_inner', 25.4)
+        msgPattern.size = Point(x=0.7 * rospy.get_param('arena/radius_inner', 25.4),y=0)
+        #msgPattern.radius = 0.8 * rospy.get_param('arena/radius_inner', 25.4)
         msgPattern.preempt = True
+        msgPattern.param = 0
         if msgPattern.shape=='spiral':
             msgPattern.hzPattern = 0.01
         else:
@@ -536,8 +541,9 @@ class CalibrateStagePlate():
             msgPattern.frame_id = 'Stage'
             msgPattern.hz = 1.0
             msgPattern.count = 1
-            msgPattern.radius = 0.0
+            msgPattern.size = Point(x=0,y=0)
             msgPattern.preempt = True
+            msgPattern.param = 0
             self.pubPatternGen.publish (msgPattern)
     
     
