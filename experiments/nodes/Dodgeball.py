@@ -27,9 +27,9 @@ class ExperimentDodgeball():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.tracking.exclusionzone.enabled = False
-        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
-        self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
+        self.experimentparams.tracking.exclusionzone.enabled = True
+        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=50.0, y=68.0)]
+        self.experimentparams.tracking.exclusionzone.radius_list = [3.0]
         
         self.experimentparams.home.enabled = True
         self.experimentparams.home.x = 0.0
@@ -63,16 +63,16 @@ class ExperimentDodgeball():
         # The first one to finish preempts the others.
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'relative'                        # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
-        self.experimentparams.move.relative.tracking = False                # True=update the target point continually.  False=the target point is set at the trigger time. 
+        self.experimentparams.move.relative.tracking = True                # True=update the target point continually.  False=the target point is set at the trigger time. 
         self.experimentparams.move.relative.frameidOriginPosition = "Fly1"
         self.experimentparams.move.relative.frameidOriginAngle = "Fly1"
         self.experimentparams.move.relative.distance = 3                    # Distance to the target point from the origin frame's position.
         self.experimentparams.move.relative.angle = 0                       # Angle to the target point from the origin frame's x-axis.
-        self.experimentparams.move.relative.angleType = 'constant'          # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
+        self.experimentparams.move.relative.angleType = 'random'          # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
         self.experimentparams.move.relative.speed = 20                      # Speed at which to move the robot toward the target point. 
         self.experimentparams.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random fraction of it. 
         self.experimentparams.move.relative.tolerance = 2                   # When robot-to-target distance is within this tolerance, then the move is over.
-        self.experimentparams.move.timeout = 4                              # When this duration has passed, then the move is over.
+        self.experimentparams.move.timeout = 10                             # When this duration has passed, then the move is over.
         
         self.experimentparams.lasertrack.enabled = False
         

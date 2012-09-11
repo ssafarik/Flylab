@@ -77,6 +77,8 @@ class ContourIdentifier:
         self.endeffector_endeffectorframe.point.z = 0
         
 
+        self.xMask = rospy.get_param("camera/mask/x", 0) # Pixels
+        self.yMask = rospy.get_param("camera/mask/y", 0) # Pixels
         self.radiusMask = rospy.get_param("camera/mask/radius", 25) # Pixels
         self.radiusArenaInner = rospy.get_param("arena/radius_inner", 25) # Millimeters
         self.radiusArenaOuter = rospy.get_param("arena/radius_outer", 30) # Millimeters
@@ -164,7 +166,7 @@ class ContourIdentifier:
                                                                             b=1.0),
                                                             lifetime=rospy.Duration(1.0))
                                                      )
-
+        self.ResetFlyObjects()
         
 
     def EndEffector_callback(self, state):
@@ -253,7 +255,7 @@ class ContourIdentifier:
     # FilterContourinfoWithinRadius()
     # Filter the contours by radius.  Return a contourinfo containing only those within radius.
     #  
-    def FilterContourinfoWithinRadius(self, contourinfoIn, radius):
+    def FilterContourinfoWithinMask(self, contourinfoIn):
         contourinfoOut = ContourInfo()
         if self.initialized:
             contourinfoOut.header = contourinfoIn.header
@@ -265,7 +267,8 @@ class ContourIdentifier:
             
             #contourinfoPlate = TransformContourinfoPlateFromCamera(contourinfoIn)
             for iContour in range(len(contourinfoIn.x)):
-                if N.linalg.norm(N.array([contourinfoIn.x[iContour],contourinfoIn.y[iContour]])) <= radius:
+                if N.linalg.norm(N.array([contourinfoIn.x[iContour]-self.xMask, 
+                                          contourinfoIn.y[iContour]-self.yMask])) <= self.radiusMask:
                     contourinfoOut.x.append(contourinfoIn.x[iContour])
                     contourinfoOut.y.append(contourinfoIn.y[iContour])
                     contourinfoOut.angle.append(contourinfoIn.angle[iContour])
@@ -606,16 +609,16 @@ class ContourIdentifier:
         return mapContoursFromObjects
     
 
-    def ContourInfo_callback(self, contourinfo):
+    def ContourInfo_callback(self, contourinfoPixels):
 #        rospy.logwarn('ContourInfo_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
 #        self.timePrev = rospy.Time.now().to_sec()
         with self.lock:
             if self.initialized:
                 try:
                     #rospy.logwarn ('CI contourinfo0 %s' % contourinfo)
-                    contourinfo = self.TransformContourinfoPlateFromCamera(contourinfo)
+                    contourinfoPixels = self.FilterContourinfoWithinMask(contourinfoPixels)
                     #rospy.logwarn ('CI contourinfo1 %s' % contourinfo)
-                    contourinfo = self.FilterContourinfoWithinRadius(contourinfo, self.radiusMask)
+                    contourinfo = self.TransformContourinfoPlateFromCamera(contourinfoPixels)
                     #rospy.logwarn ('CI contourinfo2 %s' % contourinfo)
         
                     # Create a null contour.
