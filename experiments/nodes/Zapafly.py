@@ -4,8 +4,9 @@ import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
 import ExperimentLib
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
+from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from patterngen.msg import MsgPattern
 from tracking.msg import ArenaState
@@ -21,7 +22,7 @@ class ExperimentZapafly():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Aim laser at fly"
+        self.experimentparams.experiment.description = "Laser tracks all flies for 30min"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
@@ -29,22 +30,27 @@ class ExperimentZapafly():
         self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
-        self.experimentparams.save.onlyWhileTriggered = True
+        self.experimentparams.save.onlyWhileTriggered = False
+        
+        self.experimentparams.tracking.exclusionzone.enabled = False
+        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
+        self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
         
         self.experimentparams.home.enabled = False
-        self.experimentparams.home.x = 0.0
-        self.experimentparams.home.y = 0.0
-        self.experimentparams.home.speed = 20
-        self.experimentparams.home.timeout = -1
-        self.experimentparams.home.tolerance = 2
         
         self.experimentparams.waitEntry = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
+        self.experimentparams.triggerEntry.frameidParent = 'Plate'
+        self.experimentparams.triggerEntry.frameidChild = 'Fly1'
+        self.experimentparams.triggerEntry.speedAbsParentMin =   0.0
+        self.experimentparams.triggerEntry.speedAbsParentMax = 999.0
+        self.experimentparams.triggerEntry.speedAbsChildMin =   0.0
+        self.experimentparams.triggerEntry.speedAbsChildMax = 999.0
+        self.experimentparams.triggerEntry.speedRelMin =   0.0
+        self.experimentparams.triggerEntry.speedRelMax = 999.0
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
-        self.experimentparams.triggerEntry.speedMin =   0.0
-        self.experimentparams.triggerEntry.speedMax = 999.0
         self.experimentparams.triggerEntry.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleTest = 'inclusive'
@@ -56,69 +62,96 @@ class ExperimentZapafly():
         # .move, .lasertrack, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.move.enabled = False
-        self.experimentparams.move.mode = 'relative'        
-        self.experimentparams.move.relative.tracking = True
-        self.experimentparams.move.relative.frameidOriginPosition = "Fly1"
-        self.experimentparams.move.relative.frameidOriginAngle = "Fly1"
-        self.experimentparams.move.relative.distance = 5
-        self.experimentparams.move.relative.angle = 180.0 * N.pi / 180.0
-        self.experimentparams.move.relative.angleType = 'constant'
-        self.experimentparams.move.relative.speed = 200
-        self.experimentparams.move.relative.speedType = 'constant'
-        self.experimentparams.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.move.timeout = -1
         
         
-        shape='gridflies' # 'gridflies' or 'numberflies' or 'flylogo' or 'maze' or 'fixedpoint'
+        #mode='fixedpointlist'    # Laser to specific locations.
+        #mode='fixedcircle'
+        #mode='fixedmaze' 
+        #mode='trackgrid'        # Small grid tracks flies.
+        mode='tracknumber'      # Draw a numeral on flies.
+        #mode='trackflylogo'
+        flies_list = range(1,1+rospy.get_param('nFlies', 0))
+        
         
         self.experimentparams.lasertrack.enabled = True
         self.experimentparams.lasertrack.pattern_list = []
-        if shape=='gridflies':
-            for iFly in range(rospy.get_param('nFlies', 0)):
+        self.experimentparams.lasertrack.statefilterLo_list = []
+        self.experimentparams.lasertrack.statefilterHi_list = []
+        self.experimentparams.lasertrack.statefilterCriteria_list = []
+        if mode=='fixedpointlist':
+            # Draw a point.
+            self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'bypoints',
+                                                                            shape      = 'constant',
+                                                                            frame_id   = 'Plate',
+                                                                            hzPattern  = 40.0,
+                                                                            hzPoint    = 1000.0,
+                                                                            count      = 1,
+                                                                            points     = [Point(x=34  ,y=34),
+                                                                                          Point(x=34  ,y=34+6),
+                                                                                          Point(x=34  ,y=34-6),
+                                                                                          Point(x=34+6,y=34),
+                                                                                          Point(x=34-6,y=34)],
+                                                                            size       = Point(x=0,
+                                                                                               y=0),
+                                                                            preempt    = False,
+                                                                            param      = 3), # Peano curve level.
+                                                                 )
+        if mode=='fixedcircle':
+            # Draw a point.
+            self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+                                                                            shape      = 'circle',
+                                                                            frame_id   = 'Plate',
+                                                                            hzPattern  = 40.0,
+                                                                            hzPoint    = 1000.0,
+                                                                            count      = 1,
+                                                                            size       = Point(x=80,
+                                                                                               y= 0),
+                                                                            preempt    = False,
+                                                                            param      = 3), # Peano curve level.
+                                                                 )
+        if mode=='trackgrid':
+            for iFly in flies_list:
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = 'grid',
-                                                                                frame_id   = 'Fly%d' % (iFly+1),
+                                                                                frame_id   = 'Fly%d' % iFly,
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
-                                                                                size       = Point(x=2,
+                                                                                size       = Point(x=3,
                                                                                                    y=3),
                                                                                 preempt    = False,
-                                                                                param      = 2), # Peano curve level.
+                                                                                param      = 3), # Peano curve level.
                                                                      )
-        if shape=='numberflies':
-            for iFly in range(rospy.get_param('nFlies', 0)):
+        if mode=='tracknumber':
+            for iFly in flies_list:
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
-                                                                                shape      = '%s' % (iFly+1),
-                                                                                frame_id   = 'Fly%d' % (iFly+1),
-                                                                                hzPattern  = 40.0,
+                                                                                shape      = '%s' % iFly,
+                                                                                frame_id   = 'Fly%dForecast' % iFly,
+                                                                                hzPattern  = 10.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
                                                                                 size       = Point(x=6,
                                                                                                    y=6),
                                                                                 preempt    = False,
-                                                                                param      = 2), # Peano curve level.
+                                                                                param      = 0), # Peano curve level.
                                                                      )
-        if shape=='flylogo':
-            for iFly in range(rospy.get_param('nFlies', 0)):
+        if mode=='trackflylogo':
+            for iFly in flies_list:
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = 'flylogo',
-                                                                                frame_id   = 'Fly%d' % (iFly+1),
+                                                                                frame_id   = 'Fly%d' % iFly,
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
                                                                                 size       = Point(x=6,
                                                                                                    y=6),
                                                                                 preempt    = False,
-                                                                                param      = 2), # Peano curve level.
+                                                                                param      = 0), # Peano curve level.
                                                                      )
-        if shape=='maze':
+        if mode=='fixedmaze':
             # Draw a maze.
             self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
-                                                                            #shape      = '%s' % (iFly+1),
-                                                                            #shape      = 'flylogo',
                                                                             shape      = 'grid',
-                                                                            #shape      = 'constant',
                                                                             frame_id   = 'Plate',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -128,37 +161,27 @@ class ExperimentZapafly():
                                                                             preempt    = False,
                                                                             param      = 2), # Peano curve level.
                                                                  )
-        if shape=='fixedpoint':
-            # Draw a point.
-            self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
-                                                                            #shape      = '%s' % (iFly+1),
-                                                                            #shape      = 'flylogo',
-                                                                            #shape      = 'grid',
-                                                                            shape      = 'constant',
-                                                                            frame_id   = 'Plate',
-                                                                            hzPattern  = 40.0,
-                                                                            hzPoint    = 1000.0,
-                                                                            count      = 1,
-                                                                            size       = Point(x=0,
-                                                                                               y=0),
-                                                                            preempt    = False,
-                                                                            param      = 2), # Peano curve level.
-                                                                 )
         
         self.experimentparams.lasertrack.timeout = -1
         
         self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.distanceMin = 999.0
         self.experimentparams.triggerExit.distanceMax = 888.0 # i.e. never
-        self.experimentparams.triggerExit.speedMin =  0.0
-        self.experimentparams.triggerExit.speedMax = 999.0
+        self.experimentparams.triggerExit.speedAbsParentMin =   0.0
+        self.experimentparams.triggerExit.speedAbsParentMax = 999.0
+        self.experimentparams.triggerExit.speedAbsChildMin =   0.0
+        self.experimentparams.triggerExit.speedAbsChildMax = 999.0
+        self.experimentparams.triggerExit.speedRelMin =   0.0
+        self.experimentparams.triggerExit.speedRelMax = 999.0
         self.experimentparams.triggerExit.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.triggerExit.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerExit.angleTest = 'inclusive'
         self.experimentparams.triggerExit.angleTestBilateral = True
         self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = 600
+        self.experimentparams.triggerExit.timeout = 1800
 
+        self.experimentparams.waitExit = 0.0
+        
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 
 

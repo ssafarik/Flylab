@@ -12,7 +12,7 @@ from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped,
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
 from flycore.msg import MsgFrameState
-import filters
+from pythonmodules import filters
 from pythonmodules import CircleFunctions
 
 
@@ -35,7 +35,7 @@ class Fly:
         
 
         self.kfState = filters.KalmanFilter()
-        self.lpAngleContour = filters.LowPassHalfCircleFilter(RC=rospy.get_param('tracking/rcAngleFilter', 0.1))
+        self.lpAngleContour = filters.LowPassHalfCircleFilter(RC=rospy.get_param('tracking/rcFilterAngle', 0.1))
         self.lpAngleContour.SetValue(0.0)
         self.angleContourPrev = 0.0
         self.lpOffsetMag = filters.LowPassFilter(RC=1.0)
@@ -48,15 +48,24 @@ class Fly:
         self.stampPrev = rospy.Time.now()
         self.unwind = 0.0
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
+        self.dtForecast = rospy.get_param('tracking/dtForecast',0.25)
         
         # Orientation detection stuff.
         self.angleOfTravelRecent = 0.0
-        self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFlipFilter', 3.0))
+        self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterFlip', 3.0))
         self.lpFlip.SetValue(0.0)
         self.contour = None
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
-        self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcSpeedFilter', 0.5))
+        self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterSpeed', 0.2))
         self.lpSpeed.SetValue(0.0)
+        self.speed = 0.0
+        
+        self.lpWx = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
+        self.lpWy = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
+        self.lpWz = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
+        self.lpWx.SetValue(0.0)
+        self.lpWy.SetValue(0.0)
+        self.lpWz.SetValue(0.0)
         
         self.isVisible = False
         self.isDead = False # TO DO: dead fly detection.
@@ -77,6 +86,7 @@ class Fly:
         self.state.velocity.angular.x = 0.0
         self.state.velocity.angular.y = 0.0
         self.state.velocity.angular.z = 0.0
+
 
         self.eccMin = 999.9
         self.eccMax = 0.0
@@ -248,7 +258,7 @@ class Fly:
                 
                 
                 if N.abs(self.contour.x)>9999 or N.abs(xKalman)>9999:
-                    rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check the parameter camera/diff_threshold.' % (self.contour.x, xKalman))
+                    rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check your background image, lighting, and the parameter camera/diff_threshold.' % (self.contour.x, xKalman))
 
 
             else: # We don't have a contour.
@@ -266,7 +276,7 @@ class Fly:
                 vy = vyKalman
                 vz = vzKalman
             else: # Use the unfiltered data for the case where the filters return None results.
-                rospy.logwarn('FLY Kalman filter returned \'None\' at %s, %s' % ([self.contour.x, self.contour.y], contour.header.stamp.to_sec()))
+                rospy.logwarn('Object %s not yet initialized at %s, %s' % (self.name, contour.header.stamp.to_sec(), [self.contour.x, self.contour.y]))
                 x = 0.0#self.contour.x
                 y = 0.0#self.contour.y
                 z = 0.0
@@ -290,20 +300,26 @@ class Fly:
                 try:
                     ((vx2,vy2,vz2),(wx,wy,wz)) = self.tfrx.lookupTwist(self.name, self.state.header.frame_id, self.state.header.stamp-self.dtVelocity, self.dtVelocity)
                 except (tf.Exception, AttributeError), e:
-                    ((vx2,vy2,vz2),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+                    ((vx2,vy2,vz2),(wx,wy,wz)) = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
                     #rospy.logwarn('lookupTwist() Exception: %s' % e)
             else:
-                ((vx2,vy2,vz2),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+                ((vx2,vy2,vz2),(wx,wy,wz)) = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
 
-            self.state.velocity.angular.x = wx
-            self.state.velocity.angular.y = wy
-            self.state.velocity.angular.z = wz
+            # Fix glitches due to flip orientation.
+            if wz>6.27:
+                wz = self.lpWz.GetValue()
                 
-            speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y])
+            self.state.velocity.angular.x = self.lpWx.Update(wx, self.state.header.stamp.to_sec())
+            self.state.velocity.angular.y = self.lpWy.Update(wy, self.state.header.stamp.to_sec())
+            self.state.velocity.angular.z = self.lpWz.Update(wz, self.state.header.stamp.to_sec())
+                
+            speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y, self.state.velocity.linear.z])
             self.speed = self.lpSpeed.Update(speedPre, self.state.header.stamp.to_sec())
                 
 #            if 'Fly1' in self.name:
-#                rospy.logwarn('speed=%0.2f, flip=%0.2f' % (self.speed, self.lpFlip.GetValue()))
+#                #rospy.logwarn ('FLY vel=%s' % [((vx2,vy2,vz2),(wx,wy,wz))])
+#                rospy.logwarn ('FLY speed=%0.2f, vel=(%0.2f,%0.2f,%0.2f)' % (self.speed, self.state.velocity.linear.x, self.state.velocity.linear.y, self.state.velocity.linear.z))
+#                #rospy.logwarn('speed=%0.2f, flip=%0.2f, stamp=%s' % (self.speed, self.lpFlip.GetValue(), self.state.header.stamp))
 
             # Update the most recent angle of travel.
             self.SetAngleOfTravel()
@@ -394,6 +410,23 @@ class Fly:
                                         self.state.header.stamp,
                                         self.name,
                                         self.state.header.frame_id)
+                
+
+            # Send the Forecast transform.
+            if self.state.pose.position.x is not None:
+                poseForecast = Pose()#copy.copy(self.state.pose)
+                poseForecast.position.x = self.state.pose.position.x + self.state.velocity.linear.x * self.dtForecast
+                poseForecast.position.y = self.state.pose.position.y + self.state.velocity.linear.y * self.dtForecast
+                poseForecast.position.z = self.state.pose.position.z + self.state.velocity.linear.z * self.dtForecast
+                q = self.state.pose.orientation
+                self.tfbx.sendTransform((poseForecast.position.x, 
+                                         poseForecast.position.y, 
+                                         poseForecast.position.z),
+                                        (q.x, q.y, q.z, q.w),
+                                        self.state.header.stamp,
+                                        self.name+'Forecast',
+                                        self.state.header.frame_id)
+                
 
             # Publish a 3D model marker for the robot.
             if 'Robot' in self.name:

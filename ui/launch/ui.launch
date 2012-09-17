@@ -7,12 +7,12 @@
 
 
 	<!-- Run rviz. -->
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find ui)/Multifly.vcg" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find ui)/Multifly.vcg" /> 
 	
 	
 	<!-- Show zero or more camera windows. -->
 	<!-- <node name="image_view" pkg="image_view" type="image_view" args="image:=camera/image_raw" />        -->
-	     <node name="image_view" pkg="image_view" type="image_view" args="image:=camera/image_processed" />
+	     <node name="image_view" pkg="image_view" type="image_view" args="image:=camera/image_processed" /> 
 	<!-- <node name="image_view" pkg="image_view" type="image_view" args="image:=camera/image_background" /> -->
 	<!-- <node name="image_view" pkg="image_view" type="image_view" args="image:=camera/image_foreground" /> -->
 	

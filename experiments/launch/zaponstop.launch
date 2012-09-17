@@ -1,14 +1,12 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the PASSIVECHASE experiment:              -->
-	<!--   The magnet drives in a circle, and the fly's behavior    -->
-	<!--   is recorded.                                             -->
+	<!-- Configuration of the ZAP-ON-STOP learning experiment.      -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- experiment.                                                -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments passivechase.launch                  -->
+    <!-- roslaunch experiments chase.launch                         -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 
@@ -17,12 +15,13 @@
 	
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find robots)/launch/robot_0625h_0625w.launch" />
-	<include file="$(find robots)/launch/robots_1.launch" />
-	<include file="$(find flies)/launch/flies_1.launch" />
+	<include file="$(find robots)/launch/robots_0.launch" />
+	<include file="$(find flies)/launch/flies_4.launch" />
+	<include file="$(find flies)/launch/flytype_unspecified.launch" />
+	<include file="$(find flies)/launch/flygender_unspecified.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="PassiveChase.py" name="Experiment" />
+	<node pkg="experiments" type="ZapOnStop.py" name="Experiment" />
 
 	
   

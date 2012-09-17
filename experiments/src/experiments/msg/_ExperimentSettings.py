@@ -9,9 +9,9 @@ class ExperimentSettings(genpy.Message):
   _md5sum = "42e02677c518fd77f77d9cd10747bc20"
   _type = "experiments/ExperimentSettings"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """string description
-int32 maxTrials
-int32 trial 
+  _full_text = """string  description
+int32   maxTrials
+int32   trial
 
 
 """

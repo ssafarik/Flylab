@@ -5,6 +5,7 @@ import rospy
 import numpy as N
 import ExperimentLib
 from experiments.srv import *
+from geometry_msgs.msg import Point
 
 
 
@@ -26,6 +27,10 @@ class ExperimentPattern():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
+        self.experimentparams.tracking.exclusionzone.enabled = False
+        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
+        self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
+        
         self.experimentparams.home.enabled = True
         self.experimentparams.home.x = 0.0
         self.experimentparams.home.y = 0.0
@@ -36,10 +41,16 @@ class ExperimentPattern():
         self.experimentparams.waitEntry = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
+        self.experimentparams.triggerEntry.frameidParent = 'Fly1'
+        self.experimentparams.triggerEntry.frameidChild = 'Robot'
+        self.experimentparams.triggerEntry.speedAbsParentMin =   0.0
+        self.experimentparams.triggerEntry.speedAbsParentMax = 999.0
+        self.experimentparams.triggerEntry.speedAbsChildMin  =   0.0
+        self.experimentparams.triggerEntry.speedAbsChildMax  = 999.0
+        self.experimentparams.triggerEntry.speedRelMin       =   0.0
+        self.experimentparams.triggerEntry.speedRelMax       = 999.0
         self.experimentparams.triggerEntry.distanceMin =   0.0
         self.experimentparams.triggerEntry.distanceMax = 999.0
-        self.experimentparams.triggerEntry.speedMin =   0.0
-        self.experimentparams.triggerEntry.speedMax = 999.0
         self.experimentparams.triggerEntry.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleTest = 'inclusive'
@@ -53,8 +64,8 @@ class ExperimentPattern():
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.move.pattern.hzPattern = 1/40  # Patterns per second.
-        self.experimentparams.move.pattern.hzPoint = 1/10 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
+        self.experimentparams.move.pattern.hzPattern = 1/20  # Patterns per second.
+        self.experimentparams.move.pattern.hzPoint = 1/5 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
         self.experimentparams.move.pattern.count = -1
         self.experimentparams.move.pattern.size.x = 20
         self.experimentparams.move.pattern.size.y = 20
@@ -63,10 +74,16 @@ class ExperimentPattern():
         self.experimentparams.lasertrack.enabled = False
         
         self.experimentparams.triggerExit.enabled = False
+        self.experimentparams.triggerExit.frameidParent = 'Fly1'
+        self.experimentparams.triggerExit.frameidChild = 'Robot'
+        self.experimentparams.triggerExit.speedAbsParentMin =   0.0
+        self.experimentparams.triggerExit.speedAbsParentMax = 999.0
+        self.experimentparams.triggerExit.speedAbsChildMin  =   0.0
+        self.experimentparams.triggerExit.speedAbsChildMax  = 999.0
+        self.experimentparams.triggerExit.speedRelMin       =   0.0
+        self.experimentparams.triggerExit.speedRelMax       = 999.0
         self.experimentparams.triggerExit.distanceMin = 0.0
         self.experimentparams.triggerExit.distanceMax = 999.0
-        self.experimentparams.triggerExit.speedMin =  0.0
-        self.experimentparams.triggerExit.speedMax = 999.0
         self.experimentparams.triggerExit.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.triggerExit.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerExit.angleTest = 'inclusive'
@@ -74,6 +91,8 @@ class ExperimentPattern():
         self.experimentparams.triggerExit.timeHold = 0.0
         self.experimentparams.triggerExit.timeout = -1
 
+        self.experimentparams.waitExit = 0.0
+        
         self.experiment = ExperimentLib.Experiment(self.experimentparams)
 
 

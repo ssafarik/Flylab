@@ -8,11 +8,12 @@ import geometry_msgs.msg
 import patterngen.msg
 
 class MsgGalvoCommand(genpy.Message):
-  _md5sum = "dee47c215ced6390d30ecf201bca7bde"
+  _md5sum = "d67d1aac121a314ba47d4fb3bd3c6b7b"
   _type = "galvodirector/MsgGalvoCommand"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """patterngen/MsgPattern[] pattern_list
-string units	# 'volts' or 'millimeters'
+  _full_text = """bool 						enable_laser
+patterngen/MsgPattern[] 	pattern_list
+string 						units	# 'volts' or 'millimeters'
 
 
 ================================================================================
@@ -38,8 +39,8 @@ float64 y
 float64 z
 
 """
-  __slots__ = ['pattern_list','units']
-  _slot_types = ['patterngen/MsgPattern[]','string']
+  __slots__ = ['enable_laser','pattern_list','units']
+  _slot_types = ['bool','patterngen/MsgPattern[]','string']
 
   def __init__(self, *args, **kwds):
     """
@@ -49,7 +50,7 @@ float64 z
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       pattern_list,units
+       enable_laser,pattern_list,units
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -58,11 +59,14 @@ float64 z
     if args or kwds:
       super(MsgGalvoCommand, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
+      if self.enable_laser is None:
+        self.enable_laser = False
       if self.pattern_list is None:
         self.pattern_list = []
       if self.units is None:
         self.units = ''
     else:
+      self.enable_laser = False
       self.pattern_list = []
       self.units = ''
 
@@ -78,6 +82,7 @@ float64 z
     :param buff: buffer, ``StringIO``
     """
     try:
+      buff.write(_struct_B.pack(self.enable_laser))
       length = len(self.pattern_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.pattern_list:
@@ -129,6 +134,10 @@ float64 z
       if self.pattern_list is None:
         self.pattern_list = None
       end = 0
+      start = end
+      end += 1
+      (self.enable_laser,) = _struct_B.unpack(str[start:end])
+      self.enable_laser = bool(self.enable_laser)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -209,6 +218,7 @@ float64 z
     :param numpy: numpy python module
     """
     try:
+      buff.write(_struct_B.pack(self.enable_laser))
       length = len(self.pattern_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.pattern_list:
@@ -261,6 +271,10 @@ float64 z
       if self.pattern_list is None:
         self.pattern_list = None
       end = 0
+      start = end
+      end += 1
+      (self.enable_laser,) = _struct_B.unpack(str[start:end])
+      self.enable_laser = bool(self.enable_laser)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -335,5 +349,6 @@ float64 z
 
 _struct_I = genpy.struct_I
 _struct_Bd = struct.Struct("<Bd")
+_struct_B = struct.Struct("<B")
 _struct_2di = struct.Struct("<2di")
 _struct_3d = struct.Struct("<3d")

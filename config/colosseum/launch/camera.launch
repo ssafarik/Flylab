@@ -7,8 +7,8 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<include file="$(find colosseum)/launch/params_camera.launch" ns="camera" />
-	<node name="camera" pkg="camera1394v2" type="camera1394v2_node" />
+	<include file="$(find colosseum)/launch/params_camera.launch" ns="camera/camera" />
+	<node name="camera" pkg="camera_aravis" type="camnode" ns="camera" />
 	<node name="image_proc" pkg="image_proc" type="image_proc" ns="camera" />
   
 </launch>

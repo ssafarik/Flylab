@@ -15,7 +15,8 @@
 
 	<include file="$(find galvodirector)/launch/main.launch" />
 	<include file="$(find skynet)/launch/params_galvos.launch" />
-	<include file="$(find skynet)/launch/camera.launch" />
+	<include file="$(find skynet)/launch/camera_tracking.launch" />
+	<include file="$(find skynet)/launch/camera_aux.launch" />
 
 	
 </launch>

@@ -9,7 +9,7 @@ import geometry_msgs.msg
 import std_msgs.msg
 
 class SrvFrameStateRequest(genpy.Message):
-  _md5sum = "7a56fa867b82f14dad61e4fac002dbaf"
+  _md5sum = "8ac2e11897b185b933e91584c7e46311"
   _type = "flycore/SrvFrameStateRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """MsgFrameState state
@@ -17,9 +17,11 @@ float64 speed
 
 ================================================================================
 MSG: flycore/MsgFrameState
-Header header
-geometry_msgs/Pose pose
+Header              header
+string              name
+geometry_msgs/Pose  pose
 geometry_msgs/Twist velocity
+float64             speed # This is here mainly so we can show it with rxplot.
 
 
 ================================================================================
@@ -124,8 +126,14 @@ float64 z
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.state.name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.speed))
+      buff.write(_struct_15d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -151,10 +159,19 @@ float64 z
         self.state.header.frame_id = str[start:end].decode('utf-8')
       else:
         self.state.header.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.state.name = str[start:end].decode('utf-8')
+      else:
+        self.state.name = str[start:end]
       _x = self
       start = end
-      end += 112
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.speed,) = _struct_14d.unpack(str[start:end])
+      end += 120
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.speed,) = _struct_15d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -175,8 +192,14 @@ float64 z
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.state.name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.speed))
+      buff.write(_struct_15d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -203,17 +226,26 @@ float64 z
         self.state.header.frame_id = str[start:end].decode('utf-8')
       else:
         self.state.header.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.state.name = str[start:end].decode('utf-8')
+      else:
+        self.state.name = str[start:end]
       _x = self
       start = end
-      end += 112
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.speed,) = _struct_14d.unpack(str[start:end])
+      end += 120
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.speed,) = _struct_15d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
 _struct_3I = struct.Struct("<3I")
-_struct_14d = struct.Struct("<14d")
+_struct_15d = struct.Struct("<15d")
 """autogenerated by genpy from flycore/SrvFrameStateResponse.msg. Do not edit."""
 import sys
 python3 = True if sys.hexversion > 0x03000000 else False
@@ -225,7 +257,7 @@ import geometry_msgs.msg
 import std_msgs.msg
 
 class SrvFrameStateResponse(genpy.Message):
-  _md5sum = "1977707d7eabf7e0ca765b9e57161cd5"
+  _md5sum = "9738f053fa28d511f9bcbdaa3aec1e89"
   _type = "flycore/SrvFrameStateResponse"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """MsgFrameState state
@@ -234,9 +266,11 @@ class SrvFrameStateResponse(genpy.Message):
 
 ================================================================================
 MSG: flycore/MsgFrameState
-Header header
-geometry_msgs/Pose pose
+Header              header
+string              name
+geometry_msgs/Pose  pose
 geometry_msgs/Twist velocity
+float64             speed # This is here mainly so we can show it with rxplot.
 
 
 ================================================================================
@@ -338,8 +372,14 @@ float64 z
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.state.name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_13d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z))
+      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -365,10 +405,19 @@ float64 z
         self.state.header.frame_id = str[start:end].decode('utf-8')
       else:
         self.state.header.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.state.name = str[start:end].decode('utf-8')
+      else:
+        self.state.name = str[start:end]
       _x = self
       start = end
-      end += 104
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z,) = _struct_13d.unpack(str[start:end])
+      end += 112
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed,) = _struct_14d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -389,8 +438,14 @@ float64 z
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.state.name
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_13d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z))
+      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -417,19 +472,28 @@ float64 z
         self.state.header.frame_id = str[start:end].decode('utf-8')
       else:
         self.state.header.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.state.name = str[start:end].decode('utf-8')
+      else:
+        self.state.name = str[start:end]
       _x = self
       start = end
-      end += 104
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z,) = _struct_13d.unpack(str[start:end])
+      end += 112
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed,) = _struct_14d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
 _struct_3I = struct.Struct("<3I")
-_struct_13d = struct.Struct("<13d")
+_struct_14d = struct.Struct("<14d")
 class SrvFrameState(object):
   _type          = 'flycore/SrvFrameState'
-  _md5sum = 'a77943b8f87f5da957e62998e6d39b03'
+  _md5sum = '9109b6a2dda7b8bdea91e7ac4c4b0236'
   _request_class  = SrvFrameStateRequest
   _response_class = SrvFrameStateResponse

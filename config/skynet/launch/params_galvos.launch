@@ -9,12 +9,24 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<param name="galvodriver/hzPoint" type="double" value="262144.0"/>
-	
-	<param name="galvodirector/mx" type="double" value="-0.00157858" />
-	<param name="galvodirector/bx" type="double" value="-0.36469855" />
-	<param name="galvodirector/my" type="double" value="0.01458103" />
-	<param name="galvodirector/by" type="double" value="3.43674359" />
+	<param name="galvodriver/hzPoint" type="double" value="250000.0"/>
+	<param name="galvodriver/hzUSB" type="double" value="45.0"/>  <!-- The fastest that the DAQ can be updated over USB.  Galvodriver makes sure to stay slower than this rate. -->
 
+<!--  The 785nm IR laser...	
+    <param name="galvodirector/mx" type="double" value="0.0509283" />
+    <param name="galvodirector/bx" type="double" value="-0.6446049" />
+    <param name="galvodirector/my" type="double" value="-0.0498209" />
+    <param name="galvodirector/by" type="double" value="3.3652245" />
+-->
+
+<!-- The red laser -->
+    <param name="galvodirector/mx" type="double" value="0.0510521" />
+    <param name="galvodirector/bx" type="double" value="-0.3018869" />
+    <param name="galvodirector/my" type="double" value="-0.0499613" />
+    <param name="galvodirector/by" type="double" value="3.3427498" />
+    
+    <param name="galvodirector/xBeamDump" type="double" value="0.0" />  <!-- volts -->
+    <param name="galvodirector/yBeamDump" type="double" value="-10.0" />  <!-- volts -->
+    
 </launch>
 	
