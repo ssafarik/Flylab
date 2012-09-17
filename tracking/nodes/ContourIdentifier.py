@@ -767,7 +767,7 @@ class ContourIdentifier:
                             marker.header.stamp = contourinfo.header.stamp
                             self.pubMarker.publish(marker)
                 t2 = rospy.Time.now().to_sec()
-                rospy.logwarn ('CI t2-t1=%0.6f' % (t2-t1))
+                #rospy.logwarn ('CI t2-t1=%0.6f' % (t2-t1))
 
                             
     
