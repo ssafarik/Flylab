@@ -16,8 +16,8 @@
 	<param name="robot_description" textfile="$(find babycarrot)/motorarm_urdf.xml" />  <!-- Contains 3D model of hardware. -->
 
 	<param name="motorarm/speed_max" type="double" value="3.1"/>                    	<!-- Radians per second. -->
-	<param name="motorarm/L1" type="double" value="33"/>                            	<!-- Link1 length in millimeters. -->
-	<param name="motorarm/angle_offset" type="double" value="0.16"/>                	<!-- Angle offset when index switch is triggered. -->
+	<param name="motorarm/L1" type="double" value="30"/>                            	<!-- Link1 length in millimeters. -->
+	<param name="motorarm/angleOffset" type="double" value="0.16"/>                	<!-- Angle offset when index switch is triggered. -->
 
 	<param name="motorarm/kP"      type="double" value="1.0"/>
 	<param name="motorarm/kI"      type="double" value="0.5"/>
