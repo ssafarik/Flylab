@@ -5,6 +5,7 @@ import rospy
 import numpy as N
 import ExperimentLib
 from experiments.srv import *
+from geometry_msgs.msg import Point
 
 
 
@@ -63,7 +64,7 @@ class ExperimentPassiveChase():
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.move.pattern.hzPattern = 1/20
+        self.experimentparams.move.pattern.hzPattern = 1/40
         self.experimentparams.move.pattern.hzPoint = 10
         self.experimentparams.move.pattern.count = -1
         self.experimentparams.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)

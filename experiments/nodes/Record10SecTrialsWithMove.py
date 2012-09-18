@@ -61,17 +61,14 @@ class ExperimentRecord10SecTrialsWithMove():
         # .move, .lasertrack, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.move.enabled = True
-        self.experimentparams.move.mode = 'relative'
-        self.experimentparams.move.relative.tracking = True
-        self.experimentparams.move.relative.frameidOriginPosition = "Plate"
-        self.experimentparams.move.relative.frameidOriginAngle = "Plate"
-        self.experimentparams.move.relative.distance = 50
-        self.experimentparams.move.relative.angle =  0.0 * N.pi / 180.0
-        self.experimentparams.move.relative.angleType = 'random'
-        self.experimentparams.move.relative.speed = 100
-        self.experimentparams.move.relative.speedType = 'constant'
-        self.experimentparams.move.relative.tolerance = 2
-        self.experimentparams.move.timeout = -1
+        self.experimentparams.move.mode = 'pattern'
+        self.experimentparams.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
+        self.experimentparams.move.pattern.hzPattern = 1/20
+        self.experimentparams.move.pattern.hzPoint = 10
+        self.experimentparams.move.pattern.count = -1
+        self.experimentparams.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
+        self.experimentparams.move.pattern.size.y = 0
+        self.experimentparams.move.timeout = 600
         
         self.experimentparams.lasertrack.enabled = False
         
