@@ -2,7 +2,7 @@
   <!-- <param name="guid" type="string" value="305300013a8cbc"/> -->   <!-- (defaults to first camera on bus)-->
   <param name="video_mode" type="string" value="800x600_mono8"/>
   <param name="frame_id" type="string" value="Camera0"/>
-  <param name="camera_info_url" type="string" value="file:///cameras/basler_a622f_calibration.yaml"/>
+  <param name="camera_info_url" type="string" value="file:///home/sweta/src.git/Flylab/config/babycarrot/yaml/00305300013a8cbc.yaml"/>
   
   <param name="frame_rate" type="double" value="59"/>
   <param name="auto_brightness" type="double" value="3"/>
