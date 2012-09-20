@@ -6,14 +6,12 @@
   
   <param name="autoexposure" type="int" value="0"/>
   <param name="autogain" type="int" value="0"/>
-  <param name="exposure" type="double" value="30000"/>
-  <param name="gain" type="double" value="100"/>
+  <param name="exposure" type="double" value="20000"/>
+  <param name="gain" type="double" value="300"/>
   <param name="acquisitionmode" type="int" value="0"/>
   <param name="framerate" type="double" value="40"/>
   <param name="triggersource" type="int" value="0"/>
   <param name="softwarerate" type="double" value="100"/>
-
-  <param name="diff_threshold" type="double" value="75"/>   <!-- Adjust this based on light brightness, etc, to get good contours. -->
 
 
 

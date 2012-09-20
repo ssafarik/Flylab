@@ -14,8 +14,6 @@
   <param name="auto_shutter" type="double" value="3"/>
   <param name="shutter" type="double" value="600"/>
 
-  <param name="diff_threshold" type="double" value="75"/>   <!-- Adjust this based on light brightness, etc, to get good contours. -->
-
 
 
 </launch>

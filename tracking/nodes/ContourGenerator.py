@@ -468,7 +468,7 @@ class ContourGenerator:
     
             
             # Check for new diff_threshold value
-            self.diff_threshold = rospy.get_param("camera/diff_threshold", 50)
+            self.diff_threshold = rospy.get_param("tracking/diff_threshold", 50)
             
             # Apply mask and Subtract background
             #q1 = cv.GetSize(self.cvimage)

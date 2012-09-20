@@ -10,6 +10,7 @@
     <!-- ========================================================== -->
 
     <include file="$(find rotcam)/launch/params_calibration.launch" />
+    <include file="$(find rotcam)/launch/params_tracking.launch" />
     <include file="$(find flybowls)/launch/rotbowl_24mm.launch" /> 
 
     <include file="$(find rotcam)/launch/camera.launch" />

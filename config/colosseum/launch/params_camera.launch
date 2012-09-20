@@ -9,11 +9,8 @@
   <param name="exposure" type="double" value="9745"/>
   <param name="gain" type="double" value="100"/>
   <param name="acquisitionmode" type="int" value="0"/>
-  <param name="framerate" type="double" value="30"/>
   <param name="triggersource" type="int" value="0"/>
+  <param name="softwarerate" type="double" value="30"/>
   
-  <param name="/camera/diff_threshold" type="double" value="30"/>   <!-- Adjust this based on light brightness, etc, to get good contours. -->
-
-
 
 </launch>
