@@ -5,7 +5,7 @@ import rospy
 import numpy as N
 import ExperimentLib
 from experiments.srv import *
-
+from geometry_msgs.msg import Point
 
 
 #######################################################################################################
@@ -22,7 +22,7 @@ class ExperimentRecord10MinTrials():
         
         self.experimentparams.save.filenamebase = "tenmin"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = False
+        self.experimentparams.save.video = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
@@ -30,7 +30,7 @@ class ExperimentRecord10MinTrials():
         self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
         
-        self.experimentparams.home.enabled = True
+        self.experimentparams.home.enabled = False
         self.experimentparams.home.x = 0.0
         self.experimentparams.home.y = 0.0
         self.experimentparams.home.speed = 20
