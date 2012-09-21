@@ -926,7 +926,7 @@ class Lasertrack (smach.State):
                                                         frame_id='Plate'),
                                           ns='statefilter',
                                           id=1,
-                                          type=Marker.CUBE
+                                          type=Marker.CUBE,
                                           action=0,
 #                                          type=Marker.LINE_STRIP
 #                                          points=[Point(x=xLo,y=yLo,z=zLo),Point(x=xHi,y=yLo,z=zLo),Point(x=xHi,y=yHi,z=zLo),Point(x=xLo,y=yHi,z=zLo),Point(x=xLo,y=yLo,z=zLo)],
