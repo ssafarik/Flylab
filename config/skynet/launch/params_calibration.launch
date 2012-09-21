@@ -23,6 +23,7 @@
   <param name="calibration/checker_size" type="double" value="15.0" />
 
 
+
   <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. They might need fiddling with after use. -->
   <param name="camera_plate_rvec_0" type="double" value="-3.109"/>
   <param name="camera_plate_rvec_1" type="double" value="-0.008"/>

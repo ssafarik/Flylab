@@ -9,8 +9,8 @@ import smach
 import smach_ros
 import tf
 
-from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist
-from std_msgs.msg import Header
+from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
+from std_msgs.msg import Header, ColorRGBA
 from stage_action_server.msg import *
 from pythonmodules import filters
 from flycore.msg import MsgFrameState, TrackingCommand
@@ -19,6 +19,7 @@ from experiments.srv import Trigger, ExperimentParams
 from galvodirector.msg import MsgGalvoCommand
 from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
+from visualization_msgs.msg import Marker
 
 gRate = 100  # This is the loop rate at which the experiment states run.
 g_tfrx = None
@@ -877,13 +878,14 @@ class Lasertrack (smach.State):
         smach.State.__init__(self, 
                              outcomes=['disabled','timeout','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
-
+        
         self.rosrate = rospy.Rate(gRate)
-        self.pubGalvoCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
         self.arenastate = None
-
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
+
+        self.pubMarker          = rospy.Publisher('visualization_marker', Marker)
+        self.pubGalvoCommand    = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
+        self.subArenaState      = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -894,6 +896,54 @@ class Lasertrack (smach.State):
 
     def ArenaState_callback(self, arenastate):
         self.arenastate = arenastate
+        
+    
+    # PublishStatefilterMarkers()
+    #  
+    def PublishStatefilterMarkers(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
+        if 'pose' in statefilterLo_dict:
+            poseLo_dict = statefilterLo_dict['pose'] 
+            poseHi_dict = statefilterHi_dict['pose']
+             
+            if 'position' in poseLo_dict:
+                positionLo_dict = poseLo_dict['position']
+                positionHi_dict = poseHi_dict['position']
+                (xLo,xHi) = (-9999,+9999)
+                (yLo,yHi) = (-9999,+9999)
+                (zLo,zHi) = (0,0.1)
+                if ('x' in positionLo_dict):
+                    xLo = positionLo_dict['x'] 
+                    xHi = positionHi_dict['x']
+                if ('y' in positionLo_dict):
+                    yLo = positionLo_dict['y'] 
+                    yHi = positionHi_dict['y']
+                if ('z' in positionLo_dict):
+                    zLo = positionLo_dict['z'] 
+                    zHi = positionHi_dict['z']
+
+                if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
+                    markerTarget = Marker(header=Header(stamp = state.header.stamp,
+                                                        frame_id='Plate'),
+                                          ns='statefilter',
+                                          id=1,
+                                          type=Marker.CUBE
+                                          action=0,
+#                                          type=Marker.LINE_STRIP
+#                                          points=[Point(x=xLo,y=yLo,z=zLo),Point(x=xHi,y=yLo,z=zLo),Point(x=xHi,y=yHi,z=zLo),Point(x=xLo,y=yHi,z=zLo),Point(x=xLo,y=yLo,z=zLo)],
+#                                          scale=Vector3(x=0.2, y=0.0, z=0.0),
+                                          pose=Pose(position=Point(x=(xLo+xHi)/2, 
+                                                                   y=(yLo+yHi)/2, 
+                                                                   z=(zLo+zHi)/2)),
+                                          scale=Vector3(x=xHi-xLo,
+                                                        y=yHi-yLo,
+                                                        z=zHi-zLo),
+                                          color=ColorRGBA(a=0.1,
+                                                          r=1.0,
+                                                          g=1.0,
+                                                          b=1.0),
+                                          lifetime=rospy.Duration(1.0))
+                    self.pubMarker.publish(markerTarget)
+        
         
     
     # InStatefilterRange()
@@ -1126,6 +1176,7 @@ class Lasertrack (smach.State):
     
                             bInStatefilterRangePrev[iPattern] = bInStatefilterRange[iPattern]
                             bInStatefilterRange[iPattern] = self.InStatefilterRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                            self.PublishStatefilterMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
                             
                             # If any of the filter states have changed, then we need to update them all.
                             if bInStatefilterRangePrev[iPattern] != bInStatefilterRange[iPattern]:

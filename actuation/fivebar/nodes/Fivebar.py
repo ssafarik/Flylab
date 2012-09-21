@@ -793,7 +793,7 @@ class RosFivebar:
                                                         frame_id='Stage'),
                                           ns='target',
                                           id=0,
-                                          type=2, #SPHERE,
+                                          type=Marker.SPHERE,
                                           action=0,
                                           pose=Pose(position=Point(x=self.ptsToolRef.point.x, 
                                                                    y=self.ptsToolRef.point.y, 
@@ -811,7 +811,7 @@ class RosFivebar:
 #                    markerToolOffset   = Marker(header=state.header,
 #                                          ns='markers',
 #                                          id=1,
-#                                          type=2, #SPHERE,
+#                                          type=Marker.SPHERE,
 #                                          action=0,
 #                                          pose=Pose(position=Point(x=state.pose.position.x+self.vecOffsetSense.x, 
 #                                                                   y=state.pose.position.y+self.vecOffsetSense.y, 
@@ -827,7 +827,7 @@ class RosFivebar:
                     markerToolOffset   = Marker(header=state.header,
                                                 ns='tooloffset',
                                                 id=1,
-                                                type=0, #ARROW,
+                                                type=Marker.ARROW,
                                                 action=0,
                                                 scale=Vector3(x=0.1, # Shaft diameter
                                                               y=0.2, # Head diameter
@@ -952,7 +952,7 @@ class RosFivebar:
                                                 frame_id='Stage'),
                                   ns='command',
                                   id=1,
-                                  type=0, #ARROW,
+                                  type=Marker.ARROW,
                                   action=0,
                                   scale=Vector3(x=0.1, # Shaft diameter
                                                 y=0.2, # Head diameter

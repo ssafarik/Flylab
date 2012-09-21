@@ -66,8 +66,8 @@ class GalvoDirector:
         self.my = rospy.get_param('galvodirector/my', 0.0) #-0.05003545
         self.by = rospy.get_param('galvodirector/by', 0.0) #3.15307329
         
-        self.xBeamDump = rospy.get_param('galvodirector/xBeamDump', 0.0) # volts
-        self.yBeamDump = rospy.get_param('galvodirector/yBeamDump', 0.0) # volts
+        self.xBeamsink = rospy.get_param('galvodirector/xBeamsink', 0.0) # volts
+        self.yBeamsink = rospy.get_param('galvodirector/yBeamsink', 0.0) # volts
         self.enable_laser = False
         
         self.arenastate = ArenaState()
@@ -76,14 +76,14 @@ class GalvoDirector:
         self.frameid_list = []
         self.units = 'millimeters'
         
-        self.pointcloudBeamdump = PointCloud(header=Header(frame_id='Plate', 
+        self.pointcloudBeamsink = PointCloud(header=Header(frame_id='Plate', 
                                                            stamp=rospy.Time.now()),
-                                             points=[Point(x=self.xBeamDump, 
-                                                           y=self.yBeamDump, 
+                                             points=[Point(x=self.xBeamsink, 
+                                                           y=self.yBeamsink, 
                                                            z=0.0)],
                                              channels=[ChannelFloat32(name='intensity',
                                                                       values=[0.0])])
-        self.pointcloudBeamdumpMm = self.UnitsFromVoltsPointcloud(copy.deepcopy(self.pointcloudBeamdump))
+        self.pointcloudBeamsinkMm = self.UnitsFromVoltsPointcloud(copy.deepcopy(self.pointcloudBeamsink))
                      
         
         
@@ -111,7 +111,7 @@ class GalvoDirector:
     def Preshutdown_callback(self, reason=None):
         self.enable_laser = False
         self.PublishPointcloud()
-        #self.MoveToBeamDump()
+        #self.MoveToBeamsink()
         
         
     def OnShutdown_callback(self):
@@ -164,7 +164,7 @@ class GalvoDirector:
         
     # PublishPointcloud()
     # If laser enabled, then transform the pointcloudtemplates to their respective frames,
-    # If laser disabled, then use the beamdump pointcloud.
+    # If laser disabled, then use the beamsink pointcloud.
     #
     # Publish points to the galvo driver.    
     #
@@ -178,28 +178,11 @@ class GalvoDirector:
                         pointcloud_template = self.pointcloudtemplate_list[i]
                         #t1 = rospy.Time.now().to_sec()
                         
-                        # Use latest time.
-                        if False:
-                            if ('Fly' in pointcloud_template.header.frame_id):
-                                pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp # BUG: Need to make this use the correct fly #.
-                            else:
-                                pointcloud_template.header.stamp = rospy.Time.now() 
-            
-                        if True: # Use latest common time.
-                            try:
-                                pointcloud_template.header.stamp = self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id)
-                            except tf.Exception:
-                                pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp
+                        try:
+                            pointcloud_template.header.stamp = self.tfrx.getLatestCommonTime('Plate', pointcloud_template.header.frame_id)
+                        except tf.Exception:
+                            pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp # BUG: Need to make this use the correct fly #.
     
-                        if False: 
-                            try:
-                                self.tfrx.waitForTransform('Plate', 
-                                                           pointcloud_template.header.frame_id, 
-                                                           pointcloud_template.header.stamp, 
-                                                           rospy.Duration(0.1))
-                            except tf.Exception, e:
-                                rospy.logwarn('Exception waiting for transform pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Plate', e))
-                                
                         #t2 = rospy.Time.now().to_sec()
                         if self.tfrx.canTransform('Plate', 
                                                   pointcloud_template.header.frame_id, 
@@ -228,11 +211,11 @@ class GalvoDirector:
             
             else: # not self.enable_laser
                 
-                # Publish a pointcloud in volts and mm.
-                self.pointcloudBeamdump.header.stamp=rospy.Time.now()
-                self.pubGalvoPointCloud.publish(self.pointcloudBeamdump)
-                self.pointcloudBeamdumpMm.header.stamp=rospy.Time.now()
-                self.pubGalvoPointCloudMm.publish(self.pointcloudBeamdumpMm)
+                # Point laser at the beam sink.
+                self.pointcloudBeamsink.header.stamp=rospy.Time.now()
+                self.pubGalvoPointCloud.publish(self.pointcloudBeamsink)
+                self.pointcloudBeamsinkMm.header.stamp=rospy.Time.now()
+                self.pubGalvoPointCloudMm.publish(self.pointcloudBeamsinkMm)
         
 
     # GetUnifiedPointcloud()
