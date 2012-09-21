@@ -9,7 +9,7 @@
     <!--  5. roslaunch galvodirector calibrator.launch                 -->
     <!--  6. run the galvodriver on the galvobox.                      -->
     <!--  7. After the "Saving background" message, turn on the laser. -->
-    <!--  8. Adjust laser power and/or param camera/diff_threshold     -->
+    <!--  8. Adjust laser power and/or param tracking/diff_threshold   -->
     <!--     to get good readings.                                     -->
     <!--                                                               -->
     <!--  9. Let "samples per input point" > 500, then ctrl+c          -->
@@ -33,7 +33,7 @@
 	<include file="$(find flies)/launch/flies_1.launch" />
 
 	<param name="galvodriver/hzPoint" type="double" value="250000.0"/>
-	<param name="camera/diff_threshold" type="double" value="50.0"/>
+	<param name="tracking/diff_threshold" type="double" value="100.0"/>
 	
 	<node pkg="galvodirector" type="Calibrator.py" name="GalvoCalibrator" />
 
