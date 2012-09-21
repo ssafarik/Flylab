@@ -583,6 +583,7 @@ class ContourGenerator:
             del image2
 
 
+
     def Main(self):
         rospy.spin()
       

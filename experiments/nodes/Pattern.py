@@ -64,8 +64,8 @@ class ExperimentPattern():
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.move.pattern.hzPattern = 1/20  # Patterns per second.
-        self.experimentparams.move.pattern.hzPoint = 1/5 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
+        self.experimentparams.move.pattern.hzPattern = 1/12  # Patterns per second.
+        self.experimentparams.move.pattern.hzPoint = 1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
         self.experimentparams.move.pattern.count = -1
         self.experimentparams.move.pattern.size.x = 20
         self.experimentparams.move.pattern.size.y = 20
