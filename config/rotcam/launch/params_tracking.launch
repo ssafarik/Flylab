@@ -1,0 +1,4 @@
+<launch>
+  <param name="tracking/diff_threshold" type="double" value="30"/>   <!-- Adjust this based on light brightness, etc, to get good contours. -->
+
+</launch>

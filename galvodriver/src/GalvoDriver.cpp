@@ -274,12 +274,12 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 		if (g_bStarted)
 		{
 			e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
-			ROS_WARN("IsTaskDone A");
+			//ROS_WARN("IsTaskDone A");
 			while (!bTaskDone)
 			{
 				e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
 				HandleDAQError(e);
-				ROS_WARN("IsTaskDone A");
+				//ROS_WARN("IsTaskDone A");
 			}
 
 			e = DAQmxStopTask (hTask);
@@ -349,12 +349,12 @@ void ResetDAQ(void)
 		if (g_bStarted)
 		{
 			e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
-			ROS_WARN("IsTaskDone B");
+			//ROS_WARN("IsTaskDone B");
 			while (!bTaskDone)
 			{
 				e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
 				HandleDAQError(e);
-				ROS_WARN("IsTaskDone B");
+				//ROS_WARN("IsTaskDone B");
 			}
 
 			e = DAQmxStopTask (g_hTask);

@@ -50,6 +50,13 @@ class GalvoCalibrator:
                             Point(x=0.0, y=0.0), 
                             Point(x=1.0, y=0.0), 
 
+                            Point(x=-3.0, y=0.5), 
+                            Point(x=-2.0, y=0.5), 
+                            Point(x=-1.0, y=0.5), 
+                            Point(x=0.0, y=0.5), 
+                            Point(x=1.0, y=0.5), 
+                            Point(x=2.0, y=0.5), 
+
                             Point(x=-4.0, y=1.0), 
                             Point(x=-3.0, y=1.0), 
                             Point(x=-2.0, y=1.0), 
@@ -65,7 +72,7 @@ class GalvoCalibrator:
                             Point(x=2.5, y=2.0), 
                             Point(x=3.0, y=2.0), 
                             
-                            #Point(x=-5.0, y=3.0),
+                            Point(x=-4.0, y=3.0),
                             Point(x=-3.0, y=3.0),
                             Point(x=-2.0, y=3.0),
                             Point(x=-1.0, y=3.0),
@@ -75,6 +82,17 @@ class GalvoCalibrator:
                             Point(x=2.5, y=3.0), 
                             Point(x=3.0, y=3.0), 
                             Point(x=3.5, y=3.0), 
+                            
+                            Point(x=-4.0, y=3.5),
+                            Point(x=-3.0, y=3.5),
+                            Point(x=-2.0, y=3.5),
+                            Point(x=-1.0, y=3.5),
+                            Point(x=0.0, y=3.5),
+                            Point(x=1.0, y=3.5),
+                            Point(x=2.0, y=3.5), 
+                            Point(x=2.5, y=3.5), 
+                            Point(x=3.0, y=3.5), 
+                            Point(x=3.5, y=3.5), 
                             
                             #Point(x=-5.0, y=4.0),
                             #Point(x=-4.5, y=4.0),
@@ -111,8 +129,18 @@ class GalvoCalibrator:
                             Point(x=-1.5, y=6.0),
                             Point(x=0.0, y=6.0), 
                             Point(x=1.0, y=6.0), 
+                            Point(x=1.5, y=6.0), 
+                            Point(x=2.0, y=6.0), 
+                            
+                            Point(x=-2.0, y=6.5),
+                            Point(x=-1.5, y=6.5),
+                            Point(x=0.0, y=6.5), 
+                            Point(x=1.0, y=6.5), 
                             
                             Point(x=-1.0, y=7.0),
+                            Point(x=-0.5, y=7.0),
+                            Point(x=0.0, y=7.0),
+                            Point(x=0.5, y=7.0),
                             ]
         self.caldata = {}
         pylab.ion()

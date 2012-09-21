@@ -1,0 +1,14 @@
+<launch>
+
+    <!-- ========================================================== -->
+    <!-- Configuration of the camera attached to the ROTCAM.        -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the rotcam.launch file, and point here              -->
+    <!-- from there.                                                -->
+    <!-- ========================================================== -->
+
+    <include file="$(find rotcam)/launch/params_camera.launch" ns="camera/camera" />
+    <node pkg="camera_aravis" type="camnode" ns="camera" name="camera" />
+    <node name="image_proc" pkg="image_proc" type="image_proc" ns="camera" />
+    
+</launch>

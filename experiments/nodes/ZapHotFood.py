@@ -33,8 +33,8 @@ class ExperimentZapHotFood():
         self.experimentparams.save.onlyWhileTriggered = False # Saves always.
 
         self.experimentparams.tracking.exclusionzone.enabled = True
-        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=45.0, y=48.0)]
-        self.experimentparams.tracking.exclusionzone.radius_list = [8.0]
+        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=52.3, y=-51.0)]
+        self.experimentparams.tracking.exclusionzone.radius_list = [7.0]
         
         self.experimentparams.home.enabled = False
         
@@ -72,12 +72,12 @@ class ExperimentZapHotFood():
         for iFly in range(rospy.get_param('nFlies', 0)):#range(3):#
             self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             shape      = 'grid',
-                                                                            frame_id   = 'Fly%d' % (iFly+1),
+                                                                            frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
-                                                                            size       = Point(x=0,
-                                                                                               y=0),
+                                                                            size       = Point(x=2,
+                                                                                               y=2),
                                                                             preempt    = False,
                                                                             param      = 3), # Peano curve level.
                                                                  )
@@ -87,8 +87,8 @@ class ExperimentZapHotFood():
             #self.experimentparams.lasertrack.statefilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
             #self.experimentparams.lasertrack.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
             #self.experimentparams.lasertrack.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
-            self.experimentparams.lasertrack.statefilterHi_list.append("{'pose':{'position':{'x':-30, 'y':-30}}}")
-            self.experimentparams.lasertrack.statefilterLo_list.append("{'pose':{'position':{'x':-50, 'y':-50}}}")
+            self.experimentparams.lasertrack.statefilterHi_list.append("{'pose':{'position':{'x':-30, 'y':50}}}")  # This is the cool zone.
+            self.experimentparams.lasertrack.statefilterLo_list.append("{'pose':{'position':{'x':-50, 'y':30}}}")
             self.experimentparams.lasertrack.statefilterCriteria_list.append("exclusive")
         self.experimentparams.lasertrack.timeout = -1
         

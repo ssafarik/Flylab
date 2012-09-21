@@ -10,6 +10,7 @@
 	<!-- ========================================================== -->
 
 	<include file="$(find babycarrot)/launch/params_calibration.launch" />
+	<include file="$(find babycarrot)/launch/params_tracking.launch" />
 	<include file="$(find flybowls)/launch/flybowl_50mm.launch" /> 
 
 	<include file="$(find motorarm)/launch/motorarm.launch" />
