@@ -9,6 +9,10 @@
     -->
 	  
     <param name="frameid_contours" type="string" value="ImageRect"/>
+    <param name="tracking/queue_size_images" type="int" value="2"/>
+    <param name="tracking/queue_size_arenastate" type="int" value="100"/>
+    <param name="tracking/queue_size_contours" type="int" value="100"/>
+    
 
     <param name="tracking/nContoursMax"					type="int" value="20"/>
     <param name="tracking/distanceDuplicateContour"		type="double" value="0.1"/>

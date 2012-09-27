@@ -12,7 +12,7 @@
 ###############################################################################################################
 
 
-0 ############################### Preliminary System Stuff:
+0)  ############################### Preliminary System Stuff:
 # Create calibration directory.
 sudo mkdir /cameras
 sudo chgrp video cameras/
@@ -27,7 +27,7 @@ sudo cp 99-simple_step.rules /etc/udev/rules.d
 sudo usermod -a -G plugdev <username>
 
 
-0 ############################### If this is new hardware:
+0)  ############################### If this is new hardware:
 cd ...Flylab/ros/config
 roscreate-pkg <your device name>
 cp -r colosseum/launch <your device name>/launch
@@ -113,7 +113,7 @@ roslaunch experiments <any experiment>.launch
 
 # Adjust the diff_threshold so that contours look good.
 rosparam set tracking/diff_threshold <value>
-# Once you have figured out the correct value, save it in the file "params_camera.yaml" 
+# Once you have figured out the correct value, save it in the file "params_tracking.yaml" 
 #Ctrl+c to kill the experiment.
 
 

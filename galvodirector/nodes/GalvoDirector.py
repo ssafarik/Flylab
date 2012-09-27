@@ -43,7 +43,8 @@ class GalvoDirector:
 
         # Messages
         #self.subTF = rospy.Subscriber('tf', Transform, self.Transform_callback)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
+        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
         self.subGalvoCommand = rospy.Subscriber('GalvoDirector/command', MsgGalvoCommand, self.GalvoCommand_callback, queue_size=2)
         self.pubGalvoPointCloud = rospy.Publisher('GalvoDriver/pointcloud', PointCloud, latch=True)

@@ -32,10 +32,12 @@ class ContourGenerator:
         self.preinit = False
         self.initialized = False
         
+        queue_size_images = rospy.get_param('tracking/queue_size_images', 1)
+        
         # Messages
         self.camerainfo = None
         self.subCameraInfo       = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
-        self.subImageRect        = rospy.Subscriber("camera/image_rect", Image, self.Image_callback, queue_size=1, buff_size=262144, tcp_nodelay=True)
+        self.subImageRect        = rospy.Subscriber("camera/image_rect", Image, self.Image_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
         #self.subImageRaw         = rospy.Subscriber("camera/image_raw", Image, self.ImageRaw_callback, queue_size=1, buff_size=262144, tcp_nodelay=True)
         
         self.pubImageProcessed   = rospy.Publisher("camera/image_processed", Image)

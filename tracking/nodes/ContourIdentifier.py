@@ -58,8 +58,9 @@ class ContourIdentifier:
         
         
         # Messages
+        queue_size_contours   = rospy.get_param('tracking/queue_size_contours', 1)
         self.subTrackingCommand = rospy.Subscriber("TrackingCommand", TrackingCommand, self.TrackingCommand_callback)
-        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback, queue_size=2)
+        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback, queue_size=queue_size_contours)
         self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback, queue_size=2)
         
         self.pubArenaState = rospy.Publisher('ArenaState', ArenaState)

@@ -22,7 +22,7 @@ class ExperimentPattern():
         self.experimentparams.experiment.trial = 1
         
         self.experimentparams.save.filenamebase = "pattern"
-        self.experimentparams.save.arenastate = False
+        self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
@@ -64,11 +64,11 @@ class ExperimentPattern():
         self.experimentparams.move.enabled = True
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.move.pattern.hzPattern = 1/12  # Patterns per second.
-        self.experimentparams.move.pattern.hzPoint = 1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
+        self.experimentparams.move.pattern.hzPattern = 1/40  # Patterns per second.
+        self.experimentparams.move.pattern.hzPoint = 20 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
         self.experimentparams.move.pattern.count = -1
-        self.experimentparams.move.pattern.size.x = 40
-        self.experimentparams.move.pattern.size.y = 40
+        self.experimentparams.move.pattern.size.x = 100
+        self.experimentparams.move.pattern.size.y = 100
         self.experimentparams.move.timeout = -1 #self.experimentparams.move.pattern.count * (1.0/self.experimentparams.move.pattern.hzPattern)
         
         self.experimentparams.lasertrack.enabled = False
