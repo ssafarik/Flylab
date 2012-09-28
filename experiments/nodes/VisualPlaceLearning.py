@@ -15,26 +15,26 @@ from tracking.msg import ArenaState
 
 
 #######################################################################################################
-class ExperimentZapColdFood():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Food in in the cold zone."
+        self.experimentparams.experiment.description = "Visual Place Learning paper by Reiser"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zapcoldfood"
+        self.experimentparams.save.filenamebase = "vpl"
         self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
-        self.experimentparams.save.onlyWhileTriggered = False # Saves always.
+        self.experimentparams.save.onlyWhileTriggered = True # Saves always.
 
         self.experimentparams.tracking.exclusionzone.enabled = False
-        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=45.0, y=48.0)]
-        self.experimentparams.tracking.exclusionzone.radius_list = [8.0]
+        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=52.3, y=-51.0)]
+        self.experimentparams.tracking.exclusionzone.radius_list = [7.0]
         
         self.experimentparams.home.enabled = False
         
@@ -87,8 +87,8 @@ class ExperimentZapColdFood():
             #self.experimentparams.lasertrack.statefilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
             #self.experimentparams.lasertrack.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
             #self.experimentparams.lasertrack.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
-            self.experimentparams.lasertrack.statefilterHi_list.append("{'pose':{'position':{'x':60, 'y':63}}}")
-            self.experimentparams.lasertrack.statefilterLo_list.append("{'pose':{'position':{'x':30, 'y':33}}}")
+            self.experimentparams.lasertrack.statefilterHi_list.append("{'pose':{'position':{'x':-25, 'y':-25}}}")  # This is the cool zone.
+            self.experimentparams.lasertrack.statefilterLo_list.append("{'pose':{'position':{'x':-50, 'y':-50}}}")
             self.experimentparams.lasertrack.statefilterCriteria_list.append("exclusive")
         self.experimentparams.lasertrack.timeout = -1
         
@@ -108,11 +108,11 @@ class ExperimentZapColdFood():
         self.experimentparams.triggerExit.angleTest = 'inclusive'
         self.experimentparams.triggerExit.angleTestBilateral = False
         self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = 3600
+        self.experimentparams.triggerExit.timeout = 10      # 5 minute trials.
 
         self.experimentparams.waitExit = 0.0
         
-        self.experiment = ExperimentLib.Experiment(self.experimentparams)
+        self.experiment = ExperimentLib.ExperimentLib(self.experimentparams, trialstart_callback=self.Trialstart_callback, trialend_callback=self.Trialend_callback)
 
 
 
@@ -120,10 +120,19 @@ class ExperimentZapColdFood():
         self.experiment.Run()
         
 
+    # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Trialstart_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
+
+    # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Trialend_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
 
 
 if __name__ == '__main__':
-    experiment = ExperimentZapColdFood()
+    experiment = Experiment()
     experiment.Run()
         
 

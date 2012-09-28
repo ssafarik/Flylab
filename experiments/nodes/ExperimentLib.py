@@ -926,7 +926,7 @@ class Lasertrack (smach.State):
                                                         frame_id='Plate'),
                                           ns='statefilter',
                                           id=1,
-                                          type=Marker.CUBE
+                                          type=Marker.CUBE,
                                           action=0,
 #                                          type=Marker.LINE_STRIP
 #                                          points=[Point(x=xLo,y=yLo,z=zLo),Point(x=xHi,y=yLo,z=zLo),Point(x=xHi,y=yHi,z=zLo),Point(x=xLo,y=yHi,z=zLo),Point(x=xLo,y=yLo,z=zLo)],
@@ -1230,8 +1230,8 @@ class Lasertrack (smach.State):
             
 #######################################################################################################
 #######################################################################################################
-class Experiment():
-    def __init__(self, experimentparams=None):
+class ExperimentLib():
+    def __init__(self, experimentparams=None, trialstart_callback=None, trialend_callback=None):
         self.xHome = 0
         self.yHome = 0
 
@@ -1245,8 +1245,8 @@ class Experiment():
         # Create the "actions" concurrency state.
         smachActions = smach.Concurrence(outcomes = ['success','disabled','aborted'],
                                          default_outcome = 'aborted',
-                                         child_termination_cb = self.child_term_callback,
-                                         outcome_cb = self.all_term_callback,
+                                         child_termination_cb = self.any_action_term_callback,
+                                         outcome_cb = self.all_actions_term_callback,
                                          input_keys = ['experimentparamsIn'])
 
         with smachActions:
@@ -1266,13 +1266,29 @@ class Experiment():
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
+            if trialstart_callback is not None:
+                stateAfterResetHardware = 'TRIALSTARTCALLBACK'
+            else:
+                stateAfterResetHardware = 'NEWTRIAL'
+
             smach.StateMachine.add('RESETHARDWARE',
                                    ResetRobot(),
-                                   transitions={'success':'NEWTRIAL',
-                                                'disabled':'NEWTRIAL',
-                                                'timeout':'NEWTRIAL',
+                                   transitions={'success':stateAfterResetHardware,
+                                                'disabled':stateAfterResetHardware,
+                                                'timeout':stateAfterResetHardware,
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
+
+            if trialstart_callback is not None:
+                smach.StateMachine.add('TRIALSTARTCALLBACK', 
+                                       smach.CBState(trialstart_callback, 
+                                                     outcomes = ['success','aborted'],
+                                                     input_keys = ['experimentparamsIn'],
+                                                     output_keys = ['experimentparamsOut']),
+                                       transitions={'success':'NEWTRIAL',
+                                                    'aborted':'aborted'},
+                                       remapping={'experimentparamsIn':'experimentparams',
+                                                  'experimentparamsOut':'experimentparams'})
 
             smach.StateMachine.add('NEWTRIAL',                         
                                    NewTrial(),
@@ -1303,12 +1319,27 @@ class Experiment():
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
+            if trialend_callback is not None:
+                stateAfterWaitExit = 'TRIALENDCALLBACK'
+            else:
+                stateAfterWaitExit = 'RESETHARDWARE'
+
             smach.StateMachine.add('WAITEXIT', 
                                    TriggerOnTime(type='exit'),
-                                   transitions={'success':'RESETHARDWARE',
+                                   transitions={'success':stateAfterWaitExit,
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
+            if trialend_callback is not None:
+                smach.StateMachine.add('TRIALENDCALLBACK', 
+                                       smach.CBState(trialend_callback, 
+                                                     outcomes = ['success','aborted'],
+                                                     input_keys = ['experimentparamsIn'],
+                                                     output_keys = ['experimentparamsOut']),
+                                       transitions={'success':'RESETHARDWARE',
+                                                    'aborted':'aborted'},
+                                       remapping={'experimentparamsIn':'experimentparams',
+                                                  'experimentparamsOut':'experimentparams'})
 
         self.sis = smach_ros.IntrospectionServer('sis_experiment',
                                                  self.smachTop,
@@ -1316,7 +1347,7 @@ class Experiment():
         
         
     # Gets called upon ANY child state termination.
-    def child_term_callback(self, outcome_map):
+    def any_action_term_callback(self, outcome_map):
         rv = False
 
         if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map):
@@ -1335,7 +1366,7 @@ class Experiment():
     
 
     # Gets called after all child states are terminated.
-    def all_term_callback(self, outcome_map):
+    def all_actions_term_callback(self, outcome_map):
         rv = 'aborted'
         if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map):
             if (outcome_map['EXITTRIGGER']=='timeout') or \
