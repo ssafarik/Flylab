@@ -112,12 +112,23 @@ class ExperimentZapOnTurn():
 
         self.experimentparams.waitExit = 0.0
         
-        self.experiment = ExperimentLib.Experiment(self.experimentparams)
+        self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, trialstart_callback=self.Trialstart_callback, trialend_callback=self.Trialend_callback)
 
 
 
     def Run(self):
-        self.experiment.Run()
+        self.experimentlib.Run()
+        
+
+    # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Trialstart_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
+
+    # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Trialend_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
         
 
 

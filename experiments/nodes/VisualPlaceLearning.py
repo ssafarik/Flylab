@@ -9,7 +9,6 @@ from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from patterngen.msg import MsgPattern
-from tracking.msg import ArenaState
 
 
 
@@ -112,12 +111,12 @@ class Experiment():
 
         self.experimentparams.waitExit = 0.0
         
-        self.experiment = ExperimentLib.ExperimentLib(self.experimentparams, trialstart_callback=self.Trialstart_callback, trialend_callback=self.Trialend_callback)
+        self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, trialstart_callback=self.Trialstart_callback, trialend_callback=self.Trialend_callback)
 
 
 
     def Run(self):
-        self.experiment.Run()
+        self.experimentlib.Run()
         
 
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
