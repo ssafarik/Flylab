@@ -188,29 +188,12 @@ class KalmanFilter:
         self.kal.process_noise_cov[2,2] = 0.5
         self.kal.process_noise_cov[3,3] = 0.5
         
-        #cv.SetIdentity(self.kal.measurement_noise_cov, 0.1)
         cv.SetIdentity(self.kal.measurement_noise_cov, 80.0)
-        self.kal.measurement_noise_cov[2,2] = 40.0
-        self.kal.measurement_noise_cov[3,3] = 40.0
-        
         self.kal.measurement_noise_cov[0,0] = 5E-5 #15.341
         self.kal.measurement_noise_cov[0,1] = 8E-6 # 2.354
-#        self.kal.measurement_noise_cov[0,2] = -1.433
-#        self.kal.measurement_noise_cov[0,3] = -0.10971
-#        
         self.kal.measurement_noise_cov[1,0] = 8E-6 #1E-2 # 2.354
         self.kal.measurement_noise_cov[1,1] = 5E-5 # Likely to be similar to the x value.
-#        self.kal.measurement_noise_cov[1,2] = -0.097233
-#        self.kal.measurement_noise_cov[1,3] = -1.6238
-#        
-#        self.kal.measurement_noise_cov[2,0] = -1.433
-#        self.kal.measurement_noise_cov[2,1] = -0.097233
         self.kal.measurement_noise_cov[2,2] =  40.0#0.22291
-#        self.kal.measurement_noise_cov[2,3] =  0.0055711
-#        
-#        self.kal.measurement_noise_cov[3,0] = -0.10971
-#        self.kal.measurement_noise_cov[3,1] = -1.6238
-#        self.kal.measurement_noise_cov[3,2] =  0.0055711
         self.kal.measurement_noise_cov[3,3] =  40.0#0.21742
         
         
@@ -232,7 +215,7 @@ class KalmanFilter:
             self.dt = t_new - self.t_previous
             self.kal.transition_matrix[0,2] = self.dt
             self.kal.transition_matrix[1,3] = self.dt
-                
+            #rospy.logwarn ('KF dt=' + '*' * int(1/(20*self.dt)))
 
             # Kalman Filtering      
             state_pre = cv.KalmanPredict(self.kal)          
@@ -254,7 +237,6 @@ class KalmanFilter:
                 vy = state_pre[3,0]
                 rospy.loginfo('KF z==None -> x,y=%s' % [x,y])
                 
-            self.t_previous = t_new
             self.z_previous = z
 
         else: # not initialized.
@@ -270,7 +252,6 @@ class KalmanFilter:
                 cv.Set2D(self.kal.state_post, 3, 0, vy)
                 rospy.loginfo ('FLT initialized kalman filter to %s' % [z[0], z[1], vx, vy])
 
-                self.t_previous = t_new
                 self.z_previous = z
                 
                 self.initialized = True
@@ -280,6 +261,7 @@ class KalmanFilter:
                 vx = None
                 vy = None
                 
+        self.t_previous = t_new
         
         return (x, y, vx, vy)
 

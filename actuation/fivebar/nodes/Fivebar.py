@@ -1015,15 +1015,16 @@ class RosFivebar:
         rospy.loginfo ('5B self.q1CenterEiz: %s, %s, %s' % (self.q1CenterE, self.q1CenterI, self.q1CenterZ))
         rospy.loginfo ('5B self.q2CenterEiz: %s, %s, %s' % (self.q2CenterE, self.q2CenterI, self.q2CenterZ))
         # Process messages forever.
-        rosrate = rospy.Rate(100)
+        rosrate = rospy.Rate(25)
 
         while not rospy.is_shutdown():
             self.time = rospy.Time.now()
             self.dt = self.time - self.timePrev
             self.timePrev = self.time
-
+            
             self.SendTransforms()
             self.SendTargetCommand()
+
             rosrate.sleep()
                 
     

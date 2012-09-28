@@ -49,8 +49,8 @@ class ExperimentDodgeball():
         self.experimentparams.triggerEntry.speedAbsChildMax  = 999.0
         self.experimentparams.triggerEntry.speedRelMin       =   0.0        # Relative speed of child to parent.
         self.experimentparams.triggerEntry.speedRelMax       = 999.0
-        self.experimentparams.triggerEntry.distanceMin = 20.0               # Distance between child and parent frames.
-        self.experimentparams.triggerEntry.distanceMax = 50.0
+        self.experimentparams.triggerEntry.distanceMin = 10.0               # Distance between child and parent frames.
+        self.experimentparams.triggerEntry.distanceMax = 35.0
         self.experimentparams.triggerEntry.angleMin = 00.0 * N.pi / 180.0   # Angle of the child frame from the perspective of the parent frame.
         self.experimentparams.triggerEntry.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleTest = 'inclusive'          # 'inclusive' or 'exclusive' of the given angle range.

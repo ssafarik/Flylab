@@ -33,7 +33,8 @@ class SaveArenaState:
         self.dirWorking = self.dirWorking_base + "/" + self.dirRelative
         chdir(self.dirWorking)
 
-        self.sub_arenastate = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback, queue_size=2)
+        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.sub_arenastate = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
         #self.sub_commandsavedata = rospy.Subscriber("CommandSavedata", CommandSavedata, self.commandsavedata_callback)
         #self.sub_experimentparams = rospy.Subscriber("ExperimentParams", ExperimentParams, self.NewTrial_callback)
         rospy.Service('save/arenastate/new_trial', ExperimentParams, self.NewTrial_callback)
@@ -497,7 +498,7 @@ class SaveArenaState:
                 bSave = False
 
             #rospy.logwarn ('SAVE %s' % [self.saveOnlyWhileTriggered,self.triggered,self.saveArenastate,bSave])
-            if bSave:                    
+            if self.saveArenastate and (self.triggered or not self.saveOnlyWhileTriggered):                    
                 with self.lock:
                     if self.fid.closed:
                         self.fid = open(self.filename, 'wa')
