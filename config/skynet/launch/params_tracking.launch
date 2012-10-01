@@ -1,4 +1,5 @@
 <launch>
   <param name="tracking/diff_threshold" type="double" value="25"/>   <!-- Adjust this based on light brightness, etc, to get good contours. -->
+  <param name="tracking/dtForecast" type="double" value="0.20"/>   <!-- Adjust this based on light brightness, etc, to get good contours. -->
 
 </launch>

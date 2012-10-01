@@ -9,6 +9,7 @@ from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from patterngen.msg import MsgPattern
+from LEDPanels.msg import MsgPanelsCommand
 
 
 
@@ -17,6 +18,11 @@ from patterngen.msg import MsgPattern
 class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
+        
+        self.pubLEDPanels = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+        self.xPanelPattern = 0
+        self.yPanelPattern = 0
+        
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
@@ -111,7 +117,10 @@ class Experiment():
 
         self.experimentparams.waitExit = 0.0
         
-        self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, trialstart_callback=self.Trialstart_callback, trialend_callback=self.Trialend_callback)
+        self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
+                                                         newexperiment_callback = self.Newexperiment_callback, 
+                                                         newtrial_callback = self.Newtrial_callback, 
+                                                         endtrial_callback = self.Endtrial_callback)
 
 
 
@@ -119,14 +128,80 @@ class Experiment():
         self.experimentlib.Run()
         
 
+    # This function gets called at the start of a new experiment.  Use this to do any one-time initialization of hardware, etc.
+    def Newexperiment_callback(self, userdata):
+        # Set the LED pattern to the origin.
+        msgPanelsCommand = MsgPanelsCommand(command='stop')
+        self.pubLEDPanels.publish (msgPanelsCommand)
+
+        msgPanelsCommand = MsgPanelsCommand(command='set_position', arg1=0, arg2=0)
+        self.pubLEDPanels.publish (msgPanelsCommand)
+        return 'success'
+
+    
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
-    def Trialstart_callback(self, userdata):
+    def Newtrial_callback(self, userdata):
         userdata.experimentparamsOut = userdata.experimentparamsIn
         return 'success'
 
+
     # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
-    def Trialend_callback(self, userdata):
-        userdata.experimentparamsOut = userdata.experimentparamsIn
+    def Endtrial_callback(self, userdata):
+        
+        # Create a rotation matrix R for an angle of +90 or -90, chosen at random.
+        plusorminusone = (N.random.random()>=0.5) * 2 - 1       # -1 means +90 (CCW), +1 means -90 (CW).
+        R = N.array([[0,plusorminusone],[-plusorminusone,0]])
+        
+        
+        # Rotate the pattern on the LED panels.
+        self.xPanelPattern += plusorminusone * 48 # 48 = 1/4 of the pixel width of the 24 panels.  192 pixels all the way around.  24 panels * 8 pixels per panel = 192.
+        self.xPanelPattern %= 192
+        self.yPanelPattern = 0
+        msgPanelsCommand = MsgPanelsCommand(command='set_position', arg1=self.xPanelPattern, arg2=self.yPanelPattern)
+        self.pubLEDPanels.publish (msgPanelsCommand)
+         
+        
+        # Rotate the points in the statefilter strings by R.  (Convert string to dict, rotate, then convert dict back to string).
+        statefilterLo_list = []
+        for iFilter in range(len(userdata.experimentparamsIn.lasertrack.statefilterLo_list)):
+            # Convert strings to dicts.
+            statefilterLo_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterLo_list[iFilter])
+
+            # Rotate
+            if 'pose' in statefilterLo_dict:
+                if 'position' in statefilterLo_dict['pose']:
+                    x = statefilterLo_dict['pose']['position']['x']
+                    y = statefilterLo_dict['pose']['position']['y']
+                    pt = N.array([x,y])
+                    [xRot,yRot] = N.dot(R,pt)
+                    statefilterLo_dict['pose']['position']['x'] = xRot
+                    statefilterLo_dict['pose']['position']['y'] = yRot
+            statefilterLo_list.append(str(statefilterLo_dict))
+
+
+        statefilterHi_list = []
+        for iFilter in range(len(userdata.experimentparamsIn.lasertrack.statefilterHi_list)):
+            # Convert strings to dicts.
+            statefilterHi_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterHi_list[iFilter])
+
+            # Rotate
+            if 'pose' in statefilterHi_dict:
+                if 'position' in statefilterHi_dict['pose']:
+                    x = statefilterHi_dict['pose']['position']['x']
+                    y = statefilterHi_dict['pose']['position']['y']
+                    pt = N.array([x,y])
+                    [xRot,yRot] = N.dot(R,pt)
+                    statefilterHi_dict['pose']['position']['x'] = xRot
+                    statefilterHi_dict['pose']['position']['y'] = yRot
+            statefilterHi_list.append(str(statefilterHi_dict))
+
+
+        # Save the results into the output.            
+        experimentparamsOut = userdata.experimentparamsIn
+        experimentparamsOut.lasertrack.statefilterLo_list = statefilterLo_list
+        experimentparamsOut.lasertrack.statefilterHi_list = statefilterHi_list
+        userdata.experimentparamsOut = experimentparamsOut
+        
         return 'success'
 
 

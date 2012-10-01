@@ -1238,7 +1238,7 @@ class Lasertrack (smach.State):
 #######################################################################################################
 #######################################################################################################
 class ExperimentLib():
-    def __init__(self, experimentparams=None, trialstart_callback=None, trialend_callback=None):
+    def __init__(self, experimentparams=None, newexperiment_callback=None, newtrial_callback=None, endtrial_callback=None):
         self.xHome = 0
         self.yHome = 0
 
@@ -1266,15 +1266,37 @@ class ExperimentLib():
 
         
         with self.smachTop:
+            ################################################################################### NEWEXPERIMENT ->  NEWEXPERIMENTCALLBACK or RESETHARDWARE
+            if newexperiment_callback is not None:
+                stateAfterNewExperiment = 'NEWEXPERIMENTCALLBACK'
+            else:
+                stateAfterNewExperiment = 'RESETHARDWARE'
+
             smach.StateMachine.add('NEWEXPERIMENT',
                                    NewExperiment(),
-                                   transitions={'success':'RESETHARDWARE',
+                                   transitions={'success':stateAfterNewExperiment,
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
-            if trialstart_callback is not None:
-                stateAfterResetHardware = 'TRIALSTARTCALLBACK'
+
+            ################################################################################### NEWEXPERIMENTCALLBACK -> RESETHARDWARE
+            if newexperiment_callback is not None:
+                smach.StateMachine.add('NEWEXPERIMENTCALLBACK', 
+                                       smach.CBState(newexperiment_callback, 
+                                                     outcomes = ['success','aborted'],
+                                                     input_keys = ['experimentparamsIn'],
+                                                     output_keys = ['experimentparamsOut']),
+                                       transitions={'success':'RESETHARDWARE',
+                                                    'aborted':'aborted'},
+                                       remapping={'experimentparamsIn':'experimentparams',
+                                                  'experimentparamsOut':'experimentparams'})
+
+
+
+            ################################################################################### RESETHARDWARE -> NEWTRIALCALLBACK or NEWTRIAL
+            if newtrial_callback is not None:
+                stateAfterResetHardware = 'NEWTRIALCALLBACK'
             else:
                 stateAfterResetHardware = 'NEWTRIAL'
 
@@ -1286,9 +1308,11 @@ class ExperimentLib():
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
-            if trialstart_callback is not None:
-                smach.StateMachine.add('TRIALSTARTCALLBACK', 
-                                       smach.CBState(trialstart_callback, 
+
+            ################################################################################### NEWTRIALCALLBACK -> NEWTRIAL
+            if newtrial_callback is not None:
+                smach.StateMachine.add('NEWTRIALCALLBACK', 
+                                       smach.CBState(newtrial_callback, 
                                                      outcomes = ['success','aborted'],
                                                      input_keys = ['experimentparamsIn'],
                                                      output_keys = ['experimentparamsOut']),
@@ -1297,6 +1321,8 @@ class ExperimentLib():
                                        remapping={'experimentparamsIn':'experimentparams',
                                                   'experimentparamsOut':'experimentparams'})
 
+
+            ################################################################################### NEWTRIAL -> WAITENTRY
             smach.StateMachine.add('NEWTRIAL',                         
                                    NewTrial(),
                                    transitions={'continue':'WAITENTRY',     # Trigger service signal goes False.
@@ -1305,12 +1331,16 @@ class ExperimentLib():
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
+
+            ################################################################################### WAITENTRY -> ENTRYTRIGGER
             smach.StateMachine.add('WAITENTRY', 
                                    TriggerOnTime(type='entry'),
                                    transitions={'success':'ENTRYTRIGGER',   # Trigger service signal goes True.
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
+
+            ################################################################################### ENTRYTRIGGER -> ACTIONS
             smach.StateMachine.add('ENTRYTRIGGER', 
                                    TriggerOnStates(type='entry'),
                                    transitions={'success':'ACTIONS',        # Trigger service signal goes True.
@@ -1319,6 +1349,8 @@ class ExperimentLib():
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
+
+            ################################################################################### ACTIONS -> WAITEXIT
             smach.StateMachine.add('ACTIONS', 
                                    smachActions,
                                    transitions={'success':'WAITEXIT',
@@ -1326,8 +1358,10 @@ class ExperimentLib():
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
-            if trialend_callback is not None:
-                stateAfterWaitExit = 'TRIALENDCALLBACK'
+
+            ################################################################################### WAITEXIT -> ENDTRIALCALLBACK or RESETHARDWARE
+            if endtrial_callback is not None:
+                stateAfterWaitExit = 'ENDTRIALCALLBACK'
             else:
                 stateAfterWaitExit = 'RESETHARDWARE'
 
@@ -1337,9 +1371,11 @@ class ExperimentLib():
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
-            if trialend_callback is not None:
-                smach.StateMachine.add('TRIALENDCALLBACK', 
-                                       smach.CBState(trialend_callback, 
+
+            ################################################################################### ENDTRIALCALLBACK -> RESETHARDWARE
+            if endtrial_callback is not None:
+                smach.StateMachine.add('ENDTRIALCALLBACK', 
+                                       smach.CBState(endtrial_callback, 
                                                      outcomes = ['success','aborted'],
                                                      input_keys = ['experimentparamsIn'],
                                                      output_keys = ['experimentparamsOut']),

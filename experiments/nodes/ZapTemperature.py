@@ -9,7 +9,6 @@ from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from patterngen.msg import MsgPattern
-from tracking.msg import ArenaState
 
 
 
