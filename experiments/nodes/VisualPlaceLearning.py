@@ -134,6 +134,9 @@ class Experiment():
         msgPanelsCommand = MsgPanelsCommand(command='stop')
         self.pubLEDPanels.publish (msgPanelsCommand)
 
+        msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', arg1=1) # Assumes preprogrammed to the three-section pattern from Reiser paper. 
+        self.pubLEDPanels.publish (msgPanelsCommand)
+
         msgPanelsCommand = MsgPanelsCommand(command='set_position', arg1=0, arg2=0)
         self.pubLEDPanels.publish (msgPanelsCommand)
         return 'success'

@@ -76,7 +76,13 @@ class ExperimentMoveAbsolute():
         self.experimentparams.move.relative.speedType = 'constant'
         self.experimentparams.move.relative.tolerance = 2
         self.experimentparams.move.timeout = -1
-        
+                self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, trialstart_callback=self.Trialstart_callback, trialend_callback=self.Trialend_callback)
+
+
+
+    def Run(self):
+        self.experimentlib.Run()
+
         self.experimentparams.lasertrack.enabled = False
         
         self.experimentparams.triggerExit.enabled = True
@@ -99,7 +105,10 @@ class ExperimentMoveAbsolute():
 
         self.experimentparams.waitExit = 0.0
         
-        self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, trialstart_callback=self.Trialstart_callback, trialend_callback=self.Trialend_callback)
+        self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
+                                                         newexperiment_callback = Newexperiment_callback, 
+                                                         newtrial_callback = self.Newtrial_callback, 
+                                                         endtrial_callback = self.Endtrial_callback)
 
 
 
@@ -107,13 +116,18 @@ class ExperimentMoveAbsolute():
         self.experimentlib.Run()
         
 
+    # This function gets called at the start of a new experiment.  Use this to do any one-time initialization of hardware, etc.
+    def Newexperiment_callback(self, userdata):
+        return 'success'
+        
+
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
-    def Trialstart_callback(self, userdata):
+    def Newtrial_callback(self, userdata):
         userdata.experimentparamsOut = userdata.experimentparamsIn
         return 'success'
 
     # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
-    def Trialend_callback(self, userdata):
+    def Endtrial_callback(self, userdata):
         userdata.experimentparamsOut = userdata.experimentparamsIn
         return 'success'
 
