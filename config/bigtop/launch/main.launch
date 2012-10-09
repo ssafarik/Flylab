@@ -1,6 +1,6 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of SKYNET hardware.                          -->
+	<!-- Configuration of the BIGTOP hardware.                      -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- hardware.                                                  -->
@@ -10,15 +10,15 @@
 	<!-- ========================================================== -->
 
 	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" /> 
-	<include file="$(find skynet)/launch/params_calibration.launch" />
-	<include file="$(find skynet)/launch/params_tracking.launch" />
+	<include file="$(find bigtop)/launch/params_calibration.launch" />
+	<include file="$(find bigtop)/launch/params_tracking.launch" />
 
 
 	<include file="$(find LEDPanels)/launch/main.launch" />
 	<include file="$(find galvodirector)/launch/main.launch" />
-	<include file="$(find skynet)/launch/params_galvos.launch" />
-	<include file="$(find skynet)/launch/camera_tracking.launch" />
-	<include file="$(find skynet)/launch/camera_aux.launch" />
+	<include file="$(find bigtop)/launch/params_galvos.launch" />
+	<include file="$(find bigtop)/launch/camera_tracking.launch" />
+	<include file="$(find bigtop)/launch/camera_aux.launch" />
 
 	
 </launch>

@@ -6,7 +6,7 @@ import serial
 import numpy as N
 
 from LEDPanels.msg import MsgPanelsCommand
-from LEDPanels.srv import SrvGetVersion, SrvGetADCValue
+from LEDPanels.srv import *
 
 
 #######################################################################################################
@@ -52,7 +52,7 @@ class LEDPanels():
                          'ident_compress_on':  {'id': 0x12, 'args': [], 'help': 'ident_compress_on(), enable compression for identical panel patches'},
                          'ident_compress_off': {'id': 0x13, 'args': [], 'help': 'ident_compress_off(), disable compression for identical panel patches'},
                          'sync_sd_info':       {'id': 0x14, 'args': [], 'help': 'sync_sd_info()'},
-                        #'get_version':        {'id': 0x15, 'args': [], 'help': 'get_version()'},     # Run as a service, not on a message topic.
+                         'get_version':        {'id': 0x15, 'args': [], 'help': 'get_version()'},     # Run as a service, not on a message topic.
                          'show_bus_number':    {'id': 0x16, 'args': [], 'help': 'show_bus_number()'},
                          'quiet_mode_on':      {'id': 0x17, 'args': [], 'help': 'quiet_mode_on(), In this mode, there is no feedback information sent from controller'},
                          'quiet_mode_off':     {'id': 0x18, 'args': [], 'help': 'quiet_mode_off(), In this mode, feedback information from controller will be shown on the GUI'},
@@ -89,9 +89,9 @@ class LEDPanels():
                          'set_config_id':      {'id': 0x09, 
                                                 'args': [{'nbytes': 1, 'min': 1, 'max': 99, 'unsigned': True}], 
                                                 'help': 'set_config_id(?)'},
-                        #'get_adc_value':      {'id': 0x10,     # Run as a service, not on a message topic.
-                        #                       'args': [{'nbytes': 1, 'min': 1, 'max': 4, 'unsigned': True}], 
-                        #                       'help': 'get_adc_value(channel_addr)'},
+                         'get_adc_value':      {'id': 0x10,     # Run as a service, not on a message topic.
+                                                'args': [{'nbytes': 1, 'min': 1, 'max': 4, 'unsigned': True}], 
+                                                'help': 'get_adc_value(channel_addr)'},
                          
                          # three byte commands:
                          'set_mode':           {'id': 0x10, 
@@ -138,8 +138,8 @@ class LEDPanels():
 
 
         # A few commands need to run as services, since they return data back to the caller.
-        self.srvGetVersion = rospy.Service('GetVersion', SrvGetVersion, self.GetVersion_callback)        
-        self.srvGetADCValue = rospy.Service('GetADCValue', SrvGetADCValue, self.GetADCValue_callback)        
+        self.srvGetVersion = rospy.Service('get_version', SrvGetVersion, self.GetVersion_callback)        
+        self.srvGetADCValue = rospy.Service('get_adc_value', SrvGetADCValue, self.GetADCValue_callback)        
 
 
         self.initialized = True
@@ -209,7 +209,7 @@ class LEDPanels():
                     if (args_dict_list[iArg]['unsigned']==False):
                         rospy.logwarn('LEDPanels not yet implemented.')
         else:
-            rospy.logerror('Unknown LEDPanels command: %s' % command)
+            rospy.logerr('Unknown LEDPanels command: %s' % command)
                         
         #rospy.logwarn ('sending %s' % serialbytes_list)
         return serialbytes_list
@@ -229,9 +229,9 @@ class LEDPanels():
 
         char_list = [0] * nChars
         if (num > 2**(8*nChars)):
-            rospy.logerror('dec2chr() overflow: Not enough characters for a number of this size.')
+            rospy.logerr('dec2chr() overflow: Not enough characters for a number of this size.')
         if (num < 0 ):
-            rospy.logerror('dec2chr() out of range: This function does not handle negative numbers.' );
+            rospy.logerr('dec2chr() out of range: This function does not handle negative numbers.' );
         
         num_rem = num
         for j in range(nChars,0,-1):
@@ -257,6 +257,8 @@ class LEDPanels():
 
 
     def Main(self):
+        panelcommand = MsgPanelsCommand(command='all_off')
+        self.PanelsCommand_callback(panelcommand)
         rospy.spin()
             
 

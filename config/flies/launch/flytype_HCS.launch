@@ -3,6 +3,6 @@
 	<!-- Configuration of the FLIES.                                -->
 	<!-- ========================================================== -->
 
-	<param name="fly/type" type="string" value="HCS" />
+	<param name="fly/type" type="string" value="HCS (wild type)" />
     
 </launch>

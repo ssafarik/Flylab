@@ -113,7 +113,7 @@ class Experiment():
         self.experimentparams.triggerExit.angleTest = 'inclusive'
         self.experimentparams.triggerExit.angleTestBilateral = False
         self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = 10      # 5 minute trials.
+        self.experimentparams.triggerExit.timeout = 300      # 5 minute trials.
 
         self.experimentparams.waitExit = 0.0
         
@@ -165,37 +165,33 @@ class Experiment():
          
         
         # Rotate the points in the statefilter strings by R.  (Convert string to dict, rotate, then convert dict back to string).
+        statefilterHi_list = []
         statefilterLo_list = []
         for iFilter in range(len(userdata.experimentparamsIn.lasertrack.statefilterLo_list)):
             # Convert strings to dicts.
+            statefilterHi_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterHi_list[iFilter])
             statefilterLo_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterLo_list[iFilter])
 
             # Rotate
             if 'pose' in statefilterLo_dict:
                 if 'position' in statefilterLo_dict['pose']:
-                    x = statefilterLo_dict['pose']['position']['x']
-                    y = statefilterLo_dict['pose']['position']['y']
-                    pt = N.array([x,y])
-                    [xRot,yRot] = N.dot(R,pt)
-                    statefilterLo_dict['pose']['position']['x'] = xRot
-                    statefilterLo_dict['pose']['position']['y'] = yRot
-            statefilterLo_list.append(str(statefilterLo_dict))
-
-
-        statefilterHi_list = []
-        for iFilter in range(len(userdata.experimentparamsIn.lasertrack.statefilterHi_list)):
-            # Convert strings to dicts.
-            statefilterHi_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterHi_list[iFilter])
-
-            # Rotate
-            if 'pose' in statefilterHi_dict:
-                if 'position' in statefilterHi_dict['pose']:
                     x = statefilterHi_dict['pose']['position']['x']
                     y = statefilterHi_dict['pose']['position']['y']
                     pt = N.array([x,y])
-                    [xRot,yRot] = N.dot(R,pt)
-                    statefilterHi_dict['pose']['position']['x'] = xRot
-                    statefilterHi_dict['pose']['position']['y'] = yRot
+                    [xRotA,yRotA] = N.dot(R,pt)
+
+                    x = statefilterLo_dict['pose']['position']['x']
+                    y = statefilterLo_dict['pose']['position']['y']
+                    pt = N.array([x,y])
+                    [xRotB,yRotB] = N.dot(R,pt)
+
+                    # Rotated hi/lo are now not necessarily in the same order.
+                    statefilterHi_dict['pose']['position']['x'] = max(xRotA,xRotB)
+                    statefilterHi_dict['pose']['position']['y'] = max(yRotA,yRotB)
+                    statefilterLo_dict['pose']['position']['x'] = min(xRotA,xRotB)
+                    statefilterLo_dict['pose']['position']['y'] = min(yRotA,yRotB)
+
+            statefilterLo_list.append(str(statefilterLo_dict))
             statefilterHi_list.append(str(statefilterHi_dict))
 
 

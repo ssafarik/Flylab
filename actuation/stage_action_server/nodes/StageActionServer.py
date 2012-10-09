@@ -17,14 +17,15 @@ import plate_tf.srv
     
 
 class StageActionServer(object):
-    def __init__(self, name):
+    def __init__(self):
         self.initialized = False
         self.isRunning = False
         self.isAtGoal = False
         
+        rospy.init_node('StageActionServer') #, anonymous=True)
         self.rosRate = rospy.Rate(100)
-        self._action_name = name
-        rospy.loginfo ('%s' % name)
+        self._action_name = rospy.get_name()
+        rospy.loginfo ('%s' % self._action_name)
         self._tfrx = tf.TransformListener() 
         self._as = actionlib.SimpleActionServer(self._action_name, ActionStageStateAction, execute_cb=self.Goal_callback, auto_start=False)
         self._as.start()
@@ -60,15 +61,15 @@ class StageActionServer(object):
     
     def Goal_callback(self, goal):
         while not self.initialized:
-            rospy.sleep(0.1)
+            rospy.sleep(0.5)
         
         #goal.state.pose.position.x = -20
         #goal.state.pose.position.y = -20
         
         # We can eliminate this section, as we are just transforming Plate to Plate.
-        poseStamped = PoseStamped(header=goal.state.header, pose=goal.state.pose) #(header=Header(frame_id='Plate'), pose=goal.state.pose)
+        poseStamped = PoseStamped(header=goal.state.header, pose=goal.state.pose) 
         #try:
-        self._tfrx.waitForTransform("Plate", poseStamped.header.frame_id, poseStamped.header.stamp, rospy.Duration(5.0))#rospy.Time(), rospy.Duration(15.0))
+        self._tfrx.waitForTransform("Plate", poseStamped.header.frame_id, poseStamped.header.stamp, rospy.Duration(5.0))
         poseStage = self._tfrx.transformPose('Plate', poseStamped)
         #except:
         #    rospy.sleep(0.1)
@@ -136,8 +137,7 @@ class StageActionServer(object):
 
 
 if __name__ == '__main__':
-    rospy.init_node('StageActionServer') #, anonymous=True)
-    node = StageActionServer(rospy.get_name())
+    node = StageActionServer()
     node.MainLoop()
       
 

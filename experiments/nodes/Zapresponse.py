@@ -100,7 +100,7 @@ class ExperimentZapresponse():
             for iFly in range(rospy.get_param('nFlies', 0)):#range(2):#
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = 'grid',
-                                                                                frame_id   = 'Fly%d' % (iFly+1),
+                                                                                frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
@@ -113,7 +113,7 @@ class ExperimentZapresponse():
             for iFly in range(rospy.get_param('nFlies', 0)):
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = '%s' % (iFly+1),
-                                                                                frame_id   = 'Fly%d' % (iFly+1),
+                                                                                frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
@@ -126,7 +126,7 @@ class ExperimentZapresponse():
             for iFly in range(rospy.get_param('nFlies', 0)):
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = 'flylogo',
-                                                                                frame_id   = 'Fly%d' % (iFly+1),
+                                                                                frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
