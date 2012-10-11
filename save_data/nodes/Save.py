@@ -373,7 +373,7 @@ class Save:
                 else:
                     self.bSavingArenastate = False
                 
-                self.OpenCsvAndWriteHeader()
+                self.OpenCsvAndWriteHeader(experimentparamsReq)
 
 
             if (self.saveVideo):
@@ -426,7 +426,7 @@ class Save:
         return True
                 
                 
-    def OpenCsvAndWriteHeader(self):                
+    def OpenCsvAndWriteHeader(self, experimentparamsReq):                
         #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
         now = rospy.Time.now().to_sec()
         self.filename = "%s%04d%02d%02d%02d%02d%02d.csv" % (experimentparamsReq.save.filenamebase, 
@@ -697,7 +697,7 @@ class Save:
 
 
     def ArenaState_callback(self, arenastate):
-        if (self.initialized) and (self.bSavingArenastate):
+        if (self.initialized) and (self.bSavingArenastate) and (self.fid is not None):
 
             #rospy.logwarn ('SAVE %s' % [self.saveOnlyWhileTriggered,self.triggered,self.saveArenastate,self.bSavingArenastate])
             # Get the state of the robot.
