@@ -124,8 +124,7 @@ def ClipXyToRadius(x, y, rmax):
 #
 class TriggerService():
     def __init__(self):
-        self.services = {"save/arenastate/trigger": None, 
-                         "save/video/trigger": None}
+        self.services = {"save/trigger": None}
         
     def attach(self):
         for key in self.services:
@@ -152,8 +151,7 @@ class TriggerService():
 #
 class NewTrialService():
     def __init__(self):
-        self.services = {"save/arenastate/new_trial": None, 
-                         "save/video/new_trial": None}
+        self.services = {"save/new_trial": None}
     
     def attach(self):
         for key in self.services:
