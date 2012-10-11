@@ -106,7 +106,7 @@ class ExperimentMoveAbsolute():
         self.experimentparams.waitExit = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
-                                                         newexperiment_callback = Newexperiment_callback, 
+                                                         newexperiment_callback = self.Newexperiment_callback, 
                                                          newtrial_callback = self.Newtrial_callback, 
                                                          endtrial_callback = self.Endtrial_callback)
 

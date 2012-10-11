@@ -75,7 +75,7 @@ class ExperimentChase():
         self.experimentparams.move.relative.speed = 200
         self.experimentparams.move.relative.speedType = 'constant'
         self.experimentparams.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.move.timeout = 600
+        self.experimentparams.move.timeout = 10
         
         self.experimentparams.lasertrack.enabled = False
         
@@ -100,7 +100,7 @@ class ExperimentChase():
         self.experimentparams.waitExit = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
-                                                         newexperiment_callback = Newexperiment_callback, 
+                                                         newexperiment_callback = self.Newexperiment_callback, 
                                                          newtrial_callback = self.Newtrial_callback, 
                                                          endtrial_callback = self.Endtrial_callback)
 
