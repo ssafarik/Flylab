@@ -1,13 +1,15 @@
 <package>
-  <description brief="panels">
+  <description brief="LEDpanels">
 
-     panels
+     LEDpanels
 
   </description>
   <author>Steve Safarik</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/panels</url>
+  <url>http://ros.org/wiki/LEDpanels</url>
+  
+  <depend package="std_msgs"/>
 
 </package>
 

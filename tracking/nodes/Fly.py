@@ -48,7 +48,7 @@ class Fly:
         self.stampPrev = rospy.Time.now()
         self.unwind = 0.0
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
-        self.dtForecast = rospy.get_param('tracking/dtForecast',0.25)
+        self.dtForecast = rospy.get_param('tracking/dtForecast',0.15)
         
         # Orientation detection stuff.
         self.angleOfTravelRecent = 0.0

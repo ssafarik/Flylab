@@ -4,8 +4,11 @@ import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
 import ExperimentLib
+from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
-from geometry_msgs.msg import Point
+from flycore.msg import MsgFrameState
+from galvodirector.msg import MsgGalvoCommand
+from patterngen.msg import MsgPattern
 
 
 
@@ -22,8 +25,8 @@ class ExperimentPattern():
         self.experimentparams.experiment.trial = 1
         
         self.experimentparams.save.filenamebase = "pattern"
-        self.experimentparams.save.arenastate = False
-        self.experimentparams.save.video = False
+        self.experimentparams.save.arenastate = True
+        self.experimentparams.save.video = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
@@ -65,11 +68,11 @@ class ExperimentPattern():
         self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
         self.experimentparams.move.pattern.hzPattern = 1/20  # Patterns per second.
-        self.experimentparams.move.pattern.hzPoint = 1/5 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
+        self.experimentparams.move.pattern.hzPoint = 20 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
         self.experimentparams.move.pattern.count = -1
-        self.experimentparams.move.pattern.size.x = 20
-        self.experimentparams.move.pattern.size.y = 20
-        self.experimentparams.move.timeout = -1 #self.experimentparams.move.pattern.count * (1.0/self.experimentparams.move.pattern.hzPattern)
+        self.experimentparams.move.pattern.size.x = 100
+        self.experimentparams.move.pattern.size.y = 100
+        self.experimentparams.move.timeout = 20 #self.experimentparams.move.pattern.count * (1.0/self.experimentparams.move.pattern.hzPattern)
         
         self.experimentparams.lasertrack.enabled = False
         
@@ -93,11 +96,31 @@ class ExperimentPattern():
 
         self.experimentparams.waitExit = 0.0
         
-        self.experiment = ExperimentLib.Experiment(self.experimentparams)
+        self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
+                                                         newexperiment_callback = self.Newexperiment_callback, 
+                                                         newtrial_callback = self.Newtrial_callback, 
+                                                         endtrial_callback = self.Endtrial_callback)
+
 
 
     def Run(self):
-        self.experiment.Run()
+        self.experimentlib.Run()
+        
+
+    # This function gets called at the start of a new experiment.  Use this to do any one-time initialization of hardware, etc.
+    def Newexperiment_callback(self, userdata):
+        return 'success'
+        
+
+    # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Newtrial_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
+
+    # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Endtrial_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
 
 
 

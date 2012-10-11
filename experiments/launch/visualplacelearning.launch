@@ -1,12 +1,12 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the RECORD10MINTRIALS experiment.         -->
+	<!-- Configuration of the ZAP-HOT-FOOD learning experiment.     -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- experiment.                                                -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments chase.launch                         -->
+    <!-- roslaunch experiments zaphotfood.launch                    -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 
@@ -15,11 +15,14 @@
 	
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find robots)/launch/robot_0625h_0625w.launch" />
-	<include file="$(find robots)/launch/robots_1.launch" />
+	<include file="$(find robots)/launch/robots_0.launch" />
 	<include file="$(find flies)/launch/flies_1.launch" />
+	<include file="$(find flies)/launch/flytype_HCS.launch" />
+	<include file="$(find flies)/launch/flygender_unspecified.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="Record10MinTrials.py" name="Experiment" />
+	<node pkg="experiments" type="VisualPlaceLearning.py" name="Experiment" />
+
+	
   
 </launch>

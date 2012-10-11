@@ -4,8 +4,11 @@ import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
 import ExperimentLib
+from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
-from geometry_msgs.msg import Point
+from flycore.msg import MsgFrameState
+from galvodirector.msg import MsgGalvoCommand
+from patterngen.msg import MsgPattern
 
 
 
@@ -93,11 +96,31 @@ class ExperimentPassiveChase():
 
         self.experimentparams.waitExit = 0.0
         
-        self.experiment = ExperimentLib.Experiment(self.experimentparams)
+        self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
+                                                         newexperiment_callback = self.Newexperiment_callback, 
+                                                         newtrial_callback = self.Newtrial_callback, 
+                                                         endtrial_callback = self.Endtrial_callback)
+
 
 
     def Run(self):
-        self.experiment.Run()
+        self.experimentlib.Run()
+        
+
+    # This function gets called at the start of a new experiment.  Use this to do any one-time initialization of hardware, etc.
+    def Newexperiment_callback(self, userdata):
+        return 'success'
+        
+
+    # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Newtrial_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
+
+    # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Endtrial_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
 
 
 

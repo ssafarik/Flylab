@@ -11,7 +11,7 @@
   <param name="acquisitionmode" type="int" value="0"/>
   <param name="framerate" type="double" value="40"/>
   <param name="triggersource" type="int" value="0"/>
-  <param name="triggerrate" type="double" value="100"/>
+  <param name="softwarerate" type="double" value="100"/>
 
 
 

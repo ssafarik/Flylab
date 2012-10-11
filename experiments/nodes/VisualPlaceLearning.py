@@ -9,30 +9,35 @@ from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from patterngen.msg import MsgPattern
-from tracking.msg import ArenaState
+from LEDPanels.msg import MsgPanelsCommand
 
 
 
 
 #######################################################################################################
-class ExperimentZapHotFood():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
+        
+        self.pubLEDPanels = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+        self.xPanelPattern = 0
+        self.yPanelPattern = 0
+        
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Food is in the hot zone."
+        self.experimentparams.experiment.description = "Visual Place Learning paper by Reiser"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zaphotfood"
+        self.experimentparams.save.filenamebase = "vpl"
         self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
-        self.experimentparams.save.onlyWhileTriggered = False # Saves always.
+        self.experimentparams.save.onlyWhileTriggered = True # Saves always.
 
-        self.experimentparams.tracking.exclusionzone.enabled = True
+        self.experimentparams.tracking.exclusionzone.enabled = False
         self.experimentparams.tracking.exclusionzone.point_list = [Point(x=52.3, y=-51.0)]
         self.experimentparams.tracking.exclusionzone.radius_list = [7.0]
         
@@ -87,8 +92,8 @@ class ExperimentZapHotFood():
             #self.experimentparams.lasertrack.statefilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
             #self.experimentparams.lasertrack.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
             #self.experimentparams.lasertrack.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
-            self.experimentparams.lasertrack.statefilterHi_list.append("{'pose':{'position':{'x':-30, 'y':50}}}")  # This is the cool zone.
-            self.experimentparams.lasertrack.statefilterLo_list.append("{'pose':{'position':{'x':-50, 'y':30}}}")
+            self.experimentparams.lasertrack.statefilterHi_list.append("{'pose':{'position':{'x':-25, 'y':-25}}}")  # This is the cool zone.
+            self.experimentparams.lasertrack.statefilterLo_list.append("{'pose':{'position':{'x':-50, 'y':-50}}}")
             self.experimentparams.lasertrack.statefilterCriteria_list.append("exclusive")
         self.experimentparams.lasertrack.timeout = -1
         
@@ -108,7 +113,7 @@ class ExperimentZapHotFood():
         self.experimentparams.triggerExit.angleTest = 'inclusive'
         self.experimentparams.triggerExit.angleTestBilateral = False
         self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = 3600
+        self.experimentparams.triggerExit.timeout = 300      # 5 minute trials.
 
         self.experimentparams.waitExit = 0.0
         
@@ -125,24 +130,82 @@ class ExperimentZapHotFood():
 
     # This function gets called at the start of a new experiment.  Use this to do any one-time initialization of hardware, etc.
     def Newexperiment_callback(self, userdata):
-        return 'success'
-        
+        # Set the LED pattern to the origin.
+        msgPanelsCommand = MsgPanelsCommand(command='stop')
+        self.pubLEDPanels.publish (msgPanelsCommand)
 
+        msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', arg1=1) # Assumes preprogrammed to the three-section pattern from Reiser paper. 
+        self.pubLEDPanels.publish (msgPanelsCommand)
+
+        msgPanelsCommand = MsgPanelsCommand(command='set_position', arg1=0, arg2=0)
+        self.pubLEDPanels.publish (msgPanelsCommand)
+        return 'success'
+
+    
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
     def Newtrial_callback(self, userdata):
         userdata.experimentparamsOut = userdata.experimentparamsIn
         return 'success'
 
+
     # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
     def Endtrial_callback(self, userdata):
-        userdata.experimentparamsOut = userdata.experimentparamsIn
-        return 'success'
         
+        # Create a rotation matrix R for an angle of +90 or -90, chosen at random.
+        plusorminusone = (N.random.random()>=0.5) * 2 - 1       # -1 means +90 (CCW), +1 means -90 (CW).
+        R = N.array([[0,plusorminusone],[-plusorminusone,0]])
+        
+        
+        # Rotate the pattern on the LED panels.
+        self.xPanelPattern += plusorminusone * 48 # 48 = 1/4 of the pixel width of the 24 panels.  192 pixels all the way around.  24 panels * 8 pixels per panel = 192.
+        self.xPanelPattern %= 192
+        self.yPanelPattern = 0
+        msgPanelsCommand = MsgPanelsCommand(command='set_position', arg1=self.xPanelPattern, arg2=self.yPanelPattern)
+        self.pubLEDPanels.publish (msgPanelsCommand)
+         
+        
+        # Rotate the points in the statefilter strings by R.  (Convert string to dict, rotate, then convert dict back to string).
+        statefilterHi_list = []
+        statefilterLo_list = []
+        for iFilter in range(len(userdata.experimentparamsIn.lasertrack.statefilterLo_list)):
+            # Convert strings to dicts.
+            statefilterHi_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterHi_list[iFilter])
+            statefilterLo_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterLo_list[iFilter])
 
+            # Rotate
+            if 'pose' in statefilterLo_dict:
+                if 'position' in statefilterLo_dict['pose']:
+                    x = statefilterHi_dict['pose']['position']['x']
+                    y = statefilterHi_dict['pose']['position']['y']
+                    pt = N.array([x,y])
+                    [xRotA,yRotA] = N.dot(R,pt)
+
+                    x = statefilterLo_dict['pose']['position']['x']
+                    y = statefilterLo_dict['pose']['position']['y']
+                    pt = N.array([x,y])
+                    [xRotB,yRotB] = N.dot(R,pt)
+
+                    # Rotated hi/lo are now not necessarily in the same order.
+                    statefilterHi_dict['pose']['position']['x'] = max(xRotA,xRotB)
+                    statefilterHi_dict['pose']['position']['y'] = max(yRotA,yRotB)
+                    statefilterLo_dict['pose']['position']['x'] = min(xRotA,xRotB)
+                    statefilterLo_dict['pose']['position']['y'] = min(yRotA,yRotB)
+
+            statefilterLo_list.append(str(statefilterLo_dict))
+            statefilterHi_list.append(str(statefilterHi_dict))
+
+
+        # Save the results into the output.            
+        experimentparamsOut = userdata.experimentparamsIn
+        experimentparamsOut.lasertrack.statefilterLo_list = statefilterLo_list
+        experimentparamsOut.lasertrack.statefilterHi_list = statefilterHi_list
+        userdata.experimentparamsOut = experimentparamsOut
+        
+        return 'success'
 
 
 if __name__ == '__main__':
-    experiment = ExperimentZapHotFood()
+    experiment = Experiment()
     experiment.Run()
         
 

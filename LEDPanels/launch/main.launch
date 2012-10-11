@@ -1,0 +1,15 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Start the LED panels.                                      -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the hardware-specific .launch file, and point here  -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+    
+	
+	<node name="LEDPanels" pkg="LEDPanels" type="panels.py" />
+
+
+</launch>
+

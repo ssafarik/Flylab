@@ -8,7 +8,7 @@ import copy
 import tf
 import numpy as N
 from cv_bridge import CvBridge, CvBridgeError
-from geometry_msgs.msg import PointStamped
+from geometry_msgs.msg import Point, PointStamped
 from std_msgs.msg import String
 from sensor_msgs.msg import Image, CameraInfo
 from tracking.msg import ContourInfo
@@ -32,10 +32,14 @@ class ContourGenerator:
         self.preinit = False
         self.initialized = False
         
+        self.bUseBackgroundSubtraction  = rospy.get_param('tracking/usebackgroundsubtraction', True)    # Set False to turn off bg subtraction.        
+        self.bUseTransforms             = rospy.get_param('tracking/usetransforms', True)               # Set False to stay in camera coordinates.
+        
         # Messages
         self.camerainfo = None
+        queue_size_images = rospy.get_param('tracking/queue_size_images', 1)
         self.subCameraInfo       = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
-        self.subImageRect        = rospy.Subscriber("camera/image_rect", Image, self.Image_callback, queue_size=1, buff_size=262144, tcp_nodelay=True)
+        self.subImageRect        = rospy.Subscriber("camera/image_rect", Image, self.Image_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
         #self.subImageRaw         = rospy.Subscriber("camera/image_raw", Image, self.ImageRaw_callback, queue_size=1, buff_size=262144, tcp_nodelay=True)
         
         self.pubImageProcessed   = rospy.Publisher("camera/image_processed", Image)
@@ -46,7 +50,8 @@ class ContourGenerator:
         self.pubCamerainfoRviz   = rospy.Publisher("camera_rviz/camera_info", CameraInfo)
         self.pubContourInfo      = rospy.Publisher("ContourInfo", ContourInfo)
         
-        self.tfrx = tf.TransformListener()
+        if self.bUseBackgroundSubtraction:
+            self.tfrx = tf.TransformListener()
         
         # Contour Info
         self.contourinfo = ContourInfo()
@@ -93,7 +98,7 @@ class ContourGenerator:
         
 
         # Mask Info
-        self.radiusMask = int(rospy.get_param("camera/mask/radius", 25))
+        self.radiusMask = int(rospy.get_param("camera/mask/radius", 9999))
 
         self.timePrev = rospy.Time.now().to_sec()
         self.preinit = True
@@ -127,22 +132,25 @@ class ContourGenerator:
             cv.SetImageROI(self.cvimageProcessed, self.rectImage)
             cv.Zero(self.cvimageZeros)
             
-            b = False
-            while not b:
-                try:
-                    self.tfrx.waitForTransform('Plate', 
-                                               self.ptsOriginImage.header.frame_id, 
-                                               self.ptsOriginImage.header.stamp, 
-                                               rospy.Duration(1.0))
-                    
-                    self.ptsOriginMask = self.tfrx.transformPoint('Plate', self.ptsOriginImage)
-                    self.ptsOriginMask.point.x = -self.ptsOriginMask.point.x
-                    self.ptsOriginMask.point.y = -self.ptsOriginMask.point.y
-                    #rospy.logwarn(self.ptsOriginMask.point)
-                    b = True
-                except tf.Exception, e:
-                    rospy.logwarn('Exception transforming mask frames %s->Plate:  %s' % (self.ptsOriginImage.header.frame_id, e))
-                    
+            if self.bUseTransforms:
+                b = False
+                while not b:
+                    try:
+                        self.tfrx.waitForTransform('Plate', 
+                                                   self.ptsOriginImage.header.frame_id, 
+                                                   self.ptsOriginImage.header.stamp, 
+                                                   rospy.Duration(1.0))
+                        
+                        self.ptsOriginMask = self.tfrx.transformPoint('Plate', self.ptsOriginImage)
+                        self.ptsOriginMask.point.x = -self.ptsOriginMask.point.x
+                        self.ptsOriginMask.point.y = -self.ptsOriginMask.point.y
+                        #rospy.logwarn(self.ptsOriginMask.point)
+                        b = True
+                    except tf.Exception, e:
+                        rospy.logwarn('Exception transforming mask frames %s->Plate:  %s' % (self.ptsOriginImage.header.frame_id, e))
+            else:
+                self.ptsOriginMask = PointStamped(point=Point(x=0, y=0))
+                        
             cv.Zero(self.cvimageMask)
             cv.Circle(self.cvimageMask,
                       (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
@@ -159,14 +167,15 @@ class ContourGenerator:
             
             #q = cv.GetSize(self.cvimage)
             #rospy.logwarn('size2=%s' % [q[0],q[1]])
-            try:
-                self.cvimageBackground = cv.LoadImage(FILENAME_BACKGROUND, cv.CV_LOAD_IMAGE_GRAYSCALE)
-            except:
-                rospy.logwarn ('Saving new background image %s' % FILENAME_BACKGROUND)
-                cv.And(self.cvimage, self.cvimageMask, self.cvimageBackground)
-                cv.SaveImage(FILENAME_BACKGROUND, self.cvimageBackground)
-                #q = cv.GetSize(self.cvimageBackground)
-                #rospy.logwarn('size3=%s' % [q[0],q[1]])
+            if self.bUseBackgroundSubtraction:
+                try:
+                    self.cvimageBackground = cv.LoadImage(FILENAME_BACKGROUND, cv.CV_LOAD_IMAGE_GRAYSCALE)
+                except:
+                    rospy.logwarn ('Saving new background image %s' % FILENAME_BACKGROUND)
+                    cv.And(self.cvimage, self.cvimageMask, self.cvimageBackground)
+                    cv.SaveImage(FILENAME_BACKGROUND, self.cvimageBackground)
+                    #q = cv.GetSize(self.cvimageBackground)
+                    #rospy.logwarn('size3=%s' % [q[0],q[1]])
               
             self.initialized = True
             
@@ -186,17 +195,22 @@ class ContourGenerator:
         
         
     def PixelsFromMm (self, xIn):
-        ptsIn = PointStamped()
-        ptsIn.header.frame_id = "Plate"
-        ptsIn.point.x = 0.0
-        ptsIn.point.y = 0.0
-        ptsOrigin = self.tfrx.transformPoint("ImageRect", ptsIn)        
-        
-        ptsIn.point.x = xIn
-        ptsIn.point.y = xIn
-        ptsOut = self.tfrx.transformPoint("ImageRect", ptsIn)
+        if self.bUseTransforms:
+            ptsIn = PointStamped()
+            ptsIn.header.frame_id = "Plate"
+            ptsIn.point.x = 0.0
+            ptsIn.point.y = 0.0
+            ptsOrigin = self.tfrx.transformPoint("ImageRect", ptsIn)        
+            
+            ptsIn.point.x = xIn
+            ptsIn.point.y = xIn
+            ptsOut = self.tfrx.transformPoint("ImageRect", ptsIn)
+            xOut = (ptsOut.point.x - ptsOrigin.point.x)
+            
+        else:
+            xOut = xIn 
                 
-        return (ptsOut.point.x - ptsOrigin.point.x)
+        return xOut
         
         
     def DrawAngleLine(self, cvimage, x0, y0, angle, ecc, length):
@@ -320,10 +334,10 @@ class ContourGenerator:
             ecc = 1.0
             
         # Save contour info
-        ptContour = PointStamped()
-        ptContour.header.frame_id = "ImageRect"
-        ptContour.point.x = x
-        ptContour.point.y = y
+        ptsContour = PointStamped()
+        ptsContour.header.frame_id = "ImageRect"
+        ptsContour.point.x = x
+        ptsContour.point.y = y
 #        if (x is None) or (y is None):
 #            for pt in cvseqContours:
 #                rospy.logwarn(pt)
@@ -331,7 +345,11 @@ class ContourGenerator:
             
         if x is not None:
             try:
-                self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptContour)
+                if self.bUseTransforms:
+                    self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptsContour)
+                else:
+                    self.ptsOutput = ptsContour
+                    
                 self.x0_list.append(self.ptsOutput.point.x)
                 self.y0_list.append(self.ptsOutput.point.y)
                 self.angle_list.append(angle)
@@ -340,10 +358,10 @@ class ContourGenerator:
                 self.nContours += 1
 
             except tf.Exception, e:
-                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContour.header.frame_id, e))
+                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptsContour.header.frame_id, e))
                 self.ptsOutput = PointStamped()
             except TypeError, e:
-                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptContour.header.frame_id, e))
+                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptsContour.header.frame_id, e))
                 
         
 
@@ -441,20 +459,21 @@ class ContourGenerator:
 
         if not self.preinit:
             return
-
         self.header = image.header
         
         # Convert ROS image to OpenCV image
         try:
             self.cvimage = cv.GetImage(self.cvbridge.imgmsg_to_cv(image, "passthrough"))
+            #cvimageIn = cv.GetImage(self.cvbridge.imgmsg_to_cv(image, "passthrough"))
+            #cv.CvtColor(cvimageIn, self.cvimage, cv.CV_RGB2GRAY)
         except CvBridgeError, e:
-          rospy.logwarn ('Exception %s' % e)
+            rospy.logwarn ('Exception %s' % e)
         
         if not self.initialized:
             self.InitializeImages()
 
         if self.initialized:        
-            radiusMask = int(rospy.get_param("camera/mask/radius", 25)) 
+            radiusMask = int(rospy.get_param("camera/mask/radius", 9999)) 
             if radiusMask != self.radiusMask:
                 self.radiusMask = radiusMask 
                 cv.Zero(self.cvimageMask)
@@ -471,11 +490,16 @@ class ContourGenerator:
             self.diff_threshold = rospy.get_param("tracking/diff_threshold", 50)
             
             # Apply mask and Subtract background
-            #q1 = cv.GetSize(self.cvimage)
-            #q2 = cv.GetSize(self.cvimageMask)
-            #rospy.logwarn ('%s' % [[q1[0],q1[1]],[q2[0],q2[1]]])
-            cv.And(self.cvimage, self.cvimageMask, self.cvimage)
-            cv.AbsDiff(self.cvimage, self.cvimageBackground, self.cvimageForeground)
+            if self.bUseBackgroundSubtraction:
+                #q1 = cv.GetSize(self.cvimage)
+                #q2 = cv.GetSize(self.cvimageMask)
+                #rospy.logwarn ('%s' % [[q1[0],q1[1]],[q2[0],q2[1]]])
+                cv.And(self.cvimage, self.cvimageMask, self.cvimage)
+                cv.AbsDiff(self.cvimage, self.cvimageBackground, self.cvimageForeground)
+            else:
+                cv.Copy(self.cvimage, self.cvimageForeground)
+                #self.cvimageForeground = self.cvimage
+                #cv.CvtColor(self.cvimage, self.cvimageForeground, cv.CV_RGB2GRAY)
             
             # Threshold
             cv.Threshold(self.cvimageForeground, 
@@ -484,7 +508,7 @@ class ContourGenerator:
                          self.max_8U, 
                          #cv.CV_THRESH_BINARY)
                          cv.CV_THRESH_TOZERO)
-    
+
             
             # Get the ContourInfo.
             #cv.Copy(self.cvimageThreshold, self.cvimageThreshold2)
@@ -515,7 +539,7 @@ class ContourGenerator:
                     rospy.logwarn ('Exception %s' % e)
             
             # Publish background image
-            if self.pubImageBackground.get_num_connections() > 0:
+            if (self.pubImageBackground.get_num_connections() > 0) and (self.bUseBackgroundSubtraction):
                 try:
                     image2 = self.cvbridge.cv_to_imgmsg(self.cvimageBackground, "passthrough")
                     image2.header.stamp = image.header.stamp
@@ -581,6 +605,7 @@ class ContourGenerator:
             self.pubCamerainfoRviz.publish(camerainfo2)
             self.pubImageRviz.publish(image2)
             del image2
+
 
 
     def Main(self):
