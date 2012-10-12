@@ -206,8 +206,12 @@ class NewTrial (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         self.pubTrackingCommand = rospy.Publisher('TrackingCommand', TrackingCommand, latch=True)
+        
+        # Command messages.
+        self.command = 'continue'
+        self.command_list = ['continue','pause']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
-        self.command = 'run'
+
         
         self.Trigger = TriggerService()
         self.Trigger.attach()
@@ -216,12 +220,11 @@ class NewTrial (smach.State):
         self.NewTrial.attach()
 
     def Command_callback(self, msgString):
-        command_list = ['run','pause']
-        if msgString.data in command_list:
+        if msgString.data in self.command_list:
             self.command = msgString.data
             rospy.logwarn ('Experiment command received: %s' % self.command)
         else:
-            rospy.logwarn ('Unknown experiment command: %s, valid commands are %s' % (msgString.data, command_list))
+            rospy.logwarn ('Unknown experiment command: %s, valid commands are %s' % (msgString.data, self.command_list))
             
         
     def execute(self, userdata):
@@ -241,7 +244,7 @@ class NewTrial (smach.State):
             rospy.logwarn ('**************************************** Experiment paused at NewTrial...')
             bWasPaused = True
             
-        while (self.command != 'run'):
+        while (self.command != 'continue'):
             rospy.sleep(1)
             
         if (bWasPaused):
