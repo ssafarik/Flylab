@@ -202,7 +202,7 @@ class NewExperiment (smach.State):
 class NewTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['continue','stop','aborted'],
+                             outcomes=['continue','exit','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         self.pubTrackingCommand = rospy.Publisher('TrackingCommand', TrackingCommand, latch=True)
@@ -222,13 +222,13 @@ class NewTrial (smach.State):
     def Command_callback(self, msgString):
         if msgString.data in self.command_list:
             self.command = msgString.data
-            rospy.logwarn ('Experiment command received: %s' % self.command)
+            rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.command)
         else:
-            rospy.logwarn ('Unknown experiment command: %s, valid commands are %s' % (msgString.data, self.command_list))
+            rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.command_list))
             
         
     def execute(self, userdata):
-        rv = 'stop'
+        rv = 'exit'
         experimentparams = userdata.experimentparamsIn
         experimentparams.experiment.trial = userdata.experimentparamsIn.experiment.trial+1
         if (experimentparams.experiment.maxTrials != -1):
@@ -1366,7 +1366,7 @@ class ExperimentLib():
             smach.StateMachine.add('NEWTRIAL',                         
                                    NewTrial(),
                                    transitions={'continue':'WAITENTRY',     # Trigger service signal goes False.
-                                                'stop':'success',           # Trigger service signal goes False.
+                                                'exit':'success',           # Trigger service signal goes False.
                                                 'aborted':'aborted'},       # Trigger service signal goes False.
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
