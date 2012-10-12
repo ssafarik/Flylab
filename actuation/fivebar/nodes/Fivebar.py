@@ -531,7 +531,7 @@ class RosFivebar:
             pt.x = self.ptEeSense.x + self.vecOffsetSense.x 
             pt.y = self.ptEeSense.y + self.vecOffsetSense.y 
             pt.z = self.ptEeSense.z + self.vecOffsetSense.z 
-            pt.point = self.ClipPtToRadius(pt.point)
+            pt = self.ClipPtToRadius(pt)
             
             rvStageState.state.header.stamp = self.time
             rvStageState.state.header.frame_id = 'Stage' # Always return Stage frame coordinates.

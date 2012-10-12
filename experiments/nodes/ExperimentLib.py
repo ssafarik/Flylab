@@ -209,7 +209,7 @@ class NewTrial (smach.State):
         
         # Command messages.
         self.command = 'continue'
-        self.command_list = ['continue','pause']
+        self.command_list = ['continue','pause', 'stage/calibrate', 'exit']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
 
         
@@ -239,16 +239,28 @@ class NewTrial (smach.State):
 
         self.Trigger.notify(False)
         
-        bWasPaused = False
+        # Handle various commands sent in via messages.
         if (self.command=='pause'):
             rospy.logwarn ('**************************************** Experiment paused at NewTrial...')
-            bWasPaused = True
-            
-        while (self.command != 'continue'):
-            rospy.sleep(1)
-            
-        if (bWasPaused):
+            while (self.command != 'continue'):
+                rospy.sleep(1)
             rospy.logwarn ('**************************************** Experiment continuing.')
+
+        if (self.command=='stage/calibrate'):
+            rospy.logwarn ('**************************************** Calibrating...')
+            rospy.wait_for_service('calibrate_stage')
+            try:
+                Calibrate = rospy.ServiceProxy('calibrate_stage', SrvFrameState)
+            except rospy.ServiceException, e:
+                rospy.logwarn ("FAILED to attach to calibrate_stage service: %s" % e)
+            else:
+                Calibrate(SrvFrameStateRequest())
+            self.command = 'continue'
+            rospy.logwarn ('**************************************** Experiment continuing.')
+            
+        if (self.command=='exit'):
+            return rv
+
             
         userdata.experimentparamsOut = experimentparams
         self.pubTrackingCommand.publish(experimentparams.tracking)
