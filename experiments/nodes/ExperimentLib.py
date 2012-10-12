@@ -10,7 +10,7 @@ import smach_ros
 import tf
 
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
-from std_msgs.msg import Header, ColorRGBA
+from std_msgs.msg import Header, ColorRGBA, String
 from stage_action_server.msg import *
 from pythonmodules import filters
 from flycore.msg import MsgFrameState, TrackingCommand
@@ -195,6 +195,10 @@ class NewExperiment (smach.State):
 # NewTrial() - Increments the trial number, untriggers, and calls the 
 #              new_trial service (which begins recording).
 #
+# Experiment may be paused & restarted via the commandlines:
+# rostopic pub -1 experiment/command std_msgs/String pause
+# rostopic pub -1 experiment/command std_msgs/String run
+#
 class NewTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
@@ -202,12 +206,23 @@ class NewTrial (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         self.pubTrackingCommand = rospy.Publisher('TrackingCommand', TrackingCommand, latch=True)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+        self.command = 'run'
+        
         self.Trigger = TriggerService()
         self.Trigger.attach()
         
         self.NewTrial = NewTrialService()
         self.NewTrial.attach()
 
+    def Command_callback(self, msgString):
+        command_list = ['run','pause']
+        if msgString.data in command_list:
+            self.command = msgString.data
+            rospy.logwarn ('Experiment command received: %s' % self.command)
+        else:
+            rospy.logwarn ('Unknown experiment command: %s, valid commands are %s' % (msgString.data, command_list))
+            
         
     def execute(self, userdata):
         rv = 'stop'
@@ -220,6 +235,18 @@ class NewTrial (smach.State):
         rospy.loginfo ('EL State NewTrial(%s)' % experimentparams.experiment.trial)
 
         self.Trigger.notify(False)
+        
+        bWasPaused = False
+        if (self.command=='pause'):
+            rospy.logwarn ('**************************************** Experiment paused at NewTrial...')
+            bWasPaused = True
+            
+        while (self.command != 'run'):
+            rospy.sleep(1)
+            
+        if (bWasPaused):
+            rospy.logwarn ('**************************************** Experiment continuing.')
+            
         userdata.experimentparamsOut = experimentparams
         self.pubTrackingCommand.publish(experimentparams.tracking)
         try:
