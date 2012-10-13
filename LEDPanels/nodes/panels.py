@@ -10,6 +10,17 @@ from LEDPanels.srv import *
 
 
 #######################################################################################################
+# LEDPanels node receives message commands on the topic 'LEDPanels/command', and communicates with
+# the panel hardware.
+#
+# For example:
+# rosrun LEDPanels panels.py
+#
+# and then:
+# rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand all_on 0 0 0 0
+# rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand set_pattern_id 1 0 0 0
+# (panel commands take 0 to 4 parameters, but the rostopic command needs to see all four, hence the "all_on 0 0 0 0", etc).
+# 
 class LEDPanels():
     def __init__(self):
         self.initialized = False
