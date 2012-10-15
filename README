@@ -1,13 +1,14 @@
-Flylab Software (formerly Flyatar2)
+Flylab Software
 -------------------------------------
 
-This software is (i.e. hopes to be) the foundation software platform of 
-the Dickinson Lab.  
+This software is the central framework for many experiments & hardware 
+platforms in the Dickinson Lab at the UW.  
 
-At the moment it provides a platform for virtual reality environments that 
-may consist of some combination of robot-magnet actuators, laser-galvo steering, 
-realtime multifly tracking & visual servoing, an experiment library & examples 
-thereof, data-logging of fly & robot states, and other related pieces.
+It provides a platform for virtual reality environments that consist of some 
+combination of realtime multifly tracking, mechanical actuators to simulate 
+robot/fly interactions, laser-galvo steering, realtime multifly tracking & 
+visual servoing, an experiment library & examples thereof, data-logging of 
+fly & robot states, and other related pieces.
 
 A focus has been to enable easy operation across multiple machines and multiple 
 experimental hardware platforms, and as such each piece of experimental hardware 
@@ -29,7 +30,20 @@ rosrun smach_viewer smach_viewer.py
 
 Some useful commands:
 -----------------------
-roslaunch experiments <experimentname>.launch					# Run an experiment.
+roslaunch experiments <experimentname>.launch					           # Run an experiment.
+rostopic pub -1 experiment/command std_msgs/String pause                   # Pause the experiment at the start of the next trial.
+rostopic pub -1 experiment/command std_msgs/String continue                # Continue a paused experiment.
+rostopic pub -1 experiment/command std_msgs/String exit                    # Terminate the experiment at the start of the next trial.
+rostopic pub -1 experiment/command std_msgs/String stage/calibrate         # Rerun the motor calibration routine at the start of the next trial.
+
+rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand all_on 0 0 0 0
+rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand all_off 0 0 0 0
+rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand set_pattern_id 1 0 0 0    # Set pattern #1 on the panels.  Assumes they're already programmed, etc.
+rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand set_gain_offset 1 2 3 4   # Set the xgain, xoffset, ygain, yoffset.
+# (panel commands take 0 to 4 parameters, but the rostopic command needs to see all four, hence the above have all four numbers, e.g. "0 0 0 0", even if they take fewer params).
+# All the various commands are supported.  See LEDPanels/nodes/panels.py for a list.
+
+
 
 roslaunch <your device name> camera.launch						# Run the camera; publish image_raw.
 ROS_NAMESPACE=camera rosrun image_proc image_proc				# Run the image processor; publish image_rect.

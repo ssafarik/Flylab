@@ -23,7 +23,7 @@
     <param name="camera/mask/radius" type="double" value="9"/>  <!-- pixels -->
     <param name="camera/shutter" type="double" value="256"/>
     
-	<node pkg="experiments" type="ZapTemperature.py" name="Experiment" />
+	<node pkg="experiments" type="ZapTemperature.py" name="Experiment" required="true" />
 
 	
   

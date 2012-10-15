@@ -10,7 +10,7 @@ import smach_ros
 import tf
 
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
-from std_msgs.msg import Header, ColorRGBA
+from std_msgs.msg import Header, ColorRGBA, String
 from stage_action_server.msg import *
 from pythonmodules import filters
 from flycore.msg import MsgFrameState, TrackingCommand
@@ -124,8 +124,7 @@ def ClipXyToRadius(x, y, rmax):
 #
 class TriggerService():
     def __init__(self):
-        self.services = {"save/arenastate/trigger": None, 
-                         "save/video/trigger": None}
+        self.services = {"save/trigger": None}
         
     def attach(self):
         for key in self.services:
@@ -152,8 +151,7 @@ class TriggerService():
 #
 class NewTrialService():
     def __init__(self):
-        self.services = {"save/arenastate/new_trial": None, 
-                         "save/video/new_trial": None}
+        self.services = {"save/new_trial": None}
     
     def attach(self):
         for key in self.services:
@@ -197,22 +195,40 @@ class NewExperiment (smach.State):
 # NewTrial() - Increments the trial number, untriggers, and calls the 
 #              new_trial service (which begins recording).
 #
+# Experiment may be paused & restarted via the commandlines:
+# rostopic pub -1 experiment/command std_msgs/String pause
+# rostopic pub -1 experiment/command std_msgs/String run
+#
 class NewTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['continue','stop','aborted'],
+                             outcomes=['continue','exit','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         self.pubTrackingCommand = rospy.Publisher('TrackingCommand', TrackingCommand, latch=True)
+        
+        # Command messages.
+        self.command = 'continue'
+        self.command_list = ['continue','pause', 'stage/calibrate', 'exit']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+
+        
         self.Trigger = TriggerService()
         self.Trigger.attach()
         
         self.NewTrial = NewTrialService()
         self.NewTrial.attach()
 
+    def Command_callback(self, msgString):
+        if msgString.data in self.command_list:
+            self.command = msgString.data
+            rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.command)
+        else:
+            rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.command_list))
+            
         
     def execute(self, userdata):
-        rv = 'stop'
+        rv = 'exit'
         experimentparams = userdata.experimentparamsIn
         experimentparams.experiment.trial = userdata.experimentparamsIn.experiment.trial+1
         if (experimentparams.experiment.maxTrials != -1):
@@ -222,6 +238,30 @@ class NewTrial (smach.State):
         rospy.loginfo ('EL State NewTrial(%s)' % experimentparams.experiment.trial)
 
         self.Trigger.notify(False)
+        
+        # Handle various commands sent in via messages.
+        if (self.command=='pause'):
+            rospy.logwarn ('**************************************** Experiment paused at NewTrial...')
+            while (self.command != 'continue'):
+                rospy.sleep(1)
+            rospy.logwarn ('**************************************** Experiment continuing.')
+
+        if (self.command=='stage/calibrate'):
+            rospy.logwarn ('**************************************** Calibrating...')
+            rospy.wait_for_service('calibrate_stage')
+            try:
+                Calibrate = rospy.ServiceProxy('calibrate_stage', SrvFrameState)
+            except rospy.ServiceException, e:
+                rospy.logwarn ("FAILED to attach to calibrate_stage service: %s" % e)
+            else:
+                Calibrate(SrvFrameStateRequest())
+            self.command = 'continue'
+            rospy.logwarn ('**************************************** Experiment continuing.')
+            
+        if (self.command=='exit'):
+            return rv
+
+            
         userdata.experimentparamsOut = experimentparams
         self.pubTrackingCommand.publish(experimentparams.tracking)
         try:
@@ -1326,7 +1366,7 @@ class ExperimentLib():
             smach.StateMachine.add('NEWTRIAL',                         
                                    NewTrial(),
                                    transitions={'continue':'WAITENTRY',     # Trigger service signal goes False.
-                                                'stop':'success',           # Trigger service signal goes False.
+                                                'exit':'success',           # Trigger service signal goes False.
                                                 'aborted':'aborted'},       # Trigger service signal goes False.
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})

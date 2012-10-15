@@ -47,8 +47,8 @@ class Save:
         chdir(self.dirWorking)
 
         self.triggered = False
-        rospy.Service('save/arenastate/new_trial', ExperimentParams, self.NewTrial_callback)
-        rospy.Service('save/arenastate/trigger', Trigger, self.Trigger_callback)
+        rospy.Service('save/new_trial', ExperimentParams, self.NewTrial_callback)
+        rospy.Service('save/trigger', Trigger, self.Trigger_callback)
 
         
         ############# Video stuff
@@ -57,9 +57,6 @@ class Save:
 
         self.topicVideo = rospy.get_param("save/videotopic", 'camera/image_rect')
         self.subImage = rospy.Subscriber(self.topicVideo, Image, self.Image_callback)
-        
-        rospy.Service('save/video/new_trial', ExperimentParams, self.NewTrial_callback)
-        rospy.Service('save/video/trigger', Trigger, self.Trigger_callback)
         
         self.bridge = CvBridge()
 
@@ -341,7 +338,7 @@ class Save:
                     if (bRisingEdge):
                         self.ResetFrameCounter()
                             
-                    if (bFallingEdge):
+                    if (bFallingEdge) and (self.filenameVideo is not None):
                         self.WriteVideoFromFrames()
                     
             
