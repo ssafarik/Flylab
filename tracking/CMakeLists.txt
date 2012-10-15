@@ -29,5 +29,8 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+rosbuild_add_executable(publishimage nodes/PublishImage.cpp)
+
+
 find_package(OpenCV REQUIRED)
 #target_link_libraries(my_target ${OpenCV_LIBRARIES})
