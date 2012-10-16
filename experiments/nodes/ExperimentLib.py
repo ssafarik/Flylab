@@ -17,6 +17,7 @@ from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from experiments.srv import Trigger, ExperimentParams
 from galvodirector.msg import MsgGalvoCommand
+from LEDPanels.msg import MsgPanelsCommand
 from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
 from visualization_msgs.msg import Marker
@@ -1277,6 +1278,366 @@ class Lasertrack (smach.State):
             
 #######################################################################################################
 #######################################################################################################
+# LEDPanels()
+# 
+# Control the LEDPanels according to the experimentparams.  
+# This smach state allows enabling the panels only when the given object's state (i.e. Fly state) is 
+# in a restricted domain of states.
+#
+class LEDPanels (smach.State):
+    def __init__(self):
+
+        smach.State.__init__(self, 
+                             outcomes=['disabled','timeout','preempt','aborted'],
+                             input_keys=['experimentparamsIn'])
+        
+        self.rosrate = rospy.Rate(gRate)
+        self.arenastate = None
+        self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
+
+        self.pubMarker           = rospy.Publisher('visualization_marker', Marker)
+        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+        queue_size_arenastate    = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.subArenaState       = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
+
+        rospy.on_shutdown(self.OnShutdown_callback)
+        
+        
+    def OnShutdown_callback(self):
+        pass
+
+
+    def ArenaState_callback(self, arenastate):
+        self.arenastate = arenastate
+        
+    
+    # PublishStatefilterMarkers()
+    #  
+    def PublishStatefilterMarkers(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
+        if 'pose' in statefilterLo_dict:
+            poseLo_dict = statefilterLo_dict['pose'] 
+            poseHi_dict = statefilterHi_dict['pose']
+             
+            if 'position' in poseLo_dict:
+                positionLo_dict = poseLo_dict['position']
+                positionHi_dict = poseHi_dict['position']
+                (xLo,xHi) = (-9999,+9999)
+                (yLo,yHi) = (-9999,+9999)
+                (zLo,zHi) = (0,0.1)
+                if ('x' in positionLo_dict):
+                    xLo = positionLo_dict['x'] 
+                    xHi = positionHi_dict['x']
+                if ('y' in positionLo_dict):
+                    yLo = positionLo_dict['y'] 
+                    yHi = positionHi_dict['y']
+                if ('z' in positionLo_dict):
+                    zLo = positionLo_dict['z'] 
+                    zHi = positionHi_dict['z']
+
+                if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
+                    markerTarget = Marker(header=Header(stamp = state.header.stamp,
+                                                        frame_id='Plate'),
+                                          ns='statefilter',
+                                          id=1,
+                                          type=Marker.CUBE,
+                                          action=0,
+#                                          type=Marker.LINE_STRIP
+#                                          points=[Point(x=xLo,y=yLo,z=zLo),Point(x=xHi,y=yLo,z=zLo),Point(x=xHi,y=yHi,z=zLo),Point(x=xLo,y=yHi,z=zLo),Point(x=xLo,y=yLo,z=zLo)],
+#                                          scale=Vector3(x=0.2, y=0.0, z=0.0),
+                                          pose=Pose(position=Point(x=(xLo+xHi)/2, 
+                                                                   y=(yLo+yHi)/2, 
+                                                                   z=(zLo+zHi)/2)),
+                                          scale=Vector3(x=xHi-xLo,
+                                                        y=yHi-yLo,
+                                                        z=zHi-zLo),
+                                          color=ColorRGBA(a=0.1,
+                                                          r=1.0,
+                                                          g=1.0,
+                                                          b=1.0),
+                                          lifetime=rospy.Duration(1.0))
+                    self.pubMarker.publish(markerTarget)
+        
+        
+    
+    # InStatefilterRange()
+    # Check if the given state falls in the given region.
+    # For statefilterCriteria=="inclusive", if the given state is within all the terms, then the filter returns True.
+    # For statefilterCriteria=="exclusive", if the given state is within all the terms, then the filter returns False.
+    #
+    # We have to manually go through each of the entries in the dict, rather than
+    # using a MsgFrameState, since we need the dict to only contain the entries
+    # we care about, and the MsgFrameState always contains them all.
+    #  
+    def InStatefilterRange(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
+        rv = True
+        if 'pose' in statefilterLo_dict:
+            poseLo_dict = statefilterLo_dict['pose'] 
+            poseHi_dict = statefilterHi_dict['pose']
+             
+            if 'position' in poseLo_dict:
+                 positionLo_dict = poseLo_dict['position']
+                 positionHi_dict = poseHi_dict['position']
+                 if 'x' in positionLo_dict:
+                     xLo = positionLo_dict['x'] 
+                     xHi = positionHi_dict['x']
+                     if (state.pose.position.x < xLo) or (xHi < state.pose.position.x):
+                         rv = False   
+                 if 'y' in positionLo_dict:
+                     yLo = positionLo_dict['y'] 
+                     yHi = positionHi_dict['y']
+                     if (state.pose.position.y < yLo) or (yHi < state.pose.position.y):
+                         rv = False   
+                 if 'z' in positionLo_dict:
+                     zLo = positionLo_dict['z'] 
+                     zHi = positionHi_dict['z']
+                     if (state.pose.position.z < zLo) or (zHi < state.pose.position.z):
+                         rv = False   
+                         
+            if 'orientation' in poseLo_dict:
+                 orientationLo_dict = poseLo_dict['orientation']
+                 orientationHi_dict = poseHi_dict['orientation']
+                 if 'x' in orientationLo_dict:
+                     xLo = orientationLo_dict['x'] 
+                     xHi = orientationHi_dict['x']
+                     if (state.pose.orientation.x < xLo) or (xHi < state.pose.orientation.x):
+                         rv = False   
+                 if 'y' in orientationLo_dict:
+                     yLo = orientationLo_dict['y'] 
+                     yHi = orientationHi_dict['y']
+                     if (state.pose.orientation.y < yLo) or (yHi < state.pose.orientation.y):
+                         rv = False   
+                 if 'z' in orientationLo_dict:
+                     zLo = orientationLo_dict['z'] 
+                     zHi = orientationHi_dict['z']
+                     if (state.pose.orientation.z < zLo) or (zHi < state.pose.orientation.z):
+                         rv = False   
+                 if 'w' in orientationLo_dict:
+                     wLo = orientationLo_dict['w'] 
+                     wHi = orientationHi_dict['w']
+                     if (state.pose.orientation.w < wLo) or (wHi < state.pose.orientation.w):
+                         rv = False   
+
+        if 'velocity' in statefilterLo_dict:
+            velocityLo_dict = statefilterLo_dict['velocity'] 
+            velocityHi_dict = statefilterHi_dict['velocity']
+             
+            if 'linear' in velocityLo_dict:
+                 linearLo_dict = velocityLo_dict['linear']
+                 linearHi_dict = velocityHi_dict['linear']
+                 if 'x' in linearLo_dict:
+                     xLo = linearLo_dict['x'] 
+                     xHi = linearHi_dict['x']
+                     if (state.velocity.linear.x < xLo) or (xHi < state.velocity.linear.x):
+                         rv = False   
+                 if 'y' in linearLo_dict:
+                     yLo = linearLo_dict['y'] 
+                     yHi = linearHi_dict['y']
+                     if (state.velocity.linear.y < yLo) or (yHi < state.velocity.linear.y):
+                         rv = False   
+                 if 'z' in linearLo_dict:
+                     zLo = linearLo_dict['z'] 
+                     zHi = linearHi_dict['z']
+                     if (state.velocity.linear.z < zLo) or (zHi < state.velocity.linear.z):
+                         rv = False   
+                         
+            if 'angular' in velocityLo_dict:
+                 angularLo_dict = velocityLo_dict['angular']
+                 angularHi_dict = velocityHi_dict['angular']
+                 if 'x' in angularLo_dict:
+                     xLo = angularLo_dict['x'] 
+                     xHi = angularHi_dict['x']
+                     if (state.velocity.angular.x < xLo) or (xHi < state.velocity.angular.x):
+                         rv = False   
+                 if 'y' in angularLo_dict:
+                     yLo = angularLo_dict['y'] 
+                     yHi = angularHi_dict['y']
+                     if (state.velocity.angular.y < yLo) or (yHi < state.velocity.angular.y):
+                         rv = False   
+                 if 'z' in angularLo_dict:
+                     zLo = angularLo_dict['z'] 
+                     zHi = angularHi_dict['z']
+                     if (state.velocity.angular.z < zLo) or (zHi < state.velocity.angular.z):
+                         rv = False
+                     
+        if 'speed' in statefilterLo_dict:
+            speedLo = statefilterLo_dict['speed'] 
+            speedHi = statefilterHi_dict['speed']
+            #speed = N.linalg.norm([state.velocity.linear.x, state.velocity.linear.y, state.velocity.linear.z])
+            if (state.speed < speedLo) or (speedHi < state.speed):
+                rv = False   
+
+        if (statefilterCriteria=="exclusive"):
+            rv = not rv
+            
+        return rv
+    
+    
+        
+    def execute(self, userdata):
+        rv = 'disabled'
+        if userdata.experimentparamsIn.ledpanels.enabled:
+            self.timeStart = rospy.Time.now()
+            xmax = 24*8
+    
+            # Create the panels command.
+            command = MsgPanelsCommand(command='all_off', arg1=0, arg2=0, arg3=0, arg4=0)
+
+            # Determine if we're operating only for certain states.
+            if len(userdata.experimentparamsIn.ledpanels.statefilterHi) > 0:
+                isStatefiltered = True
+            else:
+                isStatefiltered = False
+
+            # Initialize statefilter vars.                
+            bInStatefilterRangePrev = True
+            bInStatefilterRange     = True
+
+                             
+            # Set the panels pattern.
+            command.command = 'set_pattern_id'
+            command.arg1 = userdata.experimentparamsIn.ledpanels.idPattern
+            self.pubLEDPanelsCommand.publish(command)
+    
+            # Operate panels until preempt or timeout.        
+            while not rospy.is_shutdown():
+                # If possible, take the pose &/or velocity &/or speed from arenastate, else use transform via ROS.
+                pose = None
+                velocity = None     
+                speed = None   
+                if self.arenastate is not None:
+                    if ('Robot' in userdata.experimentparamsIn.ledpanels.frame_id):
+                        #pose = self.arenastate.robot.pose  # For consistency w/ galvodirector, we'll get pose via transform.
+                        velocity = self.arenastate.robot.velocity
+                        speed = self.arenastate.robot.speed
+                        
+                    elif ('Fly' in userdata.experimentparamsIn.ledpanels.frame_id):
+                        for iFly in range(len(self.arenastate.flies)):
+                            if userdata.experimentparamsIn.ledpanels.frame_id == self.arenastate.flies[iFly].name:
+                                #pose = self.arenastate.flies[iFly].pose  # For consistency w/ galvodirector, we'll get pose via transform.
+                                velocity = self.arenastate.flies[iFly].velocity
+                                speed = self.arenastate.flies[iFly].speed
+                                break
+
+                # Get the timestamp for transforms.
+                stamp=None
+                if (pose is None) or (velocity is None):
+                    try:
+                        stamp = g_tfrx.getLatestCommonTime('Plate', userdata.experimentparamsIn.ledpanels.frame_id)
+                    except tf.Exception:
+                        pass
+
+                    
+                # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
+                if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Plate', userdata.experimentparamsIn.ledpanels.frame_id, stamp):
+                    try:
+                        poseStamped = g_tfrx.transformPose('Plate', PoseStamped(header=Header(stamp=stamp,
+                                                                                              frame_id=userdata.experimentparamsIn.ledpanels.frame_id),
+                                                                                pose=Pose(position=Point(0,0,0),
+                                                                                          orientation=Quaternion(0,0,0,1)
+                                                                                          )
+                                                                                )
+                                                           )
+                        pose = poseStamped.pose
+                    except tf.Exception:
+                        pose = None
+
+                        
+                # If we still need the velocity, then get it from ROS.
+                if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Plate', userdata.experimentparamsIn.ledpanels.frame_id, stamp):
+                    try:
+                        velocity_tuple = g_tfrx.lookupTwist('Plate', userdata.experimentparamsIn.ledpanels.frame_id, stamp, self.dtVelocity)
+                    except tf.Exception:
+                        velocity = None
+                    else:
+                        velocity = Twist(linear=Point(x=velocity_tuple[0][0],
+                                                      y=velocity_tuple[0][1],
+                                                      z=velocity_tuple[0][2]), 
+                                         angular=Point(x=velocity_tuple[1][0],
+                                                       y=velocity_tuple[1][1],
+                                                       z=velocity_tuple[1][2]))
+
+                # If we still need the speed, then get it from velocity.
+                if (speed is None) and (velocity is not None):
+                    speed = N.linalg.norm([velocity.linear.x, velocity.linear.y, velocity.linear.z])
+
+                                                    
+                # See if the state is in range of the filter.
+                if isStatefiltered:
+                    # Check if any filterstates have changed.
+                    bFilterStateChanged = False
+
+                    # Convert filter string to dict.
+                    statefilterLo_dict = eval(userdata.experimentparamsIn.ledpanels.statefilterLo)
+                    statefilterHi_dict = eval(userdata.experimentparamsIn.ledpanels.statefilterHi)
+                    statefilterCriteria = userdata.experimentparamsIn.ledpanels.statefilterCriteria
+            
+                    if (pose is not None) and (velocity is not None) and (speed is not None):
+                        state = MsgFrameState(pose = pose, 
+                                              velocity = velocity,
+                                              speed = speed)
+
+                        bInStatefilterRangePrev = bInStatefilterRange
+                        bInStatefilterRange = self.InStatefilterRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                        self.PublishStatefilterMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                        
+                    # Check if the filter state has changed.
+                    if bInStatefilterRangePrev != bInStatefilterRange:
+                        bFilterStateChanged = True
+                        
+                    #rospy.logwarn ('%s: %s' % (bFilterStateChanged, bInStatefilterRange))
+                # End if isStatefiltered
+
+                    
+                # If in range of the statefilter, then publish the new command                    
+                if bInStatefilterRange and (pose is not None) and (velocity is not None) and (speed is not None):
+                    if userdata.experimentparamsIn.ledpanels.command == 'trackposition':
+                        angle = (2.0*N.pi) - N.arctan2(pose.position.y, pose.position.x) % (2.0*N.pi)
+                        x = xmax * angle / (2.0*N.pi)
+                        y = 0
+                        command.command = 'set_position'
+                        command.arg1 = int(x)
+                        command.arg2 = int(y)
+
+                    elif userdata.experimentparamsIn.ledpanels.command == 'trackorientation':
+                        x = 0 # not yet implemented.  Find where the fly is looking, i.e. intersect line with circle.
+                        y = 0
+                        command.command = 'set_position'
+                        command.arg1 = int(x)
+                        command.arg2 = int(y)
+                        
+#                    rospy.logwarn (command)                    
+                    self.pubLEDPanelsCommand.publish(command)
+                        
+            
+                if self.preempt_requested():
+                    self.recall_preempt()
+                    rv = 'preempt'
+                    break
+    
+                if userdata.experimentparamsIn.ledpanels.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.ledpanels.timeout:
+                        rv = 'timeout'
+                        break
+                
+                self.rosrate.sleep()
+                
+            # End while not rospy.is_shutdown()
+
+        else:
+            command.command = 'all_off'
+            self.pubLEDPanelsCommand.publish(command)
+            
+        # End if userdata.experimentparamsIn.ledpanels.enabled
+                
+                
+        return rv
+
+    
+
+            
+            
+#######################################################################################################
+#######################################################################################################
 class ExperimentLib():
     def __init__(self, experimentparams=None, newexperiment_callback=None, newtrial_callback=None, endtrial_callback=None):
         self.xHome = 0
@@ -1301,6 +1662,8 @@ class ExperimentLib():
                                   MoveRobot ())
             smach.Concurrence.add('LASERTRACK', 
                                   Lasertrack ())
+            smach.Concurrence.add('LEDPANELS', 
+                                  LEDPanels ())
             smach.Concurrence.add('EXITTRIGGER', 
                                   TriggerOnStates(type='exit'))
 
@@ -1433,7 +1796,7 @@ class ExperimentLib():
     def any_action_term_callback(self, outcome_map):
         rv = False
 
-        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map):
+        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map) and ('LEDPANELS' in outcome_map):
             # If any of the states either succeeds or times-out, then we're done (i.e. preempt the other states).
             if (outcome_map['EXITTRIGGER']=='timeout') or (outcome_map['EXITTRIGGER']=='success'):
                 rv = True 
@@ -1444,6 +1807,9 @@ class ExperimentLib():
             if (outcome_map['LASERTRACK']=='timeout') or (outcome_map['LASERTRACK']=='success'):
                 rv = True 
         
+            if (outcome_map['LEDPANELS']=='timeout') or (outcome_map['LEDPANELS']=='success'):
+                rv = True 
+        
             
         return rv
     
@@ -1451,20 +1817,22 @@ class ExperimentLib():
     # Gets called after all child states are terminated.
     def all_actions_term_callback(self, outcome_map):
         rv = 'aborted'
-        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map):
+        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map) and ('LEDPANELS' in outcome_map):
             if (outcome_map['EXITTRIGGER']=='timeout') or \
                (outcome_map['EXITTRIGGER']=='success') or \
                (outcome_map['MOVEROBOT']=='timeout') or \
                (outcome_map['MOVEROBOT']=='success') or \
+               (outcome_map['LEDPANELS']=='timeout') or \
+               (outcome_map['LEDPANELS']=='success') or \
                (outcome_map['LASERTRACK']=='timeout') or \
                (outcome_map['LASERTRACK']=='success'):
                 rv = 'success'
                 
-            elif (outcome_map['EXITTRIGGER']=='preempt') and (outcome_map['MOVEROBOT']=='preempt') and (outcome_map['LASERTRACK']=='preempt'):
+            elif (outcome_map['EXITTRIGGER']=='preempt') and (outcome_map['MOVEROBOT']=='preempt') and (outcome_map['LASERTRACK']=='preempt') and (outcome_map['LEDPANELS']=='preempt'):
                 rv = 'preempt'
                 rospy.logwarn ('All experiment actions preempted.')
                  
-            elif (outcome_map['EXITTRIGGER']=='disabled') and (outcome_map['MOVEROBOT']=='disabled') and (outcome_map['LASERTRACK']=='disabled'):
+            elif (outcome_map['EXITTRIGGER']=='disabled') and (outcome_map['MOVEROBOT']=='disabled') and (outcome_map['LASERTRACK']=='disabled') and (outcome_map['LEDPANELS']=='disabled'):
                 rv = 'disabled'
                 rospy.logwarn ('All experiment actions set as disabled.')
                 

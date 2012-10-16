@@ -19,7 +19,7 @@ from experiments.srv import Trigger, ExperimentParams
 from tracking.msg import ArenaState
 
 
-def chdir(dir):
+def Chdir(dir):
     try:
         os.chdir(dir)
     except (OSError):
@@ -38,13 +38,13 @@ class Save:
     def __init__(self):
         self.initialized = False
         self.dirWorking_base = os.path.expanduser("~/FlylabData")
-        chdir(self.dirWorking_base)
+        Chdir(self.dirWorking_base)
 
 
         # Create new directory each day
         self.dirRelative = time.strftime("%Y_%m_%d")
         self.dirWorking = self.dirWorking_base + "/" + self.dirRelative
-        chdir(self.dirWorking)
+        Chdir(self.dirWorking)
 
         self.triggered = False
         rospy.Service('save/new_trial', ExperimentParams, self.NewTrial_callback)
@@ -194,7 +194,8 @@ class Save:
                                     'moverobotRelAngleType, '\
                                     'moverobotRelSpeed, '\
                                     'moverobotRelSpeedType, '\
-                                    'moverobotRelTolerance\n'
+                                    'moverobotRelTolerance, ' \
+                                    'moverobotTimeout\n'
         self.templateMoveRobot =    '{moverobotEnabled:s}, '\
                                     '{moverobotPatternShape:s}, '\
                                     '{moverobotPatternHzPattern:s}, '\
@@ -211,7 +212,8 @@ class Save:
                                     '{moverobotRelAngleType:s}, '\
                                     '{moverobotRelSpeed:s}, '\
                                     '{moverobotRelSpeedType:s}, '\
-                                    '{moverobotRelTolerance:s}\n'
+                                    '{moverobotRelTolerance:s}, ' \
+                                    '{moverobotTimeout:s}\n'
                                     
         self.headingsLasertrack =   'laserEnabled, '\
                                     'laserPatternShape, '\
@@ -223,7 +225,8 @@ class Save:
                                     'laserPatternParam, '\
                                     'laserStatefilterLo, '\
                                     'laserStatefilterHi, '\
-                                    'laserStatefilterCriteria\n'
+                                    'laserStatefilterCriteria, ' \
+                                    'laserTimeout\n'
         self.templateLasertrack =   '{laserEnabled:s}, '\
                                     '{laserPatternShape:s}, '\
                                     '{laserPatternHzPattern:s}, '\
@@ -234,7 +237,25 @@ class Save:
                                     '{laserPatternParam:s}, '\
                                     '{laserStatefilterLo:s}, '\
                                     '{laserStatefilterHi:s}, '\
-                                    '{laserStatefilterCriteria:s}\n'
+                                    '{laserStatefilterCriteria:s}, ' \
+                                    '{laserTimeout:s}\n'
+        
+        self.headingsLEDPanels =    'ledpanelsEnabled, '\
+                                    'ledpanelsCommand, '\
+                                    'ledpanelsIdPattern, '\
+                                    'ledpanelsFrameid, '\
+                                    'ledpanelsStatefilterLo, '\
+                                    'ledpanelsStatefilterHi, '\
+                                    'ledpanelsStatefilterCriteria, '\
+                                    'ledpanelsTimeout\n'
+        self.templateLEDPanels =    '{ledpanelsEnabled:s}, '\
+                                    '{ledpanelsCommand:s}, '\
+                                    '{ledpanelsIdPattern:s}, '\
+                                    '{ledpanelsFrameid:s}, '\
+                                    '{ledpanelsStatefilterLo:s}, '\
+                                    '{ledpanelsStatefilterHi:s}, '\
+                                    '{ledpanelsStatefilterCriteria:s}, '\
+                                    '{ledpanelsTimeout:s}\n'
         
         self.headingsTriggerExit =  'trigger2Enabled, '\
                                     'trigger2FrameidParent, '\
@@ -397,11 +418,11 @@ class Save:
                                                                 time.localtime(now).tm_sec)
     
                 self.dirBase = os.path.expanduser("~/FlylabData")
-                chdir(self.dirBase)
+                Chdir(self.dirBase)
                 self.dirVideo = self.dirBase + "/" + time.strftime("%Y_%m_%d")
-                chdir(self.dirVideo)
+                Chdir(self.dirVideo)
                 #self.dirFrames = self.dirVideo + "/frames"
-                #chdir(self.dirFrames)
+                #Chdir(self.dirFrames)
                 # At this point we should be in ~/FlylabData/YYYYmmdd/images
                 
                 try:
@@ -506,6 +527,7 @@ class Save:
                                                 moverobotRelSpeed          = str(experimentparamsReq.move.relative.speed),
                                                 moverobotRelSpeedType      = str(experimentparamsReq.move.relative.speedType),
                                                 moverobotRelTolerance      = str(experimentparamsReq.move.relative.tolerance),
+                                                moverobotTimeout           = str(experimentparamsReq.move.timeout),
                                                 )
         
         if len(experimentparamsReq.lasertrack.pattern_list) > 0:
@@ -546,6 +568,18 @@ class Save:
                                                 laserStatefilterHi         = statefilterHi,
                                                 laserStatefilterLo         = statefilterLo,
                                                 laserStatefilterCriteria   = statefilterCriteria,
+                                                laserTimeout               = str(experimentparamsReq.lasertrack.timeout),
+                                                )
+            
+        paramsLEDPanels = self.templateLEDPanels.format(
+                                                ledpanelsEnabled             = str(experimentparamsReq.ledpanels.enabled),
+                                                ledpanelsCommand             = str(experimentparamsReq.ledpanels.command),
+                                                ledpanelsIdPattern           = str(experimentparamsReq.ledpanels.idPattern),
+                                                ledpanelsFrameid             = str(experimentparamsReq.ledpanels.frame_id),
+                                                ledpanelsStatefilterLo       = str(experimentparamsReq.ledpanels.statefilterLo),
+                                                ledpanelsStatefilterHi       = str(experimentparamsReq.ledpanels.statefilterHi),
+                                                ledpanelsStatefilterCriteria = str(experimentparamsReq.ledpanels.statefilterCriteria),
+                                                ledpanelsTimeout             = str(experimentparamsReq.ledpanels.timeout),
                                                 )
             
         paramsTriggerExit = self.templateTriggerExit.format(
@@ -611,12 +645,12 @@ class Save:
             self.fid.write(paramsTriggerExit)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsWaitExit)
-            self.fid.write(paramsWaitExit)
+            self.fid.write(self.headingsLEDPanels)
+            self.fid.write(paramsLEDPanels)
             self.fid.write('\n')
             
-            self.fid.write('\n')
-            self.fid.write('\n')
+            self.fid.write(self.headingsWaitExit)
+            self.fid.write(paramsWaitExit)
             self.fid.write('\n')
             
             self.fid.write('\n')
@@ -643,13 +677,13 @@ class Save:
         with self.lockVideo:
             
             # Rewrite all the image files, with duplicate frames to simulate slow-motion.
-            #chdir(self.dirImage)
+            #Chdir(self.dirImage)
             #imagenames = self.get_imagenames(self.dirImage)
             #iFrame = 0
             #for imagename in imagenames:
-            #    chdir(self.dirFrames)
+            #    Chdir(self.dirFrames)
             #    image = cv.LoadImage(imagename)
-            #    chdir(self.dirFrames2)
+            #    Chdir(self.dirFrames2)
             #    for iRepeat in range(self.nRepeatFrames):
             #        filenameImage = "{num:06d}.png".format(num=iFrame)
             #        cv.SaveImage(filenameImage, image)

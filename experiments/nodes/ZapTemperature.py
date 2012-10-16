@@ -178,6 +178,15 @@ class ExperimentZapafly():
         
         self.experimentparams.lasertrack.timeout = -1
         
+        self.experimentparams.ledpanels.enabled = False
+        self.experimentparams.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.ledpanels.idPattern = 1
+        self.experimentparams.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.ledpanels.statefilterHi = ''
+        self.experimentparams.ledpanels.statefilterLo = ''
+        self.experimentparams.ledpanels.statefilterCriteria = ''
+        self.experimentparams.ledpanels.timeout = -1
+
         self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.distanceMin = 999.0
         self.experimentparams.triggerExit.distanceMax = 888.0 # i.e. never

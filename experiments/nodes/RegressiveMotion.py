@@ -79,6 +79,15 @@ class ExperimentRegressiveMotion():
         
         self.experimentparams.lasertrack.enabled = False
         
+        self.experimentparams.ledpanels.enabled = False
+        self.experimentparams.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.ledpanels.idPattern = 1
+        self.experimentparams.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.ledpanels.statefilterHi = ''
+        self.experimentparams.ledpanels.statefilterLo = ''
+        self.experimentparams.ledpanels.statefilterCriteria = ''
+        self.experimentparams.ledpanels.timeout = -1
+
         self.experimentparams.triggerExit.enabled = False
         self.experimentparams.triggerExit.frameidParent = 'Fly1'
         self.experimentparams.triggerExit.frameidChild = 'Robot'

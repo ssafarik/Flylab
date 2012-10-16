@@ -6,6 +6,7 @@ float64 			       waitEntry
 TriggerSettings 	       triggerEntry
 MoveSettings 		       move
 LasertrackSettings 	       lasertrack
+LEDPanelsSettings          ledpanels
 TriggerSettings 	       triggerExit
 float64 			       waitExit
 ---
