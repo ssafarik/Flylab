@@ -47,6 +47,18 @@ class Save:
         Chdir(self.dirWorking)
 
         self.triggered = False
+        self.saveOnlyWhileTriggered = False # False: Save everything from one new_trial to the next new_trial.  True:  Save everything from trigger=on to trigger=off.
+
+        self.nFlies = rospy.get_param("nFlies", 0)
+        self.typeFlies = rospy.get_param("fly/type", "unspecified")
+        self.genderFlies = rospy.get_param("fly/gender", "unspecified")
+        self.nRobots = rospy.get_param("nRobots", 0)
+        self.widthRobot = rospy.get_param("robot/width", "3.175") # mm
+        self.heightRobot = rospy.get_param("robot/height", "3.175") # mm
+        self.visibleRobot = bool(rospy.get_param("robot/visible", "True"))
+        self.paintRobot = str(rospy.get_param("robot/paint", "blackoxide"))
+        self.scentRobot = str(rospy.get_param("robot/scent", "unscented"))
+
         rospy.Service('save/new_trial', ExperimentParams, self.NewTrial_callback)
         rospy.Service('save/trigger', Trigger, self.Trigger_callback)
 
@@ -63,16 +75,14 @@ class Save:
         self.image = None
         self.filenameVideo = None
         self.saveVideo = False
-        self.saveOnlyWhileTriggered = False # False: Save everything from one new_trial to the next new_trial.  True:  Save everything from trigger=on to trigger=off.
         self.bSavingVideo = False
 
-        self.framerate = rospy.get_param("save/framerate", 30)
         #self.nRepeatFrames = int(rospy.get_param('save/video_image_repeat_count'))
         self.sizeImage = None
 
         
         
-        ############# Arenastate stuff
+        ############# Arenastate/CSV stuff
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.sub_arenastate = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
@@ -82,19 +92,7 @@ class Save:
         self.filename = None
         self.fid = None
         self.saveArenastate = False
-        self.saveOnlyWhileTriggered = False # False: Save everything from one new_trial to the next new_trial.  True:  Save everything from trigger=on to trigger=off.
-        self.triggered = False
         self.bSavingArenastate = False
-
-        self.nFlies = rospy.get_param("nFlies", 0)
-        self.typeFlies = rospy.get_param("fly/type", "unspecified")
-        self.genderFlies = rospy.get_param("fly/gender", "unspecified")
-        self.nRobots = rospy.get_param("nRobots", 0)
-        self.widthRobot = rospy.get_param("robot/width", "3.175") # mm
-        self.heightRobot = rospy.get_param("robot/height", "3.175") # mm
-        self.visibleRobot = bool(rospy.get_param("robot/visible", "True"))
-        self.paintRobot = str(rospy.get_param("robot/paint", "blackoxide"))
-        self.scentRobot = str(rospy.get_param("robot/scent", "unscented"))
 
         self.format_align = ">"
         self.format_sign = " "
@@ -386,10 +384,10 @@ class Save:
                     rospy.logwarn('SA logfile close()')
                     
                 # Determine if we should be saving.
-                if (not self.saveOnlyWhileTriggered):
-                    self.bSavingArenastate = True
-                else:
+                if (self.saveOnlyWhileTriggered):
                     self.bSavingArenastate = False
+                else:
+                    self.bSavingArenastate = True
                 
                 self.OpenCsvAndWriteHeader(experimentparamsReq)
 
@@ -402,10 +400,10 @@ class Save:
                 self.ResetFrameCounter()
     
                 # Determine if we should be saving.
-                if (not self.saveOnlyWhileTriggered):
-                    self.bSavingVideo = True
-                else:
+                if (self.saveOnlyWhileTriggered):
                     self.bSavingVideo = False
+                else:
+                    self.bSavingVideo = True
                 
                 
                 now = rospy.Time.now().to_sec()
@@ -715,11 +713,11 @@ class Save:
         self.iFrame = 0
 
 
-    def WriteFilePng(self, cv_image):
+    def WriteFilePng(self, cvimage):
         if self.sizeImage is None:
-            self.sizeImage = cv.GetSize(cv_image)
+            self.sizeImage = cv.GetSize(cvimage)
         filenameImage = self.dirFrames+"/{num:06d}.png".format(num=self.iFrame)
-        cv.SaveImage(filenameImage, cv_image)
+        cv.SaveImage(filenameImage, cvimage)
         self.iFrame += 1
 
 

@@ -547,8 +547,8 @@ class TriggerOnTime (smach.State):
         except rospy.ServiceException:
             rv = 'aborted'
 
-        if rv!='aborted' and self.type=='entry':
-            self.Trigger.notify(True)
+        #if rv!='aborted' and self.type=='entry':
+        #    self.Trigger.notify(True)
         #else:
         #    self.Trigger.notify(False)
 
@@ -1598,9 +1598,44 @@ class LEDPanels (smach.State):
                         command.arg1 = int(x)
                         command.arg2 = int(y)
 
-                    elif userdata.experimentparamsIn.ledpanels.command == 'trackorientation':
-                        x = 0 # not yet implemented.  Find where the fly is looking, i.e. intersect line with circle.
+                    elif userdata.experimentparamsIn.ledpanels.command == 'trackview':
+                        r = 120 # Radius of the panels.
+                        xp = pose.position.x
+                        yp = pose.position.y
+                        q = pose.orientation
+                        rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
+                        theta = rpy[2] % (2.0 * N.pi)
+                        tantheta = N.tan(theta)
+                        
+                        # Points on the circle intersecting with the fly's axis.
+                        x1=(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2 + (-1)*(r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2))
+                        y1=yp+(-1)*xp*tantheta+tantheta*(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2+(-1)*(r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2));
+                        x2=(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2 + (r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2))
+                        y2=yp+(-1)*xp*tantheta+tantheta*(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2+(r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2))                        
+                        
+                        quadFly = int(1+4*theta/(2*N.pi))   # The quadrant the fly is pointing to.
+                        xo = x1-xp
+                        yo = y1-yp
+                        to = (N.arctan2(yo,xo)) % (2.0*N.pi)
+                        quad1 = int(1+4*to/(2*N.pi))        # The quadrant of pt1, in the fly frame.
+                        xo = x2-xp
+                        yo = y2-yp
+                        to = (N.arctan2(yo,xo)) % (2.0*N.pi)
+                        quad2 = int(1+4*to/(2*N.pi))        # The quadrant of pt2, in the fly frame.
+                        
+                        # Choose between the two intersection points.
+                        if quadFly==quad1:
+                            angle = N.arctan2(y1,x1) % (2.0*N.pi)
+                        elif quadFly==quad2:
+                            angle = N.arctan2(y2,x2) % (2.0*N.pi)
+                        else:
+                            rospy.logwarn('View in wrong quadrant')
+                            
+                    
+                        rospy.logwarn('(x1,y1)=%f,%f,       (x2,y2)=%f,%f,      angle=%f' % (x1,y1,x2,y2,angle))
+                        x = xmax * angle / (2.0*N.pi)
                         y = 0
+                        
                         command.command = 'set_position'
                         command.arg1 = int(x)
                         command.arg2 = int(y)
