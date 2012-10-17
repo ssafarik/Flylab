@@ -30,7 +30,7 @@ class LEDPanels():
         self.subPanelsCommand = rospy.Subscriber('LEDPanels/command', MsgPanelsCommand, self.PanelsCommand_callback)
         rospy.on_shutdown(self.OnShutdown_callback)
         self.serial = serial.Serial('/dev/ttyUSB0', baudrate=921600) # 8N1
-
+        
         self.commands = {
                          'start':              {'id': 0x20, 'args': [], 'help': 'start()'},
                          'stop':               {'id': 0x30, 'args': [], 'help': 'stop()'},
@@ -180,7 +180,7 @@ class LEDPanels():
             
             
 
-    def nbytesFromCommand (self, command):
+    def NbytesFromCommand (self, command):
         if command in self.commands:
             nBytes = 1  # For the command id.
             for arg in self.commands[command]['args']:
@@ -195,7 +195,7 @@ class LEDPanels():
         serialbytes_list = []
         
         if command in self.commands:
-            nBytesCmd = self.nbytesFromCommand(command)
+            nBytesCmd = self.NbytesFromCommand(command)
             serialbytes_list.append(chr(nBytesCmd))
             
             id = self.commands[command]['id']
@@ -211,11 +211,11 @@ class LEDPanels():
                         serialbytes_list.append(chr(arg))
                          
                     if (args_dict_list[iArg]['unsigned']==False):
-                        serialbytes_list.append(self.signed_byte_to_chr(arg))
+                        serialbytes_list.append(self.Signed_byte_to_chr(arg))
                      
                 if (nBytesArg>1):
                     if (args_dict_list[iArg]['unsigned']==True):
-                        serialbytes_list.extend(self.dec2chr(arg,nBytesArg))
+                        serialbytes_list.extend(self.Dec2chr(arg,nBytesArg))
                          
                     if (args_dict_list[iArg]['unsigned']==False):
                         rospy.logwarn('LEDPanels not yet implemented.')
@@ -227,12 +227,12 @@ class LEDPanels():
                     
         
     # Ported from Reiser's panel code.
-    def signed_byte_to_chr(self, byte):
+    def Signed_byte_to_chr(self, byte):
         return chr((256+byte) % 256)
     
 
     # Ported from Reiser's panel code.
-    def dec2chr(self, num, nChars):
+    def Dec2chr(self, num, nChars):
         # This functions makes an array of char values (0-255) from a decimal number.
         # This is listed in LSB first order.
         # Untested for negative numbers, probably wrong!
@@ -240,9 +240,9 @@ class LEDPanels():
 
         char_list = [0] * nChars
         if (num > 2**(8*nChars)):
-            rospy.logerr('dec2chr() overflow: Not enough characters for a number of this size.')
+            rospy.logerr('Dec2chr() overflow: Not enough characters for a number of this size.')
         if (num < 0 ):
-            rospy.logerr('dec2chr() out of range: This function does not handle negative numbers.' );
+            rospy.logerr('Dec2chr() out of range: This function does not handle negative numbers.' );
         
         num_rem = num
         for j in range(nChars,0,-1):
@@ -261,6 +261,7 @@ class LEDPanels():
 
     def PanelsCommand_callback(self, panelcommand):
         if self.initialized:
+            #rospy.logwarn('%s(%d,%d,%d,%d)' % (panelcommand.command, panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4))
             command = panelcommand.command.lower()
             serialbytes_list = self.SerialBytelistFromCommand(command, [panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4])
             self.serial.write(''.join(serialbytes_list))

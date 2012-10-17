@@ -1294,10 +1294,12 @@ class LEDPanels (smach.State):
         self.rosrate = rospy.Rate(gRate)
         self.arenastate = None
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
+        self.xpanels    = rospy.get_param('ledpanels/xpanels', 1)
+        self.ypanels    = rospy.get_param('ledpanels/ypanels', 1)
+        queue_size_arenastate    = rospy.get_param('tracking/queue_size_arenastate', 1)
 
         self.pubMarker           = rospy.Publisher('visualization_marker', Marker)
         self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
-        queue_size_arenastate    = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState       = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
         rospy.on_shutdown(self.OnShutdown_callback)
@@ -1477,7 +1479,7 @@ class LEDPanels (smach.State):
         rv = 'disabled'
         if userdata.experimentparamsIn.ledpanels.enabled:
             self.timeStart = rospy.Time.now()
-            xmax = 24*8
+            xmax = self.xpanels * 8 # pixels per panel.
     
             # Create the panels command.
             command = MsgPanelsCommand(command='all_off', arg1=0, arg2=0, arg3=0, arg4=0)
@@ -1585,26 +1587,29 @@ class LEDPanels (smach.State):
                         bFilterStateChanged = True
                         
                     #rospy.logwarn ('%s: %s' % (bFilterStateChanged, bInStatefilterRange))
-                # End if isStatefiltered
+                # end if isStatefiltered
 
                     
                 # If in range of the statefilter, then publish the new command                    
                 if bInStatefilterRange and (pose is not None) and (velocity is not None) and (speed is not None):
+                    bValidCommand = False
                     if userdata.experimentparamsIn.ledpanels.command == 'trackposition':
                         angle = (2.0*N.pi) - N.arctan2(pose.position.y, pose.position.x) % (2.0*N.pi)
-                        x = xmax * angle / (2.0*N.pi)
-                        y = 0
-                        command.command = 'set_position'
-                        command.arg1 = int(x)
-                        command.arg2 = int(y)
+                        if N.isfinite(angle):
+                            x = xmax * angle / (2.0*N.pi)
+                            y = 0
+                            command.command = 'set_position'
+                            command.arg1 = int(x)
+                            command.arg2 = int(y)
+                            bValidCommand = True
 
                     elif userdata.experimentparamsIn.ledpanels.command == 'trackview':
-                        r = 120 # Radius of the panels.
+                        r = rospy.get_param('ledpanels/radius', 120) # Radius of the panels.
                         xp = pose.position.x
                         yp = pose.position.y
                         q = pose.orientation
                         rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                        theta = rpy[2] % (2.0 * N.pi)
+                        theta = -rpy[2] % (2.0 * N.pi)
                         tantheta = N.tan(theta)
                         
                         # Points on the circle intersecting with the fly's axis.
@@ -1613,35 +1618,36 @@ class LEDPanels (smach.State):
                         x2=(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2 + (r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2))
                         y2=yp+(-1)*xp*tantheta+tantheta*(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2+(r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2))                        
                         
-                        quadFly = int(1+4*theta/(2*N.pi))   # The quadrant the fly is pointing to.
-                        xo = x1-xp
-                        yo = y1-yp
-                        to = (N.arctan2(yo,xo)) % (2.0*N.pi)
-                        quad1 = int(1+4*to/(2*N.pi))        # The quadrant of pt1, in the fly frame.
-                        xo = x2-xp
-                        yo = y2-yp
-                        to = (N.arctan2(yo,xo)) % (2.0*N.pi)
-                        quad2 = int(1+4*to/(2*N.pi))        # The quadrant of pt2, in the fly frame.
                         
-                        # Choose between the two intersection points.
-                        if quadFly==quad1:
+                        # Choose between the two intersection points by moving forward 1mm, and seeing which point we got closer to.
+                        r1 = N.linalg.norm([xp-x1, yp-y1]) # Fly to pt1 distance
+                        r2 = N.linalg.norm([xp-x2, yp-y2]) # Fly to pt2 distance
+                        xa = xp + 1 * N.cos(theta)         # Go one millimeter forward.
+                        ya = yp + 1 * N.sin(theta)
+                        r1a= N.linalg.norm([xa-x1, ya-y1]) # Fly+1mm to pt1 distance
+                        
+                        # If we got closer to pt1 at xa, then use pt1, else use pt2 
+                        if r1a < r1:
                             angle = N.arctan2(y1,x1) % (2.0*N.pi)
-                        elif quadFly==quad2:
-                            angle = N.arctan2(y2,x2) % (2.0*N.pi)
                         else:
-                            rospy.logwarn('View in wrong quadrant')
+                            angle = N.arctan2(y2,x2) % (2.0*N.pi)
+                        
+                        #rospy.logwarn('(x1,y1)=%f,%f,       (x2,y2)=%f,%f,      angle=%f' % (x1,y1,x2,y2,angle))
+                        if N.isfinite(angle):
+                            x = xmax * angle / (2.0*N.pi)
+                            y = 0
                             
-                    
-                        rospy.logwarn('(x1,y1)=%f,%f,       (x2,y2)=%f,%f,      angle=%f' % (x1,y1,x2,y2,angle))
-                        x = xmax * angle / (2.0*N.pi)
-                        y = 0
+                            command.command = 'set_position'
+                            command.arg1 = int(x)
+                            command.arg2 = int(y)
+                            bValidCommand = True
+                        #else:
+                            #rospy.logwarn('isnan: (%f,%f), (%f,%f)' % (x1,y1,x2,y2))
+                            
+                    # end if command == 'trackposition' or 'trackview'
                         
-                        command.command = 'set_position'
-                        command.arg1 = int(x)
-                        command.arg2 = int(y)
-                        
-#                    rospy.logwarn (command)                    
-                    self.pubLEDPanelsCommand.publish(command)
+                    if (bValidCommand):                    
+                        self.pubLEDPanelsCommand.publish(command)
                         
             
                 if self.preempt_requested():
@@ -1662,7 +1668,7 @@ class LEDPanels (smach.State):
             command.command = 'all_off'
             self.pubLEDPanelsCommand.publish(command)
             
-        # End if userdata.experimentparamsIn.ledpanels.enabled
+        # end if userdata.experimentparamsIn.ledpanels.enabled
                 
                 
         return rv
