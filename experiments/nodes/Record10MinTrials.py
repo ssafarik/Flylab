@@ -40,7 +40,7 @@ class ExperimentRecord10MinTrials():
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         
-        self.experimentparams.waitEntry = 0.0
+        self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.frameidParent = 'Fly1'
@@ -59,6 +59,8 @@ class ExperimentRecord10MinTrials():
         self.experimentparams.triggerEntry.angleTestBilateral = True
         self.experimentparams.triggerEntry.timeHold = 0.0
         self.experimentparams.triggerEntry.timeout = -1
+        
+        self.experimentparams.waitEntry2 = 0.0
         
 
         # .move, .lasertrack, and .triggerExit all run concurrently.

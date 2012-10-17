@@ -42,7 +42,7 @@ class ExperimentDodgeball():
         self.experimentparams.home.timeout = -1
         self.experimentparams.home.tolerance = 2
         
-        self.experimentparams.waitEntry = 0.0
+        self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = True
         self.experimentparams.triggerEntry.frameidParent = 'Fly1'
@@ -61,6 +61,8 @@ class ExperimentDodgeball():
         self.experimentparams.triggerEntry.angleTestBilateral = True        # True=bilateral, False=unilateral.
         self.experimentparams.triggerEntry.timeHold = 0.5                   # How long the conditions must be continually met before the trigger happens.
         self.experimentparams.triggerEntry.timeout = -1
+        
+        self.experimentparams.waitEntry2 = 0.0
         
 
         # .move, .lasertrack, and .triggerExit all run concurrently.

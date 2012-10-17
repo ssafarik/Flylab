@@ -523,7 +523,7 @@ class TriggerOnStates (smach.State):
 #######################################################################################################
 #######################################################################################################
 class TriggerOnTime (smach.State):
-    def __init__(self, type='entry'):
+    def __init__(self, type='entry1'):
         self.type = type
         smach.State.__init__(self, 
                              outcomes=['success','aborted'],
@@ -534,8 +534,10 @@ class TriggerOnTime (smach.State):
         
 
     def execute(self, userdata):
-        if self.type=='entry':
-            duration = userdata.experimentparamsIn.waitEntry
+        if self.type=='entry1':
+            duration = userdata.experimentparamsIn.waitEntry1
+        elif self.type=='entry2':
+            duration = userdata.experimentparamsIn.waitEntry2
         else:
             duration = userdata.experimentparamsIn.waitExit
 
@@ -547,7 +549,7 @@ class TriggerOnTime (smach.State):
         except rospy.ServiceException:
             rv = 'aborted'
 
-        #if rv!='aborted' and self.type=='entry':
+        #if rv!='aborted' and ('entry' in self.type):
         #    self.Trigger.notify(True)
         #else:
         #    self.Trigger.notify(False)
@@ -1766,30 +1768,38 @@ class ExperimentLib():
                                                   'experimentparamsOut':'experimentparams'})
 
 
-            ################################################################################### NEWTRIAL -> WAITENTRY
+            ################################################################################### NEWTRIAL -> WAITENTRY1
             smach.StateMachine.add('NEWTRIAL',                         
                                    NewTrial(),
-                                   transitions={'continue':'WAITENTRY',     # Trigger service signal goes False.
+                                   transitions={'continue':'WAITENTRY1',     # Trigger service signal goes False.
                                                 'exit':'success',           # Trigger service signal goes False.
                                                 'aborted':'aborted'},       # Trigger service signal goes False.
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
 
-            ################################################################################### WAITENTRY -> ENTRYTRIGGER
-            smach.StateMachine.add('WAITENTRY', 
-                                   TriggerOnTime(type='entry'),
+            ################################################################################### WAITENTRY1 -> ENTRYTRIGGER
+            smach.StateMachine.add('WAITENTRY1', 
+                                   TriggerOnTime(type='entry1'),
                                    transitions={'success':'ENTRYTRIGGER',   # Trigger service signal goes True.
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
 
-            ################################################################################### ENTRYTRIGGER -> ACTIONS
+            ################################################################################### ENTRYTRIGGER -> WAITENTRY2
             smach.StateMachine.add('ENTRYTRIGGER', 
                                    TriggerOnStates(type='entry'),
-                                   transitions={'success':'ACTIONS',        # Trigger service signal goes True.
-                                                'disabled':'ACTIONS',       # Trigger service signal goes True.
-                                                'timeout':'ACTIONS',        # Trigger service signal goes True.
+                                   transitions={'success':'WAITENTRY2',        # Trigger service signal goes True.
+                                                'disabled':'WAITENTRY2',       # Trigger service signal goes True.
+                                                'timeout':'WAITENTRY2',        # Trigger service signal goes True.
+                                                'aborted':'aborted'},
+                                   remapping={'experimentparamsIn':'experimentparams'})
+
+
+            ################################################################################### WAITENTRY2 -> ACTIONS
+            smach.StateMachine.add('WAITENTRY2', 
+                                   TriggerOnTime(type='entry2'),
+                                   transitions={'success':'ACTIONS',   # Trigger service signal goes True.
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 

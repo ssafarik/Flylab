@@ -38,7 +38,7 @@ class ExperimentZapColdFood():
         
         self.experimentparams.home.enabled = False
         
-        self.experimentparams.waitEntry = 0.0
+        self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.frameidParent = 'Plate'
@@ -57,6 +57,8 @@ class ExperimentZapColdFood():
         self.experimentparams.triggerEntry.angleTestBilateral = False
         self.experimentparams.triggerEntry.timeHold = 0.0
         self.experimentparams.triggerEntry.timeout = -1
+        
+        self.experimentparams.waitEntry2 = 0.0
         
         
         # .move, .lasertrack, and .triggerExit all run concurrently.

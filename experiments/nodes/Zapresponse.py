@@ -38,7 +38,7 @@ class ExperimentZapresponse():
         
         self.experimentparams.home.enabled = False
         
-        self.experimentparams.waitEntry = 300.0
+        self.experimentparams.waitEntry1 = 300.0
         
         self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.frameidParent = 'Plate'
@@ -57,6 +57,8 @@ class ExperimentZapresponse():
         self.experimentparams.triggerEntry.angleTestBilateral = True
         self.experimentparams.triggerEntry.timeHold = 0.0
         self.experimentparams.triggerEntry.timeout = -1
+        
+        self.experimentparams.waitEntry2 = 0.0
         
         
         # .move, .lasertrack, and .triggerExit all run concurrently.
