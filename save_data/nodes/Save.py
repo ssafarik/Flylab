@@ -649,14 +649,14 @@ class Save:
             self.fid.write(paramsLasertrack)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsTriggerExit)
-            self.fid.write(paramsTriggerExit)
-            self.fid.write('\n')
-
             self.fid.write(self.headingsLEDPanels)
             self.fid.write(paramsLEDPanels)
             self.fid.write('\n')
             
+            self.fid.write(self.headingsTriggerExit)
+            self.fid.write(paramsTriggerExit)
+            self.fid.write('\n')
+
             self.fid.write(self.headingsWaitExit)
             self.fid.write(paramsWaitExit)
             self.fid.write('\n')
