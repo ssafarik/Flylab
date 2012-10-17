@@ -138,8 +138,8 @@ class Save:
                                     '{trackingExclusionzoneY:s}, '\
                                     '{trackingExclusionzoneRadius:s}'
 
-        self.headingsWaitEntry =    'waitEntry\n'
-        self.templateWaitEntry =    '{waitEntry:s}\n'
+        self.headingsWaitEntry1 =   'waitEntry1\n'
+        self.templateWaitEntry1 =   '{waitEntry1:s}\n'
         
         self.headingsTriggerEntry = 'trigger1Enabled, '\
                                     'trigger1FrameidParent, '\
@@ -176,6 +176,9 @@ class Save:
                                     '{trigger1TimeHold:s}, '\
                                     '{trigger1Timeout:s}\n'
                                     
+        self.headingsWaitEntry2 =   'waitEntry2\n'
+        self.templateWaitEntry2 =   '{waitEntry2:s}\n'
+        
         self.headingsMoveRobot =    'moverobotEnabled, '\
                                     'moverobotPatternShape, '\
                                     'moverobotPatternHzPattern, '\
@@ -485,8 +488,8 @@ class Save:
         self.headingsTracking += '\n'
         paramsTracking += '\n'
 
-        paramsWaitEntry = self.templateWaitEntry.format(
-                                                waitEntry                  = str(experimentparamsReq.waitEntry),
+        paramsWaitEntry1 = self.templateWaitEntry1.format(
+                                                waitEntry1                  = str(experimentparamsReq.waitEntry1),
                                                 )
         paramsTriggerEntry = self.templateTriggerEntry.format(
                                                 trigger1Enabled            = str(experimentparamsReq.triggerEntry.enabled),
@@ -506,6 +509,9 @@ class Save:
                                                 trigger1AngleTestBilateral = str(experimentparamsReq.triggerEntry.angleTestBilateral),
                                                 trigger1TimeHold           = str(experimentparamsReq.triggerEntry.timeHold),
                                                 trigger1Timeout            = str(experimentparamsReq.triggerEntry.timeout),
+                                                )
+        paramsWaitEntry2 = self.templateWaitEntry2.format(
+                                                waitEntry2                  = str(experimentparamsReq.waitEntry2),
                                                 )
         paramsMoveRobot = self.templateMoveRobot.format(
                                                 moverobotEnabled           = str(experimentparamsReq.move.enabled),
@@ -623,12 +629,16 @@ class Save:
             self.fid.write(paramsTracking)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsWaitEntry)
-            self.fid.write(paramsWaitEntry)
+            self.fid.write(self.headingsWaitEntry1)
+            self.fid.write(paramsWaitEntry1)
             self.fid.write('\n')
 
             self.fid.write(self.headingsTriggerEntry)
             self.fid.write(paramsTriggerEntry)
+            self.fid.write('\n')
+
+            self.fid.write(self.headingsWaitEntry2)
+            self.fid.write(paramsWaitEntry2)
             self.fid.write('\n')
 
             self.fid.write(self.headingsMoveRobot)
@@ -651,10 +661,6 @@ class Save:
             self.fid.write(paramsWaitExit)
             self.fid.write('\n')
             
-            self.fid.write('\n')
-            self.fid.write('\n')
-            self.fid.write('\n')
-
             
             self.fid.write(self.headingsData)
 
