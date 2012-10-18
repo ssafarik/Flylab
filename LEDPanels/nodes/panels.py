@@ -37,8 +37,8 @@ class LEDPanels():
                          'start_w_trig':       {'id': 0x25, 'args': [], 'help': 'start_w_trig()'},
                          'stop_w_trig':        {'id': 0x35, 'args': [], 'help': 'stop_w_trig()'},
                          'clear':              {'id': 0xF0, 'args': [], 'help': 'clear(), clear the flash'},
-                         'all_off':            {'id': 0x00, 'args': [], 'help': 'all_off(), set all panels to OFF'},
-                         'all_on':             {'id': 0xFF, 'args': [], 'help': 'all_on(), set all panels to ON;'},
+                         'all_off':            {'id': 0x00, 'args': [], 'help': 'all_off(), set all pixels on all panels to OFF'},
+                         'all_on':             {'id': 0xFF, 'args': [], 'help': 'all_on(), set all pixels on all panels to ON;'},
                          'g_level_0':          {'id': 0x90, 'args': [], 'help': 'g_level_0(), set all panels to grey level 0;'},
                          'g_level_1':          {'id': 0x91, 'args': [], 'help': 'g_level_1(), set all panels to grey level 1;'},
                          'g_level_2':          {'id': 0x92, 'args': [], 'help': 'g_level_2(), set all panels to grey level 2;'},
@@ -156,11 +156,25 @@ class LEDPanels():
         self.initialized = True
 
 
+    def MakeSurePortIsOpen(self):
+        while not self.serial.isOpen():
+            try:
+                rospy.logwarn ('LEDPanels: Serial port trying to open...')
+                self.serial.open()
+            except serial.SerialException:
+                rospy.sleep(1)
+            else:
+                rospy.logwarn ('LEDPanels: Serial port opened.')
+    
+        
     # Sends the get_version command to the LED controller, and returns the response.
     def GetVersion_callback (self, req):
         version = None
         if self.initialized:
             serialbytes_list = self.SerialBytelistFromCommand('get_version', [])
+
+            self.MakeSurePortIsOpen()
+                        
             self.serial.write(''.join(serialbytes_list))
             version = self.serial.readline()
             
@@ -173,6 +187,7 @@ class LEDPanels():
         value = None
         if self.initialized:
             serialbytes_list = self.SerialBytelistFromCommand('get_adc_value', [req.channel])
+            self.MakeSurePortIsOpen()
             self.serial.write(''.join(serialbytes_list))
             value = self.serial.readline()
             
@@ -218,11 +233,11 @@ class LEDPanels():
                         serialbytes_list.extend(self.Dec2chr(arg,nBytesArg))
                          
                     if (args_dict_list[iArg]['unsigned']==False):
-                        rospy.logwarn('LEDPanels not yet implemented.')
+                        rospy.logwarn('LEDPanels: command argument type (signed int) not yet implemented.')
         else:
-            rospy.logerr('Unknown LEDPanels command: %s' % command)
+            rospy.logwarn('Unknown LEDPanels command: %s' % command)
                         
-        #rospy.logwarn ('sending %s' % serialbytes_list)
+        #rospy.logwarn ('LEDPanels: sending %s' % serialbytes_list)
         return serialbytes_list
                     
         
@@ -256,17 +271,30 @@ class LEDPanels():
 
     def OnShutdown_callback(self):
         if self.initialized:
-            self.serial.close()
+            if self.serial.isOpen():
+                self.serial.close()
 
 
     def PanelsCommand_callback(self, panelcommand):
         if self.initialized:
-            #rospy.logwarn('%s(%d,%d,%d,%d)' % (panelcommand.command, panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4))
+            #rospy.logwarn(LEDPanels: '%s(%d,%d,%d,%d)' % (panelcommand.command, panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4))
             command = panelcommand.command.lower()
             serialbytes_list = self.SerialBytelistFromCommand(command, [panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4])
-            self.serial.write(''.join(serialbytes_list))
-        
-
+            self.MakeSurePortIsOpen()
+                        
+            try:
+                self.serial.write(''.join(serialbytes_list))
+            except serial.SerialException, e:
+                rospy.logwarn('LEDPanels: Serial exception, trying to reopen: %s' % e)
+                if self.serial.isOpen():
+                    self.serial.close()
+                self.MakeSurePortIsOpen()
+                try:
+                    self.serial.write(''.join(serialbytes_list))
+                except serial.SerialException, e:
+                    rospy.logwarn ('LEDPanels: Serial write failed: %s' % e)
+                else:
+                    rospy.logwarn ('LEDPanels: Serial write succeeded.')
 
     def Main(self):
         panelcommand = MsgPanelsCommand(command='all_off')
