@@ -775,7 +775,7 @@ class Save:
                                                 )
 
             with self.lockArenastate:
-                self.fid.write(data_row)
+                self.fid.write(data_row) # BUG: i/o op on closed file after ctrl+c
 
     
         if (self.initialized) and (self.bSavingVideo) and (self.image is not None):
