@@ -22,7 +22,7 @@ from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
 from visualization_msgs.msg import Marker
 
-gRate = 100  # This is the loop rate at which the experiment states run.
+gRate = 50  # This is the loop rate at which the experiment states run.
 g_tfrx = None
 
 #######################################################################################################
@@ -379,7 +379,7 @@ class TriggerOnStates (smach.State):
                         if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > trigger.timeout:
                             return 'timeout'
                     #if self.preempt_requested():
-                    #    self.recall_preempt()
+                    #    self.service_preempt()
                     #    self.Trigger.notify(False)
                     #    return 'preempt'
                     rospy.sleep(1.0)
@@ -494,7 +494,7 @@ class TriggerOnStates (smach.State):
                             
                         
                     #if self.preempt_requested():
-                    #    self.recall_preempt()
+                    #    self.service_preempt()
                     #    rv = 'preempt'
                     #    break
                     
@@ -610,7 +610,7 @@ class ResetRobot (smach.State):
                     if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.home.timeout:
                         return 'timeout'
                 #if self.preempt_requested():
-                #    self.recall_preempt()
+                #    self.service_preempt()
                 #    return 'preempt'
                 rospy.sleep(1.0)
     
@@ -644,7 +644,7 @@ class ResetRobot (smach.State):
                 
                 
                 #if self.preempt_requested():
-                #    self.recall_preempt()
+                #    self.service_preempt()
                 #    rv = 'preempt'
                 #    break
                 
@@ -703,8 +703,8 @@ class MoveRobot (smach.State):
                                                   userdata.experimentparamsIn.move.relative.angle, 
                                                   userdata.experimentparamsIn.move.relative.speed])
 
-        rv = 'disabled'
         if userdata.experimentparamsIn.move.enabled:
+            rv = 'aborted'
             rospy.wait_for_service('set_stage_state')
             try:
                 self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
@@ -719,7 +719,8 @@ class MoveRobot (smach.State):
                         return 'timeout'
                 
                 if self.preempt_requested():
-                    self.recall_preempt()
+                    rospy.logwarn('preempt requested')
+                    self.service_preempt()
                     return 'preempt'
                 
                 rospy.sleep(1.0)
@@ -729,6 +730,9 @@ class MoveRobot (smach.State):
                 rv = self.MoveRelative(userdata)
             else:
                 rv = self.MovePattern(userdata)
+        else:
+            rv = 'disabled'
+            
                 
         #rospy.loginfo ('EL Exiting MoveRobot()')
         return rv
@@ -845,7 +849,8 @@ class MoveRobot (smach.State):
 
             
             if self.preempt_requested():
-                self.recall_preempt()
+                rospy.logwarn('preempt requested')
+                self.service_preempt()
                 rv = 'preempt'
                 break
 
@@ -884,7 +889,8 @@ class MoveRobot (smach.State):
         rv = 'aborted'
         while not rospy.is_shutdown():
             if self.preempt_requested():
-                self.recall_preempt()
+                rospy.logwarn('preempt requested')
+                self.service_preempt()
                 rv = 'preempt'
                 break
 
@@ -1114,8 +1120,8 @@ class Lasertrack (smach.State):
         for pattern in userdata.experimentparamsIn.lasertrack.pattern_list:
             rospy.loginfo("EL State Lasertrack(%s)" % pattern)
 
-        rv = 'disabled'
         if userdata.experimentparamsIn.lasertrack.enabled:
+            rv = 'aborted'
             self.timeStart = rospy.Time.now()
     
             # Create the tracking command for the galvo director.
@@ -1254,7 +1260,8 @@ class Lasertrack (smach.State):
                 
                 
                 if self.preempt_requested():
-                    self.recall_preempt()
+                    rospy.logwarn('preempt requested')
+                    self.service_preempt()
                     rv = 'preempt'
                     break
     
@@ -1264,6 +1271,9 @@ class Lasertrack (smach.State):
                         break
                 
                 self.rosrate.sleep()
+        else:
+            rv = 'disabled'
+
 
                 
         # Turn off the laser.
@@ -1293,7 +1303,9 @@ class LEDPanels (smach.State):
                              outcomes=['disabled','timeout','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
         
-        self.rosrate = rospy.Rate(gRate)
+        # If this rate is too fast, then we get panel glitches.  50Hz=ok, 100Hz=not.  Alternatively could use the serial port rtscts, but it doesn't seem to be supported.
+        self.rosrate = rospy.Rate(gRate)    
+        
         self.arenastate = None
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
         self.xpanels    = rospy.get_param('ledpanels/xpanels', 1)
@@ -1309,6 +1321,7 @@ class LEDPanels (smach.State):
         
     def OnShutdown_callback(self):
         pass
+        
 
 
     def ArenaState_callback(self, arenastate):
@@ -1478,14 +1491,14 @@ class LEDPanels (smach.State):
     
         
     def execute(self, userdata):
-        rv = 'disabled'
+        # Create the panels command.
+        command = MsgPanelsCommand(command='all_off', arg1=0, arg2=0, arg3=0, arg4=0)
+
         if userdata.experimentparamsIn.ledpanels.enabled:
             self.timeStart = rospy.Time.now()
+            rv = 'aborted'
             xmax = self.xpanels * 8 # pixels per panel.
     
-            # Create the panels command.
-            command = MsgPanelsCommand(command='all_off', arg1=0, arg2=0, arg3=0, arg4=0)
-
             # Determine if we're operating only for certain states.
             if len(userdata.experimentparamsIn.ledpanels.statefilterHi) > 0:
                 isStatefiltered = True
@@ -1653,7 +1666,8 @@ class LEDPanels (smach.State):
                         
             
                 if self.preempt_requested():
-                    self.recall_preempt()
+                    rospy.logwarn('preempt requested')
+                    self.service_preempt()
                     rv = 'preempt'
                     break
     
@@ -1667,6 +1681,7 @@ class LEDPanels (smach.State):
             # End while not rospy.is_shutdown()
 
         else:
+            rv = 'disabled'
             command.command = 'all_off'
             self.pubLEDPanelsCommand.publish(command)
             
@@ -1696,8 +1711,8 @@ class ExperimentLib():
         # Create the "actions" concurrency state.
         smachActions = smach.Concurrence(outcomes = ['success','disabled','aborted'],
                                          default_outcome = 'aborted',
-                                         child_termination_cb = self.any_action_term_callback,
-                                         outcome_cb = self.all_actions_term_callback,
+                                         child_termination_cb = self.AnyActionTerm_callback,
+                                         outcome_cb = self.AllActionsTerm_callback,
                                          input_keys = ['experimentparamsIn'])
 
         with smachActions:
@@ -1842,9 +1857,17 @@ class ExperimentLib():
                                                  self.smachTop,
                                                  '/EXPERIMENT')
         
+        rospy.on_shutdown(self.OnShutdown_callback)
+
+
+    def OnShutdown_callback(self):
+        rospy.logwarn ('smach shutdown')
+        self.smachTop.request_preempt()
+        
         
     # Gets called upon ANY child state termination.
-    def any_action_term_callback(self, outcome_map):
+    def AnyActionTerm_callback(self, outcome_map):
+        #rospy.logwarn('AnyActionTerm_callback(%s)' % repr(outcome_map))
         rv = False
 
         if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map) and ('LEDPANELS' in outcome_map):
@@ -1855,18 +1878,21 @@ class ExperimentLib():
             if (outcome_map['MOVEROBOT']=='timeout') or (outcome_map['MOVEROBOT']=='success'):
                 rv = True 
             
-            if (outcome_map['LASERTRACK']=='timeout') or (outcome_map['LASERTRACK']=='success'):
+            if (outcome_map['LASERTRACK']=='timeout') or (outcome_map['LASERTRACK']=='aborted'):
                 rv = True 
         
-            if (outcome_map['LEDPANELS']=='timeout') or (outcome_map['LEDPANELS']=='success'):
+            if (outcome_map['LEDPANELS']=='timeout') or (outcome_map['LEDPANELS']=='aborted'):
                 rv = True 
         
-            
+        
+        # rv==True:  preempt all remaining states.
+        # rv==False: keep running.
         return rv
     
 
     # Gets called after all child states are terminated.
-    def all_actions_term_callback(self, outcome_map):
+    def AllActionsTerm_callback(self, outcome_map):
+        #rospy.logwarn('AllActionsTerm_callback(%s)' % repr(outcome_map))
         rv = 'aborted'
         if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map) and ('LEDPANELS' in outcome_map):
             if (outcome_map['EXITTRIGGER']=='timeout') or \
@@ -1887,9 +1913,11 @@ class ExperimentLib():
                 rv = 'disabled'
                 rospy.logwarn ('All experiment actions set as disabled.')
                 
-            else: # Some preempted, some disabled.
-                rv = 'disabled'
-                rospy.logwarn ('Unexpected state outcomes.  Please check this.') 
+            elif (outcome_map['EXITTRIGGER']=='aborted') or (outcome_map['MOVEROBOT']=='aborted') or (outcome_map['LASERTRACK']=='aborted') or (outcome_map['LEDPANELS']=='aborted'):
+                rv = 'aborted'
+            else: 
+                rv = 'aborted'
+                rospy.logwarn ('Unexpected state outcomes.  Please check this.  (%s,%s,%s,%s)' % (outcome_map['EXITTRIGGER'],outcome_map['MOVEROBOT'],outcome_map['LASERTRACK'],outcome_map['LEDPANELS'])) 
 
 
         self.Trigger.notify(False)
@@ -1903,10 +1931,9 @@ class ExperimentLib():
         try:
             outcome = self.smachTop.execute()
         except Exception, e: #smach.exceptions.InvalidUserCodeError, e:
-            rospy.logwarn('Exception executing state machine: %s' % e)
+            rospy.logwarn('Exception executing experiment: %s' % e)
         
-        rospy.logwarn ('Experiment state machine finished with outcome=%s' % outcome)
+        rospy.logwarn ('Experiment finished with outcome=%s' % outcome)
         self.sis.stop()
 
-
-
+    
