@@ -10,17 +10,19 @@ import experiments.msg
 import patterngen.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "0785a5533f04ca2ffcc2e0d790b434c4"
+  _md5sum = "e97296c01ddeb13ec313eb4c7b0e994d"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings 	       experiment
 SaveSettings 		       save
 flycore/TrackingCommand    tracking
 HomeSettings 		       home
-float64 			       waitEntry
+float64 			       waitEntry1
 TriggerSettings 	       triggerEntry
+float64 			       waitEntry2
 MoveSettings 		       move
 LasertrackSettings 	       lasertrack
+LEDPanelsSettings          ledpanels
 TriggerSettings 	       triggerExit
 float64 			       waitExit
 
@@ -131,7 +133,6 @@ patterngen/MsgPattern[] 	pattern_list
 string[]                    statefilterHi_list   		# These lists should either be empty, or contain as many entries as patterns.
 string[]                    statefilterLo_list	 		# Contains strings to be interpreted as dicts.  Pattern will only be enabled for fly states between these two entries.
 string[]                    statefilterCriteria_list	# "inclusive" or "exclusive"
-#ZoneSettings                exclusionzone
 float64 					timeout
 
 
@@ -150,9 +151,21 @@ float64               param     # An extra shape-dependent parameter, if needed 
  
 
 
+================================================================================
+MSG: experiments/LEDPanelsSettings
+bool                    enabled
+string                  command                 # 'None', 'trackposition' (panel position follows fly position), 'trackorientation' (panel position follows fly angle). 
+int32                   idPattern               # The pattern number to show.
+string                  frame_id                # Which frame to track.
+string                  statefilterHi   		
+string                  statefilterLo	 		# Contains a string to be interpreted as a dict.  Operation will only be enabled for fly states between these two entries.
+string                  statefilterCriteria	    # "inclusive" or "exclusive"
+float64                 timeout
+
+
 """
-  __slots__ = ['experiment','save','tracking','home','waitEntry','triggerEntry','move','lasertrack','triggerExit','waitExit']
-  _slot_types = ['experiments/ExperimentSettings','experiments/SaveSettings','flycore/TrackingCommand','experiments/HomeSettings','float64','experiments/TriggerSettings','experiments/MoveSettings','experiments/LasertrackSettings','experiments/TriggerSettings','float64']
+  __slots__ = ['experiment','save','tracking','home','waitEntry1','triggerEntry','waitEntry2','move','lasertrack','ledpanels','triggerExit','waitExit']
+  _slot_types = ['experiments/ExperimentSettings','experiments/SaveSettings','flycore/TrackingCommand','experiments/HomeSettings','float64','experiments/TriggerSettings','float64','experiments/MoveSettings','experiments/LasertrackSettings','experiments/LEDPanelsSettings','experiments/TriggerSettings','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -162,7 +175,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       experiment,save,tracking,home,waitEntry,triggerEntry,move,lasertrack,triggerExit,waitExit
+       experiment,save,tracking,home,waitEntry1,triggerEntry,waitEntry2,move,lasertrack,ledpanels,triggerExit,waitExit
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -179,14 +192,18 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.tracking = flycore.msg.TrackingCommand()
       if self.home is None:
         self.home = experiments.msg.HomeSettings()
-      if self.waitEntry is None:
-        self.waitEntry = 0.
+      if self.waitEntry1 is None:
+        self.waitEntry1 = 0.
       if self.triggerEntry is None:
         self.triggerEntry = experiments.msg.TriggerSettings()
+      if self.waitEntry2 is None:
+        self.waitEntry2 = 0.
       if self.move is None:
         self.move = experiments.msg.MoveSettings()
       if self.lasertrack is None:
         self.lasertrack = experiments.msg.LasertrackSettings()
+      if self.ledpanels is None:
+        self.ledpanels = experiments.msg.LEDPanelsSettings()
       if self.triggerExit is None:
         self.triggerExit = experiments.msg.TriggerSettings()
       if self.waitExit is None:
@@ -196,10 +213,12 @@ float64               param     # An extra shape-dependent parameter, if needed 
       self.save = experiments.msg.SaveSettings()
       self.tracking = flycore.msg.TrackingCommand()
       self.home = experiments.msg.HomeSettings()
-      self.waitEntry = 0.
+      self.waitEntry1 = 0.
       self.triggerEntry = experiments.msg.TriggerSettings()
+      self.waitEntry2 = 0.
       self.move = experiments.msg.MoveSettings()
       self.lasertrack = experiments.msg.LasertrackSettings()
+      self.ledpanels = experiments.msg.LEDPanelsSettings()
       self.triggerExit = experiments.msg.TriggerSettings()
       self.waitExit = 0.
 
@@ -241,7 +260,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
       pattern = '<%sd'%length
       buff.write(struct.pack(pattern, *self.tracking.exclusionzone.radius_list))
       _x = self
-      buff.write(_struct_B6dB.pack(_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
+      buff.write(_struct_B6dB.pack(_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry1, _x.triggerEntry.enabled))
       _x = self.triggerEntry.frameidParent
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -263,7 +282,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_B2dB.pack(_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled))
+      buff.write(_struct_B3dB.pack(_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.waitEntry2, _x.move.enabled))
       _x = self.move.mode
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -365,7 +384,40 @@ float64               param     # An extra shape-dependent parameter, if needed 
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
       _x = self
-      buff.write(_struct_dB.pack(_x.lasertrack.timeout, _x.triggerExit.enabled))
+      buff.write(_struct_dB.pack(_x.lasertrack.timeout, _x.ledpanels.enabled))
+      _x = self.ledpanels.command
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_i.pack(self.ledpanels.idPattern))
+      _x = self.ledpanels.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.ledpanels.statefilterHi
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.ledpanels.statefilterLo
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.ledpanels.statefilterCriteria
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_dB.pack(_x.ledpanels.timeout, _x.triggerExit.enabled))
       _x = self.triggerExit.frameidParent
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -411,6 +463,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.move = experiments.msg.MoveSettings()
       if self.lasertrack is None:
         self.lasertrack = experiments.msg.LasertrackSettings()
+      if self.ledpanels is None:
+        self.ledpanels = experiments.msg.LEDPanelsSettings()
       if self.triggerExit is None:
         self.triggerExit = experiments.msg.TriggerSettings()
       end = 0
@@ -466,7 +520,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
       _x = self
       start = end
       end += 50
-      (_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_B6dB.unpack(str[start:end])
+      (_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry1, _x.triggerEntry.enabled,) = _struct_B6dB.unpack(str[start:end])
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
       start = end
@@ -502,8 +556,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.triggerEntry.angleTest = str[start:end]
       _x = self
       start = end
-      end += 18
-      (_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled,) = _struct_B2dB.unpack(str[start:end])
+      end += 26
+      (_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.waitEntry2, _x.move.enabled,) = _struct_B3dB.unpack(str[start:end])
       self.triggerEntry.angleTestBilateral = bool(self.triggerEntry.angleTestBilateral)
       self.move.enabled = bool(self.move.enabled)
       start = end
@@ -686,7 +740,60 @@ float64               param     # An extra shape-dependent parameter, if needed 
       _x = self
       start = end
       end += 9
-      (_x.lasertrack.timeout, _x.triggerExit.enabled,) = _struct_dB.unpack(str[start:end])
+      (_x.lasertrack.timeout, _x.ledpanels.enabled,) = _struct_dB.unpack(str[start:end])
+      self.ledpanels.enabled = bool(self.ledpanels.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.command = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.command = str[start:end]
+      start = end
+      end += 4
+      (self.ledpanels.idPattern,) = _struct_i.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.frame_id = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.statefilterHi = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.statefilterHi = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.statefilterLo = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.statefilterLo = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.statefilterCriteria = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.statefilterCriteria = str[start:end]
+      _x = self
+      start = end
+      end += 9
+      (_x.ledpanels.timeout, _x.triggerExit.enabled,) = _struct_dB.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -762,7 +869,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
       pattern = '<%sd'%length
       buff.write(self.tracking.exclusionzone.radius_list.tostring())
       _x = self
-      buff.write(_struct_B6dB.pack(_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled))
+      buff.write(_struct_B6dB.pack(_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry1, _x.triggerEntry.enabled))
       _x = self.triggerEntry.frameidParent
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -784,7 +891,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_B2dB.pack(_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled))
+      buff.write(_struct_B3dB.pack(_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.waitEntry2, _x.move.enabled))
       _x = self.move.mode
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -886,7 +993,40 @@ float64               param     # An extra shape-dependent parameter, if needed 
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
       _x = self
-      buff.write(_struct_dB.pack(_x.lasertrack.timeout, _x.triggerExit.enabled))
+      buff.write(_struct_dB.pack(_x.lasertrack.timeout, _x.ledpanels.enabled))
+      _x = self.ledpanels.command
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_i.pack(self.ledpanels.idPattern))
+      _x = self.ledpanels.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.ledpanels.statefilterHi
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.ledpanels.statefilterLo
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.ledpanels.statefilterCriteria
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_dB.pack(_x.ledpanels.timeout, _x.triggerExit.enabled))
       _x = self.triggerExit.frameidParent
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -933,6 +1073,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.move = experiments.msg.MoveSettings()
       if self.lasertrack is None:
         self.lasertrack = experiments.msg.LasertrackSettings()
+      if self.ledpanels is None:
+        self.ledpanels = experiments.msg.LEDPanelsSettings()
       if self.triggerExit is None:
         self.triggerExit = experiments.msg.TriggerSettings()
       end = 0
@@ -988,7 +1130,7 @@ float64               param     # An extra shape-dependent parameter, if needed 
       _x = self
       start = end
       end += 50
-      (_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry, _x.triggerEntry.enabled,) = _struct_B6dB.unpack(str[start:end])
+      (_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry1, _x.triggerEntry.enabled,) = _struct_B6dB.unpack(str[start:end])
       self.home.enabled = bool(self.home.enabled)
       self.triggerEntry.enabled = bool(self.triggerEntry.enabled)
       start = end
@@ -1024,8 +1166,8 @@ float64               param     # An extra shape-dependent parameter, if needed 
         self.triggerEntry.angleTest = str[start:end]
       _x = self
       start = end
-      end += 18
-      (_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.move.enabled,) = _struct_B2dB.unpack(str[start:end])
+      end += 26
+      (_x.triggerEntry.angleTestBilateral, _x.triggerEntry.timeHold, _x.triggerEntry.timeout, _x.waitEntry2, _x.move.enabled,) = _struct_B3dB.unpack(str[start:end])
       self.triggerEntry.angleTestBilateral = bool(self.triggerEntry.angleTestBilateral)
       self.move.enabled = bool(self.move.enabled)
       start = end
@@ -1208,7 +1350,60 @@ float64               param     # An extra shape-dependent parameter, if needed 
       _x = self
       start = end
       end += 9
-      (_x.lasertrack.timeout, _x.triggerExit.enabled,) = _struct_dB.unpack(str[start:end])
+      (_x.lasertrack.timeout, _x.ledpanels.enabled,) = _struct_dB.unpack(str[start:end])
+      self.ledpanels.enabled = bool(self.ledpanels.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.command = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.command = str[start:end]
+      start = end
+      end += 4
+      (self.ledpanels.idPattern,) = _struct_i.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.frame_id = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.frame_id = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.statefilterHi = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.statefilterHi = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.statefilterLo = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.statefilterLo = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.ledpanels.statefilterCriteria = str[start:end].decode('utf-8')
+      else:
+        self.ledpanels.statefilterCriteria = str[start:end]
+      _x = self
+      start = end
+      end += 9
+      (_x.ledpanels.timeout, _x.triggerExit.enabled,) = _struct_dB.unpack(str[start:end])
       self.triggerExit.enabled = bool(self.triggerExit.enabled)
       start = end
       end += 4
@@ -1255,10 +1450,11 @@ _struct_Bd = struct.Struct("<Bd")
 _struct_2di5dB = struct.Struct("<2di5dB")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
+_struct_i = struct.Struct("<i")
 _struct_dB = struct.Struct("<dB")
-_struct_B2dB = struct.Struct("<B2dB")
-_struct_2d = struct.Struct("<2d")
 _struct_10d = struct.Struct("<10d")
+_struct_2d = struct.Struct("<2d")
+_struct_B3dB = struct.Struct("<B3dB")
 _struct_B3d = struct.Struct("<B3d")
 _struct_B6dB = struct.Struct("<B6dB")
 _struct_5B = struct.Struct("<5B")
@@ -1369,6 +1565,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '339b7d5b1e094bfebab6b38ef72a3eaa'
+  _md5sum = '0691dcf05334afc1f6c4e7308f713af8'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse
