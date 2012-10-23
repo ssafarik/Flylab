@@ -1,0 +1,15 @@
+<package>
+  <description brief="gui">
+
+     gui
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/gui</url>
+
+  <depend package="flycore"/>
+</package>
+
+

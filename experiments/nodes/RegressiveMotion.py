@@ -30,9 +30,9 @@ class ExperimentRegressiveMotion():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.tracking.exclusionzone.enabled = False
-        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
-        self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
+        self.experimentparams.tracking.exclusionzones.enabled = False
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
         self.experimentparams.home.enabled = True
         self.experimentparams.home.x = 0.0

@@ -477,13 +477,13 @@ class Save:
                                                 )
 
         self.headingsTracking = self.headingsTrackingA
-        paramsTracking = self.templateTrackingA.format(trackingExclusionzoneEnabled = str(experimentparamsReq.tracking.exclusionzone.enabled))
-        for i in range(len(experimentparamsReq.tracking.exclusionzone.point_list)):
+        paramsTracking = self.templateTrackingA.format(trackingExclusionzoneEnabled = str(experimentparamsReq.tracking.exclusionzones.enabled))
+        for i in range(len(experimentparamsReq.tracking.exclusionzones.point_list)):
             self.headingsTracking += self.headingsTrackingB
             paramsTracking += self.templateTrackingB.format(
-                                                trackingExclusionzoneX       = str(experimentparamsReq.tracking.exclusionzone.point_list[i].x),
-                                                trackingExclusionzoneY       = str(experimentparamsReq.tracking.exclusionzone.point_list[i].y),
-                                                trackingExclusionzoneRadius  = str(experimentparamsReq.tracking.exclusionzone.radius_list[i]),
+                                                trackingExclusionzoneX       = str(experimentparamsReq.tracking.exclusionzones.point_list[i].x),
+                                                trackingExclusionzoneY       = str(experimentparamsReq.tracking.exclusionzones.point_list[i].y),
+                                                trackingExclusionzoneRadius  = str(experimentparamsReq.tracking.exclusionzones.radius_list[i]),
                                                 )
         self.headingsTracking += '\n'
         paramsTracking += '\n'

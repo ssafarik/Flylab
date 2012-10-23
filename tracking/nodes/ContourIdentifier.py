@@ -59,8 +59,8 @@ class ContourIdentifier:
         
         # Messages
         queue_size_contours   = rospy.get_param('tracking/queue_size_contours', 1)
-        self.subTrackingCommand = rospy.Subscriber("TrackingCommand", TrackingCommand, self.TrackingCommand_callback)
-        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.ContourInfo_callback, queue_size=queue_size_contours)
+        self.subTrackingCommand = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
+        self.subContourInfo = rospy.Subscriber('ContourInfo', ContourInfo, self.ContourInfo_callback, queue_size=queue_size_contours)
         self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback, queue_size=2)
         
         self.pubArenaState = rospy.Publisher('ArenaState', ArenaState)
@@ -137,37 +137,42 @@ class ContourIdentifier:
         self.fidFly.close()
         
 
+    # TrackingCommand_callback()
+    # Receives various commands to change the tracking behavior.
+    # See TrackingCommand.msg for details.
+    #
     def TrackingCommand_callback(self, trackingcommand):
-        self.enabledExclusionzone = trackingcommand.exclusionzone.enabled
-        self.pointExclusionzone_list = trackingcommand.exclusionzone.point_list
-        self.radiusExclusionzone_list = trackingcommand.exclusionzone.radius_list
-        for i in range(len(self.pointExclusionzone_list)):
-            rospy.loginfo ('Tracking exclusion zone %s at (%0.2f,%0.2f) radius=%0.2f' % (['disabled','enabled'][self.enabledExclusionzone],
-                                                                                         self.pointExclusionzone_list[i].x,
-                                                                                         self.pointExclusionzone_list[i].y,
-                                                                                         self.radiusExclusionzone_list[i]))
-        if self.enabledExclusionzone:
-            self.markerExclusionzone_list = []
+        if trackingcommand=='setexclusionzones':
+            self.enabledExclusionzone = trackingcommand.exclusionzones.enabled
+            self.pointExclusionzone_list = trackingcommand.exclusionzones.point_list
+            self.radiusExclusionzone_list = trackingcommand.exclusionzones.radius_list
             for i in range(len(self.pointExclusionzone_list)):
-                self.markerExclusionzone_list.append(Marker(header=Header(stamp = rospy.Time.now(),
-                                                                          frame_id='/Plate'),
-                                                            ns='exclusionzone',
-                                                            id=0,
-                                                            type=3, #CYLINDER,
-                                                            action=0,
-                                                            pose=Pose(position=Point(x=self.pointExclusionzone_list[i].x, 
-                                                                                     y=self.pointExclusionzone_list[i].y, 
-                                                                                     z=0)),
-                                                            scale=Vector3(x=self.radiusExclusionzone_list[i]*2.0,
-                                                                          y=self.radiusExclusionzone_list[i]*2.0,
-                                                                          z=0.01),
-                                                            color=ColorRGBA(a=0.1,
-                                                                            r=1.0,
-                                                                            g=1.0,
-                                                                            b=1.0),
-                                                            lifetime=rospy.Duration(1.0))
-                                                     )
-        self.ResetFlyObjects()
+                rospy.loginfo ('Tracking exclusion zone %s at (%0.2f,%0.2f) radius=%0.2f' % (['disabled','enabled'][self.enabledExclusionzone],
+                                                                                             self.pointExclusionzone_list[i].x,
+                                                                                             self.pointExclusionzone_list[i].y,
+                                                                                             self.radiusExclusionzone_list[i]))
+            if self.enabledExclusionzone:
+                self.markerExclusionzone_list = []
+                for i in range(len(self.pointExclusionzone_list)):
+                    self.markerExclusionzone_list.append(Marker(header=Header(stamp = rospy.Time.now(),
+                                                                              frame_id='/Plate'),
+                                                                ns='exclusionzones',
+                                                                id=0,
+                                                                type=3, #CYLINDER,
+                                                                action=0,
+                                                                pose=Pose(position=Point(x=self.pointExclusionzone_list[i].x, 
+                                                                                         y=self.pointExclusionzone_list[i].y, 
+                                                                                         z=0)),
+                                                                scale=Vector3(x=self.radiusExclusionzone_list[i]*2.0,
+                                                                              y=self.radiusExclusionzone_list[i]*2.0,
+                                                                              z=0.01),
+                                                                color=ColorRGBA(a=0.1,
+                                                                                r=1.0,
+                                                                                g=1.0,
+                                                                                b=1.0),
+                                                                lifetime=rospy.Duration(1.0))
+                                                         )
+            self.ResetFlyObjects()
         
 
     def EndEffector_callback(self, state):

@@ -28,7 +28,7 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Visual Place Learning paper by Reiser"
+        self.experimentparams.experiment.description = "Rotate Panels to Track a Fly"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
@@ -38,9 +38,9 @@ class Experiment():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True # Saves always.
 
-        self.experimentparams.tracking.exclusionzone.enabled = False
-        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=52.3, y=-51.0)]
-        self.experimentparams.tracking.exclusionzone.radius_list = [7.0]
+        self.experimentparams.tracking.exclusionzones.enabled = False
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=52.3, y=-51.0)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [7.0]
         
         self.experimentparams.home.enabled = False
         

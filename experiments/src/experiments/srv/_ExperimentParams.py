@@ -10,7 +10,7 @@ import experiments.msg
 import patterngen.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "e97296c01ddeb13ec313eb4c7b0e994d"
+  _md5sum = "b3a55f4789642789b33f80e8a8868f80"
   _type = "experiments/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """ExperimentSettings 	       experiment
@@ -44,10 +44,11 @@ bool onlyWhileTriggered
 
 ================================================================================
 MSG: flycore/TrackingCommand
-flycore/Zone    exclusionzone
+string                command          # 'setexclusionzones' or 'savebackground'
+flycore/CircleZones   exclusionzones
 
 ================================================================================
-MSG: flycore/Zone
+MSG: flycore/CircleZones
 bool                        enabled
 geometry_msgs/Point[]       point_list
 float64[]                   radius_list
@@ -249,16 +250,23 @@ float64                 timeout
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_5B.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.tracking.exclusionzone.enabled))
-      length = len(self.tracking.exclusionzone.point_list)
+      buff.write(_struct_4B.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered))
+      _x = self.tracking.command
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_B.pack(self.tracking.exclusionzones.enabled))
+      length = len(self.tracking.exclusionzones.point_list)
       buff.write(_struct_I.pack(length))
-      for val1 in self.tracking.exclusionzone.point_list:
+      for val1 in self.tracking.exclusionzones.point_list:
         _x = val1
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
-      length = len(self.tracking.exclusionzone.radius_list)
+      length = len(self.tracking.exclusionzones.radius_list)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
-      buff.write(struct.pack(pattern, *self.tracking.exclusionzone.radius_list))
+      buff.write(struct.pack(pattern, *self.tracking.exclusionzones.radius_list))
       _x = self
       buff.write(_struct_B6dB.pack(_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry1, _x.triggerEntry.enabled))
       _x = self.triggerEntry.frameidParent
@@ -492,31 +500,43 @@ float64                 timeout
         self.save.filenamebase = str[start:end]
       _x = self
       start = end
-      end += 5
-      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.tracking.exclusionzone.enabled,) = _struct_5B.unpack(str[start:end])
+      end += 4
+      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered,) = _struct_4B.unpack(str[start:end])
       self.save.arenastate = bool(self.save.arenastate)
       self.save.video = bool(self.save.video)
       self.save.bag = bool(self.save.bag)
       self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
-      self.tracking.exclusionzone.enabled = bool(self.tracking.exclusionzone.enabled)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      self.tracking.exclusionzone.point_list = []
+      start = end
+      end += length
+      if python3:
+        self.tracking.command = str[start:end].decode('utf-8')
+      else:
+        self.tracking.command = str[start:end]
+      start = end
+      end += 1
+      (self.tracking.exclusionzones.enabled,) = _struct_B.unpack(str[start:end])
+      self.tracking.exclusionzones.enabled = bool(self.tracking.exclusionzones.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.tracking.exclusionzones.point_list = []
       for i in range(0, length):
         val1 = geometry_msgs.msg.Point()
         _x = val1
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
-        self.tracking.exclusionzone.point_list.append(val1)
+        self.tracking.exclusionzones.point_list.append(val1)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       pattern = '<%sd'%length
       start = end
       end += struct.calcsize(pattern)
-      self.tracking.exclusionzone.radius_list = struct.unpack(pattern, str[start:end])
+      self.tracking.exclusionzones.radius_list = struct.unpack(pattern, str[start:end])
       _x = self
       start = end
       end += 50
@@ -858,16 +878,23 @@ float64                 timeout
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_5B.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.tracking.exclusionzone.enabled))
-      length = len(self.tracking.exclusionzone.point_list)
+      buff.write(_struct_4B.pack(_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered))
+      _x = self.tracking.command
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      buff.write(_struct_B.pack(self.tracking.exclusionzones.enabled))
+      length = len(self.tracking.exclusionzones.point_list)
       buff.write(_struct_I.pack(length))
-      for val1 in self.tracking.exclusionzone.point_list:
+      for val1 in self.tracking.exclusionzones.point_list:
         _x = val1
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
-      length = len(self.tracking.exclusionzone.radius_list)
+      length = len(self.tracking.exclusionzones.radius_list)
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
-      buff.write(self.tracking.exclusionzone.radius_list.tostring())
+      buff.write(self.tracking.exclusionzones.radius_list.tostring())
       _x = self
       buff.write(_struct_B6dB.pack(_x.home.enabled, _x.home.x, _x.home.y, _x.home.speed, _x.home.tolerance, _x.home.timeout, _x.waitEntry1, _x.triggerEntry.enabled))
       _x = self.triggerEntry.frameidParent
@@ -1102,31 +1129,43 @@ float64                 timeout
         self.save.filenamebase = str[start:end]
       _x = self
       start = end
-      end += 5
-      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered, _x.tracking.exclusionzone.enabled,) = _struct_5B.unpack(str[start:end])
+      end += 4
+      (_x.save.arenastate, _x.save.video, _x.save.bag, _x.save.onlyWhileTriggered,) = _struct_4B.unpack(str[start:end])
       self.save.arenastate = bool(self.save.arenastate)
       self.save.video = bool(self.save.video)
       self.save.bag = bool(self.save.bag)
       self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
-      self.tracking.exclusionzone.enabled = bool(self.tracking.exclusionzone.enabled)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
-      self.tracking.exclusionzone.point_list = []
+      start = end
+      end += length
+      if python3:
+        self.tracking.command = str[start:end].decode('utf-8')
+      else:
+        self.tracking.command = str[start:end]
+      start = end
+      end += 1
+      (self.tracking.exclusionzones.enabled,) = _struct_B.unpack(str[start:end])
+      self.tracking.exclusionzones.enabled = bool(self.tracking.exclusionzones.enabled)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.tracking.exclusionzones.point_list = []
       for i in range(0, length):
         val1 = geometry_msgs.msg.Point()
         _x = val1
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
-        self.tracking.exclusionzone.point_list.append(val1)
+        self.tracking.exclusionzones.point_list.append(val1)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       pattern = '<%sd'%length
       start = end
       end += struct.calcsize(pattern)
-      self.tracking.exclusionzone.radius_list = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
+      self.tracking.exclusionzones.radius_list = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
       _x = self
       start = end
       end += 50
@@ -1451,14 +1490,14 @@ _struct_2di5dB = struct.Struct("<2di5dB")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
 _struct_i = struct.Struct("<i")
+_struct_2di = struct.Struct("<2di")
 _struct_dB = struct.Struct("<dB")
 _struct_10d = struct.Struct("<10d")
 _struct_2d = struct.Struct("<2d")
 _struct_B3dB = struct.Struct("<B3dB")
 _struct_B3d = struct.Struct("<B3d")
 _struct_B6dB = struct.Struct("<B6dB")
-_struct_5B = struct.Struct("<5B")
-_struct_2di = struct.Struct("<2di")
+_struct_4B = struct.Struct("<4B")
 _struct_2i = struct.Struct("<2i")
 _struct_3d = struct.Struct("<3d")
 """autogenerated by genpy from experiments/ExperimentParamsResponse.msg. Do not edit."""
@@ -1565,6 +1604,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiments/ExperimentParams'
-  _md5sum = '0691dcf05334afc1f6c4e7308f713af8'
+  _md5sum = '0fafff7a9b928fa30b87be68b81ff990'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

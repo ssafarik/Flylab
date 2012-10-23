@@ -12,6 +12,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Point, PointStamped
 from std_msgs.msg import String
 from sensor_msgs.msg import Image, CameraInfo
+from flycore.msg import TrackingCommand
 from tracking.msg import ContourInfo
 from plate_tf.srv import PlateCameraConversion
 
@@ -41,6 +42,7 @@ class ContourGenerator:
         
         self.subCameraInfo       = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
         self.subImageRect        = rospy.Subscriber("camera/image_rect", Image, self.Image_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
+        self.subTrackingCommand  = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
         
         self.pubImageProcessed   = rospy.Publisher("camera/image_processed", Image)
         self.pubImageBackground  = rospy.Publisher("camera/image_background", Image)
@@ -153,12 +155,16 @@ class ContourGenerator:
             if self.bUseBackgroundSubtraction:
                 try:
                     self.matBackground = cv.LoadImageM(self.filenameBackground, cv.CV_LOAD_IMAGE_GRAYSCALE)
-                    self.npBackground = N.float32(self.matBackground)
+                    self.npfBackground = N.float32(self.matBackground)
                 except:
                     rospy.logwarn ('Saving new background image %s' % self.filenameBackground)
                     cv.And(self.matCamera, self.matMask, self.matBackground)
                     cv.SaveImage(self.filenameBackground, self.matBackground)
               
+                #self.histModel = cv2.calcHist([N.uint8(self.matBackground)], [0], N.uint8(self.matMask), [255], [0,255])
+                #rospy.logwarn (self.histModel)
+                self.npBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8) #N.uint8(self.matCamera)
+                
             self.initialized = True
             
 
@@ -169,6 +175,15 @@ class ContourGenerator:
             if not self.initialized:
                 self.InitializeImages()
             
+            
+    # TrackingCommand_callback()
+    # Receives various commands to change the tracking behavior.
+    # See TrackingCommand.msg for details.
+    #
+    def TrackingCommand_callback(self, trackingcommand):
+        if trackingcommand.command == 'savebackground':
+            rospy.logwarn ('Saving new background image %s' % self.filenameBackground)
+            cv.SaveImage(self.filenameBackground, self.matBackground)
 
     
     def MmFromPixels (self, xIn):
@@ -410,8 +425,6 @@ class ContourGenerator:
         # Convert ROS image to OpenCV image.
         try:
             self.matCamera = cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough"))
-            #matCamera = cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough"))
-            #cv.CvtColor(matCamera, self.matCamera, cv.CV_RGB2GRAY)
         except CvBridgeError, e:
             rospy.logwarn ('Exception %s' % e)
         
@@ -419,6 +432,9 @@ class ContourGenerator:
             self.InitializeImages()
 
         if self.initialized:        
+            # Check for new diff_threshold value
+            self.diff_threshold = rospy.get_param("tracking/diff_threshold", 50)
+
             radiusMask = int(rospy.get_param("camera/mask/radius", 9999)) 
             if radiusMask != self.radiusMask:
                 self.radiusMask = radiusMask 
@@ -429,22 +445,25 @@ class ContourGenerator:
                           self.color_max, 
                           cv.CV_FILLED)
             
+            # Mask the camera image.
             cv.And(self.matCamera, self.matMask, self.matCamera)
-    
             
-            # Check for new diff_threshold value
-            self.diff_threshold = rospy.get_param("tracking/diff_threshold", 50)
-
+            # Normalize the histogram.
+            #self.npBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8)
+            npBuffer = cv2.equalizeHist(N.array(self.matCamera))
+            self.matCamera = cv.fromarray(npBuffer)
             
-            # Update the background image
+            
             if self.bUseBackgroundSubtraction:
-                cv2.accumulateWeighted(N.float32(self.matCamera), self.npBackground, self.alphaBackground)
-                self.matBackground = cv.fromarray(N.uint8(self.npBackground))
+                # Update the background image
+                cv2.accumulateWeighted(N.float32(self.matCamera), self.npfBackground, self.alphaBackground)
+                self.matBackground = cv.fromarray(N.uint8(self.npfBackground))
 
-            
-            # Subtract background
-            if self.bUseBackgroundSubtraction:
-                cv.AbsDiff(self.matCamera, self.matBackground, self.matForeground)
+                # Subtract background
+                #self.npBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8)
+                npBuffer = cv2.equalizeHist(N.array(self.matBackground))
+                self.matBackground2 = cv.fromarray(npBuffer)
+                cv.AbsDiff(self.matCamera, self.matBackground2, self.matForeground)
             else:
                 cv.Copy(self.matCamera, self.matForeground)
 

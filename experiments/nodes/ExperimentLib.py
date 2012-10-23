@@ -206,11 +206,11 @@ class NewTrial (smach.State):
                              outcomes=['continue','exit','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
-        self.pubTrackingCommand = rospy.Publisher('TrackingCommand', TrackingCommand, latch=True)
+        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
         
         # Command messages.
         self.command = 'continue'
-        self.command_list = ['continue','pause', 'stage/calibrate', 'exit']
+        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
 
         
@@ -220,10 +220,14 @@ class NewTrial (smach.State):
         self.NewTrial = NewTrialService()
         self.NewTrial.attach()
 
+
     def Command_callback(self, msgString):
         if msgString.data in self.command_list:
             self.command = msgString.data
-            rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.command)
+            if 'now' in self.command:
+                rospy.logwarn ('Experiment received command: "%s".' % self.command)
+            else:
+                rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.command)
         else:
             rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.command_list))
             
@@ -259,12 +263,19 @@ class NewTrial (smach.State):
             self.command = 'continue'
             rospy.logwarn ('**************************************** Experiment continuing.')
             
-        if (self.command=='exit'):
+        if (self.command=='exit') or (self.command=='exitnow'):
             return rv
 
-            
+
+        # Set up the tracking exclusion zones.    
         userdata.experimentparamsOut = experimentparams
-        self.pubTrackingCommand.publish(experimentparams.tracking)
+        msgTrackingCommand = TrackingCommand()
+        msgTrackingCommand.command = 'setexclusionzones'
+        msgTrackingCommand.exclusionzones = experimentparams.tracking.exclusionzones
+        self.pubTrackingCommand.publish(msgTrackingCommand)
+        
+        
+        # Tell everyone we're starting.
         try:
             self.NewTrial.notify(experimentparams)
             rv = 'continue'
@@ -305,8 +316,17 @@ class TriggerOnStates (smach.State):
     
         self.nRobots = rospy.get_param('nRobots', 0)
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
-        
     
+        # Command messages.
+        self.command = 'continue'
+        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+
+
+    def Command_callback(self, msgString):
+        self.command = msgString.data
+            
+        
     def OnShutdown_callback(self):
         pass
         
@@ -491,7 +511,11 @@ class TriggerOnStates (smach.State):
                                 break
                             
                             #rospy.loginfo('EL duration=%s' % duration)
-                            
+                        
+                        if (self.command=='exitnow'):
+                            rv = 'aborted'
+                            break
+    
                         
                     #if self.preempt_requested():
                     #    self.service_preempt()
@@ -533,6 +557,16 @@ class TriggerOnTime (smach.State):
         self.Trigger.attach()
         
 
+        # Command messages.
+        self.command = 'continue'
+        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+
+
+    def Command_callback(self, msgString):
+        self.command = msgString.data
+            
+        
     def execute(self, userdata):
         if self.type=='entry1':
             duration = userdata.experimentparamsIn.waitEntry1
@@ -547,6 +581,9 @@ class TriggerOnTime (smach.State):
         try:
             rospy.sleep(duration)
         except rospy.ServiceException:
+            rv = 'aborted'
+
+        if (self.command=='exitnow'):
             rv = 'aborted'
 
         #if rv!='aborted' and ('entry' in self.type):
@@ -582,6 +619,16 @@ class ResetRobot (smach.State):
         rospy.on_shutdown(self.OnShutdown_callback)
         
         
+        # Command messages.
+        self.command = 'continue'
+        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+
+
+    def Command_callback(self, msgString):
+        self.command = msgString.data
+            
+        
     def OnShutdown_callback(self):
         pass
         
@@ -614,6 +661,8 @@ class ResetRobot (smach.State):
                 #    return 'preempt'
                 rospy.sleep(1.0)
     
+                if (self.command=='exitnow'):
+                    return 'aborted'
     
     
             # Send the command.
@@ -656,6 +705,9 @@ class ResetRobot (smach.State):
                 
                 self.rosrate.sleep()
 
+                if (self.command=='exitnow'):
+                    rv = 'aborted'
+                    break
 
         #rospy.loginfo ('EL Exiting ResetRobot()')
         return rv
@@ -687,6 +739,16 @@ class MoveRobot (smach.State):
         
         rospy.on_shutdown(self.OnShutdown_callback)
         
+        
+        # Command messages.
+        self.command = 'continue'
+        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+
+
+    def Command_callback(self, msgString):
+        self.command = msgString.data
+            
         
     def OnShutdown_callback(self):
         pass
@@ -723,6 +785,9 @@ class MoveRobot (smach.State):
                     self.service_preempt()
                     return 'preempt'
                 
+                if (self.command=='exitnow'):
+                    return 'aborted'
+
                 rospy.sleep(1.0)
     
     
@@ -862,6 +927,10 @@ class MoveRobot (smach.State):
             
             self.rosrate.sleep()
 
+            if (self.command=='exitnow'):
+                rv = 'aborted'
+                break
+
 
         self.ptTarget = None
         
@@ -901,6 +970,10 @@ class MoveRobot (smach.State):
                     break
             
             self.rosrate.sleep()
+
+            if (self.command=='exitnow'):
+                rv = 'aborted'
+                break
 
         # Turn off the pattern
         msgPattern.mode = 'byshape'
@@ -945,6 +1018,16 @@ class Lasertrack (smach.State):
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
+        
+        # Command messages.
+        self.command = 'continue'
+        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+
+
+    def Command_callback(self, msgString):
+        self.command = msgString.data
+            
         
     def OnShutdown_callback(self):
         pass
@@ -1271,6 +1354,11 @@ class Lasertrack (smach.State):
                         break
                 
                 self.rosrate.sleep()
+
+                if (self.command=='exitnow'):
+                    rv = 'aborted'
+                    break
+                
         else:
             rv = 'disabled'
 
@@ -1318,6 +1406,16 @@ class LEDPanels (smach.State):
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
+        
+        # Command messages.
+        self.command = 'continue'
+        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+
+
+    def Command_callback(self, msgString):
+        self.command = msgString.data
+            
         
     def OnShutdown_callback(self):
         pass
@@ -1677,6 +1775,10 @@ class LEDPanels (smach.State):
                         break
                 
                 self.rosrate.sleep()
+
+                if (self.command=='exitnow'):
+                    rv = 'aborted'
+                    break
                 
             # End while not rospy.is_shutdown()
 

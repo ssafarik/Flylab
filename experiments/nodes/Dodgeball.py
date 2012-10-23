@@ -31,9 +31,9 @@ class ExperimentDodgeball():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.tracking.exclusionzone.enabled = True
-        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=50.0, y=68.0)]
-        self.experimentparams.tracking.exclusionzone.radius_list = [3.0]
+        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=50.0, y=68.0)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
         self.experimentparams.home.enabled = True
         self.experimentparams.home.x = 0.0
