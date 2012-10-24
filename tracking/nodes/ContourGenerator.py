@@ -65,7 +65,7 @@ class ContourGenerator:
 
         
         # Contour Info
-        self.contourinfo = ContourInfo()
+        self.contourinfo_lists = ContourInfo()
         self.x0_list = []
         self.y0_list = []
         self.angle_list = []
@@ -81,14 +81,12 @@ class ContourGenerator:
             self.nContoursMax -= 1
         
         self.header = None
-        self.matCamera = None
+        self.npCamera = None
         
         
         # OpenCV
         self.max_8U = 255
         self.color_max = 255
-        self.font = cv.InitFont(cv.CV_FONT_HERSHEY_TRIPLEX,0.5,0.5)
-        self.cvstorage = cv.CreateMemStorage()
         self.cvbridge = CvBridge()
         
         # Coordinate Systems
@@ -113,17 +111,24 @@ class ContourGenerator:
         
 
     def InitializeImages(self):
-        if (self.camerainfo is not None) and (self.matCamera is not None):
-            self.sizeImageRect = cv.GetSize(self.matCamera)
-            
+        if (self.camerainfo is not None) and (self.npCamera is not None):
 
             # Initialize the images (in opencv Mat format).
-            self.matProcessed         = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC3)
-            self.matProcessedFlip     = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC3)
-            self.matMask              = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC1)
-            self.matBackground        = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC1)
-            self.matForeground        = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC1)
-            self.matThreshold         = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC1)
+            #self.matProcessed         = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC3)
+            #self.matProcessedFlip     = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC3)
+            #self.matMask              = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC1)
+            #self.matBackground        = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC1)
+            #self.matForeground        = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC1)
+            #self.matThreshold         = cv.CreateMat(self.camerainfo.height, self.camerainfo.width, cv.CV_8UC1)
+            
+            self.npProcessed         = N.zeros([self.camerainfo.height, self.camerainfo.width, 3], dtype=N.uint8)
+            self.npProcessedFlip     = N.zeros([self.camerainfo.height, self.camerainfo.width, 3], dtype=N.uint8)
+            self.npMask              = N.zeros([self.camerainfo.height, self.camerainfo.width], dtype=N.uint8)
+            self.npForeground        = N.zeros([self.camerainfo.height, self.camerainfo.width], dtype=N.uint8)
+            self.npBackground        = N.zeros([self.camerainfo.height, self.camerainfo.width], dtype=N.uint8)
+            self.npThreshold         = N.zeros([self.camerainfo.height, self.camerainfo.width], dtype=N.uint8)
+
+            
             
             if self.bUseTransforms:
                 b = False
@@ -143,8 +148,8 @@ class ContourGenerator:
             else:
                 self.ptsOriginMask = PointStamped(point=Point(x=0, y=0))
                         
-            cv.Zero(self.matMask)
-            cv.Circle(self.matMask,
+            #cv.Zero(self.matMask)
+            cv2.circle(self.npMask,
                       (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
                       int(self.radiusMask), 
                       self.color_max, 
@@ -154,16 +159,17 @@ class ContourGenerator:
             # First image is background unless one can be loaded
             if self.bUseBackgroundSubtraction:
                 try:
-                    self.matBackground = cv.LoadImageM(self.filenameBackground, cv.CV_LOAD_IMAGE_GRAYSCALE)
-                    self.npfBackground = N.float32(self.matBackground)
+                    matBackground = cv.LoadImageM(self.filenameBackground, cv.CV_LOAD_IMAGE_GRAYSCALE)
+                    self.npBackground  = N.uint8(matBackground)
+                    self.npfBackground = N.float32(matBackground)
                 except:
                     rospy.logwarn ('Saving new background image %s' % self.filenameBackground)
-                    cv.And(self.matCamera, self.matMask, self.matBackground)
-                    cv.SaveImage(self.filenameBackground, self.matBackground)
+                    self.npBackground = cv2.bitwise_and(self.npCamera, self.npMask)
+                    cv.SaveImage(self.filenameBackground, cv.fromarray(self.npBackground))
               
                 #self.histModel = cv2.calcHist([N.uint8(self.matBackground)], [0], N.uint8(self.matMask), [255], [0,255])
                 #rospy.logwarn (self.histModel)
-                self.npBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8) #N.uint8(self.matCamera)
+                self.npBuffer = N.zeros([self.npCamera.shape[0], self.npCamera.shape[1]], dtype=N.uint8) #N.uint8(self.matCamera)
                 
             self.initialized = True
             
@@ -183,7 +189,7 @@ class ContourGenerator:
     def TrackingCommand_callback(self, trackingcommand):
         if trackingcommand.command == 'savebackground':
             rospy.logwarn ('Saving new background image %s' % self.filenameBackground)
-            cv.SaveImage(self.filenameBackground, self.matBackground)
+            cv.SaveImage(self.filenameBackground, cv.GetMat(self.npBackground))
 
     
     def MmFromPixels (self, xIn):
@@ -212,7 +218,7 @@ class ContourGenerator:
         
     def DrawAngleLine(self, cvimage, x0, y0, angle, ecc, length):
         if (not N.isnan(angle)) and (self.minEccForDisplay < ecc):
-            height, width = cv.GetSize(cvimage)
+            height, width = cvimage.size #cv.GetSize(cvimage)
             y0 = height-y0
             
             # line segment for orientation
@@ -274,10 +280,11 @@ class ContourGenerator:
         return angle, ecc
         
 
-    def ContourFromMoments(self, moments):
-        m00 = cv.GetSpatialMoment(moments,0,0)
-        m10 = cv.GetSpatialMoment(moments,1,0)
-        m01 = cv.GetSpatialMoment(moments,0,1)
+    def ContourinfoFromMoments(self, moments):
+        #rospy.logwarn('moments=%s' % repr(moments))
+        m00 = moments['m00'] #cv.GetSpatialMoment(moments,0,0)
+        m10 = moments['m10'] #cv.GetSpatialMoment(moments,1,0)
+        m01 = moments['m01'] #cv.GetSpatialMoment(moments,0,1)
         
         if m00 != 0.0:
             x = m10/m00
@@ -288,28 +295,31 @@ class ContourGenerator:
             y = None
             #rospy.logwarn ('zero moments')
           
-        u11 = cv.GetCentralMoment(moments,1,1)
-        u20 = cv.GetCentralMoment(moments,2,0)
-        u02 = cv.GetCentralMoment(moments,0,2)
+        u11 = moments['mu11'] #cv.GetCentralMoment(moments,1,1)
+        u20 = moments['mu20'] #cv.GetCentralMoment(moments,2,0)
+        u02 = moments['mu02'] #cv.GetCentralMoment(moments,0,2)
         area = m00
         angle, ecc = self.FindAngleEcc(u20, u11, u02)
         #rospy.logwarn('u: %s, %s, %s, %s' % (m00, u20, u11, u02))
 
 #        rospy.logwarn ('Moments: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, xy=(%s, %s)' % (m00, m10, m01, u20, u11, u02, x, y))
 
-        return x, y, area, angle, ecc
+        return (x, y, area, angle, ecc)
     
     
-    def AppendContour(self, cvseqContours):
-        moments = cv.Moments(cvseqContours)  # Sometimes the contour contains just one pixel, resulting in moments=(0,0,0,0,0,0)
-        (x, y, area, angle, ecc) = self.ContourFromMoments(moments)
+    # AppendContourinfoListsFromContour()
+    # Converts contour to a contourinfo, transforms it to the output frame, and appends the contourinfo members to their respective lists.
+    #
+    def AppendContourinfoListsFromContour(self, contour):
+        moments = cv2.moments(contour)  # Sometimes the contour contains just one pixel, resulting in moments=(0,0,0,0,0,0)
+        (x, y, area, angle, ecc) = self.ContourinfoFromMoments(moments)
         if (x is None) or (y is None):
-            (x,y) = cvseqContours[0]
+            (x,y) = contour[0][0]
             area = 0.0001 # one pixel's worth.
             angle = 99.9
             ecc = 1.0
             
-        # Save contour info
+        # Save contourinfo_lists
         ptsContour = PointStamped()
         ptsContour.header.frame_id = "ImageRect"
         ptsContour.point.x = x
@@ -338,7 +348,7 @@ class ContourGenerator:
         
 
 
-    def ContourinfoFromImage(self, cvimage):
+    def ContourinfoListFromImage(self, npImage):
         self.x0_list = []
         self.y0_list = []
         self.angle_list = []
@@ -346,72 +356,70 @@ class ContourGenerator:
         self.ecc_list = []
         
         # Find contours
-        sumImage = cv.Sum(cvimage)
+        sumImage = cv2.sumElems(npImage)
         if self.minSumImage < sumImage[0]:
-            cvseqContours = cv.FindContours(cvimage, self.cvstorage, mode=cv.CV_RETR_CCOMP) # Modifies cvimage.
+            (contours,hierarchy) = cv2.findContours(npImage, mode=cv2.RETR_CCOMP, method=cv2.CHAIN_APPROX_SIMPLE) # Modifies npImage.
         else:
-            cvseqContours = None
-
-        # Process contours
-        self.nContours = 0
-        if cvseqContours is not None:
-            while True:
-                self.AppendContour(cvseqContours) # self.nContours++ gets incremented inside function.
-                    
-                if (cvseqContours.h_next()) and (self.nContours < self.nContoursMax):
-                    cvseqContours = cvseqContours.h_next()
-                else:
-                    break
-        
-            # Reset cvseqContours to the start.
-            while cvseqContours.h_prev():
-                cvseqContours = cvseqContours.h_prev()
+            (contours,hierarchy) = (None, None)
             
+
+        # Put the top-level contours into the contourinfo_lists
+        self.nContours = 0
+        if contours is not None:
+            (NEXT,PREV,CHILD,PARENT)=(0,1,2,3)
+            iContour = 0
+            while (True):    # While there's a next contour. 
+                contour = contours[iContour]
+                self.AppendContourinfoListsFromContour(contour) # self.nContours++ gets incremented inside function.
+                iContour = hierarchy[0][iContour][NEXT]
+                if iContour<0:
+                    break
+                    
         
-        # Put contours into contourinfo.
-        contourinfo = ContourInfo()
-        contourinfo.header.stamp = self.header.stamp
-        contourinfo.header.frame_id = self.frameidOutput # i.e. Camera
+        # Put lists into contourinfo_lists.
+        contourinfo_lists = ContourInfo()
+        contourinfo_lists.header.stamp = self.header.stamp
+        contourinfo_lists.header.frame_id = self.frameidOutput # i.e. Camera
         
         if self.nContours > 0:
-            contourinfo.x = self.x0_list
-            contourinfo.y = self.y0_list
-            contourinfo.angle = self.angle_list
-            contourinfo.area = self.area_list
-            contourinfo.ecc = self.ecc_list
+            contourinfo_lists.x = self.x0_list
+            contourinfo_lists.y = self.y0_list
+            contourinfo_lists.angle = self.angle_list
+            contourinfo_lists.area = self.area_list
+            contourinfo_lists.ecc = self.ecc_list
         
             
         # Remove duplicates and too-small contours.
         if self.nContours > 0:
             # Repackage the data.
-            contours = []
+            contourinfo_list = []
             for iContour in range(self.nContours):
-                if (self.areaContourMin <= contourinfo.area[iContour]):
-                    contours.append([contourinfo.x[iContour], 
-                                     contourinfo.y[iContour], 
-                                     contourinfo.angle[iContour], 
-                                     contourinfo.area[iContour], 
-                                     contourinfo.ecc[iContour]])
+                if (self.areaContourMin <= contourinfo_lists.area[iContour]):
+                    contourinfo_list.append([contourinfo_lists.x[iContour], 
+                                     contourinfo_lists.y[iContour], 
+                                     contourinfo_lists.angle[iContour], 
+                                     contourinfo_lists.area[iContour], 
+                                     contourinfo_lists.ecc[iContour]])
             
             # Remove the dups.
-            contours = sorted(tuple(contours))
-            contours = [x for i, x in enumerate(contours) if (not i) or (N.linalg.norm(N.array(x[0:2])-N.array(contours[i-1][0:2])) > self.distanceDuplicateContour)]
+            contourinfo_list = sorted(tuple(contourinfo_list))
+            contourinfo_list = [x for i, x in enumerate(contourinfo_list) if (not i) or (N.linalg.norm(N.array(x[0:2])-N.array(contourinfo_list[i-1][0:2])) > self.distanceDuplicateContour)]
         
             # Repackage the de-duped data.
-            self.nContours = len(contours)
-            contourinfo.x = []
-            contourinfo.y = []
-            contourinfo.angle = []
-            contourinfo.area = []
-            contourinfo.ecc = []
+            self.nContours = len(contourinfo_list)
+            contourinfo_lists.x = []
+            contourinfo_lists.y = []
+            contourinfo_lists.angle = []
+            contourinfo_lists.area = []
+            contourinfo_lists.ecc = []
             for iContour in range(self.nContours):
-                contourinfo.x.append(contours[iContour][0])
-                contourinfo.y.append(contours[iContour][1])
-                contourinfo.angle.append(contours[iContour][2])
-                contourinfo.area.append(contours[iContour][3])
-                contourinfo.ecc.append(contours[iContour][4])
+                contourinfo_lists.x.append(contourinfo_list[iContour][0])
+                contourinfo_lists.y.append(contourinfo_list[iContour][1])
+                contourinfo_lists.angle.append(contourinfo_list[iContour][2])
+                contourinfo_lists.area.append(contourinfo_list[iContour][3])
+                contourinfo_lists.ecc.append(contourinfo_list[iContour][4])
             
-        return contourinfo, cvseqContours    
+        return contourinfo_lists, contours    
         
 
     def Image_callback(self, image):
@@ -424,7 +432,7 @@ class ContourGenerator:
         
         # Convert ROS image to OpenCV image.
         try:
-            self.matCamera = cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough"))
+            self.npCamera = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
         except CvBridgeError, e:
             rospy.logwarn ('Exception %s' % e)
         
@@ -438,56 +446,56 @@ class ContourGenerator:
             radiusMask = int(rospy.get_param("camera/mask/radius", 9999)) 
             if radiusMask != self.radiusMask:
                 self.radiusMask = radiusMask 
-                cv.Zero(self.matMask)
-                cv.Circle(self.matMask,
+                self.npMask = N.zeros([self.camerainfo.height, self.camerainfo.width], dtype=N.uint8) #cv.Zero(self.matMask)
+                cv2.circle(self.npMask,
                           (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
                           int(self.radiusMask), 
                           self.color_max, 
                           cv.CV_FILLED)
             
             # Mask the camera image.
-            cv.And(self.matCamera, self.matMask, self.matCamera)
+            self.npCamera = cv2.bitwise_and(self.npCamera, self.npMask)
             
             # Normalize the histogram.
             #self.npBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8)
-            npBuffer = cv2.equalizeHist(N.array(self.matCamera))
-            self.matCamera = cv.fromarray(npBuffer)
+            self.npCamera = cv2.equalizeHist(self.npCamera)
             
             
             if self.bUseBackgroundSubtraction:
                 # Update the background image
-                cv2.accumulateWeighted(N.float32(self.matCamera), self.npfBackground, self.alphaBackground)
-                self.matBackground = cv.fromarray(N.uint8(self.npfBackground))
+                cv2.accumulateWeighted(N.float32(self.npCamera), self.npfBackground, self.alphaBackground)
+                #self.matBackground = cv.fromarray(N.uint8(self.npfBackground))
+                self.npBackground = N.uint8(self.npfBackground)
 
                 # Subtract background
                 #self.npBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8)
-                npBuffer = cv2.equalizeHist(N.array(self.matBackground))
-                self.matBackground2 = cv.fromarray(npBuffer)
-                cv.AbsDiff(self.matCamera, self.matBackground2, self.matForeground)
+                npBuffer = cv2.equalizeHist(self.npBackground)
+                self.npBackground2 = npBuffer
+                self.npForeground = cv2.absdiff(self.npCamera, self.npBackground2)
             else:
-                cv.Copy(self.matCamera, self.matForeground)
+                self.npForeground = self.npCamera
 
             
             # Threshold
-            cv.Threshold(self.matForeground, 
-                         self.matThreshold, 
-                         self.diff_threshold, 
-                         self.max_8U, 
-                         #cv.CV_THRESH_BINARY)
-                         cv.CV_THRESH_TOZERO)
+            (threshold,self.npThreshold) = cv2.threshold(self.npForeground, 
+                                             self.diff_threshold, 
+                                             self.max_8U, 
+                                             cv2.THRESH_TOZERO)
+            #rospy.logwarn ('self.npThreshold=%s' % repr(self.npThreshold))
 
             
             # Get the ContourInfo.
-            (self.contourinfo, self.cvseqContours) = self.ContourinfoFromImage(self.matThreshold)
-            self.pubContourInfo.publish(self.contourinfo)
+            (self.contourinfo_lists, self.contours) = self.ContourinfoListFromImage(self.npThreshold)
+            self.pubContourInfo.publish(self.contourinfo_lists)
             
             # Convert to color for display image
             if self.pubImageProcessed.get_num_connections() > 0:
-                cv.CvtColor(self.matCamera, self.matProcessed, cv.CV_GRAY2RGB)
+                self.npProcessed = cv2.cvtColor(self.npCamera, cv.CV_GRAY2RGB)
                 
                 # Draw contours on Processed image.
-                if self.cvseqContours:
-                    cv.DrawContours(self.matProcessed, self.cvseqContours, cv.CV_RGB(0,0,self.color_max), cv.CV_RGB(0,self.color_max,0), 1, 1)
+                if self.contours:
+                    #cv.DrawContours(self.matProcessed, self.contours, cv.CV_RGB(0,0,self.color_max), cv.CV_RGB(0,self.color_max,0), 1, 1)
+                    cv2.drawContours(self.npProcessed, self.contours, -1, cv.CV_RGB(0,0,self.color_max), thickness=1, maxLevel=1)
                 
                 
             
@@ -495,7 +503,7 @@ class ContourGenerator:
             if self.pubImageProcessed.get_num_connections() > 0:
                 try:
                     #cv.Copy(self.matProcessed, self.matProcessed2)
-                    image2 = self.cvbridge.cv_to_imgmsg(self.matProcessed, "passthrough")
+                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npProcessed), "passthrough")
                     image2.header = image.header
                     image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                     #rospy.logwarn(image2.encoding)
@@ -508,7 +516,7 @@ class ContourGenerator:
             # Publish background image
             if (self.pubImageBackground.get_num_connections() > 0) and (self.bUseBackgroundSubtraction):
                 try:
-                    image2 = self.cvbridge.cv_to_imgmsg(self.matBackground, "passthrough")
+                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npBackground), "passthrough")
                     image2.header.stamp = image.header.stamp
                     self.pubImageBackground.publish(image2)
                     del image2
@@ -519,8 +527,8 @@ class ContourGenerator:
             # Publish thresholded image
             if self.pubImageThreshold.get_num_connections() > 0:
                 try:
-                    cv.Add(self.matThreshold, self.matForeground, self.matCamera)
-                    image2 = self.cvbridge.cv_to_imgmsg(self.matCamera, "passthrough")
+                    self.npCamera = cv2.add(self.npThreshold, self.npForeground)
+                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npCamera), "passthrough")
                     image2.header.stamp = image.header.stamp
                     self.pubImageThreshold.publish(image2)
                     del image2
@@ -531,7 +539,7 @@ class ContourGenerator:
             # Publish foreground image
             if self.pubImageForeground.get_num_connections() > 0:
                 try:
-                    image2 = self.cvbridge.cv_to_imgmsg(self.matForeground, "passthrough")
+                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npForeground), "passthrough")
                     image2.header.stamp = image.header.stamp
                     self.pubImageForeground.publish(image2)
                     del image2
@@ -541,8 +549,8 @@ class ContourGenerator:
               
             # Publish a special image for use in rviz.
             if self.pubImageRviz.get_num_connections() > 0:
-                cv.Flip(self.matProcessed,self.matProcessedFlip,0)
-                image2 = self.cvbridge.cv_to_imgmsg(self.matProcessedFlip, "passthrough")
+                self.npProcessedFlip, = cv2.flip(self.npProcessed, 0)
+                image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npProcessedFlip), "passthrough")
                 image2.header = image.header
                 image2.header.frame_id = 'Plate'
                 image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
