@@ -8,6 +8,8 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/ui</url>
+  
+  <depend package="flycore" />
 
 </package>
 

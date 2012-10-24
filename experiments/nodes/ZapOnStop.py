@@ -32,9 +32,9 @@ class ExperimentZapOnStop():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = False # Saves always.
         
-        self.experimentparams.tracking.exclusionzone.enabled = False
-        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
-        self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
+        self.experimentparams.tracking.exclusionzones.enabled = False
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
         self.experimentparams.home.enabled = False
         self.experimentparams.home.x = 0.0

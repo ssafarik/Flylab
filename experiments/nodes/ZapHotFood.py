@@ -32,9 +32,9 @@ class ExperimentZapHotFood():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = False # Saves always.
 
-        self.experimentparams.tracking.exclusionzone.enabled = True
-        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=52.3, y=-51.0)]
-        self.experimentparams.tracking.exclusionzone.radius_list = [7.0]
+        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=52.3, y=-51.0)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [7.0]
         
         self.experimentparams.home.enabled = False
         

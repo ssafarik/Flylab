@@ -11,8 +11,6 @@ from sensor_msgs.msg import Image, CameraInfo
 ###############################################################################
 ###############################################################################
 ###############################################################################
-# The class ContourGenerator subscribes to image_rect, and finds the contours of the objects in the image.
-# Publishes a ContourInfo message, and several intermediary images.
 #
 class TestFrameTiming:
 
