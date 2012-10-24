@@ -394,32 +394,32 @@ class ContourGenerator:
         # Remove duplicates and too-small contours.
         if self.nContours > 0:
             # Repackage the data as a list of lists, i.e. [[x,y,a,a,e],[x,y,a,a,e],...], skipping too-small contours.
-            contourinfo_list = []
+            contourinfo_list_list = []
             for iContour in range(self.nContours):
                 if (self.areaContourMin <= contourinfo_lists.area[iContour]):
-                    contourinfo_list.append([contourinfo_lists.x[iContour], 
-                                             contourinfo_lists.y[iContour], 
-                                             contourinfo_lists.angle[iContour], 
-                                             contourinfo_lists.area[iContour], 
-                                             contourinfo_lists.ecc[iContour]])
+                    contourinfo_list_list.append([contourinfo_list_lists.x[iContour], 
+                                             contourinfo_list_lists.y[iContour], 
+                                             contourinfo_list_lists.angle[iContour], 
+                                             contourinfo_list_lists.area[iContour], 
+                                             contourinfo_list_lists.ecc[iContour]])
             
             # Remove the dups.
-            contourinfo_list = sorted(tuple(contourinfo_list))
-            contourinfo_list = [x for i, x in enumerate(contourinfo_list) if (not i) or (N.linalg.norm(N.array(x[0:2])-N.array(contourinfo_list[i-1][0:2])) > self.distanceDuplicateContour)]
+            contourinfo_list_list = sorted(tuple(contourinfo_list_list))
+            contourinfo_list_list = [x for i, x in enumerate(contourinfo_list_list) if (not i) or (N.linalg.norm(N.array(contourinfo_list_list[i][0:2])-N.array(contourinfo_list_list[i-1][0:2])) > self.distanceDuplicateContour)]
         
             # Repackage the de-duped data.
-            self.nContours = len(contourinfo_list)
+            self.nContours = len(contourinfo_list_list)
             contourinfo_lists.x = []
             contourinfo_lists.y = []
             contourinfo_lists.angle = []
             contourinfo_lists.area = []
             contourinfo_lists.ecc = []
             for iContour in range(self.nContours):
-                contourinfo_lists.x.append(contourinfo_list[iContour][0])
-                contourinfo_lists.y.append(contourinfo_list[iContour][1])
-                contourinfo_lists.angle.append(contourinfo_list[iContour][2])
-                contourinfo_lists.area.append(contourinfo_list[iContour][3])
-                contourinfo_lists.ecc.append(contourinfo_list[iContour][4])
+                contourinfo_lists.x.append(contourinfo_list_list[iContour][0])
+                contourinfo_lists.y.append(contourinfo_list_list[iContour][1])
+                contourinfo_lists.angle.append(contourinfo_list_list[iContour][2])
+                contourinfo_lists.area.append(contourinfo_list_list[iContour][3])
+                contourinfo_lists.ecc.append(contourinfo_list_list[iContour][4])
             
         return contourinfo_lists, contours    
         
