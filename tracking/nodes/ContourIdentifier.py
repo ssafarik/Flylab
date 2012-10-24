@@ -542,24 +542,25 @@ class ContourIdentifier:
             contourinfo_listAug.append(ContourinfoLists(x=55555, y=55555, ecc=1.0, area=1.0)) # norm(x,y) must be less than 999999!
             #rospy.logwarn ('len(contourinfo_listAug),len(xyObjects)=%s' % [len(contourinfo_listAug),len(xyObjects)])
             
+# Do we really need these?  They take time to send.
+#        for m in range(len(xyObjects)):
+#            if (xyObjects[m][0] is not None) and (xyObjects[m][1] is not None):
+#                self.tfbx.sendTransform((xyObjects[m][0], xyObjects[m][1], 0.0),
+#                                        (0,0,0,1),
+#                                        stamp,
+#                                        "xyObjects"+str(m),
+#                                        "Plate")
+#            
+#        for n in range(len(contourinfo_listAug)):
+#            self.tfbx.sendTransform((contourinfo_listAug[n].x, contourinfo_listAug[n].y, 0.0),
+#                                    (0,0,0,1),
+#                                    stamp,
+#                                    "contours"+str(n),
+#                                    "Plate")
+        
+
         # Match objects with contourinfo_list.
         #rospy.logwarn ('GetDistanceMatrixFromContours()')
-        for m in range(len(xyObjects)):
-            if (xyObjects[m][0] is not None) and (xyObjects[m][1] is not None):
-                self.tfbx.sendTransform((xyObjects[m][0], xyObjects[m][1], 0.0),
-                                        (0,0,0,1),
-                                        stamp,
-                                        "xyObjects"+str(m),
-                                        "Plate")
-            
-
-        for n in range(len(contourinfo_listAug)):
-            self.tfbx.sendTransform((contourinfo_listAug[n].x, contourinfo_listAug[n].y, 0.0),
-                                    (0,0,0,1),
-                                    stamp,
-                                    "contours"+str(n),
-                                    "Plate")
-        
         d = self.GetDistanceMatrixFromContours(xyObjects, contourinfo_listAug, contourinfoMin_list, contourinfoMax_list, contourinfoMean_list, ptComputed)
         if d is not []:
             # Choose the algorithm.
@@ -620,7 +621,6 @@ class ContourIdentifier:
 #        self.timePrev = rospy.Time.now().to_sec()
         with self.lock:
             if self.initialized:
-                t1 = rospy.Time.now().to_sec()
                 #rospy.logwarn ('CI contourinfolists0 %s' % contourinfolists)
                 contourinfolistsPixels = self.FilterContourinfoWithinMask(contourinfolistsPixels)
                 #rospy.logwarn ('CI contourinfolists1 %s' % contourinfolists)
@@ -667,6 +667,7 @@ class ContourIdentifier:
                     self.mapContourinfoFromObject = self.MapContoursFromObjects()
                 except IndexError:
                     self.mapContourinfoFromObject = None
+
                     
                 #rospy.logwarn ('CI map=%s' % self.mapContourinfoFromObject)
                 #for i in range(len(self.contourinfo_list)):
@@ -772,8 +773,6 @@ class ContourIdentifier:
                         for marker in self.markerExclusionzone_list:
                             marker.header.stamp = contourinfolists.header.stamp
                             self.pubMarker.publish(marker)
-                t2 = rospy.Time.now().to_sec()
-                #rospy.logwarn ('CI t2-t1=%0.6f' % (t2-t1))
 
                             
     

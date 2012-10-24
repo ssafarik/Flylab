@@ -14,7 +14,7 @@ try:
 except:
 	sys.exit(1)
 
-import roslib; roslib.load_manifest('gui')
+import roslib; roslib.load_manifest('ui')
 import rospy
 
 from std_msgs.msg import String
@@ -27,7 +27,7 @@ class FlylabGUI:
     	rospy.init_node('FlylabGUI')
     
     	#Set the path to Glade file.  Edit with 'Glade Interface Designer'
-    	self.gladefile = roslib.packages.get_pkg_dir('gui')+"/src/FlylabGUI.glade" 
+    	self.gladefile = roslib.packages.get_pkg_dir('ui')+"/nodes/FlylabGUI.glade" 
     	self.builder = gtk.Builder()
     	self.builder.add_from_file(self.gladefile)
     	self.builder.connect_signals(self) #Connect GUI event functions.
