@@ -47,7 +47,7 @@ class ExperimentDodgeball():
         self.experimentparams.triggerEntry.enabled = True
         self.experimentparams.triggerEntry.frameidParent = 'Fly1'
         self.experimentparams.triggerEntry.frameidChild = 'Robot'
-        self.experimentparams.triggerEntry.speedAbsParentMin =   3.0        # Absolute speed of the parent in fixed frame.
+        self.experimentparams.triggerEntry.speedAbsParentMin =   5.0        # Absolute speed of the parent in fixed frame.
         self.experimentparams.triggerEntry.speedAbsParentMax =  40.0
         self.experimentparams.triggerEntry.speedAbsChildMin  =   0.0        # Absolute speed of the child in fixed frame.
         self.experimentparams.triggerEntry.speedAbsChildMax  = 999.0
@@ -62,7 +62,7 @@ class ExperimentDodgeball():
         self.experimentparams.triggerEntry.timeHold = 0.5                   # How long the conditions must be continually met before the trigger happens.
         self.experimentparams.triggerEntry.timeout = -1
         
-        self.experimentparams.waitEntry2 = 0.0
+        self.experimentparams.waitEntry2 = 0.25
         
 
         # .move, .lasertrack, and .triggerExit all run concurrently.
@@ -82,7 +82,7 @@ class ExperimentDodgeball():
         
         self.experimentparams.lasertrack.enabled = False
         
-        self.experimentparams.ledpanels.enabled = False
+        self.experimentparams.ledpanels.enabled = True
         self.experimentparams.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.ledpanels.idPattern = 1
         self.experimentparams.ledpanels.frame_id = 'Fly1Forecast'
