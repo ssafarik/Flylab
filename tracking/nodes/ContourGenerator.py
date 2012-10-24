@@ -13,7 +13,7 @@ from geometry_msgs.msg import Point, PointStamped
 from std_msgs.msg import String
 from sensor_msgs.msg import Image, CameraInfo
 from flycore.msg import TrackingCommand
-from tracking.msg import ContourInfo
+from tracking.msg import ContourinfoLists
 from plate_tf.srv import PlateCameraConversion
 
 
@@ -23,7 +23,7 @@ from plate_tf.srv import PlateCameraConversion
 ###############################################################################
 ###############################################################################
 # The class ContourGenerator subscribes to image_rect, and finds the contours of the objects in the image.
-# Publishes a ContourInfo message, and several intermediary images.
+# Publishes a ContourinfoLists message, and several intermediary images.
 #
 class ContourGenerator:
 
@@ -50,7 +50,7 @@ class ContourGenerator:
         self.pubImageThreshold   = rospy.Publisher("camera/image_threshold", Image)
         self.pubImageRviz        = rospy.Publisher("camera_rviz/image_rect", Image)
         self.pubCamerainfoRviz   = rospy.Publisher("camera_rviz/camera_info", CameraInfo)
-        self.pubContourInfo      = rospy.Publisher("ContourInfo", ContourInfo)
+        self.pubContourinfoLists      = rospy.Publisher("ContourinfoLists", ContourinfoLists)
         
         if self.bUseTransforms:
             self.tfrx = tf.TransformListener()
@@ -65,7 +65,7 @@ class ContourGenerator:
 
         
         # Contour Info
-        self.contourinfo_lists = ContourInfo()
+        self.contourinfo_lists = ContourinfoLists()
         self.x0_list = []
         self.y0_list = []
         self.angle_list = []
@@ -159,13 +159,14 @@ class ContourGenerator:
             # First image is background unless one can be loaded
             if self.bUseBackgroundSubtraction:
                 try:
-                    matBackground = cv.LoadImageM(self.filenameBackground, cv.CV_LOAD_IMAGE_GRAYSCALE)
-                    self.npBackground  = N.uint8(matBackground)
-                    self.npfBackground = N.float32(matBackground)
+                    #matBackground = cv.LoadImageM(self.filenameBackground, cv.CV_LOAD_IMAGE_GRAYSCALE)
+                    self.npBackground  = cv2.imread(self.filenameBackground, cv.CV_LOAD_IMAGE_GRAYSCALE) #N.uint8(matBackground)
+                    self.npfBackground = N.float32(self.npBackground)
                 except:
                     rospy.logwarn ('Saving new background image %s' % self.filenameBackground)
                     self.npBackground = cv2.bitwise_and(self.npCamera, self.npMask)
-                    cv.SaveImage(self.filenameBackground, cv.fromarray(self.npBackground))
+                    #cv.SaveImage(self.filenameBackground, cv.fromarray(self.npBackground))
+                    cv2.imwrite(self.filenameBackground, self.npBackground)
               
                 #self.histModel = cv2.calcHist([N.uint8(self.matBackground)], [0], N.uint8(self.matMask), [255], [0,255])
                 #rospy.logwarn (self.histModel)
@@ -189,7 +190,8 @@ class ContourGenerator:
     def TrackingCommand_callback(self, trackingcommand):
         if trackingcommand.command == 'savebackground':
             rospy.logwarn ('Saving new background image %s' % self.filenameBackground)
-            cv.SaveImage(self.filenameBackground, cv.GetMat(self.npBackground))
+            #cv.SaveImage(self.filenameBackground, cv.fromarray(self.npBackground))
+            cv2.imwrite(self.filenameBackground, self.npBackground)
 
     
     def MmFromPixels (self, xIn):
@@ -377,7 +379,7 @@ class ContourGenerator:
                     
         
         # Put lists into contourinfo_lists.
-        contourinfo_lists = ContourInfo()
+        contourinfo_lists = ContourinfoLists()
         contourinfo_lists.header.stamp = self.header.stamp
         contourinfo_lists.header.frame_id = self.frameidOutput # i.e. Camera
         
@@ -391,15 +393,15 @@ class ContourGenerator:
             
         # Remove duplicates and too-small contours.
         if self.nContours > 0:
-            # Repackage the data.
+            # Repackage the data as a list of lists, i.e. [[x,y,a,a,e],[x,y,a,a,e],...], skipping too-small contours.
             contourinfo_list = []
             for iContour in range(self.nContours):
                 if (self.areaContourMin <= contourinfo_lists.area[iContour]):
                     contourinfo_list.append([contourinfo_lists.x[iContour], 
-                                     contourinfo_lists.y[iContour], 
-                                     contourinfo_lists.angle[iContour], 
-                                     contourinfo_lists.area[iContour], 
-                                     contourinfo_lists.ecc[iContour]])
+                                             contourinfo_lists.y[iContour], 
+                                             contourinfo_lists.angle[iContour], 
+                                             contourinfo_lists.area[iContour], 
+                                             contourinfo_lists.ecc[iContour]])
             
             # Remove the dups.
             contourinfo_list = sorted(tuple(contourinfo_list))
@@ -481,12 +483,11 @@ class ContourGenerator:
                                              self.diff_threshold, 
                                              self.max_8U, 
                                              cv2.THRESH_TOZERO)
-            #rospy.logwarn ('self.npThreshold=%s' % repr(self.npThreshold))
 
             
-            # Get the ContourInfo.
-            (self.contourinfo_lists, self.contours) = self.ContourinfoListFromImage(self.npThreshold)
-            self.pubContourInfo.publish(self.contourinfo_lists)
+            # Get the ContourinfoLists.
+            (self.contourinfo_lists, self.contours) = self.ContourinfoListFromImage(self.npThreshold)    # Modifies self.npThreshold
+            self.pubContourinfoLists.publish(self.contourinfo_lists)
             
             # Convert to color for display image
             if self.pubImageProcessed.get_num_connections() > 0:
@@ -593,7 +594,6 @@ def main(args):
         cg.Main()
     except rospy.exceptions.ROSInterruptException:
         rospy.loginfo("Shutting down")
-    cv.DestroyAllWindows()
 
 if __name__ == '__main__':
     main(sys.argv)

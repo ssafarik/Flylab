@@ -10,7 +10,7 @@ from pythonmodules import cvNumpy,CameraParameters
 from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import Point, PoseStamped
 from plate_tf.srv import *
-from tracking.msg import ContourInfo
+from tracking.msg import ContourinfoLists
 from patterngen.msg import MsgPattern
 from flycore.msg import MsgFrameState
 
@@ -30,7 +30,7 @@ class CalibrateStagePlate():
         self.tvec = None
         self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
         self.subImage = rospy.Subscriber("camera/image_rect", Image, self.image_callback)
-        self.subContourInfo = rospy.Subscriber("ContourInfo", ContourInfo, self.contourinfo_callback)
+        self.subContourinfoLists = rospy.Subscriber("ContourinfoLists", ContourinfoLists, self.ContourinfoLists_callback)
         self.subEndEffector = rospy.Subscriber('EndEffector', MsgFrameState, self.EndEffector_callback)
         self.pubPatternGen = rospy.Publisher('SetSignalGen', MsgPattern, latch=True)
         
@@ -413,23 +413,15 @@ class CalibrateStagePlate():
             cv.ShowImage("Stage Plate Calibration", self.im_display)
             cv.WaitKey(3)
 
-    # def cbPose(self,contourinfo):
-    #   if not self.initialized_pose:
-    #     self.initialized_pose = True
-    #   self.poseRobot_camera.header = contourinfo.header
-    #   self.poseRobot_camera.pose.position.x = contourinfo.pose.position.x
-    #   self.poseRobot_camera.pose.position.y = contourinfo.pose.position.y
-    #   self.poseRobot_rect = self.camera_to_rect_pose(self.poseRobot_camera)
-    #   self.poseRobot_plate = self.PosePlateFromCamera(self.poseRobot_camera)
-    
-    def contourinfo_callback(self,contourinfo):
+   
+    def ContourinfoLists_callback(self,contourinfo_lists):
         if self.initialized:
-            header = contourinfo.header
-            x_list = contourinfo.x
-            y_list = contourinfo.y
-            angle_list = contourinfo.angle
-            area_list = contourinfo.area
-            ecc_list = contourinfo.ecc
+            header = contourinfo_lists.header
+            x_list = contourinfo_lists.x
+            y_list = contourinfo_lists.y
+            angle_list = contourinfo_lists.angle
+            area_list = contourinfo_lists.area
+            ecc_list = contourinfo_lists.ecc
             contour_count = min(len(x_list),len(y_list),len(angle_list),len(area_list),len(ecc_list))
             
             if contour_count == 1:
@@ -437,7 +429,7 @@ class CalibrateStagePlate():
                 if not self.initialized_pose:
                     self.initialized_pose = True
                   
-                self.poseRobot_camera.header = contourinfo.header
+                self.poseRobot_camera.header = contourinfo_lists.header
                 self.poseRobot_camera.pose.position.x = x_list[0]
                 self.poseRobot_camera.pose.position.y = y_list[0]
                 self.poseRobot_rect = self.camera_to_rect_pose(self.poseRobot_camera)
