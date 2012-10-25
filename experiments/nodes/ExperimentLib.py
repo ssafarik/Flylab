@@ -143,6 +143,7 @@ class TriggerService():
         for key,callback in self.services.iteritems():
             if callback is not None:
                 callback(status)
+# End class TriggerService()
             
         
 
@@ -167,6 +168,7 @@ class NewTrialService():
         for key,callback in self.services.iteritems():
             if callback is not None:
                 callback(experimentparams)
+# End class NewTrialService()
 
     
 
@@ -189,7 +191,172 @@ class NewExperiment (smach.State):
         
         #rospy.loginfo ('EL Exiting NewExperiment()')
         return 'success'
+# End class NewExperiment()
 
+
+
+#######################################################################################################
+#######################################################################################################
+class ResetHardware (smach.State):
+    def __init__(self):
+
+        smach.State.__init__(self, 
+                             outcomes=['success','disabled','timeout','aborted'],
+                             input_keys=['experimentparamsIn'])
+
+        self.arenastate = None
+        self.rosrate = rospy.Rate(gRate)
+
+        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
+
+        rospy.on_shutdown(self.OnShutdown_callback)
+        
+        
+        # Command messages.
+        self.commandExperimentExperiment = 'continue'
+        self.commandExperimentExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+
+
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperimentExperiment = msgString.data
+            
+        
+    def OnShutdown_callback(self):
+        pass
+        
+        
+    def ArenaState_callback(self, arenastate):
+        self.arenastate = arenastate
+
+
+
+    def execute(self, userdata):
+        rospy.loginfo("EL State ResetHardware(%s)" % [userdata.experimentparamsIn.robot.home.enabled, userdata.experimentparamsIn.robot.home.x, userdata.experimentparamsIn.robot.home.y])
+
+        # Reset the various hardware.
+        rv1 = self.ResetRobot(userdata)
+        rv2 = self.ResetLEDPanels(userdata)
+        
+        
+        # Figure out what happened.
+        if ('aborted' in [rv1,rv2]):
+            rv = 'aborted'
+        elif ('timeout' in [rv1,rv2]):
+            rv = 'timeout'
+        elif rv1=='disabled' and rv2=='disabled':
+            rv = 'disabled'
+        else:
+            rv = 'success'
+            
+        #rospy.loginfo ('EL Exiting ResetHardware()')
+        return rv
+    
+        
+    def ResetRobot(self, userdata):
+        self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
+        self.action.wait_for_server()
+        self.goal = ActionStageStateGoal()
+        self.set_stage_state = None
+        
+
+        rv = 'disabled'
+        if (userdata.experimentparamsIn.robot.enabled) and (userdata.experimentparamsIn.robot.home.enabled):
+            self.timeStart = rospy.Time.now()
+    
+            rospy.wait_for_service('set_stage_state')
+            try:
+                self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
+            except rospy.ServiceException, e:
+                print "Service call failed: %s"%e
+            
+
+            while self.arenastate is None:
+                if userdata.experimentparamsIn.robot.home.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.home.timeout:
+                        return 'timeout'
+                #if self.preempt_requested():
+                #    self.service_preempt()
+                #    return 'preempt'
+                rospy.sleep(1.0)
+    
+                if (self.commandExperimentExperiment=='exitnow'):
+                    return 'aborted'
+    
+    
+            # Send the command.
+            self.goal.state.header = self.arenastate.robot.header
+            #self.goal.state.header.stamp = rospy.Time.now()
+            self.goal.state.pose.position.x = userdata.experimentparamsIn.robot.home.x
+            self.goal.state.pose.position.y = userdata.experimentparamsIn.robot.home.y
+            self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+                                                                          pose=self.goal.state.pose),
+                                                      speed = userdata.experimentparamsIn.robot.home.speed))
+
+            rv = 'aborted'
+            while not rospy.is_shutdown():
+                # Are we there yet?
+                
+                ptRobot = N.array([self.arenastate.robot.pose.position.x, 
+                                   self.arenastate.robot.pose.position.y])
+                ptTarget = N.array([self.goal.state.pose.position.x,
+                                    self.goal.state.pose.position.y])                
+                r = N.linalg.norm(ptRobot-ptTarget)
+                rospy.loginfo ('EL ResetHardware() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
+                
+                
+                if (r <= userdata.experimentparamsIn.robot.home.tolerance):
+                    rospy.sleep(0.5) # Allow some settling time.
+                    rv = 'success'
+                    break
+                
+                
+                #if self.preempt_requested():
+                #    self.service_preempt()
+                #    rv = 'preempt'
+                #    break
+                
+                
+                if userdata.experimentparamsIn.robot.home.timeout != -1:
+                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.home.timeout:
+                        rv = 'timeout'
+                        break
+                
+                self.rosrate.sleep()
+
+                if (self.commandExperiment=='exitnow'):
+                    rv = 'aborted'
+                    break
+                
+        return rv
+        
+
+    def ResetLEDPanels(self, userdata):
+        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+
+        # Init the LEDPanels.  Assumes preprogrammed panels.
+        if (userdata.experimentparamsIn.ledpanels.enabled):
+            msgPanelsCommand = MsgPanelsCommand(command='stop')
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+
+            msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', 
+                                                arg1=userdata.experimentparamsIn.ledpanels.idPattern)
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+
+            msgPanelsCommand = MsgPanelsCommand(command='set_position', 
+                                                arg1=userdata.experimentparamsIn.ledpanels.origin.x, 
+                                                arg2=userdata.experimentparamsIn.ledpanels.origin.y)  # Set (x,y) position for the experiment.
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+        else:
+            msgPanelsCommand = MsgPanelsCommand(command='all_off')
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+            
+
+        return 'success'
+# End class ResetHardware()        
+
+        
 
 #######################################################################################################
 #######################################################################################################
@@ -207,12 +374,11 @@ class NewTrial (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
-        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
         
         # Command messages.
-        self.command = 'continue'
-        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
         
         self.Trigger = TriggerService()
@@ -222,15 +388,15 @@ class NewTrial (smach.State):
         self.NewTrial.attach()
 
 
-    def Command_callback(self, msgString):
-        if msgString.data in self.command_list:
-            self.command = msgString.data
-            if 'now' in self.command:
-                rospy.logwarn ('Experiment received command: "%s".' % self.command)
+    def CommandExperiment_callback(self, msgString):
+        if msgString.data in self.commandExperiment_list:
+            self.commandExperiment = msgString.data
+            if 'now' in self.commandExperiment:
+                rospy.logwarn ('Experiment received command: "%s".' % self.commandExperiment)
             else:
-                rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.command)
+                rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.commandExperiment)
         else:
-            rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.command_list))
+            rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.commandExperiment_list))
             
         
     def execute(self, userdata):
@@ -246,13 +412,13 @@ class NewTrial (smach.State):
         self.Trigger.notify(False)
         
         # Handle various commands sent in via messages.
-        if (self.command=='pause'):
+        if (self.commandExperiment=='pause'):
             rospy.logwarn ('**************************************** Experiment paused at NewTrial...')
-            while (self.command != 'continue'):
+            while (self.commandExperiment != 'continue'):
                 rospy.sleep(1)
             rospy.logwarn ('**************************************** Experiment continuing.')
 
-        if (self.command=='stage/calibrate'):
+        if (self.commandExperiment=='stage/calibrate'):
             rospy.logwarn ('**************************************** Calibrating...')
             rospy.wait_for_service('calibrate_stage')
             try:
@@ -261,10 +427,10 @@ class NewTrial (smach.State):
                 rospy.logwarn ("FAILED to attach to calibrate_stage service: %s" % e)
             else:
                 Calibrate(SrvFrameStateRequest())
-            self.command = 'continue'
+            self.commandExperiment = 'continue'
             rospy.logwarn ('**************************************** Experiment continuing.')
             
-        if (self.command=='exit') or (self.command=='exitnow'):
+        if (self.commandExperiment=='exit') or (self.commandExperiment=='exitnow'):
             return rv
 
 
@@ -276,22 +442,6 @@ class NewTrial (smach.State):
         self.pubTrackingCommand.publish(msgTrackingCommand)
         
 
-        # Init the LEDPanels.
-        if (userdata.experimentparamsIn.ledpanels.enabled):
-            msgPanelsCommand = MsgPanelsCommand(command='stop')
-            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
-
-            msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', arg1=userdata.experimentparamsIn.ledpanels.idPattern) # Assumes preprogrammed panels.
-            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
-
-            msgPanelsCommand = MsgPanelsCommand(command='set_position', arg1=0, arg2=0)  # Set (x,y) position for the experiment.
-            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
-        else:
-            msgPanelsCommand = MsgPanelsCommand(command='all_off')
-            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
-            
-
-        
         # Tell everyone we're starting.
         try:
             self.NewTrial.notify(experimentparams)
@@ -301,6 +451,7 @@ class NewTrial (smach.State):
 
         #rospy.loginfo ('EL Exiting NewTrial()')
         return rv
+# End class NewTrial()
 
 
 
@@ -335,13 +486,13 @@ class TriggerOnStates (smach.State):
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
     
         # Command messages.
-        self.command = 'continue'
-        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
-    def Command_callback(self, msgString):
-        self.command = msgString.data
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
             
         
     def OnShutdown_callback(self):
@@ -529,7 +680,7 @@ class TriggerOnStates (smach.State):
                             
                             #rospy.loginfo('EL duration=%s' % duration)
                         
-                        if (self.command=='exitnow'):
+                        if (self.commandExperiment=='exitnow'):
                             rv = 'aborted'
                             break
     
@@ -558,6 +709,7 @@ class TriggerOnStates (smach.State):
             
         #rospy.loginfo ('EL Exiting TriggerOnStates()')
         return rv
+# End class TriggerOnStates()
 
     
 
@@ -575,13 +727,13 @@ class TriggerOnTime (smach.State):
         
 
         # Command messages.
-        self.command = 'continue'
-        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
-    def Command_callback(self, msgString):
-        self.command = msgString.data
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
             
         
     def execute(self, userdata):
@@ -600,7 +752,7 @@ class TriggerOnTime (smach.State):
         except rospy.ServiceException:
             rv = 'aborted'
 
-        if (self.command=='exitnow'):
+        if (self.commandExperiment=='exitnow'):
             rv = 'aborted'
 
         #if rv!='aborted' and ('entry' in self.type):
@@ -610,125 +762,8 @@ class TriggerOnTime (smach.State):
 
         #rospy.loginfo ('EL Exiting TriggerOnTime()')
         return rv
+# End class TriggerOnTime()
 
-
-
-#######################################################################################################
-#######################################################################################################
-class ResetRobot (smach.State):
-    def __init__(self):
-
-        smach.State.__init__(self, 
-                             outcomes=['success','disabled','timeout','aborted'],
-                             input_keys=['experimentparamsIn'])
-
-        self.arenastate = None
-        self.rosrate = rospy.Rate(gRate)
-
-        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
-
-        self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
-        self.action.wait_for_server()
-        self.goal = ActionStageStateGoal()
-        self.set_stage_state = None
-        
-        rospy.on_shutdown(self.OnShutdown_callback)
-        
-        
-        # Command messages.
-        self.command = 'continue'
-        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
-
-
-    def Command_callback(self, msgString):
-        self.command = msgString.data
-            
-        
-    def OnShutdown_callback(self):
-        pass
-        
-        
-    def ArenaState_callback(self, arenastate):
-        self.arenastate = arenastate
-
-
-
-    def execute(self, userdata):
-        rospy.loginfo("EL State ResetRobot(%s)" % [userdata.experimentparamsIn.home.enabled, userdata.experimentparamsIn.home.x, userdata.experimentparamsIn.home.y])
-
-        rv = 'disabled'
-        if userdata.experimentparamsIn.home.enabled:
-            self.timeStart = rospy.Time.now()
-    
-            rospy.wait_for_service('set_stage_state')
-            try:
-                self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
-            except rospy.ServiceException, e:
-                print "Service call failed: %s"%e
-            
-
-            while self.arenastate is None:
-                if userdata.experimentparamsIn.home.timeout != -1:
-                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.home.timeout:
-                        return 'timeout'
-                #if self.preempt_requested():
-                #    self.service_preempt()
-                #    return 'preempt'
-                rospy.sleep(1.0)
-    
-                if (self.command=='exitnow'):
-                    return 'aborted'
-    
-    
-            # Send the command.
-            self.goal.state.header = self.arenastate.robot.header
-            #self.goal.state.header.stamp = rospy.Time.now()
-            self.goal.state.pose.position.x = userdata.experimentparamsIn.home.x
-            self.goal.state.pose.position.y = userdata.experimentparamsIn.home.y
-            self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                          pose=self.goal.state.pose),
-                                                      speed = userdata.experimentparamsIn.home.speed))
-
-            rv = 'aborted'
-            while not rospy.is_shutdown():
-                # Are we there yet?
-                
-                ptRobot = N.array([self.arenastate.robot.pose.position.x, 
-                                   self.arenastate.robot.pose.position.y])
-                ptTarget = N.array([self.goal.state.pose.position.x,
-                                    self.goal.state.pose.position.y])                
-                r = N.linalg.norm(ptRobot-ptTarget)
-                rospy.loginfo ('EL ResetRobot() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
-                
-                
-                if (r <= userdata.experimentparamsIn.home.tolerance):
-                    rospy.sleep(0.5) # Allow some settling time.
-                    rv = 'success'
-                    break
-                
-                
-                #if self.preempt_requested():
-                #    self.service_preempt()
-                #    rv = 'preempt'
-                #    break
-                
-                
-                if userdata.experimentparamsIn.home.timeout != -1:
-                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.home.timeout:
-                        rv = 'timeout'
-                        break
-                
-                self.rosrate.sleep()
-
-                if (self.command=='exitnow'):
-                    rv = 'aborted'
-                    break
-
-        #rospy.loginfo ('EL Exiting ResetRobot()')
-        return rv
-        
 
 
 #######################################################################################################
@@ -758,13 +793,13 @@ class MoveRobot (smach.State):
         
         
         # Command messages.
-        self.command = 'continue'
-        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
-    def Command_callback(self, msgString):
-        self.command = msgString.data
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
             
         
     def OnShutdown_callback(self):
@@ -777,12 +812,12 @@ class MoveRobot (smach.State):
 
 
     def execute(self, userdata):
-        rospy.loginfo("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.mode,
-                                                  userdata.experimentparamsIn.move.relative.distance, 
-                                                  userdata.experimentparamsIn.move.relative.angle, 
-                                                  userdata.experimentparamsIn.move.relative.speed])
+        rospy.loginfo("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.robot.move.mode,
+                                                  userdata.experimentparamsIn.robot.move.relative.distance, 
+                                                  userdata.experimentparamsIn.robot.move.relative.angle, 
+                                                  userdata.experimentparamsIn.robot.move.relative.speed])
 
-        if userdata.experimentparamsIn.move.enabled:
+        if userdata.experimentparamsIn.robot.enabled:
             rv = 'aborted'
             rospy.wait_for_service('set_stage_state')
             try:
@@ -793,8 +828,8 @@ class MoveRobot (smach.State):
             self.timeStart = rospy.Time.now()
     
             while self.arenastate is None:
-                if userdata.experimentparamsIn.move.timeout != -1:
-                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+                if userdata.experimentparamsIn.robot.move.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.move.timeout:
                         return 'timeout'
                 
                 if self.preempt_requested():
@@ -802,13 +837,13 @@ class MoveRobot (smach.State):
                     self.service_preempt()
                     return 'preempt'
                 
-                if (self.command=='exitnow'):
+                if (self.commandExperiment=='exitnow'):
                     return 'aborted'
 
                 rospy.sleep(1.0)
     
     
-            if userdata.experimentparamsIn.move.mode=='relative':
+            if userdata.experimentparamsIn.robot.move.mode=='relative':
                 rv = self.MoveRelative(userdata)
             else:
                 rv = self.MovePattern(userdata)
@@ -835,10 +870,10 @@ class MoveRobot (smach.State):
 
             
             # Get a random velocity once per move, non-random velocity always.
-            if (userdata.experimentparamsIn.move.relative.speedType=='random'):
+            if (userdata.experimentparamsIn.robot.move.relative.speedType=='random'):
                 if (self.ptTarget is None):
                     # Choose a random velocity forward or backward.                        
-                    speedTarget = userdata.experimentparamsIn.move.relative.speed * (2.0*N.random.random() - 1.0) # Choose a random vel, plus or minus.
+                    speedTarget = userdata.experimentparamsIn.robot.move.relative.speed * (2.0*N.random.random() - 1.0) # Choose a random vel, plus or minus.
                     # Choose a random velocity forward or backward.                        
                     if speedTarget < 0:
                         speedTarget = -speedTarget
@@ -846,32 +881,32 @@ class MoveRobot (smach.State):
                     else:
                         angleDirection = 0.0
             else:
-                speedTarget = userdata.experimentparamsIn.move.relative.speed
+                speedTarget = userdata.experimentparamsIn.robot.move.relative.speed
                 angleDirection = 0.0
 
             
             # Get a random angle once per move, non-random angle always.
-            if (userdata.experimentparamsIn.move.relative.angleType=='random'):
+            if (userdata.experimentparamsIn.robot.move.relative.angleType=='random'):
                 if (self.ptTarget is None):
                     angle = 2.0*N.pi*N.random.random()
             else:
                 # Move at an angle relative to whose orientation?
-                if (userdata.experimentparamsIn.move.relative.frameidOriginAngle=="Fly1") and (len(self.arenastate.flies)>0):
-                    angle = GetOrientationFly(self.arenastate, iFly) + userdata.experimentparamsIn.move.relative.angle
-                elif userdata.experimentparamsIn.move.relative.frameidOriginAngle=="Robot":
-                    angle = GetOrientationRobot(self.arenastate) + userdata.experimentparamsIn.move.relative.angle
+                if (userdata.experimentparamsIn.robot.move.relative.frameidOriginAngle=="Fly1") and (len(self.arenastate.flies)>0):
+                    angle = GetOrientationFly(self.arenastate, iFly) + userdata.experimentparamsIn.robot.move.relative.angle
+                elif userdata.experimentparamsIn.robot.move.relative.frameidOriginAngle=="Robot":
+                    angle = GetOrientationRobot(self.arenastate) + userdata.experimentparamsIn.robot.move.relative.angle
                 else:
-                    angle = userdata.experimentparamsIn.move.relative.angle # Relative to orientation of the Plate frame.
+                    angle = userdata.experimentparamsIn.robot.move.relative.angle # Relative to orientation of the Plate frame.
 
                 # Correct the angle for the velocity sign.
                 angle = (angle + angleDirection) % (2.0*N.pi)    
                 
                                                    
             # Move a distance relative to whose position?
-            if userdata.experimentparamsIn.move.relative.frameidOriginPosition=="Fly1" and (len(self.arenastate.flies)>0):
+            if userdata.experimentparamsIn.robot.move.relative.frameidOriginPosition=="Fly1" and (len(self.arenastate.flies)>0):
                 posOrigin = posFly
                 doMove = True
-            elif userdata.experimentparamsIn.move.relative.frameidOriginPosition=="Robot":
+            elif userdata.experimentparamsIn.robot.move.relative.frameidOriginPosition=="Robot":
                 posOrigin = posRobot
                 doMove = True
             else:
@@ -881,16 +916,16 @@ class MoveRobot (smach.State):
             #rospy.loginfo('EL len(ArenaState)=%d, posOrigin=[%0.2f,%0.2f]'%(len(self.arenastate.flies),posOrigin.x,posOrigin.y))
 
             # If we need to calculate a target.
-            if (self.ptTarget is None) or (userdata.experimentparamsIn.move.relative.tracking):
+            if (self.ptTarget is None) or (userdata.experimentparamsIn.robot.move.relative.tracking):
                 # Compute target point in workspace (i.e. Plate) coordinates.
                 ptOrigin = N.array([posOrigin.x, posOrigin.y])
-                d = userdata.experimentparamsIn.move.relative.distance
+                d = userdata.experimentparamsIn.robot.move.relative.distance
                 ptRelative = d * N.array([N.cos(angle), N.sin(angle)])
                 ptTarget = ptOrigin + ptRelative
                 self.ptTarget = ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
                 #self.ptTarget = ptTarget
 
-                #rospy.loginfo ('EL self.ptTarget=%s, ptOrigin=%s, ptRelative=%s, angle=%s, frameAngle=%s' % (self.ptTarget, ptOrigin, ptRelative, angle,userdata.experimentparamsIn.move.relative.frameidOriginAngle))
+                #rospy.loginfo ('EL self.ptTarget=%s, ptOrigin=%s, ptRelative=%s, angle=%s, frameAngle=%s' % (self.ptTarget, ptOrigin, ptRelative, angle,userdata.experimentparamsIn.robot.move.relative.frameidOriginAngle))
                 #rospy.loginfo('EL Robot/Fly frame_id=%s' % [self.arenastate.robot.header.frame_id,self.arenastate.flies[iFly].header.frame_id])
 
                 # Send the command.
@@ -925,7 +960,7 @@ class MoveRobot (smach.State):
             if self.ptTarget is not None:
                 r = N.linalg.norm(ptRobot-self.ptTarget)
                 #rospy.loginfo ('EL ptTarget=%s, ptRobot=%s, r=%s' % (self.ptTarget, ptRobot, r))
-                if (r <= userdata.experimentparamsIn.move.relative.tolerance):
+                if (r <= userdata.experimentparamsIn.robot.move.relative.tolerance):
                     rv = 'success'
                     break
 
@@ -937,14 +972,14 @@ class MoveRobot (smach.State):
                 break
 
             
-            if userdata.experimentparamsIn.move.timeout != -1:
-                if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+            if userdata.experimentparamsIn.robot.move.timeout != -1:
+                if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.move.timeout:
                     rv = 'timeout'
                     break
             
             self.rosrate.sleep()
 
-            if (self.command=='exitnow'):
+            if (self.commandExperiment=='exitnow'):
                 rv = 'aborted'
                 break
 
@@ -960,15 +995,15 @@ class MoveRobot (smach.State):
 
         # Publish the pattern message.
         msgPattern.mode = 'byshape'
-        msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
+        msgPattern.shape = userdata.experimentparamsIn.robot.move.pattern.shape
         msgPattern.points = []
         msgPattern.frame_id = 'Plate'
-        msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
-        msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
-        msgPattern.count = userdata.experimentparamsIn.move.pattern.count
-        msgPattern.size = userdata.experimentparamsIn.move.pattern.size
+        msgPattern.hzPattern = userdata.experimentparamsIn.robot.move.pattern.hzPattern
+        msgPattern.hzPoint = userdata.experimentparamsIn.robot.move.pattern.hzPoint
+        msgPattern.count = userdata.experimentparamsIn.robot.move.pattern.count
+        msgPattern.size = userdata.experimentparamsIn.robot.move.pattern.size
         msgPattern.preempt = True
-        msgPattern.param = 0.0#userdata.experimentparamsIn.move.pattern.param
+        msgPattern.param = 0.0#userdata.experimentparamsIn.robot.move.pattern.param
         self.pubPatternGen.publish (msgPattern)
                 
 
@@ -981,32 +1016,33 @@ class MoveRobot (smach.State):
                 break
 
             
-            if userdata.experimentparamsIn.move.timeout != -1:
-                if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+            if userdata.experimentparamsIn.robot.move.timeout != -1:
+                if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.move.timeout:
                     rv = 'timeout'
                     break
             
             self.rosrate.sleep()
 
-            if (self.command=='exitnow'):
+            if (self.commandExperiment=='exitnow'):
                 rv = 'aborted'
                 break
 
         # Turn off the pattern
         msgPattern.mode = 'byshape'
-        msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
+        msgPattern.shape = userdata.experimentparamsIn.robot.move.pattern.shape
         msgPattern.points = []
         msgPattern.frame_id = 'Plate'
-        msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
-        msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
+        msgPattern.hzPattern = userdata.experimentparamsIn.robot.move.pattern.hzPattern
+        msgPattern.hzPoint = userdata.experimentparamsIn.robot.move.pattern.hzPoint
         msgPattern.count = 0
-        msgPattern.size = userdata.experimentparamsIn.move.pattern.size
+        msgPattern.size = userdata.experimentparamsIn.robot.move.pattern.size
         msgPattern.preempt = True
-        msgPattern.param = 0.0#userdata.experimentparamsIn.move.pattern.param
+        msgPattern.param = 0.0#userdata.experimentparamsIn.robot.move.pattern.param
         self.pubPatternGen.publish (msgPattern)
 
         return rv
-        
+# End class MoveRobot()        
+
 
 
 #######################################################################################################
@@ -1037,13 +1073,13 @@ class Lasertrack (smach.State):
         
         
         # Command messages.
-        self.command = 'continue'
-        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
-    def Command_callback(self, msgString):
-        self.command = msgString.data
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
             
         
     def OnShutdown_callback(self):
@@ -1372,7 +1408,7 @@ class Lasertrack (smach.State):
                 
                 self.rosrate.sleep()
 
-                if (self.command=='exitnow'):
+                if (self.commandExperiment=='exitnow'):
                     rv = 'aborted'
                     break
                 
@@ -1388,10 +1424,9 @@ class Lasertrack (smach.State):
         
                 
         return rv
-
+# End class Lasertrack()
     
 
-            
             
 #######################################################################################################
 #######################################################################################################
@@ -1425,14 +1460,14 @@ class LEDPanels (smach.State):
         
         
         # Command messages.
-        self.command = 'continue'
-        self.command_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
 
-    def Command_callback(self, msgString):
-        self.command = msgString.data
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
             
         
     def OnShutdown_callback(self):
@@ -1725,8 +1760,8 @@ class LEDPanels (smach.State):
                     bValidCommand = False
                     if userdata.experimentparamsIn.ledpanels.command == 'fixed':
                         command.command = 'set_position'
-                        command.arg1 = 0 # userdata.experimentparamsIn.ledpanels.x
-                        command.arg2 = 0 # userdata.experimentparamsIn.ledpanels.y
+                        command.arg1 = userdata.experimentparamsIn.ledpanels.origin.x
+                        command.arg2 = userdata.experimentparamsIn.ledpanels.origin.y
                         bValidCommand = True
 
                     elif userdata.experimentparamsIn.ledpanels.command == 'trackposition':
@@ -1799,7 +1834,7 @@ class LEDPanels (smach.State):
                 
                 self.rosrate.sleep()
 
-                if (self.command=='exitnow'):
+                if (self.commandExperiment=='exitnow'):
                     rv = 'aborted'
                     break
                 
@@ -1814,9 +1849,7 @@ class LEDPanels (smach.State):
                 
                 
         return rv
-
-    
-        
+# End class LEDPanels()
 
             
             
@@ -1888,7 +1921,7 @@ class ExperimentLib():
                 stateAfterResetHardware = 'NEWTRIAL'
 
             smach.StateMachine.add('RESETHARDWARE',
-                                   ResetRobot(),
+                                   ResetHardware(),
                                    transitions={'success':stateAfterResetHardware,
                                                 'disabled':stateAfterResetHardware,
                                                 'timeout':stateAfterResetHardware,
@@ -2061,5 +2094,5 @@ class ExperimentLib():
         
         rospy.logwarn ('Experiment finished with outcome=%s' % outcome)
         self.sis.stop()
-
+# End class ExperimentLib()
     

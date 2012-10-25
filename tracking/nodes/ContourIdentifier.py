@@ -142,7 +142,7 @@ class ContourIdentifier:
     # See TrackingCommand.msg for details.
     #
     def TrackingCommand_callback(self, trackingcommand):
-        if trackingcommand=='setexclusionzones':
+        if trackingcommand.command=='setexclusionzones':
             self.enabledExclusionzone = trackingcommand.exclusionzones.enabled
             self.pointExclusionzone_list = trackingcommand.exclusionzones.point_list
             self.radiusExclusionzone_list = trackingcommand.exclusionzones.radius_list

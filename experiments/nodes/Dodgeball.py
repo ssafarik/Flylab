@@ -36,13 +36,6 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=50.0, y=68.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
-        self.experimentparams.home.enabled = True
-        self.experimentparams.home.x = 0.0
-        self.experimentparams.home.y = 0.0
-        self.experimentparams.home.speed = 20
-        self.experimentparams.home.timeout = -1
-        self.experimentparams.home.tolerance = 2
-        
         self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = True
@@ -66,28 +59,36 @@ class Experiment():
         self.experimentparams.waitEntry2 = 0.25
         
 
-        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # .robot, .lasertrack, .ledpanels, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.move.enabled = True
-        self.experimentparams.move.mode = 'relative'                        # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
-        self.experimentparams.move.relative.tracking = True                # True=update the target point continually.  False=the target point is set at the trigger time. 
-        self.experimentparams.move.relative.frameidOriginPosition = "Fly1"
-        self.experimentparams.move.relative.frameidOriginAngle = "Fly1"
-        self.experimentparams.move.relative.distance = 3                    # Distance to the target point from the origin frame's position.
-        self.experimentparams.move.relative.angle = 0                       # Angle to the target point from the origin frame's x-axis.
-        self.experimentparams.move.relative.angleType = 'random'          # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
-        self.experimentparams.move.relative.speed = 20                      # Speed at which to move the robot toward the target point. 
-        self.experimentparams.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random fraction of it. 
-        self.experimentparams.move.relative.tolerance = 2                   # When robot-to-target distance is within this tolerance, then the move is over.
-        self.experimentparams.move.timeout = 10                             # When this duration has passed, then the move is over.
+        self.experimentparams.robot.enabled = True
+        self.experimentparams.robot.move.mode = 'relative'                        # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
+        self.experimentparams.robot.move.relative.tracking = True                # True=update the target point continually.  False=the target point is set at the trigger time. 
+        self.experimentparams.robot.move.relative.frameidOriginPosition = "Fly1"
+        self.experimentparams.robot.move.relative.frameidOriginAngle = "Fly1"
+        self.experimentparams.robot.move.relative.distance = 3                    # Distance to the target point from the origin frame's position.
+        self.experimentparams.robot.move.relative.angle = 0                       # Angle to the target point from the origin frame's x-axis.
+        self.experimentparams.robot.move.relative.angleType = 'random'          # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
+        self.experimentparams.robot.move.relative.speed = 20                      # Speed at which to move the robot toward the target point. 
+        self.experimentparams.robot.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random fraction of it. 
+        self.experimentparams.robot.move.relative.tolerance = 2                   # When robot-to-target distance is within this tolerance, then the move is over.
+        self.experimentparams.robot.move.timeout = 10                             # When this duration has passed, then the move is over.
+        
+        self.experimentparams.robot.home.enabled = True
+        self.experimentparams.robot.home.x = 0.0
+        self.experimentparams.robot.home.y = 0.0
+        self.experimentparams.robot.home.speed = 20
+        self.experimentparams.robot.home.timeout = -1
+        self.experimentparams.robot.home.tolerance = 2
+        
         
         self.experimentparams.lasertrack.enabled = False
         
         self.experimentparams.ledpanels.enabled = True
         self.experimentparams.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.ledpanels.idPattern = 1 
-        #self.experimentparams.ledpanels.origin.x = 0 
-        #self.experimentparams.ledpanels.origin.y = 0 
+        self.experimentparams.ledpanels.origin.x = 0 
+        self.experimentparams.ledpanels.origin.y = 0 
         self.experimentparams.ledpanels.frame_id = 'Fly1Forecast'
         self.experimentparams.ledpanels.statefilterHi = ''
         self.experimentparams.ledpanels.statefilterLo = ''

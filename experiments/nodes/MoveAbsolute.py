@@ -8,6 +8,7 @@ from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
+from LEDPanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 
 
@@ -34,13 +35,6 @@ class ExperimentMoveAbsolute():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.home.enabled = False
-        self.experimentparams.home.x = 0.0
-        self.experimentparams.home.y = 0.0
-        self.experimentparams.home.speed = 20
-        self.experimentparams.home.timeout = -1
-        self.experimentparams.home.tolerance = 2
-        
         self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
@@ -64,22 +58,27 @@ class ExperimentMoveAbsolute():
         self.experimentparams.waitEntry2 = 0.0
         
 
-        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # .robot.move, .lasertrack, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.move.enabled = True
-        self.experimentparams.move.mode = 'relative'
-        self.experimentparams.move.relative.tracking = True
-        self.experimentparams.move.relative.frameidOriginPosition = "Plate"
-        self.experimentparams.move.relative.frameidOriginAngle = "Plate"
-        self.experimentparams.move.relative.distance = 30.0
-        self.experimentparams.move.relative.angle = 0.0
-        self.experimentparams.move.relative.angleType = 'constant'
-        self.experimentparams.move.relative.speed = 200
-        self.experimentparams.move.relative.speedType = 'constant'
-        self.experimentparams.move.relative.tolerance = 2
-        self.experimentparams.move.timeout = -1
-                self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, trialstart_callback=self.Trialstart_callback, trialend_callback=self.Trialend_callback)
-
+        self.experimentparams.robot.enabled = True
+        self.experimentparams.robot.move.mode = 'relative'
+        self.experimentparams.robot.move.relative.tracking = True
+        self.experimentparams.robot.move.relative.frameidOriginPosition = "Plate"
+        self.experimentparams.robot.move.relative.frameidOriginAngle = "Plate"
+        self.experimentparams.robot.move.relative.distance = 30.0
+        self.experimentparams.robot.move.relative.angle = 0.0
+        self.experimentparams.robot.move.relative.angleType = 'constant'
+        self.experimentparams.robot.move.relative.speed = 200
+        self.experimentparams.robot.move.relative.speedType = 'constant'
+        self.experimentparams.robot.move.relative.tolerance = 2
+        self.experimentparams.robot.move.timeout = -1
+        self.experimentparams.robot.home.enabled = False
+        self.experimentparams.robot.home.x = 0.0
+        self.experimentparams.robot.home.y = 0.0
+        self.experimentparams.robot.home.speed = 20
+        self.experimentparams.robot.home.timeout = -1
+        self.experimentparams.robot.home.tolerance = 2
+        
 
         self.experimentparams.lasertrack.enabled = False
         

@@ -179,42 +179,42 @@ class Save:
         self.headingsWaitEntry2 =   'waitEntry2\n'
         self.templateWaitEntry2 =   '{waitEntry2:s}\n'
         
-        self.headingsMoveRobot =    'moverobotEnabled, '\
-                                    'moverobotPatternShape, '\
-                                    'moverobotPatternHzPattern, '\
-                                    'moverobotPatternHzPoint, '\
-                                    'moverobotPatternCount, '\
-                                    'moverobotPatternSizeX, '\
-                                    'moverobotPatternSizeY, '\
-                                    'moverobotPatternParam, '\
-                                    'moverobotRelTracking, '\
-                                    'moverobotRelOriginPosition, '\
-                                    'moverobotRelOriginAngle, '\
-                                    'moverobotRelDistance, '\
-                                    'moverobotRelAngle, '\
-                                    'moverobotRelAngleType, '\
-                                    'moverobotRelSpeed, '\
-                                    'moverobotRelSpeedType, '\
-                                    'moverobotRelTolerance, ' \
-                                    'moverobotTimeout\n'
-        self.templateMoveRobot =    '{moverobotEnabled:s}, '\
-                                    '{moverobotPatternShape:s}, '\
-                                    '{moverobotPatternHzPattern:s}, '\
-                                    '{moverobotPatternHzPoint:s}, '\
-                                    '{moverobotPatternCount:s}, '\
-                                    '{moverobotPatternSizeX:s}, '\
-                                    '{moverobotPatternSizeY:s}, '\
-                                    '{moverobotPatternParam:s}, '\
-                                    '{moverobotRelTracking:s}, '\
-                                    '{moverobotRelOriginPosition:s}, '\
-                                    '{moverobotRelOriginAngle:s}, '\
-                                    '{moverobotRelDistance:s}, '\
-                                    '{moverobotRelAngle:s}, '\
-                                    '{moverobotRelAngleType:s}, '\
-                                    '{moverobotRelSpeed:s}, '\
-                                    '{moverobotRelSpeedType:s}, '\
-                                    '{moverobotRelTolerance:s}, ' \
-                                    '{moverobotTimeout:s}\n'
+        self.headingsMoveRobot =    'robotEnabled, '\
+                                    'robotmovePatternShape, '\
+                                    'robotmovePatternHzPattern, '\
+                                    'robotmovePatternHzPoint, '\
+                                    'robotmovePatternCount, '\
+                                    'robotmovePatternSizeX, '\
+                                    'robotmovePatternSizeY, '\
+                                    'robotmovePatternParam, '\
+                                    'robotmoveRelTracking, '\
+                                    'robotmoveRelOriginPosition, '\
+                                    'robotmoveRelOriginAngle, '\
+                                    'robotmoveRelDistance, '\
+                                    'robotmoveRelAngle, '\
+                                    'robotmoveRelAngleType, '\
+                                    'robotmoveRelSpeed, '\
+                                    'robotmoveRelSpeedType, '\
+                                    'robotmoveRelTolerance, ' \
+                                    'robotmoveTimeout\n'
+        self.templateMoveRobot =    '{robotEnabled:s}, '\
+                                    '{robotmovePatternShape:s}, '\
+                                    '{robotmovePatternHzPattern:s}, '\
+                                    '{robotmovePatternHzPoint:s}, '\
+                                    '{robotmovePatternCount:s}, '\
+                                    '{robotmovePatternSizeX:s}, '\
+                                    '{robotmovePatternSizeY:s}, '\
+                                    '{robotmovePatternParam:s}, '\
+                                    '{robotmoveRelTracking:s}, '\
+                                    '{robotmoveRelOriginPosition:s}, '\
+                                    '{robotmoveRelOriginAngle:s}, '\
+                                    '{robotmoveRelDistance:s}, '\
+                                    '{robotmoveRelAngle:s}, '\
+                                    '{robotmoveRelAngleType:s}, '\
+                                    '{robotmoveRelSpeed:s}, '\
+                                    '{robotmoveRelSpeedType:s}, '\
+                                    '{robotmoveRelTolerance:s}, ' \
+                                    '{robotmoveTimeout:s}\n'
                                     
         self.headingsLasertrack =   'laserEnabled, '\
                                     'laserPatternShape, '\
@@ -514,24 +514,24 @@ class Save:
                                                 waitEntry2                  = str(experimentparamsReq.waitEntry2),
                                                 )
         paramsMoveRobot = self.templateMoveRobot.format(
-                                                moverobotEnabled           = str(experimentparamsReq.move.enabled),
-                                                moverobotPatternShape      = str(experimentparamsReq.move.pattern.shape),
-                                                moverobotPatternHzPattern  = str(experimentparamsReq.move.pattern.hzPattern),
-                                                moverobotPatternHzPoint    = str(experimentparamsReq.move.pattern.hzPoint),
-                                                moverobotPatternCount      = str(experimentparamsReq.move.pattern.count),
-                                                moverobotPatternSizeX      = str(experimentparamsReq.move.pattern.size.x),
-                                                moverobotPatternSizeY      = str(experimentparamsReq.move.pattern.size.y),
-                                                moverobotPatternParam      = str(experimentparamsReq.move.pattern.param),
-                                                moverobotRelTracking       = str(experimentparamsReq.move.relative.tracking),
-                                                moverobotRelOriginPosition = str(experimentparamsReq.move.relative.frameidOriginPosition),
-                                                moverobotRelOriginAngle    = str(experimentparamsReq.move.relative.frameidOriginAngle),
-                                                moverobotRelDistance       = str(experimentparamsReq.move.relative.distance),
-                                                moverobotRelAngle          = str(experimentparamsReq.move.relative.angle),
-                                                moverobotRelAngleType      = str(experimentparamsReq.move.relative.angleType),
-                                                moverobotRelSpeed          = str(experimentparamsReq.move.relative.speed),
-                                                moverobotRelSpeedType      = str(experimentparamsReq.move.relative.speedType),
-                                                moverobotRelTolerance      = str(experimentparamsReq.move.relative.tolerance),
-                                                moverobotTimeout           = str(experimentparamsReq.move.timeout),
+                                                robotEnabled           = str(experimentparamsReq.robot.enabled),
+                                                robotmovePatternShape      = str(experimentparamsReq.robot.move.pattern.shape),
+                                                robotmovePatternHzPattern  = str(experimentparamsReq.robot.move.pattern.hzPattern),
+                                                robotmovePatternHzPoint    = str(experimentparamsReq.robot.move.pattern.hzPoint),
+                                                robotmovePatternCount      = str(experimentparamsReq.robot.move.pattern.count),
+                                                robotmovePatternSizeX      = str(experimentparamsReq.robot.move.pattern.size.x),
+                                                robotmovePatternSizeY      = str(experimentparamsReq.robot.move.pattern.size.y),
+                                                robotmovePatternParam      = str(experimentparamsReq.robot.move.pattern.param),
+                                                robotmoveRelTracking       = str(experimentparamsReq.robot.move.relative.tracking),
+                                                robotmoveRelOriginPosition = str(experimentparamsReq.robot.move.relative.frameidOriginPosition),
+                                                robotmoveRelOriginAngle    = str(experimentparamsReq.robot.move.relative.frameidOriginAngle),
+                                                robotmoveRelDistance       = str(experimentparamsReq.robot.move.relative.distance),
+                                                robotmoveRelAngle          = str(experimentparamsReq.robot.move.relative.angle),
+                                                robotmoveRelAngleType      = str(experimentparamsReq.robot.move.relative.angleType),
+                                                robotmoveRelSpeed          = str(experimentparamsReq.robot.move.relative.speed),
+                                                robotmoveRelSpeedType      = str(experimentparamsReq.robot.move.relative.speedType),
+                                                robotmoveRelTolerance      = str(experimentparamsReq.robot.move.relative.tolerance),
+                                                robotmoveTimeout           = str(experimentparamsReq.robot.move.timeout),
                                                 )
         
         if len(experimentparamsReq.lasertrack.pattern_list) > 0:

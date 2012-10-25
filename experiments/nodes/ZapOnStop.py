@@ -8,6 +8,7 @@ from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
+from LEDPanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 from tracking.msg import ArenaState
 
@@ -36,13 +37,6 @@ class ExperimentZapOnStop():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.home.enabled = False
-        self.experimentparams.home.x = 0.0
-        self.experimentparams.home.y = 0.0
-        self.experimentparams.home.speed = 20
-        self.experimentparams.home.timeout = -1
-        self.experimentparams.home.tolerance = 2
-        
         self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
@@ -66,20 +60,9 @@ class ExperimentZapOnStop():
         self.experimentparams.waitEntry2 = 0.0
         
         
-        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # .robot, .lasertrack, .ledpanels, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.move.enabled = False
-        self.experimentparams.move.mode = 'relative'        
-        self.experimentparams.move.relative.tracking = True
-        self.experimentparams.move.relative.frameidOriginPosition = "Fly1"
-        self.experimentparams.move.relative.frameidOriginAngle = "Fly1"
-        self.experimentparams.move.relative.distance = 5
-        self.experimentparams.move.relative.angle = 180.0 * N.pi / 180.0
-        self.experimentparams.move.relative.angleType = 'constant'
-        self.experimentparams.move.relative.speed = 200
-        self.experimentparams.move.relative.speedType = 'constant'
-        self.experimentparams.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.move.timeout = -1
+        self.experimentparams.robot.enabled = False
         
         
         self.experimentparams.lasertrack.enabled = True

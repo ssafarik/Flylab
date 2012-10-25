@@ -8,14 +8,13 @@ import geometry_msgs.msg
 import experiments.msg
 
 class MoveSettings(genpy.Message):
-  _md5sum = "c08573c1aa714edccca84e966bc89462"
+  _md5sum = "9c786b8734a343df756977efa677313c"
   _type = "experiments/MoveSettings"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """bool enabled
-string mode  # 'pattern' or 'relative'
-MoveRelative relative
-MovePattern pattern
-float64 timeout
+  _full_text = """string        mode  # 'pattern' or 'relative'
+MoveRelative  relative
+MovePattern   pattern
+float64       timeout
 
 
 ================================================================================
@@ -49,8 +48,8 @@ float64 y
 float64 z
 
 """
-  __slots__ = ['enabled','mode','relative','pattern','timeout']
-  _slot_types = ['bool','string','experiments/MoveRelative','experiments/MovePattern','float64']
+  __slots__ = ['mode','relative','pattern','timeout']
+  _slot_types = ['string','experiments/MoveRelative','experiments/MovePattern','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -60,7 +59,7 @@ float64 z
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       enabled,mode,relative,pattern,timeout
+       mode,relative,pattern,timeout
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -69,8 +68,6 @@ float64 z
     if args or kwds:
       super(MoveSettings, self).__init__(*args, **kwds)
       #message fields cannot be None, assign default values for those that are
-      if self.enabled is None:
-        self.enabled = False
       if self.mode is None:
         self.mode = ''
       if self.relative is None:
@@ -80,7 +77,6 @@ float64 z
       if self.timeout is None:
         self.timeout = 0.
     else:
-      self.enabled = False
       self.mode = ''
       self.relative = experiments.msg.MoveRelative()
       self.pattern = experiments.msg.MovePattern()
@@ -98,7 +94,6 @@ float64 z
     :param buff: buffer, ``StringIO``
     """
     try:
-      buff.write(_struct_B.pack(self.enabled))
       _x = self.mode
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -156,10 +151,6 @@ float64 z
       if self.pattern is None:
         self.pattern = experiments.msg.MovePattern()
       end = 0
-      start = end
-      end += 1
-      (self.enabled,) = _struct_B.unpack(str[start:end])
-      self.enabled = bool(self.enabled)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -244,7 +235,6 @@ float64 z
     :param numpy: numpy python module
     """
     try:
-      buff.write(_struct_B.pack(self.enabled))
       _x = self.mode
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -303,10 +293,6 @@ float64 z
       if self.pattern is None:
         self.pattern = experiments.msg.MovePattern()
       end = 0
-      start = end
-      end += 1
-      (self.enabled,) = _struct_B.unpack(str[start:end])
-      self.enabled = bool(self.enabled)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])

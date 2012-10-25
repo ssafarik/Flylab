@@ -3,12 +3,19 @@ from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
+#!/usr/bin/env python
+from __future__ import division
+import roslib; roslib.load_manifest('experiments')
+import rospy
+import numpy as N
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
+from LEDPanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
+from tracking.msg import ArenaState
 
 
 
@@ -35,8 +42,6 @@ class ExperimentZapafly():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.home.enabled = False
-        
         self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
@@ -60,9 +65,9 @@ class ExperimentZapafly():
         self.experimentparams.waitEntry2 = 0.0
         
         
-        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # .robot, .lasertrack, .ledpanels, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.move.enabled = False
+        self.experimentparams.robot.enabled = False
         
         
         mode='platepoint' # 'platepoint' or 'plategrid' or 'trackgrid1' or 'trackgrid' or 'tracknumber' or 'trackflylogo' or 'fixedmaze' or 'fixedpoint'

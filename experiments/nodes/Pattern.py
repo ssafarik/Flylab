@@ -8,6 +8,7 @@ from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
+from LEDPanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 
 
@@ -34,13 +35,6 @@ class ExperimentPattern():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.home.enabled = True
-        self.experimentparams.home.x = 0.0
-        self.experimentparams.home.y = 0.0
-        self.experimentparams.home.speed = 20
-        self.experimentparams.home.timeout = -1
-        self.experimentparams.home.tolerance = 2
-        
         self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
@@ -64,17 +58,24 @@ class ExperimentPattern():
         self.experimentparams.waitEntry2 = 0.0
         
 
-        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # .robot, .lasertrack, .ledpanels, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.move.enabled = True
-        self.experimentparams.move.mode = 'pattern' # 'pattern' or 'relative'
-        self.experimentparams.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.move.pattern.hzPattern = 1/20  # Patterns per second.
-        self.experimentparams.move.pattern.hzPoint = 20 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
-        self.experimentparams.move.pattern.count = -1
-        self.experimentparams.move.pattern.size.x = 100
-        self.experimentparams.move.pattern.size.y = 100
-        self.experimentparams.move.timeout = 20 #self.experimentparams.move.pattern.count * (1.0/self.experimentparams.move.pattern.hzPattern)
+        self.experimentparams.robot.enabled = True
+        self.experimentparams.robot.move.mode = 'pattern' # 'pattern' or 'relative'
+        self.experimentparams.robot.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+        self.experimentparams.robot.move.pattern.hzPattern = 1/20  # Patterns per second.
+        self.experimentparams.robot.move.pattern.hzPoint = 20 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
+        self.experimentparams.robot.move.pattern.count = -1
+        self.experimentparams.robot.move.pattern.size.x = 100
+        self.experimentparams.robot.move.pattern.size.y = 100
+        self.experimentparams.robot.move.timeout = 20 #self.experimentparams.robot.move.pattern.count * (1.0/self.experimentparams.robot.move.pattern.hzPattern)
+        self.experimentparams.robot.home.enabled = True
+        self.experimentparams.robot.home.x = 0.0
+        self.experimentparams.robot.home.y = 0.0
+        self.experimentparams.robot.home.speed = 20
+        self.experimentparams.robot.home.timeout = -1
+        self.experimentparams.robot.home.tolerance = 2
+        
         
         self.experimentparams.lasertrack.enabled = False
         

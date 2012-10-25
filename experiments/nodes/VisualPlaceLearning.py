@@ -41,8 +41,6 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=52.3, y=-51.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [7.0]
         
-        self.experimentparams.home.enabled = False
-        
         self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
@@ -66,9 +64,9 @@ class Experiment():
         self.experimentparams.waitEntry2 = 0.0
         
         
-        # .move, .lasertrack, and .triggerExit all run concurrently.
+        # .robot, .lasertrack, .ledpanels, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.move.enabled = False
+        self.experimentparams.robot.enabled = False
         
         
         self.experimentparams.lasertrack.enabled = True
