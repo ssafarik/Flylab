@@ -207,6 +207,7 @@ class NewTrial (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
+        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
         
         # Command messages.
         self.command = 'continue'
@@ -274,6 +275,22 @@ class NewTrial (smach.State):
         msgTrackingCommand.exclusionzones = experimentparams.tracking.exclusionzones
         self.pubTrackingCommand.publish(msgTrackingCommand)
         
+
+        # Init the LEDPanels.
+        if (userdata.experimentparamsIn.ledpanels.enabled):
+            msgPanelsCommand = MsgPanelsCommand(command='stop')
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+
+            msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', arg1=userdata.experimentparamsIn.ledpanels.idPattern) # Assumes preprogrammed panels.
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+
+            msgPanelsCommand = MsgPanelsCommand(command='set_position', arg1=0, arg2=0)  # Set (x,y) position for the experiment.
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+        else:
+            msgPanelsCommand = MsgPanelsCommand(command='all_off')
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+            
+
         
         # Tell everyone we're starting.
         try:
@@ -1413,6 +1430,7 @@ class LEDPanels (smach.State):
         self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
 
 
+
     def Command_callback(self, msgString):
         self.command = msgString.data
             
@@ -1587,7 +1605,6 @@ class LEDPanels (smach.State):
         return rv
     
     
-        
     def execute(self, userdata):
         # Create the panels command.
         command = MsgPanelsCommand(command='all_off', arg1=0, arg2=0, arg3=0, arg4=0)
@@ -1706,7 +1723,13 @@ class LEDPanels (smach.State):
                 # If in range of the statefilter, then publish the new command                    
                 if bInStatefilterRange and (pose is not None) and (velocity is not None) and (speed is not None):
                     bValidCommand = False
-                    if userdata.experimentparamsIn.ledpanels.command == 'trackposition':
+                    if userdata.experimentparamsIn.ledpanels.command == 'fixed':
+                        command.command = 'set_position'
+                        command.arg1 = 0 # userdata.experimentparamsIn.ledpanels.x
+                        command.arg2 = 0 # userdata.experimentparamsIn.ledpanels.y
+                        bValidCommand = True
+
+                    elif userdata.experimentparamsIn.ledpanels.command == 'trackposition':
                         angle = (2.0*N.pi) - N.arctan2(pose.position.y, pose.position.x) % (2.0*N.pi)
                         if N.isfinite(angle):
                             x = xmax * angle / (2.0*N.pi)
@@ -1793,6 +1816,7 @@ class LEDPanels (smach.State):
         return rv
 
     
+        
 
             
             
@@ -1963,7 +1987,7 @@ class ExperimentLib():
 
 
     def OnShutdown_callback(self):
-        rospy.logwarn ('smach shutdown')
+        #rospy.logwarn ('smach shutdown')
         self.smachTop.request_preempt()
         
         

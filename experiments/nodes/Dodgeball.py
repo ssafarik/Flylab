@@ -3,18 +3,19 @@ from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
-from geometry_msgs.msg import Point
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
+from LEDPanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 
 
 
+
 #######################################################################################################
-class ExperimentDodgeball():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
@@ -84,7 +85,9 @@ class ExperimentDodgeball():
         
         self.experimentparams.ledpanels.enabled = True
         self.experimentparams.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.ledpanels.idPattern = 1
+        self.experimentparams.ledpanels.idPattern = 1 
+        #self.experimentparams.ledpanels.origin.x = 0 
+        #self.experimentparams.ledpanels.origin.y = 0 
         self.experimentparams.ledpanels.frame_id = 'Fly1Forecast'
         self.experimentparams.ledpanels.statefilterHi = ''
         self.experimentparams.ledpanels.statefilterLo = ''
@@ -141,7 +144,7 @@ class ExperimentDodgeball():
 
 if __name__ == '__main__':
     try:
-        experiment = ExperimentDodgeball()
+        experiment = Experiment()
         experiment.Run()
         
     except KeyboardInterrupt:

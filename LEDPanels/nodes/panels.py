@@ -279,7 +279,7 @@ class LEDPanels():
 
     def PanelsCommand_callback(self, panelcommand):
         if self.initialized:
-            #rospy.logwarn(LEDPanels: '%s(%d,%d,%d,%d)' % (panelcommand.command, panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4))
+            #rospy.logwarn('LEDPanels: %s(%d,%d,%d,%d)' % (panelcommand.command, panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4))
             command = panelcommand.command.lower()
             serialbytes_list = self.SerialBytelistFromCommand(command, [panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4])
             self.MakeSurePortIsOpen()

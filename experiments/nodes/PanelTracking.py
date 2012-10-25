@@ -10,7 +10,6 @@ from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from LEDPanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
-from LEDPanels.msg import MsgPanelsCommand
 
 
 
@@ -143,15 +142,15 @@ class Experiment():
 
     # This function gets called at the start of a new experiment.  Use this to do any one-time initialization of hardware, etc.
     def Newexperiment_callback(self, userdata):
-        # Set the LED pattern to the origin.
-        msgPanelsCommand = MsgPanelsCommand(command='stop')
-        self.pubLEDPanels.publish (msgPanelsCommand)
-
-        msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', arg1=1) # Assumes preprogrammed to the three-section pattern from Reiser paper. 
-        self.pubLEDPanels.publish (msgPanelsCommand)
-
-        msgPanelsCommand = MsgPanelsCommand(command='set_position', arg1=0, arg2=0)
-        self.pubLEDPanels.publish (msgPanelsCommand)
+#        # Set the LED pattern to the origin.
+#        msgPanelsCommand = MsgPanelsCommand(command='stop')
+#        self.pubLEDPanels.publish (msgPanelsCommand)
+#
+#        msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', arg1=1) # Assumes preprogrammed to the three-section pattern from Reiser paper. 
+#        self.pubLEDPanels.publish (msgPanelsCommand)
+#
+#        msgPanelsCommand = MsgPanelsCommand(command='set_position', arg1=0, arg2=0)
+#        self.pubLEDPanels.publish (msgPanelsCommand)
         return 'success'
 
     
