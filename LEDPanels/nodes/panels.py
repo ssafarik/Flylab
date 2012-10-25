@@ -29,7 +29,8 @@ class LEDPanels():
         
         self.subPanelsCommand = rospy.Subscriber('LEDPanels/command', MsgPanelsCommand, self.PanelsCommand_callback)
         rospy.on_shutdown(self.OnShutdown_callback)
-        self.serial = serial.Serial('/dev/ttyUSB0', baudrate=921600, rtscts=False, dsrdtr=False) # 8N1
+        serialport = rospy.get_param('ledpanels/serialport', '/dev/ttyUSB0')
+        self.serial = serial.Serial(serialport, baudrate=921600, rtscts=False, dsrdtr=False) # 8N1
         
         self.commands = {
                          'start':              {'id': 0x20, 'args': [], 'help': 'start()'},

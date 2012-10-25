@@ -57,6 +57,8 @@ class FlylabGUI:
         if not rospy.is_shutdown():
             command = String(data='exitnow')
             self.pubExperimentCommand.publish(command)
+            rospy.sleep(1)
+            sys.exit(0)
     
     def BtnCalibrateMotors_clicked_cb(self, widget):
     	if not rospy.is_shutdown():

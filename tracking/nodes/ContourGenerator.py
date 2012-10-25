@@ -35,6 +35,7 @@ class ContourGenerator:
         
         self.bUseBackgroundSubtraction  = rospy.get_param('tracking/usebackgroundsubtraction', True)    # Set False to turn off bg subtraction.        
         self.bUseTransforms             = rospy.get_param('tracking/usetransforms', True)               # Set False to stay in camera coordinates.
+        self.bEqualizeHist = False
         
         # Messages
         self.camerainfo = None
@@ -158,15 +159,14 @@ class ContourGenerator:
             # Create Background image
             # First image is background unless one can be loaded
             if self.bUseBackgroundSubtraction:
-                try:
-                    #matBackground = cv.LoadImageM(self.filenameBackground, cv.CV_LOAD_IMAGE_GRAYSCALE)
-                    self.npBackground  = cv2.imread(self.filenameBackground, cv.CV_LOAD_IMAGE_GRAYSCALE) #N.uint8(matBackground)
-                    self.npfBackground = N.float32(self.npBackground)
-                except:
+                self.npBackground  = cv2.imread(self.filenameBackground, cv.CV_LOAD_IMAGE_GRAYSCALE) #N.uint8(matBackground)
+                if self.npBackground is None:
                     rospy.logwarn ('Saving new background image %s' % self.filenameBackground)
                     self.npBackground = cv2.bitwise_and(self.npCamera, self.npMask)
                     #cv.SaveImage(self.filenameBackground, cv.fromarray(self.npBackground))
                     cv2.imwrite(self.filenameBackground, self.npBackground)
+
+                self.npfBackground = N.float32(self.npBackground)
               
                 #self.histModel = cv2.calcHist([N.uint8(self.matBackground)], [0], N.uint8(self.matMask), [255], [0,255])
                 #rospy.logwarn (self.histModel)
@@ -461,18 +461,24 @@ class ContourGenerator:
             
             # Normalize the histogram.
             #self.npBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8)
-            self.npCamera = cv2.equalizeHist(self.npCamera)
+            if self.bEqualizeHist:
+                self.npCamera = cv2.equalizeHist(self.npCamera)
             
             
             if self.bUseBackgroundSubtraction:
                 # Update the background image
+                #rospy.logwarn('types: %s' % [type(N.float32(self.npCamera)), type(self.npfBackground), type(self.alphaBackground)])
                 cv2.accumulateWeighted(N.float32(self.npCamera), self.npfBackground, self.alphaBackground)
                 #self.matBackground = cv.fromarray(N.uint8(self.npfBackground))
                 self.npBackground = N.uint8(self.npfBackground)
 
                 # Subtract background
                 #self.npBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8)
-                npBuffer = cv2.equalizeHist(self.npBackground)
+                if self.bEqualizeHist:
+                    npBuffer = cv2.equalizeHist(self.npBackground)
+                else:
+                    npBuffer = self.npBackground
+
                 self.npBackground2 = npBuffer
                 self.npForeground = cv2.absdiff(self.npCamera, self.npBackground2)
             else:
