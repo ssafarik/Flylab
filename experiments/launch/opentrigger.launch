@@ -22,6 +22,6 @@
 	<include file="$(find flies)/launch/flygender_unspecified.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="OpenTrigger.py" name="Experiment" />
+	<node pkg="experiments" type="OpenTrigger.py" name="Experiment" required="true" />
   
 </launch>

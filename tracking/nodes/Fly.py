@@ -48,7 +48,7 @@ class Fly:
         self.stampPrev = rospy.Time.now()
         self.unwind = 0.0
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
-        self.dtForecast = rospy.get_param('tracking/dtForecast',0.25)
+        self.dtForecast = rospy.get_param('tracking/dtForecast',0.15)
         
         # Orientation detection stuff.
         self.angleOfTravelRecent = 0.0
@@ -258,7 +258,7 @@ class Fly:
                 
                 
                 if N.abs(self.contour.x)>9999 or N.abs(xKalman)>9999:
-                    rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check your background image, lighting, and the parameter camera/diff_threshold.' % (self.contour.x, xKalman))
+                    rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check your background image, lighting, and the parameter tracking/diff_threshold.' % (self.contour.x, xKalman))
 
 
             else: # We don't have a contour.
@@ -334,7 +334,7 @@ class Fly:
 #                                                        frame_id='Plate'),
 #                                          ns='kalman',
 #                                          id=4,
-#                                          type=2, #SPHERE,
+#                                          type=Marker.SPHERE,
 #                                          action=0,
 #                                          pose=Pose(position=Point(x=x, 
 #                                                                   y=y, 
@@ -352,7 +352,7 @@ class Fly:
 #                                                        frame_id='Plate'),
 #                                          ns='computed',
 #                                          id=5,
-#                                          type=2, #SPHERE,
+#                                          type=Marker.SPHERE,
 #                                          action=0,
 #                                          pose=Pose(position=Point(x=ptComputed.x, 
 #                                                                   y=ptComputed.y, 
@@ -414,6 +414,7 @@ class Fly:
 
             # Send the Forecast transform.
             if self.state.pose.position.x is not None:
+                #self.dtForecast = rospy.get_param('tracking/dtForecast',0.25)
                 poseForecast = Pose()#copy.copy(self.state.pose)
                 poseForecast.position.x = self.state.pose.position.x + self.state.velocity.linear.x * self.dtForecast
                 poseForecast.position.y = self.state.pose.position.y + self.state.velocity.linear.y * self.dtForecast
@@ -434,7 +435,7 @@ class Fly:
                                                     frame_id='Plate'),
                                       ns='robot',
                                       id=1,
-                                      type=3, #cylinder,
+                                      type=Marker.CYLINDER,
                                       action=0,
                                       pose=Pose(position=Point(x=self.state.pose.position.x, 
                                                                y=self.state.pose.position.y, 

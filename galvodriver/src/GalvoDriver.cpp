@@ -1,6 +1,8 @@
 #include "ros/ros.h"
-#include "sensor_msgs/PointCloud.h"
+#include "ros/node_handle.h"
 #include "geometry_msgs/Point32.h"
+#include "sensor_msgs/PointCloud.h"
+#include "std_msgs/Time.h"
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -274,12 +276,12 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 		if (g_bStarted)
 		{
 			e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
-			ROS_WARN("IsTaskDone A");
+			//ROS_WARN("IsTaskDone A");
 			while (!bTaskDone)
 			{
 				e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
 				HandleDAQError(e);
-				ROS_WARN("IsTaskDone A");
+				//ROS_WARN("IsTaskDone A");
 			}
 
 			e = DAQmxStopTask (hTask);
@@ -349,12 +351,12 @@ void ResetDAQ(void)
 		if (g_bStarted)
 		{
 			e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
-			ROS_WARN("IsTaskDone B");
+			//ROS_WARN("IsTaskDone B");
 			while (!bTaskDone)
 			{
 				e = DAQmxIsTaskDone (g_hTask, &bTaskDone);
 				HandleDAQError(e);
-				ROS_WARN("IsTaskDone B");
+				//ROS_WARN("IsTaskDone B");
 			}
 
 			e = DAQmxStopTask (g_hTask);
@@ -465,17 +467,20 @@ int main(int argc, char **argv)
 	float64				fdata;
 	char 				szTask[]="OutputPointList";
 	char				szPhysicalChannel[]=DEVICE "/" CHANNELS;
-
+	double				hzSpin;
 	
 	g_pszError = new char[LENERR];
 	
 	node.getParam("galvodriver/hzPoint", g_hzPoint);
 	node.getParam("galvodriver/hzUSB", g_hzUSB);
 	
-	ros::Rate           rosRate(2.0 * g_hzUSB);
+	hzSpin = 2.0 * g_hzUSB;
+	ros::Rate           rosRate(hzSpin);
 	
 	ros::Subscriber subGalvoPoints = node.subscribe("GalvoDriver/pointcloud", 2, GalvoPointCloud_callback);
 	ROS_WARN ("Listening on GalvoDriver/pointcloud, hzPoint=%0.2f", g_hzPoint);
+
+	ros::Publisher	pubHeartbeat = node.advertise<std_msgs::Time>("heartbeat", 10);
 
 	ResetDAQ();
 
@@ -502,8 +507,13 @@ int main(int argc, char **argv)
 	ROS_WARN("USB transfer request count=%u", udata);
 	
 	//ros::spin();
-	double timeAllowed = ros::Duration(5.0).toSec();
-	double timeTaken;
+	double 			timeAllowed = ros::Duration(2.0).toSec();
+	double 			timeTaken;
+	std_msgs::Time	heartbeat;
+	int				iCount=0;
+	int				nSpin=(int)hzSpin;
+	
+	
 	while (ros::ok())
 	{
 		ros::spinOnce();
@@ -514,6 +524,13 @@ int main(int argc, char **argv)
 			ROS_WARN("Resetting DAQ due to heartbeat irregularity.");
 			ResetDAQ();
 		}
+		if (!(iCount % nSpin))
+		{
+			heartbeat.data = ros::Time::now();
+			pubHeartbeat.publish(heartbeat);
+		}
+		
+		iCount++;
 	}
 	
 	ResetDAQ();

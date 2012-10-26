@@ -1,0 +1,57 @@
+<launch>
+  <!-- =================================================================== -->
+  <!-- This file contains both the Plate-Stage and Plate-Camera            -->
+  <!-- transform data.                                                     -->
+  <!-- =================================================================== -->
+
+  <!-- =================================================================== -->
+  <!-- Plate-Camera transform.                                             -->
+  <!--                                                                     -->
+  <!-- "roslaunch calibration CameraPlate.launch"                          -->
+  <!--                                                                     -->
+  <!-- Use the following command to move the center and radius of the      -->
+  <!-- circle to correspond to the arena:                                  -->
+  <!-- rostopic pub -1 Joystick/Commands geometry_msgs/Point @@ dx dy dr   -->
+  <!-- (where dx,dy,dr are replaced with numbers, and the @'s are hyphens) -->
+  <!-- =================================================================== -->
+  
+  <!-- The mask circle in camera coordinates (i.e. pixels).    -->
+  <param name="camera/mask/x" type="double" value="321"/>
+  <param name="camera/mask/y" type="double" value="210"/>
+  <param name="camera/mask/radius" type="double" value="205"/>  <!-- pixels -->
+
+  <param name="calibration/checker_size" type="double" value="15.0" />
+
+
+
+  <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. They might need fiddling with after use. -->
+  <param name="camera_plate_rvec_0" type="double" value="-3.109"/>
+  <param name="camera_plate_rvec_1" type="double" value="-0.008"/>
+  <param name="camera_plate_rvec_2" type="double" value="-0.056"/>
+  <param name="camera_plate_tvec_0" type="double" value="142.2"/> <!-- Adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_1" type="double" value="94.6"/> <!-- Adjust for plate alignment here. -->
+  <param name="camera_plate_tvec_2" type="double" value="378.2"/>
+  
+
+  <!-- ================================================================== -->
+  <!-- Plate-to-Galvo transform                                           -->
+  <!-- where you align the computed laser position with the visual        -->
+  <!-- laser position.                                                    -->
+  <!--                                                                    -->
+  <!-- "roslaunch calibration GalvoPlate.launch"                          -->
+  <!-- Then let it run until the "Translation Vector" and "Quaternion"    -->
+  <!-- stabilize.  Then copy the translation & quaternion values to       -->
+  <!-- the "args" below, e.g.  as:  tx,ty,tz,qx,qy,qz,qw                  -->
+  <!--                                                                    -->
+  <!-- ================================================================== -->
+  
+  <param name="plate_galvo_x" type="double" value="0"/>  <!-- Adjust for laser alignment here. -->
+  <param name="plate_galvo_y" type="double" value="0"/>  <!-- Adjust for laser alignment here. -->
+  <param name="plate_galvo_z" type="double" value="0"/>
+  <param name="plate_galvo_qx" type="double" value="0"/>
+  <param name="plate_galvo_qy" type="double" value="0"/>
+  <param name="plate_galvo_qz" type="double" value="0"/>
+  <param name="plate_galvo_qw" type="double" value="1"/>
+
+
+</launch>

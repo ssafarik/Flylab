@@ -531,7 +531,7 @@ class RosFivebar:
             pt.x = self.ptEeSense.x + self.vecOffsetSense.x 
             pt.y = self.ptEeSense.y + self.vecOffsetSense.y 
             pt.z = self.ptEeSense.z + self.vecOffsetSense.z 
-            pt.point = self.ClipPtToRadius(pt.point)
+            pt = self.ClipPtToRadius(pt)
             
             rvStageState.state.header.stamp = self.time
             rvStageState.state.header.frame_id = 'Stage' # Always return Stage frame coordinates.
@@ -793,7 +793,7 @@ class RosFivebar:
                                                         frame_id='Stage'),
                                           ns='target',
                                           id=0,
-                                          type=2, #SPHERE,
+                                          type=Marker.SPHERE,
                                           action=0,
                                           pose=Pose(position=Point(x=self.ptsToolRef.point.x, 
                                                                    y=self.ptsToolRef.point.y, 
@@ -811,7 +811,7 @@ class RosFivebar:
 #                    markerToolOffset   = Marker(header=state.header,
 #                                          ns='markers',
 #                                          id=1,
-#                                          type=2, #SPHERE,
+#                                          type=Marker.SPHERE,
 #                                          action=0,
 #                                          pose=Pose(position=Point(x=state.pose.position.x+self.vecOffsetSense.x, 
 #                                                                   y=state.pose.position.y+self.vecOffsetSense.y, 
@@ -827,7 +827,7 @@ class RosFivebar:
                     markerToolOffset   = Marker(header=state.header,
                                                 ns='tooloffset',
                                                 id=1,
-                                                type=0, #ARROW,
+                                                type=Marker.ARROW,
                                                 action=0,
                                                 scale=Vector3(x=0.1, # Shaft diameter
                                                               y=0.2, # Head diameter
@@ -952,7 +952,7 @@ class RosFivebar:
                                                 frame_id='Stage'),
                                   ns='command',
                                   id=1,
-                                  type=0, #ARROW,
+                                  type=Marker.ARROW,
                                   action=0,
                                   scale=Vector3(x=0.1, # Shaft diameter
                                                 y=0.2, # Head diameter
@@ -1015,15 +1015,16 @@ class RosFivebar:
         rospy.loginfo ('5B self.q1CenterEiz: %s, %s, %s' % (self.q1CenterE, self.q1CenterI, self.q1CenterZ))
         rospy.loginfo ('5B self.q2CenterEiz: %s, %s, %s' % (self.q2CenterE, self.q2CenterI, self.q2CenterZ))
         # Process messages forever.
-        rosrate = rospy.Rate(100)
+        rosrate = rospy.Rate(25)
 
         while not rospy.is_shutdown():
             self.time = rospy.Time.now()
             self.dt = self.time - self.timePrev
             self.timePrev = self.time
-
+            
             self.SendTransforms()
             self.SendTargetCommand()
+
             rosrate.sleep()
                 
     

@@ -3,6 +3,6 @@
 	<!-- Configuration of the FLIES.                                -->
 	<!-- ========================================================== -->
 
-	<param name="fly/type" type="string" value="G15" />
+	<param name="fly/type" type="string" value="G15 (octopamine)" />
     
 </launch>

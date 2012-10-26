@@ -3,11 +3,17 @@ from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
+#!/usr/bin/env python
+from __future__ import division
+import roslib; roslib.load_manifest('experiments')
+import rospy
+import numpy as N
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
+from LEDPanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 from tracking.msg import ArenaState
 
@@ -32,13 +38,11 @@ class ExperimentZapafly():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.tracking.exclusionzone.enabled = False
-        self.experimentparams.tracking.exclusionzone.point_list = [Point(x=0.0, y=0.0)]
-        self.experimentparams.tracking.exclusionzone.radius_list = [0.0]
+        self.experimentparams.tracking.exclusionzones.enabled = False
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.home.enabled = False
-        
-        self.experimentparams.waitEntry = 0.0
+        self.experimentparams.waitEntry1 = 0.0
         
         self.experimentparams.triggerEntry.enabled = False
         self.experimentparams.triggerEntry.frameidParent = 'Plate'
@@ -58,10 +62,12 @@ class ExperimentZapafly():
         self.experimentparams.triggerEntry.timeHold = 0.0
         self.experimentparams.triggerEntry.timeout = -1
         
+        self.experimentparams.waitEntry2 = 0.0
         
-        # .move, .lasertrack, and .triggerExit all run concurrently.
+        
+        # .robot, .lasertrack, .ledpanels, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.move.enabled = False
+        self.experimentparams.robot.enabled = False
         
         
         mode='platepoint' # 'platepoint' or 'plategrid' or 'trackgrid1' or 'trackgrid' or 'tracknumber' or 'trackflylogo' or 'fixedmaze' or 'fixedpoint'
@@ -109,7 +115,7 @@ class ExperimentZapafly():
             for iFly in range(rospy.get_param('nFlies', 0)):
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = 'grid',
-                                                                                frame_id   = 'Fly%d' % (iFly+1),
+                                                                                frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
@@ -122,7 +128,7 @@ class ExperimentZapafly():
             for iFly in range(rospy.get_param('nFlies', 0)):
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = '%s' % (iFly+1),
-                                                                                frame_id   = 'Fly%d' % (iFly+1),
+                                                                                frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
@@ -135,7 +141,7 @@ class ExperimentZapafly():
             for iFly in range(rospy.get_param('nFlies', 0)):
                 self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = 'flylogo',
-                                                                                frame_id   = 'Fly%d' % (iFly+1),
+                                                                                frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
@@ -179,6 +185,15 @@ class ExperimentZapafly():
         
         self.experimentparams.lasertrack.timeout = -1
         
+        self.experimentparams.ledpanels.enabled = False
+        self.experimentparams.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.ledpanels.idPattern = 1
+        self.experimentparams.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.ledpanels.statefilterHi = ''
+        self.experimentparams.ledpanels.statefilterLo = ''
+        self.experimentparams.ledpanels.statefilterCriteria = ''
+        self.experimentparams.ledpanels.timeout = -1
+
         self.experimentparams.triggerExit.enabled = True
         self.experimentparams.triggerExit.distanceMin = 999.0
         self.experimentparams.triggerExit.distanceMax = 888.0 # i.e. never
@@ -197,13 +212,31 @@ class ExperimentZapafly():
 
         self.experimentparams.waitExit = 0.0
         
-        self.experiment = ExperimentLib.Experiment(self.experimentparams)
+        self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
+                                                         newexperiment_callback = self.Newexperiment_callback, 
+                                                         newtrial_callback = self.Newtrial_callback, 
+                                                         endtrial_callback = self.Endtrial_callback)
 
 
 
     def Run(self):
-        self.experiment.Run()
+        self.experimentlib.Run()
         
+
+    # This function gets called at the start of a new experiment.  Use this to do any one-time initialization of hardware, etc.
+    def Newexperiment_callback(self, userdata):
+        return 'success'
+
+    # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Newtrial_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
+
+    # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
+    def Endtrial_callback(self, userdata):
+        userdata.experimentparamsOut = userdata.experimentparamsIn
+        return 'success'
+
 
 
 

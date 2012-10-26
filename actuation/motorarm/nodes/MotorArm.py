@@ -57,14 +57,14 @@ class MotorArm:
         
         self.ptsToolRefExternal = None #Point(0,0,0) # Where we want the "tool".
         self.ptsToolRef = None
+        self.ptToolRefClipped = Point(0,0,0) 
         self.ptEeSense = Point(0,0,0)
         self.ptEeCommand = Point(0,0,0) # Where to command the end-effector.
-        self.vecOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
-        self.ptToolRefClipped = Point(0,0,0) 
+        self.ptEeRef = Point(0,0,0)
         self.ptContourSense = Point(0,0,0)
+        self.vecOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
         self.vecContourError = Point(0,0,0)
         self.vecToolRefError = Point(0,0,0)
-        self.ptEeRef = Point(0,0,0)
         self.vecError = Point(0,0,0)
         self.vecErrorPrev = Point(0,0,0)
         self.vecDError = Point(0,0,0)
@@ -351,7 +351,7 @@ class MotorArm:
                                       frame_id='Stage'),
                           ns=name,
                           id=id,
-                          type=2, #SPHERE,
+                          type=Marker.SPHERE,
                           action=0,
                           pose=Pose(position=Point(x=pt.x, 
                                                    y=pt.y, 
@@ -425,7 +425,7 @@ class MotorArm:
                                                         frame_id=self.ptsToolRef.header.frame_id),
                                           ns='target',
                                           id=2,
-                                          type=2, #SPHERE,
+                                          type=Marker.SPHERE,
                                           action=0,
                                           pose=Pose(position=Point(x=self.ptsToolRef.point.x, 
                                                                    y=self.ptsToolRef.point.y, 
@@ -444,7 +444,7 @@ class MotorArm:
                                                               frame_id='Stage'),
                                           ns='tooloffset',
                                           id=3,
-                                          type=0, #ARROW,
+                                          type=Marker.ARROW,
                                           action=0,
                                           scale=Vector3(x=0.1, # Shaft diameter
                                                         y=0.2, # Head diameter
@@ -557,7 +557,7 @@ class MotorArm:
                                                 frame_id='Stage'),
                                   ns='command',
                                   id=4,
-                                  type=0, #ARROW,
+                                  type=Marker.ARROW,
                                   action=0,
                                   scale=Vector3(x=0.1, # Shaft diameter
                                                 y=0.2, # Head diameter

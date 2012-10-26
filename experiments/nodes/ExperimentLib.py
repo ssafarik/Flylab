@@ -9,18 +9,20 @@ import smach
 import smach_ros
 import tf
 
-from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist
-from std_msgs.msg import Header
+from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
+from std_msgs.msg import Header, ColorRGBA, String
 from stage_action_server.msg import *
 from pythonmodules import filters
 from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from experiments.srv import Trigger, ExperimentParams
 from galvodirector.msg import MsgGalvoCommand
+from LEDPanels.msg import MsgPanelsCommand
 from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
+from visualization_msgs.msg import Marker
 
-gRate = 100  # This is the loop rate at which the experiment states run.
+gRate = 50  # This is the loop rate at which the experiment states run.
 g_tfrx = None
 
 #######################################################################################################
@@ -123,8 +125,7 @@ def ClipXyToRadius(x, y, rmax):
 #
 class TriggerService():
     def __init__(self):
-        self.services = {"save/arenastate/trigger": None, 
-                         "save/video/trigger": None}
+        self.services = {"save/trigger": None}
         
     def attach(self):
         for key in self.services:
@@ -142,6 +143,7 @@ class TriggerService():
         for key,callback in self.services.iteritems():
             if callback is not None:
                 callback(status)
+# End class TriggerService()
             
         
 
@@ -151,8 +153,7 @@ class TriggerService():
 #
 class NewTrialService():
     def __init__(self):
-        self.services = {"save/arenastate/new_trial": None, 
-                         "save/video/new_trial": None}
+        self.services = {"save/new_trial": None}
     
     def attach(self):
         for key in self.services:
@@ -167,6 +168,7 @@ class NewTrialService():
         for key,callback in self.services.iteritems():
             if callback is not None:
                 callback(experimentparams)
+# End class NewTrialService()
 
     
 
@@ -189,29 +191,216 @@ class NewExperiment (smach.State):
         
         #rospy.loginfo ('EL Exiting NewExperiment()')
         return 'success'
+# End class NewExperiment()
 
+
+
+#######################################################################################################
+#######################################################################################################
+class ResetHardware (smach.State):
+    def __init__(self):
+
+        smach.State.__init__(self, 
+                             outcomes=['success','disabled','timeout','aborted'],
+                             input_keys=['experimentparamsIn'])
+
+        self.arenastate = None
+        self.rosrate = rospy.Rate(gRate)
+
+        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
+
+        rospy.on_shutdown(self.OnShutdown_callback)
+        
+        
+        # Command messages.
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+
+
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
+            
+        
+    def OnShutdown_callback(self):
+        pass
+        
+        
+    def ArenaState_callback(self, arenastate):
+        self.arenastate = arenastate
+
+
+
+    def execute(self, userdata):
+        rospy.loginfo("EL State ResetHardware(%s)" % [userdata.experimentparamsIn.robot.home.enabled, userdata.experimentparamsIn.robot.home.x, userdata.experimentparamsIn.robot.home.y])
+
+        # Reset the various hardware.
+        rv1 = self.ResetRobot(userdata)
+        rv2 = self.ResetLEDPanels(userdata)
+        
+        
+        # Figure out what happened.
+        if ('aborted' in [rv1,rv2]):
+            rv = 'aborted'
+        elif ('timeout' in [rv1,rv2]):
+            rv = 'timeout'
+        elif rv1=='disabled' and rv2=='disabled':
+            rv = 'disabled'
+        else:
+            rv = 'success'
+            
+        #rospy.loginfo ('EL Exiting ResetHardware()')
+        return rv
+    
+        
+    def ResetRobot(self, userdata):
+        self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
+        self.action.wait_for_server()
+        self.goal = ActionStageStateGoal()
+        self.set_stage_state = None
+        
+
+        rv = 'disabled'
+        if (userdata.experimentparamsIn.robot.enabled) and (userdata.experimentparamsIn.robot.home.enabled):
+            self.timeStart = rospy.Time.now()
+    
+            rospy.wait_for_service('set_stage_state')
+            try:
+                self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
+            except rospy.ServiceException, e:
+                print "Service call failed: %s"%e
+            
+
+            while self.arenastate is None:
+                if userdata.experimentparamsIn.robot.home.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.home.timeout:
+                        return 'timeout'
+                #if self.preempt_requested():
+                #    self.service_preempt()
+                #    return 'preempt'
+                rospy.sleep(1.0)
+    
+                if (self.commandExperiment=='exitnow'):
+                    return 'aborted'
+    
+    
+            # Send the command.
+            self.goal.state.header = self.arenastate.robot.header
+            #self.goal.state.header.stamp = rospy.Time.now()
+            self.goal.state.pose.position.x = userdata.experimentparamsIn.robot.home.x
+            self.goal.state.pose.position.y = userdata.experimentparamsIn.robot.home.y
+            self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+                                                                          pose=self.goal.state.pose),
+                                                      speed = userdata.experimentparamsIn.robot.home.speed))
+
+            rv = 'aborted'
+            while not rospy.is_shutdown():
+                # Are we there yet?
+                
+                ptRobot = N.array([self.arenastate.robot.pose.position.x, 
+                                   self.arenastate.robot.pose.position.y])
+                ptTarget = N.array([self.goal.state.pose.position.x,
+                                    self.goal.state.pose.position.y])                
+                r = N.linalg.norm(ptRobot-ptTarget)
+                rospy.loginfo ('EL ResetHardware() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
+                
+                
+                if (r <= userdata.experimentparamsIn.robot.home.tolerance):
+                    rospy.sleep(0.5) # Allow some settling time.
+                    rv = 'success'
+                    break
+                
+                
+                #if self.preempt_requested():
+                #    self.service_preempt()
+                #    rv = 'preempt'
+                #    break
+                
+                
+                if userdata.experimentparamsIn.robot.home.timeout != -1:
+                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.home.timeout:
+                        rv = 'timeout'
+                        break
+                
+                self.rosrate.sleep()
+
+                if (self.commandExperiment=='exitnow'):
+                    rv = 'aborted'
+                    break
+                
+        return rv
+        
+
+    def ResetLEDPanels(self, userdata):
+        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+
+        # Init the LEDPanels.  Assumes preprogrammed panels.
+        if (userdata.experimentparamsIn.ledpanels.enabled):
+            msgPanelsCommand = MsgPanelsCommand(command='stop')
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+
+            msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', 
+                                                arg1=userdata.experimentparamsIn.ledpanels.idPattern)
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+
+            msgPanelsCommand = MsgPanelsCommand(command='set_position', 
+                                                arg1=userdata.experimentparamsIn.ledpanels.origin.x, 
+                                                arg2=userdata.experimentparamsIn.ledpanels.origin.y)  # Set (x,y) position for the experiment.
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+        else:
+            msgPanelsCommand = MsgPanelsCommand(command='all_off')
+            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
+            
+
+        return 'success'
+# End class ResetHardware()        
+
+        
 
 #######################################################################################################
 #######################################################################################################
 # NewTrial() - Increments the trial number, untriggers, and calls the 
 #              new_trial service (which begins recording).
 #
+# Experiment may be paused & restarted via the commandlines:
+# rostopic pub -1 experiment/command std_msgs/String pause
+# rostopic pub -1 experiment/command std_msgs/String run
+#
 class NewTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['continue','stop','aborted'],
+                             outcomes=['continue','exit','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
-        self.pubTrackingCommand = rospy.Publisher('TrackingCommand', TrackingCommand, latch=True)
+        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
+        
+        # Command messages.
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+
+        
         self.Trigger = TriggerService()
         self.Trigger.attach()
         
         self.NewTrial = NewTrialService()
         self.NewTrial.attach()
 
+
+    def CommandExperiment_callback(self, msgString):
+        if msgString.data in self.commandExperiment_list:
+            self.commandExperiment = msgString.data
+            if 'now' in self.commandExperiment:
+                rospy.logwarn ('Experiment received command: "%s".' % self.commandExperiment)
+            else:
+                rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.commandExperiment)
+        else:
+            rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.commandExperiment_list))
+            
         
     def execute(self, userdata):
-        rv = 'stop'
+        rv = 'exit'
         experimentparams = userdata.experimentparamsIn
         experimentparams.experiment.trial = userdata.experimentparamsIn.experiment.trial+1
         if (experimentparams.experiment.maxTrials != -1):
@@ -221,8 +410,39 @@ class NewTrial (smach.State):
         rospy.loginfo ('EL State NewTrial(%s)' % experimentparams.experiment.trial)
 
         self.Trigger.notify(False)
+        
+        # Handle various commands sent in via messages.
+        if (self.commandExperiment=='pause'):
+            rospy.logwarn ('**************************************** Experiment paused at NewTrial...')
+            while (self.commandExperiment != 'continue'):
+                rospy.sleep(1)
+            rospy.logwarn ('**************************************** Experiment continuing.')
+
+        if (self.commandExperiment=='stage/calibrate'):
+            rospy.logwarn ('**************************************** Calibrating...')
+            rospy.wait_for_service('calibrate_stage')
+            try:
+                Calibrate = rospy.ServiceProxy('calibrate_stage', SrvFrameState)
+            except rospy.ServiceException, e:
+                rospy.logwarn ("FAILED to attach to calibrate_stage service: %s" % e)
+            else:
+                Calibrate(SrvFrameStateRequest())
+            self.commandExperiment = 'continue'
+            rospy.logwarn ('**************************************** Experiment continuing.')
+            
+        if (self.commandExperiment=='exit') or (self.commandExperiment=='exitnow'):
+            return rv
+
+
+        # Set up the tracking exclusion zones.    
         userdata.experimentparamsOut = experimentparams
-        self.pubTrackingCommand.publish(experimentparams.tracking)
+        msgTrackingCommand = TrackingCommand()
+        msgTrackingCommand.command = 'setexclusionzones'
+        msgTrackingCommand.exclusionzones = experimentparams.tracking.exclusionzones
+        self.pubTrackingCommand.publish(msgTrackingCommand)
+        
+
+        # Tell everyone we're starting.
         try:
             self.NewTrial.notify(experimentparams)
             rv = 'continue'
@@ -231,6 +451,7 @@ class NewTrial (smach.State):
 
         #rospy.loginfo ('EL Exiting NewTrial()')
         return rv
+# End class NewTrial()
 
 
 
@@ -252,7 +473,9 @@ class TriggerOnStates (smach.State):
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
         self.rosrate = rospy.Rate(gRate)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
+
+        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
         if g_tfrx is None:
             g_tfrx = tf.TransformListener()
 
@@ -261,8 +484,17 @@ class TriggerOnStates (smach.State):
     
         self.nRobots = rospy.get_param('nRobots', 0)
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
-        
     
+        # Command messages.
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+
+
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
+            
+        
     def OnShutdown_callback(self):
         pass
         
@@ -303,13 +535,29 @@ class TriggerOnStates (smach.State):
 
     def GetSpeedFrameToFrame (self, frameidParent, frameidChild):
         speed = None
-        try:
-            stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
-            ((vx,vy,vz),(wx,wy,wz)) = g_tfrx.lookupTwist(frameidChild, frameidParent, stamp-self.dtVelocity, self.dtVelocity)
-        except (tf.Exception, AttributeError), e:
-            ((vx,vy,vz),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+        
+        # If absolute speed (i.e. in the Plate frame), then try to use ArenaState speed.
+        if (frameidParent=='Plate') and (self.arenastate is not None):
 
-        speed = N.linalg.norm(N.array([vx,vy,vz]))
+            # Check the robot.
+            if (self.nRobots>0) and (frameidChild==self.arenastate.robot.name):
+                speed = self.arenastate.robot.speed
+
+            # Check the flies.
+            if (speed is None):
+                for state in self.arenastate.flies:
+                    if (frameidChild==state.name):
+                        speed = state.speed
+                        break
+
+        else:    # Get the speed via transforms.
+            try:
+                stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
+                ((vx,vy,vz),(wx,wy,wz)) = g_tfrx.lookupTwist(frameidChild, frameidParent, stamp-self.dtVelocity, self.dtVelocity)
+            except (tf.Exception, AttributeError), e:
+                ((vx,vy,vz),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+
+            speed = N.linalg.norm(N.array([vx,vy,vz]))
             
         return speed
 
@@ -335,7 +583,7 @@ class TriggerOnStates (smach.State):
                         if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > trigger.timeout:
                             return 'timeout'
                     #if self.preempt_requested():
-                    #    self.recall_preempt()
+                    #    self.service_preempt()
                     #    self.Trigger.notify(False)
                     #    return 'preempt'
                     rospy.sleep(1.0)
@@ -396,7 +644,7 @@ class TriggerOnStates (smach.State):
                         if (trigger.speedAbsParentMin is not None) and (trigger.speedAbsParentMax is not None):
                             isSpeedAbsParentInRange = False
                             speedAbsParent = self.GetSpeedFrameToFrame('Plate', trigger.frameidParent)# Absolute speed of the parent frame.
-                            #rospy.loginfo ('EL speed=%s' % speed)
+                            #rospy.loginfo ('EL parent speed=%s' % speedAbsParent)
                             if speedAbsParent is not None:
                                 if (trigger.speedAbsParentMin <= speedAbsParent <= trigger.speedAbsParentMax):
                                     isSpeedAbsParentInRange = True
@@ -406,7 +654,7 @@ class TriggerOnStates (smach.State):
                         if (trigger.speedAbsChildMin is not None) and (trigger.speedAbsChildMax is not None):
                             isSpeedAbsChildInRange = False
                             speedAbsChild = self.GetSpeedFrameToFrame('Plate', trigger.frameidChild)# Absolute speed of the child frame.
-                            #rospy.loginfo ('EL speed=%s' % speed)
+                            #rospy.loginfo ('EL child speed=%s' % speedAbsChild)
                             if speedAbsChild is not None:
                                 if (trigger.speedAbsChildMin <= speedAbsChild <= trigger.speedAbsChildMax):
                                     isSpeedAbsChildInRange = True
@@ -434,9 +682,9 @@ class TriggerOnStates (smach.State):
                             self.timeTriggered = None
         
                         #if (distance is not None) and (angle is not None) and (speedAbsParent is not None) and (speedAbsChild is not None) and (speedRel is not None):
-                        #    rospy.loginfo ('EL triggers=distance=%0.3f, speed=%0.3f,%0.3f, angle=%0.3f, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
+                        #    rospy.logwarn ('EL triggers=distance=%0.3f, speed=%0.3f,%0.3f, angle=%0.3f, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
                         #else:
-                        #    rospy.loginfo ('EL triggers=distance=%s, speed=%s,%s, angle=%s, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeecRelInRange, isAngleInRange]))
+                        #    rospy.logwarn ('EL triggers=distance=%s, speed=%s,%s, angle=%s, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
         
                         # If pending trigger has lasted longer than requested duration, then set trigger.
                         if (self.isTriggered):
@@ -447,10 +695,14 @@ class TriggerOnStates (smach.State):
                                 break
                             
                             #rospy.loginfo('EL duration=%s' % duration)
-                            
+                        
+                        if (self.commandExperiment=='exitnow'):
+                            rv = 'aborted'
+                            break
+    
                         
                     #if self.preempt_requested():
-                    #    self.recall_preempt()
+                    #    self.service_preempt()
                     #    rv = 'preempt'
                     #    break
                     
@@ -473,13 +725,14 @@ class TriggerOnStates (smach.State):
             
         #rospy.loginfo ('EL Exiting TriggerOnStates()')
         return rv
+# End class TriggerOnStates()
 
     
 
 #######################################################################################################
 #######################################################################################################
 class TriggerOnTime (smach.State):
-    def __init__(self, type='entry'):
+    def __init__(self, type='entry1'):
         self.type = type
         smach.State.__init__(self, 
                              outcomes=['success','aborted'],
@@ -489,9 +742,21 @@ class TriggerOnTime (smach.State):
         self.Trigger.attach()
         
 
+        # Command messages.
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+
+
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
+            
+        
     def execute(self, userdata):
-        if self.type=='entry':
-            duration = userdata.experimentparamsIn.waitEntry
+        if self.type=='entry1':
+            duration = userdata.experimentparamsIn.waitEntry1
+        elif self.type=='entry2':
+            duration = userdata.experimentparamsIn.waitEntry2
         else:
             duration = userdata.experimentparamsIn.waitExit
 
@@ -503,115 +768,18 @@ class TriggerOnTime (smach.State):
         except rospy.ServiceException:
             rv = 'aborted'
 
-        if rv!='aborted' and self.type=='entry':
-            self.Trigger.notify(True)
+        if (self.commandExperiment=='exitnow'):
+            rv = 'aborted'
+
+        #if rv!='aborted' and ('entry' in self.type):
+        #    self.Trigger.notify(True)
         #else:
         #    self.Trigger.notify(False)
 
         #rospy.loginfo ('EL Exiting TriggerOnTime()')
         return rv
+# End class TriggerOnTime()
 
-
-
-#######################################################################################################
-#######################################################################################################
-class ResetRobot (smach.State):
-    def __init__(self):
-
-        smach.State.__init__(self, 
-                             outcomes=['success','disabled','timeout','aborted'],
-                             input_keys=['experimentparamsIn'])
-
-        self.arenastate = None
-        self.rosrate = rospy.Rate(gRate)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
-
-        self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
-        self.action.wait_for_server()
-        self.goal = ActionStageStateGoal()
-        self.set_stage_state = None
-        
-        rospy.on_shutdown(self.OnShutdown_callback)
-        
-        
-    def OnShutdown_callback(self):
-        pass
-        
-        
-    def ArenaState_callback(self, arenastate):
-        self.arenastate = arenastate
-
-
-
-    def execute(self, userdata):
-        rospy.loginfo("EL State ResetRobot(%s)" % [userdata.experimentparamsIn.home.enabled, userdata.experimentparamsIn.home.x, userdata.experimentparamsIn.home.y])
-
-        rv = 'disabled'
-        if userdata.experimentparamsIn.home.enabled:
-            self.timeStart = rospy.Time.now()
-    
-            rospy.wait_for_service('set_stage_state')
-            try:
-                self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
-            except rospy.ServiceException, e:
-                print "Service call failed: %s"%e
-            
-
-            while self.arenastate is None:
-                if userdata.experimentparamsIn.home.timeout != -1:
-                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.home.timeout:
-                        return 'timeout'
-                #if self.preempt_requested():
-                #    self.recall_preempt()
-                #    return 'preempt'
-                rospy.sleep(1.0)
-    
-    
-    
-            # Send the command.
-            self.goal.state.header = self.arenastate.robot.header
-            #self.goal.state.header.stamp = rospy.Time.now()
-            self.goal.state.pose.position.x = userdata.experimentparamsIn.home.x
-            self.goal.state.pose.position.y = userdata.experimentparamsIn.home.y
-            self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                          pose=self.goal.state.pose),
-                                                      speed = userdata.experimentparamsIn.home.speed))
-
-            rv = 'aborted'
-            while not rospy.is_shutdown():
-                # Are we there yet?
-                
-                ptRobot = N.array([self.arenastate.robot.pose.position.x, 
-                                   self.arenastate.robot.pose.position.y])
-                ptTarget = N.array([self.goal.state.pose.position.x,
-                                    self.goal.state.pose.position.y])                
-                r = N.linalg.norm(ptRobot-ptTarget)
-                rospy.loginfo ('EL ResetRobot() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
-                
-                
-                if (r <= userdata.experimentparamsIn.home.tolerance):
-                    rospy.sleep(0.5) # Allow some settling time.
-                    rv = 'success'
-                    break
-                
-                
-                #if self.preempt_requested():
-                #    self.recall_preempt()
-                #    rv = 'preempt'
-                #    break
-                
-                
-                if userdata.experimentparamsIn.home.timeout != -1:
-                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.home.timeout:
-                        rv = 'timeout'
-                        break
-                
-                self.rosrate.sleep()
-
-
-        #rospy.loginfo ('EL Exiting ResetRobot()')
-        return rv
-        
 
 
 #######################################################################################################
@@ -625,7 +793,9 @@ class MoveRobot (smach.State):
 
         self.arenastate = None
         self.rosrate = rospy.Rate(gRate)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
+
+        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
         self.pubPatternGen = rospy.Publisher('SetSignalGen', MsgPattern, latch=True)
 
         self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
@@ -638,6 +808,16 @@ class MoveRobot (smach.State):
         rospy.on_shutdown(self.OnShutdown_callback)
         
         
+        # Command messages.
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+
+
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
+            
+        
     def OnShutdown_callback(self):
         pass
         
@@ -648,13 +828,13 @@ class MoveRobot (smach.State):
 
 
     def execute(self, userdata):
-        rospy.loginfo("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.move.mode,
-                                                  userdata.experimentparamsIn.move.relative.distance, 
-                                                  userdata.experimentparamsIn.move.relative.angle, 
-                                                  userdata.experimentparamsIn.move.relative.speed])
+        rospy.loginfo("EL State MoveRobot(%s)" % [userdata.experimentparamsIn.robot.move.mode,
+                                                  userdata.experimentparamsIn.robot.move.relative.distance, 
+                                                  userdata.experimentparamsIn.robot.move.relative.angle, 
+                                                  userdata.experimentparamsIn.robot.move.relative.speed])
 
-        rv = 'disabled'
-        if userdata.experimentparamsIn.move.enabled:
+        if userdata.experimentparamsIn.robot.enabled:
+            rv = 'aborted'
             rospy.wait_for_service('set_stage_state')
             try:
                 self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
@@ -664,21 +844,28 @@ class MoveRobot (smach.State):
             self.timeStart = rospy.Time.now()
     
             while self.arenastate is None:
-                if userdata.experimentparamsIn.move.timeout != -1:
-                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+                if userdata.experimentparamsIn.robot.move.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.move.timeout:
                         return 'timeout'
                 
                 if self.preempt_requested():
-                    self.recall_preempt()
+                    rospy.logwarn('preempt requested')
+                    self.service_preempt()
                     return 'preempt'
                 
+                if (self.commandExperiment=='exitnow'):
+                    return 'aborted'
+
                 rospy.sleep(1.0)
     
     
-            if userdata.experimentparamsIn.move.mode=='relative':
+            if userdata.experimentparamsIn.robot.move.mode=='relative':
                 rv = self.MoveRelative(userdata)
             else:
                 rv = self.MovePattern(userdata)
+        else:
+            rv = 'disabled'
+            
                 
         #rospy.loginfo ('EL Exiting MoveRobot()')
         return rv
@@ -699,10 +886,10 @@ class MoveRobot (smach.State):
 
             
             # Get a random velocity once per move, non-random velocity always.
-            if (userdata.experimentparamsIn.move.relative.speedType=='random'):
+            if (userdata.experimentparamsIn.robot.move.relative.speedType=='random'):
                 if (self.ptTarget is None):
                     # Choose a random velocity forward or backward.                        
-                    speedTarget = userdata.experimentparamsIn.move.relative.speed * (2.0*N.random.random() - 1.0) # Choose a random vel, plus or minus.
+                    speedTarget = userdata.experimentparamsIn.robot.move.relative.speed * (2.0*N.random.random() - 1.0) # Choose a random vel, plus or minus.
                     # Choose a random velocity forward or backward.                        
                     if speedTarget < 0:
                         speedTarget = -speedTarget
@@ -710,32 +897,32 @@ class MoveRobot (smach.State):
                     else:
                         angleDirection = 0.0
             else:
-                speedTarget = userdata.experimentparamsIn.move.relative.speed
+                speedTarget = userdata.experimentparamsIn.robot.move.relative.speed
                 angleDirection = 0.0
 
             
             # Get a random angle once per move, non-random angle always.
-            if (userdata.experimentparamsIn.move.relative.angleType=='random'):
+            if (userdata.experimentparamsIn.robot.move.relative.angleType=='random'):
                 if (self.ptTarget is None):
                     angle = 2.0*N.pi*N.random.random()
             else:
                 # Move at an angle relative to whose orientation?
-                if (userdata.experimentparamsIn.move.relative.frameidOriginAngle=="Fly1") and (len(self.arenastate.flies)>0):
-                    angle = GetOrientationFly(self.arenastate, iFly) + userdata.experimentparamsIn.move.relative.angle
-                elif userdata.experimentparamsIn.move.relative.frameidOriginAngle=="Robot":
-                    angle = GetOrientationRobot(self.arenastate) + userdata.experimentparamsIn.move.relative.angle
+                if (userdata.experimentparamsIn.robot.move.relative.frameidOriginAngle=="Fly1") and (len(self.arenastate.flies)>0):
+                    angle = GetOrientationFly(self.arenastate, iFly) + userdata.experimentparamsIn.robot.move.relative.angle
+                elif userdata.experimentparamsIn.robot.move.relative.frameidOriginAngle=="Robot":
+                    angle = GetOrientationRobot(self.arenastate) + userdata.experimentparamsIn.robot.move.relative.angle
                 else:
-                    angle = userdata.experimentparamsIn.move.relative.angle # Relative to orientation of the Plate frame.
+                    angle = userdata.experimentparamsIn.robot.move.relative.angle # Relative to orientation of the Plate frame.
 
                 # Correct the angle for the velocity sign.
                 angle = (angle + angleDirection) % (2.0*N.pi)    
                 
                                                    
             # Move a distance relative to whose position?
-            if userdata.experimentparamsIn.move.relative.frameidOriginPosition=="Fly1" and (len(self.arenastate.flies)>0):
+            if userdata.experimentparamsIn.robot.move.relative.frameidOriginPosition=="Fly1" and (len(self.arenastate.flies)>0):
                 posOrigin = posFly
                 doMove = True
-            elif userdata.experimentparamsIn.move.relative.frameidOriginPosition=="Robot":
+            elif userdata.experimentparamsIn.robot.move.relative.frameidOriginPosition=="Robot":
                 posOrigin = posRobot
                 doMove = True
             else:
@@ -745,16 +932,16 @@ class MoveRobot (smach.State):
             #rospy.loginfo('EL len(ArenaState)=%d, posOrigin=[%0.2f,%0.2f]'%(len(self.arenastate.flies),posOrigin.x,posOrigin.y))
 
             # If we need to calculate a target.
-            if (self.ptTarget is None) or (userdata.experimentparamsIn.move.relative.tracking):
+            if (self.ptTarget is None) or (userdata.experimentparamsIn.robot.move.relative.tracking):
                 # Compute target point in workspace (i.e. Plate) coordinates.
                 ptOrigin = N.array([posOrigin.x, posOrigin.y])
-                d = userdata.experimentparamsIn.move.relative.distance
+                d = userdata.experimentparamsIn.robot.move.relative.distance
                 ptRelative = d * N.array([N.cos(angle), N.sin(angle)])
                 ptTarget = ptOrigin + ptRelative
                 self.ptTarget = ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
                 #self.ptTarget = ptTarget
 
-                #rospy.loginfo ('EL self.ptTarget=%s, ptOrigin=%s, ptRelative=%s, angle=%s, frameAngle=%s' % (self.ptTarget, ptOrigin, ptRelative, angle,userdata.experimentparamsIn.move.relative.frameidOriginAngle))
+                #rospy.loginfo ('EL self.ptTarget=%s, ptOrigin=%s, ptRelative=%s, angle=%s, frameAngle=%s' % (self.ptTarget, ptOrigin, ptRelative, angle,userdata.experimentparamsIn.robot.move.relative.frameidOriginAngle))
                 #rospy.loginfo('EL Robot/Fly frame_id=%s' % [self.arenastate.robot.header.frame_id,self.arenastate.flies[iFly].header.frame_id])
 
                 # Send the command.
@@ -789,23 +976,28 @@ class MoveRobot (smach.State):
             if self.ptTarget is not None:
                 r = N.linalg.norm(ptRobot-self.ptTarget)
                 #rospy.loginfo ('EL ptTarget=%s, ptRobot=%s, r=%s' % (self.ptTarget, ptRobot, r))
-                if (r <= userdata.experimentparamsIn.move.relative.tolerance):
+                if (r <= userdata.experimentparamsIn.robot.move.relative.tolerance):
                     rv = 'success'
                     break
 
             
             if self.preempt_requested():
-                self.recall_preempt()
+                rospy.logwarn('preempt requested')
+                self.service_preempt()
                 rv = 'preempt'
                 break
 
             
-            if userdata.experimentparamsIn.move.timeout != -1:
-                if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+            if userdata.experimentparamsIn.robot.move.timeout != -1:
+                if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.move.timeout:
                     rv = 'timeout'
                     break
             
             self.rosrate.sleep()
+
+            if (self.commandExperiment=='exitnow'):
+                rv = 'aborted'
+                break
 
 
         self.ptTarget = None
@@ -819,48 +1011,54 @@ class MoveRobot (smach.State):
 
         # Publish the pattern message.
         msgPattern.mode = 'byshape'
-        msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
+        msgPattern.shape = userdata.experimentparamsIn.robot.move.pattern.shape
         msgPattern.points = []
         msgPattern.frame_id = 'Plate'
-        msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
-        msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
-        msgPattern.count = userdata.experimentparamsIn.move.pattern.count
-        msgPattern.size = userdata.experimentparamsIn.move.pattern.size
+        msgPattern.hzPattern = userdata.experimentparamsIn.robot.move.pattern.hzPattern
+        msgPattern.hzPoint = userdata.experimentparamsIn.robot.move.pattern.hzPoint
+        msgPattern.count = userdata.experimentparamsIn.robot.move.pattern.count
+        msgPattern.size = userdata.experimentparamsIn.robot.move.pattern.size
         msgPattern.preempt = True
-        msgPattern.param = 0.0#userdata.experimentparamsIn.move.pattern.param
+        msgPattern.param = 0.0#userdata.experimentparamsIn.robot.move.pattern.param
         self.pubPatternGen.publish (msgPattern)
                 
 
         rv = 'aborted'
         while not rospy.is_shutdown():
             if self.preempt_requested():
-                self.recall_preempt()
+                rospy.logwarn('preempt requested')
+                self.service_preempt()
                 rv = 'preempt'
                 break
 
             
-            if userdata.experimentparamsIn.move.timeout != -1:
-                if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.move.timeout:
+            if userdata.experimentparamsIn.robot.move.timeout != -1:
+                if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.robot.move.timeout:
                     rv = 'timeout'
                     break
             
             self.rosrate.sleep()
 
+            if (self.commandExperiment=='exitnow'):
+                rv = 'aborted'
+                break
+
         # Turn off the pattern
         msgPattern.mode = 'byshape'
-        msgPattern.shape = userdata.experimentparamsIn.move.pattern.shape
+        msgPattern.shape = userdata.experimentparamsIn.robot.move.pattern.shape
         msgPattern.points = []
         msgPattern.frame_id = 'Plate'
-        msgPattern.hzPattern = userdata.experimentparamsIn.move.pattern.hzPattern
-        msgPattern.hzPoint = userdata.experimentparamsIn.move.pattern.hzPoint
+        msgPattern.hzPattern = userdata.experimentparamsIn.robot.move.pattern.hzPattern
+        msgPattern.hzPoint = userdata.experimentparamsIn.robot.move.pattern.hzPoint
         msgPattern.count = 0
-        msgPattern.size = userdata.experimentparamsIn.move.pattern.size
+        msgPattern.size = userdata.experimentparamsIn.robot.move.pattern.size
         msgPattern.preempt = True
-        msgPattern.param = 0.0#userdata.experimentparamsIn.move.pattern.param
+        msgPattern.param = 0.0#userdata.experimentparamsIn.robot.move.pattern.param
         self.pubPatternGen.publish (msgPattern)
 
         return rv
-        
+# End class MoveRobot()        
+
 
 
 #######################################################################################################
@@ -877,16 +1075,28 @@ class Lasertrack (smach.State):
         smach.State.__init__(self, 
                              outcomes=['disabled','timeout','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
-
+        
         self.rosrate = rospy.Rate(gRate)
-        self.pubGalvoCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=2)
         self.arenastate = None
-
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
+
+        self.pubMarker          = rospy.Publisher('visualization_marker', Marker)
+        self.pubGalvoCommand    = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
+        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.subArenaState      = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
+        
+        # Command messages.
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+
+
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
+            
         
     def OnShutdown_callback(self):
         pass
@@ -894,6 +1104,54 @@ class Lasertrack (smach.State):
 
     def ArenaState_callback(self, arenastate):
         self.arenastate = arenastate
+        
+    
+    # PublishStatefilterMarkers()
+    #  
+    def PublishStatefilterMarkers(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
+        if 'pose' in statefilterLo_dict:
+            poseLo_dict = statefilterLo_dict['pose'] 
+            poseHi_dict = statefilterHi_dict['pose']
+             
+            if 'position' in poseLo_dict:
+                positionLo_dict = poseLo_dict['position']
+                positionHi_dict = poseHi_dict['position']
+                (xLo,xHi) = (-9999,+9999)
+                (yLo,yHi) = (-9999,+9999)
+                (zLo,zHi) = (0,0.1)
+                if ('x' in positionLo_dict):
+                    xLo = positionLo_dict['x'] 
+                    xHi = positionHi_dict['x']
+                if ('y' in positionLo_dict):
+                    yLo = positionLo_dict['y'] 
+                    yHi = positionHi_dict['y']
+                if ('z' in positionLo_dict):
+                    zLo = positionLo_dict['z'] 
+                    zHi = positionHi_dict['z']
+
+                if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
+                    markerTarget = Marker(header=Header(stamp = state.header.stamp,
+                                                        frame_id='Plate'),
+                                          ns='statefilter',
+                                          id=1,
+                                          type=Marker.CUBE,
+                                          action=0,
+#                                          type=Marker.LINE_STRIP
+#                                          points=[Point(x=xLo,y=yLo,z=zLo),Point(x=xHi,y=yLo,z=zLo),Point(x=xHi,y=yHi,z=zLo),Point(x=xLo,y=yHi,z=zLo),Point(x=xLo,y=yLo,z=zLo)],
+#                                          scale=Vector3(x=0.2, y=0.0, z=0.0),
+                                          pose=Pose(position=Point(x=(xLo+xHi)/2, 
+                                                                   y=(yLo+yHi)/2, 
+                                                                   z=(zLo+zHi)/2)),
+                                          scale=Vector3(x=xHi-xLo,
+                                                        y=yHi-yLo,
+                                                        z=zHi-zLo),
+                                          color=ColorRGBA(a=0.1,
+                                                          r=1.0,
+                                                          g=1.0,
+                                                          b=1.0),
+                                          lifetime=rospy.Duration(1.0))
+                    self.pubMarker.publish(markerTarget)
+        
         
     
     # InStatefilterRange()
@@ -1014,8 +1272,8 @@ class Lasertrack (smach.State):
         for pattern in userdata.experimentparamsIn.lasertrack.pattern_list:
             rospy.loginfo("EL State Lasertrack(%s)" % pattern)
 
-        rv = 'disabled'
         if userdata.experimentparamsIn.lasertrack.enabled:
+            rv = 'aborted'
             self.timeStart = rospy.Time.now()
     
             # Create the tracking command for the galvo director.
@@ -1126,6 +1384,7 @@ class Lasertrack (smach.State):
     
                             bInStatefilterRangePrev[iPattern] = bInStatefilterRange[iPattern]
                             bInStatefilterRange[iPattern] = self.InStatefilterRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                            self.PublishStatefilterMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
                             
                             # If any of the filter states have changed, then we need to update them all.
                             if bInStatefilterRangePrev[iPattern] != bInStatefilterRange[iPattern]:
@@ -1153,7 +1412,8 @@ class Lasertrack (smach.State):
                 
                 
                 if self.preempt_requested():
-                    self.recall_preempt()
+                    rospy.logwarn('preempt requested')
+                    self.service_preempt()
                     rv = 'preempt'
                     break
     
@@ -1164,6 +1424,14 @@ class Lasertrack (smach.State):
                 
                 self.rosrate.sleep()
 
+                if (self.commandExperiment=='exitnow'):
+                    rv = 'aborted'
+                    break
+                
+        else:
+            rv = 'disabled'
+
+
                 
         # Turn off the laser.
         command = MsgGalvoCommand()
@@ -1172,15 +1440,439 @@ class Lasertrack (smach.State):
         
                 
         return rv
-
+# End class Lasertrack()
     
 
             
+#######################################################################################################
+#######################################################################################################
+# LEDPanels()
+# 
+# Control the LEDPanels according to the experimentparams.  
+# This smach state allows enabling the panels only when the given object's state (i.e. Fly state) is 
+# in a restricted domain of states.
+#
+class LEDPanels (smach.State):
+    def __init__(self):
+
+        smach.State.__init__(self, 
+                             outcomes=['disabled','timeout','preempt','aborted'],
+                             input_keys=['experimentparamsIn'])
+        
+        # If this rate is too fast, then we get panel glitches.  50Hz=ok, 100Hz=not.  Alternatively could use the serial port rtscts, but it doesn't seem to be supported.
+        self.rosrate = rospy.Rate(gRate)    
+        
+        self.arenastate = None
+        self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
+        self.xpanels    = rospy.get_param('ledpanels/xpanels', 1)
+        self.ypanels    = rospy.get_param('ledpanels/ypanels', 1)
+        queue_size_arenastate    = rospy.get_param('tracking/queue_size_arenastate', 1)
+
+        self.pubMarker           = rospy.Publisher('visualization_marker', Marker)
+        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+        self.subArenaState       = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
+
+        rospy.on_shutdown(self.OnShutdown_callback)
+        
+        
+        # Command messages.
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+
+
+
+    def CommandExperiment_callback(self, msgString):
+        self.commandExperiment = msgString.data
+            
+        
+    def OnShutdown_callback(self):
+        pass
+        
+
+
+    def ArenaState_callback(self, arenastate):
+        self.arenastate = arenastate
+        
+    
+    # PublishStatefilterMarkers()
+    #  
+    def PublishStatefilterMarkers(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
+        if 'pose' in statefilterLo_dict:
+            poseLo_dict = statefilterLo_dict['pose'] 
+            poseHi_dict = statefilterHi_dict['pose']
+             
+            if 'position' in poseLo_dict:
+                positionLo_dict = poseLo_dict['position']
+                positionHi_dict = poseHi_dict['position']
+                (xLo,xHi) = (-9999,+9999)
+                (yLo,yHi) = (-9999,+9999)
+                (zLo,zHi) = (0,0.1)
+                if ('x' in positionLo_dict):
+                    xLo = positionLo_dict['x'] 
+                    xHi = positionHi_dict['x']
+                if ('y' in positionLo_dict):
+                    yLo = positionLo_dict['y'] 
+                    yHi = positionHi_dict['y']
+                if ('z' in positionLo_dict):
+                    zLo = positionLo_dict['z'] 
+                    zHi = positionHi_dict['z']
+
+                if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
+                    markerTarget = Marker(header=Header(stamp = state.header.stamp,
+                                                        frame_id='Plate'),
+                                          ns='statefilter',
+                                          id=1,
+                                          type=Marker.CUBE,
+                                          action=0,
+#                                          type=Marker.LINE_STRIP
+#                                          points=[Point(x=xLo,y=yLo,z=zLo),Point(x=xHi,y=yLo,z=zLo),Point(x=xHi,y=yHi,z=zLo),Point(x=xLo,y=yHi,z=zLo),Point(x=xLo,y=yLo,z=zLo)],
+#                                          scale=Vector3(x=0.2, y=0.0, z=0.0),
+                                          pose=Pose(position=Point(x=(xLo+xHi)/2, 
+                                                                   y=(yLo+yHi)/2, 
+                                                                   z=(zLo+zHi)/2)),
+                                          scale=Vector3(x=xHi-xLo,
+                                                        y=yHi-yLo,
+                                                        z=zHi-zLo),
+                                          color=ColorRGBA(a=0.1,
+                                                          r=1.0,
+                                                          g=1.0,
+                                                          b=1.0),
+                                          lifetime=rospy.Duration(1.0))
+                    self.pubMarker.publish(markerTarget)
+        
+        
+    
+    # InStatefilterRange()
+    # Check if the given state falls in the given region.
+    # For statefilterCriteria=="inclusive", if the given state is within all the terms, then the filter returns True.
+    # For statefilterCriteria=="exclusive", if the given state is within all the terms, then the filter returns False.
+    #
+    # We have to manually go through each of the entries in the dict, rather than
+    # using a MsgFrameState, since we need the dict to only contain the entries
+    # we care about, and the MsgFrameState always contains them all.
+    #  
+    def InStatefilterRange(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
+        rv = True
+        if 'pose' in statefilterLo_dict:
+            poseLo_dict = statefilterLo_dict['pose'] 
+            poseHi_dict = statefilterHi_dict['pose']
+             
+            if 'position' in poseLo_dict:
+                 positionLo_dict = poseLo_dict['position']
+                 positionHi_dict = poseHi_dict['position']
+                 if 'x' in positionLo_dict:
+                     xLo = positionLo_dict['x'] 
+                     xHi = positionHi_dict['x']
+                     if (state.pose.position.x < xLo) or (xHi < state.pose.position.x):
+                         rv = False   
+                 if 'y' in positionLo_dict:
+                     yLo = positionLo_dict['y'] 
+                     yHi = positionHi_dict['y']
+                     if (state.pose.position.y < yLo) or (yHi < state.pose.position.y):
+                         rv = False   
+                 if 'z' in positionLo_dict:
+                     zLo = positionLo_dict['z'] 
+                     zHi = positionHi_dict['z']
+                     if (state.pose.position.z < zLo) or (zHi < state.pose.position.z):
+                         rv = False   
+                         
+            if 'orientation' in poseLo_dict:
+                 orientationLo_dict = poseLo_dict['orientation']
+                 orientationHi_dict = poseHi_dict['orientation']
+                 if 'x' in orientationLo_dict:
+                     xLo = orientationLo_dict['x'] 
+                     xHi = orientationHi_dict['x']
+                     if (state.pose.orientation.x < xLo) or (xHi < state.pose.orientation.x):
+                         rv = False   
+                 if 'y' in orientationLo_dict:
+                     yLo = orientationLo_dict['y'] 
+                     yHi = orientationHi_dict['y']
+                     if (state.pose.orientation.y < yLo) or (yHi < state.pose.orientation.y):
+                         rv = False   
+                 if 'z' in orientationLo_dict:
+                     zLo = orientationLo_dict['z'] 
+                     zHi = orientationHi_dict['z']
+                     if (state.pose.orientation.z < zLo) or (zHi < state.pose.orientation.z):
+                         rv = False   
+                 if 'w' in orientationLo_dict:
+                     wLo = orientationLo_dict['w'] 
+                     wHi = orientationHi_dict['w']
+                     if (state.pose.orientation.w < wLo) or (wHi < state.pose.orientation.w):
+                         rv = False   
+
+        if 'velocity' in statefilterLo_dict:
+            velocityLo_dict = statefilterLo_dict['velocity'] 
+            velocityHi_dict = statefilterHi_dict['velocity']
+             
+            if 'linear' in velocityLo_dict:
+                 linearLo_dict = velocityLo_dict['linear']
+                 linearHi_dict = velocityHi_dict['linear']
+                 if 'x' in linearLo_dict:
+                     xLo = linearLo_dict['x'] 
+                     xHi = linearHi_dict['x']
+                     if (state.velocity.linear.x < xLo) or (xHi < state.velocity.linear.x):
+                         rv = False   
+                 if 'y' in linearLo_dict:
+                     yLo = linearLo_dict['y'] 
+                     yHi = linearHi_dict['y']
+                     if (state.velocity.linear.y < yLo) or (yHi < state.velocity.linear.y):
+                         rv = False   
+                 if 'z' in linearLo_dict:
+                     zLo = linearLo_dict['z'] 
+                     zHi = linearHi_dict['z']
+                     if (state.velocity.linear.z < zLo) or (zHi < state.velocity.linear.z):
+                         rv = False   
+                         
+            if 'angular' in velocityLo_dict:
+                 angularLo_dict = velocityLo_dict['angular']
+                 angularHi_dict = velocityHi_dict['angular']
+                 if 'x' in angularLo_dict:
+                     xLo = angularLo_dict['x'] 
+                     xHi = angularHi_dict['x']
+                     if (state.velocity.angular.x < xLo) or (xHi < state.velocity.angular.x):
+                         rv = False   
+                 if 'y' in angularLo_dict:
+                     yLo = angularLo_dict['y'] 
+                     yHi = angularHi_dict['y']
+                     if (state.velocity.angular.y < yLo) or (yHi < state.velocity.angular.y):
+                         rv = False   
+                 if 'z' in angularLo_dict:
+                     zLo = angularLo_dict['z'] 
+                     zHi = angularHi_dict['z']
+                     if (state.velocity.angular.z < zLo) or (zHi < state.velocity.angular.z):
+                         rv = False
+                     
+        if 'speed' in statefilterLo_dict:
+            speedLo = statefilterLo_dict['speed'] 
+            speedHi = statefilterHi_dict['speed']
+            #speed = N.linalg.norm([state.velocity.linear.x, state.velocity.linear.y, state.velocity.linear.z])
+            if (state.speed < speedLo) or (speedHi < state.speed):
+                rv = False   
+
+        if (statefilterCriteria=="exclusive"):
+            rv = not rv
+            
+        return rv
+    
+    
+    def execute(self, userdata):
+        # Create the panels command.
+        command = MsgPanelsCommand(command='all_off', arg1=0, arg2=0, arg3=0, arg4=0)
+
+        if userdata.experimentparamsIn.ledpanels.enabled:
+            self.timeStart = rospy.Time.now()
+            rv = 'aborted'
+            xmax = self.xpanels * 8 # pixels per panel.
+    
+            # Determine if we're operating only for certain states.
+            if len(userdata.experimentparamsIn.ledpanels.statefilterHi) > 0:
+                isStatefiltered = True
+            else:
+                isStatefiltered = False
+
+            # Initialize statefilter vars.                
+            bInStatefilterRangePrev = True
+            bInStatefilterRange     = True
+
+                             
+            # Set the panels pattern.
+            command.command = 'set_pattern_id'
+            command.arg1 = userdata.experimentparamsIn.ledpanels.idPattern
+            self.pubLEDPanelsCommand.publish(command)
+    
+            # Operate panels until preempt or timeout.        
+            while not rospy.is_shutdown():
+                # If possible, take the pose &/or velocity &/or speed from arenastate, else use transform via ROS.
+                pose = None
+                velocity = None     
+                speed = None   
+                if self.arenastate is not None:
+                    if ('Robot' in userdata.experimentparamsIn.ledpanels.frame_id):
+                        #pose = self.arenastate.robot.pose  # For consistency w/ galvodirector, we'll get pose via transform.
+                        velocity = self.arenastate.robot.velocity
+                        speed = self.arenastate.robot.speed
+                        
+                    elif ('Fly' in userdata.experimentparamsIn.ledpanels.frame_id):
+                        for iFly in range(len(self.arenastate.flies)):
+                            if userdata.experimentparamsIn.ledpanels.frame_id == self.arenastate.flies[iFly].name:
+                                #pose = self.arenastate.flies[iFly].pose  # For consistency w/ galvodirector, we'll get pose via transform.
+                                velocity = self.arenastate.flies[iFly].velocity
+                                speed = self.arenastate.flies[iFly].speed
+                                break
+
+                # Get the timestamp for transforms.
+                stamp=None
+                if (pose is None) or (velocity is None):
+                    try:
+                        stamp = g_tfrx.getLatestCommonTime('Plate', userdata.experimentparamsIn.ledpanels.frame_id)
+                    except tf.Exception:
+                        pass
+
+                    
+                # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
+                if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Plate', userdata.experimentparamsIn.ledpanels.frame_id, stamp):
+                    try:
+                        poseStamped = g_tfrx.transformPose('Plate', PoseStamped(header=Header(stamp=stamp,
+                                                                                              frame_id=userdata.experimentparamsIn.ledpanels.frame_id),
+                                                                                pose=Pose(position=Point(0,0,0),
+                                                                                          orientation=Quaternion(0,0,0,1)
+                                                                                          )
+                                                                                )
+                                                           )
+                        pose = poseStamped.pose
+                    except tf.Exception:
+                        pose = None
+
+                        
+                # If we still need the velocity, then get it from ROS.
+                if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Plate', userdata.experimentparamsIn.ledpanels.frame_id, stamp):
+                    try:
+                        velocity_tuple = g_tfrx.lookupTwist('Plate', userdata.experimentparamsIn.ledpanels.frame_id, stamp, self.dtVelocity)
+                    except tf.Exception:
+                        velocity = None
+                    else:
+                        velocity = Twist(linear=Point(x=velocity_tuple[0][0],
+                                                      y=velocity_tuple[0][1],
+                                                      z=velocity_tuple[0][2]), 
+                                         angular=Point(x=velocity_tuple[1][0],
+                                                       y=velocity_tuple[1][1],
+                                                       z=velocity_tuple[1][2]))
+
+                # If we still need the speed, then get it from velocity.
+                if (speed is None) and (velocity is not None):
+                    speed = N.linalg.norm([velocity.linear.x, velocity.linear.y, velocity.linear.z])
+
+                                                    
+                # See if the state is in range of the filter.
+                if isStatefiltered:
+                    # Check if any filterstates have changed.
+                    bFilterStateChanged = False
+
+                    # Convert filter string to dict.
+                    statefilterLo_dict = eval(userdata.experimentparamsIn.ledpanels.statefilterLo)
+                    statefilterHi_dict = eval(userdata.experimentparamsIn.ledpanels.statefilterHi)
+                    statefilterCriteria = userdata.experimentparamsIn.ledpanels.statefilterCriteria
+            
+                    if (pose is not None) and (velocity is not None) and (speed is not None):
+                        state = MsgFrameState(pose = pose, 
+                                              velocity = velocity,
+                                              speed = speed)
+
+                        bInStatefilterRangePrev = bInStatefilterRange
+                        bInStatefilterRange = self.InStatefilterRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                        self.PublishStatefilterMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                        
+                    # Check if the filter state has changed.
+                    if bInStatefilterRangePrev != bInStatefilterRange:
+                        bFilterStateChanged = True
+                        
+                    #rospy.logwarn ('%s: %s' % (bFilterStateChanged, bInStatefilterRange))
+                # end if isStatefiltered
+
+                    
+                # If in range of the statefilter, then publish the new command                    
+                if bInStatefilterRange and (pose is not None) and (velocity is not None) and (speed is not None):
+                    bValidCommand = False
+                    if userdata.experimentparamsIn.ledpanels.command == 'fixed':
+                        command.command = 'set_position'
+                        command.arg1 = userdata.experimentparamsIn.ledpanels.origin.x
+                        command.arg2 = userdata.experimentparamsIn.ledpanels.origin.y
+                        bValidCommand = True
+
+                    elif userdata.experimentparamsIn.ledpanels.command == 'trackposition':
+                        angle = (2.0*N.pi) - N.arctan2(pose.position.y, pose.position.x) % (2.0*N.pi)
+                        if N.isfinite(angle):
+                            x = xmax * angle / (2.0*N.pi)
+                            y = 0
+                            command.command = 'set_position'
+                            command.arg1 = int(x)
+                            command.arg2 = int(y)
+                            bValidCommand = True
+
+                    elif userdata.experimentparamsIn.ledpanels.command == 'trackview':
+                        r = rospy.get_param('ledpanels/radius', 120) # Radius of the panels.
+                        xp = pose.position.x
+                        yp = pose.position.y
+                        q = pose.orientation
+                        rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
+                        theta = -rpy[2] % (2.0 * N.pi)
+                        tantheta = N.tan(theta)
+                        
+                        # Points on the circle intersecting with the fly's axis.
+                        x1=(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2 + (-1)*(r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2))
+                        y1=yp+(-1)*xp*tantheta+tantheta*(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2+(-1)*(r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2));
+                        x2=(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2 + (r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2))
+                        y2=yp+(-1)*xp*tantheta+tantheta*(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2+(r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2))                        
+                        
+                        
+                        # Choose between the two intersection points by moving forward 1mm, and seeing which point we got closer to.
+                        r1 = N.linalg.norm([xp-x1, yp-y1]) # Fly to pt1 distance
+                        r2 = N.linalg.norm([xp-x2, yp-y2]) # Fly to pt2 distance
+                        xa = xp + 1 * N.cos(theta)         # Go one millimeter forward.
+                        ya = yp + 1 * N.sin(theta)
+                        r1a= N.linalg.norm([xa-x1, ya-y1]) # Fly+1mm to pt1 distance
+                        
+                        # If we got closer to pt1 at xa, then use pt1, else use pt2 
+                        if r1a < r1:
+                            angle = N.arctan2(y1,x1) % (2.0*N.pi)
+                        else:
+                            angle = N.arctan2(y2,x2) % (2.0*N.pi)
+                        
+                        #rospy.logwarn('(x1,y1)=%f,%f,       (x2,y2)=%f,%f,      angle=%f' % (x1,y1,x2,y2,angle))
+                        if N.isfinite(angle):
+                            x = xmax * angle / (2.0*N.pi)
+                            y = 0
+                            
+                            command.command = 'set_position'
+                            command.arg1 = int(x)
+                            command.arg2 = int(y)
+                            bValidCommand = True
+                        #else:
+                            #rospy.logwarn('isnan: (%f,%f), (%f,%f)' % (x1,y1,x2,y2))
+                            
+                    # end if command == 'trackposition' or 'trackview'
+                        
+                    if (bValidCommand):                    
+                        self.pubLEDPanelsCommand.publish(command)
+                        
+            
+                if self.preempt_requested():
+                    rospy.logwarn('preempt requested')
+                    self.service_preempt()
+                    rv = 'preempt'
+                    break
+    
+                if userdata.experimentparamsIn.ledpanels.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.ledpanels.timeout:
+                        rv = 'timeout'
+                        break
+                
+                self.rosrate.sleep()
+
+                if (self.commandExperiment=='exitnow'):
+                    rv = 'aborted'
+                    break
+                
+            # End while not rospy.is_shutdown()
+
+        else:
+            rv = 'disabled'
+            command.command = 'all_off'
+            self.pubLEDPanelsCommand.publish(command)
+            
+        # end if userdata.experimentparamsIn.ledpanels.enabled
+                
+                
+        return rv
+# End class LEDPanels()
+
+            
             
 #######################################################################################################
 #######################################################################################################
-class Experiment():
-    def __init__(self, experimentparams=None):
+class ExperimentLib():
+    def __init__(self, experimentparams=None, newexperiment_callback=None, newtrial_callback=None, endtrial_callback=None):
         self.xHome = 0
         self.yHome = 0
 
@@ -1194,8 +1886,8 @@ class Experiment():
         # Create the "actions" concurrency state.
         smachActions = smach.Concurrence(outcomes = ['success','disabled','aborted'],
                                          default_outcome = 'aborted',
-                                         child_termination_cb = self.child_term_callback,
-                                         outcome_cb = self.all_term_callback,
+                                         child_termination_cb = self.AnyActionTerm_callback,
+                                         outcome_cb = self.AllActionsTerm_callback,
                                          input_keys = ['experimentparamsIn'])
 
         with smachActions:
@@ -1203,48 +1895,106 @@ class Experiment():
                                   MoveRobot ())
             smach.Concurrence.add('LASERTRACK', 
                                   Lasertrack ())
+            smach.Concurrence.add('LEDPANELS', 
+                                  LEDPanels ())
             smach.Concurrence.add('EXITTRIGGER', 
                                   TriggerOnStates(type='exit'))
 
         
         with self.smachTop:
+            ################################################################################### NEWEXPERIMENT ->  NEWEXPERIMENTCALLBACK or RESETHARDWARE
+            if newexperiment_callback is not None:
+                stateAfterNewExperiment = 'NEWEXPERIMENTCALLBACK'
+            else:
+                stateAfterNewExperiment = 'RESETHARDWARE'
+
             smach.StateMachine.add('NEWEXPERIMENT',
                                    NewExperiment(),
-                                   transitions={'success':'RESETHARDWARE',
+                                   transitions={'success':stateAfterNewExperiment,
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
+
+            ################################################################################### NEWEXPERIMENTCALLBACK -> RESETHARDWARE
+            if newexperiment_callback is not None:
+                smach.StateMachine.add('NEWEXPERIMENTCALLBACK', 
+                                       smach.CBState(newexperiment_callback, 
+                                                     outcomes = ['success','aborted'],
+                                                     input_keys = ['experimentparamsIn'],
+                                                     output_keys = ['experimentparamsOut']),
+                                       transitions={'success':'RESETHARDWARE',
+                                                    'aborted':'aborted'},
+                                       remapping={'experimentparamsIn':'experimentparams',
+                                                  'experimentparamsOut':'experimentparams'})
+
+
+
+            ################################################################################### RESETHARDWARE -> NEWTRIALCALLBACK or NEWTRIAL
+            if newtrial_callback is not None:
+                stateAfterResetHardware = 'NEWTRIALCALLBACK'
+            else:
+                stateAfterResetHardware = 'NEWTRIAL'
+
             smach.StateMachine.add('RESETHARDWARE',
-                                   ResetRobot(),
-                                   transitions={'success':'NEWTRIAL',
-                                                'disabled':'NEWTRIAL',
-                                                'timeout':'NEWTRIAL',
+                                   ResetHardware(),
+                                   transitions={'success':stateAfterResetHardware,
+                                                'disabled':stateAfterResetHardware,
+                                                'timeout':stateAfterResetHardware,
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
+
+            ################################################################################### NEWTRIALCALLBACK -> NEWTRIAL
+            if newtrial_callback is not None:
+                smach.StateMachine.add('NEWTRIALCALLBACK', 
+                                       smach.CBState(newtrial_callback, 
+                                                     outcomes = ['success','aborted'],
+                                                     input_keys = ['experimentparamsIn'],
+                                                     output_keys = ['experimentparamsOut']),
+                                       transitions={'success':'NEWTRIAL',
+                                                    'aborted':'aborted'},
+                                       remapping={'experimentparamsIn':'experimentparams',
+                                                  'experimentparamsOut':'experimentparams'})
+
+
+            ################################################################################### NEWTRIAL -> WAITENTRY1
             smach.StateMachine.add('NEWTRIAL',                         
                                    NewTrial(),
-                                   transitions={'continue':'WAITENTRY',     # Trigger service signal goes False.
-                                                'stop':'success',           # Trigger service signal goes False.
+                                   transitions={'continue':'WAITENTRY1',     # Trigger service signal goes False.
+                                                'exit':'success',           # Trigger service signal goes False.
                                                 'aborted':'aborted'},       # Trigger service signal goes False.
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
-            smach.StateMachine.add('WAITENTRY', 
-                                   TriggerOnTime(type='entry'),
+
+            ################################################################################### WAITENTRY1 -> ENTRYTRIGGER
+            smach.StateMachine.add('WAITENTRY1', 
+                                   TriggerOnTime(type='entry1'),
                                    transitions={'success':'ENTRYTRIGGER',   # Trigger service signal goes True.
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
+
+            ################################################################################### ENTRYTRIGGER -> WAITENTRY2
             smach.StateMachine.add('ENTRYTRIGGER', 
                                    TriggerOnStates(type='entry'),
-                                   transitions={'success':'ACTIONS',        # Trigger service signal goes True.
-                                                'disabled':'ACTIONS',       # Trigger service signal goes True.
-                                                'timeout':'ACTIONS',        # Trigger service signal goes True.
+                                   transitions={'success':'WAITENTRY2',        # Trigger service signal goes True.
+                                                'disabled':'WAITENTRY2',       # Trigger service signal goes True.
+                                                'timeout':'WAITENTRY2',        # Trigger service signal goes True.
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
+
+            ################################################################################### WAITENTRY2 -> ACTIONS
+            smach.StateMachine.add('WAITENTRY2', 
+                                   TriggerOnTime(type='entry2'),
+                                   transitions={'success':'ACTIONS',   # Trigger service signal goes True.
+                                                'aborted':'aborted'},
+                                   remapping={'experimentparamsIn':'experimentparams'})
+
+
+            ################################################################################### ACTIONS -> WAITEXIT
             smach.StateMachine.add('ACTIONS', 
                                    smachActions,
                                    transitions={'success':'WAITEXIT',
@@ -1252,23 +2002,50 @@ class Experiment():
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
+
+            ################################################################################### WAITEXIT -> ENDTRIALCALLBACK or RESETHARDWARE
+            if endtrial_callback is not None:
+                stateAfterWaitExit = 'ENDTRIALCALLBACK'
+            else:
+                stateAfterWaitExit = 'RESETHARDWARE'
+
             smach.StateMachine.add('WAITEXIT', 
                                    TriggerOnTime(type='exit'),
-                                   transitions={'success':'RESETHARDWARE',
+                                   transitions={'success':stateAfterWaitExit,
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
+
+            ################################################################################### ENDTRIALCALLBACK -> RESETHARDWARE
+            if endtrial_callback is not None:
+                smach.StateMachine.add('ENDTRIALCALLBACK', 
+                                       smach.CBState(endtrial_callback, 
+                                                     outcomes = ['success','aborted'],
+                                                     input_keys = ['experimentparamsIn'],
+                                                     output_keys = ['experimentparamsOut']),
+                                       transitions={'success':'RESETHARDWARE',
+                                                    'aborted':'aborted'},
+                                       remapping={'experimentparamsIn':'experimentparams',
+                                                  'experimentparamsOut':'experimentparams'})
 
         self.sis = smach_ros.IntrospectionServer('sis_experiment',
                                                  self.smachTop,
                                                  '/EXPERIMENT')
         
+        rospy.on_shutdown(self.OnShutdown_callback)
+
+
+    def OnShutdown_callback(self):
+        #rospy.logwarn ('smach shutdown')
+        self.smachTop.request_preempt()
+        
         
     # Gets called upon ANY child state termination.
-    def child_term_callback(self, outcome_map):
+    def AnyActionTerm_callback(self, outcome_map):
+        #rospy.logwarn('AnyActionTerm_callback(%s)' % repr(outcome_map))
         rv = False
 
-        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map):
+        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map) and ('LEDPANELS' in outcome_map):
             # If any of the states either succeeds or times-out, then we're done (i.e. preempt the other states).
             if (outcome_map['EXITTRIGGER']=='timeout') or (outcome_map['EXITTRIGGER']=='success'):
                 rv = True 
@@ -1276,36 +2053,46 @@ class Experiment():
             if (outcome_map['MOVEROBOT']=='timeout') or (outcome_map['MOVEROBOT']=='success'):
                 rv = True 
             
-            if (outcome_map['LASERTRACK']=='timeout') or (outcome_map['LASERTRACK']=='success'):
+            if (outcome_map['LASERTRACK']=='timeout') or (outcome_map['LASERTRACK']=='aborted'):
                 rv = True 
         
-            
+            if (outcome_map['LEDPANELS']=='timeout') or (outcome_map['LEDPANELS']=='aborted'):
+                rv = True 
+        
+        
+        # rv==True:  preempt all remaining states.
+        # rv==False: keep running.
         return rv
     
 
     # Gets called after all child states are terminated.
-    def all_term_callback(self, outcome_map):
+    def AllActionsTerm_callback(self, outcome_map):
+        #rospy.logwarn('AllActionsTerm_callback(%s)' % repr(outcome_map))
         rv = 'aborted'
-        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map):
+        if ('EXITTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map) and ('LEDPANELS' in outcome_map):
             if (outcome_map['EXITTRIGGER']=='timeout') or \
                (outcome_map['EXITTRIGGER']=='success') or \
                (outcome_map['MOVEROBOT']=='timeout') or \
                (outcome_map['MOVEROBOT']=='success') or \
+               (outcome_map['LEDPANELS']=='timeout') or \
+               (outcome_map['LEDPANELS']=='success') or \
                (outcome_map['LASERTRACK']=='timeout') or \
                (outcome_map['LASERTRACK']=='success'):
                 rv = 'success'
                 
-            elif (outcome_map['EXITTRIGGER']=='preempt') and (outcome_map['MOVEROBOT']=='preempt') and (outcome_map['LASERTRACK']=='preempt'):
+            elif (outcome_map['EXITTRIGGER']=='preempt') and (outcome_map['MOVEROBOT']=='preempt') and (outcome_map['LASERTRACK']=='preempt') and (outcome_map['LEDPANELS']=='preempt'):
                 rv = 'preempt'
                 rospy.logwarn ('All experiment actions preempted.')
                  
-            elif (outcome_map['EXITTRIGGER']=='disabled') and (outcome_map['MOVEROBOT']=='disabled') and (outcome_map['LASERTRACK']=='disabled'):
+            elif (outcome_map['EXITTRIGGER']=='disabled') and (outcome_map['MOVEROBOT']=='disabled') and (outcome_map['LASERTRACK']=='disabled') and (outcome_map['LEDPANELS']=='disabled'):
                 rv = 'disabled'
                 rospy.logwarn ('All experiment actions set as disabled.')
                 
-            else: # Some preempted, some disabled.
-                rv = 'disabled'
-                rospy.logwarn ('Unexpected state outcomes.  Please check this.') 
+            elif (outcome_map['EXITTRIGGER']=='aborted') or (outcome_map['MOVEROBOT']=='aborted') or (outcome_map['LASERTRACK']=='aborted') or (outcome_map['LEDPANELS']=='aborted'):
+                rv = 'aborted'
+            else: 
+                rv = 'aborted'
+                rospy.logwarn ('Unexpected state outcomes.  Please check this.  (%s,%s,%s,%s)' % (outcome_map['EXITTRIGGER'],outcome_map['MOVEROBOT'],outcome_map['LASERTRACK'],outcome_map['LEDPANELS'])) 
 
 
         self.Trigger.notify(False)
@@ -1319,10 +2106,9 @@ class Experiment():
         try:
             outcome = self.smachTop.execute()
         except Exception, e: #smach.exceptions.InvalidUserCodeError, e:
-            rospy.logwarn('Exception executing state machine: %s' % e)
+            rospy.logwarn('Exception executing experiment: %s' % e)
         
-        rospy.logwarn ('Experiment state machine finished with outcome=%s' % outcome)
+        rospy.logwarn ('Experiment finished with outcome=%s' % outcome)
         self.sis.stop()
-
-
-
+# End class ExperimentLib()
+    

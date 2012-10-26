@@ -49,8 +49,17 @@ class GalvoCalibrator:
                             Point(x=-1.0, y=0.0), 
                             Point(x=0.0, y=0.0), 
                             Point(x=1.0, y=0.0), 
+                            Point(x=1.5, y=0.0), 
 
-                            Point(x=-4.0, y=1.0), 
+                            Point(x=-3.0, y=0.5), 
+                            Point(x=-2.0, y=0.5), 
+                            Point(x=-1.0, y=0.5), 
+                            Point(x=0.0, y=0.5), 
+                            Point(x=1.0, y=0.5), 
+                            Point(x=2.0, y=0.5), 
+                            Point(x=2.5, y=0.5), 
+
+                            Point(x=-3.5, y=1.0), 
                             Point(x=-3.0, y=1.0), 
                             Point(x=-2.0, y=1.0), 
                             Point(x=-1.0, y=1.0), 
@@ -59,13 +68,19 @@ class GalvoCalibrator:
                             Point(x=2.0, y=1.0), 
                             Point(x=3.0, y=1.0), 
                             
+                            Point(x=-4.0, y=1.5),
+                            Point(x=-3.5, y=1.5),
+                            #Point(x=0.0, y=1.5),
+                            Point(x=2.5, y=1.5), 
+                            Point(x=3.0, y=1.5), 
+                            
                             Point(x=-4.0, y=2.0),
                             Point(x=-3.5, y=2.0),
                             #Point(x=0.0, y=2.0),
                             Point(x=2.5, y=2.0), 
                             Point(x=3.0, y=2.0), 
                             
-                            #Point(x=-5.0, y=3.0),
+                            Point(x=-4.0, y=3.0),
                             Point(x=-3.0, y=3.0),
                             Point(x=-2.0, y=3.0),
                             Point(x=-1.0, y=3.0),
@@ -75,6 +90,19 @@ class GalvoCalibrator:
                             Point(x=2.5, y=3.0), 
                             Point(x=3.0, y=3.0), 
                             Point(x=3.5, y=3.0), 
+                            Point(x=4.0, y=3.0), 
+                            
+                            Point(x=-4.0, y=3.5),
+                            Point(x=-3.0, y=3.5),
+                            Point(x=-2.0, y=3.5),
+                            Point(x=-1.0, y=3.5),
+                            Point(x=0.0, y=3.5),
+                            Point(x=1.0, y=3.5),
+                            Point(x=2.0, y=3.5), 
+                            Point(x=2.5, y=3.5), 
+                            Point(x=3.0, y=3.5), 
+                            Point(x=3.5, y=3.5), 
+                            Point(x=4.0, y=3.5), 
                             
                             #Point(x=-5.0, y=4.0),
                             #Point(x=-4.5, y=4.0),
@@ -93,7 +121,7 @@ class GalvoCalibrator:
                             Point(x=2.0, y=4.0), 
                             Point(x=2.5, y=4.0), 
                             Point(x=3.0, y=4.0), 
-                            #Point(x=3.5, y=4.0), 
+                            Point(x=3.5, y=4.0), 
                             #Point(x=4.0, y=4.0), 
                             
                             #Point(x=-5.0, y=5.0),
@@ -105,14 +133,41 @@ class GalvoCalibrator:
                             Point(x=1.0, y=5.0), 
                             Point(x=2.0, y=5.0), 
                             Point(x=3.0, y=5.0), 
+                            Point(x=3.5, y=5.0), 
+                            
+                            Point(x=-3.5, y=5.5),
+                            Point(x=-3.0, y=5.5),
+                            Point(x=-2.0, y=5.5),
+                            #Point(x=-1.5, y=5.5),
+                            #Point(x=0.0, y=5.5), 
+                            #Point(x=1.0, y=5.5), 
+                            #Point(x=1.5, y=5.5), 
+                            Point(x=2.0, y=5.5), 
+                            Point(x=2.5, y=5.5), 
+                            Point(x=3.0, y=5.5), 
                             
                             Point(x=-3.0, y=6.0),
                             Point(x=-2.0, y=6.0),
                             Point(x=-1.5, y=6.0),
                             Point(x=0.0, y=6.0), 
                             Point(x=1.0, y=6.0), 
+                            Point(x=1.5, y=6.0), 
+                            Point(x=2.0, y=6.0), 
+                            Point(x=2.5, y=6.0), 
+                            
+                            Point(x=-2.0, y=6.5),
+                            Point(x=-1.5, y=6.5),
+                            Point(x=0.0, y=6.5), 
+                            Point(x=1.0, y=6.5), 
+                            Point(x=1.5, y=6.5), 
+                            Point(x=2.0, y=6.5), 
                             
                             Point(x=-1.0, y=7.0),
+                            Point(x=-0.5, y=7.0),
+                            Point(x=0.0, y=7.0),
+                            Point(x=0.5, y=7.0),
+                            Point(x=1.0, y=7.0),
+                            Point(x=1.5, y=7.0),
                             ]
         self.caldata = {}
         pylab.ion()
@@ -202,7 +257,7 @@ class GalvoCalibrator:
             
 
     def Main(self):
-        rosRate = rospy.Rate(1)
+        rosRate = rospy.Rate(0.1)
     
         rospy.sleep(5)
         self.initialized = True
@@ -210,6 +265,7 @@ class GalvoCalibrator:
         rospy.logwarn ('Find the median values, and enter them in params_galvos.launch')
         rospy.logwarn ('mx, bx, my, by:')
         plt.figure(1)
+        rospy.sleep(20)
         
         while not rospy.is_shutdown():
             # Send all the input points.  The arenastate callback collects the output points into self.caldata.

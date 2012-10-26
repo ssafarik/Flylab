@@ -1,0 +1,16 @@
+<package>
+  <description brief="LEDpanels">
+
+     LEDpanels
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/LEDpanels</url>
+  
+  <depend package="std_msgs"/>
+
+</package>
+
+

@@ -9,12 +9,12 @@ class HomeSettings(genpy.Message):
   _md5sum = "7ed82ede88cbba66af66a81228a10223"
   _type = "experiments/HomeSettings"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """bool enabled
-float64 x
-float64 y
-float64 speed
-float64 tolerance
-float64 timeout
+  _full_text = """bool          enabled
+float64       x
+float64       y
+float64       speed
+float64       tolerance
+float64       timeout
 
 
 

@@ -1,11 +1,12 @@
 ExperimentSettings 	       experiment
 SaveSettings 		       save
 flycore/TrackingCommand    tracking
-HomeSettings 		       home
-float64 			       waitEntry
+float64 			       waitEntry1
 TriggerSettings 	       triggerEntry
-MoveSettings 		       move
+float64 			       waitEntry2
+RobotSettings 		       robot
 LasertrackSettings 	       lasertrack
+LEDPanelsSettings          ledpanels
 TriggerSettings 	       triggerExit
 float64 			       waitExit
 ---

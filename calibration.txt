@@ -12,18 +12,14 @@
 ###############################################################################################################
 
 
-0 ############################### Preliminary System Stuff:
+0)  ############################### Preliminary System Stuff:
 # Create calibration directory.
 sudo mkdir /cameras
 sudo chgrp video cameras/
 sudo chmod g+rwx cameras/
 groups   # (If "video" isn't listed, then "sudo usermod -a -G video username").
 
-rosdep install camera_calibration
-rosmake camera_calibration
-rosmake image_proc
 rosmake experiments
-rosmake calibration
 
 # If using simple_step
 cd ~/git/Flylab/udevrules
@@ -31,7 +27,7 @@ sudo cp 99-simple_step.rules /etc/udev/rules.d
 sudo usermod -a -G plugdev <username>
 
 
-0 ############################### If this is new hardware:
+0)  ############################### If this is new hardware:
 cd ...Flylab/ros/config
 roscreate-pkg <your device name>
 cp -r colosseum/launch <your device name>/launch
@@ -103,7 +99,7 @@ rostopic pub -1 Joystick/Commands geometry_msgs/Point -- dx dy dr            #(w
 roscd <your device name>/launch
 # Edit params_calibration.launch with mask/x, mask/y, mask/radius, etc. 
 # Print ~/git/Flylab/ros/calibration/patterns/camera_plate_calibration_pattern.pdf in 1:1 scale
-# Measure each checker to make sure it is 15mm, then use scissors to cut along circular line surrounding pattern
+# Measure the checker square size, and enter that number (in millimeters) in params_calibration.  
 # Place circular paper containing the checkerboard pattern on plate
 # Edit calibration.launch with rvec and tvec values.
 # Ctrl+c to shutdown CameraPlate.launch
@@ -116,8 +112,8 @@ roslaunch experiments <any experiment>.launch
 # After the background.png file is written, place the magnet in the arena.
 
 # Adjust the diff_threshold so that contours look good.
-rosparam set camera/diff_threshold <value>
-# Once you have figured out the correct value, save it in the file "params_camera.yaml" 
+rosparam set tracking/diff_threshold <value>
+# Once you have figured out the correct value, save it in the file "params_tracking.yaml" 
 #Ctrl+c to kill the experiment.
 
 

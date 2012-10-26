@@ -1,0 +1,14 @@
+<package>
+  <description brief="rotcam">
+
+     rotcam
+
+  </description>
+  <author>rancher</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rotcam</url>
+
+</package>
+
+

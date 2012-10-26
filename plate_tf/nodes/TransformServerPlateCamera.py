@@ -97,16 +97,16 @@ class TransformServerPlateCamera:
 
     def SendTransforms(self):      
         if (self.camerainfo is not None):
-            stamp = self.camerainfo.header.stamp #rospy.Time.now()
+            stamp = self.camerainfo.header.stamp 
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
                                     stamp, 
                                     "Camera", "Camera0")
-            self.tfbx.sendTransform((0,0,0),#(-self.camerainfo.K[2], -self.camerainfo.K[5],0), #(-608, -581, 0), 
+            self.tfbx.sendTransform((0,0,0), 
                                     (0,0,0,1), 
                                     stamp, 
                                     "ImageRaw", "Camera")
-            self.tfbx.sendTransform((0,0,0),#(self.camerainfo.K[2], self.camerainfo.K[5],0), #(-607, -551, 0), 
+            self.tfbx.sendTransform((0,0,0), 
                                     (0,0,0,1), 
                                     stamp, 
                                     "ImageRect", "ImageRaw")

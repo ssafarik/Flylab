@@ -1,0 +1,14 @@
+<launch>
+
+	<!-- ========================================================== -->
+	<!-- Configuration of the camera attached to the BIGTOP.        -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the bigtop.launch file, and point here              -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+
+	<include file="$(find bigtop)/launch/params_camera.launch" ns="camera" />
+	<node name="camera" pkg="camera1394v2" type="camera1394v2_node" />
+	<node name="image_proc" pkg="image_proc" type="image_proc" ns="camera" />
+  
+</launch>

@@ -5,18 +5,25 @@
     <!--  1. Remove all flies.                                         -->
     <!--  2. rm /cameras/background.png                                -->
     <!--  3. Turn off the backlight.                                   -->
-    <!--  4. Remove the lens filter.                                   -->
-    <!--  5. roslaunch galvodirector calibrator.launch                 -->
-    <!--  6. run the galvodriver on the galvobox.                      -->
-    <!--  7. After the "Saving background" message, turn on the laser. -->
-    <!--  8. Adjust laser power and/or param camera/diff_threshold     -->
+    <!--  4. Turn on the galvos.                                       -->
+    <!--  5. Remove the lens filter.                                   -->
+    <!--  6. roslaunch galvodirector calibrator.launch                 -->
+    <!--  7. Run the galvodriver on the Windows box.                   -->
+    <!--  8. After the "Saving background" message, turn on the laser. -->
+    <!--  9. Adjust laser power and/or param tracking/diff_threshold   -->
     <!--     to get good readings.                                     -->
+    <!-- 9a. Ctrl+c, and restart from step 6.                          -->
     <!--                                                               -->
-    <!--  9. Ctrl+c                                                    -->
-    <!-- 10. Enter the given values into params_galvos.launch          -->
-    <!-- 11. Install the lens filter.                                  -->
-    <!-- 12. rm /cameras/background.png                                -->
-    <!-- 13. Turn on the backlight.                                    -->
+    <!-- 10. Let "samples per input point" > 500, then ctrl+c          -->
+    <!-- 11. Enter the given values into params_galvos.launch          -->
+    <!-- 12. Install the lens filter.                                  -->
+    <!-- 13. rm /cameras/background.png                                -->
+    <!-- 14. Turn on the backlight.                                    -->
+    <!-- 15. Turn off the laser.                                       -->
+    <!-- 16. Run any experiment to capture a new background.png        -->
+    <!-- 17. Turn on the laser.                                        -->
+    <!-- 18. Add flies.                                                -->
+    <!-- 19. Run your experiments.                                     -->
     <!--                                                               -->
 	<!-- ==========================================================    -->
 
@@ -28,8 +35,8 @@
 	<include file="$(find robots)/launch/robots_0.launch" />
 	<include file="$(find flies)/launch/flies_1.launch" />
 
-	<param name="galvodriver/hzPoint" type="double" value="262144.0"/>
-	<param name="camera/diff_threshold" type="double" value="2100.0"/>
+	<param name="galvodriver/hzPoint" type="double" value="250000.0"/>
+	<param name="tracking/diff_threshold" type="double" value="100.0"/>
 	
 	<node pkg="galvodirector" type="Calibrator.py" name="GalvoCalibrator" />
 

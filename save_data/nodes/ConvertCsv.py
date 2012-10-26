@@ -1035,8 +1035,8 @@ class ConvertCsv:
 if __name__ == '__main__':
     convert = ConvertCsv()
     
-    dirIn   = '/home/ssafarik/FlylabData'
-    dirOut  = '/home/ssafarik/FlylabData_V2'
+    dirIn   = '/home/ssafarik/WeeklyMeeting'
+    dirOut  = '/home/ssafarik/WeeklyMeeting_V2'
     convert.ConvertDirToDir(dirIn, dirOut)
     
     
