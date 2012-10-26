@@ -468,6 +468,7 @@ class ContourGenerator:
             if self.bUseBackgroundSubtraction:
                 # Update the background image
                 #rospy.logwarn('types: %s' % [type(N.float32(self.npCamera)), type(self.npfBackground), type(self.alphaBackground)])
+                #self.alphaBackground = rospy.get_param('tracking/alphaBackground', 0.001) # Alpha value for moving average background.
                 cv2.accumulateWeighted(N.float32(self.npCamera), self.npfBackground, self.alphaBackground)
                 #self.matBackground = cv.fromarray(N.uint8(self.npfBackground))
                 self.npBackground = N.uint8(self.npfBackground)
