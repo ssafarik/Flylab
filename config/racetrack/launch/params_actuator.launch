@@ -1,11 +1,11 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of BABYCARROT's motorarm.                    -->
+	<!-- Configuration of racetrack's motorarm.                     -->
     <!--                                                            -->
     <!-- Edit this file to describe the motor hardware.             -->
     <!--                                                            -->
     <!-- Don't launch this file directly.                           -->
-    <!-- Launch babycarrot.launch file, and point here from there.  -->
+    <!-- Launch racetrack.launch file, and point here from there.  -->
     <!--                                                            -->
 	<!-- ========================================================== -->
     
@@ -13,7 +13,7 @@
 	<param name="rosSimpleStep/limitHi" type="double" value="2147483647" />           	<!-- Max absolute angle. -->
 	<param name="rosSimpleStep/limitLo" type="double" value="-2147483646" />          	<!-- Min absolute angle. -->
 	<param name="actuator/hzPoint" type="double" value="10.0"/>				<!-- Update rate of actuator. -->
-	<param name="robot_description" textfile="$(find babycarrot)/motorarm_urdf.xml" />  <!-- Contains 3D model of hardware. -->
+	<param name="robot_description" textfile="$(find racetrack)/motorarm_urdf.xml" />  <!-- Contains 3D model of hardware. -->
 
 	<param name="motorarm/speed_max" type="double" value="3.1"/>                    	<!-- Radians per second. -->
 	<param name="motorarm/L1" type="double" value="33"/>                            	<!-- Link1 length in millimeters. -->

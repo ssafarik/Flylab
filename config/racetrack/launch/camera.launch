@@ -1,13 +1,13 @@
 <launch>
 
 	<!-- ========================================================== -->
-	<!-- Configuration of the camera attached to the BABYCARROT.    -->
+	<!-- Configuration of the camera attached to the racetrack.     -->
     <!-- Don't launch this file directly.                           -->
-    <!-- Launch the babycarrot.launch file, and point here          -->
+    <!-- Launch the racetrack.launch file, and point here          -->
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<include file="$(find babycarrot)/launch/params_camera.launch" ns="camera" />
+	<include file="$(find racetrack)/launch/params_camera.launch" ns="camera" />
 	<!-- <node pkg="camera1394v2" type="camera1394v2_node" name="camera" /> -->
 	<node pkg="camera_aravis" type="camnode" ns="camera" name="camera" />
 	<node pkg="image_proc" type="image_proc" ns="camera" name="image_proc" />

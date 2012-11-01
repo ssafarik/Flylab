@@ -1,15 +1,15 @@
 <package>
-  <description brief="babycarrot">
+  <description brief="racetrack">
 
-     babycarrot
+     racetrack
 
   </description>
   <author>Steve Safarik</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/babycarrot</url>
+  <url>http://ros.org/wiki/racetrack</url>
 
-  <depend package="camera1394v2"/>
+  <depend package="camera_aravis"/>
   <depend package="motorarm"/>
 
 </package>

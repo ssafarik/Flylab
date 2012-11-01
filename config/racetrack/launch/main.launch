@@ -1,6 +1,6 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the BABYCARROT hardware.                  -->
+	<!-- Configuration of the racetrack hardware.                   -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- hardware.                                                  -->
@@ -9,14 +9,14 @@
     <!-- Launch hardware.launch, and point here from there.         -->
 	<!-- ========================================================== -->
 
-	<include file="$(find babycarrot)/launch/params_calibration.launch" />
-	<include file="$(find babycarrot)/launch/params_tracking.launch" />
+	<include file="$(find racetrack)/launch/params_calibration.launch" />
+	<include file="$(find racetrack)/launch/params_tracking.launch" />
 	<include file="$(find flybowls)/launch/flybowl_50mm.launch" /> 
 
 	<include file="$(find motorarm)/launch/motorarm.launch" />
-	<include file="$(find babycarrot)/launch/params_actuator.launch" />
+	<include file="$(find racetrack)/launch/params_actuator.launch" />
 
-	<include file="$(find babycarrot)/launch/camera.launch" />
+	<include file="$(find racetrack)/launch/camera.launch" />
 	
 </launch>
 	
