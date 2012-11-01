@@ -16,21 +16,21 @@
   <!-- =================================================================== -->
   
   <!-- The mask circle in camera coordinates (i.e. pixels).    -->
-  <param name="camera/mask/x" type="double" value="441"/>
-  <param name="camera/mask/y" type="double" value="302"/>
-  <param name="camera/mask/radius" type="double" value="295"/>  <!-- pixels -->
+  <param name="camera/mask/x" type="double" value="330"/>
+  <param name="camera/mask/y" type="double" value="245"/>
+  <param name="camera/mask/radius" type="double" value="252"/>  <!-- pixels -->
 
   <param name="calibration/checker_size" type="double" value="9.6" />
 
 
 
   <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
-  <param name="camera_plate_rvec_0" type="double" value="-3.136"/>
-  <param name="camera_plate_rvec_1" type="double" value="0.003"/>
-  <param name="camera_plate_rvec_2" type="double" value="-0.021"/>
-  <param name="camera_plate_tvec_0" type="double" value="74.16"/> <!-- Adjust for camera/plate alignment here. -->
-  <param name="camera_plate_tvec_1" type="double" value = "50.77"/> <!-- Adjust for camera/plate alignment here. -->
-  <param name="camera_plate_tvec_2" type="double" value="210.7"/>
+  <param name="camera_plate_rvec_0" type="double" value="3.12"/>
+  <param name="camera_plate_rvec_1" type="double" value="-0.004"/>
+  <param name="camera_plate_rvec_2" type="double" value="0.073"/>
+  <param name="camera_plate_tvec_0" type="double" value="71.4"/> <!-- 71.4 Adjust for camera/plate alignment here. -->
+  <param name="camera_plate_tvec_1" type="double" value = "53.26"/> <!-- 53.26 Adjust for camera/plate alignment here. -->
+  <param name="camera_plate_tvec_2" type="double" value="343.9"/>
   
 
   <!-- ================================================================== -->
@@ -50,8 +50,8 @@
   <param name="plate_stage_z" type="double" value="0"/>
   <param name="plate_stage_qx" type="double" value="0"/>
   <param name="plate_stage_qy" type="double" value="0"/>
-  <param name="plate_stage_qz" type="double" value="0"/>
-  <param name="plate_stage_qw" type="double" value="1"/>
+  <param name="plate_stage_qz" type="double" value="0.70710678"/>
+  <param name="plate_stage_qw" type="double" value="0.70710678"/>
 
 
 </launch>

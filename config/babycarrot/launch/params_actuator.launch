@@ -19,12 +19,18 @@
 	<param name="motorarm/L1" type="double" value="33"/>                            	<!-- Link1 length in millimeters. -->
 	<param name="motorarm/angleOffset" type="double" value="0.16"/>                	<!-- Angle offset when index switch is triggered. -->
 
-	<param name="motorarm/kP"      type="double" value="1.0"/>
+<!--	<param name="motorarm/kP"      type="double" value="1.0"/>
 	<param name="motorarm/kI"      type="double" value="0.5"/>
 	<param name="motorarm/kD"      type="double" value="-0.5"/>
 	<param name="motorarm/kWindup" type="double" value="0.1"/>  
 	<param name="motorarm/maxI"    type="double" value="0.0"/>  
+-->
 	
+	<param name="motorarm/kP"      type="double" value="1.0"/>
+	<param name="motorarm/kI"      type="double" value="0.0"/>
+	<param name="motorarm/kD"      type="double" value="0.0"/>
+	<param name="motorarm/kWindup" type="double" value="0.1"/>  
+	<param name="motorarm/maxI"    type="double" value="0.0"/>  
 	
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.0'"/>
 </launch>

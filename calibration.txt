@@ -83,7 +83,7 @@ rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/
 # Click <calibrate> button (will take several minutes)
 # Click <commit> button (writes data to /cameras/<your device name>_calibration.yaml)
 roscd <your device name>/launch
-# Edit "params_camera.yaml" to refer to the "/cameras/<camera name>_calibration.yaml" file.
+# Edit "params_camera.launch" to refer to the "/cameras/<camera name>_calibration.yaml" file.
 
 
 4 ############################### Camera Extrinsic Parameters (i.e. Relationship of Camera to Arena):

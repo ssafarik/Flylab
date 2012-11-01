@@ -14,7 +14,7 @@
     <param name="tracking/queue_size_contours" type="int" value="100"/>
     
 
-    <param name="tracking/nContoursMax"					type="int" value="20"/>
+    <param name="tracking/nContoursMax"					type="int" value="15"/>
     <param name="tracking/distanceDuplicateContour"		type="double" value="0.1"/>
     <param name="tracking/areaContourMin"				type="double" value="1.001"/>
     <param name="tracking/speedThresholdForTravel" 		type="double" value="4.0"/>

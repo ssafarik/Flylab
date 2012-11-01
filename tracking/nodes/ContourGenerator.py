@@ -57,7 +57,7 @@ class ContourGenerator:
             self.tfrx = tf.TransformListener()
         
         self.filenameBackground = rospy.get_param('tracking/filenameBackground', '/cameras/background.png')
-        self.alphaBackground = rospy.get_param('tracking/alphaBackground', 0.001) # Alpha value for moving average background.
+        self.alphaBackground = rospy.get_param('tracking/alphaBackground', 0.01) # Alpha value for moving average background.
 #        if self.bUseBackgroundSubtraction:
 #            self.bghistory = 100
 #            self.bgnmixtures = 2

@@ -2102,6 +2102,11 @@ class ExperimentLib():
         
 
     def Run(self):
+        #rospy.logwarn ('quaternion(0): %s' % tf.transformations.quaternion_about_axis(0.0, (0,0,1)))
+        #rospy.logwarn ('quaternion(-90): %s' % tf.transformations.quaternion_about_axis(-N.pi/2, (0,0,1)))
+        #rospy.logwarn ('quaternion(-60): %s' % tf.transformations.quaternion_about_axis(-N.pi/3, (0,0,1)))
+        #rospy.logwarn ('quaternion(+60): %s' % tf.transformations.quaternion_about_axis(N.pi/3, (0,0,1)))
+        #rospy.logwarn ('quaternion(+90): %s' % tf.transformations.quaternion_about_axis(N.pi/2, (0,0,1)))
         self.sis.start()
         try:
             outcome = self.smachTop.execute()
