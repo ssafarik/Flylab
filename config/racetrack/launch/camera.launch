@@ -7,8 +7,7 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<include file="$(find racetrack)/launch/params_camera.launch" ns="camera" />
-	<!-- <node pkg="camera1394v2" type="camera1394v2_node" name="camera" /> -->
+	<include file="$(find racetrack)/launch/params_camera.launch" ns="camera/camera" />
 	<node pkg="camera_aravis" type="camnode" ns="camera" name="camera" />
 	<node pkg="image_proc" type="image_proc" ns="camera" name="image_proc" />
   
