@@ -215,13 +215,13 @@ class ResetHardware (smach.State):
         
         
         # Command messages.
-        self.commandExperimentExperiment = 'continue'
-        self.commandExperimentExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
-        self.commandExperimentExperiment = msgString.data
+        self.commandExperiment = msgString.data
             
         
     def OnShutdown_callback(self):
@@ -280,7 +280,7 @@ class ResetHardware (smach.State):
                 #    return 'preempt'
                 rospy.sleep(1.0)
     
-                if (self.commandExperimentExperiment=='exitnow'):
+                if (self.commandExperiment=='exitnow'):
                     return 'aborted'
     
     
@@ -534,13 +534,29 @@ class TriggerOnStates (smach.State):
 
     def GetSpeedFrameToFrame (self, frameidParent, frameidChild):
         speed = None
-        try:
-            stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
-            ((vx,vy,vz),(wx,wy,wz)) = g_tfrx.lookupTwist(frameidChild, frameidParent, stamp-self.dtVelocity, self.dtVelocity)
-        except (tf.Exception, AttributeError), e:
-            ((vx,vy,vz),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+        
+        # If absolute speed (i.e. in the Plate frame), then try to use ArenaState speed.
+        if (frameidParent=='Plate') and (self.arenastate is not None):
 
-        speed = N.linalg.norm(N.array([vx,vy,vz]))
+            # Check the robot.
+            if (self.nRobots>0) and (frameidChild==self.arenastate.robot.name):
+                speed = self.arenastate.robot.speed
+
+            # Check the flies.
+            if (speed is None):
+                for state in self.arenastate.flies:
+                    if (frameidChild==state.name):
+                        speed = state.speed
+                        break
+
+        else:    # Get the speed via transforms.
+            try:
+                stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
+                ((vx,vy,vz),(wx,wy,wz)) = g_tfrx.lookupTwist(frameidChild, frameidParent, stamp-self.dtVelocity, self.dtVelocity)
+            except (tf.Exception, AttributeError), e:
+                ((vx,vy,vz),(wx,wy,wz)) = ((0,0,0),(0,0,0))
+
+            speed = N.linalg.norm(N.array([vx,vy,vz]))
             
         return speed
 
@@ -627,7 +643,7 @@ class TriggerOnStates (smach.State):
                         if (trigger.speedAbsParentMin is not None) and (trigger.speedAbsParentMax is not None):
                             isSpeedAbsParentInRange = False
                             speedAbsParent = self.GetSpeedFrameToFrame('Plate', trigger.frameidParent)# Absolute speed of the parent frame.
-                            #rospy.loginfo ('EL speed=%s' % speed)
+                            #rospy.loginfo ('EL parent speed=%s' % speedAbsParent)
                             if speedAbsParent is not None:
                                 if (trigger.speedAbsParentMin <= speedAbsParent <= trigger.speedAbsParentMax):
                                     isSpeedAbsParentInRange = True
@@ -637,7 +653,7 @@ class TriggerOnStates (smach.State):
                         if (trigger.speedAbsChildMin is not None) and (trigger.speedAbsChildMax is not None):
                             isSpeedAbsChildInRange = False
                             speedAbsChild = self.GetSpeedFrameToFrame('Plate', trigger.frameidChild)# Absolute speed of the child frame.
-                            #rospy.loginfo ('EL speed=%s' % speed)
+                            #rospy.loginfo ('EL child speed=%s' % speedAbsChild)
                             if speedAbsChild is not None:
                                 if (trigger.speedAbsChildMin <= speedAbsChild <= trigger.speedAbsChildMax):
                                     isSpeedAbsChildInRange = True
@@ -665,9 +681,9 @@ class TriggerOnStates (smach.State):
                             self.timeTriggered = None
         
                         #if (distance is not None) and (angle is not None) and (speedAbsParent is not None) and (speedAbsChild is not None) and (speedRel is not None):
-                        #    rospy.loginfo ('EL triggers=distance=%0.3f, speed=%0.3f,%0.3f, angle=%0.3f, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
+                        #    rospy.logwarn ('EL triggers=distance=%0.3f, speed=%0.3f,%0.3f, angle=%0.3f, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
                         #else:
-                        #    rospy.loginfo ('EL triggers=distance=%s, speed=%s,%s, angle=%s, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeecRelInRange, isAngleInRange]))
+                        #    rospy.logwarn ('EL triggers=distance=%s, speed=%s,%s, angle=%s, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
         
                         # If pending trigger has lasted longer than requested duration, then set trigger.
                         if (self.isTriggered):
@@ -2085,6 +2101,11 @@ class ExperimentLib():
         
 
     def Run(self):
+        #rospy.logwarn ('quaternion(0): %s' % tf.transformations.quaternion_about_axis(0.0, (0,0,1)))
+        #rospy.logwarn ('quaternion(-90): %s' % tf.transformations.quaternion_about_axis(-N.pi/2, (0,0,1)))
+        #rospy.logwarn ('quaternion(-60): %s' % tf.transformations.quaternion_about_axis(-N.pi/3, (0,0,1)))
+        #rospy.logwarn ('quaternion(+60): %s' % tf.transformations.quaternion_about_axis(N.pi/3, (0,0,1)))
+        #rospy.logwarn ('quaternion(+90): %s' % tf.transformations.quaternion_about_axis(N.pi/2, (0,0,1)))
         self.sis.start()
         try:
             outcome = self.smachTop.execute()

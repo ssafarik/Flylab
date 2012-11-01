@@ -9,8 +9,10 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/config</url>
 
+  <depend package="bigtop"/>
   <depend package="colosseum"/>
-  <depend package="babycarrot"/>
+  <depend package="racetrack"/>
+  <depend package="rotcam"/>
 
 </package>
 

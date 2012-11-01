@@ -42,13 +42,13 @@ class Experiment():
         self.experimentparams.triggerEntry.frameidParent = 'Fly1'
         self.experimentparams.triggerEntry.frameidChild = 'Robot'
         self.experimentparams.triggerEntry.speedAbsParentMin =   5.0        # Absolute speed of the parent in fixed frame.
-        self.experimentparams.triggerEntry.speedAbsParentMax =  40.0
+        self.experimentparams.triggerEntry.speedAbsParentMax =  60.0
         self.experimentparams.triggerEntry.speedAbsChildMin  =   0.0        # Absolute speed of the child in fixed frame.
         self.experimentparams.triggerEntry.speedAbsChildMax  = 999.0
         self.experimentparams.triggerEntry.speedRelMin       =   0.0        # Relative speed of child to parent.
         self.experimentparams.triggerEntry.speedRelMax       = 999.0
         self.experimentparams.triggerEntry.distanceMin = 10.0               # Distance between child and parent frames.
-        self.experimentparams.triggerEntry.distanceMax = 35.0
+        self.experimentparams.triggerEntry.distanceMax = 40.0
         self.experimentparams.triggerEntry.angleMin = 00.0 * N.pi / 180.0   # Angle of the child frame from the perspective of the parent frame.
         self.experimentparams.triggerEntry.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.triggerEntry.angleTest = 'inclusive'          # 'inclusive' or 'exclusive' of the given angle range.
@@ -73,7 +73,6 @@ class Experiment():
         self.experimentparams.robot.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random fraction of it. 
         self.experimentparams.robot.move.relative.tolerance = 2                   # When robot-to-target distance is within this tolerance, then the move is over.
         self.experimentparams.robot.move.timeout = 10                             # When this duration has passed, then the move is over.
-        
         self.experimentparams.robot.home.enabled = True
         self.experimentparams.robot.home.x = 0.0
         self.experimentparams.robot.home.y = 0.0
