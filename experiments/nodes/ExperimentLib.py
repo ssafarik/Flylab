@@ -209,6 +209,7 @@ class ResetHardware (smach.State):
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
+        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -255,14 +256,12 @@ class ResetHardware (smach.State):
     
         
     def ResetRobot(self, userdata):
-        self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
-        self.action.wait_for_server()
-        self.goal = ActionStageStateGoal()
-        self.set_stage_state = None
-        
-
         rv = 'disabled'
         if (userdata.experimentparamsIn.robot.enabled) and (userdata.experimentparamsIn.robot.home.enabled):
+            self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
+            self.action.wait_for_server()
+            self.goal = ActionStageStateGoal()
+            self.set_stage_state = None
             self.timeStart = rospy.Time.now()
     
             rospy.wait_for_service('set_stage_state')
@@ -333,10 +332,10 @@ class ResetHardware (smach.State):
         
 
     def ResetLEDPanels(self, userdata):
-        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
-
         # Init the LEDPanels.  Assumes preprogrammed panels.
+        rv = 'disabled'
         if (userdata.experimentparamsIn.ledpanels.enabled):
+            rv = 'success'
             msgPanelsCommand = MsgPanelsCommand(command='stop')
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
 
@@ -353,7 +352,7 @@ class ResetHardware (smach.State):
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
             
 
-        return 'success'
+        return rv
 # End class ResetHardware()        
 
         
@@ -1914,7 +1913,7 @@ class ExperimentLib():
 
 
 
-            ################################################################################### RESETHARDWARE -> NEWTRIALCALLBACK or NEWTRIAL
+            ################################################################################### RESETHARDWARE -> (NEWTRIALCALLBACK or NEWTRIAL)
             if newtrial_callback is not None:
                 stateAfterResetHardware = 'NEWTRIALCALLBACK'
             else:
@@ -1987,7 +1986,7 @@ class ExperimentLib():
                                    remapping={'experimentparamsIn':'experimentparams'})
 
 
-            ################################################################################### WAITEXIT -> ENDTRIALCALLBACK or RESETHARDWARE
+            ################################################################################### WAITEXIT -> (ENDTRIALCALLBACK or RESETHARDWARE)
             if endtrial_callback is not None:
                 stateAfterWaitExit = 'ENDTRIALCALLBACK'
             else:
