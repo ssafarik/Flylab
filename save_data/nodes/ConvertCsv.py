@@ -2440,7 +2440,7 @@ class ConvertCsv:
     #
     def ConvertDirToDir(self, dirInBase, dirOutBase, versionToWrite):
         
-        if (versionToWrite=='2.2') or (versionToWrite=='2.6'): 
+        if (versionToWrite=='2.2') or (versionToWrite=='2.6') or (versionToWrite=='latest'): 
             dirsIn = glob.glob(dirInBase+'/*')
             for d in dirsIn:
                 dirLeaf = d.split('/')[-1]
@@ -2462,21 +2462,28 @@ class ConvertCsv:
                         self.WriteHeader_V22(filenameOut)
                         self.CopyDataLines_Pre26(filenameIn, filenameOut)
                         
-                    elif (versionToWrite=='2.6'):
+                    elif (versionToWrite=='2.6') or (versionToWrite=='latest'):
                         self.WriteHeader_V26(filenameOut)
                         self.CopyDataLines_V26(filenameIn, filenameOut)
                         
         else:
-            print ('Only versions 2.2 and 2.6 are supported for writing.')
+            print ('Only versions "2.2", "2.6", and "latest" are supported for writing.')
             
         
         
 if __name__ == '__main__':
     convert = ConvertCsv()
     
-    versionToWrite = '2.2'
-    dirIn   = '/home/ssafarik/FlylabData_oldversions'
-    dirOut  = '/home/ssafarik/FlylabData_v26'
+    
+    ###############################################################################################
+    ###############################################################################################
+    versionToWrite = '2.6'  # '2.2' or '2.6' or 'latest'
+    dirIn   = '/home/ssafarik/FlylabData'
+    dirOut  = '/home/ssafarik/FlylabData_converted'
+    ###############################################################################################
+    ###############################################################################################
+
+    
     convert.ConvertDirToDir(dirIn, dirOut, versionToWrite)
     
     
