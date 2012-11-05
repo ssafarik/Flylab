@@ -35,81 +35,84 @@ class ExperimentRegressiveMotion():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.waitEntry1 = 0.0
+        self.experimentparams.pre.robot.enabled = False
+        self.experimentparams.pre.lasertrack.enabled = False
+        self.experimentparams.pre.ledpanels.enabled = False
+        self.experimentparams.pre.wait1 = 0.0
         
-        self.experimentparams.triggerEntry.enabled = True
-        self.experimentparams.triggerEntry.frameidParent = 'Fly1'
-        self.experimentparams.triggerEntry.frameidChild = 'Robot'
-        self.experimentparams.triggerEntry.speedAbsParentMin =   4.0
-        self.experimentparams.triggerEntry.speedAbsParentMax =  40.0
-        self.experimentparams.triggerEntry.speedAbsChildMin  =   0.0
-        self.experimentparams.triggerEntry.speedAbsChildMax  = 999.0
-        self.experimentparams.triggerEntry.speedRelMin       =   0.0
-        self.experimentparams.triggerEntry.speedRelMax       = 999.0
-        self.experimentparams.triggerEntry.distanceMin =  5.0
-        self.experimentparams.triggerEntry.distanceMax = 60.0
-        self.experimentparams.triggerEntry.angleMin = 85.0 * N.pi / 180.0
-        self.experimentparams.triggerEntry.angleMax =95.0 * N.pi / 180.0
-        self.experimentparams.triggerEntry.angleTest = 'inclusive'
-        self.experimentparams.triggerEntry.angleTestBilateral = True
-        self.experimentparams.triggerEntry.timeHold = 0.2
-        self.experimentparams.triggerEntry.timeout = -1
+        self.experimentparams.pre.trigger.enabled = True
+        self.experimentparams.pre.trigger.frameidParent = 'Fly1'
+        self.experimentparams.pre.trigger.frameidChild = 'Robot'
+        self.experimentparams.pre.trigger.speedAbsParentMin =   4.0
+        self.experimentparams.pre.trigger.speedAbsParentMax =  40.0
+        self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
+        self.experimentparams.pre.trigger.speedAbsChildMax  = 999.0
+        self.experimentparams.pre.trigger.speedRelMin       =   0.0
+        self.experimentparams.pre.trigger.speedRelMax       = 999.0
+        self.experimentparams.pre.trigger.distanceMin =  5.0
+        self.experimentparams.pre.trigger.distanceMax = 60.0
+        self.experimentparams.pre.trigger.angleMin = 85.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleMax =95.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleTest = 'inclusive'
+        self.experimentparams.pre.trigger.angleTestBilateral = True
+        self.experimentparams.pre.trigger.timeHold = 0.2
+        self.experimentparams.pre.trigger.timeout = -1
         
-        self.experimentparams.waitEntry2 = 0.0
+        self.experimentparams.pre.wait2 = 0.0
         
 
-        # .robot, .lasertrack, .ledpanels, and .triggerExit all run concurrently.
+        # .robot, .lasertrack, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.robot.enabled = True
-        self.experimentparams.robot.move.mode = 'relative'        
-        self.experimentparams.robot.move.relative.tracking = False
-        self.experimentparams.robot.move.relative.frameidOriginPosition = "Robot"
-        self.experimentparams.robot.move.relative.frameidOriginAngle = "Fly1"
-        self.experimentparams.robot.move.relative.distance = 60
-        self.experimentparams.robot.move.relative.angle = 0
-        self.experimentparams.robot.move.relative.angleType = 'constant'
-        self.experimentparams.robot.move.relative.speed = 30
-        self.experimentparams.robot.move.relative.speedType = 'random'
-        self.experimentparams.robot.move.relative.tolerance = 2
-        self.experimentparams.robot.move.timeout = 3
-        self.experimentparams.robot.home.enabled = True
-        self.experimentparams.robot.home.x = 0.0
-        self.experimentparams.robot.home.y = 0.0
-        self.experimentparams.robot.home.speed = 20
-        self.experimentparams.robot.home.timeout = -1
-        self.experimentparams.robot.home.tolerance = 2
+        self.experimentparams.trial.robot.enabled = True
+        self.experimentparams.trial.robot.move.mode = 'relative'        
+        self.experimentparams.trial.robot.move.relative.tracking = False
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Robot"
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1"
+        self.experimentparams.trial.robot.move.relative.distance = 60
+        self.experimentparams.trial.robot.move.relative.angle = 0
+        self.experimentparams.trial.robot.move.relative.angleType = 'constant'
+        self.experimentparams.trial.robot.move.relative.speed = 30
+        self.experimentparams.trial.robot.move.relative.speedType = 'random'
+        self.experimentparams.trial.robot.move.relative.tolerance = 2
+        self.experimentparams.trial.robot.move.timeout = 3
+        self.experimentparams.trial.robot.home.enabled = True
+        self.experimentparams.trial.robot.home.x = 0.0
+        self.experimentparams.trial.robot.home.y = 0.0
+        self.experimentparams.trial.robot.home.speed = 20
+        self.experimentparams.trial.robot.home.timeout = -1
+        self.experimentparams.trial.robot.home.tolerance = 2
         
         
-        self.experimentparams.lasertrack.enabled = False
+        self.experimentparams.trial.lasertrack.enabled = False
         
-        self.experimentparams.ledpanels.enabled = False
-        self.experimentparams.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.ledpanels.idPattern = 1
-        self.experimentparams.ledpanels.frame_id = 'Fly1Forecast'
-        self.experimentparams.ledpanels.statefilterHi = ''
-        self.experimentparams.ledpanels.statefilterLo = ''
-        self.experimentparams.ledpanels.statefilterCriteria = ''
-        self.experimentparams.ledpanels.timeout = -1
+        self.experimentparams.trial.ledpanels.enabled = False
+        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = 1
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.statefilterHi = ''
+        self.experimentparams.trial.ledpanels.statefilterLo = ''
+        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
+        self.experimentparams.trial.ledpanels.timeout = -1
 
-        self.experimentparams.triggerExit.enabled = False
-        self.experimentparams.triggerExit.frameidParent = 'Fly1'
-        self.experimentparams.triggerExit.frameidChild = 'Robot'
-        self.experimentparams.triggerExit.distanceMin = 0.0
-        self.experimentparams.triggerExit.distanceMax = 999.0
-        self.experimentparams.triggerExit.speedAbsParentMin =   0.0
-        self.experimentparams.triggerExit.speedAbsParentMax = 999.0
-        self.experimentparams.triggerExit.speedAbsChildMin  =   0.0
-        self.experimentparams.triggerExit.speedAbsChildMax  = 999.0
-        self.experimentparams.triggerExit.speedRelMin       =   0.0
-        self.experimentparams.triggerExit.speedRelMax       = 999.0
-        self.experimentparams.triggerExit.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.triggerExit.angleMax =180.0 * N.pi / 180.0
-        self.experimentparams.triggerExit.angleTest = 'inclusive'
-        self.experimentparams.triggerExit.angleTestBilateral = True
-        self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = -1
+        self.experimentparams.post.trigger.enabled = False
+        self.experimentparams.post.trigger.frameidParent = 'Fly1'
+        self.experimentparams.post.trigger.frameidChild = 'Robot'
+        self.experimentparams.post.trigger.distanceMin = 0.0
+        self.experimentparams.post.trigger.distanceMax = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMin =   0.0
+        self.experimentparams.post.trigger.speedAbsParentMax = 999.0
+        self.experimentparams.post.trigger.speedAbsChildMin  =   0.0
+        self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
+        self.experimentparams.post.trigger.speedRelMin       =   0.0
+        self.experimentparams.post.trigger.speedRelMax       = 999.0
+        self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleTest = 'inclusive'
+        self.experimentparams.post.trigger.angleTestBilateral = True
+        self.experimentparams.post.trigger.timeHold = 0.0
+        self.experimentparams.post.trigger.timeout = -1
 
-        self.experimentparams.waitExit = 0.0
+        self.experimentparams.post.wait = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
                                                          newexperiment_callback = self.Newexperiment_callback, 

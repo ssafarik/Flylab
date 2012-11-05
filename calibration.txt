@@ -42,7 +42,7 @@ git commit -m "Adding new hardware config."
 # Determine the name of your experimental hardware, i.e. <your device name>
 roscd config/launch
 gedit hardware.launch
-# Edit hardware.launch to point to your .launch file, e.g. babycarrot.launch
+# Edit hardware.launch to point to your .launch file, e.g. racetrack.launch
 
 
 
@@ -61,7 +61,7 @@ rosrun dynamic_reconfigure reconfigure_gui camera &
 
 # Adjust mode, brightness, exposure, gain, shutter, etc.
 # Edit "params_camera.yaml" with the new settings, for example:
-#     ~/git/Flylab/ros/babycarrot/launch/params_camera.yaml
+#     ~/git/Flylab/ros/racetrack/launch/params_camera.yaml
 # Close the Dynamic Reconfigure window.
 
 
@@ -83,7 +83,7 @@ rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/
 # Click <calibrate> button (will take several minutes)
 # Click <commit> button (writes data to /cameras/<your device name>_calibration.yaml)
 roscd <your device name>/launch
-# Edit "params_camera.yaml" to refer to the "/cameras/<camera name>_calibration.yaml" file.
+# Edit "params_camera.launch" to refer to the "/cameras/<camera name>_calibration.yaml" file.
 
 
 4 ############################### Camera Extrinsic Parameters (i.e. Relationship of Camera to Arena):

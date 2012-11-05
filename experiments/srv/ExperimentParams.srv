@@ -1,14 +1,9 @@
 ExperimentSettings 	       experiment
 SaveSettings 		       save
 flycore/TrackingCommand    tracking
-float64 			       waitEntry1
-TriggerSettings 	       triggerEntry
-float64 			       waitEntry2
-RobotSettings 		       robot
-LasertrackSettings 	       lasertrack
-LEDPanelsSettings          ledpanels
-TriggerSettings 	       triggerExit
-float64 			       waitExit
+PreSettings                pre
+TrialSettings              trial
+PostSettings               post
 ---
 bool 				       succeeded
 

@@ -33,11 +33,11 @@ class LEDPanels():
         self.serial = serial.Serial(serialport, baudrate=921600, rtscts=False, dsrdtr=False) # 8N1
         
         self.commands = {
-                         'start':              {'id': 0x20, 'args': [], 'help': 'start()'},
-                         'stop':               {'id': 0x30, 'args': [], 'help': 'stop()'},
-                         'start_w_trig':       {'id': 0x25, 'args': [], 'help': 'start_w_trig()'},
-                         'stop_w_trig':        {'id': 0x35, 'args': [], 'help': 'stop_w_trig()'},
-                         'clear':              {'id': 0xF0, 'args': [], 'help': 'clear(), clear the flash'},
+                         'start':              {'id': 0x20, 'args': [], 'help': 'start(), Start display.'},
+                         'stop':               {'id': 0x30, 'args': [], 'help': 'stop(), Stop display.'},
+                         'start_w_trig':       {'id': 0x25, 'args': [], 'help': 'start_w_trig(), Start display w/ trigger.'},
+                         'stop_w_trig':        {'id': 0x35, 'args': [], 'help': 'stop_w_trig(), Stop display w/ trigger'},
+                         'clear':              {'id': 0xF0, 'args': [], 'help': 'clear(), Clear the flash'},
                          'all_off':            {'id': 0x00, 'args': [], 'help': 'all_off(), set all pixels on all panels to OFF'},
                          'all_on':             {'id': 0xFF, 'args': [], 'help': 'all_on(), set all pixels on all panels to ON;'},
                          'g_level_0':          {'id': 0x90, 'args': [], 'help': 'g_level_0(), set all panels to grey level 0;'},
@@ -68,10 +68,12 @@ class LEDPanels():
                          'show_bus_number':    {'id': 0x16, 'args': [], 'help': 'show_bus_number()'},
                          'quiet_mode_on':      {'id': 0x17, 'args': [], 'help': 'quiet_mode_on(), In this mode, there is no feedback information sent from controller'},
                          'quiet_mode_off':     {'id': 0x18, 'args': [], 'help': 'quiet_mode_off(), In this mode, feedback information from controller will be shown on the GUI'},
+                         'update_gui_info':    {'id': 0x19, 'args': [], 'help': 'update_gui_info(), Update gain, offset, and position information.'},
                          'controller_mode':    {'id': 0x21, 'args': [], 'help': 'controller_mode()'},
                          'pc_dumping_mode':    {'id': 0x22, 'args': [], 'help': 'pc_dumping_mode()'},
-                         'reset_funccnt_x':    {'id': 0x23, 'args': [], 'help': 'reset_funccnt_x(), reset function x count'},
-                         'reset_funccnt_y':    {'id': 0x24, 'args': [], 'help': 'reset_funccnt_y(), reset function y count'},
+                         'enable_extern_trig': {'id': 0x23, 'args': [], 'help': 'reset_funccnt_x(), reset function x count'},
+                         'disable_extern_trig':{'id': 0x24, 'args': [], 'help': 'reset_funccnt_y(), reset function y count'},
+                         'read_and_set_max_voltage':{'id': 0x26, 'args': [], 'help': 'read_and_set_max_voltage()'},
                          
                          # two byte commands:
                          'reset':              {'id': 0x01, 
@@ -102,13 +104,13 @@ class LEDPanels():
                                                 'args': [{'nbytes': 1, 'min': 1, 'max': 99, 'unsigned': True}], 
                                                 'help': 'set_config_id(?)'},
                          'get_adc_value':      {'id': 0x10,     # Run as a service, not on a message topic.
-                                                'args': [{'nbytes': 1, 'min': 1, 'max': 4, 'unsigned': True}], 
+                                                'args': [{'nbytes': 1, 'min': 1, 'max': 6, 'unsigned': True}], 
                                                 'help': 'get_adc_value(channel_addr)'},
                          
                          # three byte commands:
                          'set_mode':           {'id': 0x10, 
-                                                'args': [{'nbytes': 1, 'min': 0, 'max': 5, 'unsigned': True}, 
-                                                         {'nbytes': 1, 'min': 0, 'max': 5, 'unsigned': True}], 
+                                                'args': [{'nbytes': 1, 'min': 0, 'max': 6, 'unsigned': True}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 6, 'unsigned': True}], 
                                                 'help': 'set_mode(mode_x, mode_y), 0=funcx, 1=ch1-ch2, 2=CL+funcx, 3=ch5_sets_x, 4=funcx_sets_ind, 5=debugx; similar for y'},
                          'address':            {'id': 0xFF, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}, 
@@ -117,23 +119,27 @@ class LEDPanels():
                          'set_posfunc_id':     {'id': 0x15, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}], 
-                                                'help': 'set position'},
+                                                'help': 'set_posfunc_id(channel, functionid), Set position'},
                          'set_velfunc_id':     {'id': 0x20, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}], 
-                                                'help': 'set velocity function'},
+                                                'help': 'set_velfunc_id(channel, functionid), Set velocity function'},
                          'set_funcx_freq':     {'id': 0x25, 
                                                 'args': [{'nbytes': 2, 'min': 0, 'max': 500, 'unsigned': True}], 
                                                 'help': 'set_funcx_freq(hz), function X update rate'},
                          'set_funcy_freq':     {'id': 0x30, 
                                                 'args': [{'nbytes': 2, 'min': 0, 'max': 500, 'unsigned': True}], 
                                                 'help': 'set_funcy_freq(hz), function Y update rate'},
+                         'set_max_voltage':    {'id': 0x35, 
+                                                'args': [{'nbytes': 1, 'min': 0, 'max': 10, 'unsigned': True}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 10, 'unsigned': True}], 
+                                                'help': 'set_max_voltage(xmax,ymax), Set max voltage for X and Y on range (0,10).'},
                          
                          # four byte commands:     
                          'set_ao':             {'id': 0x10, 
                                                 'args': [{'nbytes': 1, 'min': 1, 'max': 4, 'unsigned': True}, 
-                                                         {'nbytes': 2, 'min': 0, 'max': 2047, 'unsigned': True}], 
-                                                'help': 'set_AO(chan, val)'},
+                                                         {'nbytes': 2, 'min': -32767, 'max': 32767, 'unsigned': True}], # BUG: should this be signed?
+                                                'help': 'set_AO(chan, val), val ranges on (-32767,32767) aka (-10v,+10v)'},
                          
                          # five byte commands:
                          'set_position':       {'id': 0x70, 
@@ -146,6 +152,13 @@ class LEDPanels():
                                                          {'nbytes': 1, 'min': -128, 'max': 127, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': -128, 'max': 127, 'unsigned': False}], 
                                                 'help': 'set_gain_bias(gain_x, bias_x, gain_y, bias_y)'},
+
+                         'send_laser_pattern': {'id': 0x3E, 
+                                                'args': [{'nbytes': 32, 'min': 0, 'max': 1.158e77, 'unsigned': True}, 
+                                                         {'nbytes': 32, 'min': 0, 'max': 1.158e77, 'unsigned': True}, 
+                                                         {'nbytes': 32, 'min': 0, 'max': 1.158e77, 'unsigned': True}, 
+                                                         {'nbytes': 32, 'min': 0, 'max': 1.158e77, 'unsigned': True}], 
+                                                'help': 'send_laser_pattern(), Four 256bit arguments to contain 1024 binary values.  Not yet supported.'},
                          }
 
 
@@ -234,7 +247,15 @@ class LEDPanels():
                         serialbytes_list.extend(self.Dec2chr(arg,nBytesArg))
                          
                     if (args_dict_list[iArg]['unsigned']==False):
-                        rospy.logwarn('LEDPanels: command argument type (signed int) not yet implemented.')
+                        # Note: the following is a hack special case for set_ao.  Negative arg2 changes the command id, and sends abs(arg2).
+                        if (command == 'set_ao'):
+                            if arg>=0:
+                                serialbytes_list.extend(self.Dec2chr(arg,nBytesArg))
+                            else:
+                                id = 0x11
+                                serialbytes_list.extend(self.Dec2chr(N.abs(arg),nBytesArg))
+                        else:        
+                            rospy.logwarn('LEDPanels: command argument type (signed int) not yet implemented.')
         else:
             rospy.logwarn('Unknown LEDPanels command: %s' % command)
                         
