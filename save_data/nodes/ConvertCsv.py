@@ -3,6 +3,22 @@ from __future__ import division
 import sys
 import os
 import glob
+import shutil
+
+
+###############################################################################
+## How to use this utility:
+##
+##   1. Scroll to the bottom of this file.
+##   2. Edit the lines for your input and output directories.  
+##   3. Edit the version number you want to write.
+##   4. python ConvertCsv.py
+##
+##   You're done!  The directory tree will be duplicated, except that all
+##   the .csv files will be converted to the specified version.
+##   
+###############################################################################
+
 
 
 def chdir(dir):
@@ -2434,13 +2450,32 @@ class ConvertCsv:
                                                                 vaFly = field_list[13],
                                                                 )
                     fidOut.write(lineOut)
-                    
+
+
+    # ConvertFile()
+    # Convert a single file from one version to another.
+    #
+    def ConvertFile(self, filenameIn, filenameOut):
+        (versionIn, nLinesHeader) = self.GetVersion(filenameIn)
+        print '%s  ->  %s:  (ver %s -> %s)' % (filenameIn, filenameOut, versionIn, self.versionToWrite)
+        #filenameLeaf = os.path.split(filenameIn)[1]
+        #filenameOut = dirOut + '/' + filenameLeaf
+        self.ReadHeader(filenameIn)
+        
+        if (self.versionToWrite=='2.2'):
+            self.WriteHeader_V22(filenameOut)
+            self.CopyDataLines_Pre26(filenameIn, filenameOut)
+            
+        elif (self.versionToWrite=='2.6') or (self.versionToWrite=='latest'):
+            self.WriteHeader_V26(filenameOut)
+            self.CopyDataLines_V26(filenameIn, filenameOut)
+        
 
     # Convert all the .csv files in the input directory to a given version in the output directory.
     #
-    def ConvertDirToDir(self, dirInBase, dirOutBase, versionToWrite):
+    def ConvertDirToDir(self, dirInBase, dirOutBase):
         
-        if (versionToWrite=='2.2') or (versionToWrite=='2.6') or (versionToWrite=='latest'): 
+        if (self.versionToWrite=='2.2') or (self.versionToWrite=='2.6') or (self.versionToWrite=='latest'): 
             dirsIn = glob.glob(dirInBase+'/*')
             for d in dirsIn:
                 dirLeaf = d.split('/')[-1]
@@ -2452,24 +2487,58 @@ class ConvertCsv:
                 
                 filenameIn_list = glob.glob(d+'/*.csv')
                 for filenameIn in filenameIn_list:
-                    (version, nLinesHeader) = self.GetVersion(filenameIn)
-                    print '%s version %s' % (filenameIn, version)
-                    filenameLeaf = filenameIn.split('/')[-1]
-                    filenameOut = dirOut + '/' + filenameLeaf
-                    self.ReadHeader(filenameIn)
-                    
-                    if (versionToWrite=='2.2'):
-                        self.WriteHeader_V22(filenameOut)
-                        self.CopyDataLines_Pre26(filenameIn, filenameOut)
-                        
-                    elif (versionToWrite=='2.6') or (versionToWrite=='latest'):
-                        self.WriteHeader_V26(filenameOut)
-                        self.CopyDataLines_V26(filenameIn, filenameOut)
+                    self.ConvertFile(filenameIn, dirOut)
                         
         else:
             print ('Only versions "2.2", "2.6", and "latest" are supported for writing.')
             
-        
+
+    def ConvertTree(self, dirIn, dirOut):
+        if (self.versionToWrite=='2.2') or (self.versionToWrite=='2.6') or (self.versionToWrite=='latest'): 
+            if (dirIn != dirOut):
+                names = os.listdir(dirIn)
+            
+                try:
+                    print 'mkdir %s' % dirOut
+                    os.makedirs(dirOut)
+                except OSError: # Directory already exists.
+                    pass
+                
+                errors = []
+                for name in names:
+                    filespecIn = os.path.join(dirIn, name)
+                    filespecOut = os.path.join(dirOut, name)
+                    try:
+                        if os.path.isdir(filespecIn):
+                            #print 'ConvertTree:  %s -> %s' % (filespecIn, filespecOut)
+                            self.ConvertTree(filespecIn, filespecOut)
+                        else:
+                            if (os.path.splitext(filespecIn)[1]=='.csv'):
+                                #print 'ConvertFile:  %s -> %s' % (filespecIn, filespecOut)
+                                self.ConvertFile(filespecIn, filespecOut)
+                            else:
+                                print '%s  ->  %s:  (copied)' % (filespecIn, filespecOut)
+                                shutil.copy2(filespecIn, filespecOut)
+                                
+                    except (IOError, os.error) as why:
+                        errors.append((filespecIn, filespecOut, str(why)))
+                    # catch the Error from the recursive ConvertTree() so that we can continue with other files
+                    #except Error as err:
+                    #    errors.extend(err.args[0])
+                try:
+                    shutil.copystat(dirIn, dirOut)
+                except WindowsError:
+                    # can't copy file access times on Windows
+                    pass
+                except OSError as why:
+                    errors.extend((dirIn, dirOut, str(why)))
+                if errors:
+                    raise Error(errors)
+            else:
+                print "Source and Dest dirs must be different."
+        else:
+            print ('Only versions "2.2", "2.6", and "latest" are supported for writing.')
+            
         
 if __name__ == '__main__':
     convert = ConvertCsv()
@@ -2477,14 +2546,14 @@ if __name__ == '__main__':
     
     ###############################################################################################
     ###############################################################################################
-    versionToWrite = '2.6'  # '2.2' or '2.6' or 'latest'
+    convert.versionToWrite = '2.6'  # '2.2' or '2.6' or 'latest'
     dirIn   = '/home/ssafarik/FlylabData'
     dirOut  = '/home/ssafarik/FlylabData_converted'
     ###############################################################################################
     ###############################################################################################
 
     
-    convert.ConvertDirToDir(dirIn, dirOut, versionToWrite)
+    convert.ConvertTree(dirIn, dirOut)
     
     
             
