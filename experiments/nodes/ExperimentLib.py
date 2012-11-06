@@ -177,7 +177,7 @@ class NewTrialService():
 class NewExperiment (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['success','aborted'],
+                             outcomes=['success','preempt','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
 
@@ -213,7 +213,7 @@ class ResetHardware (smach.State):
     def __init__(self):
 
         smach.State.__init__(self, 
-                             outcomes=['success','disabled','timeout','aborted'],
+                             outcomes=['success','disabled','timeout','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
 
         self.arenastate = None
@@ -270,7 +270,7 @@ class ResetHardware (smach.State):
     def ResetRobot(self, userdata):
         rv = 'disabled'
         if (userdata.experimentparamsIn.trial.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
-            self.trial = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
+            self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
             self.action.wait_for_server()
             self.goal = ActionStageStateGoal()
             self.set_stage_state = None
@@ -323,10 +323,11 @@ class ResetHardware (smach.State):
                     break
                 
                 
-                #if self.preempt_requested():
-                #    self.service_preempt()
-                #    rv = 'preempt'
-                #    break
+                if self.preempt_requested():
+                    rospy.logwarn('preempt requested: ResetRobot()')
+                    self.service_preempt()
+                    rv = 'preempt'
+                    break
                 
                 
                 if userdata.experimentparamsIn.trial.robot.home.timeout != -1:
@@ -381,7 +382,7 @@ class ResetHardware (smach.State):
 class NewTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['continue','exit','aborted'],
+                             outcomes=['continue','exit','preempt','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
@@ -479,7 +480,7 @@ class TriggerOnStates (smach.State):
         
         
         smach.State.__init__(self, 
-                             outcomes=['success','disabled','timeout','aborted'],
+                             outcomes=['success','disabled','timeout','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
@@ -712,10 +713,11 @@ class TriggerOnStates (smach.State):
                             break
     
                         
-                    #if self.preempt_requested():
-                    #    self.service_preempt()
-                    #    rv = 'preempt'
-                    #    break
+                    if self.preempt_requested():
+                        rospy.logwarn('preempt requested: TriggerOnStates()')
+                        self.service_preempt()
+                        rv = 'preempt'
+                        break
                     
                     if trigger.timeout != -1:
                         if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > trigger.timeout:
@@ -746,7 +748,7 @@ class TriggerOnTime (smach.State):
     def __init__(self, mode='pre1'):
         self.mode = mode
         smach.State.__init__(self, 
-                             outcomes=['success','aborted'],
+                             outcomes=['success','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
 
         self.Trigger = TriggerService()
@@ -866,7 +868,7 @@ class MoveRobot (smach.State):
                         return 'timeout'
                 
                 if self.preempt_requested():
-                    rospy.logwarn('preempt requested')
+                    rospy.logwarn('preempt requested: MoveRobot()')
                     self.service_preempt()
                     return 'preempt'
                 
@@ -877,9 +879,9 @@ class MoveRobot (smach.State):
     
     
             if self.paramsIn.robot.move.mode=='relative':
-                rv = self.MoveRelative(userdata)
+                rv = self.MoveRelative()
             else:
-                rv = self.MovePattern(userdata)
+                rv = self.MovePattern()
         else:
             rv = 'disabled'
             
@@ -888,7 +890,7 @@ class MoveRobot (smach.State):
         return rv
             
             
-    def MoveRelative (self, userdata):            
+    def MoveRelative (self):            
         self.ptTarget = None
         rv = 'aborted'
 
@@ -999,7 +1001,7 @@ class MoveRobot (smach.State):
 
             
             if self.preempt_requested():
-                rospy.logwarn('preempt requested')
+                rospy.logwarn('preempt requested: MoveRelative()')
                 self.service_preempt()
                 rv = 'preempt'
                 break
@@ -1022,7 +1024,7 @@ class MoveRobot (smach.State):
         return rv
 
         
-    def MovePattern (self, userdata):
+    def MovePattern (self):
                     
         msgPattern = MsgPattern()
 
@@ -1043,7 +1045,7 @@ class MoveRobot (smach.State):
         rv = 'aborted'
         while not rospy.is_shutdown():
             if self.preempt_requested():
-                rospy.logwarn('preempt requested')
+                rospy.logwarn('preempt requested: MovePattern()')
                 self.service_preempt()
                 rv = 'preempt'
                 break
@@ -1435,7 +1437,7 @@ class Lasertrack (smach.State):
                 
                 
                 if self.preempt_requested():
-                    rospy.logwarn('preempt requested')
+                    rospy.logwarn('preempt requested: Lasertrack()')
                     self.service_preempt()
                     rv = 'preempt'
                     break
@@ -1868,7 +1870,7 @@ class LEDPanels (smach.State):
                         
             
                 if self.preempt_requested():
-                    rospy.logwarn('preempt requested')
+                    rospy.logwarn('preempt requested: LEDPanels()')
                     self.service_preempt()
                     rv = 'preempt'
                     break
@@ -1917,12 +1919,13 @@ class ExperimentLib():
 
 
         ################################################################################### Pre Qualifier:  wait -> trigger -> wait.
-        self.smachPreQualifier = smach.StateMachine(outcomes = ['success','aborted'])
+        self.smachPreQualifier = smach.StateMachine(outcomes = ['success','preempt','aborted'])
         self.smachPreQualifier.userdata.experimentparams = experimentparams
         with self.smachPreQualifier:
             smach.StateMachine.add('PREWAIT1', 
                                    TriggerOnTime(mode='pre1'),
                                    transitions={'success':'PRETRIGGER',   # Trigger service signal goes True.
+                                                'preempt':'preempt',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
@@ -1932,6 +1935,7 @@ class ExperimentLib():
                                    transitions={'success':'PREWAIT2',        # Trigger service signal goes True.
                                                 'disabled':'PREWAIT2',       # Trigger service signal goes True.
                                                 'timeout':'PREWAIT2',        # Trigger service signal goes True.
+                                                'preempt':'preempt',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
@@ -1939,6 +1943,7 @@ class ExperimentLib():
             smach.StateMachine.add('PREWAIT2', 
                                    TriggerOnTime(mode='pre2'),
                                    transitions={'success':'success',   # Trigger service signal goes True.
+                                                'preempt':'preempt',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
         
@@ -1989,6 +1994,7 @@ class ExperimentLib():
             smach.StateMachine.add('NEWEXPERIMENT',
                                    NewExperiment(),
                                    transitions={'success':stateAfterNewExperiment,
+                                                'preempt':'aborted',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
@@ -2019,6 +2025,7 @@ class ExperimentLib():
                                    transitions={'success':stateAfterResetHardware,
                                                 'disabled':stateAfterResetHardware,
                                                 'timeout':stateAfterResetHardware,
+                                                'preempt':'aborted',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
@@ -2041,6 +2048,7 @@ class ExperimentLib():
                                    NewTrial(),
                                    transitions={'continue':'PRE',         # Trigger service signal goes False.
                                                 'exit':'success',           # Trigger service signal goes False.
+                                                'preempt':'aborted',
                                                 'aborted':'aborted'},       # Trigger service signal goes False.
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
@@ -2079,6 +2087,7 @@ class ExperimentLib():
             smach.StateMachine.add('POSTWAIT', 
                                    TriggerOnTime(mode='post'),
                                    transitions={'success':stateAfterWaitPost,
+                                                'preempt':'aborted',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
@@ -2146,8 +2155,8 @@ class ExperimentLib():
                 rv = 'success'
                 
             
-            elif (results == ('preempt','preempt','preempt','preempt')):
-                rv = 'preempt'
+            #elif (results == ('preempt','preempt','preempt','preempt')):
+            #    rv = 'preempt'
                  
             elif (results == ('disabled','disabled','disabled','disabled')):
                 rv = 'disabled'
@@ -2204,9 +2213,9 @@ class ExperimentLib():
                (outcome_map['LASERTRACK'] in ['timeout','success']):
                 rv = 'success'
                 
-            elif (results == ('preempt','preempt','preempt','preempt')):
-                rv = 'preempt'
-                rospy.logwarn ('All experiment actions preempted.')
+            #elif (results == ('preempt','preempt','preempt','preempt')):
+            #    rv = 'preempt'
+            #    rospy.logwarn ('All experiment actions preempted.')
                  
             elif (results == ('disabled','disabled','disabled','disabled')):
                 rv = 'disabled'
