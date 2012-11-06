@@ -441,8 +441,8 @@ class Save:
             # At the end of a run, close the file if we're no longer saving.
             if (self.saveOnlyWhileTriggered):
                 if (self.saveArenastate):
-                    if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
-                        with self.lockArenastate:
+                    with self.lockArenastate:
+                        if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
                             self.fid.close()
                             rospy.logwarn('SA logfile close()')
     
@@ -472,8 +472,9 @@ class Save:
 
             if (self.saveArenastate):
                 # Close old .csv file if there was one.
-                if (self.fid is not None) and (not self.fid.closed):
-                    self.fid.close()
+                with self.lockArenastate:
+                    if (self.fid is not None) and (not self.fid.closed):
+                        self.fid.close()
                     rospy.logwarn('SA logfile close()')
                     
                 # Determine if we should be saving.
@@ -979,7 +980,8 @@ class Save:
                                                 )
 
             with self.lockArenastate:
-                self.fid.write(data_row) # BUG: i/o op on closed file after ctrl+c
+                if (not self.fid.closed):
+                    self.fid.write(data_row)
 
     
         if (self.initialized) and (self.bSavingVideo) and (self.image is not None):

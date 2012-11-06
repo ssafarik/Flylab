@@ -55,7 +55,17 @@ class Experiment():
         self.experimentparams.pre.robot.move.pattern.size.y = 0
         self.experimentparams.pre.robot.move.timeout = -1                             # When this duration has passed, then the move is over.
         self.experimentparams.pre.lasertrack.enabled = False
-        self.experimentparams.pre.ledpanels.enabled = False
+        self.experimentparams.pre.ledpanels.enabled = True
+        self.experimentparams.pre.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.pre.ledpanels.idPattern = 1 
+        self.experimentparams.pre.ledpanels.origin.x = 0 
+        self.experimentparams.pre.ledpanels.origin.y = 0 
+        self.experimentparams.pre.ledpanels.frame_id = 'Fly1'
+        self.experimentparams.pre.ledpanels.statefilterHi = ''
+        self.experimentparams.pre.ledpanels.statefilterLo = ''
+        self.experimentparams.pre.ledpanels.statefilterCriteria = ''
+        self.experimentparams.pre.ledpanels.timeout = -1
+
 
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = True
