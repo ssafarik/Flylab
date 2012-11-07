@@ -49,15 +49,15 @@ class Save:
         self.triggered = False
         self.saveOnlyWhileTriggered = False # False: Save everything from one new_trial to the next new_trial.  True:  Save everything from trigger=on to trigger=off.
 
-        self.nFlies = rospy.get_param("nFlies", 0)
-        self.typeFlies = rospy.get_param("fly/type", "unspecified")
-        self.genderFlies = rospy.get_param("fly/gender", "unspecified")
-        self.nRobots = rospy.get_param("nRobots", 0)
-        self.widthRobot = rospy.get_param("robot/width", "3.175") # mm
-        self.heightRobot = rospy.get_param("robot/height", "3.175") # mm
-        self.visibleRobot = bool(rospy.get_param("robot/visible", "True"))
-        self.paintRobot = str(rospy.get_param("robot/paint", "blackoxide"))
-        self.scentRobot = str(rospy.get_param("robot/scent", "unscented"))
+        self.nFlies         = rospy.get_param("nFlies", 0)
+        self.typeFlies      = rospy.get_param("fly/type", "unspecified")
+        self.genderFlies    = rospy.get_param("fly/gender", "unspecified")
+        self.nRobots        = rospy.get_param("nRobots", 0)
+        self.widthRobot     = rospy.get_param("robot/width", "3.175") # mm
+        self.heightRobot    = rospy.get_param("robot/height", "3.175") # mm
+        self.visibleRobot   = bool(rospy.get_param("robot/visible", "True"))
+        self.paintRobot     = str(rospy.get_param("robot/paint", "blackoxide"))
+        self.scentRobot     = str(rospy.get_param("robot/scent", "unscented"))
 
         rospy.Service('save/new_trial', ExperimentParams, self.NewTrial_callback)
         rospy.Service('save/trigger', Trigger, self.Trigger_callback)
@@ -99,6 +99,15 @@ class Save:
         self.format_width = "7"
         self.format_precision = "2"
         self.format_type = "f"
+
+        
+        #################################################################################
+        self.versionFile = '2.6'    # Increment this when the file format changes.
+        #################################################################################
+
+        
+        self.headingsVersionFile =  'versionFile\n'
+        self.templateVersionFile =  '{versionFile:s}\n'
         
         self.headingsExperiment =   'date_time, '\
                                     'description, '\
@@ -138,166 +147,247 @@ class Save:
                                     '{trackingExclusionzoneY:s}, '\
                                     '{trackingExclusionzoneRadius:s}'
 
-        self.headingsWaitEntry1 =   'waitEntry1\n'
-        self.templateWaitEntry1 =   '{waitEntry1:s}\n'
-        
-        self.headingsTriggerEntry = 'trigger1Enabled, '\
-                                    'trigger1FrameidParent, '\
-                                    'trigger1FrameidChild, '\
-                                    'trigger1SpeedAbsParentMin, '\
-                                    'trigger1SpeedAbsParentMax, '\
-                                    'trigger1SpeedAbsChildMin, '\
-                                    'trigger1SpeedAbsChildMax, '\
-                                    'trigger1SpeedRelMin, '\
-                                    'trigger1SpeedRelMax, '\
-                                    'trigger1DistanceMin, '\
-                                    'trigger1DistanceMax, '\
-                                    'trigger1AngleMin, '\
-                                    'trigger1AngleMax, '\
-                                    'trigger1AngleTest, '\
-                                    'trigger1AngleTestBilateral, '\
-                                    'trigger1TimeHold, '\
-                                    'trigger1Timeout\n'
-        self.templateTriggerEntry = '{trigger1Enabled:s}, '\
-                                    '{trigger1FrameidParent:s}, '\
-                                    '{trigger1FrameidChild:s}, '\
-                                    '{trigger1SpeedAbsParentMin:s}, '\
-                                    '{trigger1SpeedAbsParentMax:s}, '\
-                                    '{trigger1SpeedAbsChildMin:s}, '\
-                                    '{trigger1SpeedAbsChildMax:s}, '\
-                                    '{trigger1SpeedRelMin:s}, '\
-                                    '{trigger1SpeedRelMax:s}, '\
-                                    '{trigger1DistanceMin:s}, '\
-                                    '{trigger1DistanceMax:s}, '\
-                                    '{trigger1AngleMin:s}, '\
-                                    '{trigger1AngleMax:s}, '\
-                                    '{trigger1AngleTest:s}, '\
-                                    '{trigger1AngleTestBilateral:s}, '\
-                                    '{trigger1TimeHold:s}, '\
-                                    '{trigger1Timeout:s}\n'
+        self.headingsPreRobot =     'preRobotEnabled, '\
+                                    'preRobotMovePatternShape, '\
+                                    'preRobotMovePatternHzPattern, '\
+                                    'preRobotMovePatternHzPoint, '\
+                                    'preRobotMovePatternCount, '\
+                                    'preRobotMovePatternSizeX, '\
+                                    'preRobotMovePatternSizeY, '\
+                                    'preRobotMovePatternParam, '\
+                                    'preRobotMoveRelTracking, '\
+                                    'preRobotMoveRelOriginPosition, '\
+                                    'preRobotMoveRelOriginAngle, '\
+                                    'preRobotMoveRelDistance, '\
+                                    'preRobotMoveRelAngle, '\
+                                    'preRobotMoveRelAngleType, '\
+                                    'preRobotMoveRelSpeed, '\
+                                    'preRobotMoveRelSpeedType, '\
+                                    'preRobotMoveRelTolerance, ' \
+                                    'preRobotMoveTimeout\n'
+        self.templatePreRobot     = '{preRobotEnabled:s}, '\
+                                    '{preRobotMovePatternShape:s}, '\
+                                    '{preRobotMovePatternHzPattern:s}, '\
+                                    '{preRobotMovePatternHzPoint:s}, '\
+                                    '{preRobotMovePatternCount:s}, '\
+                                    '{preRobotMovePatternSizeX:s}, '\
+                                    '{preRobotMovePatternSizeY:s}, '\
+                                    '{preRobotMovePatternParam:s}, '\
+                                    '{preRobotMoveRelTracking:s}, '\
+                                    '{preRobotMoveRelOriginPosition:s}, '\
+                                    '{preRobotMoveRelOriginAngle:s}, '\
+                                    '{preRobotMoveRelDistance:s}, '\
+                                    '{preRobotMoveRelAngle:s}, '\
+                                    '{preRobotMoveRelAngleType:s}, '\
+                                    '{preRobotMoveRelSpeed:s}, '\
+                                    '{preRobotMoveRelSpeedType:s}, '\
+                                    '{preRobotMoveRelTolerance:s}, ' \
+                                    '{preRobotMoveTimeout:s}\n'
                                     
-        self.headingsWaitEntry2 =   'waitEntry2\n'
-        self.templateWaitEntry2 =   '{waitEntry2:s}\n'
+        self.headingsPreLaser     = 'preLaserEnabled, '\
+                                    'preLaserPatternShape, '\
+                                    'preLaserPatternHzPattern, '\
+                                    'preLaserPatternHzPoint, '\
+                                    'preLaserPatternCount, '\
+                                    'preLaserPatternSizeX, '\
+                                    'preLaserPatternSizeY, '\
+                                    'preLaserPatternParam, '\
+                                    'preLaserStatefilterLo, '\
+                                    'preLaserStatefilterHi, '\
+                                    'preLaserStatefilterCriteria, ' \
+                                    'preLaserTimeout\n'
+        self.templatePreLaser =   '{preLaserEnabled:s}, '\
+                                    '{preLaserPatternShape:s}, '\
+                                    '{preLaserPatternHzPattern:s}, '\
+                                    '{preLaserPatternHzPoint:s}, '\
+                                    '{preLaserPatternCount:s}, '\
+                                    '{preLaserPatternSizeX:s}, '\
+                                    '{preLaserPatternSizeY:s}, '\
+                                    '{preLaserPatternParam:s}, '\
+                                    '\"{preLaserStatefilterLo:s}\", '\
+                                    '\"{preLaserStatefilterHi:s}\", '\
+                                    '{preLaserStatefilterCriteria:s}, ' \
+                                    '{preLaserTimeout:s}\n'
         
-        self.headingsMoveRobot =    'robotEnabled, '\
-                                    'robotmovePatternShape, '\
-                                    'robotmovePatternHzPattern, '\
-                                    'robotmovePatternHzPoint, '\
-                                    'robotmovePatternCount, '\
-                                    'robotmovePatternSizeX, '\
-                                    'robotmovePatternSizeY, '\
-                                    'robotmovePatternParam, '\
-                                    'robotmoveRelTracking, '\
-                                    'robotmoveRelOriginPosition, '\
-                                    'robotmoveRelOriginAngle, '\
-                                    'robotmoveRelDistance, '\
-                                    'robotmoveRelAngle, '\
-                                    'robotmoveRelAngleType, '\
-                                    'robotmoveRelSpeed, '\
-                                    'robotmoveRelSpeedType, '\
-                                    'robotmoveRelTolerance, ' \
-                                    'robotmoveTimeout\n'
-        self.templateMoveRobot =    '{robotEnabled:s}, '\
-                                    '{robotmovePatternShape:s}, '\
-                                    '{robotmovePatternHzPattern:s}, '\
-                                    '{robotmovePatternHzPoint:s}, '\
-                                    '{robotmovePatternCount:s}, '\
-                                    '{robotmovePatternSizeX:s}, '\
-                                    '{robotmovePatternSizeY:s}, '\
-                                    '{robotmovePatternParam:s}, '\
-                                    '{robotmoveRelTracking:s}, '\
-                                    '{robotmoveRelOriginPosition:s}, '\
-                                    '{robotmoveRelOriginAngle:s}, '\
-                                    '{robotmoveRelDistance:s}, '\
-                                    '{robotmoveRelAngle:s}, '\
-                                    '{robotmoveRelAngleType:s}, '\
-                                    '{robotmoveRelSpeed:s}, '\
-                                    '{robotmoveRelSpeedType:s}, '\
-                                    '{robotmoveRelTolerance:s}, ' \
-                                    '{robotmoveTimeout:s}\n'
-                                    
-        self.headingsLasertrack =   'laserEnabled, '\
-                                    'laserPatternShape, '\
-                                    'laserPatternHzPattern, '\
-                                    'laserPatternHzPoint, '\
-                                    'laserPatternCount, '\
-                                    'laserPatternSizeX, '\
-                                    'laserPatternSizeY, '\
-                                    'laserPatternParam, '\
-                                    'laserStatefilterLo, '\
-                                    'laserStatefilterHi, '\
-                                    'laserStatefilterCriteria, ' \
-                                    'laserTimeout\n'
-        self.templateLasertrack =   '{laserEnabled:s}, '\
-                                    '{laserPatternShape:s}, '\
-                                    '{laserPatternHzPattern:s}, '\
-                                    '{laserPatternHzPoint:s}, '\
-                                    '{laserPatternCount:s}, '\
-                                    '{laserPatternSizeX:s}, '\
-                                    '{laserPatternSizeY:s}, '\
-                                    '{laserPatternParam:s}, '\
-                                    '{laserStatefilterLo:s}, '\
-                                    '{laserStatefilterHi:s}, '\
-                                    '{laserStatefilterCriteria:s}, ' \
-                                    '{laserTimeout:s}\n'
-        
-        self.headingsLEDPanels =    'ledpanelsEnabled, '\
-                                    'ledpanelsCommand, '\
-                                    'ledpanelsIdPattern, '\
-                                    'ledpanelsFrameid, '\
-                                    'ledpanelsStatefilterLo, '\
-                                    'ledpanelsStatefilterHi, '\
-                                    'ledpanelsStatefilterCriteria, '\
-                                    'ledpanelsTimeout\n'
-        self.templateLEDPanels =    '{ledpanelsEnabled:s}, '\
-                                    '{ledpanelsCommand:s}, '\
-                                    '{ledpanelsIdPattern:s}, '\
-                                    '{ledpanelsFrameid:s}, '\
-                                    '{ledpanelsStatefilterLo:s}, '\
-                                    '{ledpanelsStatefilterHi:s}, '\
-                                    '{ledpanelsStatefilterCriteria:s}, '\
-                                    '{ledpanelsTimeout:s}\n'
-        
-        self.headingsTriggerExit =  'trigger2Enabled, '\
-                                    'trigger2FrameidParent, '\
-                                    'trigger2FrameidChild, '\
-                                    'trigger2SpeedAbsParentMin, '\
-                                    'trigger2SpeedAbsParentMax, '\
-                                    'trigger2SpeedAbsChildMin, '\
-                                    'trigger2SpeedAbsChildMax, '\
-                                    'trigger2SpeedRelMin, '\
-                                    'trigger2SpeedRelMax, '\
-                                    'trigger2DistanceMin, '\
-                                    'trigger2DistanceMax, '\
-                                    'trigger2AngleMin, '\
-                                    'trigger2AngleMax, '\
-                                    'trigger2AngleTest, '\
-                                    'trigger2AngleTestBilateral, '\
-                                    'trigger2TimeHold, '\
-                                    'trigger2Timeout\n'
-        self.templateTriggerExit =  '{trigger2Enabled:s}, '\
-                                    '{trigger2FrameidParent:s}, '\
-                                    '{trigger2FrameidChild:s}, '\
-                                    '{trigger2SpeedAbsParentMin:s}, '\
-                                    '{trigger2SpeedAbsParentMax:s}, '\
-                                    '{trigger2SpeedAbsChildMin:s}, '\
-                                    '{trigger2SpeedAbsChildMax:s}, '\
-                                    '{trigger2SpeedRelMin:s}, '\
-                                    '{trigger2SpeedRelMax:s}, '\
-                                    '{trigger2DistanceMin:s}, '\
-                                    '{trigger2DistanceMax:s}, '\
-                                    '{trigger2AngleMin:s}, '\
-                                    '{trigger2AngleMax:s}, '\
-                                    '{trigger2AngleTest:s}, '\
-                                    '{trigger2AngleTestBilateral:s}, '\
-                                    '{trigger2TimeHold:s}, '\
-                                    '{trigger2Timeout:s}\n'
-                                  
-        self.headingsWaitExit =     'waitExit\n'
-        self.templateWaitExit =     '{waitExit:s}\n'
+        self.headingsPreLEDPanels = 'preLEDPanelsEnabled, '\
+                                    'preLEDPanelsCommand, '\
+                                    'preLEDPanelsIdPattern, '\
+                                    'preLEDPanelsFrameid, '\
+                                    'preLEDPanelsStatefilterLo, '\
+                                    'preLEDPanelsStatefilterHi, '\
+                                    'preLEDPanelsStatefilterCriteria, '\
+                                    'preLEDPanelsTimeout\n'
+        self.templatePreLEDPanels = '{preLEDPanelsEnabled:s}, '\
+                                    '{preLEDPanelsCommand:s}, '\
+                                    '{preLEDPanelsIdPattern:s}, '\
+                                    '{preLEDPanelsFrameid:s}, '\
+                                    '{preLEDPanelsStatefilterLo:s}, '\
+                                    '{preLEDPanelsStatefilterHi:s}, '\
+                                    '{preLEDPanelsStatefilterCriteria:s}, '\
+                                    '{preLEDPanelsTimeout:s}\n'
 
-        self.headingsData = 'time, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly\n'
-        self.templateData = '{time:0.4f}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}\n'
+        
+        self.headingsPreWait1 =     'preWait1\n'
+        self.templatePreWait1 =     '{preWait1:s}\n'
+        
+        self.headingsPreTrigger =   'preTriggerEnabled, '\
+                                    'preTriggerFrameidParent, '\
+                                    'preTriggerFrameidChild, '\
+                                    'preTriggerSpeedAbsParentMin, '\
+                                    'preTriggerSpeedAbsParentMax, '\
+                                    'preTriggerSpeedAbsChildMin, '\
+                                    'preTriggerSpeedAbsChildMax, '\
+                                    'preTriggerSpeedRelMin, '\
+                                    'preTriggerSpeedRelMax, '\
+                                    'preTriggerDistanceMin, '\
+                                    'preTriggerDistanceMax, '\
+                                    'preTriggerAngleMin, '\
+                                    'preTriggerAngleMax, '\
+                                    'preTriggerAngleTest, '\
+                                    'preTriggerAngleTestBilateral, '\
+                                    'preTriggerTimeHold, '\
+                                    'preTriggerTimeout\n'
+        self.templatePreTrigger =   '{preTriggerEnabled:s}, '\
+                                    '{preTriggerFrameidParent:s}, '\
+                                    '{preTriggerFrameidChild:s}, '\
+                                    '{preTriggerSpeedAbsParentMin:s}, '\
+                                    '{preTriggerSpeedAbsParentMax:s}, '\
+                                    '{preTriggerSpeedAbsChildMin:s}, '\
+                                    '{preTriggerSpeedAbsChildMax:s}, '\
+                                    '{preTriggerSpeedRelMin:s}, '\
+                                    '{preTriggerSpeedRelMax:s}, '\
+                                    '{preTriggerDistanceMin:s}, '\
+                                    '{preTriggerDistanceMax:s}, '\
+                                    '{preTriggerAngleMin:s}, '\
+                                    '{preTriggerAngleMax:s}, '\
+                                    '{preTriggerAngleTest:s}, '\
+                                    '{preTriggerAngleTestBilateral:s}, '\
+                                    '{preTriggerTimeHold:s}, '\
+                                    '{preTriggerTimeout:s}\n'
+                                    
+        self.headingsPreWait2 =     'preWait2\n'
+        self.templatePreWait2 =     '{preWait2:s}\n'
+        
+        
+        self.headingsTrialRobot =  'trialRobotEnabled, '\
+                                    'trialRobotMovePatternShape, '\
+                                    'trialRobotMovePatternHzPattern, '\
+                                    'trialRobotMovePatternHzPoint, '\
+                                    'trialRobotMovePatternCount, '\
+                                    'trialRobotMovePatternSizeX, '\
+                                    'trialRobotMovePatternSizeY, '\
+                                    'trialRobotMovePatternParam, '\
+                                    'trialRobotMoveRelTracking, '\
+                                    'trialRobotMoveRelOriginPosition, '\
+                                    'trialRobotMoveRelOriginAngle, '\
+                                    'trialRobotMoveRelDistance, '\
+                                    'trialRobotMoveRelAngle, '\
+                                    'trialRobotMoveRelAngleType, '\
+                                    'trialRobotMoveRelSpeed, '\
+                                    'trialRobotMoveRelSpeedType, '\
+                                    'trialRobotMoveRelTolerance, ' \
+                                    'trialRobotMoveTimeout\n'
+        self.templateTrialRobot =  '{trialRobotEnabled:s}, '\
+                                    '{trialRobotMovePatternShape:s}, '\
+                                    '{trialRobotMovePatternHzPattern:s}, '\
+                                    '{trialRobotMovePatternHzPoint:s}, '\
+                                    '{trialRobotMovePatternCount:s}, '\
+                                    '{trialRobotMovePatternSizeX:s}, '\
+                                    '{trialRobotMovePatternSizeY:s}, '\
+                                    '{trialRobotMovePatternParam:s}, '\
+                                    '{trialRobotMoveRelTracking:s}, '\
+                                    '{trialRobotMoveRelOriginPosition:s}, '\
+                                    '{trialRobotMoveRelOriginAngle:s}, '\
+                                    '{trialRobotMoveRelDistance:s}, '\
+                                    '{trialRobotMoveRelAngle:s}, '\
+                                    '{trialRobotMoveRelAngleType:s}, '\
+                                    '{trialRobotMoveRelSpeed:s}, '\
+                                    '{trialRobotMoveRelSpeedType:s}, '\
+                                    '{trialRobotMoveRelTolerance:s}, ' \
+                                    '{trialRobotMoveTimeout:s}\n'
+                                    
+        self.headingsTrialLaser =   'trialLaserEnabled, '\
+                                    'trialLaserPatternShape, '\
+                                    'trialLaserPatternHzPattern, '\
+                                    'trialLaserPatternHzPoint, '\
+                                    'trialLaserPatternCount, '\
+                                    'trialLaserPatternSizeX, '\
+                                    'trialLaserPatternSizeY, '\
+                                    'trialLaserPatternParam, '\
+                                    'trialLaserStatefilterLo, '\
+                                    'trialLaserStatefilterHi, '\
+                                    'trialLaserStatefilterCriteria, ' \
+                                    'trialLaserTimeout\n'
+        self.templateTrialLaser = '{trialLaserEnabled:s}, '\
+                                    '{trialLaserPatternShape:s}, '\
+                                    '{trialLaserPatternHzPattern:s}, '\
+                                    '{trialLaserPatternHzPoint:s}, '\
+                                    '{trialLaserPatternCount:s}, '\
+                                    '{trialLaserPatternSizeX:s}, '\
+                                    '{trialLaserPatternSizeY:s}, '\
+                                    '{trialLaserPatternParam:s}, '\
+                                    '\"{trialLaserStatefilterLo:s}\", '\
+                                    '\"{trialLaserStatefilterHi:s}\", '\
+                                    '{trialLaserStatefilterCriteria:s}, ' \
+                                    '{trialLaserTimeout:s}\n'
+        
+        self.headingsTrialLEDPanels =    'trialLEDPanelsEnabled, '\
+                                    'trialLEDPanelsCommand, '\
+                                    'trialLEDPanelsIdPattern, '\
+                                    'trialLEDPanelsFrameid, '\
+                                    'trialLEDPanelsStatefilterLo, '\
+                                    'trialLEDPanelsStatefilterHi, '\
+                                    'trialLEDPanelsStatefilterCriteria, '\
+                                    'trialLEDPanelsTimeout\n'
+        self.templateTrialLEDPanels =    '{trialLEDPanelsEnabled:s}, '\
+                                    '{trialLEDPanelsCommand:s}, '\
+                                    '{trialLEDPanelsIdPattern:s}, '\
+                                    '{trialLEDPanelsFrameid:s}, '\
+                                    '{trialLEDPanelsStatefilterLo:s}, '\
+                                    '{trialLEDPanelsStatefilterHi:s}, '\
+                                    '{trialLEDPanelsStatefilterCriteria:s}, '\
+                                    '{trialLEDPanelsTimeout:s}\n'
+        
+        self.headingsPostTrigger =  'postTriggerEnabled, '\
+                                    'postTriggerFrameidParent, '\
+                                    'postTriggerFrameidChild, '\
+                                    'postTriggerSpeedAbsParentMin, '\
+                                    'postTriggerSpeedAbsParentMax, '\
+                                    'postTriggerSpeedAbsChildMin, '\
+                                    'postTriggerSpeedAbsChildMax, '\
+                                    'postTriggerSpeedRelMin, '\
+                                    'postTriggerSpeedRelMax, '\
+                                    'postTriggerDistanceMin, '\
+                                    'postTriggerDistanceMax, '\
+                                    'postTriggerAngleMin, '\
+                                    'postTriggerAngleMax, '\
+                                    'postTriggerAngleTest, '\
+                                    'postTriggerAngleTestBilateral, '\
+                                    'postTriggerTimeHold, '\
+                                    'postTriggerTimeout\n'
+        self.templatePostTrigger =  '{postTriggerEnabled:s}, '\
+                                    '{postTriggerFrameidParent:s}, '\
+                                    '{postTriggerFrameidChild:s}, '\
+                                    '{postTriggerSpeedAbsParentMin:s}, '\
+                                    '{postTriggerSpeedAbsParentMax:s}, '\
+                                    '{postTriggerSpeedAbsChildMin:s}, '\
+                                    '{postTriggerSpeedAbsChildMax:s}, '\
+                                    '{postTriggerSpeedRelMin:s}, '\
+                                    '{postTriggerSpeedRelMax:s}, '\
+                                    '{postTriggerDistanceMin:s}, '\
+                                    '{postTriggerDistanceMax:s}, '\
+                                    '{postTriggerAngleMin:s}, '\
+                                    '{postTriggerAngleMax:s}, '\
+                                    '{postTriggerAngleTest:s}, '\
+                                    '{postTriggerAngleTestBilateral:s}, '\
+                                    '{postTriggerTimeHold:s}, '\
+                                    '{postTriggerTimeout:s}\n'
+                                  
+        self.headingsPostWait =     'postWait\n'
+        self.templatePostWait =     '{postWait:s}\n'
+
+        self.headingsData = 'time, triggered, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly\n'
+        self.templateData = '{time:0.4f}, {triggered:s}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}\n'
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -351,8 +441,8 @@ class Save:
             # At the end of a run, close the file if we're no longer saving.
             if (self.saveOnlyWhileTriggered):
                 if (self.saveArenastate):
-                    if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
-                        with self.lockArenastate:
+                    with self.lockArenastate:
+                        if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
                             self.fid.close()
                             rospy.logwarn('SA logfile close()')
     
@@ -382,8 +472,9 @@ class Save:
 
             if (self.saveArenastate):
                 # Close old .csv file if there was one.
-                if (self.fid is not None) and (not self.fid.closed):
-                    self.fid.close()
+                with self.lockArenastate:
+                    if (self.fid is not None) and (not self.fid.closed):
+                        self.fid.close()
                     rospy.logwarn('SA logfile close()')
                     
                 # Determine if we should be saving.
@@ -456,6 +547,9 @@ class Save:
                                                             time.localtime(now).tm_min,
                                                             time.localtime(now).tm_sec)
         
+        paramsVersionFile = self.templateVersionFile.format(
+                                                versionFile                = self.versionFile
+                                                )
         paramsExperiment = self.templateExperiment.format(
                                                 date_time                  = str(rospy.Time.now().to_sec()),
                                                 description                = str(experimentparamsReq.experiment.description),
@@ -488,130 +582,221 @@ class Save:
         self.headingsTracking += '\n'
         paramsTracking += '\n'
 
-        paramsWaitEntry1 = self.templateWaitEntry1.format(
-                                                waitEntry1                  = str(experimentparamsReq.waitEntry1),
-                                                )
-        paramsTriggerEntry = self.templateTriggerEntry.format(
-                                                trigger1Enabled            = str(experimentparamsReq.triggerEntry.enabled),
-                                                trigger1FrameidParent      = str(experimentparamsReq.triggerEntry.frameidParent),
-                                                trigger1FrameidChild       = str(experimentparamsReq.triggerEntry.frameidChild),
-                                                trigger1SpeedAbsParentMin  = str(experimentparamsReq.triggerEntry.speedAbsParentMin),
-                                                trigger1SpeedAbsParentMax  = str(experimentparamsReq.triggerEntry.speedAbsParentMax),
-                                                trigger1SpeedAbsChildMin   = str(experimentparamsReq.triggerEntry.speedAbsChildMin),
-                                                trigger1SpeedAbsChildMax   = str(experimentparamsReq.triggerEntry.speedAbsChildMax),
-                                                trigger1SpeedRelMin        = str(experimentparamsReq.triggerEntry.speedRelMin),
-                                                trigger1SpeedRelMax        = str(experimentparamsReq.triggerEntry.speedRelMax),
-                                                trigger1DistanceMin        = str(experimentparamsReq.triggerEntry.distanceMin),
-                                                trigger1DistanceMax        = str(experimentparamsReq.triggerEntry.distanceMax),
-                                                trigger1AngleMin           = str(experimentparamsReq.triggerEntry.angleMin),
-                                                trigger1AngleMax           = str(experimentparamsReq.triggerEntry.angleMax),
-                                                trigger1AngleTest          = str(experimentparamsReq.triggerEntry.angleTest),
-                                                trigger1AngleTestBilateral = str(experimentparamsReq.triggerEntry.angleTestBilateral),
-                                                trigger1TimeHold           = str(experimentparamsReq.triggerEntry.timeHold),
-                                                trigger1Timeout            = str(experimentparamsReq.triggerEntry.timeout),
-                                                )
-        paramsWaitEntry2 = self.templateWaitEntry2.format(
-                                                waitEntry2                  = str(experimentparamsReq.waitEntry2),
-                                                )
-        paramsMoveRobot = self.templateMoveRobot.format(
-                                                robotEnabled           = str(experimentparamsReq.robot.enabled),
-                                                robotmovePatternShape      = str(experimentparamsReq.robot.move.pattern.shape),
-                                                robotmovePatternHzPattern  = str(experimentparamsReq.robot.move.pattern.hzPattern),
-                                                robotmovePatternHzPoint    = str(experimentparamsReq.robot.move.pattern.hzPoint),
-                                                robotmovePatternCount      = str(experimentparamsReq.robot.move.pattern.count),
-                                                robotmovePatternSizeX      = str(experimentparamsReq.robot.move.pattern.size.x),
-                                                robotmovePatternSizeY      = str(experimentparamsReq.robot.move.pattern.size.y),
-                                                robotmovePatternParam      = str(experimentparamsReq.robot.move.pattern.param),
-                                                robotmoveRelTracking       = str(experimentparamsReq.robot.move.relative.tracking),
-                                                robotmoveRelOriginPosition = str(experimentparamsReq.robot.move.relative.frameidOriginPosition),
-                                                robotmoveRelOriginAngle    = str(experimentparamsReq.robot.move.relative.frameidOriginAngle),
-                                                robotmoveRelDistance       = str(experimentparamsReq.robot.move.relative.distance),
-                                                robotmoveRelAngle          = str(experimentparamsReq.robot.move.relative.angle),
-                                                robotmoveRelAngleType      = str(experimentparamsReq.robot.move.relative.angleType),
-                                                robotmoveRelSpeed          = str(experimentparamsReq.robot.move.relative.speed),
-                                                robotmoveRelSpeedType      = str(experimentparamsReq.robot.move.relative.speedType),
-                                                robotmoveRelTolerance      = str(experimentparamsReq.robot.move.relative.tolerance),
-                                                robotmoveTimeout           = str(experimentparamsReq.robot.move.timeout),
+        #######################################################################
+        paramsPreRobot = self.templatePreRobot.format(
+                                                preRobotEnabled               = str(experimentparamsReq.pre.robot.enabled),
+                                                preRobotMovePatternShape      = str(experimentparamsReq.pre.robot.move.pattern.shape),
+                                                preRobotMovePatternHzPattern  = str(experimentparamsReq.pre.robot.move.pattern.hzPattern),
+                                                preRobotMovePatternHzPoint    = str(experimentparamsReq.pre.robot.move.pattern.hzPoint),
+                                                preRobotMovePatternCount      = str(experimentparamsReq.pre.robot.move.pattern.count),
+                                                preRobotMovePatternSizeX      = str(experimentparamsReq.pre.robot.move.pattern.size.x),
+                                                preRobotMovePatternSizeY      = str(experimentparamsReq.pre.robot.move.pattern.size.y),
+                                                preRobotMovePatternParam      = str(experimentparamsReq.pre.robot.move.pattern.param),
+                                                preRobotMoveRelTracking       = str(experimentparamsReq.pre.robot.move.relative.tracking),
+                                                preRobotMoveRelOriginPosition = str(experimentparamsReq.pre.robot.move.relative.frameidOriginPosition),
+                                                preRobotMoveRelOriginAngle    = str(experimentparamsReq.pre.robot.move.relative.frameidOriginAngle),
+                                                preRobotMoveRelDistance       = str(experimentparamsReq.pre.robot.move.relative.distance),
+                                                preRobotMoveRelAngle          = str(experimentparamsReq.pre.robot.move.relative.angle),
+                                                preRobotMoveRelAngleType      = str(experimentparamsReq.pre.robot.move.relative.angleType),
+                                                preRobotMoveRelSpeed          = str(experimentparamsReq.pre.robot.move.relative.speed),
+                                                preRobotMoveRelSpeedType      = str(experimentparamsReq.pre.robot.move.relative.speedType),
+                                                preRobotMoveRelTolerance      = str(experimentparamsReq.pre.robot.move.relative.tolerance),
+                                                preRobotMoveTimeout           = str(experimentparamsReq.pre.robot.move.timeout),
                                                 )
         
-        if len(experimentparamsReq.lasertrack.pattern_list) > 0:
-            patternShape           = str(experimentparamsReq.lasertrack.pattern_list[0].shape)
-            patternHzPattern       = str(experimentparamsReq.lasertrack.pattern_list[0].hzPattern)
-            patternHzPoint         = str(experimentparamsReq.lasertrack.pattern_list[0].hzPoint)
-            patternCount           = str(experimentparamsReq.lasertrack.pattern_list[0].count)
-            patternSizeX           = str(experimentparamsReq.lasertrack.pattern_list[0].size.x)
-            patternSizeY           = str(experimentparamsReq.lasertrack.pattern_list[0].size.y)
-            patternParam           = str(experimentparamsReq.lasertrack.pattern_list[0].param)
+        #######################################################################
+        if len(experimentparamsReq.pre.lasertrack.pattern_list) > 0:
+            patternShape           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].shape)
+            patternHzPattern       = str(experimentparamsReq.pre.lasertrack.pattern_list[0].hzPattern)
+            patternHzPoint         = str(experimentparamsReq.pre.lasertrack.pattern_list[0].hzPoint)
+            patternCount           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].count)
+            patternSizeX           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].size.x)
+            patternSizeY           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].size.y)
+            patternParam           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].param)
         else:
-            patternShape           = "",
-            patternHzPattern       = str(0.0),
-            patternHzPoint         = str(0.0),
-            patternCount           = str(0),
-            patternSizeX           = str(0.0),
-            patternSizeY           = str(0.0),
-            patternParam           = str(0.0),
+            patternShape           = ""
+            patternHzPattern       = str(0.0)
+            patternHzPoint         = str(0.0)
+            patternCount           = str(0)
+            patternSizeX           = str(0.0)
+            patternSizeY           = str(0.0)
+            patternParam           = str(0.0)
 
-        if len(experimentparamsReq.lasertrack.statefilterHi_list) > 0:
-            statefilterHi          = '\"' + str(experimentparamsReq.lasertrack.statefilterHi_list[0]) + '\"'
-            statefilterLo          = '\"' + str(experimentparamsReq.lasertrack.statefilterLo_list[0]) + '\"'
-            statefilterCriteria    = str(experimentparamsReq.lasertrack.statefilterCriteria_list[0])
+        if len(experimentparamsReq.pre.lasertrack.statefilterHi_list) > 0:
+            statefilterHi          = str(experimentparamsReq.pre.lasertrack.statefilterHi_list[0])
+            statefilterLo          = str(experimentparamsReq.pre.lasertrack.statefilterLo_list[0])
+            statefilterCriteria    = str(experimentparamsReq.pre.lasertrack.statefilterCriteria_list[0])
         else:
             statefilterHi          = ""
             statefilterLo          = ""
             statefilterCriteria    = ""
 
-        paramsLasertrack = self.templateLasertrack.format(
-                                                laserEnabled               = str(experimentparamsReq.lasertrack.enabled),
-                                                laserPatternShape          = patternShape,
-                                                laserPatternHzPattern      = patternHzPattern,
-                                                laserPatternHzPoint        = patternHzPoint,
-                                                laserPatternCount          = patternCount,
-                                                laserPatternSizeX          = patternSizeX,
-                                                laserPatternSizeY          = patternSizeY,
-                                                laserPatternParam          = patternParam,
-                                                laserStatefilterHi         = statefilterHi,
-                                                laserStatefilterLo         = statefilterLo,
-                                                laserStatefilterCriteria   = statefilterCriteria,
-                                                laserTimeout               = str(experimentparamsReq.lasertrack.timeout),
+        paramsPreLaser = self.templatePreLaser.format(
+                                                preLaserEnabled               = str(experimentparamsReq.pre.lasertrack.enabled),
+                                                preLaserPatternShape          = patternShape,
+                                                preLaserPatternHzPattern      = patternHzPattern,
+                                                preLaserPatternHzPoint        = patternHzPoint,
+                                                preLaserPatternCount          = patternCount,
+                                                preLaserPatternSizeX          = patternSizeX,
+                                                preLaserPatternSizeY          = patternSizeY,
+                                                preLaserPatternParam          = patternParam,
+                                                preLaserStatefilterHi         = statefilterHi,
+                                                preLaserStatefilterLo         = statefilterLo,
+                                                preLaserStatefilterCriteria   = statefilterCriteria,
+                                                preLaserTimeout               = str(experimentparamsReq.pre.lasertrack.timeout),
                                                 )
             
-        paramsLEDPanels = self.templateLEDPanels.format(
-                                                ledpanelsEnabled             = str(experimentparamsReq.ledpanels.enabled),
-                                                ledpanelsCommand             = str(experimentparamsReq.ledpanels.command),
-                                                ledpanelsIdPattern           = str(experimentparamsReq.ledpanels.idPattern),
-                                                ledpanelsFrameid             = str(experimentparamsReq.ledpanels.frame_id),
-                                                ledpanelsStatefilterLo       = str(experimentparamsReq.ledpanels.statefilterLo),
-                                                ledpanelsStatefilterHi       = str(experimentparamsReq.ledpanels.statefilterHi),
-                                                ledpanelsStatefilterCriteria = str(experimentparamsReq.ledpanels.statefilterCriteria),
-                                                ledpanelsTimeout             = str(experimentparamsReq.ledpanels.timeout),
+        #######################################################################
+        paramsPreLEDPanels = self.templatePreLEDPanels.format(
+                                                preLEDPanelsEnabled             = str(experimentparamsReq.pre.ledpanels.enabled),
+                                                preLEDPanelsCommand             = str(experimentparamsReq.pre.ledpanels.command),
+                                                preLEDPanelsIdPattern           = str(experimentparamsReq.pre.ledpanels.idPattern),
+                                                preLEDPanelsFrameid             = str(experimentparamsReq.pre.ledpanels.frame_id),
+                                                preLEDPanelsStatefilterLo       = str(experimentparamsReq.pre.ledpanels.statefilterLo),
+                                                preLEDPanelsStatefilterHi       = str(experimentparamsReq.pre.ledpanels.statefilterHi),
+                                                preLEDPanelsStatefilterCriteria = str(experimentparamsReq.pre.ledpanels.statefilterCriteria),
+                                                preLEDPanelsTimeout             = str(experimentparamsReq.pre.ledpanels.timeout),
+                                                )
+        #######################################################################
+        paramsPreWait1 = self.templatePreWait1.format(
+                                                preWait1                  = str(experimentparamsReq.pre.wait1),
+                                                )
+        #######################################################################
+        paramsPreTrigger = self.templatePreTrigger.format(
+                                                preTriggerEnabled            = str(experimentparamsReq.pre.trigger.enabled),
+                                                preTriggerFrameidParent      = str(experimentparamsReq.pre.trigger.frameidParent),
+                                                preTriggerFrameidChild       = str(experimentparamsReq.pre.trigger.frameidChild),
+                                                preTriggerSpeedAbsParentMin  = str(experimentparamsReq.pre.trigger.speedAbsParentMin),
+                                                preTriggerSpeedAbsParentMax  = str(experimentparamsReq.pre.trigger.speedAbsParentMax),
+                                                preTriggerSpeedAbsChildMin   = str(experimentparamsReq.pre.trigger.speedAbsChildMin),
+                                                preTriggerSpeedAbsChildMax   = str(experimentparamsReq.pre.trigger.speedAbsChildMax),
+                                                preTriggerSpeedRelMin        = str(experimentparamsReq.pre.trigger.speedRelMin),
+                                                preTriggerSpeedRelMax        = str(experimentparamsReq.pre.trigger.speedRelMax),
+                                                preTriggerDistanceMin        = str(experimentparamsReq.pre.trigger.distanceMin),
+                                                preTriggerDistanceMax        = str(experimentparamsReq.pre.trigger.distanceMax),
+                                                preTriggerAngleMin           = str(experimentparamsReq.pre.trigger.angleMin),
+                                                preTriggerAngleMax           = str(experimentparamsReq.pre.trigger.angleMax),
+                                                preTriggerAngleTest          = str(experimentparamsReq.pre.trigger.angleTest),
+                                                preTriggerAngleTestBilateral = str(experimentparamsReq.pre.trigger.angleTestBilateral),
+                                                preTriggerTimeHold           = str(experimentparamsReq.pre.trigger.timeHold),
+                                                preTriggerTimeout            = str(experimentparamsReq.pre.trigger.timeout),
+                                                )
+        #######################################################################
+        paramsPreWait2 = self.templatePreWait2.format(
+                                                preWait2                       = str(experimentparamsReq.pre.wait2),
+                                                )
+
+        
+        #######################################################################
+        paramsTrialRobot = self.templateTrialRobot.format(
+                                                trialRobotEnabled               = str(experimentparamsReq.trial.robot.enabled),
+                                                trialRobotMovePatternShape      = str(experimentparamsReq.trial.robot.move.pattern.shape),
+                                                trialRobotMovePatternHzPattern  = str(experimentparamsReq.trial.robot.move.pattern.hzPattern),
+                                                trialRobotMovePatternHzPoint    = str(experimentparamsReq.trial.robot.move.pattern.hzPoint),
+                                                trialRobotMovePatternCount      = str(experimentparamsReq.trial.robot.move.pattern.count),
+                                                trialRobotMovePatternSizeX      = str(experimentparamsReq.trial.robot.move.pattern.size.x),
+                                                trialRobotMovePatternSizeY      = str(experimentparamsReq.trial.robot.move.pattern.size.y),
+                                                trialRobotMovePatternParam      = str(experimentparamsReq.trial.robot.move.pattern.param),
+                                                trialRobotMoveRelTracking       = str(experimentparamsReq.trial.robot.move.relative.tracking),
+                                                trialRobotMoveRelOriginPosition = str(experimentparamsReq.trial.robot.move.relative.frameidOriginPosition),
+                                                trialRobotMoveRelOriginAngle    = str(experimentparamsReq.trial.robot.move.relative.frameidOriginAngle),
+                                                trialRobotMoveRelDistance       = str(experimentparamsReq.trial.robot.move.relative.distance),
+                                                trialRobotMoveRelAngle          = str(experimentparamsReq.trial.robot.move.relative.angle),
+                                                trialRobotMoveRelAngleType      = str(experimentparamsReq.trial.robot.move.relative.angleType),
+                                                trialRobotMoveRelSpeed          = str(experimentparamsReq.trial.robot.move.relative.speed),
+                                                trialRobotMoveRelSpeedType      = str(experimentparamsReq.trial.robot.move.relative.speedType),
+                                                trialRobotMoveRelTolerance      = str(experimentparamsReq.trial.robot.move.relative.tolerance),
+                                                trialRobotMoveTimeout           = str(experimentparamsReq.trial.robot.move.timeout),
+                                                )
+        
+        #######################################################################
+        if len(experimentparamsReq.trial.lasertrack.pattern_list) > 0:
+            patternShape           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].shape)
+            patternHzPattern       = str(experimentparamsReq.trial.lasertrack.pattern_list[0].hzPattern)
+            patternHzPoint         = str(experimentparamsReq.trial.lasertrack.pattern_list[0].hzPoint)
+            patternCount           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].count)
+            patternSizeX           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].size.x)
+            patternSizeY           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].size.y)
+            patternParam           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].param)
+        else:
+            patternShape           = ""
+            patternHzPattern       = str(0.0)
+            patternHzPoint         = str(0.0)
+            patternCount           = str(0)
+            patternSizeX           = str(0.0)
+            patternSizeY           = str(0.0)
+            patternParam           = str(0.0)
+
+        if len(experimentparamsReq.trial.lasertrack.statefilterHi_list) > 0:
+            statefilterHi          = str(experimentparamsReq.trial.lasertrack.statefilterHi_list[0])
+            statefilterLo          = str(experimentparamsReq.trial.lasertrack.statefilterLo_list[0])
+            statefilterCriteria    = str(experimentparamsReq.trial.lasertrack.statefilterCriteria_list[0])
+        else:
+            statefilterHi          = ""
+            statefilterLo          = ""
+            statefilterCriteria    = ""
+
+        paramsTrialLaser = self.templateTrialLaser.format(
+                                                trialLaserEnabled               = str(experimentparamsReq.trial.lasertrack.enabled),
+                                                trialLaserPatternShape          = patternShape,
+                                                trialLaserPatternHzPattern      = patternHzPattern,
+                                                trialLaserPatternHzPoint        = patternHzPoint,
+                                                trialLaserPatternCount          = patternCount,
+                                                trialLaserPatternSizeX          = patternSizeX,
+                                                trialLaserPatternSizeY          = patternSizeY,
+                                                trialLaserPatternParam          = patternParam,
+                                                trialLaserStatefilterHi         = statefilterHi,
+                                                trialLaserStatefilterLo         = statefilterLo,
+                                                trialLaserStatefilterCriteria   = statefilterCriteria,
+                                                trialLaserTimeout               = str(experimentparamsReq.trial.lasertrack.timeout),
                                                 )
             
-        paramsTriggerExit = self.templateTriggerExit.format(
-                                                trigger2Enabled            = str(experimentparamsReq.triggerExit.enabled),
-                                                trigger2FrameidParent      = str(experimentparamsReq.triggerExit.frameidParent),
-                                                trigger2FrameidChild       = str(experimentparamsReq.triggerExit.frameidChild),
-                                                trigger2SpeedAbsParentMin  = str(experimentparamsReq.triggerExit.speedAbsParentMin),
-                                                trigger2SpeedAbsParentMax  = str(experimentparamsReq.triggerExit.speedAbsParentMax),
-                                                trigger2SpeedAbsChildMin   = str(experimentparamsReq.triggerExit.speedAbsChildMin),
-                                                trigger2SpeedAbsChildMax   = str(experimentparamsReq.triggerExit.speedAbsChildMax),
-                                                trigger2SpeedRelMin        = str(experimentparamsReq.triggerExit.speedRelMin),
-                                                trigger2SpeedRelMax        = str(experimentparamsReq.triggerExit.speedRelMax),
-                                                trigger2DistanceMin        = str(experimentparamsReq.triggerExit.distanceMin),
-                                                trigger2DistanceMax        = str(experimentparamsReq.triggerExit.distanceMax),
-                                                trigger2AngleMin           = str(experimentparamsReq.triggerExit.angleMin),
-                                                trigger2AngleMax           = str(experimentparamsReq.triggerExit.angleMax),
-                                                trigger2AngleTest          = str(experimentparamsReq.triggerExit.angleTest),
-                                                trigger2AngleTestBilateral = str(experimentparamsReq.triggerExit.angleTestBilateral),
-                                                trigger2TimeHold           = str(experimentparamsReq.triggerExit.timeHold),
-                                                trigger2Timeout            = str(experimentparamsReq.triggerExit.timeout),
+        #######################################################################
+        paramsTrialLEDPanels = self.templateTrialLEDPanels.format(
+                                                trialLEDPanelsEnabled             = str(experimentparamsReq.trial.ledpanels.enabled),
+                                                trialLEDPanelsCommand             = str(experimentparamsReq.trial.ledpanels.command),
+                                                trialLEDPanelsIdPattern           = str(experimentparamsReq.trial.ledpanels.idPattern),
+                                                trialLEDPanelsFrameid             = str(experimentparamsReq.trial.ledpanels.frame_id),
+                                                trialLEDPanelsStatefilterLo       = str(experimentparamsReq.trial.ledpanels.statefilterLo),
+                                                trialLEDPanelsStatefilterHi       = str(experimentparamsReq.trial.ledpanels.statefilterHi),
+                                                trialLEDPanelsStatefilterCriteria = str(experimentparamsReq.trial.ledpanels.statefilterCriteria),
+                                                trialLEDPanelsTimeout             = str(experimentparamsReq.trial.ledpanels.timeout),
                                                 )
-        paramsWaitExit = self.templateWaitExit.format(
-                                                waitExit                   = str(experimentparamsReq.waitExit),
+            
+        #######################################################################
+        paramsPostTrigger = self.templatePostTrigger.format(
+                                                postTriggerEnabled            = str(experimentparamsReq.post.trigger.enabled),
+                                                postTriggerFrameidParent      = str(experimentparamsReq.post.trigger.frameidParent),
+                                                postTriggerFrameidChild       = str(experimentparamsReq.post.trigger.frameidChild),
+                                                postTriggerSpeedAbsParentMin  = str(experimentparamsReq.post.trigger.speedAbsParentMin),
+                                                postTriggerSpeedAbsParentMax  = str(experimentparamsReq.post.trigger.speedAbsParentMax),
+                                                postTriggerSpeedAbsChildMin   = str(experimentparamsReq.post.trigger.speedAbsChildMin),
+                                                postTriggerSpeedAbsChildMax   = str(experimentparamsReq.post.trigger.speedAbsChildMax),
+                                                postTriggerSpeedRelMin        = str(experimentparamsReq.post.trigger.speedRelMin),
+                                                postTriggerSpeedRelMax        = str(experimentparamsReq.post.trigger.speedRelMax),
+                                                postTriggerDistanceMin        = str(experimentparamsReq.post.trigger.distanceMin),
+                                                postTriggerDistanceMax        = str(experimentparamsReq.post.trigger.distanceMax),
+                                                postTriggerAngleMin           = str(experimentparamsReq.post.trigger.angleMin),
+                                                postTriggerAngleMax           = str(experimentparamsReq.post.trigger.angleMax),
+                                                postTriggerAngleTest          = str(experimentparamsReq.post.trigger.angleTest),
+                                                postTriggerAngleTestBilateral = str(experimentparamsReq.post.trigger.angleTestBilateral),
+                                                postTriggerTimeHold           = str(experimentparamsReq.post.trigger.timeHold),
+                                                postTriggerTimeout            = str(experimentparamsReq.post.trigger.timeout),
                                                 )
+        #######################################################################
+        paramsPostWait = self.templatePostWait.format(
+                                                postWait                      = str(experimentparamsReq.post.wait),
+                                                )
+        #######################################################################
+
 
         with self.lockArenastate:
             self.fid = open(self.filename, 'w')
             rospy.logwarn('SA logfile open(%s)' % self.filename)
+
+            self.fid.write(self.headingsVersionFile)
+            self.fid.write(paramsVersionFile)
+            self.fid.write('\n')
 
             self.fid.write(self.headingsExperiment)
             self.fid.write(paramsExperiment)
@@ -629,36 +814,48 @@ class Save:
             self.fid.write(paramsTracking)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsWaitEntry1)
-            self.fid.write(paramsWaitEntry1)
+            self.fid.write(self.headingsPreRobot)
+            self.fid.write(paramsPreRobot)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsTriggerEntry)
-            self.fid.write(paramsTriggerEntry)
+            self.fid.write(self.headingsPreLaser)
+            self.fid.write(paramsPreLaser)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsWaitEntry2)
-            self.fid.write(paramsWaitEntry2)
-            self.fid.write('\n')
-
-            self.fid.write(self.headingsMoveRobot)
-            self.fid.write(paramsMoveRobot)
-            self.fid.write('\n')
-
-            self.fid.write(self.headingsLasertrack)
-            self.fid.write(paramsLasertrack)
-            self.fid.write('\n')
-
-            self.fid.write(self.headingsLEDPanels)
-            self.fid.write(paramsLEDPanels)
+            self.fid.write(self.headingsPreLEDPanels)
+            self.fid.write(paramsPreLEDPanels)
             self.fid.write('\n')
             
-            self.fid.write(self.headingsTriggerExit)
-            self.fid.write(paramsTriggerExit)
+            self.fid.write(self.headingsPreWait1)
+            self.fid.write(paramsPreWait1)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsWaitExit)
-            self.fid.write(paramsWaitExit)
+            self.fid.write(self.headingsPreTrigger)
+            self.fid.write(paramsPreTrigger)
+            self.fid.write('\n')
+
+            self.fid.write(self.headingsPreWait2)
+            self.fid.write(paramsPreWait2)
+            self.fid.write('\n')
+
+            self.fid.write(self.headingsTrialRobot)
+            self.fid.write(paramsTrialRobot)
+            self.fid.write('\n')
+
+            self.fid.write(self.headingsTrialLaser)
+            self.fid.write(paramsTrialLaser)
+            self.fid.write('\n')
+
+            self.fid.write(self.headingsTrialLEDPanels)
+            self.fid.write(paramsTrialLEDPanels)
+            self.fid.write('\n')
+            
+            self.fid.write(self.headingsPostTrigger)
+            self.fid.write(paramsPostTrigger)
+            self.fid.write('\n')
+
+            self.fid.write(self.headingsPostWait)
+            self.fid.write(paramsPostWait)
             self.fid.write('\n')
             
             
@@ -734,6 +931,8 @@ class Save:
     def ArenaState_callback(self, arenastate):
         if (self.initialized) and (self.bSavingArenastate) and (self.fid is not None):
 
+            stamp = 0.0
+            
             #rospy.logwarn ('SAVE %s' % [self.saveOnlyWhileTriggered,self.triggered,self.saveArenastate,self.bSavingArenastate])
             # Get the state of the robot.
             stateRobot = arenastate.robot
@@ -753,13 +952,19 @@ class Save:
             rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
             angleFly = rpy[2] % (2.0 * N.pi)
             
+            
+            # Get latest time.
+            stamp = max(stamp, stateRobot.header.stamp.to_sec())
+            stamp = max(stamp, stateFly.header.stamp.to_sec())
+            
             # Write the robot & fly data to the file.
             data_row = self.templateData.format(align   = self.format_align,
                                                 sign    = self.format_sign,
                                                 width   = self.format_width,
                                                 precision = self.format_precision,
                                                 type    = self.format_type,
-                                                time    = rospy.Time.now().to_sec(), #stateRobot.header.stamp,
+                                                time    = stamp, #rospy.Time.now().to_sec(), #stateRobot.header.stamp,
+                                                triggered = str(int(self.triggered)),
                                                 xRobot  = stateRobot.pose.position.x,
                                                 yRobot  = stateRobot.pose.position.y,
                                                 aRobot  = angleRobot,
@@ -775,7 +980,8 @@ class Save:
                                                 )
 
             with self.lockArenastate:
-                self.fid.write(data_row) # BUG: i/o op on closed file after ctrl+c
+                if (not self.fid.closed):
+                    self.fid.write(data_row)
 
     
         if (self.initialized) and (self.bSavingVideo) and (self.image is not None):

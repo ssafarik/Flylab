@@ -42,41 +42,43 @@ class ExperimentZapafly():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.waitEntry1 = 0.0
+        self.experimentparams.pre.robot.enabled = False
+        self.experimentparams.pre.lasertrack.enabled = False
+        self.experimentparams.pre.ledpanels.enabled = False
+
+        self.experimentparams.pre.wait1 = 0.0
+        self.experimentparams.pre.trigger.enabled = False
+        self.experimentparams.pre.trigger.frameidParent = 'Plate'
+        self.experimentparams.pre.trigger.frameidChild = 'Fly1'
+        self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
+        self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
+        self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
+        self.experimentparams.pre.trigger.speedAbsChildMax  = 999.0
+        self.experimentparams.pre.trigger.speedRelMin       =   0.0
+        self.experimentparams.pre.trigger.speedRelMax       = 999.0
+        self.experimentparams.pre.trigger.distanceMin =   0.0
+        self.experimentparams.pre.trigger.distanceMax = 999.0
+        self.experimentparams.pre.trigger.angleMin =  0.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleTest = 'inclusive'
+        self.experimentparams.pre.trigger.angleTestBilateral = True
+        self.experimentparams.pre.trigger.timeHold = 0.0
+        self.experimentparams.pre.trigger.timeout = -1
+        self.experimentparams.pre.wait2 = 0.0
         
-        self.experimentparams.triggerEntry.enabled = False
-        self.experimentparams.triggerEntry.frameidParent = 'Plate'
-        self.experimentparams.triggerEntry.frameidChild = 'Fly1'
-        self.experimentparams.triggerEntry.speedAbsParentMin =   0.0
-        self.experimentparams.triggerEntry.speedAbsParentMax = 999.0
-        self.experimentparams.triggerEntry.speedAbsChildMin  =   0.0
-        self.experimentparams.triggerEntry.speedAbsChildMax  = 999.0
-        self.experimentparams.triggerEntry.speedRelMin       =   0.0
-        self.experimentparams.triggerEntry.speedRelMax       = 999.0
-        self.experimentparams.triggerEntry.distanceMin =   0.0
-        self.experimentparams.triggerEntry.distanceMax = 999.0
-        self.experimentparams.triggerEntry.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.triggerEntry.angleMax =180.0 * N.pi / 180.0
-        self.experimentparams.triggerEntry.angleTest = 'inclusive'
-        self.experimentparams.triggerEntry.angleTestBilateral = True
-        self.experimentparams.triggerEntry.timeHold = 0.0
-        self.experimentparams.triggerEntry.timeout = -1
         
-        self.experimentparams.waitEntry2 = 0.0
-        
-        
-        # .robot, .lasertrack, .ledpanels, and .triggerExit all run concurrently.
+        # .robot, .lasertrack, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.robot.enabled = False
+        self.experimentparams.trial.robot.enabled = False
         
         
         mode='platepoint' # 'platepoint' or 'plategrid' or 'trackgrid1' or 'trackgrid' or 'tracknumber' or 'trackflylogo' or 'fixedmaze' or 'fixedpoint'
         
-        self.experimentparams.lasertrack.enabled = True
-        self.experimentparams.lasertrack.pattern_list = []
+        self.experimentparams.trial.lasertrack.enabled = True
+        self.experimentparams.trial.lasertrack.pattern_list = []
         if mode=='platepoint':
             # Draw a point.
-            self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             shape      = 'constant',
                                                                             frame_id   = 'Plate',
                                                                             hzPattern  = 40.0,
@@ -88,7 +90,7 @@ class ExperimentZapafly():
                                                                             param      = 2), # Peano curve level.
                                                                  )
         if mode=='plategrid':
-            self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             shape      = 'grid',
                                                                             frame_id   = 'Plate',
                                                                             hzPattern  = 40.0,
@@ -100,7 +102,7 @@ class ExperimentZapafly():
                                                                             param      = 3), # Peano curve level.
                                                                  )
         if mode=='trackgrid1':
-            self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             shape      = 'grid',
                                                                             frame_id   = 'Fly1',
                                                                             hzPattern  = 40.0,
@@ -113,7 +115,7 @@ class ExperimentZapafly():
                                                                  )
         if mode=='trackgrid':
             for iFly in range(rospy.get_param('nFlies', 0)):
-                self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = 'grid',
                                                                                 frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                                 hzPattern  = 40.0,
@@ -126,7 +128,7 @@ class ExperimentZapafly():
                                                                      )
         if mode=='tracknumber':
             for iFly in range(rospy.get_param('nFlies', 0)):
-                self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = '%s' % (iFly+1),
                                                                                 frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                                 hzPattern  = 40.0,
@@ -139,7 +141,7 @@ class ExperimentZapafly():
                                                                      )
         if mode=='trackflylogo':
             for iFly in range(rospy.get_param('nFlies', 0)):
-                self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                                 shape      = 'flylogo',
                                                                                 frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                                 hzPattern  = 40.0,
@@ -152,7 +154,7 @@ class ExperimentZapafly():
                                                                      )
         if mode=='fixedmaze':
             # Draw a maze.
-            self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             #shape      = '%s' % (iFly+1),
                                                                             #shape      = 'flylogo',
                                                                             shape      = 'grid',
@@ -168,7 +170,7 @@ class ExperimentZapafly():
                                                                  )
         if mode=='fixedpoint':
             # Draw a point.
-            self.experimentparams.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             #shape      = '%s' % (iFly+1),
                                                                             #shape      = 'flylogo',
                                                                             #shape      = 'grid',
@@ -183,34 +185,34 @@ class ExperimentZapafly():
                                                                             param      = 2), # Peano curve level.
                                                                  )
         
-        self.experimentparams.lasertrack.timeout = -1
+        self.experimentparams.trial.lasertrack.timeout = -1
         
-        self.experimentparams.ledpanels.enabled = False
-        self.experimentparams.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.ledpanels.idPattern = 1
-        self.experimentparams.ledpanels.frame_id = 'Fly1Forecast'
-        self.experimentparams.ledpanels.statefilterHi = ''
-        self.experimentparams.ledpanels.statefilterLo = ''
-        self.experimentparams.ledpanels.statefilterCriteria = ''
-        self.experimentparams.ledpanels.timeout = -1
+        self.experimentparams.trial.ledpanels.enabled = False
+        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = 1
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.statefilterHi = ''
+        self.experimentparams.trial.ledpanels.statefilterLo = ''
+        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
+        self.experimentparams.trial.ledpanels.timeout = -1
 
-        self.experimentparams.triggerExit.enabled = True
-        self.experimentparams.triggerExit.distanceMin = 999.0
-        self.experimentparams.triggerExit.distanceMax = 888.0 # i.e. never
-        self.experimentparams.triggerExit.speedAbsParentMin =   0.0
-        self.experimentparams.triggerExit.speedAbsParentMax = 999.0
-        self.experimentparams.triggerExit.speedAbsChildMin =   0.0
-        self.experimentparams.triggerExit.speedAbsChildMax = 999.0
-        self.experimentparams.triggerExit.speedRelMin =   0.0
-        self.experimentparams.triggerExit.speedRelMax = 999.0
-        self.experimentparams.triggerExit.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.triggerExit.angleMax =180.0 * N.pi / 180.0
-        self.experimentparams.triggerExit.angleTest = 'inclusive'
-        self.experimentparams.triggerExit.angleTestBilateral = True
-        self.experimentparams.triggerExit.timeHold = 0.0
-        self.experimentparams.triggerExit.timeout = 660
+        self.experimentparams.post.trigger.enabled = True
+        self.experimentparams.post.trigger.distanceMin = 999.0
+        self.experimentparams.post.trigger.distanceMax = 888.0 # i.e. never
+        self.experimentparams.post.trigger.speedAbsParentMin =   0.0
+        self.experimentparams.post.trigger.speedAbsParentMax = 999.0
+        self.experimentparams.post.trigger.speedAbsChildMin =   0.0
+        self.experimentparams.post.trigger.speedAbsChildMax = 999.0
+        self.experimentparams.post.trigger.speedRelMin =   0.0
+        self.experimentparams.post.trigger.speedRelMax = 999.0
+        self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleTest = 'inclusive'
+        self.experimentparams.post.trigger.angleTestBilateral = True
+        self.experimentparams.post.trigger.timeHold = 0.0
+        self.experimentparams.post.trigger.timeout = 660
 
-        self.experimentparams.waitExit = 0.0
+        self.experimentparams.post.wait = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
                                                          newexperiment_callback = self.Newexperiment_callback, 
