@@ -55,10 +55,14 @@ def GetAngleFrame (arenastate, frameid):
     stamp = arenastate.robot.header.stamp
     if len(arenastate.flies)>0:
         stamp = max(stamp,arenastate.robot.header.stamp)
-        
-    (trans,q) = g_tfrx.lookupTransform('Plate', frameid, stamp)
-    rpy = tf.transformations.euler_from_quaternion(q)
-    angle = rpy[2] % (2.0 * N.pi)
+
+    if g_tfrx.canTransform('Plate', frameid, stamp):        
+        (trans,q) = g_tfrx.lookupTransform('Plate', frameid, stamp)
+        rpy = tf.transformations.euler_from_quaternion(q)
+        angle = rpy[2] % (2.0 * N.pi)
+    else:
+        angle = 0.0
+
         
     return angle
 
@@ -68,14 +72,18 @@ def GetPositionFrame (arenastate, frameid):
     if len(arenastate.flies)>0:
         stamp = max(stamp,arenastate.robot.header.stamp)
         
-    (trans,q) = g_tfrx.lookupTransform('Plate', frameid, stamp)
+    if g_tfrx.canTransform('Plate', frameid, stamp):        
+        (trans,q) = g_tfrx.lookupTransform('Plate', frameid, stamp)
+        trans = N.array(trans)
+    else:
+        trans = None
         
     return trans
 
 
 def GetPointFrame (arenastate, frameid):
     trans = GetPositionFrame (arenastate, frameid)
-    return Point(x=trans[0], y=trans[1], z=trans[2]
+    return Point(x=trans[0], y=trans[1], z=trans[2])
 
 
 def GetAngleRobot (arenastate):
@@ -985,24 +993,25 @@ class MoveRobot (smach.State):
                 # Compute target point in workspace (i.e. Plate) coordinates.
                 #ptOrigin = N.array([posOrigin.x, posOrigin.y])
                 ptOrigin = GetPositionFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginPosition)
-                
-                d = self.paramsIn.robot.move.relative.distance
-                ptRelative = d * N.array([N.cos(angle), N.sin(angle)])
-                ptTarget = ptOrigin + ptRelative
-                self.ptTarget = ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
+                if (ptOrigin is not None):
+                    d = self.paramsIn.robot.move.relative.distance
+                    ptRelative = d * N.array([N.cos(angle), N.sin(angle)])
+                    ptTarget = ptOrigin[0:2] + ptRelative
+                    self.ptTarget = ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
 
-                # Send the command.
-                self.goal.state.header = self.arenastate.robot.header
-                self.goal.state.pose.position.x = self.ptTarget[0]
-                self.goal.state.pose.position.y = self.ptTarget[1]
-                try:
-                    if (doMove):
-                        self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                                      pose=self.goal.state.pose),
-                                                                  speed = speedTarget))
-                except (rospy.ServiceException, rospy.exceptions.ROSInterruptException), e:
-                    rospy.logwarn ('EL Exception calling set_stage_state(): %s' % e)
-                    self.ptTarget = None
+                    # Send the command.
+                    self.goal.state.header = self.arenastate.robot.header
+                    self.goal.state.pose.position.x = self.ptTarget[0]
+                    self.goal.state.pose.position.y = self.ptTarget[1]
+                    #rospy.logwarn (self.ptTarget)
+                    try:
+                        if (doMove):
+                            self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+                                                                                          pose=self.goal.state.pose),
+                                                                      speed = speedTarget))
+                    except (rospy.ServiceException, rospy.exceptions.ROSInterruptException), e:
+                        rospy.logwarn ('EL Exception calling set_stage_state(): %s' % e)
+                        self.ptTarget = None
 
 
                     

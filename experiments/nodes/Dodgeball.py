@@ -48,7 +48,7 @@ class Experiment():
         self.experimentparams.pre.robot.move.relative.speedType = 'constant'        # 'constant' or 'random'.  Use the given value, or a random frpre of it. 
         self.experimentparams.pre.robot.move.relative.tolerance = 2                 # When robot-to-target distance is within this tolerance, then the move is over.
         self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/20               # Patterns per second.
+        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/10               # Patterns per second.
         self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
         self.experimentparams.pre.robot.move.pattern.count = -1
         self.experimentparams.pre.robot.move.pattern.size.x = 10
@@ -78,12 +78,12 @@ class Experiment():
         self.experimentparams.pre.trigger.speedRelMin       =   0.0        # Relative speed of child to parent.
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
         self.experimentparams.pre.trigger.distanceMin = 10.0               # Distance between child and parent frames.
-        self.experimentparams.pre.trigger.distanceMax = 35.0
+        self.experimentparams.pre.trigger.distanceMax = 40.0
         self.experimentparams.pre.trigger.angleMin = 00.0 * N.pi / 180.0   # Angle of the child frame from the perspective of the parent frame.
         self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'          # 'inclusive' or 'exclusive' of the given angle range.
         self.experimentparams.pre.trigger.angleTestBilateral = True        # True=bilateral, False=unilateral.
-        self.experimentparams.pre.trigger.timeHold = 0.1                   # How long the conditions must be continually met before the trigger happens.
+        self.experimentparams.pre.trigger.timeHold = 0.2                   # How long the conditions must be continually met before the trigger happens.
         self.experimentparams.pre.trigger.timeout = -1
         self.experimentparams.pre.wait2 = 0.0
         
