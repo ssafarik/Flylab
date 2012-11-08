@@ -861,10 +861,10 @@ class RosFivebar:
 
 
 
-    # SendTargetCommand()
+    # UpdateMotorCommandFromTarget()
     #   Updates the motor command with the current target.
     #
-    def SendTargetCommand(self):
+    def UpdateMotorCommandFromTarget(self):
         #rospy.loginfo ('5B ptToolRef=%s' % self.ptToolRef)
         if self.ptsToolRef is not None:
             #self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
@@ -1037,7 +1037,7 @@ class RosFivebar:
             self.timePrev = self.time
             
             self.SendTransforms()
-            self.SendTargetCommand()
+            self.UpdateMotorCommandFromTarget()
 
             rosrate.sleep()
                 
