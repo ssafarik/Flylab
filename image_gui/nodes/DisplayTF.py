@@ -10,8 +10,8 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import PointStamped
 from flycore.msg import Setpoint
-from plate_tf.srv import *
-from plate_tf.msg import StopState, InBoundsState
+from arena_tf.srv import *
+from arena_tf.msg import StopState, InBoundsState
 
 class ImageDisplay:
 
@@ -36,16 +36,16 @@ class ImageDisplay:
         self.font = cv.InitFont(cv.CV_FONT_HERSHEY_TRIPLEX,0.5,0.5)
 
 
-        self.bounds_center_plate = PointStamped()
-        self.bounds_center_plate.header.frame_id = "Plate"
-        self.bounds_center_plate.point.x = 0
-        self.bounds_center_plate.point.y = 0
-        self.bounds_center_plate.point.z = 0
-        self.bounds_limit_plate = PointStamped()
-        self.bounds_limit_plate.header.frame_id = "Plate"
-        self.bounds_limit_plate.point.x = rospy.get_param('in_bounds_radius',100)
-        self.bounds_limit_plate.point.y = 0
-        self.bounds_limit_plate.point.z = 0
+        self.bounds_center_arena = PointStamped()
+        self.bounds_center_arena.header.frame_id = "Arena"
+        self.bounds_center_arena.point.x = 0
+        self.bounds_center_arena.point.y = 0
+        self.bounds_center_arena.point.z = 0
+        self.bounds_limit_arena = PointStamped()
+        self.bounds_limit_arena.header.frame_id = "Arena"
+        self.bounds_limit_arena.point.x = rospy.get_param('in_bounds_radius',100)
+        self.bounds_limit_arena.point.y = 0
+        self.bounds_limit_arena.point.z = 0
 
         self.bounds_center_camera = PointStamped()
         self.bounds_center_camera.header.frame_id = "Camera"
@@ -53,7 +53,7 @@ class ImageDisplay:
         self.bounds_limit_camera.header.frame_id = "Camera"
 
         self.display_y_axis = False
-        self.display_plate_axes = False
+        self.display_arena_axes = False
 
         self.fly_image_origin = PointStamped()
         self.fly_image_origin.header.frame_id = "FlyContour"
@@ -128,11 +128,11 @@ class ImageDisplay:
         self.axes_x_head_shifted.point.z = 0
         self.axes_x_head_shifted_camera = PointStamped()
         self.axes_x_head_shifted_camera.header.frame_id = "Camera"
-        self.plate_origin = PointStamped()
-        self.plate_origin.header.frame_id = "Plate"
-        self.plate_origin.point.x = 0
-        self.plate_origin.point.y = 0
-        self.plate_origin.point.z = 0
+        self.arena_origin = PointStamped()
+        self.arena_origin.header.frame_id = "Arena"
+        self.arena_origin.point.x = 0
+        self.arena_origin.point.y = 0
+        self.arena_origin.point.z = 0
 
 
         self.setpoint = Setpoint()
@@ -144,9 +144,9 @@ class ImageDisplay:
         self.setpoint_line_width = 2
         self.setpoint_size = 4
 
-        rospy.wait_for_service('camera_from_plate')
+        rospy.wait_for_service('camera_from_arena')
         try:
-            self.camera_from_plate = rospy.ServiceProxy('camera_from_plate', PlateCameraConversion)
+            self.camera_from_arena = rospy.ServiceProxy('camera_from_arena', ArenaCameraConversion)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
@@ -160,13 +160,13 @@ class ImageDisplay:
         else:
             self.im_display_pub = cv.CreateImage(cv.GetSize(cv_image),cv.IPL_DEPTH_8U,3)
 
-        Xsrc = [self.bounds_center_plate.point.x,self.bounds_limit_plate.point.x]
-        Ysrc = [self.bounds_center_plate.point.y,self.bounds_limit_plate.point.y]
-        # rospy.logwarn("self.bounds_center_plate.point.x = %s" % (str(self.bounds_center_plate.point.x)))
-        # rospy.logwarn("self.bounds_center_plate.point.y = %s" % (str(self.bounds_center_plate.point.y)))
-        # rospy.logwarn("self.bounds_limit_plate.point.x = %s" % (str(self.bounds_limit_plate.point.x)))
-        # rospy.logwarn("self.bounds_limit_plate.point.y = %s" % (str(self.bounds_limit_plate.point.y)))
-        response = self.camera_from_plate(Xsrc,Ysrc)
+        Xsrc = [self.bounds_center_arena.point.x,self.bounds_limit_arena.point.x]
+        Ysrc = [self.bounds_center_arena.point.y,self.bounds_limit_arena.point.y]
+        # rospy.logwarn("self.bounds_center_arena.point.x = %s" % (str(self.bounds_center_arena.point.x)))
+        # rospy.logwarn("self.bounds_center_arena.point.y = %s" % (str(self.bounds_center_arena.point.y)))
+        # rospy.logwarn("self.bounds_limit_arena.point.x = %s" % (str(self.bounds_limit_arena.point.x)))
+        # rospy.logwarn("self.bounds_limit_arena.point.y = %s" % (str(self.bounds_limit_arena.point.y)))
+        response = self.camera_from_arena(Xsrc,Ysrc)
         self.bounds_center_camera.point.x = response.Xdst[0]
         self.bounds_center_camera.point.y = response.Ydst[0]
         self.bounds_limit_camera.point.x = response.Xdst[1]
@@ -214,24 +214,24 @@ class ImageDisplay:
             self.axes_x_head_shifted.header.frame_id = frame_id
             self.axes_x_tail_shifted.header.frame_id = frame_id
 
-            plate_origin_frame_id = self.tf_listener.transformPoint(frame_id,self.plate_origin)
+            arena_origin_frame_id = self.tf_listener.transformPoint(frame_id,self.arena_origin)
 
-            self.axes_x_head_shifted.point.y = math.copysign(self.setpoint.radius,plate_origin_frame_id.point.y)
-            self.axes_x_tail_shifted.point.y = math.copysign(self.setpoint.radius,plate_origin_frame_id.point.y)
+            self.axes_x_head_shifted.point.y = math.copysign(self.setpoint.radius,arena_origin_frame_id.point.y)
+            self.axes_x_tail_shifted.point.y = math.copysign(self.setpoint.radius,arena_origin_frame_id.point.y)
 
 
-            axes_center_plate = self.tf_listener.transformPoint("Plate",self.axes_center)
-            axes_x_tail_plate = self.tf_listener.transformPoint("Plate",self.axes_x_tail)
-            axes_y_tail_plate = self.tf_listener.transformPoint("Plate",self.axes_y_tail)
-            axes_x_head_plate = self.tf_listener.transformPoint("Plate",self.axes_x_head)
-            axes_y_head_plate = self.tf_listener.transformPoint("Plate",self.axes_y_head)
+            axes_center_arena = self.tf_listener.transformPoint("Arena",self.axes_center)
+            axes_x_tail_arena = self.tf_listener.transformPoint("Arena",self.axes_x_tail)
+            axes_y_tail_arena = self.tf_listener.transformPoint("Arena",self.axes_y_tail)
+            axes_x_head_arena = self.tf_listener.transformPoint("Arena",self.axes_x_head)
+            axes_y_head_arena = self.tf_listener.transformPoint("Arena",self.axes_y_head)
 
-            axes_x_head_shifted_plate = self.tf_listener.transformPoint("Plate",self.axes_x_head_shifted)
-            axes_x_tail_shifted_plate = self.tf_listener.transformPoint("Plate",self.axes_x_tail_shifted)
+            axes_x_head_shifted_arena = self.tf_listener.transformPoint("Arena",self.axes_x_head_shifted)
+            axes_x_tail_shifted_arena = self.tf_listener.transformPoint("Arena",self.axes_x_tail_shifted)
 
-            Xsrc = [axes_center_plate.point.x,axes_x_tail_plate.point.x,axes_y_tail_plate.point.x,axes_x_head_plate.point.x,axes_y_head_plate.point.x,axes_x_head_shifted_plate.point.x,axes_x_tail_shifted_plate.point.x]
-            Ysrc = [axes_center_plate.point.y,axes_x_tail_plate.point.y,axes_y_tail_plate.point.y,axes_x_head_plate.point.y,axes_y_head_plate.point.y,axes_x_head_shifted_plate.point.y,axes_x_tail_shifted_plate.point.y]
-            response = self.camera_from_plate(Xsrc,Ysrc)
+            Xsrc = [axes_center_arena.point.x,axes_x_tail_arena.point.x,axes_y_tail_arena.point.x,axes_x_head_arena.point.x,axes_y_head_arena.point.x,axes_x_head_shifted_arena.point.x,axes_x_tail_shifted_arena.point.x]
+            Ysrc = [axes_center_arena.point.y,axes_x_tail_arena.point.y,axes_y_tail_arena.point.y,axes_x_head_arena.point.y,axes_y_head_arena.point.y,axes_x_head_shifted_arena.point.y,axes_x_tail_shifted_arena.point.y]
+            response = self.camera_from_arena(Xsrc,Ysrc)
             self.axes_center_camera.point.x = response.Xdst[0]
             self.axes_center_camera.point.y = response.Ydst[0]
             self.axes_x_tail_camera.point.x = response.Xdst[1]
@@ -334,12 +334,12 @@ class ImageDisplay:
                 self.setpoint_frame.point.x = self.setpoint.radius*math.cos(self.setpoint.theta)
                 self.setpoint_frame.point.y = self.setpoint.radius*math.sin(self.setpoint.theta)
 
-                setpoint_plate = self.tf_listener.transformPoint("Plate",self.setpoint_frame)
-                # rospy.logwarn("setpoint_plate.point.x = \n%s", str(setpoint_plate.point.x))
-                # rospy.logwarn("setpoint_plate.point.y = \n%s", str(setpoint_plate.point.y))
-                Xsrc = [setpoint_plate.point.x]
-                Ysrc = [setpoint_plate.point.y]
-                response = self.camera_from_plate(Xsrc,Ysrc)
+                setpoint_arena = self.tf_listener.transformPoint("Arena",self.setpoint_frame)
+                # rospy.logwarn("setpoint_arena.point.x = \n%s", str(setpoint_arena.point.x))
+                # rospy.logwarn("setpoint_arena.point.y = \n%s", str(setpoint_arena.point.y))
+                Xsrc = [setpoint_arena.point.x]
+                Ysrc = [setpoint_arena.point.y]
+                response = self.camera_from_arena(Xsrc,Ysrc)
                 self.setpoint_camera.point.x = response.Xdst[0]
                 self.setpoint_camera.point.y = response.Ydst[0]
                 setpoint_image = self.tf_listener.transformPoint(self.image_frame,self.setpoint_camera)
@@ -350,12 +350,12 @@ class ImageDisplay:
                 self.setpoint_line_tail_frame.point.x = (self.axis_tail_dist/self.setpoint.radius)*self.setpoint_frame.point.x
                 self.setpoint_line_tail_frame.point.y = (self.axis_tail_dist/self.setpoint.radius)*self.setpoint_frame.point.y
 
-                setpoint_line_tail_plate = self.tf_listener.transformPoint("Plate",self.setpoint_line_tail_frame)
-                # rospy.logwarn("setpoint_plate.point.x = \n%s", str(setpoint_plate.point.x))
-                # rospy.logwarn("setpoint_plate.point.y = \n%s", str(setpoint_plate.point.y))
-                Xsrc = [setpoint_line_tail_plate.point.x]
-                Ysrc = [setpoint_line_tail_plate.point.y]
-                response = self.camera_from_plate(Xsrc,Ysrc)
+                setpoint_line_tail_arena = self.tf_listener.transformPoint("Arena",self.setpoint_line_tail_frame)
+                # rospy.logwarn("setpoint_arena.point.x = \n%s", str(setpoint_arena.point.x))
+                # rospy.logwarn("setpoint_arena.point.y = \n%s", str(setpoint_arena.point.y))
+                Xsrc = [setpoint_line_tail_arena.point.x]
+                Ysrc = [setpoint_line_tail_arena.point.y]
+                response = self.camera_from_arena(Xsrc,Ysrc)
                 self.setpoint_line_tail_camera.point.x = response.Xdst[0]
                 self.setpoint_line_tail_camera.point.y = response.Ydst[0]
                 setpoint_line_tail_image = self.tf_listener.transformPoint(self.image_frame,self.setpoint_line_tail_camera)
@@ -407,20 +407,20 @@ class ImageDisplay:
         #           int(self.bounds_radius), cv.CV_RGB(self.color_max,self.color_max,0), 2)
 
         try:
-            plate_o = self.tf_listener.transformPoint(self.image_frame,self.plate_origin)
+            arena_o = self.tf_listener.transformPoint(self.image_frame,self.arena_origin)
             fly_image_o = self.tf_listener.transformPoint(self.image_frame,self.fly_image_origin)
             robot_image_o = self.tf_listener.transformPoint(self.image_frame,self.robot_image_origin)
 
-            if self.setpoint.header.frame_id in "Plate":
-                self.setpoint_image_origin = plate_o
+            if self.setpoint.header.frame_id in "Arena":
+                self.setpoint_image_origin = arena_o
                 self.draw_setpoint()
             else:
                 self.setpoint_image_origin = fly_image_o
                 if self.fly_in_bounds_state.InBounds:
                     self.draw_setpoint()
 
-            if self.display_plate_axes:
-                self.draw_axes("Plate")
+            if self.display_arena_axes:
+                self.draw_axes("Arena")
             if self.fly_in_bounds_state.InBounds:
                 self.draw_axes("Fly")
             if self.robot_in_bounds_state.InBounds:

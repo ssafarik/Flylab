@@ -1,7 +1,7 @@
 <launch>
 	<!-- ================================================================== -->
 	<!-- This is the launch file for the procedure to calibrate the         -->
-	<!-- Camera-to-Plate transform.                                         -->
+	<!-- Camera-to-Arena transform.                                         -->
 	<!--                                                                    -->
 	<!-- This is where you align the camera image with the arena.           -->
 	<!-- The command to move & resize the mask circle is:                   -->
@@ -15,8 +15,8 @@
 	<!-- ================================================================== -->
 	
 	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find plate_tf)/launch/plate_tf.launch" />
+	<include file="$(find arena_tf)/launch/arena_tf.launch" />
 	<include file="$(find tracking)/launch/tracking.launch" />
 
-	<node pkg="calibration" type="CameraPlate.py" name="CameraPlateCalibration"/>
+	<node pkg="calibration" type="CameraArena.py" name="CameraArenaCalibration"/>
 </launch>

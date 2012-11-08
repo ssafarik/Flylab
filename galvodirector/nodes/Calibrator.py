@@ -198,7 +198,7 @@ class GalvoCalibrator:
         pattern = MsgPattern()
         pattern.mode       = 'bypoints'
         pattern.shape      = 'constant'
-        pattern.frame_id   = 'Plate'
+        pattern.frame_id   = 'Arena'
         pattern.hzPattern  = 1.0
         pattern.hzPoint    = 100.0
         pattern.count      = 1
@@ -218,7 +218,7 @@ class GalvoCalibrator:
         pattern = MsgPattern()
         pattern.mode       = 'bypoints'
         pattern.shape      = 'constant'
-        pattern.frame_id   = 'Plate'
+        pattern.frame_id   = 'Arena'
         pattern.hzPattern  = 1.0
         pattern.hzPoint    = 100.0
         pattern.count      = 1

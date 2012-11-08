@@ -12,7 +12,7 @@
   <depend package="tracking"/>
   <depend package="flycore"/>
   <depend package="tf"/>
-  <depend package="plate_tf"/>
+  <depend package="arena_tf"/>
   <depend package="rosbag"/>
 
 </package>

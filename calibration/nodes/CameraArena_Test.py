@@ -20,7 +20,7 @@ class Calibration:
     self.initialized = False
     self.initialized_images = False
     print "Initialized00"
-    cv.NamedWindow("Camera Plate Calibration", 1)
+    cv.NamedWindow("Camera Arena Calibration", 1)
     print "Initialized01"
     self.tfrx = tf.TransformListener()
     # print "Initialized02"
@@ -38,9 +38,9 @@ class Calibration:
     # print "Initialized08"
     # self.font_color = cv.CV_RGB(self.color_max,0,0)
     # print "Initialized09"
-    # self.camera_plate = PointStamped()
+    # self.camera_arena = PointStamped()
     # print "Initialized10"
-    # self.camera_plate.header.frame_id = "Camera"
+    # self.camera_arena.header.frame_id = "Camera"
     # print "Initialized11"
     # self.camera_origin = PointStamped()
     # print "Initialized12"
@@ -70,7 +70,7 @@ class Calibration:
     # self.criteria = (cv.CV_TERMCRIT_ITER+cv.CV_TERMCRIT_EPS,100,.01)
 
     # self.image_points = cv.CreateMat(self.board_corner_number,2,cv.CV_32FC1)
-    # self.plate_points = cv.CreateMat(self.board_corner_number,3,cv.CV_32FC1)
+    # self.arena_points = cv.CreateMat(self.board_corner_number,3,cv.CV_32FC1)
     # self.point_counts = cv.CreateMat(1,1,cv.CV_32SC1)
     # self.rvec = cv.CreateMat(1,3,cv.CV_32FC1)
     # self.tvec = cv.CreateMat(1,3,cv.CV_32FC1)
@@ -85,8 +85,8 @@ class Calibration:
   #   self.im = cv.CreateImage(self.im_size,cv.IPL_DEPTH_8U,1)
   #   self.im_mask = cv.CreateImage(self.im_size,cv.IPL_DEPTH_8U,1)
   #   self.im_display = cv.CreateImage(self.im_size,cv.IPL_DEPTH_8U,3)
-  #   self.camera_plate.point.x = self.im_width//2 - self.KK_cx
-  #   self.camera_plate.point.y = self.im_height//2 - self.KK_cy
+  #   self.camera_arena.point.x = self.im_width//2 - self.KK_cx
+  #   self.camera_arena.point.y = self.im_height//2 - self.KK_cy
   #   self.mask_radius = int(self.im_height * .48)
   #   self.initialized_images = True
 
@@ -97,9 +97,9 @@ class Calibration:
   #     (x,y) = corners[corner_count]
   #     cv.SetReal2D(self.image_points, step, 0, x)
   #     cv.SetReal2D(self.image_points, step, 1, y)
-  #     cv.SetReal2D(self.plate_points, step, 0, (corner_count // self.col_corner_number)*self.checker_size)
-  #     cv.SetReal2D(self.plate_points, step, 1, (corner_count % self.col_corner_number)*self.checker_size)
-  #     cv.SetReal2D(self.plate_points, step, 2, 0.0)
+  #     cv.SetReal2D(self.arena_points, step, 0, (corner_count // self.col_corner_number)*self.checker_size)
+  #     cv.SetReal2D(self.arena_points, step, 1, (corner_count % self.col_corner_number)*self.checker_size)
+  #     cv.SetReal2D(self.arena_points, step, 2, 0.0)
   #     step += 1
   #   cv.SetReal2D(self.point_counts, self.capture_count, 0, self.board_corner_number)
 
@@ -141,14 +141,14 @@ class Calibration:
 
   # def find_extrinsics(self):
   #   # Update image mask
-  #   cv.Circle(self.im_mask,(int(self.undistorted_plate.point.x),int(self.undistorted_plate.point.y)), int(self.mask_radius), self.color_max, cv.CV_FILLED)
+  #   cv.Circle(self.im_mask,(int(self.undistorted_arena.point.x),int(self.undistorted_arena.point.y)), int(self.mask_radius), self.color_max, cv.CV_FILLED)
   #   cv.And(self.im,self.im_mask,self.im)
   #   (corners_status, corners) = cv.FindChessboardCorners(self.im, self.pattern_size)
   #   if corners_status and (len(corners) == self.board_corner_number):
   #     sub_corners = cv.FindCornerSubPix(self.im, corners, self.win, self.zero_zone, self.criteria)
   #     cv.DrawChessboardCorners(self.im_display, self.pattern_size, sub_corners, corners_status)
   #     self.add_board_to_data(corners)
-  #     cv.FindExtrinsicCameraParams2(self.plate_points,
+  #     cv.FindExtrinsicCameraParams2(self.arena_points,
   #                                   self.image_points,
   #                                   self.intrinsic_matrix,
   #                                   self.distortion_coeffs,
@@ -194,15 +194,15 @@ class Calibration:
   #     self.im = cv.CloneImage(cv_image)
   #     cv.CvtColor(cv_image,self.im_display,cv.CV_GRAY2RGB)
 
-  #     display_text = "camera_plate_origin = [%0.0f, %0.0f]" % (self.camera_plate.point.x, self.camera_plate.point.y)
+  #     display_text = "camera_arena_origin = [%0.0f, %0.0f]" % (self.camera_arena.point.x, self.camera_arena.point.y)
   #     cv.PutText(self.im_display,display_text,(25,25),self.font,self.font_color)
 
   #     try:
   #       self.undistorted_camera = self.tfrx.transformPoint("UndistortedImage",self.camera_origin)
   #       cv.Circle(self.im_display, (int(self.undistorted_camera.point.x),int(self.undistorted_camera.point.y)), 3, cv.CV_RGB(self.color_max,0,self.color_max), cv.CV_FILLED)
-  #       self.undistorted_plate = self.tfrx.transformPoint("UndistortedImage",self.camera_plate)
-  #       cv.Circle(self.im_display, (int(self.undistorted_plate.point.x),int(self.undistorted_plate.point.y)), 3, cv.CV_RGB(0,self.color_max,0), cv.CV_FILLED)
-  #       cv.Circle(self.im_display, (int(self.undistorted_plate.point.x),int(self.undistorted_plate.point.y)), int(self.mask_radius), cv.CV_RGB(0,self.color_max,0))
+  #       self.undistorted_arena = self.tfrx.transformPoint("UndistortedImage",self.camera_arena)
+  #       cv.Circle(self.im_display, (int(self.undistorted_arena.point.x),int(self.undistorted_arena.point.y)), 3, cv.CV_RGB(0,self.color_max,0), cv.CV_FILLED)
+  #       cv.Circle(self.im_display, (int(self.undistorted_arena.point.x),int(self.undistorted_arena.point.y)), int(self.mask_radius), cv.CV_RGB(0,self.color_max,0))
   #       display_text = "mask radius = " + str(int(self.mask_radius))
   #       cv.PutText(self.im_display,display_text,(25,45),self.font,self.font_color)
 
@@ -210,38 +210,38 @@ class Calibration:
   #     except (tf.LookupException, tf.ConnectivityException):
   #       pass
 
-  #     cv.ShowImage("Camera Plate Calibration", self.im_display)
+  #     cv.ShowImage("Camera Arena Calibration", self.im_display)
   #     cv.WaitKey(3)
 
   # def joy_callback(self,data):
   #   if self.initialized and self.initialized_images:
-  #     self.camera_plate.point.x += data.x_velocity
-  #     self.camera_plate.point.y += -data.y_velocity
+  #     self.camera_arena.point.x += data.x_velocity
+  #     self.camera_arena.point.y += -data.y_velocity
   #     self.mask_radius += data.radius_velocity
 
   # def remap_extrinsics(self):
-  #   X = [self.camera_plate.point.x, self.camera_plate.point.x + self.checker_size]
-  #   Y = [self.camera_plate.point.y, self.camera_plate.point.y]
+  #   X = [self.camera_arena.point.x, self.camera_arena.point.x + self.checker_size]
+  #   Y = [self.camera_arena.point.y, self.camera_arena.point.y]
   #   Z = [1,1]
   #   camera_points = numpy.array([X,Y,Z])
-  #   plate_points = numpy.dot(self.H,camera_points)
-  #   x0 = plate_points[0,0]
-  #   x1 = plate_points[0,1]
-  #   y0 = plate_points[1,0]
-  #   y1 = plate_points[1,1]
+  #   arena_points = numpy.dot(self.H,camera_points)
+  #   x0 = arena_points[0,0]
+  #   x1 = arena_points[0,1]
+  #   y0 = arena_points[1,0]
+  #   y1 = arena_points[1,1]
   #   rot_angle = numpy.arctan2((y1-y0),(x1-x0))
 
-  #   checkerboard_plate_vector = plate_points[:,0]
-  #   checkerboard_plate_vector[2] = 0
+  #   checkerboard_arena_vector = arena_points[:,0]
+  #   checkerboard_arena_vector[2] = 0
 
-  #   self.tfbx.sendTransform(checkerboard_plate_vector,
+  #   self.tfbx.sendTransform(checkerboard_arena_vector,
   #                                     tf.transformations.quaternion_from_euler(0, 0, rot_angle),
   #                                     rospy.Time.now(),
-  #                                     "Plate",
+  #                                     "Arena",
   #                                     "Checkerboard")
 
   #   try:
-  #     (trans,rot_quat) = self.tfrx.lookupTransform('Image', 'Plate', rospy.Time(0))
+  #     (trans,rot_quat) = self.tfrx.lookupTransform('Image', 'Arena', rospy.Time(0))
 
   #     rot_array = tf.transformations.quaternion_matrix(rot_quat)
   #     rot_array = rot_array[0:3,0:3]
@@ -265,7 +265,7 @@ class Calibration:
 
 
 def main(args):
-  rospy.init_node('camera_plate_calibration_test')
+  rospy.init_node('camera_arena_calibration_test')
   cal = Calibration()
   try:
     rospy.spin()

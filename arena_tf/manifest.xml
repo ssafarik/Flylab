@@ -1,7 +1,7 @@
 <package>
-  <description brief="plate_tf">
+  <description brief="arena_tf">
 
-	plate_tf
+	arena_tf
 
   </description>
   <author>Steve Safarik, Peter Polidoro</author>

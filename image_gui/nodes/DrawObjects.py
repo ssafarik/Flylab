@@ -9,7 +9,7 @@ import CvPrimitives
 import DrawPrimitives
 import tf
 from geometry_msgs.msg import PointStamped
-import plate_tf.srv
+import arena_tf.srv
 import numpy as N
 from tracking.msg import ArenaState
 
@@ -26,40 +26,40 @@ class DrawObjects:
         self.hzDrawUpdate = rospy.get_param("hz_drawupdate","100")
         self.rate = rospy.Rate(self.hzDrawUpdate)
 
-        rospy.wait_for_service('camera_from_plate')
+        rospy.wait_for_service('camera_from_arena')
         try:
-            self.camera_from_plate = rospy.ServiceProxy('camera_from_plate', plate_tf.srv.PlateCameraConversion)
+            self.camera_from_arena = rospy.ServiceProxy('camera_from_arena', arena_tf.srv.ArenaCameraConversion)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
         self.radiusArena = rospy.get_param('arena/radius_inner', 25.4)
-        self.axis_length_plate = 4
+        self.axis_length_arena = 4
         self.radiusMask = rospy.get_param('camera/mask/radius', 25)
 
-        Xsrc = [0, self.radiusArena, self.axis_length_plate]
+        Xsrc = [0, self.radiusArena, self.axis_length_arena]
         Ysrc = [0, 0, 0]
 
-        self.plate_origin_camera = PointStamped()
-        self.plate_origin_camera.header.frame_id = "Camera"
-        response = self.camera_from_plate(Xsrc,Ysrc)
-        x0 = self.plate_origin_camera.point.x = response.Xdst[0]
-        y0 = self.plate_origin_camera.point.y = response.Ydst[0]
+        self.arena_origin_camera = PointStamped()
+        self.arena_origin_camera.header.frame_id = "Camera"
+        response = self.camera_from_arena(Xsrc,Ysrc)
+        x0 = self.arena_origin_camera.point.x = response.Xdst[0]
+        y0 = self.arena_origin_camera.point.y = response.Ydst[0]
 
-        self.plate_point_camera = PointStamped()
-        self.plate_point_camera.header.frame_id = "Camera"
-        x1 = self.plate_point_camera.point.x = response.Xdst[1]
-        y1 = self.plate_point_camera.point.y = response.Ydst[1]
+        self.arena_point_camera = PointStamped()
+        self.arena_point_camera.header.frame_id = "Camera"
+        x1 = self.arena_point_camera.point.x = response.Xdst[1]
+        y1 = self.arena_point_camera.point.y = response.Ydst[1]
         x2 = response.Xdst[2]
         y2 = response.Ydst[2]
         
         self.radiusMask = N.sqrt((x1-x0)**2 + (y1-y0)**2)
         self.axis_length_camera = N.sqrt((x2-x0)**2 + (y2-y0)**2)
 
-        self.plate_origin = PointStamped()
-        self.plate_origin.header.frame_id = "Plate"
-        self.plate_origin.point.x = 0
-        self.plate_origin.point.y = 0
-        self.plate_origin.point.z = 0
+        self.arena_origin = PointStamped()
+        self.arena_origin.header.frame_id = "Arena"
+        self.arena_origin.point.x = 0
+        self.arena_origin.point.y = 0
+        self.arena_origin.point.z = 0
         
         self.robot_image_origin = PointStamped()
         self.robot_image_origin.header.frame_id = "RobotContour"
@@ -82,21 +82,21 @@ class DrawObjects:
         #rospy.logwarn('DO waitForTransform(%s, %s, %s)' % (self.frameidDisplay, self.robot_image_origin.header.frame_id, rospy.Time()))
         #self.tfrx.waitForTransform(self.frameidDisplay, self.robot_image_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
         #self.tfrx.waitForTransform(self.frameidDisplay, self.fly_image_origin.header.frame_id,   rospy.Time(), rospy.Duration(15.0))
-        self.tfrx.waitForTransform(self.frameidDisplay, self.plate_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
+        self.tfrx.waitForTransform(self.frameidDisplay, self.arena_origin.header.frame_id, rospy.Time(), rospy.Duration(15.0))
             
 
-        self.plate_origin_display_frame = self.tfrx.transformPoint(self.frameidDisplay, self.plate_origin)
+        self.arena_origin_display_frame = self.tfrx.transformPoint(self.frameidDisplay, self.arena_origin)
 
-        self.plate_origin_primitives = CvPrimitives.Point(self.plate_origin_display_frame.point.x,
-                                                          self.plate_origin_display_frame.point.y)
+        self.arena_origin_primitives = CvPrimitives.Point(self.arena_origin_display_frame.point.x,
+                                                          self.arena_origin_display_frame.point.y)
 
-        self.markerPlateOrigin = DrawPrimitives.Axes(self.plate_origin_primitives.point)
+        self.markerArenaOrigin = DrawPrimitives.Axes(self.arena_origin_primitives.point)
         self.markerRobot       = DrawPrimitives.CenteredCircle(self.origin.point, 4, self.colors.blue, 2)
         self.markerFly         = DrawPrimitives.CenteredCircle(self.origin.point, 4, self.colors.red, 2)
-        self.markerInBounds    = DrawPrimitives.CenteredCircle(self.plate_origin_primitives.point, self.radiusMask, self.colors.yellow, 2)
-        self.markerMask        = DrawPrimitives.CenteredCircle(self.plate_origin_primitives.point, self.radiusMask, self.colors.yellow, 1)
+        self.markerInBounds    = DrawPrimitives.CenteredCircle(self.arena_origin_primitives.point, self.radiusMask, self.colors.yellow, 2)
+        self.markerMask        = DrawPrimitives.CenteredCircle(self.arena_origin_primitives.point, self.radiusMask, self.colors.yellow, 1)
 
-        #self.draw_objects.draw_object_list = [self.markerPlateOrigin.draw_object,
+        #self.draw_objects.draw_object_list = [self.markerArenaOrigin.draw_object,
         #                                      self.markerRobot.draw_object,
         #                                      self.markerFly.draw_object,
         #                                      self.markerInBounds.draw_object,

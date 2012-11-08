@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 from __future__ import division
-import roslib; roslib.load_manifest('plate_tf')
+import roslib; roslib.load_manifest('arena_tf')
 import rospy
 import cv
 import numpy as N
 import tf
 from sensor_msgs.msg import Image, CameraInfo
 from pythonmodules import cvNumpy, CameraParameters
-import plate_tf.srv
+import arena_tf.srv
 
 
-class TransformServerPlateCamera:
+class TransformServerArenaCamera:
     def __init__(self):
         self.initialized = False
         self.camerainfo = None
-        rospy.init_node('TransformServerPlateCamera')
+        rospy.init_node('TransformServerArenaCamera')
         
         self.tfbx = tf.TransformBroadcaster()
 
@@ -26,8 +26,8 @@ class TransformServerPlateCamera:
         self.Hinv = N.identity(3)
         self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
 
-        rospy.Service('camera_from_plate', plate_tf.srv.PlateCameraConversion, self.CameraFromPlate_callback)
-        rospy.Service('plate_from_camera', plate_tf.srv.PlateCameraConversion, self.PlateFromCamera_callback)
+        rospy.Service('camera_from_arena', arena_tf.srv.ArenaCameraConversion, self.CameraFromArena_callback)
+        rospy.Service('arena_from_camera', arena_tf.srv.ArenaCameraConversion, self.ArenaFromCamera_callback)
         
         self.initialized = True
 
@@ -38,7 +38,7 @@ class TransformServerPlateCamera:
             #M = N.reshape(N.array(camerainfo.P),[3,4])[0:3,0:3]
             M[:-1,-1] = 0  # Zero the translation entries (1,3) and (2,3).
     
-            (rvec, tvec) = CameraParameters.extrinsic("plate")
+            (rvec, tvec) = CameraParameters.extrinsic("arena")
             rvec = cvNumpy.mat_to_array(rvec).squeeze()
             tvec = cvNumpy.mat_to_array(tvec).squeeze()
     
@@ -58,14 +58,14 @@ class TransformServerPlateCamera:
         self.camerainfo = camerainfo
             
 
-    def CameraFromPlate_callback(self, req):
+    def CameraFromArena_callback(self, req):
         if (self.camerainfo is not None):
             point_count = min(len(req.Xsrc), len(req.Ysrc))
             xSrc = list(req.Xsrc)
             ySrc = list(req.Ysrc)
             zSrc = [1]*point_count
-            plate_points = N.array([xSrc, ySrc, zSrc])
-            camera_points = N.dot(self.Hinv, plate_points)
+            arena_points = N.array([xSrc, ySrc, zSrc])
+            camera_points = N.dot(self.Hinv, arena_points)
 
             xDst = camera_points[0,:]
             yDst = camera_points[1,:]
@@ -76,17 +76,17 @@ class TransformServerPlateCamera:
         return {'Xdst': xDst,
                 'Ydst': yDst}
 
-    def PlateFromCamera_callback(self, req):
+    def ArenaFromCamera_callback(self, req):
         if (self.camerainfo is not None):
             point_count = min(len(req.Xsrc), len(req.Ysrc))
             xSrc = list(req.Xsrc)
             ySrc = list(req.Ysrc)
             zSrc = [1]*point_count
             camera_points = N.array([xSrc, ySrc, zSrc])
-            plate_points = N.dot(self.H, camera_points)
+            arena_points = N.dot(self.H, camera_points)
     
-            xDst = plate_points[0,:]
-            yDst = plate_points[1,:]
+            xDst = arena_points[0,:]
+            yDst = arena_points[1,:]
         else:
             xDst = None
             yDst = None
@@ -115,7 +115,7 @@ class TransformServerPlateCamera:
                                      self.zMask),
                                     (0,0,0,1), 
                                     stamp, 
-                                    "Plate", "ImageRect")
+                                    "Arena", "ImageRect")
       
         
     def Main(self):
@@ -126,12 +126,12 @@ class TransformServerPlateCamera:
                     self.SendTransforms()
                     rate.sleep()
                 except tf.Exception:
-                    rospy.logwarn ('Exception in TransformServerPlateCamera()')
+                    rospy.logwarn ('Exception in TransformServerArenaCamera()')
         except:
             print "Shutting down"
 
 
 if __name__ == "__main__":
-    tspc = TransformServerPlateCamera()
+    tspc = TransformServerArenaCamera()
     tspc.Main()
 

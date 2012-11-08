@@ -56,8 +56,8 @@ def GetAngleFrame (arenastate, frameid):
     if len(arenastate.flies)>0:
         stamp = max(stamp,arenastate.robot.header.stamp)
 
-    if g_tfrx.canTransform('Plate', frameid, stamp):        
-        (trans,q) = g_tfrx.lookupTransform('Plate', frameid, stamp)
+    if g_tfrx.canTransform('Arena', frameid, stamp):        
+        (trans,q) = g_tfrx.lookupTransform('Arena', frameid, stamp)
         rpy = tf.transformations.euler_from_quaternion(q)
         angle = rpy[2] % (2.0 * N.pi)
     else:
@@ -72,8 +72,8 @@ def GetPositionFrame (arenastate, frameid):
     if len(arenastate.flies)>0:
         stamp = max(stamp,arenastate.robot.header.stamp)
         
-    if g_tfrx.canTransform('Plate', frameid, stamp):        
-        (trans,q) = g_tfrx.lookupTransform('Plate', frameid, stamp)
+    if g_tfrx.canTransform('Arena', frameid, stamp):        
+        (trans,q) = g_tfrx.lookupTransform('Arena', frameid, stamp)
         trans = N.array(trans)
     else:
         trans = None
@@ -379,21 +379,21 @@ class ResetHardware (smach.State):
         return rv
         
 
+    # Init the LEDPanels to either off, or to the pretrial state, depending on what's enabled.
     def ResetLEDPanels(self, userdata):
-        # Init the LEDPanels.  Assumes preprogrammed panels.
         rv = 'disabled'
-        if (userdata.experimentparamsIn.trial.ledpanels.enabled):
+        if (userdata.experimentparamsIn.pre.ledpanels.enabled):
             rv = 'success'
             msgPanelsCommand = MsgPanelsCommand(command='stop')
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
 
             msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', 
-                                                arg1=userdata.experimentparamsIn.trial.ledpanels.idPattern)
+                                                arg1=userdata.experimentparamsIn.pre.ledpanels.idPattern)
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
 
             msgPanelsCommand = MsgPanelsCommand(command='set_position', 
-                                                arg1=userdata.experimentparamsIn.trial.ledpanels.origin.x, 
-                                                arg2=userdata.experimentparamsIn.trial.ledpanels.origin.y)  # Set (x,y) position for the experiment.
+                                                arg1=userdata.experimentparamsIn.pre.ledpanels.origin.x, 
+                                                arg2=userdata.experimentparamsIn.pre.ledpanels.origin.y)  # Set (x,y) position for the experiment.
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
         else:
             msgPanelsCommand = MsgPanelsCommand(command='all_off')
@@ -489,7 +489,7 @@ class NewTrial (smach.State):
         self.pubTrackingCommand.publish(msgTrackingCommand)
         
 
-        # Tell everyone we're starting.
+        # Tell everyone that the trial is starting.
         try:
             self.NewTrial.notify(experimentparams)
             rv = 'continue'
@@ -583,8 +583,8 @@ class TriggerOnStates (smach.State):
     def GetSpeedFrameToFrame (self, frameidParent, frameidChild):
         speed = None
         
-        # If absolute speed (i.e. in the Plate frame), then try to use ArenaState speed.
-        if (frameidParent=='Plate') and (self.arenastate is not None):
+        # If absolute speed (i.e. in the Arena frame), then try to use ArenaState speed.
+        if (frameidParent=='Arena') and (self.arenastate is not None):
 
             # Check the robot.
             if (self.nRobots>0) and (frameidChild==self.arenastate.robot.name):
@@ -618,155 +618,148 @@ class TriggerOnStates (smach.State):
             trigger = userdata.experimentparamsIn.post.trigger
 
         rv = 'disabled'
-        try:
-            if trigger.enabled:
-                self.timeStart = rospy.Time.now()
-                self.isTriggered = False
-                self.timeTriggered  = None
-                
-                # Wait for an arenastate.
-                while self.arenastate is None:
-                    if trigger.timeout != -1:
-                        if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > trigger.timeout:
-                            return 'timeout'
-                    #if self.preempt_requested():
-                    #    self.service_preempt()
-                    #    self.Trigger.notify(False)
-                    #    return 'preempt'
-                    rospy.sleep(1.0)
-        
-        
-                rv = 'aborted'
-                while not rospy.is_shutdown():
-                    if True: #(len(self.arenastate.flies)>0) and (self.nRobots>0):
-                        #iFly = GetNearestFly(self.arenastate)
-                        #if iFly is None:
-                        #    continue
-        
-                        # Test for distance.
-                        isDistanceInRange = True
-                        distance = None
-                        if (trigger.distanceMin is not None) and (trigger.distanceMax is not None):
-                            #distance = GetDistanceFlyToRobot(self.arenastate, iFly)
-                            distance = self.GetDistanceFrameToFrame(trigger.frameidParent, trigger.frameidChild)
-                            isDistanceInRange = False
-                            if (distance is not None) and (trigger.distanceMin <= distance <= trigger.distanceMax):
-                                isDistanceInRange = True
-                                
-                        # Test for angle.
-                        isAngleInRange = True
-                        if (trigger.angleMin is not None) and (trigger.angleMax is not None):
-                            #angle = GetAngleToRobotInFlyView(self.arenastate, iFly)
-                            angle = self.GetAngleFrameToFrame(trigger.frameidParent, trigger.frameidChild)
-                            
-                            angleA1 = trigger.angleMin % (2.0*N.pi)
-                            angleA2 = trigger.angleMax % (2.0*N.pi)
-                            angleB1 = (2.0*N.pi - angleA2) # % (2.0*N.pi)
-                            angleB2 = (2.0*N.pi - angleA1) # % (2.0*N.pi)
+        if trigger.enabled:
+            self.timeStart = rospy.Time.now()
+            self.isTriggered = False
+            self.timeTriggered  = None
             
-                            if angle is not None:
-                                # Test for angle meeting the angle criteria.
-                                isAngleInRange = False
-                                if trigger.angleTestBilateral:
-                                    if trigger.angleTest=='inclusive':
-                                        #rospy.loginfo('EL angles %s' % [angleA1, angleA2, angleB1, angleB2, angle])
-                                        if (angleA1 <= angle <= angleA2) or (angleB1 <= angle <= angleB2):
-                                            isAngleInRange = True
-                                            
-                                    elif trigger.angleTest=='exclusive':
-                                        if (0.0 <= angle < angleA1) or (angleA2 < angle < angleB1) or (angleB2 < angle <= (2.0*N.pi)):
-                                            isAngleInRange = True
-                                else:
-                                    if trigger.angleTest=='inclusive':
-                                        if (angleA1 <= angle <= angleA2):
-                                            isAngleInRange = True
-                                            
-                                    elif trigger.angleTest=='exclusive':
-                                        if (angle < angleA1) or (angleA2 < angle):
-                                            isAngleInRange = True
-                            
-                        
-                        # Test for absolute speed of parent.
-                        isSpeedAbsParentInRange = True
-                        if (trigger.speedAbsParentMin is not None) and (trigger.speedAbsParentMax is not None):
-                            isSpeedAbsParentInRange = False
-                            speedAbsParent = self.GetSpeedFrameToFrame('Plate', trigger.frameidParent)# Absolute speed of the parent frame.
-                            #rospy.loginfo ('EL parent speed=%s' % speedAbsParent)
-                            if speedAbsParent is not None:
-                                if (trigger.speedAbsParentMin <= speedAbsParent <= trigger.speedAbsParentMax):
-                                    isSpeedAbsParentInRange = True
-        
-                        # Test for absolute speed of child.
-                        isSpeedAbsChildInRange = True
-                        if (trigger.speedAbsChildMin is not None) and (trigger.speedAbsChildMax is not None):
-                            isSpeedAbsChildInRange = False
-                            speedAbsChild = self.GetSpeedFrameToFrame('Plate', trigger.frameidChild)# Absolute speed of the child frame.
-                            #rospy.loginfo ('EL child speed=%s' % speedAbsChild)
-                            if speedAbsChild is not None:
-                                if (trigger.speedAbsChildMin <= speedAbsChild <= trigger.speedAbsChildMax):
-                                    isSpeedAbsChildInRange = True
-        
-                        # Test for relative speed between parent & child.
-                        isSpeedRelInRange = True
-                        if (trigger.speedRelMin is not None) and (trigger.speedRelMax is not None):
-                            isSpeedRelInRange = False
-                            speedRel = self.GetSpeedFrameToFrame(trigger.frameidParent, trigger.frameidChild)# Relative speed parent to child.
-                            #rospy.loginfo ('EL speed=%s' % speed)
-                            if speedRel is not None:
-                                if (trigger.speedRelMin <= speedRel <= trigger.speedRelMax):
-                                    isSpeedRelInRange = True
-        
-                        # Test all the trigger criteria.
-                        if isDistanceInRange and isAngleInRange and isSpeedAbsParentInRange and isSpeedAbsChildInRange and isSpeedRelInRange:
-                            
-                            # Set the pending trigger start time.
-                            if not self.isTriggered:
-                                self.isTriggered = True
-                                self.timeTriggered = rospy.Time.now()
-                        else:
-                            # Cancel a pending trigger.
-                            self.isTriggered = False
-                            self.timeTriggered = None
-        
-                        #if (distance is not None) and (angle is not None) and (speedAbsParent is not None) and (speedAbsChild is not None) and (speedRel is not None):
-                        #    rospy.logwarn ('EL triggers=distance=%0.3f, speed=%0.3f,%0.3f, angle=%0.3f, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
-                        #else:
-                        #    rospy.logwarn ('EL triggers=distance=%s, speed=%s,%s, angle=%s, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
-        
-                        # If pending trigger has lasted longer than requested duration, then set trigger.
-                        if (self.isTriggered):
-                            duration = rospy.Time.now().to_sec() - self.timeTriggered.to_sec()
-                            
-                            if duration >= trigger.timeHold:
-                                rv = 'success'
-                                break
-                            
-                            #rospy.loginfo('EL duration=%s' % duration)
-                        
-                        if (self.commandExperiment=='exitnow'):
-                            rv = 'aborted'
-                            break
+            # Wait for an arenastate.
+            while self.arenastate is None:
+                if trigger.timeout != -1:
+                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > trigger.timeout:
+                        return 'timeout'
+                #if self.preempt_requested():
+                #    self.service_preempt()
+                #    self.Trigger.notify(False)
+                #    return 'preempt'
+                rospy.sleep(1.0)
     
+    
+            rv = 'aborted'
+            while not rospy.is_shutdown():
+                # Test for distance.
+                isDistanceInRange = True
+                distance = None
+                if (trigger.distanceMin is not None) and (trigger.distanceMax is not None):
+                    distance = self.GetDistanceFrameToFrame(trigger.frameidParent, trigger.frameidChild)
+                    isDistanceInRange = False
+                    if (distance is not None) and (trigger.distanceMin <= distance <= trigger.distanceMax):
+                        isDistanceInRange = True
                         
-                    if self.preempt_requested():
-                        rospy.logwarn('preempt requested: TriggerOnStates()')
-                        self.service_preempt()
-                        rv = 'preempt'
+                # Test for angle.
+                isAngleInRange = True
+                if (trigger.angleMin is not None) and (trigger.angleMax is not None):
+                    angle = self.GetAngleFrameToFrame(trigger.frameidParent, trigger.frameidChild)
+                    
+                    angleA1 = trigger.angleMin % (2.0*N.pi)
+                    angleA2 = trigger.angleMax % (2.0*N.pi)
+                    angleB1 = (2.0*N.pi - angleA2) # % (2.0*N.pi)
+                    angleB2 = (2.0*N.pi - angleA1) # % (2.0*N.pi)
+    
+                    if angle is not None:
+                        # Test for angle meeting the angle criteria.
+                        isAngleInRange = False
+                        if trigger.angleTestBilateral:
+                            if trigger.angleTest=='inclusive':
+                                #rospy.loginfo('EL angles %s' % [angleA1, angleA2, angleB1, angleB2, angle])
+                                if (angleA1 <= angle <= angleA2) or (angleB1 <= angle <= angleB2):
+                                    isAngleInRange = True
+                                    
+                            elif trigger.angleTest=='exclusive':
+                                if (0.0 <= angle < angleA1) or (angleA2 < angle < angleB1) or (angleB2 < angle <= (2.0*N.pi)):
+                                    isAngleInRange = True
+                        else:
+                            if trigger.angleTest=='inclusive':
+                                if (angleA1 <= angle <= angleA2):
+                                    isAngleInRange = True
+                                    
+                            elif trigger.angleTest=='exclusive':
+                                if (angle < angleA1) or (angleA2 < angle):
+                                    isAngleInRange = True
+                    
+                
+                # Test for absolute speed of parent.
+                isSpeedAbsParentInRange = True
+                if (trigger.speedAbsParentMin is not None) and (trigger.speedAbsParentMax is not None):
+                    isSpeedAbsParentInRange = False
+                    speedAbsParent = self.GetSpeedFrameToFrame('Arena', trigger.frameidParent)# Absolute speed of the parent frame.
+                    #rospy.loginfo ('EL parent speed=%s' % speedAbsParent)
+                    if speedAbsParent is not None:
+                        if (trigger.speedAbsParentMin <= speedAbsParent <= trigger.speedAbsParentMax):
+                            isSpeedAbsParentInRange = True
+
+                # Test for absolute speed of child.
+                isSpeedAbsChildInRange = True
+                if (trigger.speedAbsChildMin is not None) and (trigger.speedAbsChildMax is not None):
+                    isSpeedAbsChildInRange = False
+                    speedAbsChild = self.GetSpeedFrameToFrame('Arena', trigger.frameidChild)# Absolute speed of the child frame.
+                    #rospy.loginfo ('EL child speed=%s' % speedAbsChild)
+                    if speedAbsChild is not None:
+                        if (trigger.speedAbsChildMin <= speedAbsChild <= trigger.speedAbsChildMax):
+                            isSpeedAbsChildInRange = True
+
+                # Test for relative speed between parent & child.
+                isSpeedRelInRange = True
+                if (trigger.speedRelMin is not None) and (trigger.speedRelMax is not None):
+                    isSpeedRelInRange = False
+                    speedRel = self.GetSpeedFrameToFrame(trigger.frameidParent, trigger.frameidChild)# Relative speed parent to child.
+                    #rospy.loginfo ('EL speed=%s' % speed)
+                    if speedRel is not None:
+                        if (trigger.speedRelMin <= speedRel <= trigger.speedRelMax):
+                            isSpeedRelInRange = True
+
+                # Test all the trigger criteria.
+                if isDistanceInRange and isAngleInRange and isSpeedAbsParentInRange and isSpeedAbsChildInRange and isSpeedRelInRange:
+                    
+                    # Set the pending trigger start time.
+                    if not self.isTriggered:
+                        self.isTriggered = True
+                        self.timeTriggered = rospy.Time.now()
+                else:
+                    # Cancel a pending trigger.
+                    self.isTriggered = False
+                    self.timeTriggered = None
+
+                #if (distance is not None) and (angle is not None) and (speedAbsParent is not None) and (speedAbsChild is not None) and (speedRel is not None):
+                #    rospy.logwarn ('EL triggers=distance=%0.3f, speed=%0.3f,%0.3f, angle=%0.3f, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
+                #else:
+                #    rospy.logwarn ('EL triggers=distance=%s, speed=%s,%s, angle=%s, bools=%s' % (distance, speedAbsParent, speedAbsChild, angle, [isDistanceInRange, isSpeedAbsParentInRange, isSpeedAbsChildInRange, isSpeedRelInRange, isAngleInRange]))
+
+                # If pending trigger has lasted longer than requested duration, then set trigger.
+                if (self.isTriggered):
+                    duration = rospy.Time.now().to_sec() - self.timeTriggered.to_sec()
+                    
+                    if duration >= trigger.timeHold:
+                        rv = 'success'
                         break
                     
-                    if trigger.timeout != -1:
-                        if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > trigger.timeout:
-                            rv = 'timeout'
-                            break
-                    
-                    self.rosrate.sleep()
+                    #rospy.loginfo('EL duration=%s' % duration)
+                
+                if (self.commandExperiment=='exitnow'):
+                    rv = 'aborted'
+                    break
 
-            #rospy.logwarn ('rv=%s', rv)
-            #rospy.logwarn ('self.mode=%s', self.mode)
-            if rv!='aborted' and self.mode=='pre':
+                    
+                if self.preempt_requested():
+                    rospy.logwarn('preempt requested: TriggerOnStates()')
+                    self.service_preempt()
+                    rv = 'preempt'
+                    break
+                
+                if trigger.timeout != -1:
+                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > trigger.timeout:
+                        rv = 'timeout'
+                        break
+                
+                self.rosrate.sleep()
+
+        #rospy.logwarn ('rv=%s', rv)
+        #rospy.logwarn ('self.mode=%s', self.mode)
+        #if rv!='aborted' and self.mode=='pre':
+        #    self.Trigger.notify(True)
+        try:
+            if self.mode=='pre':
                 self.Trigger.notify(True)
-            #else:
-            #    self.Trigger.notify(False)
                 
         except rospy.ServiceException:
             rv = 'aborted'
@@ -811,18 +804,16 @@ class TriggerOnTime (smach.State):
         rospy.loginfo("EL State TriggerOnTime(%s, %s)" % (self.mode, duration))
             
         rv = 'success'
-        try:
-            rospy.sleep(duration)
-        except rospy.ServiceException:
-            rv = 'aborted'
+        rospy.sleep(duration)
 
         if (self.commandExperiment=='exitnow'):
             rv = 'aborted'
 
-        #if rv!='aborted' and ('pre' in self.mode):
-        #    self.Trigger.notify(True)
-        #else:
-        #    self.Trigger.notify(False)
+        #try:
+        #    if rv!='aborted' and ('pre' in self.mode):
+        #        self.Trigger.notify(True)
+        #except rospy.ServiceException:
+        #    rv = 'aborted'
 
         #rospy.loginfo ('EL Exiting TriggerOnTime()')
         return rv
@@ -930,14 +921,8 @@ class MoveRobot (smach.State):
         rv = 'aborted'
 
         while not rospy.is_shutdown():
-            posRobot = self.arenastate.robot.pose.position # Assumed in the "Plate" frame.
+            posRobot = self.arenastate.robot.pose.position # Assumed in the "Arena" frame.
             ptRobot = N.array([posRobot.x, posRobot.y])
-            
-            # Fly data.                        
-            if (len(self.arenastate.flies)>0):
-                iFly = GetNearestFly(self.arenastate)
-                posFly = self.arenastate.flies[iFly].pose.position # Assumed in the "Plate" frame
-
             
             # Get a random speed once per move, non-random speed always.
             angleSpeed = 0.0
@@ -983,14 +968,14 @@ class MoveRobot (smach.State):
             #    posOrigin = posRobot
             #    doMove = True
             #else:
-            #    posOrigin = Point(x=0, y=0, z=0) # Relative to the origin of the Plate frame
+            #    posOrigin = Point(x=0, y=0, z=0) # Relative to the origin of the Arena frame
             #    doMove = False
             
 
             # If we need to calculate a target.
             if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
                 doMove = True
-                # Compute target point in workspace (i.e. Plate) coordinates.
+                # Compute target point in workspace (i.e. Arena) coordinates.
                 #ptOrigin = N.array([posOrigin.x, posOrigin.y])
                 ptOrigin = GetPositionFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginPosition)
                 if (ptOrigin is not None):
@@ -1055,7 +1040,7 @@ class MoveRobot (smach.State):
         msgPattern.mode = 'byshape'
         msgPattern.shape = self.paramsIn.robot.move.pattern.shape
         msgPattern.points = []
-        msgPattern.frame_id = 'Plate'
+        msgPattern.frame_id = 'Arena'
         msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
         msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
         msgPattern.count = self.paramsIn.robot.move.pattern.count
@@ -1089,7 +1074,7 @@ class MoveRobot (smach.State):
         msgPattern.mode = 'byshape'
         msgPattern.shape = self.paramsIn.robot.move.pattern.shape
         msgPattern.points = []
-        msgPattern.frame_id = 'Plate'
+        msgPattern.frame_id = 'Arena'
         msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
         msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
         msgPattern.count = 0
@@ -1174,7 +1159,7 @@ class Lasertrack (smach.State):
 
                 if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
                     markerTarget = Marker(header=Header(stamp = state.header.stamp,
-                                                        frame_id='Plate'),
+                                                        frame_id='Arena'),
                                           ns='statefilter',
                                           id=1,
                                           type=Marker.CUBE,
@@ -1385,15 +1370,15 @@ class Lasertrack (smach.State):
                         stamp=None
                         if (pose is None) or (velocity is None):
                             try:
-                                stamp = g_tfrx.getLatestCommonTime('Plate', pattern.frame_id)
+                                stamp = g_tfrx.getLatestCommonTime('Arena', pattern.frame_id)
                             except tf.Exception:
                                 pass
 
                             
                         # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                        if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Plate', pattern.frame_id, stamp):
+                        if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Arena', pattern.frame_id, stamp):
                             try:
-                                poseStamped = g_tfrx.transformPose('Plate', PoseStamped(header=Header(stamp=stamp,
+                                poseStamped = g_tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
                                                                                                       frame_id=pattern.frame_id),
                                                                                         pose=Pose(position=Point(0,0,0),
                                                                                                   orientation=Quaternion(0,0,0,1)
@@ -1406,9 +1391,9 @@ class Lasertrack (smach.State):
 
                                 
                         # If we still need the velocity, then get it from ROS.
-                        if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Plate', pattern.frame_id, stamp):
+                        if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Arena', pattern.frame_id, stamp):
                             try:
-                                velocity_tuple = g_tfrx.lookupTwist('Plate', pattern.frame_id, stamp, self.dtVelocity)
+                                velocity_tuple = g_tfrx.lookupTwist('Arena', pattern.frame_id, stamp, self.dtVelocity)
                             except tf.Exception:
                                 velocity = None
                             else:
@@ -1570,7 +1555,7 @@ class LEDPanels (smach.State):
 
                 if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
                     markerTarget = Marker(header=Header(stamp = state.header.stamp,
-                                                        frame_id='Plate'),
+                                                        frame_id='Arena'),
                                           ns='statefilter',
                                           id=1,
                                           type=Marker.CUBE,
@@ -1760,15 +1745,15 @@ class LEDPanels (smach.State):
                 stamp=None
                 if (pose is None) or (velocity is None):
                     try:
-                        stamp = g_tfrx.getLatestCommonTime('Plate', self.paramsIn.ledpanels.frame_id)
+                        stamp = g_tfrx.getLatestCommonTime('Arena', self.paramsIn.ledpanels.frame_id)
                     except tf.Exception:
                         pass
 
                     
                 # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Plate', self.paramsIn.ledpanels.frame_id, stamp):
+                if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Arena', self.paramsIn.ledpanels.frame_id, stamp):
                     try:
-                        poseStamped = g_tfrx.transformPose('Plate', PoseStamped(header=Header(stamp=stamp,
+                        poseStamped = g_tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
                                                                                               frame_id=self.paramsIn.ledpanels.frame_id),
                                                                                 pose=Pose(position=Point(0,0,0),
                                                                                           orientation=Quaternion(0,0,0,1)
@@ -1781,9 +1766,9 @@ class LEDPanels (smach.State):
 
                         
                 # If we still need the velocity, then get it from ROS.
-                if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Plate', self.paramsIn.ledpanels.frame_id, stamp):
+                if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Arena', self.paramsIn.ledpanels.frame_id, stamp):
                     try:
-                        velocity_tuple = g_tfrx.lookupTwist('Plate', self.paramsIn.ledpanels.frame_id, stamp, self.dtVelocity)
+                        velocity_tuple = g_tfrx.lookupTwist('Arena', self.paramsIn.ledpanels.frame_id, stamp, self.dtVelocity)
                     except tf.Exception:
                         velocity = None
                     else:
@@ -1990,11 +1975,11 @@ class ExperimentLib():
 
         
         # Create the main "Trials" concurrency state.
-        ################################################################################### ACTIONS
+        ################################################################################### TRIAL
         smachTrial = smach.Concurrence(outcomes = ['success','disabled','aborted'],
                                          default_outcome = 'aborted',
                                          child_termination_cb = self.AnyTrialTerm_callback,
-                                         outcome_cb = self.AllTrialsTerm_callback,
+                                         outcome_cb = self.AllTrialTerm_callback,
                                          input_keys = ['experimentparamsIn'])
         with smachTrial:
             smach.Concurrence.add('MOVEROBOT', 
@@ -2079,12 +2064,12 @@ class ExperimentLib():
 
 
 
-            ################################################################################### PRE -> ACTIONS
+            ################################################################################### PRE -> TRIAL
             smach.StateMachine.add('PRE',                         
                                    smachPre,
-                                   transitions={'success':'ACTIONS', 
-                                                'disabled':'ACTIONS',
-                                                'timeout':'ACTIONS',
+                                   transitions={'success':'TRIAL', 
+                                                'disabled':'TRIAL',
+                                                'timeout':'TRIAL',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
@@ -2092,22 +2077,22 @@ class ExperimentLib():
 
 
 
-            ################################################################################### ACTIONS -> POSTWAIT
-            smach.StateMachine.add('ACTIONS', 
+            ################################################################################### TRIAL -> POST
+            smach.StateMachine.add('TRIAL', 
                                    smachTrial,
-                                   transitions={'success':'POSTWAIT',
-                                                'disabled':'POSTWAIT',
+                                   transitions={'success':'POST',
+                                                'disabled':'POST',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
 
-            ################################################################################### POSTWAIT -> (ENDTRIALCALLBACK or RESETHARDWARE)
+            ################################################################################### POST -> (ENDTRIALCALLBACK or RESETHARDWARE)
             if endtrial_callback is not None:
                 stateAfterWaitPost = 'ENDTRIALCALLBACK'
             else:
                 stateAfterWaitPost = 'RESETHARDWARE'
 
-            smach.StateMachine.add('POSTWAIT', 
+            smach.StateMachine.add('POST', 
                                    TriggerOnTime(mode='post'),
                                    transitions={'success':stateAfterWaitPost,
                                                 'preempt':'aborted',
@@ -2223,8 +2208,8 @@ class ExperimentLib():
     
 
     # Gets called after all "trial" states are terminated.
-    def AllTrialsTerm_callback(self, outcome_map):
-        #rospy.logwarn('AllTrialsTerm_callback(%s)' % repr(outcome_map))
+    def AllTrialTerm_callback(self, outcome_map):
+        #rospy.logwarn('AllTrialTerm_callback(%s)' % repr(outcome_map))
         rv = 'aborted'
         if ('POSTTRIGGER' in outcome_map) and ('MOVEROBOT' in outcome_map) and ('LASERTRACK' in outcome_map) and ('LEDPANELS' in outcome_map):
             

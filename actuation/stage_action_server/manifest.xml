@@ -17,7 +17,7 @@
   <depend package="tf"/>
   
   <depend package="flycore"/>
-  <depend package="plate_tf"/>
+  <depend package="arena_tf"/>
 
 </package>
 

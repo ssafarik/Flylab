@@ -1,13 +1,13 @@
 <launch>
   <!-- =================================================================== -->
-  <!-- This file contains both the Plate-Stage and Plate-Camera            -->
+  <!-- This file contains both the Arena-Stage and Arena-Camera            -->
   <!-- transform data.                                                     -->
   <!-- =================================================================== -->
 
   <!-- =================================================================== -->
-  <!-- Plate-Camera transform.                                             -->
+  <!-- Arena-Camera transform.                                             -->
   <!--                                                                     -->
-  <!-- "roslaunch calibration CameraPlate.launch"                          -->
+  <!-- "roslaunch calibration CameraArena.launch"                          -->
   <!--                                                                     -->
   <!-- Use the following command to move the center and radius of the      -->
   <!-- circle to correspond to the arena:                                  -->
@@ -24,13 +24,13 @@
 
 
 
-  <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
-  <param name="camera_plate_rvec_0" type="double" value="-3.135"/>
-  <param name="camera_plate_rvec_1" type="double" value="0.000"/>
-  <param name="camera_plate_rvec_2" type="double" value="-0.140"/>
-  <param name="camera_plate_tvec_0" type="double" value="71.09"/> <!-- Adjust for camera/plate alignment here. -->
-  <param name="camera_plate_tvec_1" type="double" value="53.4"/> <!-- Adjust for camera/plate alignment here. -->
-  <param name="camera_plate_tvec_2" type="double" value="484.0"/>
+  <!-- These values come from CameraArena.launch, with a checkerboard on the arena. -->
+  <param name="camera_arena_rvec_0" type="double" value="-3.135"/>
+  <param name="camera_arena_rvec_1" type="double" value="0.000"/>
+  <param name="camera_arena_rvec_2" type="double" value="-0.140"/>
+  <param name="camera_arena_tvec_0" type="double" value="71.09"/> <!-- Adjust for camera/arena alignment here. -->
+  <param name="camera_arena_tvec_1" type="double" value="53.4"/> <!-- Adjust for camera/arena alignment here. -->
+  <param name="camera_arena_tvec_2" type="double" value="484.0"/>
   
 
 </launch>

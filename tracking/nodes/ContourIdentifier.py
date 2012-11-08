@@ -8,7 +8,7 @@ import tf
 import numpy as N
 import threading
 from tracking.msg import ArenaState, Contourinfo, ContourinfoLists
-from plate_tf.srv import PlateCameraConversion
+from arena_tf.srv import ArenaCameraConversion
 from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
@@ -95,7 +95,7 @@ class ContourIdentifier:
         
         self.pubMarker = rospy.Publisher('visualization_marker', Marker)
         self.markerArena = Marker(header=Header(stamp = rospy.Time.now(),
-                                                frame_id='/Plate'),
+                                                frame_id='/Arena'),
                                   ns='arena',
                                   id=0,
                                   type=3, #CYLINDER,
@@ -114,8 +114,8 @@ class ContourIdentifier:
 
 
         try:
-            rospy.wait_for_service('plate_from_camera') #, timeout=10.0)
-            self.plate_from_camera = rospy.ServiceProxy('plate_from_camera', PlateCameraConversion)
+            rospy.wait_for_service('arena_from_camera') #, timeout=10.0)
+            self.arena_from_camera = rospy.ServiceProxy('arena_from_camera', ArenaCameraConversion)
         except (rospy.ServiceException, IOError), e:
             print "Service call failed: %s"%e
 
@@ -155,7 +155,7 @@ class ContourIdentifier:
                 self.markerExclusionzone_list = []
                 for i in range(len(self.pointExclusionzone_list)):
                     self.markerExclusionzone_list.append(Marker(header=Header(stamp = rospy.Time.now(),
-                                                                              frame_id='/Plate'),
+                                                                              frame_id='/Arena'),
                                                                 ns='exclusionzones',
                                                                 id=0,
                                                                 type=3, #CYLINDER,
@@ -183,31 +183,31 @@ class ContourIdentifier:
             self.ResetFlyObjects()
             
             
-        #self.stateEndEffector.header.frame_id = "Plate" # Interpret it as the Plate frame.
+        #self.stateEndEffector.header.frame_id = "Arena" # Interpret it as the Arena frame.
         
         if True: # Use EndEffector position.
             posesStage = PoseStamped(header=state.header,
                                      pose=state.pose)
             try:
-                self.tfrx.waitForTransform('Plate', posesStage.header.frame_id, posesStage.header.stamp, rospy.Duration(1.0))
-                posesPlate = self.tfrx.transformPose('Plate', posesStage)
+                self.tfrx.waitForTransform('Arena', posesStage.header.frame_id, posesStage.header.stamp, rospy.Duration(1.0))
+                posesArena = self.tfrx.transformPose('Arena', posesStage)
             except tf.Exception, e:
                 rospy.logwarn ('Exception in EndEffector_callbackA: %s' % e)
             else:
                 self.stateEndEffector = state
-                self.stateEndEffector.header = posesPlate.header
-                self.stateEndEffector.pose = posesPlate.pose
+                self.stateEndEffector.header = posesArena.header
+                self.stateEndEffector.pose = posesArena.pose
 
         else: # Use link5 position
-            posesStage = PoseStamped(header=Header(frame_id='Plate'),
+            posesStage = PoseStamped(header=Header(frame_id='Arena'),
                                      pose=Pose(position=Point(x=0, y=0, z=0)))
             try:
                 self.tfrx.waitForTransform('link5', posesStage.header.frame_id, posesStage.header.stamp, rospy.Duration(1.0))
-                posesPlate = self.tfrx.transformPose('link5',posesStage)
+                posesArena = self.tfrx.transformPose('link5',posesStage)
                 self.stateEndEffector = state
-                self.stateEndEffector.header = posesPlate.header
-                self.stateEndEffector.header.frame_id = 'Plate'
-                self.stateEndEffector.pose = posesPlate.pose
+                self.stateEndEffector.header = posesArena.header
+                self.stateEndEffector.header.frame_id = 'Arena'
+                self.stateEndEffector.pose = posesArena.pose
             except tf.Exception, e:
                 rospy.logwarn ('Exception in EndEffector_callbackB: %s' % e)
                 
@@ -271,7 +271,7 @@ class ContourIdentifier:
             contourinfolistsOut.area = []
             contourinfolistsOut.ecc = []
             
-            #contourinfolistsPlate = TransformContourinfoPlateFromCamera(contourinfolistsIn)
+            #contourinfolistsArena = TransformContourinfoArenaFromCamera(contourinfolistsIn)
             for iContour in range(len(contourinfolistsIn.x)):
                 if N.linalg.norm(N.array([contourinfolistsIn.x[iContour]-self.xMask, 
                                           contourinfolistsIn.y[iContour]-self.yMask])) <= self.radiusMask:
@@ -284,15 +284,15 @@ class ContourIdentifier:
         return contourinfolistsOut
         
         
-    # TransformContourinfoPlateFromCamera()
-    # Transform the points in contourinfolistsIn to be in the Plate frame.
+    # TransformContourinfoArenaFromCamera()
+    # Transform the points in contourinfolistsIn to be in the Arena frame.
     #
-    def TransformContourinfoPlateFromCamera(self, contourinfolistsIn):
+    def TransformContourinfoArenaFromCamera(self, contourinfolistsIn):
         #contourinfolistsOut = ContourinfoLists()
         if self.initialized:
-            response = self.plate_from_camera(contourinfolistsIn.x, contourinfolistsIn.y)
+            response = self.arena_from_camera(contourinfolistsIn.x, contourinfolistsIn.y)
             contourinfolistsOut = copy.copy(contourinfolistsIn)
-            contourinfolistsOut.header.frame_id = "Plate"
+            contourinfolistsOut.header.frame_id = "Arena"
             contourinfolistsOut.x = response.Xdst
             contourinfolistsOut.y = response.Ydst
     
@@ -465,7 +465,7 @@ class ContourIdentifier:
                                     tf.transformations.quaternion_about_axis(0, (0,0,1)),
                                     stamp,
                                     "RobotComputed",
-                                    "Plate")
+                                    "Arena")
 
 
         # Flies.    
@@ -549,14 +549,14 @@ class ContourIdentifier:
 #                                        (0,0,0,1),
 #                                        stamp,
 #                                        "xyObjects"+str(m),
-#                                        "Plate")
+#                                        "Arena")
 #            
 #        for n in range(len(contourinfo_listAug)):
 #            self.tfbx.sendTransform((contourinfo_listAug[n].x, contourinfo_listAug[n].y, 0.0),
 #                                    (0,0,0,1),
 #                                    stamp,
 #                                    "contours"+str(n),
-#                                    "Plate")
+#                                    "Arena")
         
 
         # Match objects with contourinfo_list.
@@ -624,7 +624,7 @@ class ContourIdentifier:
                 #rospy.logwarn ('CI contourinfolists0 %s' % contourinfolists)
                 contourinfolistsPixels = self.FilterContourinfoWithinMask(contourinfolistsPixels)
                 #rospy.logwarn ('CI contourinfolists1 %s' % contourinfolists)
-                contourinfolists = self.TransformContourinfoPlateFromCamera(contourinfolistsPixels)
+                contourinfolists = self.TransformContourinfoArenaFromCamera(contourinfolistsPixels)
                 #rospy.logwarn ('CI contourinfolists2 %s' % contourinfolists)
     
                 # Create a null contourinfo.
