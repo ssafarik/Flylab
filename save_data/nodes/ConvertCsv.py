@@ -473,10 +473,21 @@ class ConvertCsv:
         self.headingsPostWait_V26 =    'postWait\n'
         self.templatePostWait_V26 =    '{postWait:s}\n'
 
-        self.headingsData_Pre26 = 'time, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly\n'
-        self.templateData_Pre26 = '{time:s}, {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}, {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}\n'
-        self.headingsData_V26 = 'time, triggered, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly\n'
-        self.templateData_V26 = '{time:s}, {triggered:s}, {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}, {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}\n'
+
+        #######################################################################
+        self.headingsDataLeft_Pre26     = 'time'
+        self.templateDataLeft_Pre26     = '{time:s}'
+        self.headingsDataRobot_Pre26    = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot'
+        self.templateDataRobot_Pre26    = ', {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}'
+        self.headingsDataFly_Pre26      = ', xFly, yFly, aFly, vxFly, vyFly, vaFly'
+        self.templateDataFly_Pre26      = ', {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}'
+
+        self.headingsDataLeft_V26       = 'time, triggered'
+        self.templateDataLeft_V26       = '{time:s}, {triggered:s}'
+        self.headingsDataRobot_V26      = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot'
+        self.templateDataRobot_V26      = ', {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}'
+        self.headingsDataFly_V26        = ', xFly, yFly, aFly, vxFly, vyFly, vaFly'
+        self.templateDataFly_V26        = ', {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}'
         
         #######################################################################
         
@@ -498,9 +509,10 @@ class ConvertCsv:
         return nLines
         
 
-    # Return the version of a Flylab .csv file.
+    # GetFileInfo()
+    # Return the (version,nLinesHeader,nRobots,nFlies) of a Flylab .csv file.
     #                
-    def GetVersion(self, filename):
+    def GetFileInfo(self, filename):
         with open(filename, 'r') as fid:
             posOrigin = fid.tell()
             nLinesHeader = self.AdvanceUntilField(fid, 'time')
@@ -510,6 +522,9 @@ class ConvertCsv:
             line = []
             for i in range(nLinesHeader):
                 line.append(fid.readline())
+                
+            # Read the data header line.
+            lineHeaderData = fid.readline()
             
             
             # Determine the version from which headings are on which lines, or from the version number.
@@ -560,9 +575,24 @@ class ConvertCsv:
     
                 else:
                     version = '9995'
-                
+
+
+            # Count the robots & flies.
+            nFields = len(lineHeaderData.split(','))
+            nFields -= 1  # For the 'time' field.
                         
-        return (version, nLinesHeader)
+            field = lineHeaderData.split(',')[1].strip(' \n')
+            if field=='triggered':
+                nFields -= 1  # For the 'triggered' field.
+
+            # Now nFields should be a multiple of 6:  (x,y,a,vx,vy,va) for each robot or fly.
+            nObjects = int(nFields/6)
+            
+            nRobots = 1 # There's always a robot in the file.
+            nFlies = nObjects-nRobots
+            
+                        
+        return (version, nLinesHeader, nRobots, nFlies)
 
 
     # Given a comma separated line of text, return a list of cleaned-up fields.
@@ -575,7 +605,7 @@ class ConvertCsv:
                  
 
     def ReadHeader_V1 (self, filename):
-        (version, nLinesHeader) = self.GetVersion(filename)
+        (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filename)
         #self.nHeader = 4
         
         with open(filename, 'r') as fid:
@@ -645,7 +675,7 @@ class ConvertCsv:
         self.param_trialLEDPanelsStatefilterCriteria  = ''
 
 
-        if version=='1.0': 
+        if versionIn=='1.0': 
             self.param_date_time = field_list[0]
             self.param_description = field_list[1]
             self.param_maxTrials = field_list[2]
@@ -740,7 +770,7 @@ class ConvertCsv:
             self.param_postWait = '0.0'
 
 
-        if version=='1.1': 
+        if versionIn=='1.1': 
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
             self.param_maxTrials                    = field_list[2]
@@ -836,7 +866,7 @@ class ConvertCsv:
 
 
     def ReadHeader_V2 (self, filename):
-        (version, nLinesHeader) = self.GetVersion(filename)
+        (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filename)
         #self.nHeader = 37
         
         with open(filename, 'r') as fid:
@@ -846,7 +876,7 @@ class ConvertCsv:
                 line.append(fid.readline())
 
             
-            if version == '2.0':
+            if versionIn == '2.0':
                 i = 0;
                 headerExperimentTxt = line[i]; i=i+1
                 headerExperiment    = line[i]; i=i+1
@@ -865,7 +895,7 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-            if version=='2.1':
+            if versionIn=='2.1':
                 i = 0;
                 headerExperimentTxt = line[i]; i=i+1
                 headerExperiment    = line[i]; i=i+1
@@ -888,7 +918,7 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-            if version=='2.2':
+            if versionIn=='2.2':
                 i = 0;
                 headerExperimentTxt = line[i]; i=i+1
                 headerExperiment    = line[i]; i=i+1
@@ -931,7 +961,7 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-            if version=='2.3':
+            if versionIn=='2.3':
                 i = 0;
                 headerExperimentTxt = line[i]; i=i+1
                 headerExperiment    = line[i]; i=i+1
@@ -978,7 +1008,7 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-            if version=='2.4':
+            if versionIn=='2.4':
                 i = 0;
                 headerExperimentTxt = line[i]; i=i+1
                 headerExperiment    = line[i]; i=i+1
@@ -1029,7 +1059,7 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-            if version=='2.5':
+            if versionIn=='2.5':
                 i = 0;
                 headerExperimentTxt = line[i]; i=i+1
                 headerExperiment    = line[i]; i=i+1
@@ -1080,7 +1110,7 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-            if version=='2.6':
+            if versionIn=='2.6':
                 i = 0;
                 headerVersionTxt    = line[i]; i=i+1
                 headerVersion       = line[i]; i=i+1
@@ -1204,7 +1234,7 @@ class ConvertCsv:
         self.param_trialLEDPanelsStatefilterCriteria  = ''
     
 
-        if version=='2.0':
+        if versionIn=='2.0':
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
@@ -1303,7 +1333,7 @@ class ConvertCsv:
             self.param_postWait                     = field_list[0]
 
 
-        if version=='2.1':
+        if versionIn=='2.1':
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
@@ -1413,7 +1443,7 @@ class ConvertCsv:
             self.param_postWait                     = field_list[0]
 
 
-        if version=='2.2':
+        if versionIn=='2.2':
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
@@ -1523,7 +1553,7 @@ class ConvertCsv:
             self.param_postWait                     = field_list[0]
 
 
-        if version=='2.3':
+        if versionIn=='2.3':
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
@@ -1642,7 +1672,7 @@ class ConvertCsv:
             self.param_postWait                     = field_list[0]
 
 
-        if version=='2.4' or version=='2.5':    # Just the order of two sections was changed: trialLEDPanels & postTrigger.
+        if versionIn=='2.4' or versionIn=='2.5':    # Just the order of two sections was changed: trialLEDPanels & postTrigger.
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
@@ -1762,7 +1792,7 @@ class ConvertCsv:
             self.param_postWait                     = field_list[0]
 
 
-        if version=='2.6':
+        if versionIn=='2.6':
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
@@ -1927,8 +1957,8 @@ class ConvertCsv:
     # Given a file of any version, load all the header fields, using defaults if necessary.
     #        
     def ReadHeader (self, filename):
-        (version, nLinesHeader) = self.GetVersion(filename)
-        fVersion = float(version)
+        (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filename)
+        fVersion = float(versionIn)
         if fVersion < 2.0:
             self.ReadHeader_V1(filename)
         elif fVersion >= 2.0 and fVersion <3.0:
@@ -2348,8 +2378,10 @@ class ConvertCsv:
             fid.write('\n')
             
 
+    # Write the data lines from any-version input file to a pre-2.6 version output file.
+    # Pre-version 2.6 doesn't include the 'triggered' column in the data.
     def CopyDataLines_Pre26(self, filenameIn, filenameOut):
-        (versionIn, nLinesHeader) = self.GetVersion(filenameIn)
+        (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filenameIn)
         
         with open(filenameIn, 'r') as fidIn:
             self.AdvanceUntilField(fidIn, 'time')
@@ -2358,49 +2390,56 @@ class ConvertCsv:
             with open(filenameOut, 'a') as fidOut:
                 
                 # Write the new heading line.
+                self.headingsData_Pre26 = self.headingsDataLeft_Pre26 + self.headingsDataRobot_Pre26
+                for i in range(nFlies):
+                    self.headingsData_Pre26 += self.headingsDataFly_Pre26
+                self.headingsData_Pre26 += '\n'
                 fidOut.write(self.headingsData_Pre26)    
                 
                 
                 # Write the data lines.
                 for lineIn in fidIn:
                     field_list = self.ListFromCsv(lineIn)
+
+                    lineOutLeft = self.templateDataLeft_Pre26.format(
+                                                            time = field_list[0],
+                                                            )
                     if (float(versionIn) < 2.6):
-                        lineOut = self.templateData_Pre26.format(
-                                                                time = field_list[0],
-                                                                xRobot = field_list[1],
-                                                                yRobot = field_list[2],
-                                                                aRobot = field_list[3],
-                                                                vxRobot = field_list[4],
-                                                                vyRobot = field_list[5],
-                                                                vaRobot = field_list[6],
-                                                                xFly = field_list[7],
-                                                                yFly = field_list[8],
-                                                                aFly = field_list[9],
-                                                                vxFly = field_list[10],
-                                                                vyFly = field_list[11],
-                                                                vaFly = field_list[12],
-                                                                )
+                        iField = 1
                     else:
-                        lineOut = self.templateData_Pre26.format(
-                                                                time = field_list[0],
-                                                                xRobot = field_list[2],
-                                                                yRobot = field_list[3],
-                                                                aRobot = field_list[4],
-                                                                vxRobot = field_list[5],
-                                                                vyRobot = field_list[6],
-                                                                vaRobot = field_list[7],
-                                                                xFly = field_list[8],
-                                                                yFly = field_list[9],
-                                                                aFly = field_list[10],
-                                                                vxFly = field_list[11],
-                                                                vyFly = field_list[12],
-                                                                vaFly = field_list[13],
-                                                                )
+                        iField = 2  # Skip the 'triggered' column.
+                        
+                    lineOutRobot = self.templateDataRobot_Pre26.format(
+                                                            xRobot = field_list[iField+0],
+                                                            yRobot = field_list[iField+1],
+                                                            aRobot = field_list[iField+2],
+                                                            vxRobot = field_list[iField+3],
+                                                            vyRobot = field_list[iField+4],
+                                                            vaRobot = field_list[iField+5],
+                                                            )
+                    iField += 6
+                    lineOut = lineOutLeft + lineOutRobot
+                    
+                    for iFly in range(nFlies): 
+                        lineOutFly = self.templateDataFly_Pre26.format(
+                                                            xFly = field_list[iField+0],
+                                                            yFly = field_list[iField+1],
+                                                            aFly = field_list[iField+2],
+                                                            vxFly = field_list[iField+3],
+                                                            vyFly = field_list[iField+4],
+                                                            vaFly = field_list[iField+5],
+                                                            )
+                        iField += 6
+                        lineOut += lineOutFly
+                        
+                    lineOut += '\n'
                     fidOut.write(lineOut)
                     
 
+    # Write the data lines from any-version input file to a post-2.6 version output file.
+    # Post-version 2.6 includes the 'triggered' column in the data.
     def CopyDataLines_V26(self, filenameIn, filenameOut):
-        (versionIn, nLinesHeader) = self.GetVersion(filenameIn)
+        (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filenameIn)
         
         with open(filenameIn, 'r') as fidIn:
             self.AdvanceUntilField(fidIn, 'time')
@@ -2409,46 +2448,54 @@ class ConvertCsv:
             with open(filenameOut, 'a') as fidOut:
                 
                 # Write the new heading line.
+                self.headingsData_V26 = self.headingsDataLeft_V26 + self.headingsDataRobot_V26
+                for i in range(nFlies):
+                    self.headingsData_V26 += self.headingsDataFly_V26
+                self.headingsData_V26 += '\n'
                 fidOut.write(self.headingsData_V26)    
                 
                 
                 # Write the data lines.
                 for lineIn in fidIn:
                     field_list = self.ListFromCsv(lineIn)
+
                     if (float(versionIn) < 2.6):
-                        lineOut = self.templateData_V26.format(
-                                                                time = field_list[0],
-                                                                triggered = '1',
-                                                                xRobot = field_list[1],
-                                                                yRobot = field_list[2],
-                                                                aRobot = field_list[3],
-                                                                vxRobot = field_list[4],
-                                                                vyRobot = field_list[5],
-                                                                vaRobot = field_list[6],
-                                                                xFly = field_list[7],
-                                                                yFly = field_list[8],
-                                                                aFly = field_list[9],
-                                                                vxFly = field_list[10],
-                                                                vyFly = field_list[11],
-                                                                vaFly = field_list[12],
-                                                                )
+                        lineOutLeft = self.templateDataLeft_V26.format(
+                                                            time = field_list[0],
+                                                            triggered = 1,
+                                                            )
+                        iField = 1
                     else:
-                        lineOut = self.templateData_V26.format(
-                                                                time = field_list[0],
-                                                                triggered = field_list[1],
-                                                                xRobot = field_list[2],
-                                                                yRobot = field_list[3],
-                                                                aRobot = field_list[4],
-                                                                vxRobot = field_list[5],
-                                                                vyRobot = field_list[6],
-                                                                vaRobot = field_list[7],
-                                                                xFly = field_list[8],
-                                                                yFly = field_list[9],
-                                                                aFly = field_list[10],
-                                                                vxFly = field_list[11],
-                                                                vyFly = field_list[12],
-                                                                vaFly = field_list[13],
-                                                                )
+                        lineOutLeft = self.templateDataLeft_V26.format(
+                                                            time = field_list[0],
+                                                            triggered = field_list[1],
+                                                            )
+                        iField = 2  # Skip the 'triggered' column.
+                        
+                    lineOutRobot = self.templateDataRobot_V26.format(
+                                                            xRobot = field_list[iField+0],
+                                                            yRobot = field_list[iField+1],
+                                                            aRobot = field_list[iField+2],
+                                                            vxRobot = field_list[iField+3],
+                                                            vyRobot = field_list[iField+4],
+                                                            vaRobot = field_list[iField+5],
+                                                            )
+                    iField += 6
+                    lineOut = lineOutLeft + lineOutRobot
+                    
+                    for iFly in range(nFlies): 
+                        lineOutFly = self.templateDataFly_V26.format(
+                                                            xFly = field_list[iField+0],
+                                                            yFly = field_list[iField+1],
+                                                            aFly = field_list[iField+2],
+                                                            vxFly = field_list[iField+3],
+                                                            vyFly = field_list[iField+4],
+                                                            vaFly = field_list[iField+5],
+                                                            )
+                        iField += 6
+                        lineOut += lineOutFly
+                        
+                    lineOut += '\n'
                     fidOut.write(lineOut)
 
 
@@ -2456,7 +2503,7 @@ class ConvertCsv:
     # Convert a single file from one version to another.
     #
     def ConvertFile(self, filenameIn, filenameOut):
-        (versionIn, nLinesHeader) = self.GetVersion(filenameIn)
+        (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filenameIn)
         print '%s  ->  %s:  (ver %s -> %s)' % (filenameIn, filenameOut, versionIn, self.versionToWrite)
         #filenameLeaf = os.path.split(filenameIn)[1]
         #filenameOut = dirOut + '/' + filenameLeaf
@@ -2546,8 +2593,8 @@ if __name__ == '__main__':
     
     ###############################################################################################
     ###############################################################################################
-    convert.versionToWrite = '2.6'  # '2.2' or '2.6' or 'latest'
-    dirIn   = '/home/ssafarik/FlylabData'
+    convert.versionToWrite = '2.2'  # '2.2' or '2.6' or 'latest'
+    dirIn   = '/home/ssafarik/FlylabData/2012_11_08'
     dirOut  = '/home/ssafarik/FlylabData_converted'
     ###############################################################################################
     ###############################################################################################

@@ -33,9 +33,13 @@ class FlylabGUI:
     	self.builder.connect_signals(self) #Connect GUI event functions.
     	
     	self.pubExperimentCommand = rospy.Publisher('experiment/command', String)
+        self.subExperimentCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
     	self.pubTrackingCommand   = rospy.Publisher('tracking/command', TrackingCommand)
-    
-    	
+
+
+    def CommandExperiment_callback(self, msgString):
+        if (msgString.data=='exitnow'):
+            sys.exit(0)
     	
     
     def BtnPause_clicked_cb(self, widget):
@@ -77,6 +81,9 @@ class FlylabGUI:
 if __name__ == "__main__":
     gui = FlylabGUI()
     while (gtk.main_iteration(block=False)):
+        if (rospy.is_shutdown()):
+            sys.exit(0)
+            
         rospy.sleep(-1)  # Returns immediately.  Equivalent to rospy.spinOnce(), if it existed.
     
     
