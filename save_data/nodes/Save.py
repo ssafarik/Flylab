@@ -196,7 +196,7 @@ class Save:
                                     'preLaserStatefilterHi, '\
                                     'preLaserStatefilterCriteria, ' \
                                     'preLaserTimeout\n'
-        self.templatePreLaser =   '{preLaserEnabled:s}, '\
+        self.templatePreLaser =     '{preLaserEnabled:s}, '\
                                     '{preLaserPatternShape:s}, '\
                                     '{preLaserPatternHzPattern:s}, '\
                                     '{preLaserPatternHzPoint:s}, '\
@@ -269,7 +269,7 @@ class Save:
         self.templatePreWait2 =     '{preWait2:s}\n'
         
         
-        self.headingsTrialRobot =  'trialRobotEnabled, '\
+        self.headingsTrialRobot =   'trialRobotEnabled, '\
                                     'trialRobotMovePatternShape, '\
                                     'trialRobotMovePatternHzPattern, '\
                                     'trialRobotMovePatternHzPoint, '\
@@ -287,7 +287,7 @@ class Save:
                                     'trialRobotMoveRelSpeedType, '\
                                     'trialRobotMoveRelTolerance, ' \
                                     'trialRobotMoveTimeout\n'
-        self.templateTrialRobot =  '{trialRobotEnabled:s}, '\
+        self.templateTrialRobot =   '{trialRobotEnabled:s}, '\
                                     '{trialRobotMovePatternShape:s}, '\
                                     '{trialRobotMovePatternHzPattern:s}, '\
                                     '{trialRobotMovePatternHzPoint:s}, '\
@@ -318,7 +318,7 @@ class Save:
                                     'trialLaserStatefilterHi, '\
                                     'trialLaserStatefilterCriteria, ' \
                                     'trialLaserTimeout\n'
-        self.templateTrialLaser = '{trialLaserEnabled:s}, '\
+        self.templateTrialLaser =   '{trialLaserEnabled:s}, '\
                                     '{trialLaserPatternShape:s}, '\
                                     '{trialLaserPatternHzPattern:s}, '\
                                     '{trialLaserPatternHzPoint:s}, '\
@@ -331,7 +331,7 @@ class Save:
                                     '{trialLaserStatefilterCriteria:s}, ' \
                                     '{trialLaserTimeout:s}\n'
         
-        self.headingsTrialLEDPanels =    'trialLEDPanelsEnabled, '\
+        self.headingsTrialLEDPanels = 'trialLEDPanelsEnabled, '\
                                     'trialLEDPanelsCommand, '\
                                     'trialLEDPanelsIdPattern, '\
                                     'trialLEDPanelsFrameid, '\
@@ -339,7 +339,7 @@ class Save:
                                     'trialLEDPanelsStatefilterHi, '\
                                     'trialLEDPanelsStatefilterCriteria, '\
                                     'trialLEDPanelsTimeout\n'
-        self.templateTrialLEDPanels =    '{trialLEDPanelsEnabled:s}, '\
+        self.templateTrialLEDPanels = '{trialLEDPanelsEnabled:s}, '\
                                     '{trialLEDPanelsCommand:s}, '\
                                     '{trialLEDPanelsIdPattern:s}, '\
                                     '{trialLEDPanelsFrameid:s}, '\
@@ -386,8 +386,24 @@ class Save:
         self.headingsPostWait =     'postWait\n'
         self.templatePostWait =     '{postWait:s}\n'
 
-        self.headingsData = 'time, triggered, xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, xFly, yFly, aFly, vxFly, vyFly, vaFly\n'
-        self.templateData = '{time:0.4f}, {triggered:s}, {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}\n'
+        # Construct a variable-length heading for the data lines, depending on the number of flies.
+        self.headingsDataLeft   = 'time, triggered'
+        self.headingsDataRobot  = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot'
+        self.headingsDataFly    = ', xFly, yFly, aFly, vxFly, vyFly, vaFly'
+        self.templateDataLeft   = '{time:0.4f}, {triggered:s}'
+        self.templateDataRobot  = ', {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}'
+        self.templateDataFly    = ', {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}'
+
+        self.headingsData = self.headingsDataLeft + self.headingsDataRobot
+        for i in range(self.nFlies):
+            self.headingsData += self.headingsDataFly
+        self.headingsData += '\n'
+
+        self.templateData = self.templateDataLeft + self.templateDataRobot
+        for i in range(self.nFlies):
+            self.templateData += self.templateDataFly
+        self.templateData += '\n'
+
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -931,9 +947,11 @@ class Save:
     def ArenaState_callback(self, arenastate):
         if (self.initialized) and (self.bSavingArenastate) and (self.fid is not None):
 
-            stamp = 0.0
+            # Get latest time.
+            stamp = max(0.0, arenastate.robot.header.stamp.to_sec())
+            for iFly in range(self.nFlies):
+                stamp = max(stamp, arenastate.flies[iFly].header.stamp.to_sec())
             
-            #rospy.logwarn ('SAVE %s' % [self.saveOnlyWhileTriggered,self.triggered,self.saveArenastate,self.bSavingArenastate])
             # Get the state of the robot.
             stateRobot = arenastate.robot
             q = stateRobot.pose.orientation
@@ -941,47 +959,67 @@ class Save:
             angleRobot = rpy[2] % (2.0 * N.pi)
 
 
-            # Get the state of the fly.                
-            iFly = 0 # Just use the first fly.
-            if len(arenastate.flies)>iFly:
-                stateFly = arenastate.flies[iFly]
-            else:
-                stateFly = MsgFrameState()
+            # Start putting the data row together.
+            dataLeft = self.templateDataLeft.format(
+                                                    align       = self.format_align,
+                                                    sign        = self.format_sign,
+                                                    width       = self.format_width,
+                                                    precision   = self.format_precision,
+                                                    type        = self.format_type,
+                                                    time        = stamp, #rospy.Time.now().to_sec(), #stateRobot.header.stamp,
+                                                    triggered   = str(int(self.triggered)),
+                                                    )
+            dataRobot = self.templateDataRobot.format(
+                                                    align       = self.format_align,
+                                                    sign        = self.format_sign,
+                                                    width       = self.format_width,
+                                                    precision   = self.format_precision,
+                                                    type        = self.format_type,
+                                                    xRobot      = stateRobot.pose.position.x,
+                                                    yRobot      = stateRobot.pose.position.y,
+                                                    aRobot      = angleRobot,
+                                                    vxRobot     = stateRobot.velocity.linear.x,
+                                                    vyRobot     = stateRobot.velocity.linear.y,
+                                                    vaRobot     = stateRobot.velocity.angular.z,
+                                                    )
+            dataRow = dataLeft + dataRobot
 
-            q = stateFly.pose.orientation
-            rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-            angleFly = rpy[2] % (2.0 * N.pi)
+
+            # Go through the flies.                
+            for iFly in range(self.nFlies):
+                # Get the state of each fly.
+                if len(arenastate.flies)>iFly:
+                    stateFly = arenastate.flies[iFly]
+                else:
+                    stateFly = MsgFrameState()
+    
+                q = stateFly.pose.orientation
+                rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
+                angleFly = rpy[2] % (2.0 * N.pi)
+
+                # Append the fly to the data row.            
+                dataFly = self.templateDataFly.format(
+                                                   align        = self.format_align,
+                                                   sign         = self.format_sign,
+                                                   width        = self.format_width,
+                                                   precision    = self.format_precision,
+                                                   type         = self.format_type,
+                                                   xFly         = stateFly.pose.position.x,
+                                                   yFly         = stateFly.pose.position.y,
+                                                   aFly         = angleFly,
+                                                   vxFly        = stateFly.velocity.linear.x,
+                                                   vyFly        = stateFly.velocity.linear.y,
+                                                   vaFly        = stateFly.velocity.angular.z,
+                                                   )
+                dataRow += dataFly
+                
+            dataRow += '\n'
             
-            
-            # Get latest time.
-            stamp = max(stamp, stateRobot.header.stamp.to_sec())
-            stamp = max(stamp, stateFly.header.stamp.to_sec())
-            
+
             # Write the robot & fly data to the file.
-            data_row = self.templateData.format(align   = self.format_align,
-                                                sign    = self.format_sign,
-                                                width   = self.format_width,
-                                                precision = self.format_precision,
-                                                type    = self.format_type,
-                                                time    = stamp, #rospy.Time.now().to_sec(), #stateRobot.header.stamp,
-                                                triggered = str(int(self.triggered)),
-                                                xRobot  = stateRobot.pose.position.x,
-                                                yRobot  = stateRobot.pose.position.y,
-                                                aRobot  = angleRobot,
-                                                vxRobot = stateRobot.velocity.linear.x,
-                                                vyRobot = stateRobot.velocity.linear.y,
-                                                vaRobot = stateRobot.velocity.angular.z,
-                                                xFly    = stateFly.pose.position.x,
-                                                yFly    = stateFly.pose.position.y,
-                                                aFly    = angleFly,
-                                                vxFly   = stateFly.velocity.linear.x,
-                                                vyFly   = stateFly.velocity.linear.y,
-                                                vaFly   = stateFly.velocity.angular.z,
-                                                )
-
             with self.lockArenastate:
                 if (not self.fid.closed):
-                    self.fid.write(data_row)
+                    self.fid.write(dataRow)
 
     
         if (self.initialized) and (self.bSavingVideo) and (self.image is not None):
