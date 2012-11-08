@@ -401,33 +401,45 @@ class RosFivebar:
         y6th = y**6.0
         
         A = (2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5
-        B = (-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5        
+        B = (-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5
+        C = -self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x
+        D = 0.5*(xsq*y-2.0*y*self.L0*x+y*self.L0sq-y*self.L4sq+y**3.0+y*self.L2sq)
+        F = x*self.L1sq+x3rd-x*self.L3sq+x*ysq
+        G = 0.5*(-2.0*self.L2*self.L4*x+2.0*self.L2*self.L4*self.L0)
+        H = self.L2*self.L4*xsq-2.0*self.L2*self.L4*self.L0*x+self.L2*self.L4*self.L0sq-self.L2*self.L4**3.0+self.L2*self.L4*ysq+self.L2**3.0*self.L4
+        J = 2.0*y*self.L2sq*self.L0-2.0*y*self.L2sq*x
+        K = 0.5*(y**3.0+xsq*y+y*self.L1sq-y*self.L3sq)
+        M = self.L3*self.L1**3.0-self.L3**3.0*self.L1+self.L3*self.L1*ysq+xsq*self.L3*self.L1
+        P = (ysq+self.L0sq+xsq-2.0*self.L0*x)
+        Q = xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq+self.L2sq
+        R = 0.5*(xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq-self.L2sq)/self.L2/self.L4
+                
         q1 = [ \
-                N.arctan2((-x*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq+A)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
-                          (    x*self.L1sq+x3rd-x*self.L3sq+x*ysq+A)/(ysq+xsq)/self.L1), \
-                N.arctan2((-x*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq-A)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
-                          (    x*self.L1sq+x3rd-x*self.L3sq+x*ysq-A)/(ysq+xsq)/self.L1) \
+                N.arctan2((-x*(F+A)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
+                          (    F+A)/(ysq+xsq)/self.L1), \
+                N.arctan2((-x*(F-A)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
+                          (    F-A)/(ysq+xsq)/self.L1) \
               ]
 
         q3 = [ \
-                N.arctan2((-2.0*y*x*self.L1sq+1.0/2.0*(y**3.0+xsq*y+y*self.L1sq-y*self.L3sq)*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq+A)/(ysq+xsq))/(-self.L3*self.L1*x*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq+(2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5)/(ysq+xsq)+self.L3*self.L1**3.0-self.L3**3.0*self.L1+self.L3*self.L1*ysq+xsq*self.L3*self.L1), \
-                          1.0/2.0*(xsq-self.L3sq+ysq-self.L1sq)/self.L1/self.L3), \
-                N.arctan2((-2.0*y*x*self.L1sq+1.0/2.0*(y**3.0+xsq*y+y*self.L1sq-y*self.L3sq)*(x*self.L1sq+x3rd-x*self.L3sq+x*ysq-A)/(ysq+xsq)+self.L3*self.L1**3.0-self.L3**3.0*self.L1+self.L3*self.L1*ysq+xsq*self.L3*self.L1), \
-                          1.0/2.0*(xsq-self.L3sq+ysq-self.L1sq)/self.L1/self.L3) \
+                N.arctan2((-2.0*x*y*self.L1sq+K*(F+A)/(xsq+ysq))/(-self.L3*self.L1*x*(F+A)/(xsq+ysq)+M), \
+                          0.5*(-self.L1sq-self.L3sq+xsq+ysq)/self.L1/self.L3), \
+                N.arctan2((-2.0*x*y*self.L1sq+K*(F-A)/(xsq+ysq)+M), \
+                          0.5*(-self.L1sq-self.L3sq+xsq+ysq)/self.L1/self.L3) \
               ]
 
         q2 = [ \
-                N.arctan2((xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq+self.L2sq+1.0/2.0*(-2.0*x+2.0*self.L0)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x+B)/(ysq+self.L0sq+xsq-2.0*self.L0*x))/self.L2/y, \
-                          (-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x+B)/(ysq+self.L0sq+xsq-2.0*self.L0*x)/self.L2), \
-                N.arctan2((xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq+self.L2sq+1.0/2.0*(-2.0*x+2.0*self.L0)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x-B)/(ysq+self.L0sq+xsq-2.0*self.L0*x))/self.L2/y, \
-                          (-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x-B)/(ysq+self.L0sq+xsq-2.0*self.L0*x)/self.L2) \
+                N.arctan2((Q+0.5*(-2.0*x+2.0*self.L0)*(C+B)/P)/self.L2/y, \
+                          (C+B)/P/self.L2), \
+                N.arctan2((Q+0.5*(-2.0*x+2.0*self.L0)*(C-B)/P)/self.L2/y, \
+                          (C-B)/P/self.L2) \
               ]
-
+        
         q4 = [ \
-                N.arctan2((2.0*y*self.L2sq*self.L0-2.0*y*self.L2sq*x+1.0/2.0*(xsq*y-2.0*y*self.L0*x+y*self.L0sq-y*self.L4sq+y**3.0+y*self.L2sq)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x+B)/(ysq+self.L0sq+xsq-2.0*self.L0*x))/(self.L2*self.L4*xsq-2.0*self.L2*self.L4*self.L0*x+self.L2*self.L4*self.L0sq-self.L2*self.L4**3.0+self.L2*self.L4*ysq+self.L2**3.0*self.L4+1.0/2.0*(-2.0*self.L2*self.L4*x+2.0*self.L2*self.L4*self.L0)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x+B)/(ysq+self.L0sq+xsq-2.0*self.L0*x)), \
-                          1.0/2.0*(xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq-self.L2sq)/self.L2/self.L4), \
-                N.arctan2((2.0*y*self.L2sq*self.L0-2.0*y*self.L2sq*x+1.0/2.0*(xsq*y-2.0*y*self.L0*x+y*self.L0sq-y*self.L4sq+y**3.0+y*self.L2sq)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x-B)/(ysq+self.L0sq+xsq-2.0*self.L0*x))/(self.L2*self.L4*xsq-2.0*self.L2*self.L4*self.L0*x+self.L2*self.L4*self.L0sq-self.L2*self.L4**3.0+self.L2*self.L4*ysq+self.L2**3.0*self.L4+1.0/2.0*(-2.0*self.L2*self.L4*x+2.0*self.L2*self.L4*self.L0)*(-self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x-B)/(ysq+self.L0sq+xsq-2.0*self.L0*x)), \
-                          1.0/2.0*(xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq-self.L2sq)/self.L2/self.L4) \
+                N.arctan2((J+D*(C+B)/P)/(H+G*(C+B)/P), 
+                          R), \
+                N.arctan2((J+D*(C-B)/P)/(H+G*(C-B)/P), 
+                          R) \
               ]
 
         #rospy.logwarn ('5B q1=%s' % q1)
