@@ -14,7 +14,7 @@
   <depend package="camera1394v2"/>
   <depend package="flycore"/>
   <depend package="pythonmodules"/>
-  <depend package="plate_tf"/>
+  <depend package="arena_tf"/>
   <depend package="patterngen"/>
   <depend package="tracking"/>
   <depend package="config"/>

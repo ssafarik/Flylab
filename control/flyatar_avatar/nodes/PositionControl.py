@@ -30,10 +30,10 @@ class PositionControl:
         self.stage_commands = StageCommands()
         self.stage_commands.position_control = False
         self.vel_scale_factor = 100     # mm/s
-        self.vel_vector_plate = numpy.array([[0],[0],[0],[1]])
+        self.vel_vector_arena = numpy.array([[0],[0],[0],[1]])
         self.vel_vector_robot = numpy.array([[0],[0],[0],[1]])
 
-        self.control_frame = "Plate"
+        self.control_frame = "Arena"
 
         self.robot_position = PointStamped()
         self.robot_position.header.frame_id = "Robot"
@@ -41,7 +41,7 @@ class PositionControl:
         self.robot_position.point.y = 0
         self.robot_position.point.z = 0
         self.target_point = PointStamped()
-        self.target_point.header.frame_id = "Plate"
+        self.target_point.header.frame_id = "Arena"
         self.target_point.point.x = 0
         self.target_point.point.y = 0
         self.target_point.point.z = 0
@@ -160,14 +160,14 @@ class PositionControl:
                     self.stage_commands.position_control = False
                     self.radius_velocity = data.radius_velocity*self.vel_scale_factor
                     self.tangent_velocity = data.tangent_velocity*self.vel_scale_factor
-                    self.vel_vector_plate[0,0] = data.x_velocity*self.vel_scale_factor
-                    self.vel_vector_plate[1,0] = data.y_velocity*self.vel_scale_factor
+                    self.vel_vector_arena[0,0] = data.x_velocity*self.vel_scale_factor
+                    self.vel_vector_arena[1,0] = data.y_velocity*self.vel_scale_factor
 
                     try:
-                        (self.stage_commands.x_velocity,self.stage_commands.y_velocity) = self.vel_vector_convert(self.vel_vector_plate,"Plate")
+                        (self.stage_commands.x_velocity,self.stage_commands.y_velocity) = self.vel_vector_convert(self.vel_vector_arena,"Arena")
                     except (tf.LookupException, tf.ConnectivityException):
-                        self.stage_commands.x_velocity = self.vel_vector_plate[0,0]
-                        self.stage_commands.y_velocity = -self.vel_vector_plate[1,0]
+                        self.stage_commands.x_velocity = self.vel_vector_arena[0,0]
+                        self.stage_commands.y_velocity = -self.vel_vector_arena[1,0]
 
                 if self.sc_ok_to_publish:
                     self.sc_pub.publish(self.stage_commands)
@@ -179,7 +179,7 @@ class PositionControl:
                     self.gain_radius = rospy.get_param("gain_radius")
                     self.gain_theta = rospy.get_param("gain_theta")
 
-                    (self.stage_commands.x_velocity,self.stage_commands.y_velocity) = self.vel_vector_convert(self.vel_vector_plate,"Plate")
+                    (self.stage_commands.x_velocity,self.stage_commands.y_velocity) = self.vel_vector_convert(self.vel_vector_arena,"Arena")
 
                     (trans,q) = self.tf_listener.lookupTransform(self.control_frame,'/Robot',rospy.Time(0))
                     x = trans[0]
@@ -199,11 +199,11 @@ class PositionControl:
                     rot_matrix = tf.transformations.rotation_matrix(theta, (0,0,1))
                     self.vel_vector_robot[0,0] = self.radius_velocity
                     self.vel_vector_robot[1,0] = self.tangent_velocity
-                    vel_vector_plate = numpy.dot(rot_matrix,self.vel_vector_robot)
-                    self.vel_vector_plate[0,0] = vel_vector_plate[0]
-                    self.vel_vector_plate[1,0] = vel_vector_plate[1]
+                    vel_vector_arena = numpy.dot(rot_matrix,self.vel_vector_robot)
+                    self.vel_vector_arena[0,0] = vel_vector_arena[0]
+                    self.vel_vector_arena[1,0] = vel_vector_arena[1]
 
-                    (x_vel_stage,y_vel_stage) = self.vel_vector_convert(self.vel_vector_plate,"Plate")
+                    (x_vel_stage,y_vel_stage) = self.vel_vector_convert(self.vel_vector_arena,"Arena")
                     self.stage_commands.x_velocity += x_vel_stage
                     self.stage_commands.y_velocity += y_vel_stage
 

@@ -1,0 +1,5 @@
+<launch>
+	<node name="TransformServerArenaCamera" pkg="arena_tf" type="TransformServerArenaCamera.py"/>
+	<node name="TransformServerArenaStage" pkg="arena_tf" type="TransformServerArenaStage.py"/>
+	<!-- <node pkg="tf" type="static_transform_publisher" name="statictf_Camera0_Camera_publisher" args="0 0 0 0 0 0 Camera0 Camera 10" /> -->
+</launch>

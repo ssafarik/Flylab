@@ -1,7 +1,7 @@
 <launch>
   <include file="$(find camera_firewire)/launch/camera_firewire.launch" />
   <!-- <include file="$(find tracking)/launch/tracking" /> -->
-  <!-- <include file="$(find plate_tf)/launch/plate_tf.launch" /> -->
+  <!-- <include file="$(find arena_tf)/launch/arena_tf.launch" /> -->
   <param name="save_image_format" type="string" value="flv"/>
   <node pkg="save_data" type="SaveImages.py" name="SaveImages" />
 

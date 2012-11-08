@@ -1,7 +1,7 @@
 <launch>
 	<!-- ================================================================== -->
 	<!-- This is the launch file for the procedure to calibrate the         -->
-	<!-- Stage-to-Plate transform.                                          -->
+	<!-- Stage-to-Arena transform.                                          -->
 	<!--                                                                    -->
 	<!-- This is where you align the computed end-effector position with    -->
 	<!-- the visual end-effector position.                                  -->
@@ -15,8 +15,8 @@
 	<include file="$(find robots)/launch/robots_1.launch" />
 	<include file="$(find flies)/launch/flies_0.launch" />
 	<include file="$(find patterngen)/launch/PatternGenXY.launch" />
-	<include file="$(find plate_tf)/launch/plate_tf.launch" />
+	<include file="$(find arena_tf)/launch/arena_tf.launch" />
 	<include file="$(find tracking)/launch/tracking.launch" />
 
-	<node pkg="calibration" type="StagePlate.py" name="StagePlateCalibration" />
+	<node pkg="calibration" type="StageArena.py" name="StageArenaCalibration" />
 </launch>

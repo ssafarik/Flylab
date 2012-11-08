@@ -12,7 +12,7 @@ import tf
 from stage_action_server.msg import *
 from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
-import plate_tf.srv
+import arena_tf.srv
 
     
 
@@ -32,11 +32,11 @@ class StageActionServer(object):
         
         # create messages that are used to publish feedback/result.
         self.goal_stage     = ActionStageStateGoal()
-        self.goal_plate     = ActionStageStateGoal()
+        self.goal_arena     = ActionStageStateGoal()
         self.result_stage   = ActionStageStateResult()
-        self.result_plate   = ActionStageStateResult()
+        self.result_arena   = ActionStageStateResult()
         self.feedback_stage = ActionStageStateFeedback()
-        self.feedback_plate = ActionStageStateFeedback()
+        self.feedback_arena = ActionStageStateFeedback()
         
         self.requestStageState = SrvFrameStateRequest()
             
@@ -66,14 +66,14 @@ class StageActionServer(object):
         #goal.state.pose.position.x = -20
         #goal.state.pose.position.y = -20
         
-        # We can eliminate this section, as we are just transforming Plate to Plate.
+        # We can eliminate this section, as we are just transforming Arena to Arena.
         poseStamped = PoseStamped(header=goal.state.header, pose=goal.state.pose) 
         #try:
-        self._tfrx.waitForTransform("Plate", poseStamped.header.frame_id, poseStamped.header.stamp, rospy.Duration(5.0))
-        poseStage = self._tfrx.transformPose('Plate', poseStamped)
+        self._tfrx.waitForTransform("Arena", poseStamped.header.frame_id, poseStamped.header.stamp, rospy.Duration(5.0))
+        poseStage = self._tfrx.transformPose('Arena', poseStamped)
         #except:
         #    rospy.sleep(0.1)
-        #    poseStage = self._tfrx.transformPose('Plate', poseStamped)
+        #    poseStage = self._tfrx.transformPose('Arena', poseStamped)
 
         rospy.loginfo ('SAS goalpose  pretransform %s' % poseStamped)
         rospy.loginfo ('SAS goalpose posttransform %s' % poseStage)
@@ -121,12 +121,12 @@ class StageActionServer(object):
                         self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=poseStage.header, pose=poseStage.pose)))
                         self.isRunning = True
                     else:
-                        # We can eliminate this section, as we are just transforming Plate to Plate.
-                        poseStamped = PoseStamped(header=Header(frame_id='Plate'), pose=responseStage.state.pose)
-                        posePlate = self._tfrx.transformPose('Plate', poseStamped)
+                        # We can eliminate this section, as we are just transforming Arena to Arena.
+                        poseStamped = PoseStamped(header=Header(frame_id='Arena'), pose=responseStage.state.pose)
+                        poseArena = self._tfrx.transformPose('Arena', poseStamped)
                             
-                        statePlate = ActionStageStateResult(state=MsgFrameState(header=posePlate.header, pose=posePlate.pose))
-                        self._as.publish_feedback(statePlate)
+                        stateArena = ActionStageStateResult(state=MsgFrameState(header=poseArena.header, pose=poseArena.pose))
+                        self._as.publish_feedback(stateArena)
             
             
             self.rosRate.sleep()

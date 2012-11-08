@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find tracking)/launch/tracking" />
-  <!-- <include file="$(find plate_tf)/launch/plate_tf.launch" /> -->
+  <!-- <include file="$(find arena_tf)/launch/arena_tf.launch" /> -->
   <node pkg="image_gui" type="DisplayTF.py" name="ImageDisplay" />
 
   <!-- <param name="mask_radius" type="double" value="225"/> -->

@@ -8,13 +8,13 @@ import tf
 import cv
 import numpy
 import copy
-from plate_tf.srv import *
+from arena_tf.srv import *
 # from flycore.srv import *
 from flycore.msg import StageCommands,Setpoint,StageState
 from joystick_commands.msg import JoystickCommands
 from geometry_msgs.msg import PointStamped
 from pythonmodules import CircleFunctions
-from plate_tf.msg import StopState, InBoundsState
+from arena_tf.msg import StopState, InBoundsState
 
 class LookupTableMove:
     def __init__(self):
@@ -100,11 +100,11 @@ class SetpointControl:
         self.stage_commands.velocity_control = False
         self.stage_commands.lookup_table_correct = False
         self.robot_velocity_max = rospy.get_param("robot_velocity_max",100) # mm/s
-        self.vel_vector_plate = numpy.array([[0],[0],[0],[1]])
+        self.vel_vector_arena = numpy.array([[0],[0],[0],[1]])
         self.vel_vector_robot = numpy.array([[0],[0],[0],[1]])
 
-        self.control_frame = "Plate"
-        self.start_frame = "Plate"
+        self.control_frame = "Arena"
+        self.start_frame = "Arena"
 
         self.setpoint = Setpoint()
         self.setpoint.header.frame_id = self.control_frame
@@ -122,7 +122,7 @@ class SetpointControl:
 
 
         self.dummy_point = PointStamped()
-        self.dummy_point.header.frame_id = "Plate"
+        self.dummy_point.header.frame_id = "Arena"
         self.dummy_point.point.x = 0
         self.dummy_point.point.y = 0
         self.dummy_point.point.z = 0
@@ -132,8 +132,8 @@ class SetpointControl:
         self.robot_origin.point.x = 0
         self.robot_origin.point.y = 0
         self.robot_origin.point.z = 0
-        self.robot_plate = PointStamped()
-        self.robot_plate.header.frame_id = "Plate"
+        self.robot_arena = PointStamped()
+        self.robot_arena.header.frame_id = "Arena"
         self.robot_control_frame = PointStamped()
         self.robot_control_frame.header.frame_id = self.control_frame
         self.setpoint_center_origin = PointStamped()
@@ -141,34 +141,34 @@ class SetpointControl:
         self.setpoint_center_origin.point.x = 0
         self.setpoint_center_origin.point.y = 0
         self.setpoint_center_origin.point.z = 0
-        self.setpoint_center_plate = PointStamped()
-        self.setpoint_center_plate.header.frame_id = "Plate"
+        self.setpoint_center_arena = PointStamped()
+        self.setpoint_center_arena.header.frame_id = "Arena"
         self.setpoint_origin = PointStamped()
         self.setpoint_origin.header.frame_id = self.control_frame
         self.setpoint_origin.point.x = self.setpoint.radius*math.cos(self.setpoint.theta)
         self.setpoint_origin.point.y = self.setpoint.radius*math.sin(self.setpoint.theta)
         self.setpoint_origin.point.z = 0
-        self.setpoint_plate = PointStamped()
-        self.setpoint_plate.header.frame_id = "Plate"
-        self.setpoint_plate.point.x = 0
-        self.setpoint_plate.point.y = 0
-        self.setpoint_plate.point.z = 0
+        self.setpoint_arena = PointStamped()
+        self.setpoint_arena.header.frame_id = "Arena"
+        self.setpoint_arena.point.x = 0
+        self.setpoint_arena.point.y = 0
+        self.setpoint_arena.point.z = 0
         self.setpoint_int_origin = PointStamped()
         self.setpoint_int_origin.header.frame_id = self.control_frame
         self.setpoint_int_origin.point.x = self.setpoint_int.radius*math.cos(self.setpoint_int.theta)
         self.setpoint_int_origin.point.y = self.setpoint_int.radius*math.sin(self.setpoint_int.theta)
         self.setpoint_int_origin.point.z = 0
-        self.setpoint_int_plate = PointStamped()
-        self.setpoint_int_plate.header.frame_id = "Plate"
+        self.setpoint_int_arena = PointStamped()
+        self.setpoint_int_arena.header.frame_id = "Arena"
 
-        self.setpoint_plate_previous = copy.deepcopy(self.setpoint_plate)
+        self.setpoint_arena_previous = copy.deepcopy(self.setpoint_arena)
 
         self.tries_limit = 4
 
         self.chord_length = 1
         self.point_count_max = 100
-        self.plate_points_x = []
-        self.plate_points_y = []
+        self.arena_points_x = []
+        self.arena_points_y = []
 
         self.gain_theta = rospy.get_param("gain_theta")
         self.gain_radius = rospy.get_param("gain_radius")
@@ -185,11 +185,11 @@ class SetpointControl:
         self.lookup_table_move_setpoint_dist_multiplier = 2.2
         self.lookup_table_move_gain_radius_multiplier = 1.8
 
-        # self.setpoint_plate_initialized = False
-        # while not self.setpoint_plate_initialized:
+        # self.setpoint_arena_initialized = False
+        # while not self.setpoint_arena_initialized:
         #     try:
-        #         self.setpoint_plate = self.tf_listener.transformPoint("Stage",self.setpoint_plate)
-        #         self.setpoint_plate_initialized = True
+        #         self.setpoint_arena = self.tf_listener.transformPoint("Stage",self.setpoint_arena)
+        #         self.setpoint_arena_initialized = True
         #     except (tf.LookupException, tf.ConnectivityException):
         #         pass
 
@@ -210,17 +210,17 @@ class SetpointControl:
 
         self.stopped = False
 
-        rospy.wait_for_service('stage_from_plate')
+        rospy.wait_for_service('stage_from_arena')
         try:
-            self.stage_from_plate = rospy.ServiceProxy('stage_from_plate', PlateCameraConversion)
+            self.stage_from_arena = rospy.ServiceProxy('stage_from_arena', ArenaCameraConversion)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
         # Xsrc = [0,10,15.4,-34.1]
         # Ysrc = [0,10,-15.3,-65.9]
-        # rospy.logwarn("self.plate_points_x = %s" % (str(Xsrc)))
-        # rospy.logwarn("self.plate_points_y = %s" % (str(Ysrc)))
-        # response = self.stage_from_plate(Xsrc,Ysrc)
+        # rospy.logwarn("self.arena_points_x = %s" % (str(Xsrc)))
+        # rospy.logwarn("self.arena_points_y = %s" % (str(Ysrc)))
+        # response = self.stage_from_arena(Xsrc,Ysrc)
         # rospy.logwarn("stage_points_x = %s" % (str(response.Xdst)))
         # rospy.logwarn("stage_points_y = %s" % (str(response.Ydst)))
 
@@ -240,16 +240,16 @@ class SetpointControl:
             self.robot_in_bounds_state = data
 
     def update_setpoint_status(self):
-        # rospy.logwarn("setpoint_plate_previous.point.x = %s" % (str(self.setpoint_plate_previous.point.x)))
-        # rospy.logwarn("setpoint_plate.point.x = %s" % (str(self.setpoint_plate.point.x)))
-        # rospy.logwarn("setpoint_plate_previous.point.y = %s" % (str(self.setpoint_plate_previous.point.y)))
-        # rospy.logwarn("setpoint_plate.point.y = %s" % (str(self.setpoint_plate.point.y)))
-        # rospy.logwarn("abs(self.setpoint_plate_previous.point.x - self.setpoint_plate.point.x) = %s" % (str(abs(self.setpoint_plate_previous.point.x - self.setpoint_plate.point.x))))
-        # rospy.logwarn("abs(self.setpoint_plate_previous.point.y - self.setpoint_plate.point.y) = %s" % (str(abs(self.setpoint_plate_previous.point.y - self.setpoint_plate.point.y))))
-        if self.setpoint_move_threshold < abs(self.setpoint_plate_previous.point.x - self.setpoint_plate.point.x) or \
-           self.setpoint_move_threshold < abs(self.setpoint_plate_previous.point.y - self.setpoint_plate.point.y):
+        # rospy.logwarn("setpoint_arena_previous.point.x = %s" % (str(self.setpoint_arena_previous.point.x)))
+        # rospy.logwarn("setpoint_arena.point.x = %s" % (str(self.setpoint_arena.point.x)))
+        # rospy.logwarn("setpoint_arena_previous.point.y = %s" % (str(self.setpoint_arena_previous.point.y)))
+        # rospy.logwarn("setpoint_arena.point.y = %s" % (str(self.setpoint_arena.point.y)))
+        # rospy.logwarn("abs(self.setpoint_arena_previous.point.x - self.setpoint_arena.point.x) = %s" % (str(abs(self.setpoint_arena_previous.point.x - self.setpoint_arena.point.x))))
+        # rospy.logwarn("abs(self.setpoint_arena_previous.point.y - self.setpoint_arena.point.y) = %s" % (str(abs(self.setpoint_arena_previous.point.y - self.setpoint_arena.point.y))))
+        if self.setpoint_move_threshold < abs(self.setpoint_arena_previous.point.x - self.setpoint_arena.point.x) or \
+           self.setpoint_move_threshold < abs(self.setpoint_arena_previous.point.y - self.setpoint_arena.point.y):
             self.setpoint_moved = True
-            self.setpoint_plate_previous = copy.deepcopy(self.setpoint_plate)
+            self.setpoint_arena_previous = copy.deepcopy(self.setpoint_arena)
         else:
             self.setpoint_moved = False
         # rospy.logwarn("setpoint_moved = %s" % (str(self.setpoint_moved)))
@@ -310,19 +310,19 @@ class SetpointControl:
         y_vel_stage = vel_vector_stage[1]
         return [x_vel_stage],[y_vel_stage]
 
-    def convert_to_plate(self,point):
+    def convert_to_arena(self,point):
         point_converted = False
         tries = 0
-        point_plate = copy.deepcopy(self.dummy_point)
-        self.dummy_point.header.frame_id = "Plate"
+        point_arena = copy.deepcopy(self.dummy_point)
+        self.dummy_point.header.frame_id = "Arena"
         while (not point_converted) and (tries < self.tries_limit):
             tries += 1
             try:
-                point_plate = self.tf_listener.transformPoint("Plate",point)
+                point_arena = self.tf_listener.transformPoint("Arena",point)
                 point_converted = True
             except (tf.LookupException, tf.ConnectivityException):
                 pass
-        return point_plate
+        return point_arena
 
     def convert_to_control_frame(self,point):
         point_converted = False
@@ -338,35 +338,35 @@ class SetpointControl:
                 pass
         return point_control_frame
 
-    # def find_robot_plate(self):
-    #     robot_plate_acquired = False
-    #     while not robot_plate_acquired:
+    # def find_robot_arena(self):
+    #     robot_arena_acquired = False
+    #     while not robot_arena_acquired:
     #         try:
-    #             self.robot_plate = self.tf_listener.transformPoint("Plate",self.robot_origin)
-    #             robot_plate_acquired = True
+    #             self.robot_arena = self.tf_listener.transformPoint("Arena",self.robot_origin)
+    #             robot_arena_acquired = True
     #         except (tf.LookupException, tf.ConnectivityException):
     #             pass
 
-    # def find_setpoint_center_plate(self):
-    #     setpoint_center_plate_acquired = False
-    #     while not setpoint_center_plate_acquired:
+    # def find_setpoint_center_arena(self):
+    #     setpoint_center_arena_acquired = False
+    #     while not setpoint_center_arena_acquired:
     #         try:
-    #             self.setpoint_center_plate = self.tf_listener.transformPoint("Plate",self.setpoint_center_origin)
-    #             setpoint_center_plate_acquired = True
+    #             self.setpoint_center_arena = self.tf_listener.transformPoint("Arena",self.setpoint_center_origin)
+    #             setpoint_center_arena_acquired = True
     #         except (tf.LookupException, tf.ConnectivityException):
     #             pass
 
-    # def find_setpoint_plate(self):
+    # def find_setpoint_arena(self):
     #     # rospy.logwarn("self.setpoint_origin.header.frame_id = %s" % (str(self.setpoint_origin.header.frame_id)))
     #     # rospy.logwarn("self.setpoint_origin.x = %s" % (str(self.setpoint_origin.x)))
     #     # rospy.logwarn("self.setpoint_origin.y = %s" % (str(self.setpoint_origin.y)))
-    #     setpoint_plate_acquired = False
-    #     while not setpoint_plate_acquired:
+    #     setpoint_arena_acquired = False
+    #     while not setpoint_arena_acquired:
     #         try:
-    #             self.setpoint_plate = self.tf_listener.transformPoint("Plate",self.setpoint_origin)
-    #             # rospy.logwarn("self.setpoint_plate.x = %s" % (str(self.setpoint_plate.x)))
-    #             # rospy.logwarn("self.setpoint_plate.y = %s" % (str(self.setpoint_plate.y)))
-    #             setpoint_plate_acquired = True
+    #             self.setpoint_arena = self.tf_listener.transformPoint("Arena",self.setpoint_origin)
+    #             # rospy.logwarn("self.setpoint_arena.x = %s" % (str(self.setpoint_arena.x)))
+    #             # rospy.logwarn("self.setpoint_arena.y = %s" % (str(self.setpoint_arena.y)))
+    #             setpoint_arena_acquired = True
     #         except (tf.LookupException, tf.ConnectivityException):
     #             pass
 
@@ -410,13 +410,13 @@ class SetpointControl:
                 vel_y.append(alpha*delta_y)
         return vel_x,vel_y
 
-    def set_stage_commands_from_plate_points(self,vel_mag_list):
-        if (len(vel_mag_list) == 0) or (len(self.plate_points_x) == 1) or (len(self.plate_points_y) == 1):
+    def set_stage_commands_from_arena_points(self,vel_mag_list):
+        if (len(vel_mag_list) == 0) or (len(self.arena_points_x) == 1) or (len(self.arena_points_y) == 1):
             self.set_zero_velocity()
         else:
-            response = self.stage_from_plate(self.plate_points_x,self.plate_points_y)
-            # rospy.logwarn("self.plate_points_x = %s" % (str(self.plate_points_x)))
-            # rospy.logwarn("self.plate_points_y = %s" % (str(self.plate_points_y)))
+            response = self.stage_from_arena(self.arena_points_x,self.arena_points_y)
+            # rospy.logwarn("self.arena_points_x = %s" % (str(self.arena_points_x)))
+            # rospy.logwarn("self.arena_points_y = %s" % (str(self.arena_points_y)))
             stage_points_x = response.Xdst
             stage_points_y = response.Ydst
             # rospy.logwarn("stage_points_x = %s" % (str(stage_points_x)))
@@ -443,20 +443,20 @@ class SetpointControl:
         # rospy.logwarn("stage_commands.x_velocity = %s" % (str(self.stage_commands.x_velocity)))
         # rospy.logwarn("stage_commands.y_velocity = %s" % (str(self.stage_commands.y_velocity)))
 
-        # rospy.logwarn("self.plate_points_x = %s" % (str(self.plate_points_x)))
-        # rospy.logwarn("self.plate_points_y = %s" % (str(self.plate_points_y)))
+        # rospy.logwarn("self.arena_points_x = %s" % (str(self.arena_points_x)))
+        # rospy.logwarn("self.arena_points_y = %s" % (str(self.arena_points_y)))
         # rospy.logwarn("stage_points_x = %s" % (str(stage_points_x)))
         # rospy.logwarn("stage_points_y = %s" % (str(stage_points_y)))
 
     def set_path_to_start(self,vel_mag):
-        self.robot_plate = self.convert_to_plate(self.robot_origin)
-        self.plate_points_x = [self.robot_plate.point.x,0]
-        self.plate_points_y = [self.robot_plate.point.y,0]
-        self.set_stage_commands_from_plate_points(vel_mag)
+        self.robot_arena = self.convert_to_arena(self.robot_origin)
+        self.arena_points_x = [self.robot_arena.point.x,0]
+        self.arena_points_y = [self.robot_arena.point.y,0]
+        self.set_stage_commands_from_arena_points(vel_mag)
         # self.set_position_velocity_point(0,0,self.start_frame,vel_mag)
 
     def find_robot_setpoint_error(self):
-        self.robot_plate = self.convert_to_plate(self.robot_origin)
+        self.robot_arena = self.convert_to_arena(self.robot_origin)
         self.robot_control_frame = self.convert_to_control_frame(self.robot_origin)
         dx = self.robot_control_frame.point.x
         dy = self.robot_control_frame.point.y
@@ -522,47 +522,47 @@ class SetpointControl:
         # rospy.logwarn("on_setpoint_radius = %s" % (str(self.on_setpoint_radius)))
         # rospy.logwarn("on_setpoint_theta = %s" % (str(self.on_setpoint_theta)))
 
-    def append_int_setpoint_to_plate_points(self,setpoint_angle):
+    def append_int_setpoint_to_arena_points(self,setpoint_angle):
         self.setpoint_int.theta = setpoint_angle
         self.setpoint_int.radius = self.setpoint.radius
 
         self.setpoint_int_origin.point.x = self.setpoint_int.radius*math.cos(self.setpoint_int.theta)
         self.setpoint_int_origin.point.y = self.setpoint_int.radius*math.sin(self.setpoint_int.theta)
-        self.setpoint_int_plate = self.convert_to_plate(self.setpoint_int_origin)
-        xi = self.setpoint_int_plate.point.x
-        yi = self.setpoint_int_plate.point.y
-        self.plate_points_x.append(xi)
-        self.plate_points_y.append(yi)
+        self.setpoint_int_arena = self.convert_to_arena(self.setpoint_int_origin)
+        xi = self.setpoint_int_arena.point.x
+        yi = self.setpoint_int_arena.point.y
+        self.arena_points_x.append(xi)
+        self.arena_points_y.append(yi)
 
-    def append_current_position_to_plate_points(self):
-        x_rp = self.robot_plate.point.x
-        y_rp = self.robot_plate.point.y
-        self.plate_points_x.append(x_rp)
-        self.plate_points_y.append(y_rp)
+    def append_current_position_to_arena_points(self):
+        x_rp = self.robot_arena.point.x
+        y_rp = self.robot_arena.point.y
+        self.arena_points_x.append(x_rp)
+        self.arena_points_y.append(y_rp)
 
     def set_velocity_to_setpoint(self):
-        self.plate_points_x = []
-        self.plate_points_y = []
-        self.append_current_position_to_plate_points()
-        self.append_int_setpoint_to_plate_points(self.setpoint.theta)
+        self.arena_points_x = []
+        self.arena_points_y = []
+        self.append_current_position_to_arena_points()
+        self.append_int_setpoint_to_arena_points(self.setpoint.theta)
         vel_mag_list = [self.find_radius_vel_mag()]
-        self.set_stage_commands_from_plate_points(vel_mag_list)
+        self.set_stage_commands_from_arena_points(vel_mag_list)
 
     def set_velocity_to_setpoint_circle(self):
-        self.plate_points_x = []
-        self.plate_points_y = []
-        self.append_current_position_to_plate_points()
-        self.append_int_setpoint_to_plate_points(self.robot_control_frame_theta)
+        self.arena_points_x = []
+        self.arena_points_y = []
+        self.append_current_position_to_arena_points()
+        self.append_int_setpoint_to_arena_points(self.robot_control_frame_theta)
         vel_mag_list = [self.find_radius_vel_mag()]
-        self.set_stage_commands_from_plate_points(vel_mag_list)
+        self.set_stage_commands_from_arena_points(vel_mag_list)
 
     def set_lookup_table_move(self):
-        self.plate_points_x = []
-        self.plate_points_y = []
+        self.arena_points_x = []
+        self.arena_points_y = []
         angle_list,vel_mag_list,direction_positive = self.angle_divide(self.robot_control_frame_theta,self.setpoint.theta)
         for angle_n in range(len(angle_list)):
-            self.append_int_setpoint_to_plate_points(angle_list[angle_n])
-        self.set_stage_commands_from_plate_points(vel_mag_list)
+            self.append_int_setpoint_to_arena_points(angle_list[angle_n])
+        self.set_stage_commands_from_arena_points(vel_mag_list)
         self.ltm.set_direction(direction_positive)
         self.ltm.start_move(self.stage_commands)
         # rospy.logwarn("in set_lookup_table_move: stage_commands.position_control = %s" % (str(self.stage_commands.position_control)))
@@ -577,11 +577,11 @@ class SetpointControl:
         # self.radius_error,self.theta_error = self.find_robot_setpoint_error()
 
         # self.robot_control_frame = self.convert_to_control_frame(self.robot_origin)
-        # self.robot_plate = self.convert_to_plate(self.robot_origin)
-        # x_rp = self.robot_plate.point.x
-        # y_rp = self.robot_plate.point.y
-        # self.plate_points_x = [x_rp]
-        # self.plate_points_y = [y_rp]
+        # self.robot_arena = self.convert_to_arena(self.robot_origin)
+        # x_rp = self.robot_arena.point.x
+        # y_rp = self.robot_arena.point.y
+        # self.arena_points_x = [x_rp]
+        # self.arena_points_y = [y_rp]
         # dx = self.robot_control_frame.point.x
         # dy = self.robot_control_frame.point.y
         # start_theta = math.atan2(dy,dx)
@@ -611,33 +611,33 @@ class SetpointControl:
         #         angle_list,vel_mag_list = self.angle_divide(start_theta,self.setpoint.theta)
         #         for angle_n in range(len(angle_list)):
         #             if angle_n != 0:
-        #                 self.append_int_setpoint_to_plate_points(angle_list[angle_n])
+        #                 self.append_int_setpoint_to_arena_points(angle_list[angle_n])
         #         self.ltm.start_move(self.stage_commands)
         #         self.ltm.in_progress = True
         #         rospy.logwarn("ltm started...")
         #         rospy.logwarn("angle_list = %s" % (str(angle_list)))
-        #         # self.plate_points_x.append(self.plate_points_x[0])
-        #         # self.plate_points_y.append(self.plate_points_y[0])
+        #         # self.arena_points_x.append(self.arena_points_x[0])
+        #         # self.arena_points_y.append(self.arena_points_y[0])
         #         # rospy.logwarn("theta move...")
         #     elif not self.theta_move_ok:
-        #         self.append_int_setpoint_to_plate_points(start_theta)
+        #         self.append_int_setpoint_to_arena_points(start_theta)
         #         vel_mag_list = [self.find_radius_vel_mag(radius_error)]
         #         # rospy.logwarn("off setpoint radius")
         #         # rospy.logwarn("radius move...")
         #     else:
         #         vel_mag_list = []
 
-        #     self.set_stage_commands_from_plate_points(vel_mag_list)
+        #     self.set_stage_commands_from_arena_points(vel_mag_list)
         # else:
         #     self.stage_commands.lookup_table_correct = True
         #     # rospy.logwarn("set_path_to_setpoint and in_progress")
         #     # if not self.on_setpoint_radius:
-        #     self.append_int_setpoint_to_plate_points(start_theta)
+        #     self.append_int_setpoint_to_arena_points(start_theta)
         #     vel_mag_list = [self.find_radius_vel_mag(radius_error)]
-        #     self.set_stage_commands_from_plate_points(vel_mag_list)
+        #     self.set_stage_commands_from_arena_points(vel_mag_list)
         #     # rospy.logwarn("vel_mag_list = %s" % (str(vel_mag_list)))
-        #     # rospy.logwarn("plate points x = \n%s" % (str(self.plate_points_x)))
-        #     # rospy.logwarn("plate points y = \n%s" % (str(self.plate_points_y)))
+        #     # rospy.logwarn("arena points x = \n%s" % (str(self.arena_points_x)))
+        #     # rospy.logwarn("arena points y = \n%s" % (str(self.arena_points_y)))
         #     #     # rospy.logwarn("off setpoint radius")
         #     # else:
         #     #     vel_mag_list = []
@@ -671,7 +671,7 @@ class SetpointControl:
             self.setpoint_pub.publish(self.setpoint)
             self.setpoint_origin.point.x = self.setpoint.radius*math.cos(self.setpoint.theta)
             self.setpoint_origin.point.y = self.setpoint.radius*math.sin(self.setpoint.theta)
-            self.setpoint_plate = self.convert_to_plate(self.setpoint_origin)
+            self.setpoint_arena = self.convert_to_arena(self.setpoint_origin)
             # rospy.logwarn("setpoint_origin.point.x = %s" % (str(self.setpoint_origin.point.x)))
             # rospy.logwarn("setpoint_origin.point.y = %s" % (str(self.setpoint_origin.point.y)))
 
@@ -696,14 +696,14 @@ class SetpointControl:
                     self.stage_commands.lookup_table_correct = False
                     self.radius_velocity = data.radius_velocity*self.robot_velocity_max
                     self.tangent_velocity = data.tangent_velocity*self.robot_velocity_max
-                    self.vel_vector_plate[0,0] = data.x_velocity*self.robot_velocity_max
-                    self.vel_vector_plate[1,0] = data.y_velocity*self.robot_velocity_max
+                    self.vel_vector_arena[0,0] = data.x_velocity*self.robot_velocity_max
+                    self.vel_vector_arena[1,0] = data.y_velocity*self.robot_velocity_max
 
                     try:
-                        (self.stage_commands.x_velocity,self.stage_commands.y_velocity) = self.vel_vector_convert(self.vel_vector_plate,"Plate")
+                        (self.stage_commands.x_velocity,self.stage_commands.y_velocity) = self.vel_vector_convert(self.vel_vector_arena,"Arena")
                     except (tf.LookupException, tf.ConnectivityException):
-                        self.stage_commands.x_velocity = [self.vel_vector_plate[0,0]]
-                        self.stage_commands.y_velocity = [-self.vel_vector_plate[1,0]]
+                        self.stage_commands.x_velocity = [self.vel_vector_arena[0,0]]
+                        self.stage_commands.y_velocity = [-self.vel_vector_arena[1,0]]
 
                 if self.sc_ok_to_publish:
                     self.sc_pub.publish(self.stage_commands)
@@ -766,10 +766,10 @@ class SetpointControl:
                 self.ltm.check_progress()
                 if self.setpoint_moved:
                     # rospy.logwarn("setpoint moved")
-                    # rospy.logwarn("self.setpoint_plate_previous.point.x = %s" % (str(self.setpoint_plate_previous.point.x)))
-                    # rospy.logwarn("self.setpoint_plate.point.x = %s" % (str(self.setpoint_plate.point.x)))
-                    # rospy.logwarn("self.setpoint_plate_previous.point.y = %s" % (str(self.setpoint_plate_previous.point.y)))
-                    # rospy.logwarn("self.setpoint_plate.point.y = %s" % (str(self.setpoint_plate.point.y)))
+                    # rospy.logwarn("self.setpoint_arena_previous.point.x = %s" % (str(self.setpoint_arena_previous.point.x)))
+                    # rospy.logwarn("self.setpoint_arena.point.x = %s" % (str(self.setpoint_arena.point.x)))
+                    # rospy.logwarn("self.setpoint_arena_previous.point.y = %s" % (str(self.setpoint_arena_previous.point.y)))
+                    # rospy.logwarn("self.setpoint_arena.point.y = %s" % (str(self.setpoint_arena.point.y)))
                     # self.on_setpoint_radius = False
                     # self.on_setpoint_theta = False
                     self.ltm.stop_move()
@@ -868,7 +868,7 @@ class SetpointControl:
                     # self.gain_radius = rospy.get_param("gain_radius")
                     # self.gain_theta = rospy.get_param("gain_theta")
 
-                    # (self.stage_commands.x_velocity,self.stage_commands.y_velocity) = self.vel_vector_convert(self.vel_vector_plate,"Plate")
+                    # (self.stage_commands.x_velocity,self.stage_commands.y_velocity) = self.vel_vector_convert(self.vel_vector_arena,"Arena")
 
                     # (trans,q) = self.tf_listener.lookupTransform(self.control_frame,'/Robot',rospy.Time(0))
                     # x = trans[0]
@@ -888,11 +888,11 @@ class SetpointControl:
                     # rot_matrix = tf.transformations.rotation_matrix(theta, (0,0,1))
                     # self.vel_vector_robot[0,0] = self.radius_velocity
                     # self.vel_vector_robot[1,0] = self.tangent_velocity
-                    # vel_vector_plate = numpy.dot(rot_matrix,self.vel_vector_robot)
-                    # self.vel_vector_plate[0,0] = vel_vector_plate[0]
-                    # self.vel_vector_plate[1,0] = vel_vector_plate[1]
+                    # vel_vector_arena = numpy.dot(rot_matrix,self.vel_vector_robot)
+                    # self.vel_vector_arena[0,0] = vel_vector_arena[0]
+                    # self.vel_vector_arena[1,0] = vel_vector_arena[1]
 
-                    # (x_vel_stage,y_vel_stage) = self.vel_vector_convert(self.vel_vector_plate,"Plate")
+                    # (x_vel_stage,y_vel_stage) = self.vel_vector_convert(self.vel_vector_arena,"Arena")
                     # self.stage_commands.x_velocity += x_vel_stage
                     # self.stage_commands.y_velocity += y_vel_stage
 

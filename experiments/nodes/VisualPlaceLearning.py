@@ -47,7 +47,7 @@ class Experiment():
         self.experimentparams.pre.wait1 = 0.0
         
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = 'Plate'
+        self.experimentparams.pre.trigger.frameidParent = 'Arena'
         self.experimentparams.pre.trigger.frameidChild = 'Fly1'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
@@ -110,7 +110,7 @@ class Experiment():
         self.experimentparams.trial.ledpanels.timeout = -1
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.frameidParent = 'Plate'
+        self.experimentparams.post.trigger.frameidParent = 'Arena'
         self.experimentparams.post.trigger.frameidChild = 'Fly1'
         self.experimentparams.post.trigger.speedAbsParentMin =   0.0
         self.experimentparams.post.trigger.speedAbsParentMax = 999.0

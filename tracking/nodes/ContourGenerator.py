@@ -14,7 +14,7 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image, CameraInfo
 from flycore.msg import TrackingCommand
 from tracking.msg import ContourinfoLists
-from plate_tf.srv import PlateCameraConversion
+from arena_tf.srv import ArenaCameraConversion
 
 
 
@@ -98,10 +98,10 @@ class ContourGenerator:
         self.ptsOriginImage.point.x = 0
         self.ptsOriginImage.point.y = 0
         
-        self.ptsOriginPlate = PointStamped()
-        self.ptsOriginPlate.header.frame_id = "Plate"
-        self.ptsOriginPlate.point.x = 0
-        self.ptsOriginPlate.point.y = 0
+        self.ptsOriginArena = PointStamped()
+        self.ptsOriginArena.header.frame_id = "Arena"
+        self.ptsOriginArena.point.x = 0
+        self.ptsOriginArena.point.y = 0
         
 
         # Mask Info
@@ -135,17 +135,17 @@ class ContourGenerator:
                 b = False
                 while not b:
                     try:
-                        self.tfrx.waitForTransform('Plate', 
+                        self.tfrx.waitForTransform('Arena', 
                                                    self.ptsOriginImage.header.frame_id, 
                                                    self.ptsOriginImage.header.stamp, 
                                                    rospy.Duration(1.0))
                         
-                        self.ptsOriginMask = self.tfrx.transformPoint('Plate', self.ptsOriginImage)
+                        self.ptsOriginMask = self.tfrx.transformPoint('Arena', self.ptsOriginImage)
                         self.ptsOriginMask.point.x = -self.ptsOriginMask.point.x
                         self.ptsOriginMask.point.y = -self.ptsOriginMask.point.y
                         b = True
                     except tf.Exception, e:
-                        rospy.logwarn('Exception transforming mask frames %s->Plate:  %s' % (self.ptsOriginImage.header.frame_id, e))
+                        rospy.logwarn('Exception transforming mask frames %s->Arena:  %s' % (self.ptsOriginImage.header.frame_id, e))
             else:
                 self.ptsOriginMask = PointStamped(point=Point(x=0, y=0))
                         
@@ -195,14 +195,14 @@ class ContourGenerator:
 
     
     def MmFromPixels (self, xIn):
-        response = self.camera_from_plate(xIn, xIn)
+        response = self.camera_from_arena(xIn, xIn)
         return (response.Xdst, response.Ydst)
         
         
     def PixelsFromMm (self, xIn):
         if self.bUseTransforms:
             ptsIn = PointStamped()
-            ptsIn.header.frame_id = "Plate"
+            ptsIn.header.frame_id = "Arena"
             ptsIn.point.x = 0.0
             ptsIn.point.y = 0.0
             ptsOrigin = self.tfrx.transformPoint("ImageRect", ptsIn)        
@@ -561,10 +561,10 @@ class ContourGenerator:
                 self.npProcessedFlip, = cv2.flip(self.npProcessed, 0)
                 image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npProcessedFlip), "passthrough")
                 image2.header = image.header
-                image2.header.frame_id = 'Plate'
+                image2.header.frame_id = 'Arena'
                 image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                 camerainfo2 = copy.copy(self.camerainfo)
-                camerainfo2.header.frame_id = 'Plate'
+                camerainfo2.header.frame_id = 'Arena'
                 k11=rospy.get_param('/k11', 1.0)
                 k13=rospy.get_param('/k13', 0.0)
                 k22=rospy.get_param('/k22', 1.0)

@@ -15,17 +15,17 @@ from cv_bridge import CvBridge, CvBridgeError
 
 FRAME_CHECKERBOARD="Checkerboard"
 FRAME_IMAGERECT="ImageRect"
-FRAME_PLATE="Plate"
+FRAME_PLATE="Arena"
 FRAME_CAMERA="Camera"
 
-class CalibrateCameraPlate:
+class CalibrateCameraArena:
 
     def __init__(self):
         self.initialized = False
-        rospy.init_node('CalibrateCameraPlate')
+        rospy.init_node('CalibrateCameraArena')
 
         self.initialized_images = False
-        cv.NamedWindow("Camera Plate Calibration", 1)
+        cv.NamedWindow("Camera Arena Calibration", 1)
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
         self.bridge = CvBridge()
@@ -37,18 +37,18 @@ class CalibrateCameraPlate:
         self.font = cv.InitFont(cv.CV_FONT_HERSHEY_TRIPLEX,0.5,0.5)
         self.font_color = cv.CV_RGB(self.color_max,0,0)
         
-        self.originPlate = PointStamped()
-        self.originPlate.header.frame_id = FRAME_CAMERA
+        self.originArena = PointStamped()
+        self.originArena.header.frame_id = FRAME_CAMERA
         
         self.originCamera = PointStamped()
         self.originCamera.header.frame_id = FRAME_CAMERA
         self.originCamera.point.x = 0
         self.originCamera.point.y = 0
-        # self.image_plate_origin_found = False
-        # self.plate_origin = PointStamped()
-        # self.plate_origin.header.frame_id = FRAME_PLATE
-        # self.plate_origin.point.x = 0
-        # self.plate_origin.point.y = 0
+        # self.image_arena_origin_found = False
+        # self.arena_origin = PointStamped()
+        # self.arena_origin.header.frame_id = FRAME_PLATE
+        # self.arena_origin.point.x = 0
+        # self.arena_origin.point.y = 0
         
         #(self.intrinsic_matrix,self.distortion_coeffs) = CameraParameters.intrinsic("rect")
         #self.KK_cx = self.intrinsic_matrix[0,2]
@@ -71,7 +71,7 @@ class CalibrateCameraPlate:
         self.criteria = (cv.CV_TERMCRIT_ITER+cv.CV_TERMCRIT_EPS,100,.01)
         
         self.image_points = cv.CreateMat(self.board_corner_number, 2, cv.CV_32FC1)
-        self.plate_points = cv.CreateMat(self.board_corner_number, 3, cv.CV_32FC1)
+        self.arena_points = cv.CreateMat(self.board_corner_number, 3, cv.CV_32FC1)
         self.point_counts = cv.CreateMat(1, 1, cv.CV_32SC1)
         self.rvec = cv.CreateMat(1, 3, cv.CV_32FC1)
         self.tvec = cv.CreateMat(1, 3, cv.CV_32FC1)
@@ -95,8 +95,8 @@ class CalibrateCameraPlate:
             self.im = cv.CreateImage(self.im_size,cv.IPL_DEPTH_8U,1)
             self.im_mask = cv.CreateImage(self.im_size,cv.IPL_DEPTH_8U,1)
             self.im_display = cv.CreateImage(self.im_size,cv.IPL_DEPTH_8U,3)
-            self.originPlate.point.x = self.im_width/2 - self.camerainfo.P[2] #self.KK_cx
-            self.originPlate.point.y = self.im_height/2 - self.camerainfo.P[6] #self.KK_cy
+            self.originArena.point.x = self.im_width/2 - self.camerainfo.P[2] #self.KK_cx
+            self.originArena.point.y = self.im_height/2 - self.camerainfo.P[6] #self.KK_cy
             self.radiusMask = int(self.im_height * .48)
             self.initialized_images = True
 
@@ -107,9 +107,9 @@ class CalibrateCameraPlate:
             (x,y) = corners[corner_count]
             cv.SetReal2D(self.image_points, step, 0, x)
             cv.SetReal2D(self.image_points, step, 1, y)
-            cv.SetReal2D(self.plate_points, step, 0, (corner_count // self.col_corner_number)*self.checker_size)
-            cv.SetReal2D(self.plate_points, step, 1, (corner_count % self.col_corner_number)*self.checker_size)
-            cv.SetReal2D(self.plate_points, step, 2, 0.0)
+            cv.SetReal2D(self.arena_points, step, 0, (corner_count // self.col_corner_number)*self.checker_size)
+            cv.SetReal2D(self.arena_points, step, 1, (corner_count % self.col_corner_number)*self.checker_size)
+            cv.SetReal2D(self.arena_points, step, 2, 0.0)
             step += 1
         cv.SetReal2D(self.point_counts, self.capture_count, 0, self.board_corner_number)
 
@@ -148,13 +148,13 @@ class CalibrateCameraPlate:
                 pt2 = tuple(a[3])
                 cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,0,self.color_max),axis_line_width)
                 
-                # if self.image_plate_origin_found:
-                #   self.image_plate_origin = pt1
-                #   self.image_plate_origin_found = False
+                # if self.image_arena_origin_found:
+                #   self.image_arena_origin = pt1
+                #   self.image_arena_origin_found = False
                 
-                # display_text = "image_plate_origin = " + str(self.image_plate_origin)
+                # display_text = "image_arena_origin = " + str(self.image_arena_origin)
                 # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
-                # display_text = "image_plate_origin = (%0.0f, %0.0f)" % (self.image_plate_origin[0],self.image_plate_origin[1])
+                # display_text = "image_arena_origin = (%0.0f, %0.0f)" % (self.image_arena_origin[0],self.image_arena_origin[1])
                 # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
             except:
                 pass
@@ -165,7 +165,7 @@ class CalibrateCameraPlate:
 
             # Update image mask
             cv.Circle(self.im_mask,
-                      (int(self.undistorted_plate.point.x), int(self.undistorted_plate.point.y)), 
+                      (int(self.undistorted_arena.point.x), int(self.undistorted_arena.point.y)), 
                       int(self.radiusMask), 
                       self.color_max, 
                       cv.CV_FILLED)
@@ -177,7 +177,7 @@ class CalibrateCameraPlate:
                 self.add_board_to_data(corners)
                 cvmatK = cv.fromarray(N.reshape(self.camerainfo.K,[3,3]))
                 cvmatD = cv.fromarray(N.reshape(self.camerainfo.D,[5,1]))
-                cv.FindExtrinsicCameraParams2(self.plate_points,
+                cv.FindExtrinsicCameraParams2(self.arena_points,
                                               self.image_points,
                                               cvmatK, #self.intrinsic_matrix,
                                               cvmatD, #self.distortion_coeffs,
@@ -232,30 +232,30 @@ class CalibrateCameraPlate:
 
 
     def remap_extrinsics(self, now):
-        X = [self.originPlate.point.x, self.originPlate.point.x + self.checker_size]
-        Y = [self.originPlate.point.y, self.originPlate.point.y]
+        X = [self.originArena.point.x, self.originArena.point.x + self.checker_size]
+        Y = [self.originArena.point.y, self.originArena.point.y]
         Z = [1,                         1]
         
         camera_points = N.array([X,Y,Z])
-        plate_points = N.dot(self.H, camera_points)
-        x0 = plate_points[0,0]
-        x1 = plate_points[0,1]
-        y0 = plate_points[1,0]
-        y1 = plate_points[1,1]
+        arena_points = N.dot(self.H, camera_points)
+        x0 = arena_points[0,0]
+        x1 = arena_points[0,1]
+        y0 = arena_points[1,0]
+        y1 = arena_points[1,1]
         angleRot = N.arctan2((y1-y0),(x1-x0))
         
-        # rospy.logwarn("plate_points = %s", str(plate_points))
-        checkerboard_plate_vector = plate_points[:,0]
-        checkerboard_plate_vector[2] = 0
+        # rospy.logwarn("arena_points = %s", str(arena_points))
+        checkerboard_arena_vector = arena_points[:,0]
+        checkerboard_arena_vector[2] = 0
         
-        self.tfbx.sendTransform(checkerboard_plate_vector,
+        self.tfbx.sendTransform(checkerboard_arena_vector,
                                   tf.transformations.quaternion_from_euler(0, 0, angleRot),
                                   now,
                                   FRAME_PLATE,
                                   FRAME_CHECKERBOARD)
         
         try:
-            # self.image_plate_origin = self.tfrx.transformPoint("Image",self.plate_origin)
+            # self.image_arena_origin = self.tfrx.transformPoint("Image",self.arena_origin)
             self.tfrx.waitForTransform(FRAME_IMAGERECT, FRAME_PLATE, now, rospy.Duration(1.0))
             (trans, quat) = self.tfrx.lookupTransform(FRAME_IMAGERECT, FRAME_PLATE, now)
             # rospy.logwarn("trans = %s", str(trans))
@@ -302,7 +302,7 @@ class CalibrateCameraPlate:
                        (25,440),
                        self.font,
                        self.font_color)
-            # self.image_plate_origin_found = True
+            # self.image_arena_origin_found = True
             self.draw_origin(self.im_display)
         except (tf.Exception):
             pass
@@ -322,18 +322,18 @@ class CalibrateCameraPlate:
                 self.im = cv.CloneImage(cv_image)
                 cv.CvtColor(cv_image, self.im_display, cv.CV_GRAY2RGB)
                 
-                # display_text = "originPlate.point.x = " + str(int(self.originPlate.point.x))
-                display_text = "originPlate = [%0.0f, %0.0f]" % (self.originPlate.point.x, self.originPlate.point.y)
+                # display_text = "originArena.point.x = " + str(int(self.originArena.point.x))
+                display_text = "originArena = [%0.0f, %0.0f]" % (self.originArena.point.x, self.originArena.point.y)
                 cv.PutText(self.im_display, display_text,(25,25),self.font,self.font_color)
-                # display_text = "originPlate.point.y = " + str(int(self.originPlate.point.y))
+                # display_text = "originArena.point.y = " + str(int(self.originArena.point.y))
                 # cv.PutText(self.im_display,display_text,(25,45),self.font,self.font_color)
                 
                 try:
                     self.undistorted_camera = self.tfrx.transformPoint(FRAME_IMAGERECT, self.originCamera)
                     cv.Circle(self.im_display, (int(self.undistorted_camera.point.x),int(self.undistorted_camera.point.y)), 3, cv.CV_RGB(self.color_max,0,self.color_max), cv.CV_FILLED)
-                    self.undistorted_plate = self.tfrx.transformPoint(FRAME_IMAGERECT,self.originPlate)
-                    cv.Circle(self.im_display, (int(self.undistorted_plate.point.x),int(self.undistorted_plate.point.y)), 3, cv.CV_RGB(0,self.color_max,0), cv.CV_FILLED)
-                    cv.Circle(self.im_display, (int(self.undistorted_plate.point.x),int(self.undistorted_plate.point.y)), int(self.radiusMask), cv.CV_RGB(0,self.color_max,0))
+                    self.undistorted_arena = self.tfrx.transformPoint(FRAME_IMAGERECT,self.originArena)
+                    cv.Circle(self.im_display, (int(self.undistorted_arena.point.x),int(self.undistorted_arena.point.y)), 3, cv.CV_RGB(0,self.color_max,0), cv.CV_FILLED)
+                    cv.Circle(self.im_display, (int(self.undistorted_arena.point.x),int(self.undistorted_arena.point.y)), int(self.radiusMask), cv.CV_RGB(0,self.color_max,0))
                     display_text = "radiusMask = " + str(int(self.radiusMask))
                     cv.PutText(self.im_display,display_text,(25,45),self.font,self.font_color)
                     
@@ -341,26 +341,26 @@ class CalibrateCameraPlate:
                 except (tf.LookupException, tf.ConnectivityException):
                     pass
                 
-                cv.ShowImage("Camera Plate Calibration", self.im_display)
+                cv.ShowImage("Camera Arena Calibration", self.im_display)
                 cv.WaitKey(3)
 
     
     def joy_callback(self, data):
         if self.initialized and self.initialized_images:
-            self.originPlate.point.x += data.x_velocity
-            self.originPlate.point.y += -data.y_velocity
+            self.originArena.point.x += data.x_velocity
+            self.originArena.point.y += -data.y_velocity
             self.radiusMask += data.radius_velocity
     
     def point_callback(self, point):
         if self.initialized and self.initialized_images:
-            self.originPlate.point.x += point.x #x_velocity
-            self.originPlate.point.y += -point.y #y_velocity
+            self.originArena.point.x += point.x #x_velocity
+            self.originArena.point.y += -point.y #y_velocity
             self.radiusMask += point.z #radius_velocity
     
     
 
 def main(args):
-    cal = CalibrateCameraPlate()
+    cal = CalibrateCameraArena()
     try:
         rospy.spin()
     except:

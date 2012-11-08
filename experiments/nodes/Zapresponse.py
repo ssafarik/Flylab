@@ -43,7 +43,7 @@ class ExperimentZapresponse():
         
         self.experimentparams.pre.wait1 = 300.0
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = 'Plate'
+        self.experimentparams.pre.trigger.frameidParent = 'Arena'
         self.experimentparams.pre.trigger.frameidChild = 'Fly1'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
@@ -78,7 +78,7 @@ class ExperimentZapresponse():
             # Draw a point.
             self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
                                                                             shape      = 'constant',
-                                                                            frame_id   = 'Plate',
+                                                                            frame_id   = 'Arena',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
@@ -145,7 +145,7 @@ class ExperimentZapresponse():
                                                                             #shape      = 'flylogo',
                                                                             shape      = 'grid',
                                                                             #shape      = 'constant',
-                                                                            frame_id   = 'Plate',
+                                                                            frame_id   = 'Arena',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
@@ -161,7 +161,7 @@ class ExperimentZapresponse():
                                                                             #shape      = 'flylogo',
                                                                             #shape      = 'grid',
                                                                             shape      = 'constant',
-                                                                            frame_id   = 'Plate',
+                                                                            frame_id   = 'Arena',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,

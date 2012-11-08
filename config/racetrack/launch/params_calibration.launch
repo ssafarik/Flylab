@@ -1,13 +1,13 @@
 <launch>
   <!-- =================================================================== -->
-  <!-- This file contains both the Plate-Stage and Plate-Camera            -->
+  <!-- This file contains both the Arena-Stage and Arena-Camera            -->
   <!-- transform data.                                                     -->
   <!-- =================================================================== -->
 
   <!-- =================================================================== -->
-  <!-- Plate-Camera transform.                                             -->
+  <!-- Arena-Camera transform.                                             -->
   <!--                                                                     -->
-  <!-- "roslaunch calibration CameraPlate.launch"                          -->
+  <!-- "roslaunch calibration CameraArena.launch"                          -->
   <!--                                                                     -->
   <!-- Use the following command to move the center and radius of the      -->
   <!-- circle to correspond to the arena:                                  -->
@@ -24,34 +24,34 @@
 
 
 
-  <!-- These values come from CameraPlate.launch, with a checkerboard on the arena. -->
-  <param name="camera_plate_rvec_0" type="double" value="3.12"/>
-  <param name="camera_plate_rvec_1" type="double" value="-0.004"/>
-  <param name="camera_plate_rvec_2" type="double" value="0.073"/>
-  <param name="camera_plate_tvec_0" type="double" value="71.4"/> <!-- 71.4 Adjust for camera/plate alignment here. -->
-  <param name="camera_plate_tvec_1" type="double" value = "53.26"/> <!-- 53.26 Adjust for camera/plate alignment here. -->
-  <param name="camera_plate_tvec_2" type="double" value="343.9"/>
+  <!-- These values come from CameraArena.launch, with a checkerboard on the arena. -->
+  <param name="camera_arena_rvec_0" type="double" value="3.12"/>
+  <param name="camera_arena_rvec_1" type="double" value="-0.004"/>
+  <param name="camera_arena_rvec_2" type="double" value="0.073"/>
+  <param name="camera_arena_tvec_0" type="double" value="71.4"/> <!-- 71.4 Adjust for camera/arena alignment here. -->
+  <param name="camera_arena_tvec_1" type="double" value = "53.26"/> <!-- 53.26 Adjust for camera/arena alignment here. -->
+  <param name="camera_arena_tvec_2" type="double" value="343.9"/>
   
 
   <!-- ================================================================== -->
-  <!-- Plate-to-Stage transform                                           -->
+  <!-- Arena-to-Stage transform                                           -->
   <!-- where you align the computed end-effector position with the visual -->
   <!-- end-effector position.                                             -->
   <!--                                                                    -->
-  <!-- "roslaunch calibration StagePlate.launch"                          -->
+  <!-- "roslaunch calibration StageArena.launch"                          -->
   <!-- Then let it run until the "Translation Vector" and "Quaternion"    -->
   <!-- stabilize.  Then copy the translation & quaternion values to       -->
   <!-- the "args" below, e.g.  as:  tx,ty,tz,qx,qy,qz,qw                  -->
   <!--                                                                    -->
   <!-- ================================================================== -->
   
-  <param name="plate_stage_x" type="double" value="0.0"/>  <!-- Adjust for stage/plate alignment here. -->
-  <param name="plate_stage_y" type="double" value="0.0"/>  <!-- Adjust for stage/plate alignment here. -->
-  <param name="plate_stage_z" type="double" value="0"/>
-  <param name="plate_stage_qx" type="double" value="0"/>
-  <param name="plate_stage_qy" type="double" value="0"/>
-  <param name="plate_stage_qz" type="double" value="0.70710678"/>
-  <param name="plate_stage_qw" type="double" value="0.70710678"/>
+  <param name="arena_stage_x" type="double" value="0.0"/>  <!-- Adjust for stage/arena alignment here. -->
+  <param name="arena_stage_y" type="double" value="0.0"/>  <!-- Adjust for stage/arena alignment here. -->
+  <param name="arena_stage_z" type="double" value="0"/>
+  <param name="arena_stage_qx" type="double" value="0"/>
+  <param name="arena_stage_qy" type="double" value="0"/>
+  <param name="arena_stage_qz" type="double" value="0.70710678"/>
+  <param name="arena_stage_qw" type="double" value="0.70710678"/>
 
 
 </launch>

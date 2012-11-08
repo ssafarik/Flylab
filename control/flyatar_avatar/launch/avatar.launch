@@ -5,7 +5,7 @@
 
   <include file="$(find image_gui)/launch/image_gui.launch" />
   <include file="$(find joystick_commands)/launch/joystick_commands.launch" />
-  <include file="$(find plate_tf)/launch/plate_tf.launch" />
+  <include file="$(find arena_tf)/launch/arena_tf.launch" />
   <include file="$(find stage_message_interface)/launch/stage_message_interface.launch" />
 
   <node pkg="save_data" type="SaveBags.py" name="SaveBags" />

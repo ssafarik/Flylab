@@ -21,7 +21,7 @@
   <rosdep name="opencv2.3"/>
     
   <depend package="flycore"/>
-  <depend package="plate_tf"/>
+  <depend package="arena_tf"/>
   <depend package="pythonmodules"/>
 
 </package>

@@ -9,13 +9,13 @@ from cv_bridge import CvBridge, CvBridgeError
 from pythonmodules import cvNumpy,CameraParameters
 from sensor_msgs.msg import Image, CameraInfo
 from geometry_msgs.msg import Point, PoseStamped
-from plate_tf.srv import *
+from arena_tf.srv import *
 from tracking.msg import ContourinfoLists
 from patterngen.msg import MsgPattern
 from flycore.msg import MsgFrameState
 
 
-class CalibrateStagePlate():
+class CalibrateStageArena():
     def __init__(self):
         self.initialized = False
         self.initialized_images = False
@@ -23,7 +23,7 @@ class CalibrateStagePlate():
         self.initialized_arrays = False
         self.initialized_endeffector = False
         
-        rospy.init_node('CalibrateStagePlate')
+        rospy.init_node('CalibrateStageArena')
         
         self.camerainfo = None
         self.rvec = None
@@ -36,11 +36,11 @@ class CalibrateStagePlate():
         
         self.tf_listener = tf.TransformListener()
 
-        cv.NamedWindow("Stage Plate Calibration", 1)
+        cv.NamedWindow("Stage Arena Calibration", 1)
         
         self.poseRobot_camera = PoseStamped()
         self.poseRobot_rect = PoseStamped()
-        self.poseRobot_plate = PoseStamped()
+        self.poseRobot_arena = PoseStamped()
         
         rospy.on_shutdown(self.OnShutdown_callback)
 
@@ -64,7 +64,7 @@ class CalibrateStagePlate():
         self.areaRobotMin = 1000000000
         self.areaRobotMax = 0
         
-        # self.plate_point_array = N.zeros((1,3))
+        # self.arena_point_array = N.zeros((1,3))
         # self.stage_point_array = N.zeros((1,3))
         #(self.intrinsic_matrix,self.distortion_coeffs) = CameraParameters.intrinsic("rect")
         self.origin_points = cv.CreateMat(4, 3, cv.CV_32FC1)
@@ -83,9 +83,9 @@ class CalibrateStagePlate():
             except:
                 rospy.logdebug("tf_listener.lookupTransform threw exception \n")
         
-        rospy.wait_for_service('plate_from_camera')
+        rospy.wait_for_service('arena_from_camera')
         try:
-            self.plate_from_camera = rospy.ServiceProxy('plate_from_camera', PlateCameraConversion)
+            self.arena_from_camera = rospy.ServiceProxy('arena_from_camera', ArenaCameraConversion)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
         
@@ -117,7 +117,7 @@ class CalibrateStagePlate():
             # Makes with respect to Camera coordinate system instead of ImageRect
             self.M[:-1,-1] = 0
 
-            (self.rvec, self.tvec) = CameraParameters.extrinsic("plate")
+            (self.rvec, self.tvec) = CameraParameters.extrinsic("arena")
       
       
         
@@ -165,13 +165,13 @@ class CalibrateStagePlate():
                 pt2 = tuple(a[3])
                 cv.Line(im_color,pt1,pt2,cv.CV_RGB(0,0,self.color_max),axis_line_width)
                 
-                # if self.image_plate_origin_found:
-                #   self.image_plate_origin = pt1
-                #   self.image_plate_origin_found = False
+                # if self.image_arena_origin_found:
+                #   self.image_arena_origin = pt1
+                #   self.image_arena_origin_found = False
                 
-                # display_text = "image_plate_origin = " + str(self.image_plate_origin)
+                # display_text = "image_arena_origin = " + str(self.image_arena_origin)
                 # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
-                # display_text = "image_plate_origin = (%0.0f, %0.0f)" % (self.image_plate_origin[0],self.image_plate_origin[1])
+                # display_text = "image_arena_origin = (%0.0f, %0.0f)" % (self.image_arena_origin[0],self.image_arena_origin[1])
                 # cv.PutText(self.im_display,display_text,(25,85),self.font,self.font_color)
             except:
                 pass
@@ -200,10 +200,10 @@ class CalibrateStagePlate():
             
             
             if self.rotate_grid:
-                x_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_start_points_array)))
-                x_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(x_end_points_array)))
-                y_start_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_start_points_array)))
-                y_end_points_array = self.from_homo(N.dot(self.T_stage_plate,self.to_homo(y_end_points_array)))
+                x_start_points_array = self.from_homo(N.dot(self.T_stage_arena,self.to_homo(x_start_points_array)))
+                x_end_points_array = self.from_homo(N.dot(self.T_stage_arena,self.to_homo(x_end_points_array)))
+                y_start_points_array = self.from_homo(N.dot(self.T_stage_arena,self.to_homo(y_start_points_array)))
+                y_end_points_array = self.from_homo(N.dot(self.T_stage_arena,self.to_homo(y_end_points_array)))
                 self.rotate_grid = False
             
             x_start_points = cvNumpy.array_to_mat(x_start_points_array.transpose())
@@ -286,14 +286,14 @@ class CalibrateStagePlate():
                     # display_text = "poseRobot_camera.y = " + str(round(self.poseRobot_camera.pose.position.y,3))
                     # cv.PutText(self.im_display,display_text,(25,45),self.font,self.font_color)
                     
-                    display_text = "RobotImage Pose with Respect to Plate = [%0.3f, %0.3f]" % (self.poseRobot_plate.pose.position.x,self.poseRobot_plate.pose.position.y)
+                    display_text = "RobotImage Pose with Respect to Arena = [%0.3f, %0.3f]" % (self.poseRobot_arena.pose.position.x,self.poseRobot_arena.pose.position.y)
                     cv.PutText(self.im_display, display_text, (25,y), self.font, self.font_color)
                     y = y+20
                     
-                    # display_text = "poseRobot_plate.x = " + str(round(self.poseRobot_plate.pose.position.x,3))
+                    # display_text = "poseRobot_arena.x = " + str(round(self.poseRobot_arena.pose.position.x,3))
                     # cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                     #y = y+20
-                    # display_text = "poseRobot_plate.y = " + str(round(self.poseRobot_plate.pose.position.y,3))
+                    # display_text = "poseRobot_arena.y = " + str(round(self.poseRobot_arena.pose.position.y,3))
                     # cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                     #y = y+20
                     
@@ -309,46 +309,46 @@ class CalibrateStagePlate():
                     #y = y+20
                     
                     image_point_new = N.array([[self.poseRobot_rect.pose.position.x], [self.poseRobot_rect.pose.position.y]])
-                    plate_point_new = N.array([[self.poseRobot_plate.pose.position.x], [self.poseRobot_plate.pose.position.y],[0]])
+                    arena_point_new = N.array([[self.poseRobot_arena.pose.position.x], [self.poseRobot_arena.pose.position.y],[0]])
                     stage_point_new = N.array([[xEndEffector], [yEndEffector], [zEndEffector]])
-                    # rospy.logwarn("plate_point_new = \n%s", str(plate_point_new))
+                    # rospy.logwarn("arena_point_new = \n%s", str(arena_point_new))
                     # rospy.logwarn("stage_point_new = \n%s", str(stage_point_new))
                     
                     if self.initialized_arrays:
-                        plate_point_prev = self.plate_point_array[:,-1].reshape((3,1))
-                        # rospy.logwarn("plate_point_prev = \n%s", str(plate_point_prev))
-                        if self.dist_min < tf.transformations.vector_norm((plate_point_new - plate_point_prev)):
+                        arena_point_prev = self.arena_point_array[:,-1].reshape((3,1))
+                        # rospy.logwarn("arena_point_prev = \n%s", str(arena_point_prev))
+                        if self.dist_min < tf.transformations.vector_norm((arena_point_new - arena_point_prev)):
                             self.image_point_array = N.append(self.image_point_array,image_point_new,axis=1)
-                            self.plate_point_array = N.append(self.plate_point_array,plate_point_new,axis=1)
-                            # rospy.logwarn("plate_point_array = \n%s", str(self.plate_point_array))
+                            self.arena_point_array = N.append(self.arena_point_array,arena_point_new,axis=1)
+                            # rospy.logwarn("arena_point_array = \n%s", str(self.arena_point_array))
                             self.stage_point_array = N.append(self.stage_point_array,stage_point_new,axis=1)
                             # rospy.logwarn("stage_point_array = \n%s", str(self.stage_point_array))
                             self.eccRobot_array = N.append(self.eccRobot_array,self.eccRobot)
                             self.areaRobot_array = N.append(self.areaRobot_array,self.areaRobot)
                     else:
                         self.image_point_array = image_point_new
-                        self.plate_point_array = plate_point_new
+                        self.arena_point_array = arena_point_new
                         self.stage_point_array = stage_point_new
                         self.initialized_arrays = True
                     
-                    if self.point_count_min < self.plate_point_array.shape[1]:
-                        self.T_plate_stage = tf.transformations.superimposition_matrix(self.plate_point_array, self.stage_point_array, scaling=True)
-                        self.T_stage_plate = tf.transformations.inverse_matrix(self.T_plate_stage)
-                        # self.T_stage_plate = tf.transformations.superimposition_matrix(self.plate_point_array, self.stage_point_array)
-                        # self.T_plate_stage = tf.transformations.inverse_matrix(self.T_stage_plate)
-                        # tvector = tf.transformations.translation_from_matrix(self.T_plate_stage)
-                        tvector = tf.transformations.translation_from_matrix(self.T_stage_plate)
+                    if self.point_count_min < self.arena_point_array.shape[1]:
+                        self.T_arena_stage = tf.transformations.superimposition_matrix(self.arena_point_array, self.stage_point_array, scaling=True)
+                        self.T_stage_arena = tf.transformations.inverse_matrix(self.T_arena_stage)
+                        # self.T_stage_arena = tf.transformations.superimposition_matrix(self.arena_point_array, self.stage_point_array)
+                        # self.T_arena_stage = tf.transformations.inverse_matrix(self.T_stage_arena)
+                        # tvector = tf.transformations.translation_from_matrix(self.T_arena_stage)
+                        tvector = tf.transformations.translation_from_matrix(self.T_stage_arena)
                         display_text = "Translation Vector = [%0.3f, %0.3f, %0.3f]" % (tvector[0],tvector[1],tvector[2])
                         cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                         y = y+20
                         # rospy.logwarn("tvec = \n%s",str(tvec))
-                        # quaternion = tf.transformations.quaternion_from_matrix(self.T_plate_stage)
-                        quaternion = tf.transformations.quaternion_from_matrix(self.T_stage_plate)
+                        # quaternion = tf.transformations.quaternion_from_matrix(self.T_arena_stage)
+                        quaternion = tf.transformations.quaternion_from_matrix(self.T_stage_arena)
                         display_text = "Quaternion = [%0.3f, %0.3f, %0.3f, %0.3f]" % (quaternion[0],quaternion[1],quaternion[2],quaternion[3])
                         cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                         y = y+20
                         # rospy.logwarn("quaternion = \n%s",str(quaternion))
-                        # euler = tf.transformations.euler_from_matrix(self.T_plate_stage,'rxyz')
+                        # euler = tf.transformations.euler_from_matrix(self.T_arena_stage,'rxyz')
                         # display_text = "Translation Vector = [%0.2f, %0.2f, %0.2f]" % (self.tvec[0],
                         # cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                         #y = y+20
@@ -375,7 +375,7 @@ class CalibrateStagePlate():
                         cv.PutText(self.im_display,display_text,(25,y),self.font,self.font_color)
                         y = y+20
                         
-                        factor, origin, direction = tf.transformations.scale_from_matrix(self.T_stage_plate)
+                        factor, origin, direction = tf.transformations.scale_from_matrix(self.T_stage_arena)
                         display_text = "Factor = %s" % factor
                         cv.PutText(self.im_display, display_text, (25,y), self.font, self.font_color)
                         y = y+20
@@ -385,16 +385,16 @@ class CalibrateStagePlate():
                         display_text = "Direction = %s" % direction
                         cv.PutText(self.im_display, display_text, (25,y), self.font, self.font_color)
                         y = y+20
-                        display_text = "T_stage_plate = %s" % self.T_stage_plate[0]
+                        display_text = "T_stage_arena = %s" % self.T_stage_arena[0]
                         cv.PutText(self.im_display, display_text, (25,y), self.font, self.font_color)
                         y = y+20
-                        display_text = "T_stage_plate = %s" % self.T_stage_plate[1]
+                        display_text = "T_stage_arena = %s" % self.T_stage_arena[1]
                         cv.PutText(self.im_display, display_text, (25,y), self.font, self.font_color)
                         y = y+20
-                        display_text = "T_stage_plate = %s" % self.T_stage_plate[2]
+                        display_text = "T_stage_arena = %s" % self.T_stage_arena[2]
                         cv.PutText(self.im_display, display_text, (25,y), self.font, self.font_color)
                         y = y+20
-                        display_text = "T_stage_plate = %s" % self.T_stage_plate[3]
+                        display_text = "T_stage_arena = %s" % self.T_stage_arena[3]
                         cv.PutText(self.im_display, display_text, (25,y), self.font, self.font_color)
                         y = y+20
                         
@@ -410,7 +410,7 @@ class CalibrateStagePlate():
             
             cv.PutText(self.im_display, self.error_text, (25,y), self.font, self.font_color)
             
-            cv.ShowImage("Stage Plate Calibration", self.im_display)
+            cv.ShowImage("Stage Arena Calibration", self.im_display)
             cv.WaitKey(3)
 
    
@@ -433,7 +433,7 @@ class CalibrateStagePlate():
                 self.poseRobot_camera.pose.position.x = x_list[0]
                 self.poseRobot_camera.pose.position.y = y_list[0]
                 self.poseRobot_rect = self.camera_to_rect_pose(self.poseRobot_camera)
-                self.poseRobot_plate = self.PosePlateFromCamera(self.poseRobot_camera)
+                self.poseRobot_arena = self.PoseArenaFromCamera(self.poseRobot_camera)
                 self.areaRobot = area_list[0]
                 self.eccRobot = ecc_list[0]
             else:
@@ -471,19 +471,19 @@ class CalibrateStagePlate():
         return poseRect
     
     
-    def PosePlateFromCamera(self, poseCamera):
-        response = self.plate_from_camera([poseCamera.pose.position.x],[poseCamera.pose.position.y])
+    def PoseArenaFromCamera(self, poseCamera):
+        response = self.arena_from_camera([poseCamera.pose.position.x],[poseCamera.pose.position.y])
         # rospy.logwarn("Xdst \n%s",str(response.Xdst))
         # rospy.logwarn("Ydst \n%s",str(response.Ydst))
-        posePlate = PoseStamped()
-        posePlate.pose.position.x = response.Xdst[0]
-        posePlate.pose.position.y = response.Ydst[0]
-        #rospy.logwarn("SP camera(%s, %s)->plate(%s, %s)" % (poseCamera.pose.position.x, 
+        poseArena = PoseStamped()
+        poseArena.pose.position.x = response.Xdst[0]
+        poseArena.pose.position.y = response.Ydst[0]
+        #rospy.logwarn("SP camera(%s, %s)->arena(%s, %s)" % (poseCamera.pose.position.x, 
         #                                                    poseCamera.pose.position.y, 
-        #                                                    posePlate.pose.position.x, 
-        #                                                    posePlate.pose.position.y))
+        #                                                    poseArena.pose.position.x, 
+        #                                                    poseArena.pose.position.y))
         
-        return posePlate
+        return poseArena
     
     def Main(self):
         rospy.sleep(2)
@@ -541,7 +541,7 @@ class CalibrateStagePlate():
     
 
 if __name__ == '__main__':
-    cal = CalibrateStagePlate()
+    cal = CalibrateStageArena()
     cal.Main()
     cv.DestroyAllWindows()
 

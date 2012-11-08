@@ -7,7 +7,7 @@ import rospy
 import tf
 import numpy as N
 from tracking.msg import *
-from plate_tf.srv import *
+from arena_tf.srv import *
 from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
@@ -71,7 +71,7 @@ class Fly:
         self.isDead = False # TO DO: dead fly detection.
 
         self.state = MsgFrameState()
-        self.state.header.frame_id = 'Plate'
+        self.state.header.frame_id = 'Arena'
         self.state.pose.position.x = 0.0
         self.state.pose.position.y = 0.0
         self.state.pose.position.z = 0.0
@@ -331,7 +331,7 @@ class Fly:
             # Update the tool offset.
             if ptComputed is not None:
 #                    marker = Marker(header=Header(stamp=rospy.Time.now(),
-#                                                        frame_id='Plate'),
+#                                                        frame_id='Arena'),
 #                                          ns='kalman',
 #                                          id=4,
 #                                          type=Marker.SPHERE,
@@ -349,7 +349,7 @@ class Fly:
 #                                          lifetime=rospy.Duration(1.0))
 #                    self.pubMarker.publish(marker)
 #                    marker = Marker(header=Header(stamp=rospy.Time.now(),
-#                                                        frame_id='Plate'),
+#                                                        frame_id='Arena'),
 #                                          ns='computed',
 #                                          id=5,
 #                                          type=Marker.SPHERE,
@@ -398,7 +398,7 @@ class Fly:
                                         tf.transformations.quaternion_about_axis(self.contour.angle, (0,0,1)),
                                         self.contour.header.stamp,
                                         self.name+"Contour",
-                                        "Plate")
+                                        "Arena")
             
             # Send the Filtered transform.
             if self.state.pose.position.x is not None:
@@ -432,7 +432,7 @@ class Fly:
             # Publish a 3D model marker for the robot.
             if 'Robot' in self.name:
                 markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
-                                                    frame_id='Plate'),
+                                                    frame_id='Arena'),
                                       ns='robot',
                                       id=1,
                                       type=Marker.CYLINDER,

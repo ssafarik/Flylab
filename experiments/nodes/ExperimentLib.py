@@ -56,8 +56,8 @@ def GetAngleFrame (arenastate, frameid):
     if len(arenastate.flies)>0:
         stamp = max(stamp,arenastate.robot.header.stamp)
 
-    if g_tfrx.canTransform('Plate', frameid, stamp):        
-        (trans,q) = g_tfrx.lookupTransform('Plate', frameid, stamp)
+    if g_tfrx.canTransform('Arena', frameid, stamp):        
+        (trans,q) = g_tfrx.lookupTransform('Arena', frameid, stamp)
         rpy = tf.transformations.euler_from_quaternion(q)
         angle = rpy[2] % (2.0 * N.pi)
     else:
@@ -72,8 +72,8 @@ def GetPositionFrame (arenastate, frameid):
     if len(arenastate.flies)>0:
         stamp = max(stamp,arenastate.robot.header.stamp)
         
-    if g_tfrx.canTransform('Plate', frameid, stamp):        
-        (trans,q) = g_tfrx.lookupTransform('Plate', frameid, stamp)
+    if g_tfrx.canTransform('Arena', frameid, stamp):        
+        (trans,q) = g_tfrx.lookupTransform('Arena', frameid, stamp)
         trans = N.array(trans)
     else:
         trans = None
@@ -583,8 +583,8 @@ class TriggerOnStates (smach.State):
     def GetSpeedFrameToFrame (self, frameidParent, frameidChild):
         speed = None
         
-        # If absolute speed (i.e. in the Plate frame), then try to use ArenaState speed.
-        if (frameidParent=='Plate') and (self.arenastate is not None):
+        # If absolute speed (i.e. in the Arena frame), then try to use ArenaState speed.
+        if (frameidParent=='Arena') and (self.arenastate is not None):
 
             # Check the robot.
             if (self.nRobots>0) and (frameidChild==self.arenastate.robot.name):
@@ -682,7 +682,7 @@ class TriggerOnStates (smach.State):
                 isSpeedAbsParentInRange = True
                 if (trigger.speedAbsParentMin is not None) and (trigger.speedAbsParentMax is not None):
                     isSpeedAbsParentInRange = False
-                    speedAbsParent = self.GetSpeedFrameToFrame('Plate', trigger.frameidParent)# Absolute speed of the parent frame.
+                    speedAbsParent = self.GetSpeedFrameToFrame('Arena', trigger.frameidParent)# Absolute speed of the parent frame.
                     #rospy.loginfo ('EL parent speed=%s' % speedAbsParent)
                     if speedAbsParent is not None:
                         if (trigger.speedAbsParentMin <= speedAbsParent <= trigger.speedAbsParentMax):
@@ -692,7 +692,7 @@ class TriggerOnStates (smach.State):
                 isSpeedAbsChildInRange = True
                 if (trigger.speedAbsChildMin is not None) and (trigger.speedAbsChildMax is not None):
                     isSpeedAbsChildInRange = False
-                    speedAbsChild = self.GetSpeedFrameToFrame('Plate', trigger.frameidChild)# Absolute speed of the child frame.
+                    speedAbsChild = self.GetSpeedFrameToFrame('Arena', trigger.frameidChild)# Absolute speed of the child frame.
                     #rospy.loginfo ('EL child speed=%s' % speedAbsChild)
                     if speedAbsChild is not None:
                         if (trigger.speedAbsChildMin <= speedAbsChild <= trigger.speedAbsChildMax):
@@ -921,7 +921,7 @@ class MoveRobot (smach.State):
         rv = 'aborted'
 
         while not rospy.is_shutdown():
-            posRobot = self.arenastate.robot.pose.position # Assumed in the "Plate" frame.
+            posRobot = self.arenastate.robot.pose.position # Assumed in the "Arena" frame.
             ptRobot = N.array([posRobot.x, posRobot.y])
             
             # Get a random speed once per move, non-random speed always.
@@ -968,14 +968,14 @@ class MoveRobot (smach.State):
             #    posOrigin = posRobot
             #    doMove = True
             #else:
-            #    posOrigin = Point(x=0, y=0, z=0) # Relative to the origin of the Plate frame
+            #    posOrigin = Point(x=0, y=0, z=0) # Relative to the origin of the Arena frame
             #    doMove = False
             
 
             # If we need to calculate a target.
             if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
                 doMove = True
-                # Compute target point in workspace (i.e. Plate) coordinates.
+                # Compute target point in workspace (i.e. Arena) coordinates.
                 #ptOrigin = N.array([posOrigin.x, posOrigin.y])
                 ptOrigin = GetPositionFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginPosition)
                 if (ptOrigin is not None):
@@ -1040,7 +1040,7 @@ class MoveRobot (smach.State):
         msgPattern.mode = 'byshape'
         msgPattern.shape = self.paramsIn.robot.move.pattern.shape
         msgPattern.points = []
-        msgPattern.frame_id = 'Plate'
+        msgPattern.frame_id = 'Arena'
         msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
         msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
         msgPattern.count = self.paramsIn.robot.move.pattern.count
@@ -1074,7 +1074,7 @@ class MoveRobot (smach.State):
         msgPattern.mode = 'byshape'
         msgPattern.shape = self.paramsIn.robot.move.pattern.shape
         msgPattern.points = []
-        msgPattern.frame_id = 'Plate'
+        msgPattern.frame_id = 'Arena'
         msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
         msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
         msgPattern.count = 0
@@ -1159,7 +1159,7 @@ class Lasertrack (smach.State):
 
                 if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
                     markerTarget = Marker(header=Header(stamp = state.header.stamp,
-                                                        frame_id='Plate'),
+                                                        frame_id='Arena'),
                                           ns='statefilter',
                                           id=1,
                                           type=Marker.CUBE,
@@ -1370,15 +1370,15 @@ class Lasertrack (smach.State):
                         stamp=None
                         if (pose is None) or (velocity is None):
                             try:
-                                stamp = g_tfrx.getLatestCommonTime('Plate', pattern.frame_id)
+                                stamp = g_tfrx.getLatestCommonTime('Arena', pattern.frame_id)
                             except tf.Exception:
                                 pass
 
                             
                         # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                        if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Plate', pattern.frame_id, stamp):
+                        if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Arena', pattern.frame_id, stamp):
                             try:
-                                poseStamped = g_tfrx.transformPose('Plate', PoseStamped(header=Header(stamp=stamp,
+                                poseStamped = g_tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
                                                                                                       frame_id=pattern.frame_id),
                                                                                         pose=Pose(position=Point(0,0,0),
                                                                                                   orientation=Quaternion(0,0,0,1)
@@ -1391,9 +1391,9 @@ class Lasertrack (smach.State):
 
                                 
                         # If we still need the velocity, then get it from ROS.
-                        if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Plate', pattern.frame_id, stamp):
+                        if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Arena', pattern.frame_id, stamp):
                             try:
-                                velocity_tuple = g_tfrx.lookupTwist('Plate', pattern.frame_id, stamp, self.dtVelocity)
+                                velocity_tuple = g_tfrx.lookupTwist('Arena', pattern.frame_id, stamp, self.dtVelocity)
                             except tf.Exception:
                                 velocity = None
                             else:
@@ -1555,7 +1555,7 @@ class LEDPanels (smach.State):
 
                 if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
                     markerTarget = Marker(header=Header(stamp = state.header.stamp,
-                                                        frame_id='Plate'),
+                                                        frame_id='Arena'),
                                           ns='statefilter',
                                           id=1,
                                           type=Marker.CUBE,
@@ -1745,15 +1745,15 @@ class LEDPanels (smach.State):
                 stamp=None
                 if (pose is None) or (velocity is None):
                     try:
-                        stamp = g_tfrx.getLatestCommonTime('Plate', self.paramsIn.ledpanels.frame_id)
+                        stamp = g_tfrx.getLatestCommonTime('Arena', self.paramsIn.ledpanels.frame_id)
                     except tf.Exception:
                         pass
 
                     
                 # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Plate', self.paramsIn.ledpanels.frame_id, stamp):
+                if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Arena', self.paramsIn.ledpanels.frame_id, stamp):
                     try:
-                        poseStamped = g_tfrx.transformPose('Plate', PoseStamped(header=Header(stamp=stamp,
+                        poseStamped = g_tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
                                                                                               frame_id=self.paramsIn.ledpanels.frame_id),
                                                                                 pose=Pose(position=Point(0,0,0),
                                                                                           orientation=Quaternion(0,0,0,1)
@@ -1766,9 +1766,9 @@ class LEDPanels (smach.State):
 
                         
                 # If we still need the velocity, then get it from ROS.
-                if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Plate', self.paramsIn.ledpanels.frame_id, stamp):
+                if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Arena', self.paramsIn.ledpanels.frame_id, stamp):
                     try:
-                        velocity_tuple = g_tfrx.lookupTwist('Plate', self.paramsIn.ledpanels.frame_id, stamp, self.dtVelocity)
+                        velocity_tuple = g_tfrx.lookupTwist('Arena', self.paramsIn.ledpanels.frame_id, stamp, self.dtVelocity)
                     except tf.Exception:
                         velocity = None
                     else:
