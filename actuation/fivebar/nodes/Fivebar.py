@@ -1022,7 +1022,7 @@ class RosFivebar:
         
     def Main(self):
         self.LoadServices()
-        self.Calibrate_callback(None)stage
+        self.Calibrate_callback(None)
         self.initialized = True
 
         rospy.loginfo ('5B QMIN,QMAX: %s, %s, %s, %s' % (self.q1MinE, self.q1MaxE, self.q2MinE, self.q2MaxE))
