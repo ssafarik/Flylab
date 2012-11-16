@@ -1,38 +1,39 @@
 #!/usr/bin/env python
 from __future__ import division
 import roslib; roslib.load_manifest('calibration')
-import sys
 import rospy
+import copy
 import cv
 import cv2
-import tf
-import copy
-import math
 import numpy as N
-from pythonmodules import cvNumpy,CameraParameters
-from geometry_msgs.msg import Point, PointStamped
-from sensor_msgs.msg import Image, CameraInfo
-#from joystick_commands.msg import JoystickCommands
+import tf
 from cv_bridge import CvBridge, CvBridgeError
+from pythonmodules import cvNumpy
+from geometry_msgs.msg import PointStamped
+from sensor_msgs.msg import Image, CameraInfo
 
 FRAME_CHECKERBOARD="Checkerboard"
 FRAME_IMAGERECT="ImageRect"
 FRAME_ARENA="Arena"
 FRAME_CAMERA="Camera"
 
-class CalibrateCameraArena:
 
+class CalibrateCameraArena:
     def __init__(self):
         self.initialized = False
         self.initialized_images = False
         rospy.init_node('CalibrateCameraArena')
 
-        cv2.namedWindow('Camera Arena Calibration')
         self.cvbridge = CvBridge()
-        self.camerainfo = None
         
-        self.color_max = 255
-        self.colorFont = cv.CV_RGB(self.color_max,0,0)
+        self.tfrx = tf.TransformListener()
+        self.tfbx = tf.TransformBroadcaster()
+        self.subCameraInfo  = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
+        self.subImage       = rospy.Subscriber("camera/image_rect", Image, self.Image_callback)
+
+        self.camerainfo = None
+        self.colorMax = 255
+        self.colorFont = cv.CV_RGB(self.colorMax,0,0)
         
         self.ptOriginArena = PointStamped()
         self.ptOriginArena.header.frame_id = FRAME_CAMERA
@@ -41,11 +42,6 @@ class CalibrateCameraArena:
         self.ptOriginCamera.header.frame_id = FRAME_CAMERA
         self.ptOriginCamera.point.x = 0
         self.ptOriginCamera.point.y = 0
-        
-        self.tfrx = tf.TransformListener()
-        self.tfbx = tf.TransformBroadcaster()
-        self.subCameraInfo  = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
-        self.subImage       = rospy.Subscriber("camera/image_rect", Image, self.Image_callback)
         
         
         # Checkerboard info
@@ -62,9 +58,9 @@ class CalibrateCameraArena:
         self.sizeDeadzone = (2,2)
         self.criteriaTerm = (cv.CV_TERMCRIT_ITER | cv.CV_TERMCRIT_EPS, 100, 0.01)
         
-        self.pointsArena = N.zeros([3, self.nCorners], dtype=N.float32)
-        self.pointsImage = N.zeros([2, self.nCorners], dtype=N.float32)
-        self.pointsAxes           = N.zeros([3, 4], dtype=N.float32)
+        self.pointsArena         = N.zeros([self.nCorners, 3], dtype=N.float32)
+        self.pointsImage         = N.zeros([self.nCorners, 2], dtype=N.float32)
+        self.pointsAxes          = N.zeros([4, 3], dtype=N.float32)
         self.pointsAxesProjected = N.zeros([4, 2], dtype=N.float32)
 
         self.rvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
@@ -97,24 +93,24 @@ class CalibrateCameraArena:
     def PrepareImageCorners(self, corners):
         for iCorner in range(self.nCorners):
             (x,y) = corners[iCorner]
-            self.pointsArena[0][iCorner] = (iCorner // self.nCols)*self.checker_size
-            self.pointsArena[1][iCorner] = (iCorner % self.nCols)*self.checker_size
-            self.pointsArena[2][iCorner] = 0.0
+            self.pointsArena[iCorner][0] = (iCorner // self.nCols)*self.checker_size
+            self.pointsArena[iCorner][1] = (iCorner % self.nCols)*self.checker_size
+            self.pointsArena[iCorner][2] = 0.0
 
-            self.pointsImage[0][iCorner] = x
-            self.pointsImage[1][iCorner] = y
+            self.pointsImage[iCorner][0] = x
+            self.pointsImage[iCorner][1] = y
             
 
     def DrawOriginAxes(self, cvimage, rvec, tvec):
         if self.camerainfo is not None:
-            
-            self.pointsAxes       = N.zeros([3, 4], dtype=N.float32) #cv.CreateMat(4, 3, cv.CV_32FC1)
-            self.pointsAxes[:][0] = 0.0               # (0,0,0)T origin point 
-            self.pointsAxes[0][1] = self.checker_size # (1,0,0)T point on x-axis
-            self.pointsAxes[1][2] = self.checker_size # (0,1,0)T point on y-axis
-            self.pointsAxes[2][3] = self.checker_size # (0,0,1)T point on z-axis
+            self.pointsAxes       = N.zeros([4, 3], dtype=N.float32) #cv.CreateMat(4, 3, cv.CV_32FC1)
+            self.pointsAxes[0][:] = 0.0               # (0,0,0)T origin point,    pt[0] 
+            self.pointsAxes[1][0] = self.checker_size # (1,0,0)T point on x-axis, pt[1]
+            self.pointsAxes[2][1] = self.checker_size # (0,1,0)T point on y-axis, pt[2]
+            self.pointsAxes[3][2] = self.checker_size # (0,0,1)T point on z-axis, pt[3]
             widthAxisLine = 3
-            (self.pointsAxesProjected,jacobian) = cv2.projectPoints(self.pointsAxes.transpose(),
+            
+            (self.pointsAxesProjected,jacobian) = cv2.projectPoints(self.pointsAxes,
                                                                     rvec,
                                                                     tvec,
                                                                     N.reshape(self.camerainfo.K, [3,3]),
@@ -126,15 +122,15 @@ class CalibrateCameraArena:
 
             # draw x-axis
             pt2 = tuple(self.pointsAxesProjected[1][0])
-            cv2.line(cvimage, pt1, pt2, cv.CV_RGB(self.color_max,0,0), widthAxisLine)
+            cv2.line(cvimage, pt1, pt2, cv.CV_RGB(self.colorMax,0,0), widthAxisLine)
 
             # draw y-axis
             pt2 = tuple(self.pointsAxesProjected[2][0])
-            cv2.line(cvimage, pt1, pt2, cv.CV_RGB(0,self.color_max,0), widthAxisLine)
+            cv2.line(cvimage, pt1, pt2, cv.CV_RGB(0,self.colorMax,0), widthAxisLine)
             
             # draw z-axis
             pt2 = tuple(self.pointsAxesProjected[3][0])
-            cv2.line(cvimage, pt1, pt2, cv.CV_RGB(0,0,self.color_max), widthAxisLine)
+            cv2.line(cvimage, pt1, pt2, cv.CV_RGB(0,0,self.colorMax), widthAxisLine)
                 
             
 
@@ -145,8 +141,8 @@ class CalibrateCameraArena:
                 cv2.cornerSubPix(self.imgProcessed, cornersImage, self.sizeWindow, self.sizeDeadzone, self.criteriaTerm)
                 cv2.drawChessboardCorners(self.imgDisplay, self.sizeCheckerboard, cornersImage, bFoundChessboard)
                 self.PrepareImageCorners(cornersImage.squeeze())
-                (rv, self.rvec, self.tvec) = cv2.solvePnP(self.pointsArena.transpose(), 
-                                                          self.pointsImage.transpose(), 
+                (rv, self.rvec, self.tvec) = cv2.solvePnP(self.pointsArena, 
+                                                          self.pointsImage, 
                                                           N.reshape(self.camerainfo.K,[3,3]), 
                                                           N.reshape(self.camerainfo.D,[5,1]))
                 self.rvec = self.rvec.squeeze()
@@ -187,14 +183,14 @@ class CalibrateCameraArena:
         Z = [1,                          1]
         
         pointsCamera = N.array([X,Y,Z])
-        pointsArena = N.dot(self.H, pointsCamera)
+        pointsArena = N.dot(self.H, pointsCamera).transpose()
         x0 = pointsArena[0,0]
-        x1 = pointsArena[0,1]
-        y0 = pointsArena[1,0]
+        x1 = pointsArena[1,0]
+        y0 = pointsArena[0,1]
         y1 = pointsArena[1,1]
         angleRot = N.arctan2((y1-y0),(x1-x0))
         
-        transCheckerboardArena = pointsArena[:,0]
+        transCheckerboardArena = pointsArena[0,:]
         transCheckerboardArena[2] = 0
         
         try:
@@ -269,37 +265,32 @@ class CalibrateCameraArena:
                 yText += dyText
                 
                 try:
-                    self.ptOriginCameraUndistorted = self.tfrx.transformPoint(FRAME_IMAGERECT, self.ptOriginCamera) # BUG: Not actually undistorted.  Merely put into the image_rect frame.
-                    self.ptOriginArenaUndistorted = self.tfrx.transformPoint(FRAME_IMAGERECT, self.ptOriginArena)   #      Should go through something like image_proc node.
+                    self.ptOriginCameraUndistorted = self.tfrx.transformPoint(FRAME_IMAGERECT, self.ptOriginCamera) # This only works for the origin point.  Merely put into the image_rect frame.
+                    self.ptOriginArenaUndistorted = self.tfrx.transformPoint(FRAME_IMAGERECT, self.ptOriginArena)   # Other points should go through something like image_proc node.
                 except tf.Exception, e:
                     rospy.logwarn('tf.Exception in Image_callback(): %s' % e)
                 else:
                     # Update image mask
                     cv2.circle(self.imgMask, 
                                (int(self.ptOriginArenaUndistorted.point.x), int(self.ptOriginArenaUndistorted.point.y)), 
-                               int(self.radiusMask), 
-                               self.color_max, 
-                               cv.CV_FILLED)
+                               int(self.radiusMask), self.colorMax, cv.CV_FILLED)
                     self.imgProcessed = cv2.bitwise_and(self.imgProcessed, self.imgMask)
                     self.FindExtrinsics()
 
                     # Draw the camera origin.
                     cv2.circle(self.imgDisplay, 
                                (int(self.ptOriginCameraUndistorted.point.x),int(self.ptOriginCameraUndistorted.point.y)), 
-                               3, 
-                               cv.CV_RGB(self.color_max,0,self.color_max), cv.CV_FILLED)
+                               3, cv.CV_RGB(self.colorMax,0,self.colorMax), cv.CV_FILLED)
                     
                     # Draw the arena origin.
                     cv2.circle(self.imgDisplay, 
                                (int(self.ptOriginArenaUndistorted.point.x),int(self.ptOriginArenaUndistorted.point.y)), 
-                               3, 
-                               cv.CV_RGB(0,self.color_max,0), cv.CV_FILLED)
+                               3, cv.CV_RGB(0,self.colorMax,0), cv.CV_FILLED)
                     
                     # Draw the mask circle
                     cv2.circle(self.imgDisplay, 
                                (int(self.ptOriginArenaUndistorted.point.x),int(self.ptOriginArenaUndistorted.point.y)), 
-                               int(self.radiusMask), 
-                               cv.CV_RGB(0,self.color_max,0))
+                               int(self.radiusMask), cv.CV_RGB(0,self.colorMax,0))
                     
                     
                     display_text = "radiusMask = " + str(int(self.radiusMask))
@@ -324,12 +315,12 @@ class CalibrateCameraArena:
     
                 
                 cv2.imshow('Camera Arena Calibration', self.imgDisplay)
-                cv.WaitKey(3)
+                cv2.waitKey(3)
 
     
     
 
-def main(args):
+if __name__ == '__main__':
     cal = CalibrateCameraArena()
     try:
         rospy.spin()
@@ -337,6 +328,3 @@ def main(args):
         print "Shutting down"
     cv2.destroyAllWindows()
 
-
-if __name__ == '__main__':
-    main(sys.argv)
