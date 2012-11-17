@@ -6,7 +6,6 @@ import cv
 import numpy as N
 import tf
 from sensor_msgs.msg import Image, CameraInfo
-from pythonmodules import cvNumpy, CameraParameters
 import arena_tf.srv
 
 
@@ -18,6 +17,8 @@ class TransformServerArenaCamera:
         
         self.tfbx = tf.TransformBroadcaster()
 
+        self.rvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
+        self.tvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
         
         self.xMask = rospy.get_param('camera/mask/x', 0.0) 
         self.yMask = rospy.get_param('camera/mask/y', 0.0) 
@@ -34,27 +35,36 @@ class TransformServerArenaCamera:
 
     def CameraInfo_callback (self, camerainfo):
         if (self.initialized) and (self.camerainfo is None):
-            M = N.reshape(N.array(camerainfo.K),[3,3]) #cvNumpy.mat_to_array(N.array(camerainfo.K))
-            #M = N.reshape(N.array(camerainfo.P),[3,4])[0:3,0:3]
+            M = N.reshape(N.array(camerainfo.K),[3,3])
             M[:-1,-1] = 0  # Zero the translation entries (1,3) and (2,3).
     
-            (rvec, tvec) = CameraParameters.extrinsic("arena")
-            rvec = cvNumpy.mat_to_array(rvec).squeeze()
-            tvec = cvNumpy.mat_to_array(tvec).squeeze()
     
-            angleRvec = N.linalg.norm(rvec)
-            R = tf.transformations.rotation_matrix(angleRvec, rvec)
-            T = tf.transformations.translation_matrix(tvec)
+            self.rvec[0] = rospy.get_param('/camera_arena_rvec_0')
+            self.rvec[1] = rospy.get_param('/camera_arena_rvec_1')
+            self.rvec[2] = rospy.get_param('/camera_arena_rvec_2')
+            self.tvec[0] = rospy.get_param('/camera_arena_tvec_0')
+            self.tvec[1] = rospy.get_param('/camera_arena_tvec_1')
+            self.tvec[2] = rospy.get_param('/camera_arena_tvec_2')
     
+            angleRvec = N.linalg.norm(self.rvec)
+            R = tf.transformations.rotation_matrix(angleRvec, self.rvec) # 4x4
+            T = tf.transformations.translation_matrix(self.tvec)         # 4x4
+    
+            
             self.Wsub = N.zeros((3,3))
             self.Wsub[:,:-1] = R[:-1,:-2]
             self.Wsub[:,-1] = T[:-1,-1]
     
             self.Hinv = N.dot(M, self.Wsub)
-            #rospy.logwarn ('Hinv scalar %f' % self.Hinv[-1,-1])
             self.Hinv = self.Hinv / self.Hinv[-1,-1]
             self.H = N.linalg.inv(self.Hinv)
-
+            
+#            rospy.logwarn(M)
+#            rospy.logwarn(R)
+#            rospy.logwarn(T)
+#            rospy.logwarn(self.Wsub)
+#            rospy.logwarn(self.Hinv)
+#            rospy.logwarn(self.H)
         self.camerainfo = camerainfo
             
 

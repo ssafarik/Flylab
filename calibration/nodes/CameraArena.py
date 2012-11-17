@@ -8,8 +8,7 @@ import cv2
 import numpy as N
 import tf
 from cv_bridge import CvBridge, CvBridgeError
-from pythonmodules import cvNumpy
-from geometry_msgs.msg import PointStamped
+from geometry_msgs.msg import Point, PointStamped
 from sensor_msgs.msg import Image, CameraInfo
 
 FRAME_CHECKERBOARD="Checkerboard"
@@ -30,7 +29,8 @@ class CalibrateCameraArena:
         self.tfbx = tf.TransformBroadcaster()
         self.subCameraInfo  = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
         self.subImage       = rospy.Subscriber("camera/image_rect", Image, self.Image_callback)
-
+        self.subPoint       = rospy.Subscriber("Joystick/Commands", Point, self.Point_callback)
+        
         self.camerainfo = None
         self.colorMax = 255
         self.colorFont = cv.CV_RGB(self.colorMax,0,0)
@@ -65,9 +65,11 @@ class CalibrateCameraArena:
 
         self.rvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
         self.rvec2     = N.zeros([1, 3], dtype=N.float32).squeeze()
-        self.rvec2_avg = 0.0
+        self.rvec2_avg = N.zeros([1, 3], dtype=N.float32).squeeze()
         self.sumWrap   = N.zeros([1, 3], dtype=N.float32).squeeze()
         self.tvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
+        self.tvec2     = N.zeros([1, 3], dtype=N.float32).squeeze()
+        self.tvec2_avg = N.zeros([1, 3], dtype=N.float32).squeeze()
 
         self.nMeasurements = 0
         self.alpha = 0.001 # For moving averages.
@@ -78,6 +80,13 @@ class CalibrateCameraArena:
     def CameraInfo_callback (self, msgCameraInfo):
         self.camerainfo = msgCameraInfo
       
+
+    def Point_callback(self, point):
+        if self.initialized and self.initialized_images:
+            self.ptOriginArena.point.x += point.x
+            self.ptOriginArena.point.y += -point.y
+            self.radiusMask += point.z
+
         
     def InitializeImages(self, (height,width)):
         if self.camerainfo is not None:
@@ -296,7 +305,7 @@ class CalibrateCameraArena:
                     display_text = "radiusMask = " + str(int(self.radiusMask))
                     cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                     yText += dyText
-                    
+
                     display_text = "rvec cur=[%+0.3f, %+0.3f, %+0.3f] avg=[%0.3f, %0.3f, %0.3f]" % ((self.rvec2[0]+N.pi)%(2*N.pi)-N.pi,     
                                                                                                     (self.rvec2[1]+N.pi)%(2*N.pi)-N.pi,     
                                                                                                     (self.rvec2[2]+N.pi)%(2*N.pi)-N.pi,
@@ -307,8 +316,8 @@ class CalibrateCameraArena:
                                (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                     yText += dyText
                     
-                    display_text = "tvec=[%+0.3f, %+0.3f, %+0.3f] avg=[%0.3f, %0.3f, %0.3f]" % (self.tvec2[0],     self.tvec2[1],     self.tvec2[2],
-                                                                                                self.tvec2_avg[0], self.tvec2_avg[1], self.tvec2_avg[2])
+                    display_text = "tvec cur=[%+0.3f, %+0.3f, %+0.3f] avg=[%0.3f, %0.3f, %0.3f]" % (self.tvec2[0],     self.tvec2[1],     self.tvec2[2],
+                                                                                                    self.tvec2_avg[0], self.tvec2_avg[1], self.tvec2_avg[2])
                     cv2.putText(self.imgDisplay, display_text,
                                 (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                     yText += dyText

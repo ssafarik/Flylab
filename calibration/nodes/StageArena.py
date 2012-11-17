@@ -8,7 +8,6 @@ import cv2
 import numpy as N
 import tf
 from cv_bridge import CvBridge, CvBridgeError
-from pythonmodules import cvNumpy,CameraParameters
 from geometry_msgs.msg import Point, PoseStamped
 from sensor_msgs.msg import Image, CameraInfo
 
