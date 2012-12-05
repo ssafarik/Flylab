@@ -57,7 +57,12 @@ class TransformServerArenaCamera:
     
             self.Hinv = N.dot(M, self.Wsub)
             self.Hinv = self.Hinv / self.Hinv[-1,-1]
-            self.H = N.linalg.inv(self.Hinv)
+            try:
+                self.H = N.linalg.inv(self.Hinv)
+            except Exception, e:
+                rospy.logwarn('Exception inverting Hinv: %s.  Is camera_info getting published?' % e)
+                rospy.logwarn('camerainfo.K = %s' %repr(camerainfo.K))
+                rospy.logwarn('Hinv = %s' %repr(self.Hinv))
             
 #            rospy.logwarn(M)
 #            rospy.logwarn(R)

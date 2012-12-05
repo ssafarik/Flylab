@@ -468,7 +468,7 @@ class ContourGenerator:
             if self.bUseBackgroundSubtraction:
                 # Update the background image
                 #rospy.logwarn('types: %s' % [type(N.float32(self.npCamera)), type(self.npfBackground), type(self.alphaBackground)])
-                #self.alphaBackground = rospy.get_param('tracking/alphaBackground', 0.001) # Alpha value for moving average background.
+                self.alphaBackground = rospy.get_param('tracking/alphaBackground', 0.01) # Alpha value for moving average background.
                 cv2.accumulateWeighted(N.float32(self.npCamera), self.npfBackground, self.alphaBackground)
                 #self.matBackground = cv.fromarray(N.uint8(self.npfBackground))
                 self.npBackground = N.uint8(self.npfBackground)
@@ -558,7 +558,7 @@ class ContourGenerator:
               
             # Publish a special image for use in rviz.
             if self.pubImageRviz.get_num_connections() > 0:
-                self.npProcessedFlip, = cv2.flip(self.npProcessed, 0)
+                self.npProcessedFlip = cv2.flip(self.npProcessed, 0)
                 image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npProcessedFlip), "passthrough")
                 image2.header = image.header
                 image2.header.frame_id = 'Arena'

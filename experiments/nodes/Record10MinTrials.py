@@ -14,7 +14,7 @@ from patterngen.msg import MsgPattern
 
 
 #######################################################################################################
-class ExperimentRecord10MinTrials():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
@@ -142,7 +142,7 @@ class ExperimentRecord10MinTrials():
 
 if __name__ == '__main__':
     try:
-        experiment = ExperimentRecord10MinTrials()
+        experiment = Experiment()
         experiment.Run()
         
     except KeyboardInterrupt:

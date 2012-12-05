@@ -14,7 +14,7 @@ from patterngen.msg import MsgPattern
 
 
 #######################################################################################################
-class ExperimentChase():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
@@ -142,7 +142,7 @@ class ExperimentChase():
 
 if __name__ == '__main__':
     #try:
-        experiment = ExperimentChase()
+        experiment = Experiment()
         experiment.Run()
         
     #except:

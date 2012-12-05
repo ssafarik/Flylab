@@ -156,7 +156,7 @@ class ContourIdentifier:
                 for i in range(len(self.pointExclusionzone_list)):
                     self.markerExclusionzone_list.append(Marker(header=Header(stamp = rospy.Time.now(),
                                                                               frame_id='/Arena'),
-                                                                ns='exclusionzones',
+                                                                ns='exclusionzone_%d' % i,
                                                                 id=0,
                                                                 type=3, #CYLINDER,
                                                                 action=0,

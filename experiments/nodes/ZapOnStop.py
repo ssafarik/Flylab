@@ -16,7 +16,7 @@ from tracking.msg import ArenaState
 
 
 #######################################################################################################
-class ExperimentZapOnStop():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
@@ -154,7 +154,7 @@ class ExperimentZapOnStop():
 
 
 if __name__ == '__main__':
-    experiment = ExperimentZapOnStop()
+    experiment = Experiment()
     experiment.Run()
         
 

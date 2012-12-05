@@ -1,7 +1,8 @@
 <launch>
-  <param name="tracking/diff_threshold"     type="double" value="40"/>   					<!-- Adjust this based on light brightness, etc, to get good contours. -->
-  <param name="tracking/dtForecast"         type="double" value="0.20"/>   					<!-- Adjust this based on light brightness, etc, to get good contours. -->
-  <param name="tracking/alphaBackground"    type="double" value="0.0001"/>   				<!-- Moving average for dynamic background. -->
-  <param name="tracking/filenameBackground" type="string" value="/cameras/background.png"/> <!-- Location of the initial background image. -->
+  <param name="tracking/diff_threshold"             type="double" value="40"/>   					<!-- Adjust this based on light brightness, etc, to get good contours. -->
+  <param name="tracking/dtForecast"                 type="double" value="0.20"/>   					<!-- How far ahead to forecast the fly position. -->
+  <param name="tracking/alphaBackground"            type="double" value="0.00001"/>   				<!-- Moving average for dynamic background. -->
+  <param name="tracking/filenameBackground"         type="string" value="/cameras/background.png"/> <!-- Location of the background image. -->
+  <param name="tracking/speedThresholdForTravel"    type="double" value="1.0"/>
 
 </launch>
