@@ -28,9 +28,6 @@ class TransformServerArenaStage:
         self.transArenaStage = (self.ptArenaStage.x,self.ptArenaStage.y,self.ptArenaStage.z)
         self.rotArenaStage = (self.qArenaStage.x,self.qArenaStage.y,self.qArenaStage.z,self.qArenaStage.w)
 
-        self.T = tf.transformations.translation_matrix(self.transArenaStage)
-        self.R = tf.transformations.quaternion_matrix(self.rotArenaStage)
-
         self.initialized = True
 
 

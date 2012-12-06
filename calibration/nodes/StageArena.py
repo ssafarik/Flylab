@@ -23,7 +23,7 @@ class CalibrateStageArena():
         self.initialized_images = False
         self.initialized_pose = False
         self.initialized_arrays = False
-        self.initialized_endeffector = False
+        #self.initialized_endeffector = False
         rospy.init_node('CalibrateStageArena')
         
         self.cvbridge = CvBridge()
@@ -32,15 +32,15 @@ class CalibrateStageArena():
         self.subCameraInfo          = rospy.Subscriber('camera/camera_info', CameraInfo,       self.CameraInfo_callback)
         self.subImage               = rospy.Subscriber('camera/image_rect',  Image,            self.Image_callback)
         self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists',   ContourinfoLists, self.ContourinfoLists_callback)
-        self.subEndEffector         = rospy.Subscriber('EndEffector',        MsgFrameState,    self.EndEffector_callback)
+        #self.subEndEffector         = rospy.Subscriber('EndEffector',        MsgFrameState,    self.EndEffector_callback)
         self.pubPatternGen          = rospy.Publisher('SetSignalGen',        MsgPattern, latch=True)
 
         self.camerainfo = None
         
         cv2.namedWindow('Stage/Arena Calibration', 1)
         
-        self.poseRobotImage = PoseStamped()
-        self.poseRobotArena = PoseStamped()
+        self.poseArena = PoseStamped()
+        self.stateEndEffector = None
         
         self.colorMax = 255
         self.colorFont = cv.CV_RGB(self.colorMax,0,0)
@@ -58,15 +58,12 @@ class CalibrateStageArena():
         self.areaRobotMin = 1000000000
         self.areaRobotMax = 0
         
-                # Checkerboard info
+        # Checkerboard info
         self.sizeCheckerboard = (3,2)
         self.nCols = self.sizeCheckerboard[0]
         self.nRows = self.sizeCheckerboard[1]
         self.checker_size = rospy.get_param('calibration/checker_size', 15)
         self.bRotateGrid = False
-        
-        self.pointsAxes                     = N.zeros([4, 3], dtype=N.float32)
-        self.pointsAxesProjected            = N.zeros([4, 2], dtype=N.float32)
         
         self.rvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
         self.tvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
@@ -104,8 +101,8 @@ class CalibrateStageArena():
         rospy.logwarn ('Found service: arena_from_camera.')
             
         self.nRobots = rospy.get_param('nRobots', 0)
-        if (self.nRobots==0):
-            self.initialized_endeffector = True
+        #if (self.nRobots==0):
+        #    self.initialized_endeffector = True
             
         rospy.on_shutdown(self.OnShutdown_callback)
 
@@ -132,9 +129,9 @@ class CalibrateStageArena():
             self.pubPatternGen.publish (msgPattern)
         
     
-    def EndEffector_callback (self, state):
-        self.initialized_endeffector = True
-        
+    #def EndEffector_callback (self, state):
+    #    self.initialized_endeffector = True
+
     
     def CameraInfo_callback (self, msgCameraInfo):
 #        if self.camerainfo is None:
@@ -155,14 +152,16 @@ class CalibrateStageArena():
     # Draw the x/y/z axes projected onto the given image, using camera intrinsic & extrinsic parameters.
     def DrawOriginAxes(self, img, rvec, tvec):
         if self.camerainfo is not None:
-            self.pointsAxes       = N.zeros([4, 3], dtype=N.float32) #cv.CreateMat(4, 3, cv.CV_32FC1)
-            self.pointsAxes[0][:] = 0.0               # (0,0,0)T origin point,    pt[0] 
-            self.pointsAxes[1][0] = self.checker_size # (1,0,0)T point on x-axis, pt[1]
-            self.pointsAxes[2][1] = self.checker_size # (0,1,0)T point on y-axis, pt[2]
-            self.pointsAxes[3][2] = self.checker_size # (0,0,1)T point on z-axis, pt[3]
+            pointsAxes          = N.zeros([4, 3], dtype=N.float32)
+            pointsAxesProjected = N.zeros([4, 2], dtype=N.float32)
+        
+            pointsAxes[0][:] = 0.0               # (0,0,0)T origin point,    pt[0] 
+            pointsAxes[1][0] = self.checker_size # (1,0,0)T point on x-axis, pt[1]
+            pointsAxes[2][1] = self.checker_size # (0,1,0)T point on y-axis, pt[2]
+            pointsAxes[3][2] = self.checker_size # (0,0,1)T point on z-axis, pt[3]
             widthAxisLine = 3
 
-            (self.pointsAxesProjected,jacobian) = cv2.projectPoints(self.pointsAxes,
+            (pointsAxesProjected,jacobian) = cv2.projectPoints(pointsAxes,
                                                                     rvec,
                                                                     tvec,
                                                                     N.reshape(self.camerainfo.K, [3,3]),
@@ -170,18 +169,18 @@ class CalibrateStageArena():
                                                                     )
             
             # origin point
-            pt1 = tuple(self.pointsAxesProjected[0][0])
+            pt1 = tuple(pointsAxesProjected[0][0])
 
             # draw x-axis
-            pt2 = tuple(self.pointsAxesProjected[1][0])
+            pt2 = tuple(pointsAxesProjected[1][0])
             cv2.line(img, pt1, pt2, cv.CV_RGB(self.colorMax,0,0), widthAxisLine)
 
             # draw y-axis
-            pt2 = tuple(self.pointsAxesProjected[2][0])
+            pt2 = tuple(pointsAxesProjected[2][0])
             cv2.line(img, pt1, pt2, cv.CV_RGB(0,self.colorMax,0), widthAxisLine)
             
             # draw z-axis
-            pt2 = tuple(self.pointsAxesProjected[3][0])
+            pt2 = tuple(pointsAxesProjected[3][0])
             cv2.line(img, pt1, pt2, cv.CV_RGB(0,0,self.colorMax), widthAxisLine)
             
             
@@ -257,77 +256,75 @@ class CalibrateStageArena():
                 if (self.nRobots>0):
                     try:
                         stamp = self.tfrx.getLatestCommonTime('Stage', 'EndEffector')
-                        (trans,rot_quat) = self.tfrx.lookupTransform('Stage', 'EndEffector', stamp)
+                        (transEndEffector, rotEndEffector_quat) = self.tfrx.lookupTransform('Stage', 'EndEffector', stamp)
                     except tf.Exception, e:
-                        rospy.logwarn ('Exception in StageArena: %s' % e)
+                        rospy.logwarn ('Exception getting EndEffector coordinates: %s' % e)
                     else:
-                        xEndEffector = trans[0]
-                        yEndEffector = trans[1]
-                        zEndEffector = trans[2]
+                        xEndEffector = transEndEffector[0]
+                        yEndEffector = transEndEffector[1]
+                        zEndEffector = transEndEffector[2]
                 else:
-                    xEndEffector = self.poseRobotArena.pose.position.x
-                    yEndEffector = self.poseRobotArena.pose.position.y
+                    # No robots means we'll just end up with the identity transform.
+                    xEndEffector = self.poseArena.pose.position.x
+                    yEndEffector = self.poseArena.pose.position.y
                     zEndEffector = 0.0
                     
-                pointImageNew = N.array([[self.poseRobotImage.pose.position.x],  [self.poseRobotImage.pose.position.y]])
-                pointArenaNew = N.array([[self.poseRobotArena.pose.position.x], [self.poseRobotArena.pose.position.y],[0]])
-                pointStageNew = N.array([[xEndEffector],                         [yEndEffector],                        [zEndEffector]])
+                pointArenaNew       = N.array([[self.poseArena.pose.position.x], [self.poseArena.pose.position.y]])
+                pointEndEffectorNew = N.array([[xEndEffector],                   [yEndEffector],                    [zEndEffector]])
                 
                 if self.initialized_arrays:
-                    pointArenaPrev = self.pointArena_array[:,-1].reshape((3,1))
-                    if self.distPointsCriteria < tf.transformations.vector_norm((pointArenaNew - pointArenaPrev)):
-                        self.pointImage_array = N.append(self.pointImage_array, pointImageNew, axis=1)
+                    pointEndEffectorPrev = self.pointEndEffector_array[:,-1].reshape((3,1))
+                    if self.distPointsCriteria < tf.transformations.vector_norm((pointEndEffectorNew - pointEndEffectorPrev)):
                         self.pointArena_array = N.append(self.pointArena_array, pointArenaNew, axis=1)
-                        self.pointStage_array = N.append(self.pointStage_array, pointStageNew, axis=1)
+                        self.pointEndEffector_array = N.append(self.pointEndEffector_array, pointEndEffectorNew, axis=1)
                         self.eccRobot_array = N.append(self.eccRobot_array,self.eccRobot)
                         self.areaRobot_array = N.append(self.areaRobot_array,self.areaRobot)
                 else:
-                    self.pointImage_array = pointImageNew
                     self.pointArena_array = pointArenaNew
-                    self.pointStage_array = pointStageNew
+                    self.pointEndEffector_array = pointEndEffectorNew
                     self.initialized_arrays = True
                 
 
-                for iPoint in range(self.pointImage_array.shape[1]):
+                for iPoint in range(self.pointArena_array.shape[1]):
                     cv2.circle(self.imgDisplay, 
-                               (int(self.pointImage_array[0,iPoint]), int(self.pointImage_array[1,iPoint])), 
+                               (int(self.pointArena_array[0,iPoint]), int(self.pointArena_array[1,iPoint])), 
                                5, cv.CV_RGB(self.colorMax,0,self.colorMax), cv.CV_FILLED)
                 
                 cv2.circle(self.imgDisplay, 
-                           (int(self.poseRobotImage.pose.position.x), int(self.poseRobotImage.pose.position.y)), 
+                           (int(self.poseArena.pose.position.x), int(self.poseArena.pose.position.y)), 
                            3, cv.CV_RGB(0,0,self.colorMax), cv.CV_FILLED)
 
-                display_text = 'positionStage = [%0.3f, %0.3f]' % (xEndEffector, yEndEffector)
-                cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
-                yText += dyText
-                display_text = 'positionImage = [%0.3f, %0.3f]' % (self.poseRobotImage.pose.position.x, self.poseRobotImage.pose.position.y)
+                display_text = 'positionContour = [%0.3f, %0.3f]' % (self.poseArena.pose.position.x, self.poseArena.pose.position.y)
                 cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                 yText += dyText
-                display_text = 'positionArena = [%0.3f, %0.3f]' % (self.poseRobotArena.pose.position.x, self.poseRobotArena.pose.position.y)
+                display_text = 'positionEndEffector = [%0.3f, %0.3f]' % (xEndEffector, yEndEffector)
                 cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                 yText += dyText
                 
-                if self.nPointsCriteria < self.pointArena_array.shape[1]:
-                    self.T_arena_stage = tf.transformations.superimposition_matrix(self.pointArena_array, self.pointStage_array, scaling=True)
+                if self.nPointsCriteria < self.pointEndEffector_array.shape[1]:
+                    # Compute transform.
+                    self.T_arena_stage = tf.transformations.superimposition_matrix(self.pointArena_array, self.pointEndEffector_array, scaling=True)
                     self.T_stage_arena = tf.transformations.inverse_matrix(self.T_arena_stage)
-                    #self.T_stage_arena = tf.transformations.superimposition_matrix(self.pointArena_array, self.pointStage_array)
-                    #self.T_arena_stage = tf.transformations.inverse_matrix(self.T_stage_arena)
-                    # tvector = tf.transformations.translation_from_matrix(self.T_arena_stage)
                     tvector = tf.transformations.translation_from_matrix(self.T_stage_arena)
+                    
+                    # Eccentricity.
                     eccMean = N.mean(self.eccRobot_array)
                     eccStd  = N.std(self.eccRobot_array)
-                    # rospy.logwarn('eccMean = %s, eccStd = %s\n' % (eccMean, eccStd))
                     self.eccRobotMin = eccMean - 3*eccStd
                     if self.eccRobotMin < 0:
                         self.eccRobotMin = 0
                     self.eccRobotMax = eccMean + 3*eccStd
+                    # rospy.logwarn('eccMean = %s, eccStd = %s\n' % (eccMean, eccStd))
+                    
+                    # Area.
                     areaMean = N.mean(self.areaRobot_array)
                     areaStd  = N.std(self.areaRobot_array)
-                    # rospy.logwarn('areaMean = %s, areaStd = %s\n' % (areaMean, areaStd))
                     self.areaRobotMin = areaMean - 3*areaStd
                     if self.areaRobotMin < 0:
                         self.areaRobotMin = 0
                     self.areaRobotMax = areaMean + 3*areaStd
+                    # rospy.logwarn('areaMean = %s, areaStd = %s\n' % (areaMean, areaStd))
+                    
                     (factor, origin, direction) = tf.transformations.scale_from_matrix(self.T_stage_arena)
                     quaternion = tf.transformations.quaternion_from_matrix(self.T_stage_arena)
                     # euler = tf.transformations.euler_from_matrix(self.T_arena_stage,'rxyz')
@@ -340,7 +337,7 @@ class CalibrateStageArena():
                     display_text = 'Quaternion = [%0.3f, %0.3f, %0.3f, %0.3f]' % (quaternion[0],quaternion[1],quaternion[2],quaternion[3])
                     cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                     yText += dyText
-                    #display_text = 'Translation Vector = [%0.2f, %0.2f, %0.2f]' % (self.tvec[0],
+                    #display_text = 'Camera Translation = [%0.2f, %0.2f, %0.2f]' % (self.tvec[0],
                     #cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                     #yText += dyText
                     display_text = 'eccRobotMin = %0.3f, eccRobotMax = %0.3f' % (self.eccRobotMin, self.eccRobotMax)
@@ -384,7 +381,7 @@ class CalibrateStageArena():
             cv2.waitKey(3)
 
    
-    def ContourinfoLists_callback(self,contourinfo_lists):
+    def ContourinfoLists_callback(self, contourinfo_lists):
         if self.initialized:
             header     = contourinfo_lists.header
             x_list     = contourinfo_lists.x
@@ -402,11 +399,15 @@ class CalibrateStageArena():
                 self.textError = ''
                 if not self.initialized_pose:
                     self.initialized_pose = True
-                  
-                self.poseRobotImage.header = contourinfo_lists.header
-                self.poseRobotImage.pose.position.x = x_list[0]
-                self.poseRobotImage.pose.position.y = y_list[0]
-                self.poseRobotArena = self.PoseArenaFromImage(self.poseRobotImage)
+
+                poseImage = PoseStamped(header=contourinfo_lists.header,
+                                        pose=Pose(position=Point(x=x_list[0],
+                                                                 y=y_list[0])) 
+                                        )
+
+                self.poseArena.header = contourinfo_lists.header
+                self.poseArena.header.frame_id = "Arena"
+                self.poseArena.pose = self.PoseArenaFromImage(poseImage)
                 self.areaRobot = area_list[0]
                 self.eccRobot  = ecc_list[0]
             elif nContours==0:
@@ -417,7 +418,9 @@ class CalibrateStageArena():
                 self.textError = 'ERROR:  More than one object detected.'
             
 
-    
+    # PoseArenaFromImage()
+    # Takes a pose in image coordinates (i.e. pixels), and transforms it to arena coordinates (i.e. millimeters).
+    #
     def PoseArenaFromImage(self, poseImage):
         response = self.ArenaFromCamera([poseImage.pose.position.x],[poseImage.pose.position.y])
         poseArena = PoseStamped()
@@ -443,8 +446,8 @@ class CalibrateStageArena():
         msgPattern.preempt = True
         msgPattern.param = 0
         self.pubPatternGen.publish (msgPattern)
-        while not self.initialized_endeffector:
-            rospy.sleep(0.5)
+        #while not self.initialized_endeffector:
+        #    rospy.sleep(0.5)
         rospy.sleep(2)
         self.initialized = True
 

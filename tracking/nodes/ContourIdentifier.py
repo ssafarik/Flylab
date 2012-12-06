@@ -115,7 +115,7 @@ class ContourIdentifier:
 
         try:
             rospy.wait_for_service('arena_from_camera') #, timeout=10.0)
-            self.arena_from_camera = rospy.ServiceProxy('arena_from_camera', ArenaCameraConversion)
+            self.ArenaFromCamera = rospy.ServiceProxy('arena_from_camera', ArenaCameraConversion)
         except (rospy.ServiceException, IOError), e:
             print "Service call failed: %s"%e
 
@@ -290,7 +290,7 @@ class ContourIdentifier:
     def TransformContourinfoArenaFromCamera(self, contourinfolistsIn):
         #contourinfolistsOut = ContourinfoLists()
         if self.initialized:
-            response = self.arena_from_camera(contourinfolistsIn.x, contourinfolistsIn.y)
+            response = self.ArenaFromCamera(contourinfolistsIn.x, contourinfolistsIn.y)
             contourinfolistsOut = copy.copy(contourinfolistsIn)
             contourinfolistsOut.header.frame_id = "Arena"
             contourinfolistsOut.x = response.Xdst
