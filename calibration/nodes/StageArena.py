@@ -291,7 +291,7 @@ class CalibrateStageArena():
                 for iPoint in range(self.pointImage_array.shape[1]):
                     cv2.circle(self.imgDisplay, 
                                (int(self.pointImage_array[0,iPoint]), int(self.pointImage_array[1,iPoint])), 
-                               5, cv.CV_RGB(self.colorMax,0,self.colorMax), cv.CV_FILLED)
+                               5, cv.CV_RGB(0,0,self.colorMax/2), cv.CV_FILLED)
                 
                 cv2.circle(self.imgDisplay, 
                            (int(self.poseRobotImage.pose.position.x), int(self.poseRobotImage.pose.position.y)), 

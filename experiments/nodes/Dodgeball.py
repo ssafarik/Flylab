@@ -33,7 +33,7 @@ class Experiment():
         self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.tracking.exclusionzones.enabled = False
-        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=49.0, y=68.5)]
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=70)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.5]
         
         self.experimentparams.pre.robot.enabled = True
@@ -57,7 +57,7 @@ class Experiment():
         self.experimentparams.pre.lasertrack.enabled = False
         self.experimentparams.pre.ledpanels.enabled = True
         self.experimentparams.pre.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.pre.ledpanels.idPattern = 2 
+        self.experimentparams.pre.ledpanels.idPattern = 1 
         self.experimentparams.pre.ledpanels.origin.x = 0 
         self.experimentparams.pre.ledpanels.origin.y = 0 
         self.experimentparams.pre.ledpanels.frame_id = 'Fly1'
@@ -98,7 +98,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.distance = 3                    # Distance to the target point from the origin frame's position.
         self.experimentparams.trial.robot.move.relative.angle = 0                       # Angle to the target point from the origin frame's x-axis.
         self.experimentparams.trial.robot.move.relative.angleType = 'random'            # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
-        self.experimentparams.trial.robot.move.relative.speed = 20                      # Speed at which to move the robot toward the target point. 
+        self.experimentparams.trial.robot.move.relative.speed = 30                      # Speed at which to move the robot toward the target point. 
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random frtrial of it. 
         self.experimentparams.trial.robot.move.relative.tolerance = 2                   # When robot-to-target distance is within this tolerance, then the move is over.
         self.experimentparams.trial.robot.move.timeout = -1                             # When this duration has passed, then the move is over.
@@ -114,7 +114,7 @@ class Experiment():
         
         self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 2
+        self.experimentparams.trial.ledpanels.idPattern = 1
         self.experimentparams.trial.ledpanels.origin.x = 0 
         self.experimentparams.trial.ledpanels.origin.y = 0 
         self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
