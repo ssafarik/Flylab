@@ -4,11 +4,11 @@
   
   <param name="autoexposure" type="double" value="0"/>
   <param name="autogain" type="double" value="0"/>
-  <param name="exposure" type="double" value="9745"/>
+  <param name="exposure" type="double" value="9990"/>
   <param name="gain" type="double" value="100"/>
   <param name="acquisitionmode" type="int" value="0"/>
   <param name="triggersource" type="int" value="0"/>
-  <param name="softwarerate" type="double" value="50"/>
+  <param name="softwarerate" type="double" value="100"/>
   
 
 </launch>
