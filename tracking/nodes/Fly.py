@@ -12,8 +12,7 @@ from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped,
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
 from flycore.msg import MsgFrameState
-from pythonmodules import filters
-from pythonmodules import CircleFunctions
+from pythonmodules import filters, CircleFunctions
 
 
         
@@ -54,7 +53,7 @@ class Fly:
         self.angleOfTravelRecent = 0.0
         self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterFlip', 3.0))
         self.lpFlip.SetValue(0.0)
-        self.contour = None
+        self.contourinfo = None
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
         self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterSpeed', 0.2))
         self.lpSpeed.SetValue(0.0)
@@ -133,7 +132,7 @@ class Fly:
 
 
     # GetNextFlipUpdate()
-    #   Using self.contour, self.state, and self.angleOfTravelRecent,
+    #   Using self.contourinfo, self.state, and self.angleOfTravelRecent,
     #   we determine a value to use for updating the "flip" filter,
     #   which varies on [-1,+1], and the sign of which determines if to flip.
     #
@@ -160,8 +159,8 @@ class Fly:
             flipvalueSign = -1.0 # Flipped
 
 
-        if self.contour.ecc is not None:
-            eccmetric = (self.contour.ecc + 1/self.contour.ecc) - 1 #self.contour.ecc#
+        if self.contourinfo.ecc is not None:
+            eccmetric = (self.contourinfo.ecc + 1/self.contourinfo.ecc) - 1 #self.contourinfo.ecc#
         else:
             eccmetric = 1.0
         #rospy.logwarn('%s: eccmetric=%0.2f' % (self.name, eccmetric))
@@ -201,7 +200,7 @@ class Fly:
         flipvaluePre = self.GetNextFlipUpdate()
             
         if (self.speed > self.speedThresholdForTravel):
-            flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contour.header.stamp.to_sec())
+            flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contourinfo.header.stamp.to_sec())
                 
         # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
         d = N.abs(CircleFunctions.circle_dist(self.lpAngleContour.GetValue(), self.angleContourPrev))
@@ -224,46 +223,46 @@ class Fly:
 
     # Update()
     # Update the current state using the visual position and the computed position (if applicable)
-    def Update(self, contour, ptComputed):
+    def Update(self, contourinfo, posesComputedExternal):
         if self.initialized:
             self.angleContourPrev = self.lpAngleContour.GetValue()
-            self.contour = contour
+            self.contourinfo = contourinfo
             
             # Update the position & orientation filters
             self.isVisible = False            
-            if (self.contour.x is not None) and \
-               (self.contour.y is not None) and \
-               (self.contour.angle is not None) and \
-               (self.contour.area is not None) and \
-               (self.contour.ecc is not None):
+            if (self.contourinfo.x is not None) and \
+               (self.contourinfo.y is not None) and \
+               (self.contourinfo.angle is not None) and \
+               (self.contourinfo.area is not None) and \
+               (self.contourinfo.ecc is not None):
                 # Update min/max ecc & area.
-                if contour.ecc < self.eccMin:
-                    self.eccMin = contour.ecc
-                if self.eccMax < contour.ecc:
-                    self.eccMax = contour.ecc
-                if contour.area < self.areaMin:
-                    self.areaMin = contour.area
-                if self.areaMax < contour.area:
-                    self.areaMax = contour.area
-                self.eccSum += contour.ecc
+                if contourinfo.ecc < self.eccMin:
+                    self.eccMin = contourinfo.ecc
+                if self.eccMax < contourinfo.ecc:
+                    self.eccMax = contourinfo.ecc
+                if contourinfo.area < self.areaMin:
+                    self.areaMin = contourinfo.area
+                if self.areaMax < contourinfo.area:
+                    self.areaMax = contourinfo.area
+                self.eccSum += contourinfo.ecc
                 self.eccCount += 1
-                self.areaSum += contour.area
+                self.areaSum += contourinfo.area
                 self.areaCount += 1
                 
                 self.isVisible = True
-                (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contour.x, self.contour.y), contour.header.stamp.to_sec())
+                (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contourinfo.x, self.contourinfo.y), contourinfo.header.stamp.to_sec())
                 (zKalman, vzKalman) = (0.0, 0.0)
-                #(x,y) = (self.contour.x,self.contour.y) # Unfiltered.
-                self.lpAngleContour.Update(self.contour.angle, contour.header.stamp.to_sec())#self.contour.header.stamp.to_sec())
+                #(x,y) = (self.contourinfo.x,self.contourinfo.y) # Unfiltered.
+                self.lpAngleContour.Update(self.contourinfo.angle, contourinfo.header.stamp.to_sec())#self.contourinfo.header.stamp.to_sec())
                 
                 
-                if N.abs(self.contour.x)>9999 or N.abs(xKalman)>9999:
-                    rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check your background image, lighting, and the parameter tracking/diff_threshold.' % (self.contour.x, xKalman))
+                if N.abs(self.contourinfo.x)>9999 or N.abs(xKalman)>9999:
+                    rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check your background image, lighting, and the parameter tracking/diff_threshold.' % (self.contourinfo.x, xKalman))
 
 
-            else: # We don't have a contour.
+            else: # We don't have a contourinfo.
                 #rospy.logwarn('FLY No contour seen for %s; check your nFlies parameter.' % self.name)
-                (xKalman, yKalman, vxKalman, vyKalman) = self.kfState.Update(None, contour.header.stamp.to_sec())
+                (xKalman, yKalman, vxKalman, vyKalman) = self.kfState.Update(None, contourinfo.header.stamp.to_sec())
                 (zKalman, vzKalman) = (0.0, 0.0)
 
                 
@@ -276,9 +275,9 @@ class Fly:
                 vy = vyKalman
                 vz = vzKalman
             else: # Use the unfiltered data for the case where the filters return None results.
-                rospy.logwarn('Object %s not yet initialized at %s, %s' % (self.name, contour.header.stamp.to_sec(), [self.contour.x, self.contour.y]))
-                x = 0.0#self.contour.x
-                y = 0.0#self.contour.y
+                rospy.logwarn('Object %s not yet initialized at %s, %s' % (self.name, contourinfo.header.stamp.to_sec(), [self.contourinfo.x, self.contourinfo.y]))
+                x = 0.0#self.contourinfo.x
+                y = 0.0#self.contourinfo.y
                 z = 0.0
                 vx = 0.0
                 vy = 0.0
@@ -286,7 +285,7 @@ class Fly:
 
                 
             # Store the latest state.
-            self.state.header.stamp = self.contour.header.stamp
+            self.state.header.stamp = self.contourinfo.header.stamp
             self.state.pose.position.x = x
             self.state.pose.position.y = y
             self.state.pose.position.z = z
@@ -329,43 +328,46 @@ class Fly:
             (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = tf.transformations.quaternion_about_axis(angle, (0,0,1))
                 
             # Update the tool offset.
-            if ptComputed is not None:
-#                    marker = Marker(header=Header(stamp=rospy.Time.now(),
-#                                                        frame_id='Arena'),
-#                                          ns='kalman',
-#                                          id=4,
-#                                          type=Marker.SPHERE,
-#                                          action=0,
-#                                          pose=Pose(position=Point(x=x, 
-#                                                                   y=y, 
-#                                                                   z=z)),
-#                                          scale=Vector3(x=3.0,
-#                                                        y=3.0,
-#                                                        z=3.0),
-#                                          color=ColorRGBA(a=0.5,
-#                                                          r=0.5,
-#                                                          g=0.5,
-#                                                          b=0.5),
-#                                          lifetime=rospy.Duration(1.0))
-#                    self.pubMarker.publish(marker)
-#                    marker = Marker(header=Header(stamp=rospy.Time.now(),
-#                                                        frame_id='Arena'),
-#                                          ns='computed',
-#                                          id=5,
-#                                          type=Marker.SPHERE,
-#                                          action=0,
-#                                          pose=Pose(position=Point(x=ptComputed.x, 
-#                                                                   y=ptComputed.y, 
-#                                                                   z=ptComputed.z)),
-#                                          scale=Vector3(x=3.0,
-#                                                        y=3.0,
-#                                                        z=3.0),
-#                                          color=ColorRGBA(a=0.5,
-#                                                          r=0.1,
-#                                                          g=0.1,
-#                                                          b=1.0),
-#                                          lifetime=rospy.Duration(1.0))
-#                    self.pubMarker.publish(marker)
+            if posesComputedExternal is not None:
+                posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
+                ptComputed = posesComputed.pose.position
+                
+                marker = Marker(header=Header(stamp=rospy.Time.now(),
+                                                    frame_id='Arena'),
+                                      ns='posKalman',
+                                      id=4,
+                                      type=Marker.SPHERE,
+                                      action=0,
+                                      pose=Pose(position=Point(x=x, 
+                                                               y=y, 
+                                                               z=z)),
+                                      scale=Vector3(x=3.0,
+                                                    y=3.0,
+                                                    z=3.0),
+                                      color=ColorRGBA(a=0.5,
+                                                      r=0.5,
+                                                      g=0.5,
+                                                      b=0.5),
+                                      lifetime=rospy.Duration(1.0))
+                self.pubMarker.publish(marker)
+                marker = Marker(header=Header(stamp=rospy.Time.now(),
+                                                    frame_id='Arena'),
+                                      ns='posComputed',
+                                      id=5,
+                                      type=Marker.SPHERE,
+                                      action=0,
+                                      pose=Pose(position=Point(x=ptComputed.x, 
+                                                               y=ptComputed.y, 
+                                                               z=ptComputed.z)),
+                                      scale=Vector3(x=3.0,
+                                                    y=3.0,
+                                                    z=3.0),
+                                      color=ColorRGBA(a=0.5,
+                                                      r=0.1,
+                                                      g=0.1,
+                                                      b=1.0),
+                                      lifetime=rospy.Duration(1.0))
+                self.pubMarker.publish(marker)
 
                 # The offset.
                 xOffset = x-ptComputed.x
@@ -382,8 +384,10 @@ class Fly:
                     angleOffset += 2.0*N.pi
                 self.angleOffsetPrev = angleOffset
                 
-                angleOffsetF = self.lpOffsetAng.Update(angleOffset, contour.header.stamp.to_sec())
-                (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(magOffset, contour.header.stamp.to_sec()), -self.maxOffset, self.maxOffset),
+                angleOffsetF = self.lpOffsetAng.Update(angleOffset, contourinfo.header.stamp.to_sec())
+                (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(magOffset, contourinfo.header.stamp.to_sec()), 
+                                                                            -self.maxOffset, 
+                                                                            self.maxOffset),
                                                                      angleOffsetF)
             else:
                 self.ptOffset = Point(x=0, y=0, z=0)
@@ -392,11 +396,11 @@ class Fly:
                 
             # Send the Raw transform.
             if self.isVisible:
-                self.tfbx.sendTransform((self.contour.x, 
-                                         self.contour.y, 
+                self.tfbx.sendTransform((self.contourinfo.x, 
+                                         self.contourinfo.y, 
                                          0.0),
-                                        tf.transformations.quaternion_about_axis(self.contour.angle, (0,0,1)),
-                                        self.contour.header.stamp,
+                                        tf.transformations.quaternion_about_axis(self.contourinfo.angle, (0,0,1)),
+                                        self.contourinfo.header.stamp,
                                         self.name+"Contour",
                                         "Arena")
             
