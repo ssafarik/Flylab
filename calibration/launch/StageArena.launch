@@ -18,5 +18,8 @@
 	<include file="$(find arena_tf)/launch/arena_tf.launch" />
 	<include file="$(find tracking)/launch/tracking.launch" />
 
+	<param name="camera/framerate" type="double" value="4"/> <!-- These are low since the processing time eventually causes ContourGenerator to hang on publishing ContourinfoLists. -->
+	<param name="camera/softwarerate" type="double" value="4"/>
+
 	<node pkg="calibration" type="StageArena.py" name="StageArenaCalibration" />
 </launch>
