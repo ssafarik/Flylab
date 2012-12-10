@@ -127,7 +127,7 @@ class RosFivebar:
 
         self.subEndEffectorOffset = rospy.Subscriber('EndEffectorOffset', Point, self.EndEffectorOffset_callback)
         self.pubJointState        = rospy.Publisher('joint_states', JointState)
-        self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
+        #self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         self.pubMarker            = rospy.Publisher('visualization_marker', Marker)
         
         self.tfrx = tf.TransformListener()
@@ -400,8 +400,15 @@ class RosFivebar:
         y4th = y**4.0
         y6th = y**6.0
         
-        A = (2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5
-        B = (-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5
+        Aa = (2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)
+        Bb = (-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)
+        if (Aa<0.0) or(Bb<0):
+            rospy.logerr('**********************************************************')
+            rospy.logerr('Fivebar actuator tried to move out of reachable workspace!')
+            rospy.logerr('**********************************************************')
+            
+        A = Aa**0.5
+        B = Bb**0.5
         C = -self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x
         D = 0.5*(xsq*y-2.0*y*self.L0*x+y*self.L0sq-y*self.L4sq+y**3.0+y*self.L2sq)
         F = x*self.L1sq+x3rd-x*self.L3sq+x*ysq
@@ -587,11 +594,8 @@ class RosFivebar:
         #                                                                 reqStageState.state.pose.position.y]))
         #(angle1,angle2,angle3,angle4) = self.Get1234FromXY(reqStageState.state.pose.position.x-self.xCenter, 
         #                                   reqStageState.state.pose.position.y-self.yCenter)
-        self.ptsToolRefExternal = PointStamped(Header(frame_id=reqStageState.state.header.frame_id,
-                                                      stamp=reqStageState.state.header.stamp),
-                                               Point(x=reqStageState.state.pose.position.x,
-                                                     y=reqStageState.state.pose.position.y,
-                                                     z=reqStageState.state.pose.position.z))
+        self.ptsToolRefExternal = PointStamped(header=reqStageState.state.header,
+                                               point=reqStageState.state.pose.position)
         try:
             self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, self.ptsToolRefExternal.header.stamp, rospy.Duration(1.0))
             self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
@@ -599,7 +603,7 @@ class RosFivebar:
             rospy.logwarn ('5B Exception in SetStageState_callback()')
             pass
 
-        #rospy.loginfo('5B ptsToolRef=[%0.2f, %0.2f], [%0.2f, %0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y,self.ptsToolRefExternal.point.x,self.ptsToolRefExternal.point.y))
+        #rospy.logwarn('5B ptsToolRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y,self.ptsToolRefExternal.point.x,self.ptsToolRefExternal.point.y))
         if reqStageState.speed is not None:
             self.speedCommandTool = reqStageState.speed # Requested speed for positioning.
         else:
@@ -615,29 +619,21 @@ class RosFivebar:
     
 
     def SignalInput_callback (self, srvSignal):
-        #rospy.logwarn('A')
         rv = SrvSignalResponse()
         rv.success = False
         self.ptsToolRefExternal = srvSignal.pts #self.pattern.points[self.iPoint]
         try:
-            #rospy.logwarn('B')
             self.tfrx.waitForTransform('Stage', self.ptsToolRefExternal.header.frame_id, self.time, rospy.Duration(1.0))
-            #rospy.logwarn('C')
             self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
-            #rospy.logwarn('D')
-
+            
+            #rospy.logwarn('5B ptsToolRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y,self.ptsToolRefExternal.point.x,self.ptsToolRefExternal.point.y))
             try:
-                #rospy.logwarn('E')
                 self.speedCommandTool = self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
-                #rospy.logwarn('F')
                 rv.success = True
-                #rospy.logwarn ('pt(%d)=[%0.2f,%0.2f]'%(self.iCount,self.ptsToolRefExternal.point.x,self.ptsToolRefExternal.point.y))
             except AttributeError:
                 pass
-            #rospy.logwarn ('5B signal pt=%s' % [self.ptToolRef.x,self.ptToolRef.y])
         except tf.Exception:
             pass
-        #rospy.logwarn('G')
         self.iCount += 1
         return rv
 
@@ -756,7 +752,7 @@ class RosFivebar:
                 state.pose.orientation.y = qEE[1]
                 state.pose.orientation.z = qEE[2]
                 state.pose.orientation.w = qEE[3]
-                self.pubEndEffector.publish (state)
+                #self.pubEndEffector.publish (state)
                 #rospy.loginfo ('5B publish state=%s' % state)
             
         
@@ -812,6 +808,10 @@ class RosFivebar:
                                         "EndEffector",     # child
                                         "Stage"      # parent
                                         )
+                #rospy.logwarn((state.pose.position.x, state.pose.position.y, state.pose.position.z))
+                #rospy.logwarn(angle1+self.q1CenterE+angle3)
+                #rospy.logwarn((state.pose.orientation.x, state.pose.orientation.y, state.pose.orientation.z, state.pose.orientation.w))
+                
                 # Frame Target
                 if self.ptsToolRef is not None:
                     #rospy.logwarn('marker at [%0.2f,%0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y))
@@ -866,9 +866,9 @@ class RosFivebar:
                                                 points=[Point(x=state.pose.position.x, 
                                                               y=state.pose.position.y, 
                                                               z=state.pose.position.z),
-                                                        Point(x=state.pose.position.x+self.vecOffsetSense.x, 
-                                                              y=state.pose.position.y+self.vecOffsetSense.y, 
-                                                              z=state.pose.position.z+self.vecOffsetSense.z)])
+                                                        Point(x=state.pose.position.x-self.vecOffsetSense.x, 
+                                                              y=state.pose.position.y-self.vecOffsetSense.y, 
+                                                              z=state.pose.position.z-self.vecOffsetSense.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -879,40 +879,17 @@ class RosFivebar:
     def UpdateMotorCommandFromTarget(self):
         #rospy.loginfo ('5B ptToolRef=%s' % self.ptToolRef)
         if self.ptsToolRef is not None:
-            #self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
-            #self.radiusMovement = rospy.get_param('arena/radius_inner', 25.4)
-            
             # Clip the target point to the arena bounds.
             #self.ptToolRefClipped = self.ClipPtToRadius(self.ptsToolRefExternal.point)
 
             # Compute various vectors.
             self.ptContourSense.x = self.ptEeSense.x + self.vecOffsetSense.x
             self.ptContourSense.y = self.ptEeSense.y + self.vecOffsetSense.y
-            self.vecContourError.x = self.ptsToolRef.point.x - self.ptContourSense.x #- self.vecOffsetSense.x
-            self.vecContourError.y = self.ptsToolRef.point.y - self.ptContourSense.y #- self.vecOffsetSense.y
+            self.vecContourError.x = self.ptsToolRef.point.x - self.ptContourSense.x + 2*self.vecOffsetSense.x
+            self.vecContourError.y = self.ptsToolRef.point.y - self.ptContourSense.y + 2*self.vecOffsetSense.y
             #self.vecToolRefError.x = self.ptsToolRef.point.x - self.ptEeSense.x
             #self.vecToolRefError.y = self.ptsToolRef.point.y - self.ptEeSense.y
 
-            # Get the end-effector ref coordinates.
-            # Option A:
-            #ptRef = self.ScaleVecToMag(self.vecToolRefError, self.vecOffsetSense)
-            #self.ptEeRef.x = self.ptsToolRef.point.x+ptRef.x
-            #self.ptEeRef.y = self.ptsToolRef.point.y+ptRef.y
-
-            # Option B: works ok.
-            #kTest = rospy.get_param('fivebar/kTest', 0.0)
-            #self.ptEeRef.x = self.ptsToolRef.point.x - self.vecOffsetSense.x + kTest*self.vecContourError.x
-            #self.ptEeRef.y = self.ptsToolRef.point.y - self.vecOffsetSense.y + kTest*self.vecContourError.y
-
-            # Option C:
-            #ptRef = self.ScaleVecToMag(self.vecContourError, self.vecOffsetSense)
-            #self.ptEeRef.x = self.ptsToolRef.point.x + ptRef.x
-            #self.ptEeRef.y = self.ptsToolRef.point.y + ptRef.y
-
-            # Option D:
-            self.ptEeRef.x = self.ptsToolRef.point.x + self.vecOffsetSense.x# + vecRef.x
-            self.ptEeRef.y = self.ptsToolRef.point.y + self.vecOffsetSense.x# + vecRef.y
-            
             
             # PID Gains & Parameters.
             self.kP = rospy.get_param('fivebar/kP', 1.0)
@@ -920,7 +897,14 @@ class RosFivebar:
             self.kD = rospy.get_param('fivebar/kD', 0.0)
             self.maxI = rospy.get_param('fivebar/maxI', 40.0)
             self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
-
+            self.kAll = rospy.get_param('fivebar/kAll', 1.0)
+            
+            self.kP *= self.kAll
+            self.kI *= self.kAll
+            self.kD *= self.kAll
+            #self.maxI *= self.kAll
+            #self.kWindup *= self.kAll
+            
             # PID control of the end-effector error.
             #self.vecEeError.x = self.ptEeRef.x - self.ptEeSense.x
             #self.vecEeError.y = self.ptEeRef.y - self.ptEeSense.y
@@ -962,9 +946,10 @@ class RosFivebar:
             #self.vecEeErrorPrev.x = self.vecEeError.x 
             #self.vecEeErrorPrev.y = self.vecEeError.y 
             
-            # Get the command for the hardware.            
-            self.ptEeCommand.x = self.ptEeSense.x + vecPID.x #+ self.vecOffsetSense.x
-            self.ptEeCommand.y = self.ptEeSense.y + vecPID.y #+ self.vecOffsetSense.y
+            # Get the command for the hardware.
+            kOffset = 0.4 #rospy.get_param('fivebar/kOffset', 0.0)            
+            self.ptEeCommand.x = self.ptEeSense.x + vecPID.x - (kOffset*self.vecOffsetSense.x)
+            self.ptEeCommand.y = self.ptEeSense.y + vecPID.y - (kOffset*self.vecOffsetSense.y)
             
             self.vecEeErrorPrev.x = self.vecEeError.x 
             self.vecEeErrorPrev.y = self.vecEeError.y 
@@ -994,7 +979,7 @@ class RosFivebar:
             
             # Get the desired positions for each joint.
             (angle1,angle2,angle3,angle4) = self.Get1234FromXY(self.ptEeCommand.x, 
-                                               self.ptEeCommand.y)
+                                                               self.ptEeCommand.y)
             
     
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):
