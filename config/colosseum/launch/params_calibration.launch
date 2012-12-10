@@ -27,33 +27,33 @@
 
 
   <!-- These values come from CameraArena.launch, with a checkerboard on the arena. They might need fiddling with after use. -->
-  <param name="camera_arena_rvec_0" type="double" value="-3.131"/>
-  <param name="camera_arena_rvec_1" type="double" value="0.010"/>
-  <param name="camera_arena_rvec_2" type="double" value="-0.101"/>
-  <param name="camera_arena_tvec_0" type="double" value="124.156"/> <!-- Adjust for arena alignment here. -->
-  <param name="camera_arena_tvec_1" type="double" value="86.672"/> <!-- Adjust for arena alignment here. -->
-  <param name="camera_arena_tvec_2" type="double" value="348.670"/>
+  <param name="camera_arena_rvec_0" type="double" value="-3.100"/>
+  <param name="camera_arena_rvec_1" type="double" value="0.014"/>
+  <param name="camera_arena_rvec_2" type="double" value="-0.119"/>
+  <param name="camera_arena_tvec_0" type="double" value="121.832"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera_arena_tvec_1" type="double" value="84.397"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera_arena_tvec_2" type="double" value="351.322"/>
   
 
   <!-- ================================================================== -->
   <!-- Arena-to-Stage transform                                           -->
-  <!-- where you align the computed end-effector position with the visual -->
-  <!-- end-effector position.                                             -->
+  <!-- where you align the kinematic end-effector position with the       -->
+  <!-- visual end-effector position.                                      -->
   <!--                                                                    -->
   <!-- "roslaunch calibration StageArena.launch"                          -->
-  <!-- Then let it run until the "Translation Vector" and "Quaternion"    -->
+  <!-- Then let it run until the "Translation" and "Quaternion"           -->
   <!-- stabilize.  Then copy the translation & quaternion values to       -->
-  <!-- the "args" below, e.g.  as:  tx,ty,tz,qx,qy,qz,qw                  -->
+  <!-- the "args" below, e.g.  as:  x,y,z, qx,qy,qz,qw                    -->
   <!--                                                                    -->
   <!-- ================================================================== -->
   
-  <param name="arena_stage_x" type="double" value="5.65"/>  <!-- Adjust for stage alignment here. -->
-  <param name="arena_stage_y" type="double" value="-1.1"/>  <!-- Adjust for stage alignment here. -->
+  <param name="arena_stage_x" type="double" value="8.5"/>  <!-- Adjust for stage alignment here. -->
+  <param name="arena_stage_y" type="double" value="-3.4"/>  <!-- Adjust for stage alignment here. -->
   <param name="arena_stage_z" type="double" value="0.0"/>
   <param name="arena_stage_qx" type="double" value="0.0"/>
   <param name="arena_stage_qy" type="double" value="0.0"/>
-  <param name="arena_stage_qz" type="double" value="1.014"/>
-  <param name="arena_stage_qw" type="double" value="0.013"/>
+  <param name="arena_stage_qz" type="double" value="0.98"/>
+  <param name="arena_stage_qw" type="double" value="-0.02"/>
 
 
 </launch>

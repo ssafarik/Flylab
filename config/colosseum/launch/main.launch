@@ -8,6 +8,10 @@
     <!-- Don't launch this file directly.                           -->
     <!-- Launch hardware.launch, and point here from there.         -->
 	<!-- ========================================================== -->
+	
+	<include file="$(find LEDPanels)/launch/main.launch" />
+	<include file="$(find fivebar)/launch/fivebar.launch" />
+	<include file="$(find colosseum)/launch/camera.launch" />
 
 	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" /> 
 	<include file="$(find colosseum)/launch/params_calibration.launch" />
@@ -15,10 +19,6 @@
 	<include file="$(find colosseum)/launch/params_actuator.launch" />
 	<include file="$(find colosseum)/launch/params_ledpanels.launch" />
 
-	
-	<include file="$(find LEDPanels)/launch/main.launch" />
-	<include file="$(find fivebar)/launch/fivebar.launch" />
-	<include file="$(find colosseum)/launch/camera.launch" />
 </launch>
 	
 	

@@ -32,9 +32,9 @@ class Experiment():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = False
         
-        self.experimentparams.tracking.exclusionzones.enabled = False
-        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=70)]
-        self.experimentparams.tracking.exclusionzones.radius_list = [3.5]
+        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=70), Point(x=-75, y=25)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [3.5, 3.0]
         
         self.experimentparams.pre.robot.enabled = True
         self.experimentparams.pre.robot.move.mode = 'pattern'                      # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
@@ -123,7 +123,7 @@ class Experiment():
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
         self.experimentparams.trial.ledpanels.timeout = -1
 
-        self.experimentparams.post.trigger.enabled = True
+        self.experimentparams.post.trigger.enabled = False
         self.experimentparams.post.trigger.frameidParent = 'Fly1'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.speedAbsParentMin = 999.0
