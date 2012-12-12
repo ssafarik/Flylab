@@ -51,27 +51,20 @@
 	<param name="fivebar/kWindup" type="double" value="1.0"/>  
 	-->
 	<!--
-	<param name="fivebar/kP"      type="double" value="0.005"/>
-	<param name="fivebar/kI"      type="double" value="0.1"/>
-	<param name="fivebar/kD"      type="double" value="-0.15"/>
+	<param name="fivebar/kP"      type="double" value="1.0"/>
+	<param name="fivebar/kI"      type="double" value="0.0"/>
+	<param name="fivebar/kD"      type="double" value="0.0"/>
 	<param name="fivebar/maxI"    type="double" value="0.0"/>  
 	<param name="fivebar/kWindup" type="double" value="0.8"/>  
-	-->
+	 -->
 
-	<!-- -->
+	<!-- --> 
 	<param name="fivebar/kP"      type="double" value="0.2"/>
 	<param name="fivebar/kI"      type="double" value="0.4"/>
-	<param name="fivebar/kD"      type="double" value="0.4"/>
+	<param name="fivebar/kD"      type="double" value="0.2"/>
 	<param name="fivebar/maxI"    type="double" value="1.0"/>  
 	<param name="fivebar/kWindup" type="double" value="0.4"/>  
 	<!-- -->
-	<!-- 
-	<param name="fivebar/kP"      type="double" value="0.0"/>
-	<param name="fivebar/kI"      type="double" value="0.0"/>
-	<param name="fivebar/kD"      type="double" value="-0.0"/>
-	<param name="fivebar/maxI"    type="double" value="0.0"/>  
-	<param name="fivebar/kWindup" type="double" value="0.5"/>  
-	-->
 
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A'"/>
 	<node name="joint2" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint2' --id='0.0.B'"/>

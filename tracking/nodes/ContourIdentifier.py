@@ -252,8 +252,8 @@ class ContourIdentifier:
             response = self.ArenaFromCamera(contourinfolistsIn.x, contourinfolistsIn.y)
             contourinfolistsOut = copy.copy(contourinfolistsIn)
             contourinfolistsOut.header.frame_id = 'Arena'
-            contourinfolistsOut.x = response.Xdst
-            contourinfolistsOut.y = response.Ydst
+            contourinfolistsOut.x = response.xDst
+            contourinfolistsOut.y = response.yDst
     
         return contourinfolistsOut
       

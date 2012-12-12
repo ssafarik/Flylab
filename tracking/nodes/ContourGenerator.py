@@ -202,7 +202,7 @@ class ContourGenerator:
     
     def MmFromPixels (self, xIn):
         response = self.camera_from_arena(xIn, xIn)
-        return (response.Xdst, response.Ydst)
+        return (response.xDst, response.yDst)
         
         
     def PixelsFromMm (self, xIn):

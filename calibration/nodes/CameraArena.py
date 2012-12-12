@@ -108,7 +108,7 @@ class CalibrateCameraArena:
 
             self.pointsImage[iCorner][0] = x
             self.pointsImage[iCorner][1] = y
-            
+
 
     def DrawOriginAxes(self, cvimage, rvec, tvec):
         if self.camerainfo is not None:
@@ -157,19 +157,19 @@ class CalibrateCameraArena:
                 self.rvec = self.rvec.squeeze()
                 self.tvec = self.tvec.squeeze()
                 
-                angleRvec = N.linalg.norm(self.rvec)
-                R = tf.transformations.rotation_matrix(angleRvec, self.rvec)
+                (R,jacobian) = cv2.Rodrigues(self.rvec)
                 T = tf.transformations.translation_matrix(self.tvec)
                 
-                Wsub = N.zeros((3,3))
-                Wsub[:,:-1] = R[:-1,:-2]
-                Wsub[:,-1] = T[:-1,-1]
+                RT = N.zeros((3,3))
+                RT[:-1,:-1] = R[:-1,:-1]
+                RT[:,-1] = T[:-1,-1]
                 
-                M = N.reshape(self.camerainfo.K,[3,3])
-                M[:-1,-1] = 0
+                K = N.reshape(self.camerainfo.K,[3,3])
+                P = N.reshape(N.array(self.camerainfo.P),[3,4])
+                
                 
                 # H is/mightbe the transform from camera point to arena point.
-                Hinv = N.dot(M, Wsub)
+                Hinv = N.dot(K, RT)
                 Hinv = Hinv / Hinv[-1,-1]
                 H = N.linalg.inv(Hinv)
                 self.Hinv = Hinv
@@ -177,7 +177,7 @@ class CalibrateCameraArena:
                 
                 
                 self.tfbx.sendTransform(self.tvec,
-                                          tf.transformations.quaternion_about_axis(angleRvec, self.rvec),
+                                          tf.transformations.quaternion_about_axis(N.linalg.norm(self.rvec), self.rvec),
                                           self.stampImage,
                                           FRAME_CHECKERBOARD,
                                           FRAME_IMAGERECT)
@@ -231,7 +231,7 @@ class CalibrateCameraArena:
 
                 if (self.nMeasurements<10):
                     self.rvec2_avg = self.rvec2+self.sumWrap 
-                    self.tvec2_avg = self.tvec2 #N.array(self.tvec_array)
+                    self.tvec2_avg = self.tvec2 
                     self.rvec2_avg = (self.rvec2_avg+2*N.pi)%(4*N.pi) - 2*N.pi # On range [-2pi,+2pi]
                 self.nMeasurements += 1
                     
@@ -306,7 +306,7 @@ class CalibrateCameraArena:
                     cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                     yText += dyText
 
-                    display_text = "rvec cur=[%+0.3f, %+0.3f, %+0.3f] avg=[%0.3f, %0.3f, %0.3f]" % ((self.rvec2[0]+N.pi)%(2*N.pi)-N.pi,     
+                    display_text = "rvec cur=[%+3.3f, %+3.3f, %+3.3f] avg=[%3.3f, %3.3f, %3.3f]" % ((self.rvec2[0]+N.pi)%(2*N.pi)-N.pi,     
                                                                                                     (self.rvec2[1]+N.pi)%(2*N.pi)-N.pi,     
                                                                                                     (self.rvec2[2]+N.pi)%(2*N.pi)-N.pi,
                                                                                                     (self.rvec2_avg[0]+N.pi)%(2*N.pi)-N.pi, 
@@ -316,7 +316,7 @@ class CalibrateCameraArena:
                                (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                     yText += dyText
                     
-                    display_text = "tvec cur=[%+0.3f, %+0.3f, %+0.3f] avg=[%0.3f, %0.3f, %0.3f]" % (self.tvec2[0],     self.tvec2[1],     self.tvec2[2],
+                    display_text = "tvec cur=[%+3.3f, %+3.3f, %+3.3f] avg=[%3.3f, %3.3f, %3.3f]" % (self.tvec2[0],     self.tvec2[1],     self.tvec2[2],
                                                                                                     self.tvec2_avg[0], self.tvec2_avg[1], self.tvec2_avg[2])
                     cv2.putText(self.imgDisplay, display_text,
                                 (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
