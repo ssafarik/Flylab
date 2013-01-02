@@ -36,21 +36,21 @@ class DrawObjects:
         self.axis_length_arena = 4
         self.radiusMask = rospy.get_param('camera/mask/radius', 25)
 
-        Xsrc = [0, self.radiusArena, self.axis_length_arena]
-        Ysrc = [0, 0, 0]
+        xSrc = [0, self.radiusArena, self.axis_length_arena]
+        ySrc = [0, 0, 0]
 
         self.arena_origin_camera = PointStamped()
         self.arena_origin_camera.header.frame_id = "Camera"
-        response = self.camera_from_arena(Xsrc,Ysrc)
-        x0 = self.arena_origin_camera.point.x = response.Xdst[0]
-        y0 = self.arena_origin_camera.point.y = response.Ydst[0]
+        response = self.camera_from_arena(xSrc,ySrc)
+        x0 = self.arena_origin_camera.point.x = response.xDst[0]
+        y0 = self.arena_origin_camera.point.y = response.yDst[0]
 
         self.arena_point_camera = PointStamped()
         self.arena_point_camera.header.frame_id = "Camera"
-        x1 = self.arena_point_camera.point.x = response.Xdst[1]
-        y1 = self.arena_point_camera.point.y = response.Ydst[1]
-        x2 = response.Xdst[2]
-        y2 = response.Ydst[2]
+        x1 = self.arena_point_camera.point.x = response.xDst[1]
+        y1 = self.arena_point_camera.point.y = response.yDst[1]
+        x2 = response.xDst[2]
+        y2 = response.yDst[2]
         
         self.radiusMask = N.sqrt((x1-x0)**2 + (y1-y0)**2)
         self.axis_length_camera = N.sqrt((x2-x0)**2 + (y2-y0)**2)

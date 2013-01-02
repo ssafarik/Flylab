@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('arena_tf')
 import rospy
-import cv
+import cv2
 import numpy as N
 import tf
 from sensor_msgs.msg import Image, CameraInfo
@@ -35,10 +35,9 @@ class TransformServerArenaCamera:
 
     def CameraInfo_callback (self, camerainfo):
         if (self.initialized) and (self.camerainfo is None):
-            M = N.reshape(N.array(camerainfo.K),[3,3])
-            M[:-1,-1] = 0  # Zero the translation entries (1,3) and (2,3).
-    
-    
+            K = N.reshape(N.array(camerainfo.K),[3,3])
+            P = N.reshape(N.array(camerainfo.P),[3,4])
+            
             self.rvec[0] = rospy.get_param('/camera_arena_rvec_0')
             self.rvec[1] = rospy.get_param('/camera_arena_rvec_1')
             self.rvec[2] = rospy.get_param('/camera_arena_rvec_2')
@@ -46,16 +45,15 @@ class TransformServerArenaCamera:
             self.tvec[1] = rospy.get_param('/camera_arena_tvec_1')
             self.tvec[2] = rospy.get_param('/camera_arena_tvec_2')
     
-            angleRvec = N.linalg.norm(self.rvec)
-            R = tf.transformations.rotation_matrix(angleRvec, self.rvec) # 4x4
-            T = tf.transformations.translation_matrix(self.tvec)         # 4x4
+            (R,jacobian) = cv2.Rodrigues(self.rvec)
+            T = tf.transformations.translation_matrix(self.tvec)         # 4x4, for a 3D transform.
     
-            
-            self.Wsub = N.zeros((3,3))
-            self.Wsub[:,:-1] = R[:-1,:-2]
-            self.Wsub[:,-1] = T[:-1,-1]
+            # Make a 2D [R|T] transform.  Drop the Z coord.
+            RT = N.zeros((3,3))
+            RT[:-1,:-1] = R[:-1,:-1]
+            RT[:,-1] = T[:-1,-1]
     
-            self.Hinv = N.dot(M, self.Wsub)
+            self.Hinv = N.dot(K, RT)
             self.Hinv = self.Hinv / self.Hinv[-1,-1]
             try:
                 self.H = N.linalg.inv(self.Hinv)
@@ -67,7 +65,7 @@ class TransformServerArenaCamera:
 #            rospy.logwarn(M)
 #            rospy.logwarn(R)
 #            rospy.logwarn(T)
-#            rospy.logwarn(self.Wsub)
+#            rospy.logwarn(RT)
 #            rospy.logwarn(self.Hinv)
 #            rospy.logwarn(self.H)
         self.camerainfo = camerainfo
@@ -75,30 +73,37 @@ class TransformServerArenaCamera:
 
     def CameraFromArena_callback(self, req):
         if (self.camerainfo is not None):
-            point_count = min(len(req.Xsrc), len(req.Ysrc))
-            xSrc = list(req.Xsrc)
-            ySrc = list(req.Ysrc)
+            point_count = min(len(req.xSrc), len(req.ySrc))
+            xSrc = list(req.xSrc)
+            ySrc = list(req.ySrc)
             zSrc = [1]*point_count
             arena_points = N.array([xSrc, ySrc, zSrc])
-            camera_points = N.dot(self.Hinv, arena_points)
 
-            xDst = camera_points[0,:]
-            yDst = camera_points[1,:]
+            imagerect_points = N.dot(self.Hinv, arena_points)
+            #P = N.reshape(N.array(self.camerainfo.P),[3,4])
+            #Pinv = N.linalg.inv(P[0:3,0:3])
+            #imagerect_points = N.dot(Pinv, arena_points)
+
+            xDst = imagerect_points[0,:]
+            yDst = imagerect_points[1,:]
         else:
             xDst = None
             yDst = None
             
-        return {'Xdst': xDst,
-                'Ydst': yDst}
+        return {'xDst': xDst,
+                'yDst': yDst}
 
     def ArenaFromCamera_callback(self, req):
         if (self.camerainfo is not None):
-            point_count = min(len(req.Xsrc), len(req.Ysrc))
-            xSrc = list(req.Xsrc)
-            ySrc = list(req.Ysrc)
+            point_count = min(len(req.xSrc), len(req.ySrc))
+            xSrc = list(req.xSrc)
+            ySrc = list(req.ySrc)
             zSrc = [1]*point_count
-            camera_points = N.array([xSrc, ySrc, zSrc])
-            arena_points = N.dot(self.H, camera_points)
+            imagerect_points = N.array([xSrc, ySrc, zSrc])
+            
+            arena_points = N.dot(self.H, imagerect_points)
+            #P = N.reshape(N.array(self.camerainfo.P),[3,4])[0:3,0:3]
+            #arena_points = N.dot(P, imagerect_points)
     
             xDst = arena_points[0,:]
             yDst = arena_points[1,:]
@@ -106,8 +111,8 @@ class TransformServerArenaCamera:
             xDst = None
             yDst = None
             
-        return {'Xdst': xDst,
-                'Ydst': yDst}
+        return {'xDst': xDst,
+                'yDst': yDst}
         
 
     def SendTransforms(self):      

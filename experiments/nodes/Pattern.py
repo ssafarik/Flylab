@@ -64,13 +64,13 @@ class Experiment():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'pattern' # 'pattern' or 'relative'
-        self.experimentparams.trial.robot.move.pattern.shape = 'constant' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20  # Patterns per second.
-        self.experimentparams.trial.robot.move.pattern.hzPoint = 20 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
+        self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/30  # Patterns per second.
+        self.experimentparams.trial.robot.move.pattern.hzPoint = 60 #4/10 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the target.
         self.experimentparams.trial.robot.move.pattern.count = -1
-        self.experimentparams.trial.robot.move.pattern.size.x = 0
-        self.experimentparams.trial.robot.move.pattern.size.y = 0
-        self.experimentparams.trial.robot.move.timeout = 60 #self.experimentparams.trial.robot.move.pattern.count * (1.0/self.experimentparams.trial.robot.move.pattern.hzPattern)
+        self.experimentparams.trial.robot.move.pattern.size.x = 50
+        self.experimentparams.trial.robot.move.pattern.size.y = 50
+        self.experimentparams.trial.robot.move.timeout = 90 #self.experimentparams.trial.robot.move.pattern.count * (1.0/self.experimentparams.trial.robot.move.pattern.hzPattern)
         self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0

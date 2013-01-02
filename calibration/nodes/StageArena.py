@@ -453,8 +453,8 @@ class CalibrateStageArena():
     def PoseArenaFromImage(self, poseImage):
         response = self.ArenaFromCamera([poseImage.pose.position.x],[poseImage.pose.position.y])
         poseArena = Pose()
-        poseArena.position.x = response.Xdst[0]
-        poseArena.position.y = response.Ydst[0]
+        poseArena.position.x = response.xDst[0]
+        poseArena.position.y = response.yDst[0]
         
         return poseArena
     
@@ -464,7 +464,7 @@ class CalibrateStageArena():
     #
     def PointImageFromArena(self, pointArena):
         response = self.CameraFromArena([pointArena.x],[pointArena.y])
-        pointImage = Point(x=response.Xdst[0], y=response.Ydst[0])
+        pointImage = Point(x=response.xDst[0], y=response.yDst[0])
         
         return pointImage
     

@@ -30,25 +30,25 @@ class Experiment():
         self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = True
         self.experimentparams.save.bag = False
-        self.experimentparams.save.onlyWhileTriggered = False
+        self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.tracking.exclusionzones.enabled = True
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=70), Point(x=-75, y=25)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.5, 3.0]
         
         self.experimentparams.pre.robot.enabled = True
-        self.experimentparams.pre.robot.move.mode = 'pattern'                      # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
+        self.experimentparams.pre.robot.move.mode = 'pattern'                       # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
         self.experimentparams.pre.robot.move.relative.tracking = True               # True=update the target point continually.  False=the target point is set at the trigger time. 
         self.experimentparams.pre.robot.move.relative.frameidOriginPosition = "Fly1"
         self.experimentparams.pre.robot.move.relative.frameidOriginAngle = "Fly1"
-        self.experimentparams.pre.robot.move.relative.distance = 35                  # Distance to the target point from the origin frame's position.
+        self.experimentparams.pre.robot.move.relative.distance = 35                 # Distance to the target point from the origin frame's position.
         self.experimentparams.pre.robot.move.relative.angle = 0                     # Angle to the target point from the origin frame's x-axis.
         self.experimentparams.pre.robot.move.relative.angleType = 'random'          # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
-        self.experimentparams.pre.robot.move.relative.speed = 20                   # Speed at which to move the robot toward the target point. 
+        self.experimentparams.pre.robot.move.relative.speed = 20                    # Speed at which to move the robot toward the target point. 
         self.experimentparams.pre.robot.move.relative.speedType = 'constant'        # 'constant' or 'random'.  Use the given value, or a random frpre of it. 
         self.experimentparams.pre.robot.move.relative.tolerance = 2                 # When robot-to-target distance is within this tolerance, then the move is over.
         self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/6               # Patterns per second.
+        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/6                # Patterns per second.
         self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
         self.experimentparams.pre.robot.move.pattern.count = -1
         self.experimentparams.pre.robot.move.pattern.size.x = 10
@@ -98,7 +98,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.distance = 3                    # Distance to the target point from the origin frame's position.
         self.experimentparams.trial.robot.move.relative.angle = 0                       # Angle to the target point from the origin frame's x-axis.
         self.experimentparams.trial.robot.move.relative.angleType = 'random'            # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
-        self.experimentparams.trial.robot.move.relative.speed = 30                      # Speed at which to move the robot toward the target point. 
+        self.experimentparams.trial.robot.move.relative.speed = 20                      # Speed at which to move the robot toward the target point. 
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random frtrial of it. 
         self.experimentparams.trial.robot.move.relative.tolerance = 2                   # When robot-to-target distance is within this tolerance, then the move is over.
         self.experimentparams.trial.robot.move.timeout = -1                             # When this duration has passed, then the move is over.

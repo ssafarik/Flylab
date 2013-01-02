@@ -947,7 +947,7 @@ class RosFivebar:
             #self.vecEeErrorPrev.y = self.vecEeError.y 
             
             # Get the command for the hardware.
-            kOffset = 0.4 #rospy.get_param('fivebar/kOffset', 0.0)            
+            kOffset = rospy.get_param('fivebar/kOffset', 0.6)            
             self.ptEeCommand.x = self.ptEeSense.x + vecPID.x - (kOffset*self.vecOffsetSense.x)
             self.ptEeCommand.y = self.ptEeSense.y + vecPID.y - (kOffset*self.vecOffsetSense.y)
             
@@ -1026,7 +1026,7 @@ class RosFivebar:
         rospy.loginfo ('5B self.q1CenterEiz: %s, %s, %s' % (self.q1CenterE, self.q1CenterI, self.q1CenterZ))
         rospy.loginfo ('5B self.q2CenterEiz: %s, %s, %s' % (self.q2CenterE, self.q2CenterI, self.q2CenterZ))
         # Process messages forever.
-        rosrate = rospy.Rate(25)
+        rosrate = rospy.Rate(60)
 
         while not rospy.is_shutdown():
             self.time = rospy.Time.now()

@@ -1,5 +1,5 @@
-float64[] Xsrc
-float64[] Ysrc
+float64[] xSrc
+float64[] ySrc
 ---
-float64[] Xdst
-float64[] Ydst
+float64[] xDst
+float64[] yDst

@@ -26,13 +26,13 @@
 
 
 
-  <!-- These values come from CameraArena.launch, with a checkerboard on the arena. They might need fiddling with after use. -->
-  <param name="camera_arena_rvec_0" type="double" value="-3.100"/>
-  <param name="camera_arena_rvec_1" type="double" value="0.014"/>
-  <param name="camera_arena_rvec_2" type="double" value="-0.119"/>
-  <param name="camera_arena_tvec_0" type="double" value="121.832"/> <!-- Adjust for arena alignment here. -->
-  <param name="camera_arena_tvec_1" type="double" value="84.397"/> <!-- Adjust for arena alignment here. -->
-  <param name="camera_arena_tvec_2" type="double" value="351.322"/>
+  <!-- These values come from CameraArena.launch, with a checkerboard on the arena. -->
+  <param name="camera_arena_rvec_0" type="double" value="-3.10"/>
+  <param name="camera_arena_rvec_1" type="double" value="0.011"/>
+  <param name="camera_arena_rvec_2" type="double" value="-0.09"/>
+  <param name="camera_arena_tvec_0" type="double" value="-6"/> 
+  <param name="camera_arena_tvec_1" type="double" value="-8"/> 
+  <param name="camera_arena_tvec_2" type="double" value="337.874"/>
   
 
   <!-- ================================================================== -->
@@ -47,8 +47,9 @@
   <!--                                                                    -->
   <!-- ================================================================== -->
   
-  <param name="arena_stage_x" type="double" value="8.5"/>  <!-- Adjust for stage alignment here. -->
-  <param name="arena_stage_y" type="double" value="-3.4"/>  <!-- Adjust for stage alignment here. -->
+  <!-- These values come from StageArena.launch. -->
+  <param name="arena_stage_x" type="double" value="-1.6"/>
+  <param name="arena_stage_y" type="double" value="2.4"/> 
   <param name="arena_stage_z" type="double" value="0.0"/>
   <param name="arena_stage_qx" type="double" value="0.0"/>
   <param name="arena_stage_qy" type="double" value="0.0"/>
