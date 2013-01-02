@@ -7,7 +7,7 @@ filespec = 'getchased*.csv';
 
 filenames = GetFilenames(dirspec, filespec);
 nSubsample = 6;
-nPretrigger = 9999;
+nPretrigger = -1;
 
 for i=1:length(filenames) %[2 16 99 111 116] % 
     [filedata,iTrigger] = FlylabReadData(filenames{i}, nPretrigger); 
