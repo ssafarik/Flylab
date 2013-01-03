@@ -131,14 +131,14 @@ class Fly:
             self.angleOfTravelRecent = angleOfTravel
 
 
-    # GetNextFlipUpdate()
+    # GetNextFlipValue()
     #   Using self.contourinfo, self.state, and self.angleOfTravelRecent,
     #   we determine a value to use for updating the "flip" filter,
     #   which varies on [-1,+1], and the sign of which determines if to flip.
     #
     # Returns the chosen flip value.
     #   
-    def GetNextFlipUpdate(self):
+    def GetNextFlipValue(self):
         # Get the prior flip value.
         flipvalueMagPrev = self.lpFlip.GetValue()
         if flipvalueMagPrev is None:
@@ -177,13 +177,13 @@ class Fly:
                 flipvalueMag = 1.0
 
         
-        flipvalueUpdate = flipvalueSign * flipvalueMag
+        flipvalue = flipvalueSign * flipvalueMag
         
         #if 'Fly1' in self.name:
         #    rospy.logwarn('%s: flipvalue %0.2f, %0.2f, %0.2f' % (self.name, flipvalueMagPrev,flipvalueWeighted,flipvalueNew))
 
 
-        return flipvalueUpdate
+        return flipvalue
     
 
         
@@ -197,7 +197,7 @@ class Fly:
     #   
     def UpdateFlipState(self):
         # Update the flip filter.
-        flipvaluePre = self.GetNextFlipUpdate()
+        flipvaluePre = self.GetNextFlipValue()
             
         if (self.speed > self.speedThresholdForTravel):
             flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contourinfo.header.stamp.to_sec())
