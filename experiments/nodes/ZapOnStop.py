@@ -73,9 +73,10 @@ class Experiment():
         self.experimentparams.trial.lasertrack.statefilterHi_list = []
         self.experimentparams.trial.lasertrack.statefilterCriteria_list = []
         for iFly in range(2):#rospy.get_param('nFlies', 0)):
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                                                                            frameidPosition   = 'Fly%dForecast' % (iFly+1),
+                                                                            frameidAngle   = 'Fly%dForecast' % (iFly+1),
                                                                             shape      = 'grid',
-                                                                            frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,

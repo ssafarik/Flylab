@@ -1,6 +1,6 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the CHASE experiment.                     -->
+	<!-- Configuration of the GETCHASED experiment.                 -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- experiment.                                                -->
@@ -22,7 +22,7 @@
 	<include file="$(find flies)/launch/flygender_M.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="Chase.py" name="Experiment" required="true" />
+	<node pkg="experiments" type="GetChased.py" name="Experiment" required="true" />
 
 	
   

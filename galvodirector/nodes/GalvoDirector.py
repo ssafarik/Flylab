@@ -74,7 +74,7 @@ class GalvoDirector:
         self.arenastate = ArenaState()
         self.pointcloudtemplate_list = []
         self.pointcloud_list = []
-        self.frameid_list = []
+        self.frameidPosition_list = []
         self.units = 'millimeters'
         
         self.pointcloudBeamsink = PointCloud(header=Header(frame_id='Arena', 
@@ -94,9 +94,9 @@ class GalvoDirector:
 
 
     def Transform_callback(self, tr):
-        # If any of the frames in frameid_list are updated, then publish the pointcloud.
+        # If any of the frames in frameidPosition_list are updated, then publish the pointcloud.
         for x in tr.transforms:
-            if (x.child_frame_id in self.frameid_list):
+            if (x.child_frame_id in self.frameidPosition_list):
                 self.PublishPointcloud()
                 break
             #rospy.logwarn ('Transform_callback() dt=%0.5f' % (rospy.Time.now().to_sec()-self.timePrev))  # Some of these are slow, e.g. 0.08, 0.1
@@ -133,10 +133,10 @@ class GalvoDirector:
                 if len(command.pattern_list) > 0:
                     # Regenerate all the patterns requested.  This "template" is the computed points centered at (0,0).
                     self.pointcloudtemplate_list = []
-                    self.frameid_list = []
+                    self.frameidPosition_list = []
                     
                     for iPattern in range(len(command.pattern_list)):
-                        self.frameid_list.append(command.pattern_list[iPattern].frame_id) # Save all the target frames for the TF callback.
+                        self.frameidPosition_list.append(command.pattern_list[iPattern].frameidPosition) # Save all the target frames for the TF callback.
                         
                         # Compute pattern points, if necessary.
                         if len(command.pattern_list[iPattern].points)==0:
@@ -146,7 +146,7 @@ class GalvoDirector:
                             pattern = command.pattern_list[iPattern]
                         
                         # Store the pointcloud templates.
-                        self.pointcloudtemplate_list.append(self.PointCloudFromPoints(pattern.frame_id, pattern.points))
+                        self.pointcloudtemplate_list.append(self.PointCloudFromPoints(pattern.frameidPosition, pattern.points))
                     
                 self.PublishPointcloud()
 
@@ -296,7 +296,7 @@ class GalvoDirector:
     # PointCloudFromPoints()
     # Reformat the given points as a pointcloud.
     #
-    def PointCloudFromPoints(self, frame_id, points):            
+    def PointCloudFromPoints(self, frameidPosition, points): # BUG: add frameidAngle            
         points_xy = [] 
         intensity = []
         for i in range(len(points)):
@@ -309,7 +309,7 @@ class GalvoDirector:
             intensity[0] = 0.0   # Make sure laser is off when going to start of pattern.
         
 
-        pointcloud = PointCloud(header=Header(frame_id=frame_id, stamp=rospy.Time.now()),
+        pointcloud = PointCloud(header=Header(frame_id=frameidPosition, stamp=rospy.Time.now()),
                                 points=points_xy,
                                 channels=[ChannelFloat32(name='intensity',
                                                          values=intensity),])

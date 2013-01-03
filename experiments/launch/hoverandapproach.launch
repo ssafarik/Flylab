@@ -1,12 +1,9 @@
 <launch>
-	<!-- ========================================================== -->
-	<!-- Configuration of the CHASE experiment.                     -->
-    <!--                                                            -->
-    <!-- Edit this file to contain the elements of the particular   -->
-    <!-- experiment.                                                -->
+    <!-- ========================================================== -->
+    <!-- Configuration of the HoverAndApproach experiment.          -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments chase.launch                         -->
+    <!-- roslaunch experiments hoverandapproach.launch              -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 
@@ -22,8 +19,7 @@
 	<include file="$(find flies)/launch/flygender_M.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="Chase.py" name="Experiment" required="true" />
-
-	
+	<param name="fivebar/speed_max" type="double" value="20.0"/>
+	<node pkg="experiments" type="HoverAndApproach.py" name="Experiment" required="true" />
   
 </launch>

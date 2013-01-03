@@ -52,7 +52,7 @@ class Fly:
         # Orientation detection stuff.
         self.angleOfTravelRecent = 0.0
         self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterFlip', 3.0))
-        self.lpFlip.SetValue(0.0)
+        self.lpFlip.SetValue(0.0) # (0.5) TEST
         self.contourinfo = None
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
         self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterSpeed', 0.2))
@@ -101,7 +101,7 @@ class Fly:
         self.robot_length = rospy.get_param ('robot/length', 1.0)
         self.robot_height = rospy.get_param ('robot/height', 1.0)
         
-        rospy.logwarn('Fly() object added, name=%s' % name)
+        rospy.logwarn('FLY object added, name=%s' % name)
         self.timePrev = rospy.Time.now().to_sec()
         self.theta = 0.0
         self.initialized = True
@@ -200,13 +200,15 @@ class Fly:
         flipvaluePre = self.GetNextFlipValue()
             
         if (self.speed > self.speedThresholdForTravel):
+            flipvaluePre = self.GetNextFlipUpdate()
             flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contourinfo.header.stamp.to_sec())
                 
-        # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
-        d = N.abs(CircleFunctions.circle_dist(self.lpAngleContour.GetValue(), self.angleContourPrev))
-        if (d > (N.pi/2.0)):
-            self.lpFlip.SetValue(-self.lpFlip.GetValue())
+            # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
+            d = N.abs(CircleFunctions.circle_dist(self.lpAngleContour.GetValue(), self.angleContourPrev))
+            if (d > (N.pi/2.0)):
+                self.lpFlip.SetValue(-self.lpFlip.GetValue())
 
+            
 
     def GetResolvedAngle(self):
         angleF = self.lpAngleContour.GetValue()
@@ -216,6 +218,8 @@ class Fly:
         else:
             angleResolved = angleF
 
+        #if 'Fly' in self.name:
+        #    rospy.logwarn('flip=%0.1f, angleF=%0.2f, GetResolvedAngle()=%0.2f' % (self.lpFlip.GetValue(), angleF, angleResolved))
 
         return angleResolved
             
@@ -233,6 +237,7 @@ class Fly:
             if (self.contourinfo.x is not None) and \
                (self.contourinfo.y is not None) and \
                (self.contourinfo.angle is not None) and \
+               (not N.isnan(self.contourinfo.angle)) and \
                (self.contourinfo.area is not None) and \
                (self.contourinfo.ecc is not None):
                 # Update min/max ecc & area.
@@ -253,7 +258,10 @@ class Fly:
                 (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contourinfo.x, self.contourinfo.y), contourinfo.header.stamp.to_sec())
                 (zKalman, vzKalman) = (0.0, 0.0)
                 #(x,y) = (self.contourinfo.x,self.contourinfo.y) # Unfiltered.
-                self.lpAngleContour.Update(self.contourinfo.angle, contourinfo.header.stamp.to_sec())#self.contourinfo.header.stamp.to_sec())
+                zf = self.lpAngleContour.Update(self.contourinfo.angle, contourinfo.header.stamp.to_sec())#self.contourinfo.header.stamp.to_sec())
+                #if 'Fly' in self.name:
+                #    rospy.logwarn('zf=%0.2f, lpFlip=%0.2f' % (zf, self.lpFlip.GetValue()))
+                
                 
                 
                 if N.abs(self.contourinfo.x)>9999 or N.abs(xKalman)>9999:
@@ -275,7 +283,7 @@ class Fly:
                 vy = vyKalman
                 vz = vzKalman
             else: # Use the unfiltered data for the case where the filters return None results.
-                rospy.logwarn('Object %s not yet initialized at %s, %s' % (self.name, contourinfo.header.stamp.to_sec(), [self.contourinfo.x, self.contourinfo.y]))
+                rospy.logwarn('FLY Object %s not yet initialized at %s, %s' % (self.name, contourinfo.header.stamp.to_sec(), [self.contourinfo.x, self.contourinfo.y]))
                 x = 0.0#self.contourinfo.x
                 y = 0.0#self.contourinfo.y
                 z = 0.0
@@ -332,42 +340,42 @@ class Fly:
                 posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
                 ptComputed = posesComputed.pose.position
                 
-                marker = Marker(header=Header(stamp=rospy.Time.now(),
-                                                    frame_id='Arena'),
-                                      ns='posKalman',
-                                      id=4,
-                                      type=Marker.SPHERE,
-                                      action=0,
-                                      pose=Pose(position=Point(x=x, 
-                                                               y=y, 
-                                                               z=z)),
-                                      scale=Vector3(x=3.0,
-                                                    y=3.0,
-                                                    z=3.0),
-                                      color=ColorRGBA(a=0.5,
-                                                      r=0.5,
-                                                      g=0.5,
-                                                      b=0.5),
-                                      lifetime=rospy.Duration(1.0))
-                self.pubMarker.publish(marker)
-                marker = Marker(header=Header(stamp=rospy.Time.now(),
-                                                    frame_id='Arena'),
-                                      ns='posComputed',
-                                      id=5,
-                                      type=Marker.SPHERE,
-                                      action=0,
-                                      pose=Pose(position=Point(x=ptComputed.x, 
-                                                               y=ptComputed.y, 
-                                                               z=ptComputed.z)),
-                                      scale=Vector3(x=3.0,
-                                                    y=3.0,
-                                                    z=3.0),
-                                      color=ColorRGBA(a=0.5,
-                                                      r=0.1,
-                                                      g=0.1,
-                                                      b=1.0),
-                                      lifetime=rospy.Duration(1.0))
-                self.pubMarker.publish(marker)
+#                marker = Marker(header=Header(stamp=rospy.Time.now(),
+#                                                    frame_id='Arena'),
+#                                      ns='posKalman',
+#                                      id=4,
+#                                      type=Marker.SPHERE,
+#                                      action=0,
+#                                      pose=Pose(position=Point(x=x, 
+#                                                               y=y, 
+#                                                               z=z)),
+#                                      scale=Vector3(x=3.0,
+#                                                    y=3.0,
+#                                                    z=3.0),
+#                                      color=ColorRGBA(a=0.5,
+#                                                      r=0.5,
+#                                                      g=0.5,
+#                                                      b=0.5),
+#                                      lifetime=rospy.Duration(1.0))
+#                self.pubMarker.publish(marker)
+#                marker = Marker(header=Header(stamp=rospy.Time.now(),
+#                                                    frame_id='Arena'),
+#                                      ns='posComputed',
+#                                      id=5,
+#                                      type=Marker.SPHERE,
+#                                      action=0,
+#                                      pose=Pose(position=Point(x=ptComputed.x, 
+#                                                               y=ptComputed.y, 
+#                                                               z=ptComputed.z)),
+#                                      scale=Vector3(x=3.0,
+#                                                    y=3.0,
+#                                                    z=3.0),
+#                                      color=ColorRGBA(a=0.5,
+#                                                      r=0.1,
+#                                                      g=0.1,
+#                                                      b=1.0),
+#                                      lifetime=rospy.Duration(1.0))
+#                self.pubMarker.publish(marker)
 
                 # The offset.
                 xOffset = x-ptComputed.x
@@ -395,7 +403,7 @@ class Fly:
 
                 
             # Send the Raw transform.
-            if self.isVisible:
+            if self.isVisible and (not N.isnan(self.contourinfo.angle)):
                 self.tfbx.sendTransform((self.contourinfo.x, 
                                          self.contourinfo.y, 
                                          0.0),

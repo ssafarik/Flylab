@@ -196,9 +196,9 @@ class GalvoCalibrator:
     
     def SendInputPoints(self):
         pattern = MsgPattern()
-        pattern.mode       = 'bypoints'
-        pattern.shape      = 'constant'
-        pattern.frame_id   = 'Arena'
+        pattern.frameidPosition = 'Arena'
+        pattern.frameidAngle    = 'Arena'
+        pattern.shape      = 'bypoints'
         pattern.hzPattern  = 1.0
         pattern.hzPoint    = 100.0
         pattern.count      = 1
@@ -207,6 +207,7 @@ class GalvoCalibrator:
         pattern.size.y     = 20.0
         pattern.preempt    = False
         pattern.param      = 0.0
+        pattern.direction  = 1
     
         command = MsgGalvoCommand()
         command.pattern_list = [pattern,]
@@ -216,9 +217,9 @@ class GalvoCalibrator:
 
     def SendPoint(self, point):
         pattern = MsgPattern()
-        pattern.mode       = 'bypoints'
-        pattern.shape      = 'constant'
-        pattern.frame_id   = 'Arena'
+        pattern.frameidPosition = 'Arena'
+        pattern.frameidAngle    = 'Arena'
+        pattern.shape      = 'bypoints'
         pattern.hzPattern  = 1.0
         pattern.hzPoint    = 100.0
         pattern.count      = 1
@@ -227,6 +228,7 @@ class GalvoCalibrator:
         pattern.size.y     = 0.0
         pattern.preempt    = False
         pattern.param      = 0.0
+        pattern.direction  = 1
     
         command = MsgGalvoCommand()
         command.enable_laser = True

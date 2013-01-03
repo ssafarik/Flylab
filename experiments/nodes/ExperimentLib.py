@@ -67,6 +67,22 @@ def GetAngleFrame (arenastate, frameid):
     return angle
 
 
+def GetAngleFrameToFrame (frameidParent, frameidChild):
+    angleToChild = None
+    try:
+        stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
+        pointC = PointStamped(header=Header(frame_id=frameidChild, stamp=stamp),
+                              point=Point(x=0.0, y=0.0, z=0.0))
+        pointP = g_tfrx.transformPoint(frameidParent, pointC)
+    except tf.Exception, e:
+        #rospy.logwarn('Exception in GetFrameToFrame():  %s' % e)
+        pass
+    else:
+        angleToChild = N.arctan2(pointP.point.y, pointP.point.x) % (2.0*N.pi)
+        
+    return angleToChild
+
+
 def GetPositionFrame (arenastate, frameid):
     stamp = arenastate.robot.header.stamp
     if len(arenastate.flies)>0:
@@ -145,10 +161,10 @@ def ClipXyToRadius(x, y, rmax):
     r = N.sqrt(x*x + y*y)
     
     xOut,yOut = x,y
-    if (rmax*0.8) < r:
+    if (rmax < r):
         angle = N.arctan2(y, x)
-        xOut = (rmax*0.8) * N.cos(angle)
-        yOut = (rmax*0.8) * N.sin(angle)
+        xOut = rmax * N.cos(angle)
+        yOut = rmax * N.sin(angle)
         #rospy.loginfo('EL CLIPPING x,y=%s to %s' % ([x,y],[xOut,yOut]))
         
     return [xOut,yOut]
@@ -308,12 +324,12 @@ class ResetHardware (smach.State):
             self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
             self.action.wait_for_server()
             self.goal = ActionStageStateGoal()
-            self.set_stage_state = None
+            self.SetStageState = None
             self.timeStart = rospy.Time.now()
     
             rospy.wait_for_service('set_stage_state')
             try:
-                self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
+                self.SetStageState = rospy.ServiceProxy('set_stage_state', SrvFrameState)
             except rospy.ServiceException, e:
                 print "Service call failed: %s"%e
             
@@ -336,9 +352,9 @@ class ResetHardware (smach.State):
             #self.goal.state.header.stamp = rospy.Time.now()
             self.goal.state.pose.position.x = userdata.experimentparamsIn.trial.robot.home.x
             self.goal.state.pose.position.y = userdata.experimentparamsIn.trial.robot.home.y
-            self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                          pose=self.goal.state.pose),
-                                                      speed = userdata.experimentparamsIn.trial.robot.home.speed))
+            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+                                                                        pose=self.goal.state.pose),
+                                                    speed = userdata.experimentparamsIn.trial.robot.home.speed))
 
             rv = 'aborted'
             while not rospy.is_shutdown():
@@ -359,7 +375,7 @@ class ResetHardware (smach.State):
                 
                 
                 if self.preempt_requested():
-                    rospy.logwarn('preempt requested: ResetRobot()')
+                    rospy.loginfo('preempt requested: ResetRobot()')
                     self.service_preempt()
                     rv = 'preempt'
                     break
@@ -565,21 +581,6 @@ class TriggerOnStates (smach.State):
         return distance
 
 
-    def GetAngleFrameToFrame (self, frameidParent, frameidChild):
-        angleToChild = None
-        try:
-            stamp = g_tfrx.getLatestCommonTime(frameidParent, frameidChild)
-            pointC = PointStamped(header=Header(frame_id=frameidChild, stamp=stamp),
-                                  point=Point(x=0.0, y=0.0, z=0.0))
-            pointP = g_tfrx.transformPoint(frameidParent, pointC)
-        except tf.Exception:
-            pass
-        else:
-            angleToChild = N.arctan2(pointP.point.y, pointP.point.x) % (2.0*N.pi)
-            
-        return angleToChild
-
-
     def GetSpeedFrameToFrame (self, frameidParent, frameidChild):
         speed = None
         
@@ -649,7 +650,7 @@ class TriggerOnStates (smach.State):
                 # Test for angle.
                 isAngleInRange = True
                 if (trigger.angleMin is not None) and (trigger.angleMax is not None):
-                    angle = self.GetAngleFrameToFrame(trigger.frameidParent, trigger.frameidChild)
+                    angle = GetAngleFrameToFrame(trigger.frameidParent, trigger.frameidChild)
                     
                     angleA1 = trigger.angleMin % (2.0*N.pi)
                     angleA2 = trigger.angleMax % (2.0*N.pi)
@@ -741,7 +742,7 @@ class TriggerOnStates (smach.State):
 
                     
                 if self.preempt_requested():
-                    rospy.logwarn('preempt requested: TriggerOnStates()')
+                    rospy.loginfo('preempt requested: TriggerOnStates()')
                     self.service_preempt()
                     rv = 'preempt'
                     break
@@ -825,7 +826,8 @@ class TriggerOnTime (smach.State):
 #######################################################################################################
 class MoveRobot (smach.State):
     def __init__(self, mode='trial'):
-
+        global g_tfrx
+        
         smach.State.__init__(self, 
                              outcomes=['success','disabled','timeout','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
@@ -836,12 +838,15 @@ class MoveRobot (smach.State):
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
-        self.pubPatternGen = rospy.Publisher('SetSignalGen', MsgPattern, latch=True)
+        self.pubPatternGen = rospy.Publisher('SetPattern', MsgPattern, latch=True)
+
+        if g_tfrx is None:
+            g_tfrx = tf.TransformListener()
 
         self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
         self.action.wait_for_server()
         self.goal = ActionStageStateGoal()
-        self.set_stage_state = None
+        self.SetStageState = None
 
         self.radiusMovement = float(rospy.get_param("arena/radius_inner","25.4"))
         
@@ -882,7 +887,7 @@ class MoveRobot (smach.State):
             rv = 'aborted'
             rospy.wait_for_service('set_stage_state')
             try:
-                self.set_stage_state = rospy.ServiceProxy('set_stage_state', SrvFrameState)
+                self.SetStageState = rospy.ServiceProxy('set_stage_state', SrvFrameState)
             except rospy.ServiceException, e:
                 print "Service call failed: %s"%e
             
@@ -894,7 +899,7 @@ class MoveRobot (smach.State):
                         return 'timeout'
                 
                 if self.preempt_requested():
-                    rospy.logwarn('preempt requested: MoveRobot()')
+                    rospy.loginfo('preempt requested: MoveRobot()')
                     self.service_preempt()
                     return 'preempt'
                 
@@ -951,6 +956,14 @@ class MoveRobot (smach.State):
                     angleBase = GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
                     angleRel = self.paramsIn.robot.move.relative.angle
                 # else we already computed the angle.
+
+            elif (self.paramsIn.robot.move.relative.angleType=='current'):
+                if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
+                    angleBase = GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
+                    angleRel = GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOriginAngle, 'Robot')
+                    if (angleRel is None):
+                        angleRel = 0.0
+                # else we already computed the angle.
                 
             else:
                 rospy.logwarn ('EL, unknown robot.move.relative.angleType: %s' % self.paramsIn.robot.move.relative.angleType)
@@ -991,9 +1004,9 @@ class MoveRobot (smach.State):
                     #rospy.logwarn (self.ptTarget)
                     try:
                         if (doMove):
-                            self.set_stage_state(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                                          pose=self.goal.state.pose),
-                                                                      speed = speedTarget))
+                            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
+                                                                                        pose=self.goal.state.pose),
+                                                                    speed = speedTarget))
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException), e:
                         rospy.logwarn ('EL Exception calling set_stage_state(): %s' % e)
                         self.ptTarget = None
@@ -1009,7 +1022,7 @@ class MoveRobot (smach.State):
 
             
             if self.preempt_requested():
-                rospy.logwarn('preempt requested: MoveRelative()')
+                rospy.loginfo('preempt requested: MoveRelative()')
                 self.service_preempt()
                 rv = 'preempt'
                 break
@@ -1037,10 +1050,10 @@ class MoveRobot (smach.State):
         msgPattern = MsgPattern()
 
         # Publish the pattern message.
-        msgPattern.mode = 'byshape'
         msgPattern.shape = self.paramsIn.robot.move.pattern.shape
         msgPattern.points = []
-        msgPattern.frame_id = 'Arena'
+        msgPattern.frameidPosition = self.paramsIn.robot.move.pattern.frameidPosition
+        msgPattern.frameidAngle = self.paramsIn.robot.move.pattern.frameidAngle
         msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
         msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
         msgPattern.count = self.paramsIn.robot.move.pattern.count
@@ -1053,7 +1066,7 @@ class MoveRobot (smach.State):
         rv = 'aborted'
         while not rospy.is_shutdown():
             if self.preempt_requested():
-                rospy.logwarn('preempt requested: MovePattern()')
+                rospy.loginfo('preempt requested: MovePattern()')
                 self.service_preempt()
                 rv = 'preempt'
                 break
@@ -1071,10 +1084,10 @@ class MoveRobot (smach.State):
                 break
 
         # Turn off the pattern
-        msgPattern.mode = 'byshape'
         msgPattern.shape = self.paramsIn.robot.move.pattern.shape
         msgPattern.points = []
-        msgPattern.frame_id = 'Arena'
+        msgPattern.frameidPosition = self.paramsIn.robot.move.pattern.frameidPosition
+        msgPattern.frameidAngle = self.paramsIn.robot.move.pattern.frameidAngle
         msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
         msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
         msgPattern.count = 0
@@ -1353,14 +1366,14 @@ class Lasertrack (smach.State):
                         velocity = None     
                         speed = None   
                         if self.arenastate is not None:
-                            if ('Robot' in pattern.frame_id):
+                            if ('Robot' in pattern.frameidPosition):
                                 #pose = self.arenastate.robot.pose  # For consistency w/ galvodirector, we'll get pose via transform.
                                 velocity = self.arenastate.robot.velocity
                                 speed = self.arenastate.robot.speed
                                 
-                            elif ('Fly' in pattern.frame_id):
+                            elif ('Fly' in pattern.frameidPosition):
                                 for iFly in range(len(self.arenastate.flies)):
-                                    if pattern.frame_id == self.arenastate.flies[iFly].name:
+                                    if pattern.frameidPosition == self.arenastate.flies[iFly].name:
                                         #pose = self.arenastate.flies[iFly].pose  # For consistency w/ galvodirector, we'll get pose via transform.
                                         velocity = self.arenastate.flies[iFly].velocity
                                         speed = self.arenastate.flies[iFly].speed
@@ -1370,16 +1383,16 @@ class Lasertrack (smach.State):
                         stamp=None
                         if (pose is None) or (velocity is None):
                             try:
-                                stamp = g_tfrx.getLatestCommonTime('Arena', pattern.frame_id)
+                                stamp = g_tfrx.getLatestCommonTime('Arena', pattern.frameidPosition)
                             except tf.Exception:
                                 pass
 
                             
                         # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                        if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Arena', pattern.frame_id, stamp):
+                        if (pose is None) and (stamp is not None) and g_tfrx.canTransform('Arena', pattern.frameidPosition, stamp):
                             try:
                                 poseStamped = g_tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
-                                                                                                      frame_id=pattern.frame_id),
+                                                                                                      frame_id=pattern.frameidPosition),
                                                                                         pose=Pose(position=Point(0,0,0),
                                                                                                   orientation=Quaternion(0,0,0,1)
                                                                                                   )
@@ -1391,9 +1404,9 @@ class Lasertrack (smach.State):
 
                                 
                         # If we still need the velocity, then get it from ROS.
-                        if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Arena', pattern.frame_id, stamp):
+                        if (velocity is None) and (stamp is not None) and g_tfrx.canTransform('Arena', pattern.frameidPosition, stamp):
                             try:
-                                velocity_tuple = g_tfrx.lookupTwist('Arena', pattern.frame_id, stamp, self.dtVelocity)
+                                velocity_tuple = g_tfrx.lookupTwist('Arena', pattern.frameidPosition, stamp, self.dtVelocity)
                             except tf.Exception:
                                 velocity = None
                             else:
@@ -1445,7 +1458,7 @@ class Lasertrack (smach.State):
                 
                 
                 if self.preempt_requested():
-                    rospy.logwarn('preempt requested: Lasertrack()')
+                    rospy.loginfo('preempt requested: Lasertrack()')
                     self.service_preempt()
                     rv = 'preempt'
                     break
@@ -1878,7 +1891,7 @@ class LEDPanels (smach.State):
                         
             
                 if self.preempt_requested():
-                    rospy.logwarn('preempt requested: LEDPanels()')
+                    rospy.loginfo('preempt requested: LEDPanels()')
                     self.service_preempt()
                     rv = 'preempt'
                     break

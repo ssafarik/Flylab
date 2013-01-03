@@ -73,17 +73,18 @@ class ExperimentZapOnTurn():
         self.experimentparams.trial.lasertrack.statefilterHi_list = []
         self.experimentparams.trial.lasertrack.statefilterCriteria_list = []
         for iFly in range(rospy.get_param('nFlies', 0)):
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
-                                                                            shape      = 'grid',
-                                                                            frame_id   = 'Fly%dForecast' % (iFly+1),
-                                                                            hzPattern  = 40.0,
-                                                                            hzPoint    = 1000.0,
-                                                                            count      = 1,
-                                                                            size       = Point(x=2,
-                                                                                               y=2),
-                                                                            preempt    = False,
-                                                                            param      = 3), # Peano curve level.
-                                                                 )
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                                                                                frameidPosition   = 'Fly%dForecast' % (iFly+1),
+                                                                                frameidAngle   = 'Fly%dForecast' % (iFly+1),
+                                                                                shape      = 'grid',
+                                                                                hzPattern  = 40.0,
+                                                                                hzPoint    = 1000.0,
+                                                                                count      = 1,
+                                                                                size       = Point(x=2,
+                                                                                                   y=2),
+                                                                                preempt    = False,
+                                                                                param      = 3), # Peano curve level.
+                                                                                )
             #self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'speed':5.0}")
             #self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'speed':0.0}")
             #self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'velocity':{'linear':{'x':+6,'y':+6}}}")

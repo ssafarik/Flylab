@@ -32,7 +32,7 @@ class CalibrateStageArena():
         self.subCameraInfo          = rospy.Subscriber('camera/camera_info', CameraInfo,       self.CameraInfo_callback)
         self.subImage               = rospy.Subscriber('camera/image_rect',  Image,            self.Image_callback)
         self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists',   ContourinfoLists, self.ContourinfoLists_callback)
-        self.pubPatternGen          = rospy.Publisher('SetSignalGen',        MsgPattern, latch=True)
+        self.pubSetPattern          = rospy.Publisher('SetPattern',          MsgPattern, latch=True)
 
         self.camerainfo = None
         
@@ -121,17 +121,17 @@ class CalibrateStageArena():
     def OnShutdown_callback(self):
         if self.initialized:
             msgPattern = MsgPattern()
-            msgPattern.mode = 'byshape'
             msgPattern.shape = 'constant'
             msgPattern.points = []
-            msgPattern.frame_id = 'Stage'
+            msgPattern.frameidPosition = 'Stage'
+            msgPattern.frameidAngle = 'Stage'
             msgPattern.hzPattern = 1.0
             msgPattern.hzPoint = 100
             msgPattern.count = 1
             msgPattern.size = Point(x=0,y=0)
             msgPattern.preempt = True
             msgPattern.param = 0
-            self.pubPatternGen.publish (msgPattern)
+            self.pubSetPattern.publish (msgPattern)
         
     
     def CameraInfo_callback (self, msgCameraInfo):
@@ -474,48 +474,48 @@ class CalibrateStageArena():
         msgPattern = MsgPattern()
 
         # Publish a goto(0,0) pattern message, and wait for the end effector to initialize.
-        msgPattern.mode = 'byshape'
+        msgPattern.frameidPosition = 'Stage'
+        msgPattern.frameidAngle = 'Stage'
         msgPattern.shape = 'constant'
-        msgPattern.points = []
-        msgPattern.frame_id = 'Stage'
         msgPattern.hzPattern = 1.0
         msgPattern.hzPoint = rospy.get_param('actuator/hzPoint', 100.0)
         msgPattern.count = 1
         msgPattern.size = Point(x=0,y=0)
+        msgPattern.points = []
         msgPattern.preempt = True
         msgPattern.param = 0
-        self.pubPatternGen.publish (msgPattern)
+        self.pubSetPattern.publish (msgPattern)
         rospy.sleep(2)
         self.initialized = True
 
         # Publish the spiral pattern message.
-        msgPattern.mode = 'byshape'
+        msgPattern.frameidPosition = 'Stage'
+        msgPattern.frameidAngle = 'Stage'
         msgPattern.shape = rospy.get_param('calibration/shape', 'spiral')
-        msgPattern.points = []
-        msgPattern.frame_id = 'Stage'
         msgPattern.count = -1
         msgPattern.size = Point(x=0.7 * rospy.get_param('arena/radius_inner', 25.4), y=0)
+        msgPattern.points = []
         msgPattern.preempt = True
         msgPattern.param = 0
         if msgPattern.shape=='spiral':
             msgPattern.hzPattern = 0.008
         else:
             msgPattern.hzPattern = 0.1
-        self.pubPatternGen.publish (msgPattern)
+        self.pubSetPattern.publish (msgPattern)
 
         rospy.spin()
         
         # Publish a goto(0,0) pattern message.
-        msgPattern.mode = 'byshape'
+        msgPattern.frameidPosition = 'Stage'
+        msgPattern.frameidAngle = 'Stage'
         msgPattern.shape = 'constant'
-        msgPattern.points = []
-        msgPattern.frame_id = 'Stage'
         msgPattern.hzPattern = 1.0
         msgPattern.count = 1
         msgPattern.size = Point(x=0,y=0)
+        msgPattern.points = []
         msgPattern.preempt = True
         msgPattern.param = 0
-        self.pubPatternGen.publish (msgPattern)
+        self.pubSetPattern.publish (msgPattern)
     
     
 

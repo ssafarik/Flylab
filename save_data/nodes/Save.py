@@ -491,7 +491,7 @@ class Save:
                 with self.lockArenastate:
                     if (self.fid is not None) and (not self.fid.closed):
                         self.fid.close()
-                    rospy.logwarn('SA logfile close()')
+                        rospy.logwarn('SA logfile close()')
                     
                 # Determine if we should be saving.
                 if (self.saveOnlyWhileTriggered):

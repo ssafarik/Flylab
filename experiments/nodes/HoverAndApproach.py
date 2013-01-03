@@ -13,6 +13,7 @@ from patterngen.msg import MsgPattern
 
 
 
+
 #######################################################################################################
 class Experiment():
     def __init__(self):
@@ -21,11 +22,11 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Chase or get chased"
+        self.experimentparams.experiment.description = "Hover and Approach"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "chase"
+        self.experimentparams.save.filenamebase = "hoverapproach"
         self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
@@ -35,48 +36,70 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
-        self.experimentparams.pre.robot.enabled = False
+        self.experimentparams.pre.robot.enabled = True
+        self.experimentparams.pre.robot.move.mode = 'pattern'                       # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
+        self.experimentparams.pre.robot.move.pattern.frameidPosition = 'Fly1Forecast'
+        self.experimentparams.pre.robot.move.pattern.frameidAngle = 'Arena'
+        self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/60                # Patterns per second.
+        self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
+        self.experimentparams.pre.robot.move.pattern.count = -1
+        self.experimentparams.pre.robot.move.pattern.size.x = 40
+        self.experimentparams.pre.robot.move.pattern.size.y = 0
+        self.experimentparams.pre.robot.move.pattern.direction = 1
+        self.experimentparams.pre.robot.move.timeout = -1                             # When this duration has passed, then the move is over.
         self.experimentparams.pre.lasertrack.enabled = False
-        self.experimentparams.pre.ledpanels.enabled = False
+        self.experimentparams.pre.ledpanels.enabled = True
+        self.experimentparams.pre.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.pre.ledpanels.idPattern = 1 
+        self.experimentparams.pre.ledpanels.origin.x = 0 
+        self.experimentparams.pre.ledpanels.origin.y = 0 
+        self.experimentparams.pre.ledpanels.frame_id = 'Fly1'
+        self.experimentparams.pre.ledpanels.statefilterHi = ''
+        self.experimentparams.pre.ledpanels.statefilterLo = ''
+        self.experimentparams.pre.ledpanels.statefilterCriteria = ''
+        self.experimentparams.pre.ledpanels.timeout = -1
+
+
         self.experimentparams.pre.wait1 = 0.0
-        self.experimentparams.pre.trigger.enabled = False
+        self.experimentparams.pre.trigger.enabled = True
         self.experimentparams.pre.trigger.frameidParent = 'Fly1'
         self.experimentparams.pre.trigger.frameidChild = 'Robot'
-        self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
-        self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
-        self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
+        self.experimentparams.pre.trigger.speedAbsParentMin =  10.0        # Absolute speed of the parent in fixed frame.
+        self.experimentparams.pre.trigger.speedAbsParentMax =  30.0
+        self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0        # Absolute speed of the child in fixed frame.
         self.experimentparams.pre.trigger.speedAbsChildMax  = 999.0
-        self.experimentparams.pre.trigger.speedRelMin       =   0.0
+        self.experimentparams.pre.trigger.speedRelMin       =   0.0        # Relative speed of child to parent.
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
-        self.experimentparams.pre.trigger.distanceMin =   0.0
-        self.experimentparams.pre.trigger.distanceMax = 999.0
-        self.experimentparams.pre.trigger.angleMin =  0.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.distanceMin = 30.0               # Distance between child and parent frames.
+        self.experimentparams.pre.trigger.distanceMax = 70.0
+        self.experimentparams.pre.trigger.angleMin = 00.0 * N.pi / 180.0   # Angle of the child frame from the perspective of the parent frame.
         self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
-        self.experimentparams.pre.trigger.angleTest = 'inclusive'
-        self.experimentparams.pre.trigger.angleTestBilateral = True
-        self.experimentparams.pre.trigger.timeHold = 0.0
+        self.experimentparams.pre.trigger.angleTest = 'inclusive'          # 'inclusive' or 'exclusive' of the given angle range.
+        self.experimentparams.pre.trigger.angleTestBilateral = True        # True=bilateral, False=unilateral.
+        self.experimentparams.pre.trigger.timeHold = 0.4                   # How long the conditions must be continually met before the trigger happens.
         self.experimentparams.pre.trigger.timeout = -1
         self.experimentparams.pre.wait2 = 0.0
         
 
-        # .robot.move, .lasertrack, and .triggerExit all run concurrently.
+        # .robot, .lasertrack, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
-        self.experimentparams.trial.robot.move.mode = 'relative'        
-        self.experimentparams.trial.robot.move.relative.tracking = True
+        self.experimentparams.trial.robot.move.mode = 'relative'                        # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
+        self.experimentparams.trial.robot.move.relative.tracking = True                 # True=update the target point continually.  False=the target point is set at the trigger time. 
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.distance = 8
-        self.experimentparams.trial.robot.move.relative.angle = 180.0 * N.pi / 180.0
-        self.experimentparams.trial.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
-        self.experimentparams.trial.robot.move.relative.speed = 5.2
-        self.experimentparams.trial.robot.move.relative.speedType = 'constant'
-        self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.trial.robot.move.timeout = -1
+        self.experimentparams.trial.robot.move.relative.distance = 6                    # Distance to the target point from the origin frame's position.
+        self.experimentparams.trial.robot.move.relative.angle = 0                       # Angle to the target point from the origin frame's x-axis.
+        self.experimentparams.trial.robot.move.relative.angleType = 'current'            # 'constant' or 'random' or 'current'.  Use given angle always, or choose random angle once per move.
+        self.experimentparams.trial.robot.move.relative.speed = 40                      # Speed at which to move the robot toward the target point. 
+        self.experimentparams.trial.robot.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random frtrial of it. 
+        self.experimentparams.trial.robot.move.relative.tolerance = 1                   # When robot-to-target distance is within this tolerance, then the move is over.
+        self.experimentparams.trial.robot.move.timeout = -1                             # When this duration has passed, then the move is over.
         self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
-        self.experimentparams.trial.robot.home.speed = 30
+        self.experimentparams.trial.robot.home.speed = 40
         self.experimentparams.trial.robot.home.timeout = -1
         self.experimentparams.trial.robot.home.tolerance = 2
         
@@ -98,19 +121,19 @@ class Experiment():
         self.experimentparams.post.trigger.frameidParent = 'Fly1'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.speedAbsParentMin = 999.0
-        self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. NEVER
+        self.experimentparams.post.trigger.speedAbsParentMax = 111.0     # i.e. NEVER
         self.experimentparams.post.trigger.speedAbsChildMin  =   0.0
         self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.post.trigger.speedRelMin       =   0.0
         self.experimentparams.post.trigger.speedRelMax       = 999.0
-        self.experimentparams.post.trigger.distanceMin = 0.0
+        self.experimentparams.post.trigger.distanceMin = 0.0              
         self.experimentparams.post.trigger.distanceMax = 999.0
-        self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0   
         self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
-        self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 600    # 10 minutes
+        self.experimentparams.post.trigger.timeHold = 1.0
+        self.experimentparams.post.trigger.timeout = 4
 
         self.experimentparams.post.wait = 0.0
         
@@ -143,11 +166,11 @@ class Experiment():
 
 
 if __name__ == '__main__':
-    #try:
+    try:
         experiment = Experiment()
         experiment.Run()
         
-    #except:
-        pass
+    except KeyboardInterrupt:
+        rospy.loginfo("Shutting down")
 
         
