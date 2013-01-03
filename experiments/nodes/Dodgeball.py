@@ -33,7 +33,7 @@ class Experiment():
         self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.tracking.exclusionzones.enabled = True
-        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=70), Point(x=-75, y=25)]
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=70), Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.5, 3.0]
         
         self.experimentparams.pre.robot.enabled = True
@@ -47,6 +47,8 @@ class Experiment():
         self.experimentparams.pre.robot.move.relative.speed = 20                    # Speed at which to move the robot toward the target point. 
         self.experimentparams.pre.robot.move.relative.speedType = 'constant'        # 'constant' or 'random'.  Use the given value, or a random frpre of it. 
         self.experimentparams.pre.robot.move.relative.tolerance = 2                 # When robot-to-target distance is within this tolerance, then the move is over.
+        self.experimentparams.pre.robot.move.pattern.frameidPosition = 'Arena'               # 
+        self.experimentparams.pre.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
         self.experimentparams.pre.robot.move.pattern.hzPattern = 1/6                # Patterns per second.
         self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
@@ -71,7 +73,7 @@ class Experiment():
         self.experimentparams.pre.trigger.enabled = True
         self.experimentparams.pre.trigger.frameidParent = 'Fly1'
         self.experimentparams.pre.trigger.frameidChild = 'Robot'
-        self.experimentparams.pre.trigger.speedAbsParentMin =   5.0        # Absolute speed of the parent in fixed frame.
+        self.experimentparams.pre.trigger.speedAbsParentMin =   10.0        # Absolute speed of the parent in fixed frame.
         self.experimentparams.pre.trigger.speedAbsParentMax =  60.0
         self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0        # Absolute speed of the child in fixed frame.
         self.experimentparams.pre.trigger.speedAbsChildMax  = 999.0
@@ -95,7 +97,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.tracking = True                 # True=update the target point continually.  False=the target point is set at the trigger time. 
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.distance = 3                    # Distance to the target point from the origin frame's position.
+        self.experimentparams.trial.robot.move.relative.distance = 6                    # Distance to the target point from the origin frame's position.
         self.experimentparams.trial.robot.move.relative.angle = 0                       # Angle to the target point from the origin frame's x-axis.
         self.experimentparams.trial.robot.move.relative.angleType = 'random'            # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
         self.experimentparams.trial.robot.move.relative.speed = 20                      # Speed at which to move the robot toward the target point. 
@@ -103,7 +105,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.tolerance = 2                   # When robot-to-target distance is within this tolerance, then the move is over.
         self.experimentparams.trial.robot.move.timeout = -1                             # When this duration has passed, then the move is over.
         self.experimentparams.trial.robot.home.enabled = True
-        self.experimentparams.trial.robot.home.x = 0.0
+        self.experimentparams.trial.robot.home.x = 10.0
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
         self.experimentparams.trial.robot.home.timeout = -1

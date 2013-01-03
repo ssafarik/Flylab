@@ -1,12 +1,9 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the CHASE experiment.                     -->
-    <!--                                                            -->
-    <!-- Edit this file to contain the elements of the particular   -->
-    <!-- experiment.                                                -->
+	<!-- Configuration to test the tracking system.                 -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments chase.launch                         -->
+    <!-- roslaunch tracking test.launch                             -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 
@@ -16,13 +13,10 @@
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find robots)/launch/robot_0625h_0625w.launch" />
-	<include file="$(find robots)/launch/robots_1.launch" />
+	<include file="$(find robots)/launch/robots_0.launch" />
 	<include file="$(find flies)/launch/flies_1.launch" />
 	<include file="$(find flies)/launch/flytype_unspecified.launch" />
 	<include file="$(find flies)/launch/flygender_M.launch" />
-
-	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="Chase.py" name="Experiment" required="true" />
 
 	
   

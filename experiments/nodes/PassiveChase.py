@@ -63,6 +63,8 @@ class ExperimentPassiveChase():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'pattern' # 'pattern' or 'relative'
+        self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'            # 
+        self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
         self.experimentparams.trial.robot.move.pattern.hzPattern = 1/40
         self.experimentparams.trial.robot.move.pattern.hzPoint = 10
@@ -80,9 +82,11 @@ class ExperimentPassiveChase():
         
         self.experimentparams.trial.lasertrack.enabled = False
         
-        self.experimentparams.trial.ledpanels.enabled = False
+        self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 1
+        self.experimentparams.trial.ledpanels.origin.x = 0 
+        self.experimentparams.trial.ledpanels.origin.y = 0 
         self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
