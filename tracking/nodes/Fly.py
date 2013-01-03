@@ -50,14 +50,15 @@ class Fly:
         self.dtForecast = rospy.get_param('tracking/dtForecast',0.15)
         
         # Orientation detection stuff.
-        self.angleOfTravelRecent = 0.0
         self.lpFlip = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterFlip', 3.0))
         self.lpFlip.SetValue(0.0) # (0.5) TEST
-        self.contourinfo = None
-        self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
         self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterSpeed', 0.2))
         self.lpSpeed.SetValue(0.0)
+        self.angleOfTravelRecent = 0.0
+        self.contourinfo = None
+        self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
         self.speed = 0.0
+
         
         self.lpWx = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
         self.lpWy = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
@@ -149,8 +150,8 @@ class Fly:
         angleContour_flipped = angleContour + N.pi
         
         # Compare distances between angles of (travel - contour) and (travel - flippedcontour)        
-        dist         = N.abs(CircleFunctions.circle_dist(angleContour,         self.angleOfTravelRecent))
-        dist_flipped = N.abs(CircleFunctions.circle_dist(angleContour_flipped, self.angleOfTravelRecent))
+        dist         = N.abs(CircleFunctions.DistanceCircle(angleContour,         self.angleOfTravelRecent))
+        dist_flipped = N.abs(CircleFunctions.DistanceCircle(angleContour_flipped, self.angleOfTravelRecent))
         
         # Choose the better orientation.
         if dist < dist_flipped:
@@ -204,7 +205,7 @@ class Fly:
             flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contourinfo.header.stamp.to_sec())
                 
             # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
-            d = N.abs(CircleFunctions.circle_dist(self.lpAngleContour.GetValue(), self.angleContourPrev))
+            d = N.abs(CircleFunctions.DistanceCircle(self.lpAngleContour.GetValue(), self.angleContourPrev))
             if (d > (N.pi/2.0)):
                 self.lpFlip.SetValue(-self.lpFlip.GetValue())
 
