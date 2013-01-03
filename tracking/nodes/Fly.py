@@ -255,8 +255,8 @@ class Fly:
                 (zKalman, vzKalman) = (0.0, 0.0)
                 #(x,y) = (self.contourinfo.x,self.contourinfo.y) # Unfiltered.
                 zf = self.lpAngleContour.Update(self.contourinfo.angle, contourinfo.header.stamp.to_sec())#self.contourinfo.header.stamp.to_sec())
-                if 'Fly' in self.name:
-                    rospy.logwarn('zf=%0.2f, lpFlip=%0.2f' % (zf, self.lpFlip.GetValue()))
+                #if 'Fly' in self.name:
+                #    rospy.logwarn('zf=%0.2f, lpFlip=%0.2f' % (zf, self.lpFlip.GetValue()))
                 
                 
                 
