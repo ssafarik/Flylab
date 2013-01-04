@@ -109,6 +109,7 @@ class RosFivebar:
         TMPy            = N.sin(N.pi - self.q1CenterE) * self.L1
         self.yCenter    = N.sqrt(self.L3**2.0 - TMPx**2.0) + TMPy + FUDGEY
         self.radiusReachable = 0.98*(self.L1+self.L3-r)/2.0 # Really it's about 90.5.  Limits in xy are at roughly (64,64), (-64,64), (-64,-64), (64,-64).
+        self.radiusArena = rospy.get_param('arena/radius_inner', 25.4)
 
 
 
@@ -121,7 +122,6 @@ class RosFivebar:
         rospy.Service('get_stage_state',    SrvFrameState, self.GetStageState_callback)
         rospy.Service('home_stage',         SrvFrameState, self.HomeStage_callback)
         rospy.Service('calibrate_stage',    SrvFrameState, self.Calibrate_callback)
-        
         rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
@@ -139,28 +139,20 @@ class RosFivebar:
         self.js.name = self.names
         #self.js.velocity = [0.0, 0.0, 0.0, 0.0]
         
-        self.xc = self.xCenter        
-        self.yc = self.yCenter
-        self.ptsToolRefExternal = None #Point(0,0,0) # Where we want the "tool".
-        self.ptsToolRef = None
-        self.ptToolRefClipped = Point(0,0,0) 
-        self.ptEeSense = Point(0,0,0)
-        self.ptEeCommand = Point(0,0,0) # Where to command the end-effector.
-        self.ptEeRef = Point(0,0,0)
-        self.ptContourSense = Point(0,0,0)
-        self.vecOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
-        self.vecContourError = Point(0,0,0)
-        self.vecToolRefError = Point(0,0,0)
-        self.vecEeError = Point(0,0,0)
-        self.vecEeErrorPrev = Point(0,0,0)
-        self.vecEeDError = Point(0,0,0)
-        self.vecEeIError = Point(0,0,0)
+        self.ptsContourRefExternal = None #Point(0,0,0) # Where we want the "tool".
+        self.ptsContourRef         = None
+        self.ptEeSense          = Point(0,0,0)
+        self.ptEeCommand        = Point(0,0,0) # Where to command the end-effector.
+        self.vecOffsetSense     = Point(0,0,0) # Vector from end-effector to the "tool"
+        self.vecEeError         = Point(0,0,0)
+        self.vecEeErrorPrev     = Point(0,0,0)
+        self.vecEeDError        = Point(0,0,0)
+        self.vecEeIError        = Point(0,0,0)
         self.vecEeIErrorClipped = Point(0,0,0)
-        self.vecAntiwindup = Point(0,0,0)
+        self.vecAntiwindup      = Point(0,0,0)
         
         self.speedCommandTool = None 
         self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
-        self.radiusMovement = rospy.get_param('arena/radius_inner', 25.4)
         
         self.timePrev = rospy.Time.now()
         self.time = rospy.Time.now()
@@ -260,10 +252,26 @@ class RosFivebar:
         return Point(r*pt.x, r*pt.y, r*pt.z)
             
         
-    # Clip the tool to the min of hardware & software radius limits.
-    def ClipPtToRadius(self, pt):
+    # Clip the tool to the given limit.
+    def ClipPtToRadius(self, pt, rLimit):
         r = N.sqrt(pt.x*pt.x + pt.y*pt.y)
-        rLimit = N.min([self.radiusMovement, self.radiusReachable])
+        
+        if rLimit < r:
+            angle = N.arctan2(pt.y, pt.x)
+            ptOut = Point(x = rLimit * N.cos(angle),
+                          y = rLimit * N.sin(angle))
+            bClipped = True
+        else:
+            ptOut = pt
+            bClipped = False
+        
+        return (bClipped, ptOut)
+                
+                
+    # Clip the tool to the hardware limit.
+    def ClipPtToReachable(self, pt):
+        r = N.sqrt(pt.x*pt.x + pt.y*pt.y)
+        rLimit = self.radiusReachable #N.min([self.radiusArena, self.radiusReachable])
         
         if rLimit < r:
             angle = N.arctan2(pt.y, pt.x)
@@ -373,7 +381,7 @@ class RosFivebar:
     # and (angle1,angle2)==(0,0) maps to (x,y)==(0,0).
     #
     def Get1234FromPt (self, pt):
-        (bClipped, ptClipped) = self.ClipPtToRadius(pt)
+        (bClipped, ptClipped) = self.ClipPtToReachable(pt)
 
         # Flip the axes if necessary.
         x = ptClipped.x
@@ -542,7 +550,7 @@ class RosFivebar:
             pt.x = self.ptEeSense.x + self.vecOffsetSense.x 
             pt.y = self.ptEeSense.y + self.vecOffsetSense.y 
             pt.z = self.ptEeSense.z + self.vecOffsetSense.z 
-            (bClipped, pt) = self.ClipPtToRadius(pt)
+            (bClipped, pt) = self.ClipPtToReachable(pt)
             
             rvStageState.state.header.stamp = self.time
             rvStageState.state.header.frame_id = 'Stage' # Always return Stage frame coordinates.
@@ -566,30 +574,30 @@ class RosFivebar:
         while not self.initialized:
             rospy.sleep(0.5)
             
-        self.ptsToolRefExternal = PointStamped(header=reqStageState.state.header,
+        self.ptsContourRefExternal = PointStamped(header=reqStageState.state.header,
                                                point=reqStageState.state.pose.position)
         
         # Transform to Arena frame, and clip to workspace.
         try:
-            self.ptsToolRefExternal.header.stamp = self.tfrx.getLatestCommonTime('Arena', self.ptsToolRefExternal.header.frame_id)
-            ptsToolRefArena = self.tfrx.transformPoint('Arena', self.ptsToolRefExternal)
+            self.ptsContourRefExternal.header.stamp = self.tfrx.getLatestCommonTime('Arena', self.ptsContourRefExternal.header.frame_id)
+            ptsContourRefArena = self.tfrx.transformPoint('Arena', self.ptsContourRefExternal)
         except tf.Exception:
             rospy.logwarn ('5B Exception transforming to Arena frame in SetStageState_callback()')
-            ptsToolRefArena = self.ptsToolRefExternal
+            ptsContourRefArena = self.ptsContourRefExternal
         else:
-            (bClipped,pt) = self.ClipPtToRadius(ptsToolRefArena.point)
+            (bClipped,pt) = self.ClipPtToRadius(ptsContourRefArena.point, self.radiusArena)
             if bClipped:
-                ptsToolRefArena.point = pt
+                ptsContourRefArena.point = pt
 
         # Transform to Stage frame.
         try:
-            ptsToolRefArena.header.stamp = self.tfrx.getLatestCommonTime('Stage', ptsToolRefArena.header.frame_id)
-            self.ptsToolRef = self.tfrx.transformPoint('Stage', ptsToolRefArena)
+            ptsContourRefArena.header.stamp = self.tfrx.getLatestCommonTime('Stage', ptsContourRefArena.header.frame_id)
+            self.ptsContourRef = self.tfrx.transformPoint('Stage', ptsContourRefArena)
         except tf.Exception:
             rospy.logwarn ('5B Exception transforming to Stage frame in SetStageState_callback()')
 
 
-        #rospy.logwarn('5B ptsToolRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y,self.ptsToolRefExternal.point.x,self.ptsToolRefExternal.point.y))
+        #rospy.logwarn('5B ptsContourRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsContourRef.point.x,self.ptsContourRef.point.y,self.ptsContourRefExternal.point.x,self.ptsContourRefExternal.point.y))
         if reqStageState.speed is not None:
             self.speedCommandTool = reqStageState.speed # Requested speed for positioning.
         else:
@@ -609,26 +617,26 @@ class RosFivebar:
     def SignalInput_callback (self, srvSignalReq):
         rv = SrvSignalResponse()
         rv.success = True
-        self.ptsToolRefExternal = srvSignalReq.pts 
+        self.ptsContourRefExternal = srvSignalReq.pts 
         
         
         # Transform to Arena frame, and clip to workspace.  
         try:
-            self.ptsToolRefExternal.header.stamp = self.tfrx.getLatestCommonTime('Arena', self.ptsToolRefExternal.header.frame_id)
-            ptsToolRefArena = self.tfrx.transformPoint('Arena', self.ptsToolRefExternal)
+            self.ptsContourRefExternal.header.stamp = self.tfrx.getLatestCommonTime('Arena', self.ptsContourRefExternal.header.frame_id)
+            ptsContourRefArena = self.tfrx.transformPoint('Arena', self.ptsContourRefExternal)
         except tf.Exception, e:
             rospy.logwarn('5B Exception transforming to Arena frame in SignalInput_callback():  %s' % e)
-            ptsToolRefArena = self.ptsToolRefExternal
+            ptsContourRefArena = self.ptsContourRefExternal
         else:
-            (bClipped,pt) = self.ClipPtToRadius(ptsToolRefArena.point)
+            (bClipped,pt) = self.ClipPtToRadius(ptsContourRefArena.point, self.radiusArena)
             if bClipped:
-                ptsToolRefArena.point = pt
+                ptsContourRefArena.point = pt
                 rv.success = False
 
         # Transform to Stage frame.
         try:
-            ptsToolRefArena.header.stamp = self.tfrx.getLatestCommonTime('Stage', ptsToolRefArena.header.frame_id)
-            self.ptsToolRef = self.tfrx.transformPoint('Stage', ptsToolRefArena)
+            ptsContourRefArena.header.stamp = self.tfrx.getLatestCommonTime('Stage', ptsContourRefArena.header.frame_id)
+            self.ptsContourRef = self.tfrx.transformPoint('Stage', ptsContourRefArena)
 
             try:
                 self.speedCommandTool = self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
@@ -789,16 +797,16 @@ class RosFivebar:
 
                 
                 # Frame Target
-                if self.ptsToolRef is not None:
+                if self.ptsContourRef is not None:
                     markerTarget = Marker(header=Header(stamp = state.header.stamp,
                                                         frame_id='Stage'),
                                           ns='target',
                                           id=0,
                                           type=Marker.SPHERE,
                                           action=0,
-                                          pose=Pose(position=Point(x=self.ptsToolRef.point.x, 
-                                                                   y=self.ptsToolRef.point.y, 
-                                                                   z=self.ptsToolRef.point.z)),
+                                          pose=Pose(position=Point(x=self.ptsContourRef.point.x, 
+                                                                   y=self.ptsContourRef.point.y, 
+                                                                   z=self.ptsContourRef.point.z)),
                                           scale=Vector3(x=3.0,
                                                         y=3.0,
                                                         z=3.0),
@@ -836,33 +844,23 @@ class RosFivebar:
     #   Updates the motor command with the current target.
     #
     def UpdateMotorCommandFromTarget(self):
-        #rospy.loginfo ('5B ptToolRef=%s' % self.ptToolRef)
-        if self.ptsToolRef is not None:
-            # Clip the target point to the arena bounds.
-            #(bClipped, self.ptToolRefClipped) = self.ClipPtToRadius(self.ptsToolRefExternal.point)
-
-            # Compute various vectors.
-            self.vecContourError.x = self.ptsToolRef.point.x - self.ptEeSense.x + self.vecOffsetSense.x
-            self.vecContourError.y = self.ptsToolRef.point.y - self.ptEeSense.y + self.vecOffsetSense.y
-
-            
+        #rospy.loginfo ('5B ptContourRef=%s' % self.ptContourRef)
+        if self.ptsContourRef is not None:
             # PID Gains & Parameters.
-            self.kP = rospy.get_param('fivebar/kP', 1.0)
-            self.kI = rospy.get_param('fivebar/kI', 0.0)
-            self.kD = rospy.get_param('fivebar/kD', 0.0)
-            self.maxI = rospy.get_param('fivebar/maxI', 40.0)
+            self.kP      = rospy.get_param('fivebar/kP', 1.0)
+            self.kI      = rospy.get_param('fivebar/kI', 0.0)
+            self.kD      = rospy.get_param('fivebar/kD', 0.0)
+            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
             self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
-            self.kAll = rospy.get_param('fivebar/kAll', 1.0)
+            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
             
             self.kP *= self.kAll
             self.kI *= self.kAll
             self.kD *= self.kAll
-            #self.maxI *= self.kAll
-            #self.kWindup *= self.kAll
             
             # PID control of the contour error.
-            self.vecEeError.x = self.vecContourError.x
-            self.vecEeError.y = self.vecContourError.y
+            self.vecEeError.x = self.ptsContourRef.point.x - self.ptEeSense.x + self.vecOffsetSense.x
+            self.vecEeError.y = self.ptsContourRef.point.y - self.ptEeSense.y + self.vecOffsetSense.y
             self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
             self.vecEeIError.y = self.vecEeIError.y + self.vecEeError.y
             self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
@@ -941,7 +939,7 @@ class RosFivebar:
                 
                 with self.lock:
                     try:
-                        #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.ptsToolRef.point.x,self.ptsToolRef.point.y))
+                        #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.ptsContourRef.point.x,self.ptsContourRef.point.y))
                         self.setPositionAtVel_joint1(Header(frame_id=self.names[0]), angle1, v1)
                         self.setPositionAtVel_joint2(Header(frame_id=self.names[1]), angle2, v2)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:

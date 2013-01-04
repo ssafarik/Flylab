@@ -58,12 +58,11 @@ class ContourIdentifier:
         
         
         # Messages
-        queue_size_contours   = rospy.get_param('tracking/queue_size_contours', 1)
-        self.subTrackingCommand = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
-        self.subContourinfoLists = rospy.Subscriber('ContourinfoLists', ContourinfoLists, self.ContourinfoLists_callback, queue_size=queue_size_contours)
-        
-        self.pubArenaState = rospy.Publisher('ArenaState', ArenaState)
-        self.pubEndEffectorOffset = rospy.Publisher('EndEffectorOffset', Point)
+        queue_size_contours         = rospy.get_param('tracking/queue_size_contours', 1)
+        self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
+        self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists', ContourinfoLists, self.ContourinfoLists_callback, queue_size=queue_size_contours)
+        self.pubArenaState          = rospy.Publisher('ArenaState', ArenaState)
+        self.pubEndEffectorOffset   = rospy.Publisher('EndEffectorOffset', Point)
 
         # Poses
         self.poseRobot = Pose()
