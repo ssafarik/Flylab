@@ -62,8 +62,8 @@ class ContourIdentifier:
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
         self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists', ContourinfoLists, self.ContourinfoLists_callback, queue_size=queue_size_contours)
         self.pubArenaState          = rospy.Publisher('ArenaState', ArenaState)
-        self.pubEndEffectorOffset   = rospy.Publisher('EndEffectorOffset', Point)
-
+        self.pubVisualPosition      = rospy.Publisher('VisualPosition', PoseStamped)
+        
         # Poses
         self.poseRobot = Pose()
         self.posearrayFly = PoseArray()
@@ -741,7 +741,8 @@ class ContourIdentifier:
                 
                 # Publish the EndEffectorOffset.
                 if (0 in self.iRobot_list) and (0 < len(self.objects)):
-                    self.pubEndEffectorOffset.publish(self.objects[0].ptOffset)
+                    self.pubVisualPosition.publish(PoseStamped(header=self.objects[0].state.header,
+                                                               pose=self.objects[0].state.pose))
                 
                 
                 # Publish a marker to indicate the size of the arena.

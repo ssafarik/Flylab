@@ -201,7 +201,7 @@ class Fly:
         flipvaluePre = self.GetNextFlipValue()
             
         if (self.speed > self.speedThresholdForTravel):
-            flipvaluePre = self.GetNextFlipUpdate()
+            flipvaluePre = self.GetNextFlipValue()
             flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contourinfo.header.stamp.to_sec())
                 
             # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.

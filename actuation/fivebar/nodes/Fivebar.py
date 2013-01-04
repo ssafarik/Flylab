@@ -125,7 +125,7 @@ class RosFivebar:
         rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
-        self.subEndEffectorOffset = rospy.Subscriber('EndEffectorOffset', Point, self.EndEffectorOffset_callback)
+        self.subVisualPosition    = rospy.Subscriber('VisualPosition', PoseStamped, self.VisualPosition_callback)
         self.pubJointState        = rospy.Publisher('joint_states', JointState)
         self.pubMarker            = rospy.Publisher('visualization_marker', Marker)
         
@@ -143,7 +143,7 @@ class RosFivebar:
         self.ptsContourRef         = None
         self.ptEeSense          = Point(0,0,0)
         self.ptEeCommand        = Point(0,0,0) # Where to command the end-effector.
-        self.vecOffsetSense     = Point(0,0,0) # Vector from end-effector to the "tool"
+        self.posesContourSense  = PoseStamped() # Visual position of the tool.
         self.vecEeError         = Point(0,0,0)
         self.vecEeErrorPrev     = Point(0,0,0)
         self.vecEeDError        = Point(0,0,0)
@@ -541,22 +541,8 @@ class RosFivebar:
         
         rvStageState = SrvFrameStateResponse()
         if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
-            #rospy.loginfo ('5B self.jointstate1=%s' % self.jointstate1)
-            #rospy.loginfo ('5B self.jointstate2=%s' % self.jointstate2)
-            #(x,y) = self.GetXyFrom12 (self.jointstate1.position, self.jointstate2.position)
-            
-            # Transform the point into the requested frame.
-            pt = Point()
-            pt.x = self.ptEeSense.x + self.vecOffsetSense.x 
-            pt.y = self.ptEeSense.y + self.vecOffsetSense.y 
-            pt.z = self.ptEeSense.z + self.vecOffsetSense.z 
-            (bClipped, pt) = self.ClipPtToReachable(pt)
-            
-            rvStageState.state.header.stamp = self.time
-            rvStageState.state.header.frame_id = 'Stage' # Always return Stage frame coordinates.
-            rvStageState.state.pose.position.x = pt.x 
-            rvStageState.state.pose.position.y = pt.y 
-            rvStageState.state.pose.position.z = pt.z
+            rvStageState.state.header = self.posesContourSense.header
+            rvStageState.state.pose = self.posesContourSense.pose
             rvStageState.state.velocity.linear.x = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.y = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.z = 0.0 # BUG: This should come from the hardware.
@@ -575,7 +561,7 @@ class RosFivebar:
             rospy.sleep(0.5)
             
         self.ptsContourRefExternal = PointStamped(header=reqStageState.state.header,
-                                               point=reqStageState.state.pose.position)
+                                                  point=reqStageState.state.pose.position)
         
         # Transform to Arena frame, and clip to workspace.
         try:
@@ -661,9 +647,13 @@ class RosFivebar:
         return ptNew
     
 
-    def EndEffectorOffset_callback(self, ptOffset):
-        self.vecOffsetSense = ptOffset #Point(0,0,0)#
-        #rospy.logwarn ('5B ptOffset=%s' % ptOffset)
+    def VisualPosition_callback(self, posesContour):
+        # Transform to Stage frame.
+        try:
+            posesContour.header.stamp = self.tfrx.getLatestCommonTime('Stage', posesContour.header.frame_id)
+            self.posesContourSense = self.tfrx.transformPose('Stage', posesContour)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming to Stage frame in VisualPosition_callback()')
         
         
     def HomeStage_callback(self, reqStageState):
@@ -798,8 +788,8 @@ class RosFivebar:
                 
                 # Frame Target
                 if self.ptsContourRef is not None:
-                    markerTarget = Marker(header=Header(stamp = state.header.stamp,
-                                                        frame_id='Stage'),
+                    markerTarget = Marker(header=self.ptsContourRef.header, #Header(stamp = state.header.stamp,
+                                                                            #frame_id='Stage'),
                                           ns='target',
                                           id=0,
                                           type=Marker.SPHERE,
@@ -833,9 +823,9 @@ class RosFivebar:
                                                 points=[Point(x=state.pose.position.x, 
                                                               y=state.pose.position.y, 
                                                               z=state.pose.position.z),
-                                                        Point(x=state.pose.position.x-self.vecOffsetSense.x, 
-                                                              y=state.pose.position.y-self.vecOffsetSense.y, 
-                                                              z=state.pose.position.z-self.vecOffsetSense.z)])
+                                                        Point(x=self.posesContourSense.pose.position.x, 
+                                                              y=self.posesContourSense.pose.position.y, 
+                                                              z=self.posesContourSense.pose.position.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -844,7 +834,6 @@ class RosFivebar:
     #   Updates the motor command with the current target.
     #
     def UpdateMotorCommandFromTarget(self):
-        #rospy.loginfo ('5B ptContourRef=%s' % self.ptContourRef)
         if self.ptsContourRef is not None:
             # PID Gains & Parameters.
             self.kP      = rospy.get_param('fivebar/kP', 1.0)
@@ -858,9 +847,11 @@ class RosFivebar:
             self.kI *= self.kAll
             self.kD *= self.kAll
             
+            # The contour error.
+            self.vecEeError.x = self.ptsContourRef.point.x - self.posesContourSense.pose.position.x
+            self.vecEeError.y = self.ptsContourRef.point.y - self.posesContourSense.pose.position.y
+
             # PID control of the contour error.
-            self.vecEeError.x = self.ptsContourRef.point.x - self.ptEeSense.x + self.vecOffsetSense.x
-            self.vecEeError.y = self.ptsContourRef.point.y - self.ptEeSense.y + self.vecOffsetSense.y
             self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
             self.vecEeIError.y = self.vecEeIError.y + self.vecEeError.y
             self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
@@ -874,6 +865,8 @@ class RosFivebar:
             self.vecAntiwindup = Point(self.kWindup * (self.vecEeIError.x - self.vecEeIErrorClipped.x),
                                        self.kWindup * (self.vecEeIError.y - self.vecEeIErrorClipped.y),
                                        self.kWindup * (self.vecEeIError.z - self.vecEeIErrorClipped.z))
+            self.vecEeIError.x -= self.vecAntiwindup.x
+            self.vecEeIError.y -= self.vecAntiwindup.y
             
             # Print the PID component values.
             #magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
@@ -882,14 +875,11 @@ class RosFivebar:
             #magPID = N.linalg.norm([vecPID.x, vecPID.y])
             #rospy.logwarn('[P,I,D]=[%0.2f,%0.2f,%0.2f], PID=%0.4f' % (magP,magI,magD, magPID))
             
-            
-            self.vecEeIError.x -= self.vecAntiwindup.x
-            self.vecEeIError.y -= self.vecAntiwindup.y
+
 
             # Get the command for the hardware.
-            kOffset = rospy.get_param('fivebar/kOffset', 0.6)            
-            self.ptEeCommand.x = self.ptEeSense.x + vecPID.x - (kOffset*self.vecOffsetSense.x)
-            self.ptEeCommand.y = self.ptEeSense.y + vecPID.y - (kOffset*self.vecOffsetSense.y)
+            self.ptEeCommand.x = vecPID.x + self.ptEeSense.x
+            self.ptEeCommand.y = vecPID.y + self.ptEeSense.y
             self.vecEeErrorPrev.x = self.vecEeError.x 
             self.vecEeErrorPrev.y = self.vecEeError.y 
             

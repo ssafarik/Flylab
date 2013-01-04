@@ -949,7 +949,7 @@ class Save:
 
             # Get latest time.
             stamp = max(0.0, arenastate.robot.header.stamp.to_sec())
-            for iFly in range(self.nFlies):
+            for iFly in range(len(arenastate.flies)): #self.nFlies):
                 stamp = max(stamp, arenastate.flies[iFly].header.stamp.to_sec())
             
             # Get the state of the robot.

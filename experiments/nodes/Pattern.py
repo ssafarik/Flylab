@@ -64,7 +64,9 @@ class Experiment():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'pattern' # 'pattern' or 'relative'
-        self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+        self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
+        self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
+        self.experimentparams.trial.robot.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
         self.experimentparams.trial.robot.move.pattern.hzPattern = 1/30  # Patterns per second.
         self.experimentparams.trial.robot.move.pattern.hzPoint = 60 #4/10 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the target.
         self.experimentparams.trial.robot.move.pattern.count = -1

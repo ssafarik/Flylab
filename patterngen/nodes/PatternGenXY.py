@@ -589,10 +589,11 @@ class PatternGenXY:
             (pos,q) = self.tfrx.lookupTransform('Arena', self.pattern1.frameidPosition, pts.header.stamp)
         except tf.Exception, e:
             rospy.logwarn('Exception transforming %s->Arena in TransformPatternPoint():  %s' % (self.pattern1.frameidPosition,e))
-        pts.header.frame_id = 'Arena'
-        pts.point = copy.copy(self.pattern1.points[self.iPoint])
-        pts.point.x += pos[0]
-        pts.point.y += pos[1]
+        else:
+            pts.header.frame_id = 'Arena'
+            pts.point = copy.copy(self.pattern1.points[self.iPoint])
+            pts.point.x += pos[0]
+            pts.point.y += pos[1]
         
         return pts
                 
