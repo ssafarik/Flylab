@@ -21,6 +21,8 @@ function histAll = FlylabPlotPositionHistogramFiles(dirspec, filespec)
     [m nFiles] = size(filenames);
     %iFiles = [2 16 99 111 116];
     iFiles = 1:min(nFiles,nFilesMax);
+    iFrameRobot = 1;
+    iFrameFly = 2;
 
     fprintf ('Found %d files.\n', nFiles)
     fprintf ('Plotting files 1-%d.\n', length(iFiles))
@@ -29,8 +31,8 @@ function histAll = FlylabPlotPositionHistogramFiles(dirspec, filespec)
     for i = iFiles;
         fprintf('File %d: %s ... ', i, filenames{i})
         [filedata, iTrigger] = FlylabReadData(filenames{i}, 0);
-        histFile(:,:,i) = FlylabGetHistPos(filedata, radius, nBins, 'Fly', 'Robot');
-        %histFile(:,:,i) = FlylabSaturateByCount(histFile(:,:,i), nClipped);
+        histFile(:,:,i) = FlylabGetHistPos(filedata, radius, nBins, iFrameFly, iFrameRobot);
+        %histFile(:,:,i) = FlylabClipByCount(histFile(:,:,i), nClipped);
         
         % Make the histogram into an image, i.e. normalize to 1.
         imgFile{i} = histFile(:,:,i)./max(max(histFile(:,:,i)));  

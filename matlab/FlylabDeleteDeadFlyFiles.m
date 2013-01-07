@@ -6,11 +6,12 @@ function FlylabDeleteDeadFlyFiles (dirspec, filespec)
     filenames = GetFilenames(dirspec, filespec);
     
     for k = 1:length(filenames)
-        if FlylabIsDeadFly(filenames{k})
+        [filedata,iTrigger] = FlylabReadData(filenames{k}, -1);
+        if FlylabHasDeadFly(filedata)
             fprintf ('Deleting %s\n', filenames{k});
             delete(filenames{k});
         else
-            fprintf ('Keeping %s\n', filenames{k}); 
+            fprintf ('Keeping  %s\n', filenames{k}); 
         end
     end
     

@@ -1,6 +1,6 @@
-function FlylabPlotPosition(filedata, frameParent, iTrigger, nSubsample)
+function FlylabPlotPosition(filedata, iFrameParent, iFrameChildren, iTrigger, nSubsample)
 % FlylabPlotPosition(filedata)
-% Plot positions of the fly & robot, in the given frame of reference.
+% Plot positions of the specified object (robot=1, fly1=2, fly2=3, etc), in the given frame of reference.
 % Draws a circle on the sample given by iTrigger.
 %
 
@@ -17,78 +17,58 @@ function FlylabPlotPosition(filedata, frameParent, iTrigger, nSubsample)
     cCircle = [0 0 0];
     mCircle = '.';
     
-    % Get robot & fly poses.
-    [posRobot, aRobot] = FlylabGetTransformedData(filedata, frameParent, 'Robot');
-    [posFly, aFly] = FlylabGetTransformedData(filedata, frameParent, 'Fly');
-    aFly = aFly - pi/2;
-
-    % Rotate if necessary so fly points north.
-    if ~strcmpi(frameParent,'Arena')
-        posRobot = (R90 * posRobot')';   
-        aRobot = aRobot + pi/2;
-        posFly = (R90 * posFly')';   
-        aFly = 0*aFly;
-    end
-
-    % Set up vectors for scatter plot.
-    [m,n] = size(posRobot);
-    iTrigger = max(1,floor(iTrigger/nSubsample));
+    markers = {'o','triangle','triangle','triangle','triangle','triangle','triangle','triangle'};
+    colors = [[1 0 0]; [0.3 0.3 0.3]; [0.0 0.8 0.0]; [0.0 0.0 0.8]; [0.0 0.5 0.5]; [0.5 0.0 0.5]; [0.5 0.5 0.0]; [0.3 0.3 0.3]];
+    pix = [100 100 100 100 100 100 100 100];
+    radii = [0.8 1.25 1.25 1.25 1.25 1.25 1.25 1.25 1.25];
     
-    xRobot=posRobot(1:nSubsample:m, 1);
-    yRobot=posRobot(1:nSubsample:m, 2);
-    aRobot=aRobot(1:nSubsample:m);
-    pixRobot = 10;
-    rRobot = 0.8;    % radius
-    cRobot = [1 0 0];
-    mRobot = 'o';
-    xFly=posFly(1:nSubsample:m, 1);
-    yFly=posFly(1:nSubsample:m, 2);
-    aFly=aFly(1:nSubsample:m);
-    pixFly = 10;
-    rFly = 1.25;       % radius
-    cFly = [0.3 0.3 0.3];
-    mFly = 'triangle';
-
     % Start plotting.
     hold off;
     cla;
     axis equal;
+    hold on;
     
-    
-    % Remove points outside a boundary.
-    rMax = 20;
-    if ~strcmpi(frameParent,'Arena')
-        iInBounds = find(xRobot>-rMax & xRobot<rMax & yRobot>-rMax & yRobot<rMax);
-        xRobot = xRobot(iInBounds);
-        yRobot = yRobot(iInBounds);
-    end
-    
-    % Draw the arena bounds if in Arena frame.
-    %if strcmpi(frameParent,'Arena')
-    %    scatter(xCircle, yCircle, sCircle, cCircle, mCircle);
-    %end
-    %hold on;
-    
-    % Draw the Robot positions, with circle on start.
-    if ~isempty(xRobot)
-        hold on;
-        scatter(xRobot(1),        yRobot(1),        10*pixRobot, cRobot,           mRobot);
-        scatterPose(xRobot,       yRobot,           aRobot,      cRobot,  rRobot,  mRobot);
-    end
-    
-    % Draw the Fly positions, with circle on start.
-    if ~isempty(xFly)
-        scatterPose(xFly,         yFly,             aFly,         cFly,   rFly,    mFly);
-    end
-    
-    if strcmpi(frameParent,'Arena')
-        scatter(xRobot(iTrigger), yRobot(iTrigger), 20*pixRobot,  cRobot,          mRobot);
-        scatter(xFly(1),          yFly(1),          10*pixFly,    cFly,            mRobot);
-        scatter(xFly(iTrigger),   yFly(iTrigger),   20*pixFly,    cFly,            mRobot);
-    else
-        axis([-rMax rMax -rMax rMax]);
-    end
+    for iFrameChild = iFrameChildren
+        % Get object pose.
+        [pos, ang] = FlylabGetTransformedData(filedata, iFrameParent, iFrameChild);
 
+        % Rotate if necessary so fly points north.
+        if iFrameParent~=0
+            pos = (R90 * pos')';   
+            ang = ang + pi/2;
+        end
+
+        % Subsample vectors for scatter plot.
+        [m,n] = size(pos);
+        iTrigger = max(1,floor(iTrigger/nSubsample));
+        x = pos(1:nSubsample:m, 1);
+        y = pos(1:nSubsample:m, 2);
+        ang=ang(1:nSubsample:m);
+
+
+        % Remove points outside a boundary.
+        if iFrameParent~=0
+            rMax = 30;
+        else
+            rMax = 100;
+        end
+        iInBounds = find(x>-rMax & x<rMax & y>-rMax & y<rMax);
+        x = x(iInBounds);
+        y = y(iInBounds);
+
+
+        % Draw the  positions, with circles on start and trigger.
+        if ~isempty(x)
+            scatter    (x(1),        y(1),          pix(iFrameChild), colors(iFrameChild,:),                      'o');
+            scatter    (x(iTrigger), y(iTrigger), 2*pix(iFrameChild), colors(iFrameChild,:),                      'o');
+            scatterPose(x,           y,             ang,              colors(iFrameChild,:), radii(iFrameChild),  markers{iFrameChild});
+        end
+
+        if iFrameParent~=0
+            axis([-rMax rMax -rMax rMax]);
+        end
+    end
+    
     axis off
     axis equal
 

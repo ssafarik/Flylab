@@ -1,5 +1,5 @@
 function [dataOut, iTriggerOut] = FlylabReadData (filename, nPretrigger)
-% filedata = FlylabReadData(filename)
+% dataOut = FlylabReadData(filename)
 % Read the fly & robot state data lines from the given file.
 %
 % filename: The .csv file to read.
@@ -9,17 +9,17 @@ function [dataOut, iTriggerOut] = FlylabReadData (filename, nPretrigger)
 %
 
     if nPretrigger==-1
-        nPretrigger = intmax;
+        nPretrigger = intmax/2;
     end
     
-    filedata = csvread(filename, 49, 0);
+    dataFile = csvread(filename, 49, 0);
     
     % Return data for N steps prior to the trigger.
-    iTriggers = find(filedata(:,2)==1);
+    iTriggers = find(dataFile(:,2)==1);
     iTrigger = iTriggers(1);
     iPretrigger = max(1,iTrigger-nPretrigger);
     iEnd = iTriggers(length(iTriggers));
     
     iTriggerOut = max(1,iTrigger-iPretrigger);
-    dataOut = filedata(iPretrigger:iEnd,:);
+    dataOut = dataFile(iPretrigger:iEnd,:);
     

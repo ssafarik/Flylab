@@ -16,12 +16,23 @@ function scatterPose (x, y, angle, c, r, m)
     xRep = repmat(x,3,1);
     yRep = repmat(y,3,1);
     
+    % Rotation matrices to get markers at 0 deg == east.
+    Rn90 = [cos(-pi/2) -sin(-pi/2);
+            sin(-pi/2)  cos(-pi/2)];
+    R90 = [cos(pi/2) -sin(pi/2);
+           sin(pi/2)  cos(pi/2)];
+    R180 = [cos(pi) -sin(pi);
+            sin(pi)  cos(pi)];
     
     % Define the marker shape matrix.
     if strcmpi(m,'triangle')
-        xMarker = [-r/2, 0,    r/2];
-        yMarker = [-r,   r,   -r];
-        zMarker = [ 1,   1,    1];
+        marker = [-r -r/2;
+                   r  0;
+                  -r  r/2]';
+        xMarker = marker(1,:);
+        yMarker = marker(2,:);
+        zMarker = ones(1,length(xMarker));
+               
     elseif strcmpi(m,'fly')
         flylogo = [-4, 14; 
                     -3, 11; 
@@ -87,11 +98,8 @@ function scatterPose (x, y, angle, c, r, m)
                     -7, 7; 
                     -3, 11; 
                     -4, 14]';
-        R = [cos(-pi/2) -sin(-pi/2);
-             sin(-pi/2)  cos(-pi/2)];
-                
-        flylogo = r* flylogo / max(max(flylogo')-min(flylogo')); % Scale so max length is 1.
-        flylogo = R * flylogo;
+        flylogo = r* flylogo / max(max(flylogo')-min(flylogo')); % Scale so max length is r.
+        flylogo = R180 * flylogo;
         xMarker = flylogo(1,:);
         yMarker = flylogo(2,:);
         zMarker = ones(1,length(xMarker));
@@ -101,7 +109,7 @@ function scatterPose (x, y, angle, c, r, m)
         q = (0:pi/r/10:(2*pi));
         xMarker = r * cos(q);
         yMarker = r * sin(q);
-        zMarker = ones(1,length(q));
+        zMarker = ones(1,length(xMarker));
     else
         fprintf ('Unrecognized marker type.\n');
     end

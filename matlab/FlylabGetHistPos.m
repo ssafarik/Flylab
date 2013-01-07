@@ -1,4 +1,4 @@
-function histFile = FlylabGetHistPos(filedata, radius, nBins, frameParent, frameChild)
+function histFile = FlylabGetHistPos(filedata, radius, nBins, iFrameParent, iFrameChild)
 % FlylabGetHistPos(filedata, nBins, nSaturation)
 % Get the position histogram of the child frame in the parent frame.
 %
@@ -11,7 +11,7 @@ function histFile = FlylabGetHistPos(filedata, radius, nBins, frameParent, frame
 
     [m,n] = size(filedata);
     if n>=14
-        [posFile,angleFile] = FlylabGetTransformedData(filedata, frameParent, frameChild);
+        [posFile,angleFile] = FlylabGetTransformedData(filedata, iFrameParent, iFrameChild);
 
         % Append two points at corners [-radius -radius]; [+radius +radius].  Clip points outside that rect.
         posFile = [posFile; [-radius -radius]; [+radius +radius]];
