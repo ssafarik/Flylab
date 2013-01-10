@@ -113,11 +113,11 @@ function scatterPose (x, y, angle, c, r, m)
     else
         fprintf ('Unrecognized marker type.\n');
     end
-    marker = [xMarker; yMarker; zMarker];
-    markersIn = repmat(marker, nMarkers, 1);
+    xyz = [xMarker; yMarker; zMarker];
+    xyzIn = repmat(xyz, nMarkers, 1);
 
     
-    % Construct a big transform to move all the markers into position.
+    % Construct a big transform (with T's on the diag) to move all the markers into position.
     bigT = zeros(nMarkers*3);
     for i=1:nMarkers
         T = [cos(angle(i)), -sin(angle(i)), x(i);
@@ -127,11 +127,11 @@ function scatterPose (x, y, angle, c, r, m)
         bigT(iT:iT+2,iT:iT+2) = T;
     end
     
-    markersOut = bigT * markersIn;
+    xyzOut = bigT * xyzIn;
     
     % Need to pull out the (x,y)'s.
-    xOut = markersOut( 1:3:nMarkers*3-1,    :)';
-    yOut = markersOut((1:3:nMarkers*3-1)+1, :)';
+    xOut = xyzOut( 1:3:nMarkers*3-1,    :)';
+    yOut = xyzOut((1:3:nMarkers*3-1)+1, :)';
     
     patch (xOut, yOut, c, 'EdgeColor', c*0.7);
 

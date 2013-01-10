@@ -40,7 +40,7 @@ function FlylabPlotPosition(filedata, iFrameParent, iFrameChildren, iTrigger, nS
 
         % Subsample vectors for scatter plot.
         [m,n] = size(pos);
-        iTrigger = max(1,floor(iTrigger/nSubsample));
+        iTriggerA = max(1,floor(iTrigger/nSubsample));
         x = pos(1:nSubsample:m, 1);
         y = pos(1:nSubsample:m, 2);
         ang=ang(1:nSubsample:m);
@@ -59,9 +59,9 @@ function FlylabPlotPosition(filedata, iFrameParent, iFrameChildren, iTrigger, nS
 
         % Draw the  positions, with circles on start and trigger.
         if ~isempty(x)
-            scatter    (x(1),        y(1),          pix(iFrameChild), colors(iFrameChild,:),                      'o');
-            scatter    (x(iTrigger), y(iTrigger), 2*pix(iFrameChild), colors(iFrameChild,:),                      'o');
-            scatterPose(x,           y,             ang,              colors(iFrameChild,:), radii(iFrameChild),  markers{iFrameChild});
+            scatter    (x(1),         y(1),         2*pix(iFrameChild), colors(iFrameChild,:),                      's');
+            scatter    (x(iTriggerA), y(iTriggerA), 2*pix(iFrameChild), colors(iFrameChild,:),                      'o');
+            scatterPose(x,            y,              ang,              colors(iFrameChild,:), radii(iFrameChild),  markers{iFrameChild});
         end
 
         if iFrameParent~=0
