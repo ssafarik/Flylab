@@ -21,27 +21,27 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Chase or get chased"
+        self.experimentparams.experiment.description = "Record Fly-On-Fly Behavior"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "chase"
+        self.experimentparams.save.filenamebase = "twoflies"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = False
+        self.experimentparams.save.video = True
         self.experimentparams.save.bag = False
-        self.experimentparams.save.onlyWhileTriggered = True
+        self.experimentparams.save.onlyWhileTriggered = False
         
-        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasertrack.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
-        self.experimentparams.pre.wait1 = 0.0
+        self.experimentparams.pre.wait1 = 1.0
         self.experimentparams.pre.trigger.enabled = False
         self.experimentparams.pre.trigger.frameidParent = 'Fly1'
-        self.experimentparams.pre.trigger.frameidChild = 'Robot'
+        self.experimentparams.pre.trigger.frameidChild = 'Fly2'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
@@ -59,24 +59,24 @@ class Experiment():
         self.experimentparams.pre.wait2 = 0.0
         
 
-        # .robot.move, .lasertrack, and .triggerExit all run concurrently.
+        # .robot, .lasertrack, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.trial.robot.enabled = True
-        self.experimentparams.trial.robot.move.mode = 'relative'        
+        self.experimentparams.trial.robot.enabled = False
+        self.experimentparams.trial.robot.move.mode = 'relative'
         self.experimentparams.trial.robot.move.relative.tracking = True
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.distance = 8
-        self.experimentparams.trial.robot.move.relative.angle = 180.0 * N.pi / 180.0
-        self.experimentparams.trial.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
-        self.experimentparams.trial.robot.move.relative.speed = 20 #5.2
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Arena"
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Arena"
+        self.experimentparams.trial.robot.move.relative.distance = 50
+        self.experimentparams.trial.robot.move.relative.angle =  90.0 * N.pi / 180.0
+        self.experimentparams.trial.robot.move.relative.angleType = 'constant'
+        self.experimentparams.trial.robot.move.relative.speed = 50
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
-        self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
+        self.experimentparams.trial.robot.move.relative.tolerance = 2
         self.experimentparams.trial.robot.move.timeout = -1
         self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
-        self.experimentparams.trial.robot.home.speed = 30
+        self.experimentparams.trial.robot.home.speed = 20
         self.experimentparams.trial.robot.home.timeout = -1
         self.experimentparams.trial.robot.home.tolerance = 2
         
@@ -96,21 +96,21 @@ class Experiment():
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly1'
-        self.experimentparams.post.trigger.frameidChild = 'Robot'
+        self.experimentparams.post.trigger.frameidChild = 'Fly2'
         self.experimentparams.post.trigger.speedAbsParentMin = 999.0
-        self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. NEVER
+        self.experimentparams.post.trigger.speedAbsParentMax = 999.0
         self.experimentparams.post.trigger.speedAbsChildMin  =   0.0
         self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.post.trigger.speedRelMin       =   0.0
         self.experimentparams.post.trigger.speedRelMax       = 999.0
-        self.experimentparams.post.trigger.distanceMin = 0.0
-        self.experimentparams.post.trigger.distanceMax = 999.0
+        self.experimentparams.post.trigger.distanceMin = 999.0
+        self.experimentparams.post.trigger.distanceMax =   0.0
         self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 600    # 10 minutes
+        self.experimentparams.post.trigger.timeout = 600
 
         self.experimentparams.post.wait = 0.0
         
@@ -143,11 +143,11 @@ class Experiment():
 
 
 if __name__ == '__main__':
-    #try:
+    try:
         experiment = Experiment()
         experiment.Run()
         
-    #except:
-        pass
+    except KeyboardInterrupt:
+        rospy.loginfo("Shutting down")
 
         

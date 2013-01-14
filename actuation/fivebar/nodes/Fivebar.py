@@ -23,10 +23,12 @@ from patterngen.srv import SrvSignal, SrvSignalResponse
 #
 #PRM:#     Parameter                  Value         Default 
 #----------------------------------------------------------------
-#PRM:0:    KP                         4537740       750000
-#PRM:1:    KI                         84154         35000
-#PRM:2:    KPOS                       1729          15000
+#PRM:0:    KP                         2000000       750000
+#PRM:1:    KI                         0             35000
+#PRM:2:    KPOS                       10000         15000
+#PRM:8:    RMS current limt           40            20
 #PRM:11:   integral clamp             500           5000
+#PRM:12:   position error trap        400           100
 #PRM:20:   operating mode             5             4
 #PRM:26:   lowpass filter             1             0
 #PRM:90:   baud rate                  38400         9600
@@ -552,7 +554,45 @@ class RosFivebar:
         
         return rvStageState.state
 
+
+    def ClipPtsToArena(self, ptsIn):        
+        isInArena = True
         
+        # Transform to Arena frame, and clip to arena radius.
+        try:
+            ptsIn.header.stamp = self.tfrx.getLatestCommonTime('Arena', ptsIn.header.frame_id)
+            ptsArena = self.tfrx.transformPoint('Arena', ptsIn)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming to Arena frame in ClipPtsToArena()')
+            ptsArena = ptsIn
+        else:
+            (bClipped,ptClipped) = self.ClipPtToRadius(ptsArena.point, self.radiusArena)
+            if bClipped:
+                ptsArena.point = ptClipped
+                isInArena = False
+    
+        # Transform back to original frame.
+        try:
+            ptsArena.header.stamp = self.tfrx.getLatestCommonTime(ptsIn.header.frame_id, ptsArena.header.frame_id)
+            ptsOut = self.tfrx.transformPoint(ptsIn.header.frame_id, ptsArena)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming in ClipPtsToArena()')
+            ptsOut = ptsIn
+    
+        return (ptsOut, isInArena)
+        
+
+    def TransformToStageFrame(self, pts):
+        try:
+            pts.header.stamp = self.tfrx.getLatestCommonTime('Stage', pts.header.frame_id)
+            ptsOut = self.tfrx.transformPoint('Stage', pts)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming in TransformToStageFrame()')
+            ptsOut = pts
+        
+        return ptsOut
+
+            
     # SetStageState_callback()
     #   Updates the target command.
     #
@@ -563,24 +603,8 @@ class RosFivebar:
         self.ptsContourRefExternal = PointStamped(header=reqStageState.state.header,
                                                   point=reqStageState.state.pose.position)
         
-        # Transform to Arena frame, and clip to workspace.
-        try:
-            self.ptsContourRefExternal.header.stamp = self.tfrx.getLatestCommonTime('Arena', self.ptsContourRefExternal.header.frame_id)
-            ptsContourRefArena = self.tfrx.transformPoint('Arena', self.ptsContourRefExternal)
-        except tf.Exception:
-            rospy.logwarn ('5B Exception transforming to Arena frame in SetStageState_callback()')
-            ptsContourRefArena = self.ptsContourRefExternal
-        else:
-            (bClipped,pt) = self.ClipPtToRadius(ptsContourRefArena.point, self.radiusArena)
-            if bClipped:
-                ptsContourRefArena.point = pt
-
-        # Transform to Stage frame.
-        try:
-            ptsContourRefArena.header.stamp = self.tfrx.getLatestCommonTime('Stage', ptsContourRefArena.header.frame_id)
-            self.ptsContourRef = self.tfrx.transformPoint('Stage', ptsContourRefArena)
-        except tf.Exception:
-            rospy.logwarn ('5B Exception transforming to Stage frame in SetStageState_callback()')
+        (self.ptsContourRefExternal, isInArena) = self.ClipPtsToArena(self.ptsContourRefExternal)
+        self.ptsContourRef = self.TransformToStageFrame(self.ptsContourRefExternal)
 
 
         #rospy.logwarn('5B ptsContourRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsContourRef.point.x,self.ptsContourRef.point.y,self.ptsContourRefExternal.point.x,self.ptsContourRefExternal.point.y))
@@ -606,32 +630,15 @@ class RosFivebar:
         self.ptsContourRefExternal = srvSignalReq.pts 
         
         
-        # Transform to Arena frame, and clip to workspace.  
+        (self.ptsContourRefExternal, isInArena) = self.ClipPtsToArena(self.ptsContourRefExternal)
+        self.ptsContourRef = self.TransformToStageFrame(self.ptsContourRefExternal)
+        rv.success = isInArena
+        
         try:
-            self.ptsContourRefExternal.header.stamp = self.tfrx.getLatestCommonTime('Arena', self.ptsContourRefExternal.header.frame_id)
-            ptsContourRefArena = self.tfrx.transformPoint('Arena', self.ptsContourRefExternal)
-        except tf.Exception, e:
-            rospy.logwarn('5B Exception transforming to Arena frame in SignalInput_callback():  %s' % e)
-            ptsContourRefArena = self.ptsContourRefExternal
-        else:
-            (bClipped,pt) = self.ClipPtToRadius(ptsContourRefArena.point, self.radiusArena)
-            if bClipped:
-                ptsContourRefArena.point = pt
-                rv.success = False
-
-        # Transform to Stage frame.
-        try:
-            ptsContourRefArena.header.stamp = self.tfrx.getLatestCommonTime('Stage', ptsContourRefArena.header.frame_id)
-            self.ptsContourRef = self.tfrx.transformPoint('Stage', ptsContourRefArena)
-
-            try:
-                self.speedCommandTool = self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
-            except AttributeError, e:
-                rospy.logwarn('AttributeError: %s' % e)
-                rv.success = False
-        except tf.Exception:
-            rospy.logwarn ('5B Exception transforming to Stage frame in SetStageState_callback()')
-            rv.success = False
+            self.speedCommandTool = self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
+        except AttributeError, e:
+            rospy.logwarn('AttributeError: %s' % e)
+            
         
         return rv
 
@@ -882,6 +889,13 @@ class RosFivebar:
             self.ptEeCommand.y = vecPID.y + self.ptEeSense.y
             self.vecEeErrorPrev.x = self.vecEeError.x 
             self.vecEeErrorPrev.y = self.vecEeError.y 
+            
+            # Transform to arena coords, clip, & back to stage.
+            (pts, isInArena) = self.ClipPtsToArena(PointStamped(header=Header(stamp=self.ptsContourRef.header.stamp,
+                                                                              frame_id='Stage'),
+                                                                point=self.ptEeCommand))
+            self.ptEeCommand = pts.point
+            
             
             # Display a vector in rviz.
             ptBase = self.ptEeSense

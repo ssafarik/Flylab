@@ -20,19 +20,19 @@
   <param name="calibration/checker_size" type="double" value="14.4" />
 
   <!-- The mask circle in camera coordinates (i.e. pixels).    -->
-  <param name="camera/mask/x"      type="double" value="350"/>
-  <param name="camera/mask/y"      type="double" value="244"/>
-  <param name="camera/mask/radius" type="double" value="240"/>
+  <param name="camera/mask/x"      type="double" value="356"/>
+  <param name="camera/mask/y"      type="double" value="249"/>
+  <param name="camera/mask/radius" type="double" value="225"/>
 
 
 
   <!-- These values come from CameraArena.launch, with a checkerboard on the arena. -->
-  <param name="camera_arena_rvec_0" type="double" value="-3.10"/>
-  <param name="camera_arena_rvec_1" type="double" value="0.011"/>
-  <param name="camera_arena_rvec_2" type="double" value="-0.09"/>
-  <param name="camera_arena_tvec_0" type="double" value="-6"/> 
-  <param name="camera_arena_tvec_1" type="double" value="-8"/> 
-  <param name="camera_arena_tvec_2" type="double" value="337.874"/>
+  <param name="camera_arena_rvec_0" type="double" value="-3.129"/>
+  <param name="camera_arena_rvec_1" type="double" value="-0.000"/>
+  <param name="camera_arena_rvec_2" type="double" value="0.031"/>
+  <param name="camera_arena_tvec_0" type="double" value="2.715"/> 
+  <param name="camera_arena_tvec_1" type="double" value="3.183"/> 
+  <param name="camera_arena_tvec_2" type="double" value="313.200"/>
   
 
   <!-- ================================================================== -->
@@ -48,8 +48,8 @@
   <!-- ================================================================== -->
   
   <!-- These values come from StageArena.launch. -->
-  <param name="arena_stage_x" type="double" value="-1.6"/>
-  <param name="arena_stage_y" type="double" value="2.4"/> 
+  <param name="arena_stage_x" type="double" value="-1.0"/>
+  <param name="arena_stage_y" type="double" value="3.0"/> 
   <param name="arena_stage_z" type="double" value="0.0"/>
   <param name="arena_stage_qx" type="double" value="0.0"/>
   <param name="arena_stage_qy" type="double" value="0.0"/>

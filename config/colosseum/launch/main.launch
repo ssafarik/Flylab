@@ -13,7 +13,7 @@
 	<include file="$(find fivebar)/launch/fivebar.launch" />
 	<include file="$(find colosseum)/launch/camera.launch" />
 
-	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" /> 
+	<include file="$(find flybowls)/launch/heatbowl_50mm.launch" /> 
 	<include file="$(find colosseum)/launch/params_calibration.launch" />
 	<include file="$(find colosseum)/launch/params_tracking.launch" />
 	<include file="$(find colosseum)/launch/params_actuator.launch" />
