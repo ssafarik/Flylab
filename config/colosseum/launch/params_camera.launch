@@ -3,8 +3,8 @@
   
   <param name="autoexposure" type="double" value="0"/>
   <param name="autogain" type="double" value="0"/>
-  <param name="exposure" type="double" value="16000"/>
-  <param name="gain" type="double" value="200"/>
+  <param name="exposure" type="double" value="1400"/>
+  <param name="gain" type="double" value="100"/>
   <param name="acquisitionmode" type="int" value="0"/>
   <param name="triggersource" type="int" value="0"/>
   <param name="framerate" type="double" value="60"/>

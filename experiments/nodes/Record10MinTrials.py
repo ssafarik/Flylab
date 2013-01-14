@@ -27,13 +27,13 @@ class Experiment():
         
         self.experimentparams.save.filenamebase = "tenmin"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = False
+        self.experimentparams.save.video = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.tracking.exclusionzones.enabled = False
-        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
-        self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasertrack.enabled = False
@@ -83,9 +83,11 @@ class Experiment():
         
         self.experimentparams.trial.lasertrack.enabled = False
         
-        self.experimentparams.trial.ledpanels.enabled = False
+        self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 1
+        self.experimentparams.trial.ledpanels.origin.x = 0 
+        self.experimentparams.trial.ledpanels.origin.y = 0 
         self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
