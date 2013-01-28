@@ -9,7 +9,7 @@ import geometry_msgs.msg
 import std_msgs.msg
 
 class ArenaState(genpy.Message):
-  _md5sum = "11b5b4f31e8db813f50a89b5a8f9b076"
+  _md5sum = "d8cbb1ba4198a22c7838a2e8f6d75dd0"
   _type = "tracking/ArenaState"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """flycore/MsgFrameState robot
@@ -23,7 +23,7 @@ string              name
 geometry_msgs/Pose  pose
 geometry_msgs/Twist velocity
 float64             speed # This is here mainly so we can show it with rxplot.
-
+Wings               wings
 
 ================================================================================
 MSG: std_msgs/Header
@@ -78,6 +78,16 @@ MSG: geometry_msgs/Vector3
 float64 x
 float64 y
 float64 z
+================================================================================
+MSG: flycore/Wings
+WingState   left
+WingState   right
+
+
+================================================================================
+MSG: flycore/WingState
+float64             angle
+
 """
   __slots__ = ['robot','flies']
   _slot_types = ['flycore/MsgFrameState','flycore/MsgFrameState[]']
@@ -134,7 +144,7 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed))
+      buff.write(_struct_16d.pack(_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed, _x.robot.wings.left.angle, _x.robot.wings.right.angle))
       length = len(self.flies)
       buff.write(_struct_I.pack(length))
       for val1 in self.flies:
@@ -170,6 +180,11 @@ float64 z
         _x = _v8
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         buff.write(_struct_d.pack(val1.speed))
+        _v9 = val1.wings
+        _v10 = _v9.left
+        buff.write(_struct_d.pack(_v10.angle))
+        _v11 = _v9.right
+        buff.write(_struct_d.pack(_v11.angle))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -208,20 +223,20 @@ float64 z
         self.robot.name = str[start:end]
       _x = self
       start = end
-      end += 112
-      (_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed,) = _struct_14d.unpack(str[start:end])
+      end += 128
+      (_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed, _x.robot.wings.left.angle, _x.robot.wings.right.angle,) = _struct_16d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       self.flies = []
       for i in range(0, length):
         val1 = flycore.msg.MsgFrameState()
-        _v9 = val1.header
+        _v12 = val1.header
         start = end
         end += 4
-        (_v9.seq,) = _struct_I.unpack(str[start:end])
-        _v10 = _v9.stamp
-        _x = _v10
+        (_v12.seq,) = _struct_I.unpack(str[start:end])
+        _v13 = _v12.stamp
+        _x = _v13
         start = end
         end += 8
         (_x.secs, _x.nsecs,) = _struct_2I.unpack(str[start:end])
@@ -231,9 +246,9 @@ float64 z
         start = end
         end += length
         if python3:
-          _v9.frame_id = str[start:end].decode('utf-8')
+          _v12.frame_id = str[start:end].decode('utf-8')
         else:
-          _v9.frame_id = str[start:end]
+          _v12.frame_id = str[start:end]
         start = end
         end += 4
         (length,) = _struct_I.unpack(str[start:end])
@@ -243,31 +258,40 @@ float64 z
           val1.name = str[start:end].decode('utf-8')
         else:
           val1.name = str[start:end]
-        _v11 = val1.pose
-        _v12 = _v11.position
-        _x = _v12
-        start = end
-        end += 24
-        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
-        _v13 = _v11.orientation
-        _x = _v13
-        start = end
-        end += 32
-        (_x.x, _x.y, _x.z, _x.w,) = _struct_4d.unpack(str[start:end])
-        _v14 = val1.velocity
-        _v15 = _v14.linear
+        _v14 = val1.pose
+        _v15 = _v14.position
         _x = _v15
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
-        _v16 = _v14.angular
+        _v16 = _v14.orientation
         _x = _v16
+        start = end
+        end += 32
+        (_x.x, _x.y, _x.z, _x.w,) = _struct_4d.unpack(str[start:end])
+        _v17 = val1.velocity
+        _v18 = _v17.linear
+        _x = _v18
+        start = end
+        end += 24
+        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+        _v19 = _v17.angular
+        _x = _v19
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         start = end
         end += 8
         (val1.speed,) = _struct_d.unpack(str[start:end])
+        _v20 = val1.wings
+        _v21 = _v20.left
+        start = end
+        end += 8
+        (_v21.angle,) = _struct_d.unpack(str[start:end])
+        _v22 = _v20.right
+        start = end
+        end += 8
+        (_v22.angle,) = _struct_d.unpack(str[start:end])
         self.flies.append(val1)
       return self
     except struct.error as e:
@@ -296,16 +320,16 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed))
+      buff.write(_struct_16d.pack(_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed, _x.robot.wings.left.angle, _x.robot.wings.right.angle))
       length = len(self.flies)
       buff.write(_struct_I.pack(length))
       for val1 in self.flies:
-        _v17 = val1.header
-        buff.write(_struct_I.pack(_v17.seq))
-        _v18 = _v17.stamp
-        _x = _v18
+        _v23 = val1.header
+        buff.write(_struct_I.pack(_v23.seq))
+        _v24 = _v23.stamp
+        _x = _v24
         buff.write(_struct_2I.pack(_x.secs, _x.nsecs))
-        _x = _v17.frame_id
+        _x = _v23.frame_id
         length = len(_x)
         if python3 or type(_x) == unicode:
           _x = _x.encode('utf-8')
@@ -317,21 +341,26 @@ float64 z
           _x = _x.encode('utf-8')
           length = len(_x)
         buff.write(struct.pack('<I%ss'%length, length, _x))
-        _v19 = val1.pose
-        _v20 = _v19.position
-        _x = _v20
+        _v25 = val1.pose
+        _v26 = _v25.position
+        _x = _v26
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
-        _v21 = _v19.orientation
-        _x = _v21
+        _v27 = _v25.orientation
+        _x = _v27
         buff.write(_struct_4d.pack(_x.x, _x.y, _x.z, _x.w))
-        _v22 = val1.velocity
-        _v23 = _v22.linear
-        _x = _v23
+        _v28 = val1.velocity
+        _v29 = _v28.linear
+        _x = _v29
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
-        _v24 = _v22.angular
-        _x = _v24
+        _v30 = _v28.angular
+        _x = _v30
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         buff.write(_struct_d.pack(val1.speed))
+        _v31 = val1.wings
+        _v32 = _v31.left
+        buff.write(_struct_d.pack(_v32.angle))
+        _v33 = _v31.right
+        buff.write(_struct_d.pack(_v33.angle))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -371,20 +400,20 @@ float64 z
         self.robot.name = str[start:end]
       _x = self
       start = end
-      end += 112
-      (_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed,) = _struct_14d.unpack(str[start:end])
+      end += 128
+      (_x.robot.pose.position.x, _x.robot.pose.position.y, _x.robot.pose.position.z, _x.robot.pose.orientation.x, _x.robot.pose.orientation.y, _x.robot.pose.orientation.z, _x.robot.pose.orientation.w, _x.robot.velocity.linear.x, _x.robot.velocity.linear.y, _x.robot.velocity.linear.z, _x.robot.velocity.angular.x, _x.robot.velocity.angular.y, _x.robot.velocity.angular.z, _x.robot.speed, _x.robot.wings.left.angle, _x.robot.wings.right.angle,) = _struct_16d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
       self.flies = []
       for i in range(0, length):
         val1 = flycore.msg.MsgFrameState()
-        _v25 = val1.header
+        _v34 = val1.header
         start = end
         end += 4
-        (_v25.seq,) = _struct_I.unpack(str[start:end])
-        _v26 = _v25.stamp
-        _x = _v26
+        (_v34.seq,) = _struct_I.unpack(str[start:end])
+        _v35 = _v34.stamp
+        _x = _v35
         start = end
         end += 8
         (_x.secs, _x.nsecs,) = _struct_2I.unpack(str[start:end])
@@ -394,9 +423,9 @@ float64 z
         start = end
         end += length
         if python3:
-          _v25.frame_id = str[start:end].decode('utf-8')
+          _v34.frame_id = str[start:end].decode('utf-8')
         else:
-          _v25.frame_id = str[start:end]
+          _v34.frame_id = str[start:end]
         start = end
         end += 4
         (length,) = _struct_I.unpack(str[start:end])
@@ -406,31 +435,40 @@ float64 z
           val1.name = str[start:end].decode('utf-8')
         else:
           val1.name = str[start:end]
-        _v27 = val1.pose
-        _v28 = _v27.position
-        _x = _v28
+        _v36 = val1.pose
+        _v37 = _v36.position
+        _x = _v37
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
-        _v29 = _v27.orientation
-        _x = _v29
+        _v38 = _v36.orientation
+        _x = _v38
         start = end
         end += 32
         (_x.x, _x.y, _x.z, _x.w,) = _struct_4d.unpack(str[start:end])
-        _v30 = val1.velocity
-        _v31 = _v30.linear
-        _x = _v31
+        _v39 = val1.velocity
+        _v40 = _v39.linear
+        _x = _v40
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
-        _v32 = _v30.angular
-        _x = _v32
+        _v41 = _v39.angular
+        _x = _v41
         start = end
         end += 24
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         start = end
         end += 8
         (val1.speed,) = _struct_d.unpack(str[start:end])
+        _v42 = val1.wings
+        _v43 = _v42.left
+        start = end
+        end += 8
+        (_v43.angle,) = _struct_d.unpack(str[start:end])
+        _v44 = _v42.right
+        start = end
+        end += 8
+        (_v44.angle,) = _struct_d.unpack(str[start:end])
         self.flies.append(val1)
       return self
     except struct.error as e:
@@ -438,7 +476,7 @@ float64 z
 
 _struct_I = genpy.struct_I
 _struct_d = struct.Struct("<d")
-_struct_14d = struct.Struct("<14d")
+_struct_16d = struct.Struct("<16d")
 _struct_3I = struct.Struct("<3I")
 _struct_4d = struct.Struct("<4d")
 _struct_2I = struct.Struct("<2I")

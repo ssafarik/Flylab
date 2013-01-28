@@ -4,6 +4,7 @@ import sys
 import os
 import glob
 import shutil
+import numpy as N
 
 
 ###############################################################################
@@ -32,6 +33,8 @@ def chdir(dir):
 class ConvertCsv:
     def __init__(self):
 
+        #######################################################################
+        # Structure of the Header lines.
         #######################################################################
         self.headingsExperiment_V22 =  'date_time, '\
                                         'description, '\
@@ -210,45 +213,21 @@ class ConvertCsv:
         self.headingsVersionFile_V26 = 'versionFile\n'
         self.templateVersionFile_V26 = '{versionFile:s}\n'
         
-        self.headingsExperiment_V26 =  'date_time, '\
-                                        'description, '\
-                                        'maxTrials, '\
-                                        'trial\n'
-        self.templateExperiment_V26 =  '{date_time:s}, '\
-                                        '{description:s}, '\
-                                        '{maxTrials:s}, '\
-                                        '{trial:s}\n'
+        self.headingsExperiment_V26 =  self.headingsExperiment_V22
+        self.templateExperiment_V26 =  self.templateExperiment_V22
                                   
-        self.headingsRobot_V26 =       'nRobots, '\
-                                        'widthRobot, '\
-                                        'heightRobot, '\
-                                        'visibleRobot, '\
-                                        'paintRobot, '\
-                                        'scentRobot\n'
-        self.templateRobots_V26 =       '{nRobots:s}, '\
-                                        '{widthRobot:s}, '\
-                                        '{heightRobot:s}, '\
-                                        '{visibleRobot:s}, '\
-                                        '{paintRobot:s}, '\
-                                        '{scentRobot:s}\n'
+        self.headingsRobot_V26 =       self.headingsRobot_V22
+        self.templateRobots_V26 =       self.templateRobots_V22
                                   
-        self.headingsFlies_V26 =       'nFlies, '\
-                                        'typeFlies, '\
-                                        'genderFlies\n'
-        self.templateFlies_V26 =       '{nFlies:s}, '\
-                                        '{typeFlies:s}, '\
-                                        '{genderFlies:s}\n'
+        self.headingsFlies_V26 =       self.headingsFlies_V22
+        self.templateFlies_V26 =       self.templateFlies_V22
 
-        self.headingsTrackingA_V26 =   'trackingExclusionzoneEnabled'
-        self.headingsTrackingB_V26 =   ', trackingExclusionzoneX, '\
-                                        'trackingExclusionzoneY, '\
-                                        'trackingExclusionzoneRadius'
-        self.templateTrackingA_V26 =   '{trackingExclusionzoneEnabled:s}'
-        self.templateTrackingB_V26 =   ', {trackingExclusionzoneX:s}, '\
-                                        '{trackingExclusionzoneY:s}, '\
-                                        '{trackingExclusionzoneRadius:s}'
+        self.headingsTrackingA_V26 =   self.headingsTrackingA_V22
+        self.headingsTrackingB_V26 =   self.headingsTrackingB_V22
+        self.templateTrackingA_V26 =   self.templateTrackingA_V22
+        self.templateTrackingB_V26 =   self.templateTrackingB_V22
 
-        self.headingsPreRobot_V26 =    'preRobotEnabled, '\
+        self.headingsPreRobot_V26 =     'preRobotEnabled, '\
                                         'preRobotMovePatternShape, '\
                                         'preRobotMovePatternHzPattern, '\
                                         'preRobotMovePatternHzPoint, '\
@@ -265,7 +244,7 @@ class ConvertCsv:
                                         'preRobotMoveRelSpeed, '\
                                         'preRobotMoveRelSpeedType, '\
                                         'preRobotMoveRelTolerance\n'
-        self.templatePreRobot_V26 =    '{preRobotEnabled:s}, '\
+        self.templatePreRobot_V26 =     '{preRobotEnabled:s}, '\
                                         '{preRobotMovePatternShape:s}, '\
                                         '{preRobotMovePatternHzPattern:s}, '\
                                         '{preRobotMovePatternHzPoint:s}, '\
@@ -283,7 +262,7 @@ class ConvertCsv:
                                         '{preRobotMoveRelSpeedType:s}, '\
                                         '{preRobotMoveRelTolerance:s}\n'
                                     
-        self.headingsPreLaser_V26 =    'preLaserEnabled, '\
+        self.headingsPreLaser_V26 =     'preLaserEnabled, '\
                                         'preLaserPatternShape, '\
                                         'preLaserPatternHzPattern, '\
                                         'preLaserPatternHzPoint, '\
@@ -294,7 +273,7 @@ class ConvertCsv:
                                         'preLaserStatefilterLo, '\
                                         'preLaserStatefilterHi, '\
                                         'preLaserStatefilterCriteria\n'
-        self.templatePreLaser_V26 =    '{preLaserEnabled:s}, '\
+        self.templatePreLaser_V26 =     '{preLaserEnabled:s}, '\
                                         '{preLaserPatternShape:s}, '\
                                         '{preLaserPatternHzPattern:s}, '\
                                         '{preLaserPatternHzPoint:s}, '\
@@ -306,14 +285,14 @@ class ConvertCsv:
                                         '\"{preLaserStatefilterHi:s}\", '\
                                         '{preLaserStatefilterCriteria:s}\n'
         
-        self.headingsPreLEDPanels_V26 ='preLEDPanelsEnabled, '\
+        self.headingsPreLEDPanels_V26 = 'preLEDPanelsEnabled, '\
                                         'preLEDPanelsCommand, '\
                                         'preLEDPanelsIdPattern, '\
                                         'preLEDPanelsFrameid, '\
                                         'preLEDPanelsStatefilterLo, '\
                                         'preLEDPanelsStatefilterHi, '\
                                         'preLEDPanelsStatefilterCriteria\n'
-        self.templatePreLEDPanels_V26 ='{preLEDPanelsEnabled:s}, '\
+        self.templatePreLEDPanels_V26 = '{preLEDPanelsEnabled:s}, '\
                                         '{preLEDPanelsCommand:s}, '\
                                         '{preLEDPanelsIdPattern:s}, '\
                                         '{preLEDPanelsFrameid:s}, '\
@@ -321,10 +300,10 @@ class ConvertCsv:
                                         '{preLEDPanelsStatefilterHi:s}, '\
                                         '{preLEDPanelsStatefilterCriteria:s}\n'
 
-        self.headingsPreWait1_V26 =    'preWait1\n'
-        self.templatePreWait1_V26 =    '{preWait1:s}\n'
+        self.headingsPreWait1_V26 =     'preWait1\n'
+        self.templatePreWait1_V26 =     '{preWait1:s}\n'
         
-        self.headingsPreTrigger_V26 =  'preTriggerEnabled, '\
+        self.headingsPreTrigger_V26 =   'preTriggerEnabled, '\
                                         'preTriggerFrameidParent, '\
                                         'preTriggerFrameidChild, '\
                                         'preTriggerSpeedAbsParentMin, '\
@@ -341,7 +320,7 @@ class ConvertCsv:
                                         'preTriggerAngleTestBilateral, '\
                                         'preTriggerTimeHold, '\
                                         'preTriggerTimeout\n'
-        self.templatePreTrigger_V26 =  '{preTriggerEnabled:s}, '\
+        self.templatePreTrigger_V26 =   '{preTriggerEnabled:s}, '\
                                         '{preTriggerFrameidParent:s}, '\
                                         '{preTriggerFrameidChild:s}, '\
                                         '{preTriggerSpeedAbsParentMin:s}, '\
@@ -362,7 +341,7 @@ class ConvertCsv:
         self.headingsPreWait2_V26 =    'preWait2\n'
         self.templatePreWait2_V26 =    '{preWait2:s}\n'
         
-        self.headingsTrialRobot_V26 =  'trialRobotEnabled, '\
+        self.headingsTrialRobot_V26 =   'trialRobotEnabled, '\
                                         'trialRobotMovePatternShape, '\
                                         'trialRobotMovePatternHzPattern, '\
                                         'trialRobotMovePatternHzPoint, '\
@@ -379,7 +358,7 @@ class ConvertCsv:
                                         'trialRobotMoveRelSpeed, '\
                                         'trialRobotMoveRelSpeedType, '\
                                         'trialRobotMoveRelTolerance\n'
-        self.templateTrialRobot_V26 =  '{trialRobotEnabled:s}, '\
+        self.templateTrialRobot_V26 =   '{trialRobotEnabled:s}, '\
                                         '{trialRobotMovePatternShape:s}, '\
                                         '{trialRobotMovePatternHzPattern:s}, '\
                                         '{trialRobotMovePatternHzPoint:s}, '\
@@ -397,7 +376,7 @@ class ConvertCsv:
                                         '{trialRobotMoveRelSpeedType:s}, '\
                                         '{trialRobotMoveRelTolerance:s}\n'
                                     
-        self.headingsTrialLaser_V26 =  'trialLaserEnabled, '\
+        self.headingsTrialLaser_V26 =   'trialLaserEnabled, '\
                                         'trialLaserPatternShape, '\
                                         'trialLaserPatternHzPattern, '\
                                         'trialLaserPatternHzPoint, '\
@@ -408,7 +387,7 @@ class ConvertCsv:
                                         'trialLaserStatefilterLo, '\
                                         'trialLaserStatefilterHi, '\
                                         'trialLaserStatefilterCriteria\n'
-        self.templateTrialLaser_V26 =  '{trialLaserEnabled:s}, '\
+        self.templateTrialLaser_V26 =   '{trialLaserEnabled:s}, '\
                                         '{trialLaserPatternShape:s}, '\
                                         '{trialLaserPatternHzPattern:s}, '\
                                         '{trialLaserPatternHzPoint:s}, '\
@@ -435,7 +414,7 @@ class ConvertCsv:
                                         '{trialLEDPanelsStatefilterHi:s}, '\
                                         '{trialLEDPanelsStatefilterCriteria:s}\n'
         
-        self.headingsPostTrigger_V26 = 'postTriggerEnabled, '\
+        self.headingsPostTrigger_V26 =  'postTriggerEnabled, '\
                                         'postTriggerFrameidParent, '\
                                         'postTriggerFrameidChild, '\
                                         'postTriggerSpeedAbsParentMin, '\
@@ -452,7 +431,7 @@ class ConvertCsv:
                                         'postTriggerAngleTestBilateral, '\
                                         'postTriggerTimeHold, '\
                                         'postTriggerTimeout\n'
-        self.templatePostTrigger_V26 = '{postTriggerEnabled:s}, '\
+        self.templatePostTrigger_V26 =  '{postTriggerEnabled:s}, '\
                                         '{postTriggerFrameidParent:s}, '\
                                         '{postTriggerFrameidChild:s}, '\
                                         '{postTriggerSpeedAbsParentMin:s}, '\
@@ -470,24 +449,71 @@ class ConvertCsv:
                                         '{postTriggerTimeHold:s}, '\
                                         '{postTriggerTimeout:s}\n'
                                   
-        self.headingsPostWait_V26 =    'postWait\n'
-        self.templatePostWait_V26 =    '{postWait:s}\n'
+        self.headingsPostWait_V26 =     'postWait\n'
+        self.templatePostWait_V26 =     '{postWait:s}\n'
+
+
+       
+        #######################################################################
+        self.headingsVersionFile_V27 = self.headingsVersionFile_V26
+        self.templateVersionFile_V27 = self.templateVersionFile_V26
+        self.headingsExperiment_V27 =  self.headingsExperiment_V26
+        self.templateExperiment_V27 =  self.templateExperiment_V26
+        self.headingsRobot_V27 =       self.headingsRobot_V26
+        self.templateRobots_V27 =      self.templateRobots_V26
+        self.headingsFlies_V27 =       self.headingsFlies_V26
+        self.templateFlies_V27 =       self.templateFlies_V26
+        self.headingsTrackingA_V27 =   self.headingsTrackingA_V26
+        self.headingsTrackingB_V27 =   self.headingsTrackingB_V26
+        self.templateTrackingA_V27 =   self.templateTrackingA_V26
+        self.templateTrackingB_V27 =   self.templateTrackingB_V26
+        self.headingsPreRobot_V27 =    self.headingsPreRobot_V26
+        self.templatePreRobot_V27 =    self.templatePreRobot_V26
+        self.headingsPreLaser_V27 =    self.headingsPreLaser_V26
+        self.templatePreLaser_V27 =    self.templatePreLaser_V26
+        self.headingsPreLEDPanels_V27 =self.headingsPreLEDPanels_V26
+        self.templatePreLEDPanels_V27 =self.templatePreLEDPanels_V26
+        self.headingsPreWait1_V27 =    self.headingsPreWait1_V26
+        self.templatePreWait1_V27 =    self.templatePreWait1_V26
+        self.headingsPreTrigger_V27 =  self.headingsPreTrigger_V26
+        self.templatePreTrigger_V27 =  self.templatePreTrigger_V26
+        self.headingsPreWait2_V27 =    self.headingsPreWait2_V26
+        self.templatePreWait2_V27 =    self.templatePreWait2_V26
+        self.headingsTrialRobot_V27 =  self.headingsTrialRobot_V26
+        self.templateTrialRobot_V27 =  self.templateTrialRobot_V26
+        self.headingsTrialLaser_V27 =  self.headingsTrialLaser_V26
+        self.templateTrialLaser_V27 =  self.templateTrialLaser_V26
+        self.headingsTrialLEDPanels_V27 = self.headingsTrialLEDPanels_V26
+        self.templateTrialLEDPanels_V27 = self.templateTrialLEDPanels_V26
+        self.headingsPostTrigger_V27 = self.headingsPostTrigger_V26
+        self.templatePostTrigger_V27 = self.templatePostTrigger_V26
+        self.headingsPostWait_V27 =    self.headingsPostWait_V26
+        self.templatePostWait_V27 =    self.templatePostWait_V26
 
 
         #######################################################################
-        self.headingsDataLeft_Pre26     = 'time'
-        self.templateDataLeft_Pre26     = '{time:s}'
-        self.headingsDataRobot_Pre26    = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot'
-        self.templateDataRobot_Pre26    = ', {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}'
-        self.headingsDataFly_Pre26      = ', xFly, yFly, aFly, vxFly, vyFly, vaFly'
-        self.templateDataFly_Pre26      = ', {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}'
+        # Structure of the Data lines.
+        #######################################################################
+        self.headingsDataLeft_Vpre26    = 'time'
+        self.templateDataLeft_Vpre26    = '{time:s}'
+        self.headingsDataRobot_Vpre26   = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot'
+        self.templateDataRobot_Vpre26   = ', {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}'
+        self.headingsDataFly_Vpre26     = ', xFly, yFly, aFly, vxFly, vyFly, vaFly'
+        self.templateDataFly_Vpre26     = ', {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}'
 
         self.headingsDataLeft_V26       = 'time, triggered'
         self.templateDataLeft_V26       = '{time:s}, {triggered:s}'
-        self.headingsDataRobot_V26      = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot'
-        self.templateDataRobot_V26      = ', {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}'
-        self.headingsDataFly_V26        = ', xFly, yFly, aFly, vxFly, vyFly, vaFly'
-        self.templateDataFly_V26        = ', {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}'
+        self.headingsDataRobot_V26      = self.headingsDataRobot_Vpre26
+        self.templateDataRobot_V26      = self.templateDataRobot_Vpre26
+        self.headingsDataFly_V26        = self.headingsDataFly_Vpre26
+        self.templateDataFly_V26        = self.templateDataFly_Vpre26
+
+        self.headingsDataLeft_V27       = self.headingsDataLeft_V26
+        self.templateDataLeft_V27       = self.templateDataLeft_V26
+        self.headingsDataRobot_V27      = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, aRobotWingLeft, aRobotWingRight'
+        self.templateDataRobot_V27      = ', {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}, {aRobotWingLeft:s}, {aRobotWingRight:s}'
+        self.headingsDataFly_V27        = ', xFly, yFly, aFly, vxFly, vyFly, vaFly, aFlyWingLeft, aFlyWingRight'
+        self.templateDataFly_V27        = ', {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}, {aFlyWingLeft:s}, {aFlyWingRight:s}'
         
         #######################################################################
         
@@ -586,7 +612,10 @@ class ConvertCsv:
                 nFields -= 1  # For the 'triggered' field.
 
             # Now nFields should be a multiple of 6:  (x,y,a,vx,vy,va) for each robot or fly.
-            nObjects = int(nFields/6)
+            if (float(version)<2.7):
+                nObjects = int(nFields/6)
+            elif (version=='2.7'):
+                nObjects = int(nFields/8)
             
             nRobots = 1 # There's always a robot in the file.
             nFlies = nObjects-nRobots
@@ -620,7 +649,7 @@ class ConvertCsv:
             
             
         # Set default values for PreRobot.
-        self.param_preRobotEnabled             = 'False'
+        self.param_preRobotEnabled                 = 'False'
         self.param_preRobotMovePatternShape        = ''
         self.param_preRobotMovePatternHzPattern    = '0'
         self.param_preRobotMovePatternHzPoint      = '0'
@@ -1089,12 +1118,12 @@ class ConvertCsv:
                 headerPreWait2      = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
-                headerTrialRobotTxt      = line[i]; i=i+1
-                headerTrialRobot         = line[i]; i=i+1
+                headerTrialRobotTxt = line[i]; i=i+1
+                headerTrialRobot    = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
-                headerTrialLaserTxt      = line[i]; i=i+1
-                headerTrialLaser         = line[i]; i=i+1
+                headerTrialLaserTxt = line[i]; i=i+1
+                headerTrialLaser    = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
                 headerTrialLEDPanelsTxt  = line[i]; i=i+1
@@ -1110,7 +1139,7 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-            if versionIn=='2.6':
+            if (versionIn=='2.6') or (versionIn=='2.7'):
                 i = 0;
                 headerVersionTxt    = line[i]; i=i+1
                 headerVersion       = line[i]; i=i+1
@@ -1156,12 +1185,12 @@ class ConvertCsv:
                 headerPreWait2      = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
-                headerTrialRobotTxt      = line[i]; i=i+1
-                headerTrialRobot         = line[i]; i=i+1
+                headerTrialRobotTxt = line[i]; i=i+1
+                headerTrialRobot    = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
-                headerTrialLaserTxt      = line[i]; i=i+1
-                headerTrialLaser         = line[i]; i=i+1
+                headerTrialLaserTxt = line[i]; i=i+1
+                headerTrialLaser    = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
                 headerTrialLEDPanelsTxt  = line[i]; i=i+1
@@ -1179,7 +1208,7 @@ class ConvertCsv:
 
         
         # Set default values for PreRobot.
-        self.param_preRobotEnabled             = 'False'
+        self.param_preRobotEnabled                 = 'False'
         self.param_preRobotMovePatternShape        = ''
         self.param_preRobotMovePatternHzPattern    = '0'
         self.param_preRobotMovePatternHzPoint      = '0'
@@ -1792,7 +1821,7 @@ class ConvertCsv:
             self.param_postWait                     = field_list[0]
 
 
-        if versionIn=='2.6':
+        if (versionIn=='2.6') or (versionIn=='2.7'):
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
@@ -2378,9 +2407,13 @@ class ConvertCsv:
             fid.write('\n')
             
 
+    def WriteHeader_V27(self, filename):
+        self.WriteHeader_V26(filename)
+        
+
     # Write the data lines from any-version input file to a pre-2.6 version output file.
-    # Pre-version 2.6 doesn't include the 'triggered' column in the data.
-    def CopyDataLines_Pre26(self, filenameIn, filenameOut):
+    # Pre-version 2.6 doesn't include the 'triggered' column, nor the 'wings' columns.
+    def WriteDataLines_Vpre26(self, filenameIn, filenameOut):
         (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filenameIn)
         
         with open(filenameIn, 'r') as fidIn:
@@ -2390,55 +2423,74 @@ class ConvertCsv:
             with open(filenameOut, 'a') as fidOut:
                 
                 # Write the new heading line.
-                self.headingsData_Pre26 = self.headingsDataLeft_Pre26 + self.headingsDataRobot_Pre26
+                headingsData = self.headingsDataLeft_Vpre26 + self.headingsDataRobot_Vpre26
                 for i in range(nFlies):
-                    self.headingsData_Pre26 += self.headingsDataFly_Pre26
-                self.headingsData_Pre26 += '\n'
-                fidOut.write(self.headingsData_Pre26)    
+                    headingsData += self.headingsDataFly_Vpre26
+                headingsData += '\n'
+                fidOut.write(headingsData)    
                 
                 
                 # Write the data lines.
                 for lineIn in fidIn:
-                    field_list = self.ListFromCsv(lineIn)
+                    fieldsIn_list = self.ListFromCsv(lineIn)
 
-                    lineOutLeft = self.templateDataLeft_Pre26.format(
-                                                            time = field_list[0],
-                                                            )
+
+                    ############### Fields:  Time,Triggered
+                    lineOutLeft = self.templateDataLeft_Vpre26.format(
+                                                                    time = fieldsIn_list[0],
+                                                                    )
                     if (float(versionIn) < 2.6):
-                        iField = 1
+                        iFieldIn = 1
                     else:
-                        iField = 2  # Skip the 'triggered' column.
+                        iFieldIn = 2  # Skip the 'triggered' column.
                         
-                    lineOutRobot = self.templateDataRobot_Pre26.format(
-                                                            xRobot = field_list[iField+0],
-                                                            yRobot = field_list[iField+1],
-                                                            aRobot = field_list[iField+2],
-                                                            vxRobot = field_list[iField+3],
-                                                            vyRobot = field_list[iField+4],
-                                                            vaRobot = field_list[iField+5],
+                    lineOut = lineOutLeft
+
+                        
+                    ############### Fields:  Robot state.
+                    lineOutRobot = self.templateDataRobot_Vpre26.format(
+                                                            xRobot = fieldsIn_list[iFieldIn+0],
+                                                            yRobot = fieldsIn_list[iFieldIn+1],
+                                                            aRobot = fieldsIn_list[iFieldIn+2],
+                                                            vxRobot = fieldsIn_list[iFieldIn+3],
+                                                            vyRobot = fieldsIn_list[iFieldIn+4],
+                                                            vaRobot = fieldsIn_list[iFieldIn+5],
                                                             )
-                    iField += 6
-                    lineOut = lineOutLeft + lineOutRobot
                     
+                    if (versionIn == '2.6'):
+                        iFieldIn += 6
+                    elif (versionIn == '2.7'):
+                        iFieldIn += 8   # Skip the wings fields.
+                        
+                    lineOut += lineOutRobot
+                    
+                    
+                    ############### Fields:  Fly state.
                     for iFly in range(nFlies): 
-                        lineOutFly = self.templateDataFly_Pre26.format(
-                                                            xFly = field_list[iField+0],
-                                                            yFly = field_list[iField+1],
-                                                            aFly = field_list[iField+2],
-                                                            vxFly = field_list[iField+3],
-                                                            vyFly = field_list[iField+4],
-                                                            vaFly = field_list[iField+5],
+                        lineOutFly = self.templateDataFly_Vpre26.format(
+                                                            xFly = fieldsIn_list[iFieldIn+0],
+                                                            yFly = fieldsIn_list[iFieldIn+1],
+                                                            aFly = fieldsIn_list[iFieldIn+2],
+                                                            vxFly = fieldsIn_list[iFieldIn+3],
+                                                            vyFly = fieldsIn_list[iFieldIn+4],
+                                                            vaFly = fieldsIn_list[iFieldIn+5],
                                                             )
-                        iField += 6
+                        if (versionIn == '2.6'):
+                            iFieldIn += 6
+                        elif (versionIn == '2.7'):
+                            iFieldIn += 8   # Skip the wings fields.
+
                         lineOut += lineOutFly
                         
+                        
+                    ############### End of the line.
                     lineOut += '\n'
                     fidOut.write(lineOut)
                     
 
-    # Write the data lines from any-version input file to a post-2.6 version output file.
-    # Post-version 2.6 includes the 'triggered' column in the data.
-    def CopyDataLines_V26(self, filenameIn, filenameOut):
+    # Write the data lines from any-version input file to a 2.6 version output file.
+    # Versions >= 2.6 include the 'triggered' column in the data.
+    def WriteDataLines_V26(self, filenameIn, filenameOut):
         (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filenameIn)
         
         with open(filenameIn, 'r') as fidIn:
@@ -2448,53 +2500,189 @@ class ConvertCsv:
             with open(filenameOut, 'a') as fidOut:
                 
                 # Write the new heading line.
-                self.headingsData_V26 = self.headingsDataLeft_V26 + self.headingsDataRobot_V26
+                headingsData = self.headingsDataLeft_V26 + self.headingsDataRobot_V26
                 for i in range(nFlies):
-                    self.headingsData_V26 += self.headingsDataFly_V26
-                self.headingsData_V26 += '\n'
-                fidOut.write(self.headingsData_V26)    
+                    headingsData += self.headingsDataFly_V26
+                headingsData += '\n'
+                fidOut.write(headingsData)    
                 
                 
                 # Write the data lines.
                 for lineIn in fidIn:
-                    field_list = self.ListFromCsv(lineIn)
+                    fieldsIn_list = self.ListFromCsv(lineIn)
 
+                    ############### Fields:  Time,Triggered
                     if (float(versionIn) < 2.6):
                         lineOutLeft = self.templateDataLeft_V26.format(
-                                                            time = field_list[0],
-                                                            triggered = 1,
+                                                            time = fieldsIn_list[0],
+                                                            triggered = '1',
                                                             )
-                        iField = 1
-                    else:
+                        iFieldIn = 1
+                    elif (versionIn == '2.6'):      # Use 'triggered' value from file.
                         lineOutLeft = self.templateDataLeft_V26.format(
-                                                            time = field_list[0],
-                                                            triggered = field_list[1],
+                                                            time = fieldsIn_list[0],
+                                                            triggered = fieldsIn_list[1],
                                                             )
-                        iField = 2  # Skip the 'triggered' column.
+                        iFieldIn = 2  # Skip the 'triggered' column.
+                    elif (versionIn == '2.7'):      # Use 'triggered' value from file.
+                        lineOutLeft = self.templateDataLeft_V26.format(
+                                                            time = fieldsIn_list[0],
+                                                            triggered = fieldsIn_list[1],
+                                                            )
+                        iFieldIn = 2  # Skip the 'triggered' column.
                         
+                    lineOut = lineOutLeft
+
+                        
+                    ############### Fields:  Robot state.
                     lineOutRobot = self.templateDataRobot_V26.format(
-                                                            xRobot = field_list[iField+0],
-                                                            yRobot = field_list[iField+1],
-                                                            aRobot = field_list[iField+2],
-                                                            vxRobot = field_list[iField+3],
-                                                            vyRobot = field_list[iField+4],
-                                                            vaRobot = field_list[iField+5],
+                                                            xRobot = fieldsIn_list[iFieldIn+0],
+                                                            yRobot = fieldsIn_list[iFieldIn+1],
+                                                            aRobot = fieldsIn_list[iFieldIn+2],
+                                                            vxRobot = fieldsIn_list[iFieldIn+3],
+                                                            vyRobot = fieldsIn_list[iFieldIn+4],
+                                                            vaRobot = fieldsIn_list[iFieldIn+5],
                                                             )
-                    iField += 6
-                    lineOut = lineOutLeft + lineOutRobot
+                    if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing' columns.
+                        iFieldIn += 6
+                    elif (versionIn == '2.7'):
+                        iFieldIn += 8
+                        
+                    lineOut += lineOutRobot
+
                     
+                    ############### Fields:  Fly state.
                     for iFly in range(nFlies): 
                         lineOutFly = self.templateDataFly_V26.format(
-                                                            xFly = field_list[iField+0],
-                                                            yFly = field_list[iField+1],
-                                                            aFly = field_list[iField+2],
-                                                            vxFly = field_list[iField+3],
-                                                            vyFly = field_list[iField+4],
-                                                            vaFly = field_list[iField+5],
+                                                            xFly = fieldsIn_list[iFieldIn+0],
+                                                            yFly = fieldsIn_list[iFieldIn+1],
+                                                            aFly = fieldsIn_list[iFieldIn+2],
+                                                            vxFly = fieldsIn_list[iFieldIn+3],
+                                                            vyFly = fieldsIn_list[iFieldIn+4],
+                                                            vaFly = fieldsIn_list[iFieldIn+5],
                                                             )
-                        iField += 6
+                        if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing' columns.
+                            iFieldIn += 6
+                        elif (versionIn == '2.7'):
+                            iFieldIn += 8
+                            
                         lineOut += lineOutFly
+
                         
+                    ############### End of the line.
+                    lineOut += '\n'
+                    fidOut.write(lineOut)
+
+
+    # Write the data lines from any-version input file to a 2.7 version output file.
+    # Versions >= 2.7 include wing angles.
+    def WriteDataLines_V27(self, filenameIn, filenameOut):
+        (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filenameIn)
+        
+        with open(filenameIn, 'r') as fidIn:
+            self.AdvanceUntilField(fidIn, 'time')
+            tmp = fidIn.readline()   # Skip the old heading text.
+            
+            with open(filenameOut, 'a') as fidOut:
+                
+                # Write the new heading line.
+                headingsData = self.headingsDataLeft_V27 + self.headingsDataRobot_V27
+                for i in range(nFlies):
+                    headingsData += self.headingsDataFly_V27
+                headingsData += '\n'
+                fidOut.write(headingsData)    
+                
+                
+                # Write the data lines.
+                for lineIn in fidIn:
+                    fieldsIn_list = self.ListFromCsv(lineIn)
+
+                    ############### Fields:  Time,Triggered
+                    if (float(versionIn) < 2.6):    # Pre-2.6 had no 'triggered' column.  Use default value.
+                        lineOutLeft = self.templateDataLeft_V27.format(
+                                                            time = fieldsIn_list[0],
+                                                            triggered = '1',
+                                                            )
+                        iFieldIn = 1
+                    
+                    elif (versionIn == '2.6'):      # Use 'triggered' value from file.
+                        lineOutLeft = self.templateDataLeft_V27.format(
+                                                            time = fieldsIn_list[0],
+                                                            triggered = fieldsIn_list[1],
+                                                            )
+                        iFieldIn = 2
+
+                    elif (versionIn == '2.7'):      # Use 'triggered' value from file.
+                        lineOutLeft = self.templateDataLeft_V27.format(
+                                                            time = fieldsIn_list[0],
+                                                            triggered = fieldsIn_list[1],
+                                                            )
+                        iFieldIn = 2
+                        
+                    lineOut = lineOutLeft
+                    
+                    
+                    ############### Fields:  Robot state.
+                    if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing' columns.  Use default values.
+                        lineOutRobot = self.templateDataRobot_V27.format(
+                                                                xRobot          = fieldsIn_list[iFieldIn+0],
+                                                                yRobot          = fieldsIn_list[iFieldIn+1],
+                                                                aRobot          = fieldsIn_list[iFieldIn+2],
+                                                                vxRobot         = fieldsIn_list[iFieldIn+3],
+                                                                vyRobot         = fieldsIn_list[iFieldIn+4],
+                                                                vaRobot         = fieldsIn_list[iFieldIn+5],
+                                                                aRobotWingLeft  = repr(N.pi),
+                                                                aRobotWingRight = repr(N.pi),
+                                                                )
+                        iFieldIn += 6
+                        
+                    elif (versionIn == '2.7'):      # Use 'wing' values from file.
+                        lineOutRobot = self.templateDataRobot_V27.format(
+                                                                xRobot          = fieldsIn_list[iFieldIn+0],
+                                                                yRobot          = fieldsIn_list[iFieldIn+1],
+                                                                aRobot          = fieldsIn_list[iFieldIn+2],
+                                                                vxRobot         = fieldsIn_list[iFieldIn+3],
+                                                                vyRobot         = fieldsIn_list[iFieldIn+4],
+                                                                vaRobot         = fieldsIn_list[iFieldIn+5],
+                                                                aRobotWingLeft  = fieldsIn_list[iFieldIn+6],
+                                                                aRobotWingRight = fieldsIn_list[iFieldIn+7],
+                                                                )
+                        iFieldIn += 8
+                        
+                        
+                    lineOut += lineOutRobot
+                    
+
+                    ############### Fields:  Fly state.
+                    for iFly in range(nFlies): 
+                        if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing' columns.  Use default values.
+                            lineOutFly = self.templateDataFly_V27.format(
+                                                                xFly = fieldsIn_list[iFieldIn+0],
+                                                                yFly = fieldsIn_list[iFieldIn+1],
+                                                                aFly = fieldsIn_list[iFieldIn+2],
+                                                                vxFly = fieldsIn_list[iFieldIn+3],
+                                                                vyFly = fieldsIn_list[iFieldIn+4],
+                                                                vaFly = fieldsIn_list[iFieldIn+5],
+                                                                aFlyWingLeft  = repr(N.pi),
+                                                                aFlyWingRight = repr(N.pi),
+                                                                )
+                            iFieldIn += 6
+                        elif (versionIn == '2.7'):      # Use 'wing' values from file.
+                            lineOutFly = self.templateDataFly_V27.format(
+                                                                xFly          = fieldsIn_list[iFieldIn+0],
+                                                                yFly          = fieldsIn_list[iFieldIn+1],
+                                                                aFly          = fieldsIn_list[iFieldIn+2],
+                                                                vxFly         = fieldsIn_list[iFieldIn+3],
+                                                                vyFly         = fieldsIn_list[iFieldIn+4],
+                                                                vaFly         = fieldsIn_list[iFieldIn+5],
+                                                                aFlyWingLeft  = fieldsIn_list[iFieldIn+6],
+                                                                aFlyWingRight = fieldsIn_list[iFieldIn+7],
+                                                                )
+                            iFieldIn += 8
+                                
+                        lineOut += lineOutFly
+
+                    ############### End of the line.
                     lineOut += '\n'
                     fidOut.write(lineOut)
 
@@ -2511,18 +2699,22 @@ class ConvertCsv:
         
         if (self.versionToWrite=='2.2'):
             self.WriteHeader_V22(filenameOut)
-            self.CopyDataLines_Pre26(filenameIn, filenameOut)
+            self.WriteDataLines_Vpre26(filenameIn, filenameOut)
             
-        elif (self.versionToWrite=='2.6') or (self.versionToWrite=='latest'):
+        elif (self.versionToWrite=='2.6'):
             self.WriteHeader_V26(filenameOut)
-            self.CopyDataLines_V26(filenameIn, filenameOut)
+            self.WriteDataLines_V26(filenameIn, filenameOut)
+        
+        elif (self.versionToWrite=='2.7') or (self.versionToWrite=='latest'):
+            self.WriteHeader_V27(filenameOut)
+            self.WriteDataLines_V27(filenameIn, filenameOut)
         
 
     # Convert all the .csv files in the input directory to a given version in the output directory.
     #
     def ConvertDirToDir(self, dirInBase, dirOutBase):
         
-        if (self.versionToWrite=='2.2') or (self.versionToWrite=='2.6') or (self.versionToWrite=='latest'): 
+        if (self.versionToWrite=='2.2') or (self.versionToWrite=='2.6') or (self.versionToWrite=='2.7') or (self.versionToWrite=='latest'): 
             dirsIn = glob.glob(dirInBase+'/*')
             for d in dirsIn:
                 dirLeaf = d.split('/')[-1]
@@ -2537,11 +2729,11 @@ class ConvertCsv:
                     self.ConvertFile(filenameIn, dirOut)
                         
         else:
-            print ('Only versions "2.2", "2.6", and "latest" are supported for writing.')
+            print ('Only versions "2.2", "2.6", "2.7", and "latest" are supported for writing.')
             
 
     def ConvertTree(self, dirIn, dirOut):
-        if (self.versionToWrite=='2.2') or (self.versionToWrite=='2.6') or (self.versionToWrite=='latest'): 
+        if (self.versionToWrite=='2.2') or (self.versionToWrite=='2.6') or (self.versionToWrite=='2.7') or (self.versionToWrite=='latest'): 
             if (dirIn != dirOut):
                 names = os.listdir(dirIn)
             
@@ -2584,7 +2776,7 @@ class ConvertCsv:
             else:
                 print "Source and Dest dirs must be different."
         else:
-            print ('Only versions "2.2", "2.6", and "latest" are supported for writing.')
+            print ('Only versions "2.2", "2.6", "2.7", and "latest" are supported for writing.')
             
         
 if __name__ == '__main__':
@@ -2593,8 +2785,8 @@ if __name__ == '__main__':
     
     ###############################################################################################
     ###############################################################################################
-    convert.versionToWrite = '2.2'  # '2.2' or '2.6' or 'latest'
-    dirIn   = '/home/ssafarik/FlylabData/2012_11_08'
+    convert.versionToWrite = '2.6'  # '2.2' or '2.6' or '2.7' or 'latest'
+    dirIn   = '/home/ssafarik/FlylabData/2012_10_25'
     dirOut  = '/home/ssafarik/FlylabData_converted'
     ###############################################################################################
     ###############################################################################################

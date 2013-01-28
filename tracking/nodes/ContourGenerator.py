@@ -52,6 +52,7 @@ class ContourGenerator:
         self.pubImageBackground  = rospy.Publisher("camera/image_background", Image)
         self.pubImageForeground  = rospy.Publisher("camera/image_foreground", Image)
         self.pubImageThreshold   = rospy.Publisher("camera/image_threshold", Image)
+        self.pubImageRoi         = rospy.Publisher("camera/image_roi", Image)
         self.pubImageRviz        = rospy.Publisher("camera_rviz/image_rect", Image)
         self.pubCamerainfoRviz   = rospy.Publisher("camera_rviz/camera_info", CameraInfo)
         self.pubContourinfoLists = rospy.Publisher("ContourinfoLists", ContourinfoLists)
@@ -68,14 +69,17 @@ class ContourGenerator:
 #            self.bgratio = 0.5
 #            self.bg = cv2.BackgroundSubtractorMOG(self.bghistory, self.bgnmixtures, self.bgratio)
 
+        self.widthRoi  = rospy.get_param ('tracking/roi/width', 15)
+        self.heightRoi = rospy.get_param ('tracking/roi/height', 15)
         
         # Contour Info
         self.contourinfolists = ContourinfoLists()
-        self.x0_list = []
-        self.y0_list = []
+        self.x_list = []
+        self.y_list = []
         self.angle_list = []
         self.area_list = []
         self.ecc_list = []
+        self.imgRoi_list = []
         self.nContours = 0
         self.nContoursMax = rospy.get_param("tracking/nContoursMax", 20)
         self.areaContourMin = rospy.get_param("tracking/areaContourMin", 0.0)
@@ -308,7 +312,7 @@ class ContourGenerator:
     # AppendContourinfoListsFromContour()
     # Converts contour to a contourinfo, transforms it to the output frame, and appends the contourinfo members to their respective lists.
     #
-    def AppendContourinfoListsFromContour(self, contour):
+    def AppendContourinfoListsFromContour(self, contour, imgForeground):
         moments = cv2.moments(contour)  # Sometimes the contour contains just one pixel, resulting in moments=(0,0,0,0,0,0)
         (x, y, area, angle, ecc) = self.ContourinfoFromMoments(moments)
         if (x is None) or (y is None):
@@ -316,6 +320,7 @@ class ContourGenerator:
             area = 0.0001 # one pixel's worth.
             angle = 99.9
             ecc = 1.0
+        
             
         # Save contourinfolists
         ptsContour = PointStamped()
@@ -324,17 +329,20 @@ class ContourGenerator:
         ptsContour.point.y = y
             
         if x is not None:
+            imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(cv2.getRectSubPix(imgForeground, (self.widthRoi, self.heightRoi), (x,y))), 'passthrough')
+            #self.pubImageRoi.publish(imgRoi)
             try:
                 if self.bUseTransforms:
                     self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptsContour)
                 else:
                     self.ptsOutput = ptsContour
                     
-                self.x0_list.append(self.ptsOutput.point.x)
-                self.y0_list.append(self.ptsOutput.point.y)
+                self.x_list.append(self.ptsOutput.point.x)
+                self.y_list.append(self.ptsOutput.point.y)
                 self.angle_list.append(angle)
                 self.area_list.append(area)
                 self.ecc_list.append(ecc)
+                self.imgRoi_list.append(imgRoi)
                 self.nContours += 1
 
             except tf.Exception, e:
@@ -346,17 +354,18 @@ class ContourGenerator:
         
 
 
-    def ContourinfoListsFromImage(self, npImage):
-        self.x0_list = []
-        self.y0_list = []
+    def ContourinfoListsFromImage(self, imgThreshold, imgForeground):
+        self.x_list = []
+        self.y_list = []
         self.angle_list = []
         self.area_list = []
         self.ecc_list = []
+        self.imgRoi_list = []
         
         # Find contours
-        sumImage = cv2.sumElems(npImage)
+        sumImage = cv2.sumElems(imgThreshold)
         if self.minSumImage < sumImage[0]:
-            (contours,hierarchy) = cv2.findContours(npImage, mode=cv2.RETR_CCOMP, method=cv2.CHAIN_APPROX_SIMPLE) # Modifies npImage.
+            (contours,hierarchy) = cv2.findContours(imgThreshold, mode=cv2.RETR_CCOMP, method=cv2.CHAIN_APPROX_SIMPLE) # Modifies imgThreshold.
         else:
             (contours,hierarchy) = (None, None)
             
@@ -368,7 +377,7 @@ class ContourGenerator:
             iContour = 0
             while (True):    # While there's a next contour. 
                 contour = contours[iContour]
-                self.AppendContourinfoListsFromContour(contour) # self.nContours++ gets incremented inside function.
+                self.AppendContourinfoListsFromContour(contour, imgForeground) # self.nContours++ gets incremented inside function.
                 iContour = hierarchy[0][iContour][NEXT]
                 if iContour<0:
                     break
@@ -382,11 +391,12 @@ class ContourGenerator:
         self.seq += 1
         
         if self.nContours > 0:
-            contourinfolists.x = self.x0_list
-            contourinfolists.y = self.y0_list
+            contourinfolists.x = self.x_list
+            contourinfolists.y = self.y_list
             contourinfolists.angle = self.angle_list
             contourinfolists.area = self.area_list
             contourinfolists.ecc = self.ecc_list
+            contourinfolists.imgRoi = self.imgRoi_list
         
             
         # Remove duplicates and too-small contours.
@@ -399,7 +409,8 @@ class ContourGenerator:
                                                  contourinfolists.y[iContour], 
                                                  contourinfolists.angle[iContour], 
                                                  contourinfolists.area[iContour], 
-                                                 contourinfolists.ecc[iContour]])
+                                                 contourinfolists.ecc[iContour], 
+                                                 contourinfolists.imgRoi[iContour]])
 
             # Remove the dups.
             contourinfolists_list = sorted(tuple(contourinfolists_list))
@@ -412,12 +423,14 @@ class ContourGenerator:
             contourinfolists.angle = []
             contourinfolists.area = []
             contourinfolists.ecc = []
+            contourinfolists.imgRoi = []
             for iContour in range(self.nContours):
                 contourinfolists.x.append(contourinfolists_list[iContour][0])
                 contourinfolists.y.append(contourinfolists_list[iContour][1])
                 contourinfolists.angle.append(contourinfolists_list[iContour][2])
                 contourinfolists.area.append(contourinfolists_list[iContour][3])
                 contourinfolists.ecc.append(contourinfolists_list[iContour][4])
+                contourinfolists.imgRoi.append(contourinfolists_list[iContour][5])
 
             
         return contourinfolists, contours    
@@ -474,11 +487,11 @@ class ContourGenerator:
                     # Subtract background
                     #self.imgBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8)
                     if self.bEqualizeHist:
-                        npBuffer = cv2.equalizeHist(self.imgBackground)
+                        imgBuffer = cv2.equalizeHist(self.imgBackground)
                     else:
-                        npBuffer = self.imgBackground
+                        imgBuffer = self.imgBackground
     
-                    self.imgBackground2 = npBuffer
+                    self.imgBackground2 = imgBuffer
                     self.imgForeground = cv2.absdiff(self.imgCamera, self.imgBackground2)
                 else:
                     self.imgForeground = self.imgCamera
@@ -492,7 +505,7 @@ class ContourGenerator:
     
                 
                 # Get the ContourinfoLists.
-                (self.contourinfolists, self.contours) = self.ContourinfoListsFromImage(self.imgThreshold)    # Modifies self.imgThreshold
+                (self.contourinfolists, self.contours) = self.ContourinfoListsFromImage(self.imgThreshold, self.imgForeground)    # Modifies self.imgThreshold
                 self.pubContourinfoLists.publish(self.contourinfolists)
                 
                 # Convert to color for display image
