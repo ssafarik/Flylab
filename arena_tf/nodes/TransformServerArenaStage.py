@@ -25,11 +25,13 @@ class TransformServerArenaStage:
         self.qArenaStage.z = rospy.get_param('arena_stage_qz', 0.0)
         self.qArenaStage.w = rospy.get_param('arena_stage_qw', 1.0)
 
-        self.transArenaStage = (self.ptArenaStage.x,self.ptArenaStage.y,self.ptArenaStage.z)
-        self.rotArenaStage = (self.qArenaStage.x,self.qArenaStage.y,self.qArenaStage.z,self.qArenaStage.w)
-
-        self.T = tf.transformations.translation_matrix(self.transArenaStage)
-        self.R = tf.transformations.quaternion_matrix(self.rotArenaStage)
+        self.transArenaStage = (self.ptArenaStage.x, 
+                                self.ptArenaStage.y,
+                                self.ptArenaStage.z)
+        self.rotArenaStage   = (self.qArenaStage.x,
+                                self.qArenaStage.y,
+                                self.qArenaStage.z,
+                                self.qArenaStage.w)
 
         self.initialized = True
 

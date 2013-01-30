@@ -89,7 +89,7 @@ class SaveVideo:
 #            cmdCreateVideoFile = 'ffmpeg -f image2 -i ' + self.dirFrames + '/%06d.png -r ' + str(self.framerate) + ' ' + \
 #                                   '-sameq -s 640x480 -mbd rd -trellis 2 -cmp 2 -subcmp 2 -g 100 -bf 2 -pass 1/2 ' + \
 #                                   self.filenameVideo
-            cmdCreateVideoFile = 'avconv -i ' + self.dirFrames + '/%06d.png ' + self.filenameVideo
+            cmdCreateVideoFile = 'avconv -i ' + self.dirFrames + '/%06d.png -r' + str(self.framerate) + self.filenameVideo
             rospy.logwarn('Converting .png images to video using command:')
             rospy.logwarn (cmdCreateVideoFile)
             try:

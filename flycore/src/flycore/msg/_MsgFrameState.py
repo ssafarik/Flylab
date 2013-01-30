@@ -4,11 +4,12 @@ python3 = True if sys.hexversion > 0x03000000 else False
 import genpy
 import struct
 
+import flycore.msg
 import geometry_msgs.msg
 import std_msgs.msg
 
 class MsgFrameState(genpy.Message):
-  _md5sum = "3170dd2479342d605cab9df7bac33672"
+  _md5sum = "4c2e25e3358d3b77c674811dd552fe7b"
   _type = "flycore/MsgFrameState"
   _has_header = True #flag to mark the presence of a Header object
   _full_text = """Header              header
@@ -16,7 +17,7 @@ string              name
 geometry_msgs/Pose  pose
 geometry_msgs/Twist velocity
 float64             speed # This is here mainly so we can show it with rxplot.
-
+Wings               wings
 
 ================================================================================
 MSG: std_msgs/Header
@@ -71,9 +72,19 @@ MSG: geometry_msgs/Vector3
 float64 x
 float64 y
 float64 z
+================================================================================
+MSG: flycore/Wings
+WingState   left
+WingState   right
+
+
+================================================================================
+MSG: flycore/WingState
+float64             angle
+
 """
-  __slots__ = ['header','name','pose','velocity','speed']
-  _slot_types = ['std_msgs/Header','string','geometry_msgs/Pose','geometry_msgs/Twist','float64']
+  __slots__ = ['header','name','pose','velocity','speed','wings']
+  _slot_types = ['std_msgs/Header','string','geometry_msgs/Pose','geometry_msgs/Twist','float64','flycore/Wings']
 
   def __init__(self, *args, **kwds):
     """
@@ -83,7 +94,7 @@ float64 z
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       header,name,pose,velocity,speed
+       header,name,pose,velocity,speed,wings
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -102,12 +113,15 @@ float64 z
         self.velocity = geometry_msgs.msg.Twist()
       if self.speed is None:
         self.speed = 0.
+      if self.wings is None:
+        self.wings = flycore.msg.Wings()
     else:
       self.header = std_msgs.msg.Header()
       self.name = ''
       self.pose = geometry_msgs.msg.Pose()
       self.velocity = geometry_msgs.msg.Twist()
       self.speed = 0.
+      self.wings = flycore.msg.Wings()
 
   def _get_types(self):
     """
@@ -136,7 +150,7 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed))
+      buff.write(_struct_16d.pack(_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed, _x.wings.left.angle, _x.wings.right.angle))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -152,6 +166,8 @@ float64 z
         self.pose = geometry_msgs.msg.Pose()
       if self.velocity is None:
         self.velocity = geometry_msgs.msg.Twist()
+      if self.wings is None:
+        self.wings = flycore.msg.Wings()
       end = 0
       _x = self
       start = end
@@ -177,8 +193,8 @@ float64 z
         self.name = str[start:end]
       _x = self
       start = end
-      end += 112
-      (_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed,) = _struct_14d.unpack(str[start:end])
+      end += 128
+      (_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed, _x.wings.left.angle, _x.wings.right.angle,) = _struct_16d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -206,7 +222,7 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed))
+      buff.write(_struct_16d.pack(_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed, _x.wings.left.angle, _x.wings.right.angle))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -223,6 +239,8 @@ float64 z
         self.pose = geometry_msgs.msg.Pose()
       if self.velocity is None:
         self.velocity = geometry_msgs.msg.Twist()
+      if self.wings is None:
+        self.wings = flycore.msg.Wings()
       end = 0
       _x = self
       start = end
@@ -248,12 +266,12 @@ float64 z
         self.name = str[start:end]
       _x = self
       start = end
-      end += 112
-      (_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed,) = _struct_14d.unpack(str[start:end])
+      end += 128
+      (_x.pose.position.x, _x.pose.position.y, _x.pose.position.z, _x.pose.orientation.x, _x.pose.orientation.y, _x.pose.orientation.z, _x.pose.orientation.w, _x.velocity.linear.x, _x.velocity.linear.y, _x.velocity.linear.z, _x.velocity.angular.x, _x.velocity.angular.y, _x.velocity.angular.z, _x.speed, _x.wings.left.angle, _x.wings.right.angle,) = _struct_16d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
+_struct_16d = struct.Struct("<16d")
 _struct_3I = struct.Struct("<3I")
-_struct_14d = struct.Struct("<14d")

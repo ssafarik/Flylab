@@ -10,4 +10,5 @@ srv_gen/
 *.cmake
 *.internal
 *.lisp
+*.asv
 

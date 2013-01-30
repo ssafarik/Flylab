@@ -7,8 +7,8 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<include file="$(find bigtop)/launch/params_camera_aux.launch" ns="camera_aux/camera_aux" />
-	<node pkg="camera_aravis" type="camnode" ns="camera_aux" name="camera_aux" />
+	<include file="$(find bigtop)/launch/params_camera_aux.launch" ns="camera_aux" />
+	<node pkg="camera_aravis" type="camnode" name="camera_aux" />
 	<node pkg="image_view" type="image_view" name="image_view_aux" args="image:=camera_aux/image_raw" />  
 	
 </launch>

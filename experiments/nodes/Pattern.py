@@ -14,7 +14,7 @@ from patterngen.msg import MsgPattern
 
 
 #######################################################################################################
-class ExperimentPattern():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
@@ -26,20 +26,20 @@ class ExperimentPattern():
         self.experimentparams.experiment.trial = 1
         
         self.experimentparams.save.filenamebase = "pattern"
-        self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = True
+        self.experimentparams.save.arenastate = False
+        self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.tracking.exclusionzones.enabled = False
-        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
-        self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
+        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-75, y=25)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasertrack.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
+
         self.experimentparams.pre.wait1 = 0.0
-        
         self.experimentparams.pre.trigger.enabled = False
         self.experimentparams.pre.trigger.frameidParent = 'Fly1'
         self.experimentparams.pre.trigger.frameidChild = 'Robot'
@@ -57,7 +57,6 @@ class ExperimentPattern():
         self.experimentparams.pre.trigger.angleTestBilateral = True
         self.experimentparams.pre.trigger.timeHold = 0.0
         self.experimentparams.pre.trigger.timeout = -1
-        
         self.experimentparams.pre.wait2 = 0.0
         
 
@@ -65,20 +64,21 @@ class ExperimentPattern():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'pattern' # 'pattern' or 'relative'
+        self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
+        self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20  # Patterns per second.
-        self.experimentparams.trial.robot.move.pattern.hzPoint = 20 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the actuator.
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/30  # Patterns per second.
+        self.experimentparams.trial.robot.move.pattern.hzPoint = 60 #4/10 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the target.
         self.experimentparams.trial.robot.move.pattern.count = -1
-        self.experimentparams.trial.robot.move.pattern.size.x = 100
-        self.experimentparams.trial.robot.move.pattern.size.y = 100
-        self.experimentparams.trial.robot.move.timeout = 20 #self.experimentparams.trial.robot.move.pattern.count * (1.0/self.experimentparams.trial.robot.move.pattern.hzPattern)
-        self.experimentparams.trial.robot.home.enabled = True
+        self.experimentparams.trial.robot.move.pattern.size.x = 50
+        self.experimentparams.trial.robot.move.pattern.size.y = 50
+        self.experimentparams.trial.robot.move.timeout = 90 #self.experimentparams.trial.robot.move.pattern.count * (1.0/self.experimentparams.trial.robot.move.pattern.hzPattern)
+        self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
         self.experimentparams.trial.robot.home.timeout = -1
         self.experimentparams.trial.robot.home.tolerance = 2
-        
         
         self.experimentparams.trial.lasertrack.enabled = False
         
@@ -141,7 +141,7 @@ class ExperimentPattern():
 
 if __name__ == '__main__':
     #try:
-        experiment = ExperimentPattern()
+        experiment = Experiment()
         experiment.Run()
         
     #except:

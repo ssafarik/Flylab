@@ -8,7 +8,7 @@ import geometry_msgs.msg
 import patterngen.msg
 
 class MsgGalvoCommand(genpy.Message):
-  _md5sum = "d67d1aac121a314ba47d4fb3bd3c6b7b"
+  _md5sum = "50d1b31b801356464d6459ca215967f0"
   _type = "galvodirector/MsgGalvoCommand"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool 						enable_laser
@@ -18,16 +18,17 @@ string 						units	# 'volts' or 'millimeters'
 
 ================================================================================
 MSG: patterngen/MsgPattern
-string                mode      # 'byshape' or 'bypoints'
-string                shape     # 'constant' or 'square' or 'circle' or 'flylogo' or 'spiral' or 'ramp' or 'grid' or 'raster' or 'hilbert' or 'peano' or 'none'
-string                frame_id  # The frame to which the pattern applies.
-float64               hzPattern # Frequency of the pattern.
-float64               hzPoint   # Frequency of points making up the pattern.
-int32                 count     # How many times to output the pattern (-1 or N.inf means infinite).
-geometry_msgs/Point[] points    # If mode=='bypoints', then this is the list of points to scan.
-geometry_msgs/Point   size      # (x,y) dimensions.
-bool				  preempt   # Should this message restart an in-progress pattern.
-float64               param     # An extra shape-dependent parameter, if needed (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
+string                frameidPosition   # The frame to which the pattern position applies.
+string                frameidAngle      # The frame to which the pattern angle applies.
+string                shape             # 'constant' or 'square' or 'circle' or 'flylogo' or 'spiral' or 'ramp' or 'grid' or 'raster' or 'hilbert' or 'peano' or 'none' or 'bypoints'
+float64               hzPattern         # Frequency of the pattern.
+float64               hzPoint           # Frequency of points making up the pattern.
+int32                 count             # How many times to output the pattern (-1 or N.inf means infinite).
+geometry_msgs/Point[] points            # If shape=='bypoints', then this is the list of points to use.
+geometry_msgs/Point   size              # (x,y) dimensions.
+bool				  preempt           # Should this message restart an in-progress pattern.
+float64               param             # An extra shape-dependent parameter, if needed (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
+int32                 direction         # Step forward (+1) or reverse (-1) through the pattern points.
  
 
 
@@ -86,19 +87,19 @@ float64 z
       length = len(self.pattern_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.pattern_list:
-        _x = val1.mode
+        _x = val1.frameidPosition
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
+        _x = val1.frameidAngle
         length = len(_x)
         if python3 or type(_x) == unicode:
           _x = _x.encode('utf-8')
           length = len(_x)
         buff.write(struct.pack('<I%ss'%length, length, _x))
         _x = val1.shape
-        length = len(_x)
-        if python3 or type(_x) == unicode:
-          _x = _x.encode('utf-8')
-          length = len(_x)
-        buff.write(struct.pack('<I%ss'%length, length, _x))
-        _x = val1.frame_id
         length = len(_x)
         if python3 or type(_x) == unicode:
           _x = _x.encode('utf-8')
@@ -115,7 +116,7 @@ float64 z
         _x = _v1
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
-        buff.write(_struct_Bd.pack(_x.preempt, _x.param))
+        buff.write(_struct_Bdi.pack(_x.preempt, _x.param, _x.direction))
       _x = self.units
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -150,9 +151,18 @@ float64 z
         start = end
         end += length
         if python3:
-          val1.mode = str[start:end].decode('utf-8')
+          val1.frameidPosition = str[start:end].decode('utf-8')
         else:
-          val1.mode = str[start:end]
+          val1.frameidPosition = str[start:end]
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.frameidAngle = str[start:end].decode('utf-8')
+        else:
+          val1.frameidAngle = str[start:end]
         start = end
         end += 4
         (length,) = _struct_I.unpack(str[start:end])
@@ -162,15 +172,6 @@ float64 z
           val1.shape = str[start:end].decode('utf-8')
         else:
           val1.shape = str[start:end]
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        start = end
-        end += length
-        if python3:
-          val1.frame_id = str[start:end].decode('utf-8')
-        else:
-          val1.frame_id = str[start:end]
         _x = val1
         start = end
         end += 20
@@ -193,8 +194,8 @@ float64 z
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         _x = val1
         start = end
-        end += 9
-        (_x.preempt, _x.param,) = _struct_Bd.unpack(str[start:end])
+        end += 13
+        (_x.preempt, _x.param, _x.direction,) = _struct_Bdi.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
         self.pattern_list.append(val1)
       start = end
@@ -222,19 +223,19 @@ float64 z
       length = len(self.pattern_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.pattern_list:
-        _x = val1.mode
+        _x = val1.frameidPosition
+        length = len(_x)
+        if python3 or type(_x) == unicode:
+          _x = _x.encode('utf-8')
+          length = len(_x)
+        buff.write(struct.pack('<I%ss'%length, length, _x))
+        _x = val1.frameidAngle
         length = len(_x)
         if python3 or type(_x) == unicode:
           _x = _x.encode('utf-8')
           length = len(_x)
         buff.write(struct.pack('<I%ss'%length, length, _x))
         _x = val1.shape
-        length = len(_x)
-        if python3 or type(_x) == unicode:
-          _x = _x.encode('utf-8')
-          length = len(_x)
-        buff.write(struct.pack('<I%ss'%length, length, _x))
-        _x = val1.frame_id
         length = len(_x)
         if python3 or type(_x) == unicode:
           _x = _x.encode('utf-8')
@@ -251,7 +252,7 @@ float64 z
         _x = _v3
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
-        buff.write(_struct_Bd.pack(_x.preempt, _x.param))
+        buff.write(_struct_Bdi.pack(_x.preempt, _x.param, _x.direction))
       _x = self.units
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -287,9 +288,18 @@ float64 z
         start = end
         end += length
         if python3:
-          val1.mode = str[start:end].decode('utf-8')
+          val1.frameidPosition = str[start:end].decode('utf-8')
         else:
-          val1.mode = str[start:end]
+          val1.frameidPosition = str[start:end]
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1.frameidAngle = str[start:end].decode('utf-8')
+        else:
+          val1.frameidAngle = str[start:end]
         start = end
         end += 4
         (length,) = _struct_I.unpack(str[start:end])
@@ -299,15 +309,6 @@ float64 z
           val1.shape = str[start:end].decode('utf-8')
         else:
           val1.shape = str[start:end]
-        start = end
-        end += 4
-        (length,) = _struct_I.unpack(str[start:end])
-        start = end
-        end += length
-        if python3:
-          val1.frame_id = str[start:end].decode('utf-8')
-        else:
-          val1.frame_id = str[start:end]
         _x = val1
         start = end
         end += 20
@@ -330,8 +331,8 @@ float64 z
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         _x = val1
         start = end
-        end += 9
-        (_x.preempt, _x.param,) = _struct_Bd.unpack(str[start:end])
+        end += 13
+        (_x.preempt, _x.param, _x.direction,) = _struct_Bdi.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
         self.pattern_list.append(val1)
       start = end
@@ -348,7 +349,7 @@ float64 z
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_Bd = struct.Struct("<Bd")
+_struct_Bdi = struct.Struct("<Bdi")
 _struct_B = struct.Struct("<B")
 _struct_2di = struct.Struct("<2di")
 _struct_3d = struct.Struct("<3d")

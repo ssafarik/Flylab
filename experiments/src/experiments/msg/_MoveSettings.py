@@ -6,15 +6,16 @@ import struct
 
 import geometry_msgs.msg
 import experiments.msg
+import patterngen.msg
 
 class MoveSettings(genpy.Message):
-  _md5sum = "9c786b8734a343df756977efa677313c"
+  _md5sum = "e88b0a4362e5657bfafbffd4b49641e0"
   _type = "experiments/MoveSettings"
   _has_header = False #flag to mark the presence of a Header object
-  _full_text = """string        mode  # 'pattern' or 'relative'
-MoveRelative  relative
-MovePattern   pattern
-float64       timeout
+  _full_text = """string                    mode  # 'pattern' or 'relative'
+MoveRelative              relative
+patterngen/MsgPattern     pattern
+float64                   timeout
 
 
 ================================================================================
@@ -31,13 +32,19 @@ float64 	tolerance
 
 
 ================================================================================
-MSG: experiments/MovePattern
-string 				shape  # 'constant' or 'ramp' or 'circle' or 'square' or 'flylogo' or 'spiral'
-float64 			hzPattern
-float64 			hzPoint
-int32 				count  # -1 means forever
-geometry_msgs/Point size
-float64             param
+MSG: patterngen/MsgPattern
+string                frameidPosition   # The frame to which the pattern position applies.
+string                frameidAngle      # The frame to which the pattern angle applies.
+string                shape             # 'constant' or 'square' or 'circle' or 'flylogo' or 'spiral' or 'ramp' or 'grid' or 'raster' or 'hilbert' or 'peano' or 'none' or 'bypoints'
+float64               hzPattern         # Frequency of the pattern.
+float64               hzPoint           # Frequency of points making up the pattern.
+int32                 count             # How many times to output the pattern (-1 or N.inf means infinite).
+geometry_msgs/Point[] points            # If shape=='bypoints', then this is the list of points to use.
+geometry_msgs/Point   size              # (x,y) dimensions.
+bool				  preempt           # Should this message restart an in-progress pattern.
+float64               param             # An extra shape-dependent parameter, if needed (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
+int32                 direction         # Step forward (+1) or reverse (-1) through the pattern points.
+ 
 
 
 ================================================================================
@@ -49,7 +56,7 @@ float64 z
 
 """
   __slots__ = ['mode','relative','pattern','timeout']
-  _slot_types = ['string','experiments/MoveRelative','experiments/MovePattern','float64']
+  _slot_types = ['string','experiments/MoveRelative','patterngen/MsgPattern','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -73,13 +80,13 @@ float64 z
       if self.relative is None:
         self.relative = experiments.msg.MoveRelative()
       if self.pattern is None:
-        self.pattern = experiments.msg.MovePattern()
+        self.pattern = patterngen.msg.MsgPattern()
       if self.timeout is None:
         self.timeout = 0.
     else:
       self.mode = ''
       self.relative = experiments.msg.MoveRelative()
-      self.pattern = experiments.msg.MovePattern()
+      self.pattern = patterngen.msg.MsgPattern()
       self.timeout = 0.
 
   def _get_types(self):
@@ -129,6 +136,18 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       buff.write(_struct_d.pack(self.relative.tolerance))
+      _x = self.pattern.frameidPosition
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.pattern.frameidAngle
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self.pattern.shape
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -136,7 +155,14 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di5d.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.param, _x.timeout))
+      buff.write(_struct_2di.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count))
+      length = len(self.pattern.points)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.pattern.points:
+        _x = val1
+        buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+      _x = self
+      buff.write(_struct_3dBdid.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -149,7 +175,7 @@ float64 z
       if self.relative is None:
         self.relative = experiments.msg.MoveRelative()
       if self.pattern is None:
-        self.pattern = experiments.msg.MovePattern()
+        self.pattern = patterngen.msg.MsgPattern()
       end = 0
       start = end
       end += 4
@@ -216,13 +242,47 @@ float64 z
       start = end
       end += length
       if python3:
+        self.pattern.frameidPosition = str[start:end].decode('utf-8')
+      else:
+        self.pattern.frameidPosition = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.pattern.frameidAngle = str[start:end].decode('utf-8')
+      else:
+        self.pattern.frameidAngle = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
         self.pattern.shape = str[start:end].decode('utf-8')
       else:
         self.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 60
-      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.param, _x.timeout,) = _struct_2di5d.unpack(str[start:end])
+      end += 20
+      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count,) = _struct_2di.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.pattern.points = []
+      for i in range(0, length):
+        val1 = geometry_msgs.msg.Point()
+        _x = val1
+        start = end
+        end += 24
+        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+        self.pattern.points.append(val1)
+      _x = self
+      start = end
+      end += 45
+      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.timeout,) = _struct_3dBdid.unpack(str[start:end])
+      self.pattern.preempt = bool(self.pattern.preempt)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -270,6 +330,18 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       buff.write(_struct_d.pack(self.relative.tolerance))
+      _x = self.pattern.frameidPosition
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self.pattern.frameidAngle
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self.pattern.shape
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -277,7 +349,14 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_2di5d.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.param, _x.timeout))
+      buff.write(_struct_2di.pack(_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count))
+      length = len(self.pattern.points)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.pattern.points:
+        _x = val1
+        buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
+      _x = self
+      buff.write(_struct_3dBdid.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.timeout))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -291,7 +370,7 @@ float64 z
       if self.relative is None:
         self.relative = experiments.msg.MoveRelative()
       if self.pattern is None:
-        self.pattern = experiments.msg.MovePattern()
+        self.pattern = patterngen.msg.MsgPattern()
       end = 0
       start = end
       end += 4
@@ -358,19 +437,55 @@ float64 z
       start = end
       end += length
       if python3:
+        self.pattern.frameidPosition = str[start:end].decode('utf-8')
+      else:
+        self.pattern.frameidPosition = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.pattern.frameidAngle = str[start:end].decode('utf-8')
+      else:
+        self.pattern.frameidAngle = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
         self.pattern.shape = str[start:end].decode('utf-8')
       else:
         self.pattern.shape = str[start:end]
       _x = self
       start = end
-      end += 60
-      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count, _x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.param, _x.timeout,) = _struct_2di5d.unpack(str[start:end])
+      end += 20
+      (_x.pattern.hzPattern, _x.pattern.hzPoint, _x.pattern.count,) = _struct_2di.unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.pattern.points = []
+      for i in range(0, length):
+        val1 = geometry_msgs.msg.Point()
+        _x = val1
+        start = end
+        end += 24
+        (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
+        self.pattern.points.append(val1)
+      _x = self
+      start = end
+      end += 45
+      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.timeout,) = _struct_3dBdid.unpack(str[start:end])
+      self.pattern.preempt = bool(self.pattern.preempt)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_2d = struct.Struct("<2d")
-_struct_2di5d = struct.Struct("<2di5d")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
+_struct_3dBdid = struct.Struct("<3dBdid")
+_struct_2d = struct.Struct("<2d")
+_struct_2di = struct.Struct("<2di")
+_struct_3d = struct.Struct("<3d")

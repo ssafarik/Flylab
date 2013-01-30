@@ -5,7 +5,7 @@ Arena.Reference\ Frame=/Arena
 Background\ ColorB=0
 Background\ ColorG=0
 Background\ ColorR=0
-Camera\ Config=1.5598 4.70585 220.623 1.45151 -4.8949 21.6836
+Camera\ Config=1.5048 4.70585 210.746 1.78587 3.60599 -2.87451
 Camera\ Type=rviz::OrbitViewController
 CameraAxes.Enabled=0
 CameraAxes.Length=30
@@ -74,7 +74,7 @@ Grid.OffsetY=0
 Grid.OffsetZ=0
 Grid.Plane=0
 Grid.Plane\ Cell\ Count=20
-Grid.Reference\ Frame=<Fixed Frame>
+Grid.Reference\ Frame=/Arena
 PointCloud..AxisColorAutocompute\ Value\ Bounds=1
 PointCloud..AxisColorAxis=2
 PointCloud..AxisColorMax\ Value=10
@@ -104,9 +104,15 @@ PointCloud.Queue\ Size=10
 PointCloud.Selectable=1
 PointCloud.Style=1
 PointCloud.Topic=/GalvoDriver/pointcloudmm
+<<<<<<< HEAD
 Property\ Grid\ Splitter=600,78
 Property\ Grid\ State=expanded=.Global Options,Grid.Enabled,TF.Enabled,Robot Model.Enabled,Stage.Enabled,Arena.Enabled,Robot.Enabled,Fly1Contour.Enabled,RobotContour.Enabled,EndEffector.Enabled,Target.Enabled,Target.Namespaces,CameraAxes.Enabled,contour0.Enabled,contour1.Enabled,link5.Enabled,Fly1.Enabled,Fly2.Enabled,Fly3.Enabled,Fly4.Enabled,Fly5.Enabled,Fly6.Enabled,Fly7.Enabled,Fly8.Enabled,Fly9.Enabled,Fly10.Enabled,PointCloud.Enabled;splitterratio=0.5
 QMainWindow=000000ff00000000fd0000000300000000000001d6000002f8fc0200000002fb000000100044006900730070006c006100790073010000001d000002f8000000ee00fffffffb0000000c00430061006d0065007200610000000334000000d70000000000000000000000010000013100000316fc0200000003fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073000000001d000000700000006700fffffffb0000000a00560069006500770073000000001d00000316000000bb00fffffffb0000001200530065006c0065006300740069006f006e000000001d000001b90000006700ffffff00000003000003d00000003efc0100000001fb0000000800540069006d00650100000000000003d0000002bf00ffffff000001f4000002f800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+=======
+Property\ Grid\ Splitter=822,78
+Property\ Grid\ State=expanded=.Global Options;splitterratio=0.588406
+QMainWindow=000000ff00000000fd00000003000000000000011d000003d6fc0200000002fb000000100044006900730070006c006100790073010000001d000003d6000000ee00fffffffb0000000c00430061006d0065007200610000000334000000d70000000000000000000000010000013100000316fc0200000003fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073000000001d000000700000006700fffffffb0000000a00560069006500770073000000001d00000316000000bb00fffffffb0000001200530065006c0065006300740069006f006e000000001d000001b90000006700ffffff00000003000005510000003efc0100000001fb0000000800540069006d0065010000000000000551000002bf00ffffff0000042e000003d600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+>>>>>>> 2189580024180a855078fa4b5d4a4aedbeaa05df
 Robot\ Model.Alpha=0.2
 Robot\ Model.Collision\ Enabled=0
 Robot\ Model.Enabled=0
@@ -114,7 +120,7 @@ Robot\ Model.Robot\ Description=robot_description
 Robot\ Model.TF\ Prefix=
 Robot\ Model.Update\ Interval=0.02
 Robot\ Model.Visual\ Enabled=1
-Robot.Enabled=0
+Robot.Enabled=1
 Robot.Length=0.75
 Robot.Radius=0.2
 Robot.Reference\ Frame=/Robot
@@ -134,12 +140,18 @@ TF.Show\ Arrows=0
 TF.Show\ Axes=0
 TF.Show\ Names=1
 TF.Update\ Interval=0
-Target\ Frame=<Fixed Frame>
+Target\ Frame=/Arena
 Target.Enabled=1
 Target.Marker\ Topic=visualization_marker
 Target.Queue\ Size=100
 Target.arena=1
 Target.command=1
+<<<<<<< HEAD
+=======
+Target.exclusionzone_0=1
+Target.posComputed=0
+Target.posKalman=0
+>>>>>>> 2189580024180a855078fa4b5d4a4aedbeaa05df
 Target.robot=1
 Target.target=1
 Target.tooloffset=1
@@ -233,7 +245,14 @@ Name=EndEffector
 ClassName=rviz::MarkerDisplay
 Name=Target
 [Window]
+<<<<<<< HEAD
 Height=893
 Width=992
 X=763
 Y=173
+=======
+Height=1115
+Width=1377
+X=-158
+Y=1
+>>>>>>> 2189580024180a855078fa4b5d4a4aedbeaa05df

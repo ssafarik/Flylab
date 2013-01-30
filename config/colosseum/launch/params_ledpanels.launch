@@ -2,9 +2,9 @@
 	<!-- ========================================================== -->
 	<!-- Configuration of the LEDPANELS                             -->
     <!--                                                            -->
-    <!-- Don't launch this file directly.                           -->
-    <!-- Launch the colosseum.launch file, and point here              -->
-    <!-- from there.                                                -->
+    <!-- Enter the following command at a prompt to find the tty:   -->
+    <!-- dmesg | grep tty | grep FTDI                               -->
+    <!--                                                            -->
 	<!-- ========================================================== -->
 
 	<param name="ledpanels/radius" type="double" value="120.0"/>

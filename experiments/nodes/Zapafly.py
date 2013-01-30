@@ -16,7 +16,7 @@ from tracking.msg import ArenaState
 
 
 #######################################################################################################
-class ExperimentZapafly():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
@@ -84,9 +84,10 @@ class ExperimentZapafly():
         self.experimentparams.trial.lasertrack.statefilterCriteria_list = []
         if mode=='fixedpointlist':
             # Draw a point.
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'bypoints',
-                                                                            shape      = 'constant',
-                                                                            frame_id   = 'Arena',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                                                                            frameidPosition   = 'Arena',
+                                                                            frameidAngle   = 'Arena',
+                                                                            shape      = 'bypoints',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
@@ -102,9 +103,10 @@ class ExperimentZapafly():
                                                                  )
         if mode=='fixedcircle':
             # Draw a point.
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                                                                            frameidPosition   = 'Arena',
+                                                                            frameidAngle   = 'Arena',
                                                                             shape      = 'circle',
-                                                                            frame_id   = 'Arena',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
@@ -115,9 +117,10 @@ class ExperimentZapafly():
                                                                  )
         if mode=='trackgrid':
             for iFly in flies_list:
-                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                                                                                frameidPosition   = 'Fly%dForecast' % iFly,
+                                                                                frameidAngle   = 'Fly%dForecast' % iFly,
                                                                                 shape      = 'grid',
-                                                                                frame_id   = 'Fly%dForecast' % iFly,
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
@@ -128,9 +131,10 @@ class ExperimentZapafly():
                                                                      )
         if mode=='tracknumber':
             for iFly in flies_list:
-                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                                                                                frameidPosition   = 'Fly%dForecast' % iFly,
+                                                                                frameidAngle   = 'Fly%dForecast' % iFly,
                                                                                 shape      = '%s' % iFly,
-                                                                                frame_id   = 'Fly%dForecast' % iFly,
                                                                                 hzPattern  = 10.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
@@ -141,9 +145,10 @@ class ExperimentZapafly():
                                                                      )
         if mode=='trackflylogo':
             for iFly in flies_list:
-                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                                                                                frameidPosition   = 'Fly%dForecast' % iFly,
+                                                                                frameidAngle   = 'Fly%dForecast' % iFly,
                                                                                 shape      = 'flylogo',
-                                                                                frame_id   = 'Fly%dForecast' % iFly,
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
                                                                                 count      = 1,
@@ -154,9 +159,10 @@ class ExperimentZapafly():
                                                                      )
         if mode=='fixedmaze':
             # Draw a maze.
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                                                                            frameidPosition   = 'Arena',
+                                                                            frameidAngle   = 'Arena',
                                                                             shape      = 'grid',
-                                                                            frame_id   = 'Arena',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
@@ -225,7 +231,7 @@ class ExperimentZapafly():
 
 
 if __name__ == '__main__':
-    experiment = ExperimentZapafly()
+    experiment = Experiment()
     experiment.Run()
         
 

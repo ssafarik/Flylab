@@ -14,26 +14,26 @@ from patterngen.msg import MsgPattern
 
 
 #######################################################################################################
-class ExperimentChase():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Chase the Fly"
+        self.experimentparams.experiment.description = "Chase or get chased"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
         self.experimentparams.save.filenamebase = "chase"
-        self.experimentparams.save.arenastate = False
+        self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.tracking.exclusionzones.enabled = False
-        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
-        self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
+        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasertrack.enabled = False
@@ -64,39 +64,41 @@ class ExperimentChase():
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'relative'        
         self.experimentparams.trial.robot.move.relative.tracking = True
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1"
-        self.experimentparams.trial.robot.move.relative.distance = 5
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
+        self.experimentparams.trial.robot.move.relative.distance = 8
         self.experimentparams.trial.robot.move.relative.angle = 180.0 * N.pi / 180.0
-        self.experimentparams.trial.robot.move.relative.angleType = 'constant'
-        self.experimentparams.trial.robot.move.relative.speed = 200
+        self.experimentparams.trial.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
+        self.experimentparams.trial.robot.move.relative.speed = 20 #5.2
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.trial.robot.move.timeout = 10
+        self.experimentparams.trial.robot.move.timeout = -1
         self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
-        self.experimentparams.trial.robot.home.speed = 20
+        self.experimentparams.trial.robot.home.speed = 30
         self.experimentparams.trial.robot.home.timeout = -1
         self.experimentparams.trial.robot.home.tolerance = 2
         
         
         self.experimentparams.trial.lasertrack.enabled = False
         
-        self.experimentparams.trial.ledpanels.enabled = False
+        self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 1
+        self.experimentparams.trial.ledpanels.origin.x = 0 
+        self.experimentparams.trial.ledpanels.origin.y = 0 
         self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
         self.experimentparams.trial.ledpanels.timeout = -1
 
-        self.experimentparams.post.trigger.enabled = False
+        self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly1'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
-        self.experimentparams.post.trigger.speedAbsParentMin =   0.0
-        self.experimentparams.post.trigger.speedAbsParentMax = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMin = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. NEVER
         self.experimentparams.post.trigger.speedAbsChildMin  =   0.0
         self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.post.trigger.speedRelMin       =   0.0
@@ -108,7 +110,7 @@ class ExperimentChase():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = -1
+        self.experimentparams.post.trigger.timeout = 600    # 10 minutes
 
         self.experimentparams.post.wait = 0.0
         
@@ -142,7 +144,7 @@ class ExperimentChase():
 
 if __name__ == '__main__':
     #try:
-        experiment = ExperimentChase()
+        experiment = Experiment()
         experiment.Run()
         
     #except:

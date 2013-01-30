@@ -16,7 +16,7 @@ from tracking.msg import ArenaState
 
 
 #######################################################################################################
-class ExperimentZapHotFood():
+class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
@@ -74,9 +74,10 @@ class ExperimentZapHotFood():
         self.experimentparams.trial.lasertrack.statefilterLo_list = []
         self.experimentparams.trial.lasertrack.statefilterCriteria_list = []
         for iFly in range(rospy.get_param('nFlies', 0)):#range(3):#
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(mode       = 'byshape',
+            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                                                                            frameidPosition   = 'Fly%dForecast' % (iFly+1),
+                                                                            frameidAngle   = 'Fly%dForecast' % (iFly+1),
                                                                             shape      = 'grid',
-                                                                            frame_id   = 'Fly%dForecast' % (iFly+1),
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
@@ -155,7 +156,7 @@ class ExperimentZapHotFood():
 
 
 if __name__ == '__main__':
-    experiment = ExperimentZapHotFood()
+    experiment = Experiment()
     experiment.Run()
         
 

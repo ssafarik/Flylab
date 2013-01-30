@@ -1,0 +1,12 @@
+<launch>
+    <!-- ========================================================== -->
+    <!-- Description of the maze with one central room and three    -->
+    <!-- side rooms.  Each room 10mm radius, overall 35mm radius.   -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch arena.launch, and point here from there.            -->
+    <!-- ========================================================== -->
+
+    <param name="arena/radius_inner" type="double" value="35.0"/>  <!-- millimeters -->
+    <param name="arena/radius_outer" type="double" value="35.0"/>  <!-- millimeters -->
+</launch> 

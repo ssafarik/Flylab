@@ -1,14 +1,14 @@
 <launch>
   <param name="frame_id" type="string" value="Camera0" />
-  <param name="/camera/camera_info_url" type="string" value="file:///cameras/21111539.yaml"  />
   
   <param name="autoexposure" type="double" value="0"/>
   <param name="autogain" type="double" value="0"/>
-  <param name="exposure" type="double" value="9745"/>
+  <param name="exposure" type="double" value="1400"/>
   <param name="gain" type="double" value="100"/>
   <param name="acquisitionmode" type="int" value="0"/>
   <param name="triggersource" type="int" value="0"/>
-  <param name="softwarerate" type="double" value="50"/>
+  <param name="framerate" type="double" value="60"/>
+  <param name="softwarerate" type="double" value="60"/>
   
 
 </launch>

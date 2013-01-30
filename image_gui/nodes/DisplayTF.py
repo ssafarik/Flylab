@@ -160,17 +160,17 @@ class ImageDisplay:
         else:
             self.im_display_pub = cv.CreateImage(cv.GetSize(cv_image),cv.IPL_DEPTH_8U,3)
 
-        Xsrc = [self.bounds_center_arena.point.x,self.bounds_limit_arena.point.x]
-        Ysrc = [self.bounds_center_arena.point.y,self.bounds_limit_arena.point.y]
+        xSrc = [self.bounds_center_arena.point.x,self.bounds_limit_arena.point.x]
+        ySrc = [self.bounds_center_arena.point.y,self.bounds_limit_arena.point.y]
         # rospy.logwarn("self.bounds_center_arena.point.x = %s" % (str(self.bounds_center_arena.point.x)))
         # rospy.logwarn("self.bounds_center_arena.point.y = %s" % (str(self.bounds_center_arena.point.y)))
         # rospy.logwarn("self.bounds_limit_arena.point.x = %s" % (str(self.bounds_limit_arena.point.x)))
         # rospy.logwarn("self.bounds_limit_arena.point.y = %s" % (str(self.bounds_limit_arena.point.y)))
-        response = self.camera_from_arena(Xsrc,Ysrc)
-        self.bounds_center_camera.point.x = response.Xdst[0]
-        self.bounds_center_camera.point.y = response.Ydst[0]
-        self.bounds_limit_camera.point.x = response.Xdst[1]
-        self.bounds_limit_camera.point.y = response.Ydst[1]
+        response = self.camera_from_arena(xSrc,ySrc)
+        self.bounds_center_camera.point.x = response.xDst[0]
+        self.bounds_center_camera.point.y = response.yDst[0]
+        self.bounds_limit_camera.point.x = response.xDst[1]
+        self.bounds_limit_camera.point.y = response.yDst[1]
         # rospy.logwarn("self.bounds_center_camera.point.x = %s" % (str(self.bounds_center_camera.point.x)))
         # rospy.logwarn("self.bounds_center_camera.point.y = %s" % (str(self.bounds_center_camera.point.y)))
         # rospy.logwarn("self.bounds_limit_camera.point.x = %s" % (str(self.bounds_limit_camera.point.x)))
@@ -229,25 +229,25 @@ class ImageDisplay:
             axes_x_head_shifted_arena = self.tf_listener.transformPoint("Arena",self.axes_x_head_shifted)
             axes_x_tail_shifted_arena = self.tf_listener.transformPoint("Arena",self.axes_x_tail_shifted)
 
-            Xsrc = [axes_center_arena.point.x,axes_x_tail_arena.point.x,axes_y_tail_arena.point.x,axes_x_head_arena.point.x,axes_y_head_arena.point.x,axes_x_head_shifted_arena.point.x,axes_x_tail_shifted_arena.point.x]
-            Ysrc = [axes_center_arena.point.y,axes_x_tail_arena.point.y,axes_y_tail_arena.point.y,axes_x_head_arena.point.y,axes_y_head_arena.point.y,axes_x_head_shifted_arena.point.y,axes_x_tail_shifted_arena.point.y]
-            response = self.camera_from_arena(Xsrc,Ysrc)
-            self.axes_center_camera.point.x = response.Xdst[0]
-            self.axes_center_camera.point.y = response.Ydst[0]
-            self.axes_x_tail_camera.point.x = response.Xdst[1]
-            self.axes_x_tail_camera.point.y = response.Ydst[1]
-            self.axes_y_tail_camera.point.x = response.Xdst[2]
-            self.axes_y_tail_camera.point.y = response.Ydst[2]
+            xSrc = [axes_center_arena.point.x,axes_x_tail_arena.point.x,axes_y_tail_arena.point.x,axes_x_head_arena.point.x,axes_y_head_arena.point.x,axes_x_head_shifted_arena.point.x,axes_x_tail_shifted_arena.point.x]
+            ySrc = [axes_center_arena.point.y,axes_x_tail_arena.point.y,axes_y_tail_arena.point.y,axes_x_head_arena.point.y,axes_y_head_arena.point.y,axes_x_head_shifted_arena.point.y,axes_x_tail_shifted_arena.point.y]
+            response = self.camera_from_arena(xSrc,ySrc)
+            self.axes_center_camera.point.x = response.xDst[0]
+            self.axes_center_camera.point.y = response.yDst[0]
+            self.axes_x_tail_camera.point.x = response.xDst[1]
+            self.axes_x_tail_camera.point.y = response.yDst[1]
+            self.axes_y_tail_camera.point.x = response.xDst[2]
+            self.axes_y_tail_camera.point.y = response.yDst[2]
 
-            self.axes_x_head_camera.point.x = response.Xdst[3]
-            self.axes_x_head_camera.point.y = response.Ydst[3]
-            self.axes_y_head_camera.point.x = response.Xdst[4]
-            self.axes_y_head_camera.point.y = response.Ydst[4]
+            self.axes_x_head_camera.point.x = response.xDst[3]
+            self.axes_x_head_camera.point.y = response.yDst[3]
+            self.axes_y_head_camera.point.x = response.xDst[4]
+            self.axes_y_head_camera.point.y = response.yDst[4]
 
-            self.axes_x_head_shifted_camera.point.x = response.Xdst[5]
-            self.axes_x_head_shifted_camera.point.y = response.Ydst[5]
-            self.axes_x_tail_shifted_camera.point.x = response.Xdst[6]
-            self.axes_x_tail_shifted_camera.point.y = response.Ydst[6]
+            self.axes_x_head_shifted_camera.point.x = response.xDst[5]
+            self.axes_x_head_shifted_camera.point.y = response.yDst[5]
+            self.axes_x_tail_shifted_camera.point.x = response.xDst[6]
+            self.axes_x_tail_shifted_camera.point.y = response.yDst[6]
 
             axes_center_image = self.tf_listener.transformPoint(self.image_frame,self.axes_center_camera)
             axes_x_tail_image = self.tf_listener.transformPoint(self.image_frame,self.axes_x_tail_camera)
@@ -337,11 +337,11 @@ class ImageDisplay:
                 setpoint_arena = self.tf_listener.transformPoint("Arena",self.setpoint_frame)
                 # rospy.logwarn("setpoint_arena.point.x = \n%s", str(setpoint_arena.point.x))
                 # rospy.logwarn("setpoint_arena.point.y = \n%s", str(setpoint_arena.point.y))
-                Xsrc = [setpoint_arena.point.x]
-                Ysrc = [setpoint_arena.point.y]
-                response = self.camera_from_arena(Xsrc,Ysrc)
-                self.setpoint_camera.point.x = response.Xdst[0]
-                self.setpoint_camera.point.y = response.Ydst[0]
+                xSrc = [setpoint_arena.point.x]
+                ySrc = [setpoint_arena.point.y]
+                response = self.camera_from_arena(xSrc,ySrc)
+                self.setpoint_camera.point.x = response.xDst[0]
+                self.setpoint_camera.point.y = response.yDst[0]
                 setpoint_image = self.tf_listener.transformPoint(self.image_frame,self.setpoint_camera)
                 setpoint_image_radius = math.sqrt((setpoint_image.point.x - self.setpoint_image_origin.point.x)**2 +
                                                   (setpoint_image.point.y - self.setpoint_image_origin.point.y)**2 )
@@ -353,11 +353,11 @@ class ImageDisplay:
                 setpoint_line_tail_arena = self.tf_listener.transformPoint("Arena",self.setpoint_line_tail_frame)
                 # rospy.logwarn("setpoint_arena.point.x = \n%s", str(setpoint_arena.point.x))
                 # rospy.logwarn("setpoint_arena.point.y = \n%s", str(setpoint_arena.point.y))
-                Xsrc = [setpoint_line_tail_arena.point.x]
-                Ysrc = [setpoint_line_tail_arena.point.y]
-                response = self.camera_from_arena(Xsrc,Ysrc)
-                self.setpoint_line_tail_camera.point.x = response.Xdst[0]
-                self.setpoint_line_tail_camera.point.y = response.Ydst[0]
+                xSrc = [setpoint_line_tail_arena.point.x]
+                ySrc = [setpoint_line_tail_arena.point.y]
+                response = self.camera_from_arena(xSrc,ySrc)
+                self.setpoint_line_tail_camera.point.x = response.xDst[0]
+                self.setpoint_line_tail_camera.point.y = response.yDst[0]
                 setpoint_line_tail_image = self.tf_listener.transformPoint(self.image_frame,self.setpoint_line_tail_camera)
 
                 # cv.Line(self.im_display,

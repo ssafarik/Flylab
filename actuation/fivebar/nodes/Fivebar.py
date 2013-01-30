@@ -23,10 +23,12 @@ from patterngen.srv import SrvSignal, SrvSignalResponse
 #
 #PRM:#     Parameter                  Value         Default 
 #----------------------------------------------------------------
-#PRM:0:    KP                         4537740       750000
-#PRM:1:    KI                         84154         35000
-#PRM:2:    KPOS                       1729          15000
+#PRM:0:    KP                         2000000       750000
+#PRM:1:    KI                         0             35000
+#PRM:2:    KPOS                       10000         15000
+#PRM:8:    RMS current limt           40            20
 #PRM:11:   integral clamp             500           5000
+#PRM:12:   position error trap        400           100
 #PRM:20:   operating mode             5             4
 #PRM:26:   lowpass filter             1             0
 #PRM:90:   baud rate                  38400         9600
@@ -109,6 +111,7 @@ class RosFivebar:
         TMPy            = N.sin(N.pi - self.q1CenterE) * self.L1
         self.yCenter    = N.sqrt(self.L3**2.0 - TMPx**2.0) + TMPy + FUDGEY
         self.radiusReachable = 0.98*(self.L1+self.L3-r)/2.0 # Really it's about 90.5.  Limits in xy are at roughly (64,64), (-64,64), (-64,-64), (64,-64).
+        self.radiusArena = rospy.get_param('arena/radius_inner', 25.4)
 
 
 
@@ -121,13 +124,11 @@ class RosFivebar:
         rospy.Service('get_stage_state',    SrvFrameState, self.GetStageState_callback)
         rospy.Service('home_stage',         SrvFrameState, self.HomeStage_callback)
         rospy.Service('calibrate_stage',    SrvFrameState, self.Calibrate_callback)
-        
         rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
-        self.subEndEffectorOffset = rospy.Subscriber('EndEffectorOffset', Point, self.EndEffectorOffset_callback)
+        self.subVisualPosition    = rospy.Subscriber('VisualPosition', PoseStamped, self.VisualPosition_callback)
         self.pubJointState        = rospy.Publisher('joint_states', JointState)
-        self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         self.pubMarker            = rospy.Publisher('visualization_marker', Marker)
         
         self.tfrx = tf.TransformListener()
@@ -140,40 +141,30 @@ class RosFivebar:
         self.js.name = self.names
         #self.js.velocity = [0.0, 0.0, 0.0, 0.0]
         
-        self.xc = self.xCenter        
-        self.yc = self.yCenter
-        self.ptsToolRefExternal = None #Point(0,0,0) # Where we want the "tool".
-        self.ptsToolRef = None
-        self.ptToolRefClipped = Point(0,0,0) 
-        self.ptEeSense = Point(0,0,0)
-        self.ptEeCommand = Point(0,0,0) # Where to command the end-effector.
-        self.ptEeRef = Point(0,0,0)
-        self.ptContourSense = Point(0,0,0)
-        self.vecOffsetSense = Point(0,0,0) # Vector from end-effector to the "tool"
-        self.vecContourError = Point(0,0,0)
-        self.vecToolRefError = Point(0,0,0)
-        self.vecEeError = Point(0,0,0)
-        self.vecEeErrorPrev = Point(0,0,0)
-        self.vecEeDError = Point(0,0,0)
-        self.vecEeIError = Point(0,0,0)
+        self.ptsContourRefExternal = None #Point(0,0,0) # Where we want the "tool".
+        self.ptsContourRef         = None
+        self.ptEeSense          = Point(0,0,0)
+        self.ptEeCommand        = Point(0,0,0) # Where to command the end-effector.
+        self.posesContourSense  = PoseStamped() # Visual position of the tool.
+        self.vecEeError         = Point(0,0,0)
+        self.vecEeErrorPrev     = Point(0,0,0)
+        self.vecEeDError        = Point(0,0,0)
+        self.vecEeIError        = Point(0,0,0)
         self.vecEeIErrorClipped = Point(0,0,0)
-        self.vecAntiwindup = Point(0,0,0)
+        self.vecAntiwindup      = Point(0,0,0)
         
         self.speedCommandTool = None 
         self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
-        self.radiusMovement = rospy.get_param('arena/radius_inner', 25.4)
         
         self.timePrev = rospy.Time.now()
         self.time = rospy.Time.now()
         
         self.request = SrvFrameStateRequest()
-        #self.request.state.header.stamp = self.time
         self.request.state.header.frame_id = 'Stage'
         self.request.state.pose.position.x = 0.0
         self.request.state.pose.position.y = 0.0
         self.request.state.pose.position.z = 0.0
 
-        self.iCount = 0
 
 
     def LoadServices(self):
@@ -253,22 +244,47 @@ class RosFivebar:
         self.initializedServices = True
         
 
-    # Clip the tool to the min of hardware & software radius limits.
-    def ClipPtToRadius(self, pt):
-        (pt.x,pt.y) = self.ClipXyToRadius(pt.x,pt.y)
-        return pt
-    
-    def ClipXyToRadius(self, x, y):
-        r = N.sqrt(x*x+y*y)
-        rLimit = N.min([self.radiusMovement, self.radiusReachable])
+    def ClipPtMag (self, pt, magMax):
+        magPt = N.linalg.norm([pt.x, pt.y, pt.z])
+        if magPt > magMax:
+            r = magMax / magPt
+        else:
+            r = 1.0
+            
+        return Point(r*pt.x, r*pt.y, r*pt.z)
+            
+        
+    # Clip the tool to the given limit.
+    def ClipPtToRadius(self, pt, rLimit):
+        r = N.sqrt(pt.x*pt.x + pt.y*pt.y)
         
         if rLimit < r:
-            angle = N.arctan2(y,x)
-            x = rLimit * N.cos(angle)
-            y = rLimit * N.sin(angle)
-            #rospy.logwarn('5B CLIPPING x,y to %s' % [x,y])
-
-        return x,y
+            angle = N.arctan2(pt.y, pt.x)
+            ptOut = Point(x = rLimit * N.cos(angle),
+                          y = rLimit * N.sin(angle))
+            bClipped = True
+        else:
+            ptOut = pt
+            bClipped = False
+        
+        return (bClipped, ptOut)
+                
+                
+    # Clip the tool to the hardware limit.
+    def ClipPtToReachable(self, pt):
+        r = N.sqrt(pt.x*pt.x + pt.y*pt.y)
+        rLimit = self.radiusReachable #N.min([self.radiusArena, self.radiusReachable])
+        
+        if rLimit < r:
+            angle = N.arctan2(pt.y, pt.x)
+            ptOut = Point(x = rLimit * N.cos(angle),
+                          y = rLimit * N.sin(angle))
+            bClipped = True
+        else:
+            ptOut = pt
+            bClipped = False
+        
+        return (bClipped, ptOut)
                 
                 
     # Close the kinematics chain:  Get thetas 1,2,3,4 from thetas 1,2
@@ -286,12 +302,6 @@ class RosFivebar:
         
         s2 = N.sin(angle2)
         c2 = N.cos(angle2)
-        
-        #s13 = N.sin(angle1+angle3)
-        #c13 = N.cos(angle1+angle3)
-        
-        #s24 = N.sin(angle2+angle4)
-        #c24 = N.cos(angle2+angle4)
         
         j3x =       self.L1 * c1
         j3y =       self.L1 * s1
@@ -367,17 +377,17 @@ class RosFivebar:
         return (angle1, angle2, angle3, angle4, x, y)
     
     
-    # Get1234FromXY()
+    # Get1234FromPt()
     # Inverse Kinematics: Get thetas (1,2,3,4) from the (x,y) end-effector position,
     # where (x,y) is in the coordinate frame of the workspace center,
     # and (angle1,angle2)==(0,0) maps to (x,y)==(0,0).
     #
-    def Get1234FromXY (self, x0, y0):
-        x0,y0 = self.ClipXyToRadius(x0, y0)
+    def Get1234FromPt (self, pt):
+        (bClipped, ptClipped) = self.ClipPtToReachable(pt)
 
         # Flip the axes if necessary.
-        x = x0
-        y = y0
+        x = ptClipped.x
+        y = ptClipped.y
         
         # Translate to frame at joint1.
         x = x + self.xCenter
@@ -400,8 +410,15 @@ class RosFivebar:
         y4th = y**4.0
         y6th = y**6.0
         
-        A = (2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)**0.5
-        B = (-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)**0.5
+        Aa = (2.0*xsq*self.L3sq*ysq+2.0*xsq*self.L1sq*ysq+2.0*ysq*self.L3sq*self.L1sq-2.0*xsq*y4th-x4th*ysq-ysq*self.L1**4.0-ysq*self.L3**4.0+2.0*y4th*self.L3sq+2.0*y4th*self.L1sq-y6th)
+        Bb = (-4.0*self.L2sq*self.L0*x*ysq-4.0*x*ysq*self.L4sq*self.L0-2.0*xsq*y4th-x4th*ysq+2.0*xsq*self.L2sq*ysq+2.0*self.L2sq*self.L0sq*ysq-6.0*xsq*ysq*self.L0sq+2.0*xsq*ysq*self.L4sq+4.0*x3rd*ysq*self.L0+4.0*x*y4th*self.L0+4.0*self.L0**3.0*x*ysq+2.0*ysq*self.L0sq*self.L4sq+2.0*ysq*self.L4sq*self.L2sq-2.0*y4th*self.L0sq-self.L0**4.0*ysq+2.0*y4th*self.L4sq-ysq*self.L2**4.0-ysq*self.L4**4.0+2.0*y4th*self.L2sq-y6th)
+        if (Aa<0.0) or(Bb<0):
+            rospy.logerr('**********************************************************')
+            rospy.logerr('Fivebar actuator tried to move out of reachable workspace!')
+            rospy.logerr('**********************************************************')
+            
+        A = Aa**0.5
+        B = Bb**0.5
         C = -self.L2sq*self.L0+x*self.L2sq-self.L0**3.0+x*ysq-ysq*self.L0-3*self.L0*xsq+self.L4sq*self.L0+x3rd-x*self.L4sq+3*self.L0sq*x
         D = 0.5*(xsq*y-2.0*y*self.L0*x+y*self.L0sq-y*self.L4sq+y**3.0+y*self.L2sq)
         F = x*self.L1sq+x3rd-x*self.L3sq+x*ysq
@@ -422,10 +439,10 @@ class RosFivebar:
               ]
 
         q3 = [ \
-                N.arctan2((-2.0*x*y*self.L1sq+K*(F+A)/(xsq+ysq))/(-self.L3*self.L1*x*(F+A)/(xsq+ysq)+M), \
-                          0.5*(-self.L1sq-self.L3sq+xsq+ysq)/self.L1/self.L3), \
-                N.arctan2((-2.0*x*y*self.L1sq+K*(F-A)/(xsq+ysq)+M), \
-                          0.5*(-self.L1sq-self.L3sq+xsq+ysq)/self.L1/self.L3) \
+                N.arctan2((-2.0*y*x*self.L1sq+K*(F+A)/(ysq+xsq))/(-self.L3*self.L1*x*(F+A)/(ysq+xsq)+M), \
+                          1.0/2.0*(xsq-self.L3sq+ysq-self.L1sq)/self.L1/self.L3), \
+                N.arctan2((-2.0*y*x*self.L1sq+K*(F-A)/(ysq+xsq))/(-self.L3*self.L1*x*(F-A)/(ysq+xsq)+M), \
+                          1.0/2.0*(xsq-self.L3sq+ysq-self.L1sq)/self.L1/self.L3) \
               ]
 
         q2 = [ \
@@ -524,34 +541,10 @@ class RosFivebar:
         x = 0.0
         y = 0.0
         
-#        with self.lock:
-#            try:
-#                self.jointstate1 = self.getState_joint1()
-#                self.jointstate2 = self.getState_joint2()
-#            except (rospy.ServiceException, IOError), e:
-#                rospy.logwarn ("5B FAILED %s"%e)
-#                self.jointstate1 = None
-#                self.jointstate2 = None
-
-
         rvStageState = SrvFrameStateResponse()
         if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
-            #rospy.loginfo ('5B self.jointstate1=%s' % self.jointstate1)
-            #rospy.loginfo ('5B self.jointstate2=%s' % self.jointstate2)
-            #(x,y) = self.GetXyFrom12 (self.jointstate1.position, self.jointstate2.position)
-            
-            # Transform the point into the requested frame.
-            pt = Point()
-            pt.x = self.ptEeSense.x + self.vecOffsetSense.x 
-            pt.y = self.ptEeSense.y + self.vecOffsetSense.y 
-            pt.z = self.ptEeSense.z + self.vecOffsetSense.z 
-            pt = self.ClipPtToRadius(pt)
-            
-            rvStageState.state.header.stamp = self.time
-            rvStageState.state.header.frame_id = 'Stage' # Always return Stage frame coordinates.
-            rvStageState.state.pose.position.x = pt.x 
-            rvStageState.state.pose.position.y = pt.y 
-            rvStageState.state.pose.position.z = pt.z
+            rvStageState.state.header = self.posesContourSense.header
+            rvStageState.state.pose = self.posesContourSense.pose
             rvStageState.state.velocity.linear.x = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.y = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.z = 0.0 # BUG: This should come from the hardware.
@@ -561,7 +554,45 @@ class RosFivebar:
         
         return rvStageState.state
 
+
+    def ClipPtsToArena(self, ptsIn):        
+        isInArena = True
         
+        # Transform to Arena frame, and clip to arena radius.
+        try:
+            ptsIn.header.stamp = self.tfrx.getLatestCommonTime('Arena', ptsIn.header.frame_id)
+            ptsArena = self.tfrx.transformPoint('Arena', ptsIn)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming to Arena frame in ClipPtsToArena()')
+            ptsArena = ptsIn
+        else:
+            (bClipped,ptClipped) = self.ClipPtToRadius(ptsArena.point, self.radiusArena)
+            if bClipped:
+                ptsArena.point = ptClipped
+                isInArena = False
+    
+        # Transform back to original frame.
+        try:
+            ptsArena.header.stamp = self.tfrx.getLatestCommonTime(ptsIn.header.frame_id, ptsArena.header.frame_id)
+            ptsOut = self.tfrx.transformPoint(ptsIn.header.frame_id, ptsArena)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming in ClipPtsToArena()')
+            ptsOut = ptsIn
+    
+        return (ptsOut, isInArena)
+        
+
+    def TransformToStageFrame(self, pts):
+        try:
+            pts.header.stamp = self.tfrx.getLatestCommonTime('Stage', pts.header.frame_id)
+            ptsOut = self.tfrx.transformPoint('Stage', pts)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming in TransformToStageFrame()')
+            ptsOut = pts
+        
+        return ptsOut
+
+            
     # SetStageState_callback()
     #   Updates the target command.
     #
@@ -569,25 +600,14 @@ class RosFivebar:
         while not self.initialized:
             rospy.sleep(0.5)
             
-        #rospy.loginfo ('5B SetStageState_callback req=%s' % reqStageState)
+        self.ptsContourRefExternal = PointStamped(header=reqStageState.state.header,
+                                                  point=reqStageState.state.pose.position)
         
-        #rospy.loginfo ('5B SetStageState_callback Request x,y=%s' % ([reqStageState.state.pose.position.x, 
-        #                                                                 reqStageState.state.pose.position.y]))
-        #(angle1,angle2,angle3,angle4) = self.Get1234FromXY(reqStageState.state.pose.position.x-self.xCenter, 
-        #                                   reqStageState.state.pose.position.y-self.yCenter)
-        self.ptsToolRefExternal = PointStamped(Header(frame_id=reqStageState.state.header.frame_id,
-                                                      stamp=reqStageState.state.header.stamp),
-                                               Point(x=reqStageState.state.pose.position.x,
-                                                     y=reqStageState.state.pose.position.y,
-                                                     z=reqStageState.state.pose.position.z))
-        try:
-            self.tfrx.waitForTransform("Stage", self.ptsToolRefExternal.header.frame_id, self.ptsToolRefExternal.header.stamp, rospy.Duration(1.0))
-            self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
-        except tf.Exception:
-            rospy.logwarn ('5B Exception in SetStageState_callback()')
-            pass
+        (self.ptsContourRefExternal, isInArena) = self.ClipPtsToArena(self.ptsContourRefExternal)
+        self.ptsContourRef = self.TransformToStageFrame(self.ptsContourRefExternal)
 
-        #rospy.loginfo('5B ptsToolRef=[%0.2f, %0.2f], [%0.2f, %0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y,self.ptsToolRefExternal.point.x,self.ptsToolRefExternal.point.y))
+
+        #rospy.logwarn('5B ptsContourRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsContourRef.point.x,self.ptsContourRef.point.y,self.ptsContourRefExternal.point.x,self.ptsContourRefExternal.point.y))
         if reqStageState.speed is not None:
             self.speedCommandTool = reqStageState.speed # Requested speed for positioning.
         else:
@@ -602,31 +622,24 @@ class RosFivebar:
         return rvStageState
     
 
-    def SignalInput_callback (self, srvSignal):
-        #rospy.logwarn('A')
+    # Take the target point from a signal generator, and set it as the tool reference.  
+    # If the point falls outside the workspace, then clip it to the workspace, and return False.
+    def SignalInput_callback (self, srvSignalReq):
         rv = SrvSignalResponse()
-        rv.success = False
-        self.ptsToolRefExternal = srvSignal.pts #self.pattern.points[self.iPoint]
+        rv.success = True
+        self.ptsContourRefExternal = srvSignalReq.pts 
+        
+        
+        (self.ptsContourRefExternal, isInArena) = self.ClipPtsToArena(self.ptsContourRefExternal)
+        self.ptsContourRef = self.TransformToStageFrame(self.ptsContourRefExternal)
+        rv.success = isInArena
+        
         try:
-            #rospy.logwarn('B')
-            self.tfrx.waitForTransform('Stage', self.ptsToolRefExternal.header.frame_id, self.time, rospy.Duration(1.0))
-            #rospy.logwarn('C')
-            self.ptsToolRef = self.tfrx.transformPoint('Stage', self.ptsToolRefExternal)
-            #rospy.logwarn('D')
-
-            try:
-                #rospy.logwarn('E')
-                self.speedCommandTool = self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
-                #rospy.logwarn('F')
-                rv.success = True
-                #rospy.logwarn ('pt(%d)=[%0.2f,%0.2f]'%(self.iCount,self.ptsToolRefExternal.point.x,self.ptsToolRefExternal.point.y))
-            except AttributeError:
-                pass
-            #rospy.logwarn ('5B signal pt=%s' % [self.ptToolRef.x,self.ptToolRef.y])
-        except tf.Exception:
-            pass
-        #rospy.logwarn('G')
-        self.iCount += 1
+            self.speedCommandTool = self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
+        except AttributeError, e:
+            rospy.logwarn('AttributeError: %s' % e)
+            
+        
         return rv
 
 
@@ -641,19 +654,13 @@ class RosFivebar:
         return ptNew
     
 
-    def ClipPtMag (self, pt, magMax):
-        magPt = N.linalg.norm([pt.x, pt.y, pt.z])
-        if magPt > magMax:
-            r = magMax / magPt
-        else:
-            r = 1.0
-            
-        return Point(r*pt.x, r*pt.y, r*pt.z)
-            
-        
-    def EndEffectorOffset_callback(self, ptOffset):
-        self.vecOffsetSense = ptOffset #Point(0,0,0)#
-        #rospy.logwarn ('5B ptOffset=%s' % ptOffset)
+    def VisualPosition_callback(self, posesContour):
+        # Transform to Stage frame.
+        try:
+            posesContour.header.stamp = self.tfrx.getLatestCommonTime('Stage', posesContour.header.frame_id)
+            self.posesContourSense = self.tfrx.transformPose('Stage', posesContour)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming to Stage frame in VisualPosition_callback()')
         
         
     def HomeStage_callback(self, reqStageState):
@@ -677,7 +684,7 @@ class RosFivebar:
         self.xPark = self.xPark
         self.yPark = self.yPark
         with self.lock:
-            [q1park,q2park,q3park,q4park] = self.Get1234FromXY(self.xPark, self.yPark)
+            [q1park,q2park,q3park,q4park] = self.Get1234FromPt(Point(x=self.xPark, y=self.yPark))
 
         q1origin = self.q1CenterI # From the index switch
         q2origin = self.q2CenterI # From the index switch
@@ -715,19 +722,8 @@ class RosFivebar:
                     
 
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
-                #rospy.loginfo ('5B self.jointstate1=%s' % self.jointstate1)
                 (angle1,angle2,angle3,angle4, self.ptEeSense.x, self.ptEeSense.y) = self.Get1234xyFrom12(self.jointstate1.position, self.jointstate2.position)
-                #rospy.logwarn('5B compare [xc,yc]-[xa,ya]=%s' % [self.ptEeCommand.x-self.ptEeSense.x,self.ptEeCommand.y-self.ptEeSense.y])
-                #rospy.logwarn('5B actual [x,y]=%s' % [self.ptEeSense.x,self.ptEeSense.y])
 
-                #with self.lock:
-                #    (angle1a,angle2a,angle3a,angle4a) = self.Get1234FromXY(self.state.pose.position.x, self.state.pose.position.y)
-                #rospy.loginfo ('5B xy=%s, angle1-angle1a=%0.5f, angle2-angle2a=%0.5f, angle3-angle3a=%0.5f, angle4-angle4a=%0.5f' % ([self.state.pose.position.x, self.state.pose.position.y], angle1-angle1a, angle2-angle2a, angle3-angle3a, angle4-angle4a))
-                
-                # Move the crossover point from pi/-pi to 0/2pi
-                #angle1 = angle1 % (2.0*N.pi) 
-                #angle2 = angle2 % (2.0*N.pi)
-    
                 # Publish the joint states (for rviz, etc)    
                 self.js.header.seq = self.js.header.seq + 1
                 self.js.header.stamp.secs = self.time
@@ -744,14 +740,9 @@ class RosFivebar:
                 state.pose.orientation.y = qEE[1]
                 state.pose.orientation.z = qEE[2]
                 state.pose.orientation.w = qEE[3]
-                self.pubEndEffector.publish (state)
-                #rospy.loginfo ('5B publish state=%s' % state)
-            
-        
+
         
                 # Publish the link transforms.
-                
-        
                 self.tfbx.sendTransform((-self.L3/2, -246.31423, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
                                         state.header.stamp,
@@ -800,18 +791,19 @@ class RosFivebar:
                                         "EndEffector",     # child
                                         "Stage"      # parent
                                         )
+
+                
                 # Frame Target
-                if self.ptsToolRef is not None:
-                    #rospy.logwarn('marker at [%0.2f,%0.2f]' % (self.ptsToolRef.point.x,self.ptsToolRef.point.y))
-                    markerTarget = Marker(header=Header(stamp = state.header.stamp,
-                                                        frame_id='Stage'),
+                if self.ptsContourRef is not None:
+                    markerTarget = Marker(header=self.ptsContourRef.header, #Header(stamp = state.header.stamp,
+                                                                            #frame_id='Stage'),
                                           ns='target',
                                           id=0,
                                           type=Marker.SPHERE,
                                           action=0,
-                                          pose=Pose(position=Point(x=self.ptsToolRef.point.x, 
-                                                                   y=self.ptsToolRef.point.y, 
-                                                                   z=self.ptsToolRef.point.z)),
+                                          pose=Pose(position=Point(x=self.ptsContourRef.point.x, 
+                                                                   y=self.ptsContourRef.point.y, 
+                                                                   z=self.ptsContourRef.point.z)),
                                           scale=Vector3(x=3.0,
                                                         y=3.0,
                                                         z=3.0),
@@ -822,22 +814,6 @@ class RosFivebar:
                                           lifetime=rospy.Duration(1.0))
                     self.pubMarker.publish(markerTarget)
 
-#                    markerToolOffset   = Marker(header=state.header,
-#                                          ns='markers',
-#                                          id=1,
-#                                          type=Marker.SPHERE,
-#                                          action=0,
-#                                          pose=Pose(position=Point(x=state.pose.position.x+self.vecOffsetSense.x, 
-#                                                                   y=state.pose.position.y+self.vecOffsetSense.y, 
-#                                                                   z=state.pose.position.z+self.vecOffsetSense.z)),
-#                                          scale=Vector3(x=6.0,
-#                                                        y=6.0,
-#                                                        z=6.0),
-#                                          color=ColorRGBA(a=0.5,
-#                                                          r=0.5,
-#                                                          g=0.5,
-#                                                          b=0.5),
-#                                          lifetime=rospy.Duration(0.1))
                     markerToolOffset   = Marker(header=state.header,
                                                 ns='tooloffset',
                                                 id=1,
@@ -854,9 +830,9 @@ class RosFivebar:
                                                 points=[Point(x=state.pose.position.x, 
                                                               y=state.pose.position.y, 
                                                               z=state.pose.position.z),
-                                                        Point(x=state.pose.position.x+self.vecOffsetSense.x, 
-                                                              y=state.pose.position.y+self.vecOffsetSense.y, 
-                                                              z=state.pose.position.z+self.vecOffsetSense.z)])
+                                                        Point(x=self.posesContourSense.pose.position.x, 
+                                                              y=self.posesContourSense.pose.position.y, 
+                                                              z=self.posesContourSense.pose.position.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -865,63 +841,24 @@ class RosFivebar:
     #   Updates the motor command with the current target.
     #
     def UpdateMotorCommandFromTarget(self):
-        #rospy.loginfo ('5B ptToolRef=%s' % self.ptToolRef)
-        if self.ptsToolRef is not None:
-            #self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
-            #self.radiusMovement = rospy.get_param('arena/radius_inner', 25.4)
-            
-            # Clip the target point to the arena bounds.
-            #self.ptToolRefClipped = self.ClipPtToRadius(self.ptsToolRefExternal.point)
-
-            # Compute various vectors.
-            self.ptContourSense.x = self.ptEeSense.x + self.vecOffsetSense.x
-            self.ptContourSense.y = self.ptEeSense.y + self.vecOffsetSense.y
-            self.vecContourError.x = self.ptsToolRef.point.x - self.ptContourSense.x #- self.vecOffsetSense.x
-            self.vecContourError.y = self.ptsToolRef.point.y - self.ptContourSense.y #- self.vecOffsetSense.y
-            #self.vecToolRefError.x = self.ptsToolRef.point.x - self.ptEeSense.x
-            #self.vecToolRefError.y = self.ptsToolRef.point.y - self.ptEeSense.y
-
-            # Get the end-effector ref coordinates.
-            # Option A:
-            #ptRef = self.ScaleVecToMag(self.vecToolRefError, self.vecOffsetSense)
-            #self.ptEeRef.x = self.ptsToolRef.point.x+ptRef.x
-            #self.ptEeRef.y = self.ptsToolRef.point.y+ptRef.y
-
-            # Option B: works ok.
-            #kTest = rospy.get_param('fivebar/kTest', 0.0)
-            #self.ptEeRef.x = self.ptsToolRef.point.x - self.vecOffsetSense.x + kTest*self.vecContourError.x
-            #self.ptEeRef.y = self.ptsToolRef.point.y - self.vecOffsetSense.y + kTest*self.vecContourError.y
-
-            # Option C:
-            #ptRef = self.ScaleVecToMag(self.vecContourError, self.vecOffsetSense)
-            #self.ptEeRef.x = self.ptsToolRef.point.x + ptRef.x
-            #self.ptEeRef.y = self.ptsToolRef.point.y + ptRef.y
-
-            # Option D:
-            self.ptEeRef.x = self.ptsToolRef.point.x + self.vecOffsetSense.x# + vecRef.x
-            self.ptEeRef.y = self.ptsToolRef.point.y + self.vecOffsetSense.x# + vecRef.y
-            
-            
+        if self.ptsContourRef is not None:
             # PID Gains & Parameters.
-            self.kP = rospy.get_param('fivebar/kP', 1.0)
-            self.kI = rospy.get_param('fivebar/kI', 0.0)
-            self.kD = rospy.get_param('fivebar/kD', 0.0)
-            self.maxI = rospy.get_param('fivebar/maxI', 40.0)
+            self.kP      = rospy.get_param('fivebar/kP', 1.0)
+            self.kI      = rospy.get_param('fivebar/kI', 0.0)
+            self.kD      = rospy.get_param('fivebar/kD', 0.0)
+            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
             self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
+            
+            self.kP *= self.kAll
+            self.kI *= self.kAll
+            self.kD *= self.kAll
+            
+            # The contour error.
+            self.vecEeError.x = self.ptsContourRef.point.x - self.posesContourSense.pose.position.x
+            self.vecEeError.y = self.ptsContourRef.point.y - self.posesContourSense.pose.position.y
 
-            # PID control of the end-effector error.
-            #self.vecEeError.x = self.ptEeRef.x - self.ptEeSense.x
-            #self.vecEeError.y = self.ptEeRef.y - self.ptEeSense.y
-            #self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
-            #self.vecEeIError.y = self.vecEeIError.y + self.vecEeError.y
-            #self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
-            #self.vecEeDError.y = self.vecEeError.y - self.vecEeErrorPrev.y
-            #ptPID = Point(self.kP*self.vecEeError.x + self.kI*self.vecEeIError.x + self.kD*self.vecEeDError.x,
-            #              self.kP*self.vecEeError.y + self.kI*self.vecEeIError.y + self.kD*self.vecEeDError.y,
-            #              0.0)
-            # PID control of the error. (from motorarm)
-            self.vecEeError.x = self.vecContourError.x
-            self.vecEeError.y = self.vecContourError.y
+            # PID control of the contour error.
             self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
             self.vecEeIError.y = self.vecEeIError.y + self.vecEeError.y
             self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
@@ -935,30 +872,31 @@ class RosFivebar:
             self.vecAntiwindup = Point(self.kWindup * (self.vecEeIError.x - self.vecEeIErrorClipped.x),
                                        self.kWindup * (self.vecEeIError.y - self.vecEeIErrorClipped.y),
                                        self.kWindup * (self.vecEeIError.z - self.vecEeIErrorClipped.z))
-            magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
-            magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
-            magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
-            magPID = N.linalg.norm([vecPID.x, vecPID.y])
-            #magPIDRaw = N.linalg.norm([vecPIDRaw.x, vecPIDRaw.y])
-            #rospy.logwarn('[P,I,D]=[%0.2f,%0.2f,%0.2f], PID=%0.4f' % (magP,magI,magD, magPID))
             self.vecEeIError.x -= self.vecAntiwindup.x
             self.vecEeIError.y -= self.vecAntiwindup.y
+            
+            # Print the PID component values.
+            #magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
+            #magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
+            #magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
+            #magPID = N.linalg.norm([vecPID.x, vecPID.y])
+            #rospy.logwarn('[P,I,D]=[%0.2f,%0.2f,%0.2f], PID=%0.4f' % (magP,magI,magD, magPID))
+            
 
-            # Get the command for the hardware.            
-            #self.ptEeCommand.x = ptPID.x + self.ptEeSense.x
-            #self.ptEeCommand.y = ptPID.y + self.ptEeSense.y
-            #self.vecEeErrorPrev.x = self.vecEeError.x 
-            #self.vecEeErrorPrev.y = self.vecEeError.y 
-            
-            # Get the command for the hardware.            
-            self.ptEeCommand.x = self.ptEeSense.x + vecPID.x #+ self.vecOffsetSense.x
-            self.ptEeCommand.y = self.ptEeSense.y + vecPID.y #+ self.vecOffsetSense.y
-            
+
+            # Get the command for the hardware.
+            self.ptEeCommand.x = vecPID.x + self.ptEeSense.x
+            self.ptEeCommand.y = vecPID.y + self.ptEeSense.y
             self.vecEeErrorPrev.x = self.vecEeError.x 
             self.vecEeErrorPrev.y = self.vecEeError.y 
             
-            #rospy.logwarn ('5B ptEeCommand=%s' % [self.ptEeCommand.x, self.ptEeCommand.y])
-
+            # Transform to arena coords, clip, & back to stage.
+            (pts, isInArena) = self.ClipPtsToArena(PointStamped(header=Header(stamp=self.ptsContourRef.header.stamp,
+                                                                              frame_id='Stage'),
+                                                                point=self.ptEeCommand))
+            self.ptEeCommand = pts.point
+            
+            
             # Display a vector in rviz.
             ptBase = self.ptEeSense
             ptEnd = self.ptEeCommand
@@ -981,8 +919,7 @@ class RosFivebar:
 
             
             # Get the desired positions for each joint.
-            (angle1,angle2,angle3,angle4) = self.Get1234FromXY(self.ptEeCommand.x, 
-                                               self.ptEeCommand.y)
+            (angle1,angle2,angle3,angle4) = self.Get1234FromPt(self.ptEeCommand)
             
     
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):
@@ -1003,12 +940,10 @@ class RosFivebar:
                 v1 = scale1 * speedMax
                 v2 = scale2 * speedMax
                 
-                #rospy.logwarn('5B speedMax=%s, v1,v2=%s' % (speedMax,[v1,v2]))
-        
                 
                 with self.lock:
                     try:
-                        #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.ptsToolRef.point.x,self.ptsToolRef.point.y))
+                        #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.ptsContourRef.point.x,self.ptsContourRef.point.y))
                         self.setPositionAtVel_joint1(Header(frame_id=self.names[0]), angle1, v1)
                         self.setPositionAtVel_joint2(Header(frame_id=self.names[1]), angle2, v2)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
@@ -1022,14 +957,14 @@ class RosFivebar:
         
     def Main(self):
         self.LoadServices()
-        self.Calibrate_callback(None)stage
+        self.Calibrate_callback(None)
         self.initialized = True
 
         rospy.loginfo ('5B QMIN,QMAX: %s, %s, %s, %s' % (self.q1MinE, self.q1MaxE, self.q2MinE, self.q2MaxE))
         rospy.loginfo ('5B self.q1CenterEiz: %s, %s, %s' % (self.q1CenterE, self.q1CenterI, self.q1CenterZ))
         rospy.loginfo ('5B self.q2CenterEiz: %s, %s, %s' % (self.q2CenterE, self.q2CenterI, self.q2CenterZ))
         # Process messages forever.
-        rosrate = rospy.Rate(25)
+        rosrate = rospy.Rate(100)
 
         while not rospy.is_shutdown():
             self.time = rospy.Time.now()

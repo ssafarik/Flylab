@@ -5,57 +5,43 @@ import copy
 import numpy as N
 import threading
 from geometry_msgs.msg import PoseStamped, Point, PointStamped
+import tf
 
 from patterngen.msg import MsgPattern
 from patterngen.srv import *
 
 
 
-class NullClass:
-    pass
-    
 class PatternGenXY:
 
     def __init__(self):
         rospy.init_node('PatternGenXY')
         rospy.loginfo ("PatternGenXY name=%s", __name__)
 
-        # The signal to continuously output.
-        self.signal = NullClass()
-        self.signal.mode = 'byshape'
-        self.signal.shape = 'none'
-        self.signal.frame_id = 'Stage'
-        self.signal.hzPattern = 1.0
-        self.signal.hzPoint = 50
-        self.signal.count = 0
-        self.signal.points = []
-        self.signal.size = Point(25.4, 25.4, 0.0)
-        self.signal.preempt = True
-        self.signal.param = 0.0
-
-        # The pattern to use for point creation.
-        self.pattern = NullClass()
-        self.pattern.mode = 'byshape'
-        self.pattern.shape = 'none'
-        self.pattern.frame_id = 'Stage'
-        self.pattern.hzPattern = 1.0
-        self.pattern.hzPoint = 50
-        self.pattern.count = 0
-        self.pattern.points = []
-        self.pattern.size = Point(25.4, 25.4, 0.0)
-        self.pattern.preempt = True
-        self.pattern.param = 0.0
+        # The pattern for continuous output.
+        self.pattern1 = MsgPattern()
+        self.pattern1.shape = 'none'
+        self.pattern1.hzPattern = 1.0
+        self.pattern1.hzPoint = 50
+        self.pattern1.count = 0
+        self.pattern1.points = []
+        self.pattern1.frameidPosition = 'Arena'
+        self.pattern1.frameidAngle = 'Arena'
+        self.pattern1.size = Point(25.4, 25.4, 0.0)
+        self.pattern1.preempt = True
+        self.pattern1.param = 0.0
 
         self.iPoint = 0
 
-        self.pts = PointStamped()
         self.lock = threading.Lock()
         
-        self.dtPoint = rospy.Duration(1/self.pattern.hzPoint)
-        self.ratePoint = rospy.Rate(self.pattern.hzPoint)
+        #self.dtPattern = rospy.Duration(1/self.pattern1.hzPattern)
+        self.dtPoint = rospy.Duration(1/self.pattern1.hzPoint)
+        self.ratePoint = rospy.Rate(self.pattern1.hzPoint)
         
-        self.subSetSignalGen = rospy.Subscriber('SetSignalGen', MsgPattern, self.SetSignalGen_callback)
+        self.subSetPattern       = rospy.Subscriber('SetPattern', MsgPattern, self.SetPattern_callback)
         self.srvGetPatternPoints = rospy.Service('GetPatternPoints', SrvGetPatternPoints, self.GetPatternPoints_callback)
+        self.tfrx = tf.TransformListener()
         
         
         # Load stage services.
@@ -155,7 +141,6 @@ class PatternGenXY:
         
     def GetPointsSpiral (self, pattern):
         nPoints = int(pattern.hzPoint/pattern.hzPattern)
-        rospy.logwarn('nPoints=%d' % nPoints)
         pitchSpiral = 2
         nRevolutionsPerPattern = 2 * 2 * pitchSpiral  # nCworCCW * nInOrOut * pitch
         nPointsPerRevolution = nPoints / nRevolutionsPerPattern
@@ -491,63 +476,73 @@ class PatternGenXY:
         
 
     def UpdatePatternPoints (self, pattern):        
-        if pattern.mode == 'byshape':  # Create the point list.
-            if pattern.shape == 'constant':
-                pattern.points = self.GetPointsConstant(pattern)
-            elif pattern.shape == 'circle':
-                pattern.points = self.GetPointsCircle(pattern)
-            elif pattern.shape == 'square':
-                pattern.points = self.GetPointsSquare(pattern)
-            elif pattern.shape == 'flylogo':
-                pattern.points = self.GetPointsFlylogo(pattern)
-            elif pattern.shape == 'spiral':
-                pattern.points = self.GetPointsSpiral(pattern)
-            elif pattern.shape == 'ramp':
-                pattern.points = self.GetPointsRamp(pattern)
-            elif pattern.shape == 'grid':
-                pattern.points = self.GetPointsGrid(pattern)
-            elif pattern.shape == 'raster':
-                pattern.points = self.GetPointsGridRaster(pattern)
-            elif pattern.shape == 'peano':
-                pattern.points = self.GetPointsGridPeano(pattern)
-            elif (len(pattern.shape)==1) and (pattern.shape.isalnum()):
-                pattern.points = self.GetPointsCharacter(pattern)
-            elif pattern.shape == 'none':
-                pattern.points = []
-            else:
-                pattern.points = []
-                rospy.logerror('PatternGen: unknown shape')
-        #else pattern.points = pattern.points
+        if pattern.shape == 'constant':
+            pattern.points = self.GetPointsConstant(pattern)
+        elif pattern.shape == 'circle':
+            pattern.points = self.GetPointsCircle(pattern)
+        elif pattern.shape == 'square':
+            pattern.points = self.GetPointsSquare(pattern)
+        elif pattern.shape == 'flylogo':
+            pattern.points = self.GetPointsFlylogo(pattern)
+        elif pattern.shape == 'spiral':
+            pattern.points = self.GetPointsSpiral(pattern)
+        elif pattern.shape == 'ramp':
+            pattern.points = self.GetPointsRamp(pattern)
+        elif pattern.shape == 'grid':
+            pattern.points = self.GetPointsGrid(pattern)
+        elif pattern.shape == 'raster':
+            pattern.points = self.GetPointsGridRaster(pattern)
+        elif pattern.shape == 'peano':
+            pattern.points = self.GetPointsGridPeano(pattern)
+        elif (len(pattern.shape)==1) and (pattern.shape.isalnum()):
+            pattern.points = self.GetPointsCharacter(pattern)
+        elif pattern.shape == 'bypoints':
+            pass
+        elif pattern.shape == 'none':
+            pattern.points = []
+        else:
+            pattern.points = []
+            rospy.logerror('PatternGen: unknown pattern')
                 
                 
         
     # PatternGen_callback() 
     #   Receive the message that sets up a pattern generation.
     #
-    def SetSignalGen_callback (self, msgPatternGen):
+    def SetPattern_callback (self, msgPatternGen):
         with self.lock:
-            self.signal.mode        = msgPatternGen.mode
-            self.signal.shape       = msgPatternGen.shape
-            self.signal.frame_id    = msgPatternGen.frame_id
-            self.signal.hzPattern   = msgPatternGen.hzPattern
-            self.signal.hzPoint     = msgPatternGen.hzPoint
-            self.signal.count       = msgPatternGen.count
-            self.signal.size        = msgPatternGen.size
+            self.pattern1.frameidPosition   = msgPatternGen.frameidPosition
+            self.pattern1.frameidAngle      = msgPatternGen.frameidAngle
+            self.pattern1.shape             = msgPatternGen.shape
+            self.pattern1.hzPattern         = msgPatternGen.hzPattern
+            self.pattern1.hzPoint           = msgPatternGen.hzPoint
+            self.pattern1.count             = msgPatternGen.count
+            self.pattern1.size              = msgPatternGen.size
+            self.pattern1.direction         = msgPatternGen.direction # Forward (+1) or reverse (-1) through the pattern points.
+            if (self.pattern1.direction==0):
+                self.pattern1.direction = 1 
 
-	    self.dtPoint = rospy.Duration(1/self.signal.hzPoint)
-	    self.ratePoint = rospy.Rate(self.signal.hzPoint)
+    	    self.dtPoint = rospy.Duration(1/self.pattern1.hzPoint)
+    	    self.ratePoint = rospy.Rate(self.pattern1.hzPoint)
     
-            if self.signal.count==-1:
-                self.signal.count = 2147483640 # MAX_INT
+            if self.pattern1.count==-1:
+                self.pattern1.count = 2147483640 # MAX_INT
             
-            if self.signal.mode=='bypoints':
-                self.signal.points = msgPatternGen.points
+            if msgPatternGen.shape=='bypoints':
+                self.pattern1.points = msgPatternGen.points
                 
-            self.UpdatePatternPoints(self.signal)
-            if msgPatternGen.preempt or self.iPoint >= len(self.signal.points):
-                self.iPoint = 0
+            self.UpdatePatternPoints(self.pattern1)
+            if (len(self.pattern1.points)>0):
+                if (msgPatternGen.preempt) or (self.iPoint >= len(self.pattern1.points)) or (self.iPoint < 0):
+                    if (self.pattern1.direction > 0):
+                        self.iPoint = 0
+                    elif (self.pattern1.direction < 0):
+                        self.iPoint = len(self.pattern1.points)-1
+                    else:
+                        rospy.logwarn ('pattern.direction==0.  Pattern will not advance.')
+                    
 
-	    #rospy.logwarn ('SetSignalGen_callback() points=%s' % self.signal.points)
+	    #rospy.logwarn ('SetPattern_callback() points=%s' % self.pattern1.points)
             
             
     def GetPatternPoints_callback(self, reqGetPatternPoints):
@@ -558,29 +553,70 @@ class PatternGenXY:
     
             
     def SendSignalPoint(self): 
-        if self.signal.points is not None and len(self.signal.points)>0:
-            #rospy.logwarn('rate=%s' % self.pattern.hzPoint)
-            if self.signal.count>0:
-                self.pts.header.frame_id = self.signal.frame_id
-                #self.pts.header.stamp = rospy.Time.now() + self.dtPoint
-                self.pts.point = self.signal.points[self.iPoint]
-                try:
-                    self.SignalOutput (self.pts)
-                    #rospy.logwarn('points[%d]=[%0.2f,%0.2f]' % (self.iPoint,self.signal.points[self.iPoint].x,self.signal.points[self.iPoint].y))
-                except rospy.ServiceException:
-                    rospy.logwarn('SignalOutput() exception.  Reconnecting...')
-                    rospy.wait_for_service(self.stSignalInput)
-                    self.SignalOutput = rospy.ServiceProxy(self.stSignalInput, SrvSignal)
+        if (self.pattern1.points is not None) and (len(self.pattern1.points)>0):
+            if self.pattern1.count>0:
+                direction = copy.copy(self.pattern1.direction)
+                bSuccess = False
+                i=0
+                while (not bSuccess):
+                    pts = self.TransformPatternPoint()
                     
-                #rospy.logwarn ('PG pt=%s' % [pts.point.x, pts.point.y])
-                self.iPoint += 1
+                    try:
+                        resp = self.SignalOutput (pts)
+                    except rospy.ServiceException:
+                        bSuccess = True
+                        rospy.logwarn('SignalOutput() exception.  Reconnecting...')
+                        rospy.wait_for_service(self.stSignalInput)
+                        self.SignalOutput = rospy.ServiceProxy(self.stSignalInput, SrvSignal)
+                    else:
+                        bSuccess = resp.success
+                        if (not bSuccess):
+                            self.pattern1.direction = -direction # Back out until no longer clipped.  
+                            #rospy.logwarn('clipped')
+                    i += 1
+
+                        
+                    self.StepNextPatternPoint()
+                    #rospy.logwarn(self.iPoint)
+
+
+
+    def TransformPatternPoint(self):
+        pts = PointStamped()
+                      
+        try:  
+            pts.header.stamp = self.tfrx.getLatestCommonTime('Arena', self.pattern1.frameidPosition)
+            (pos,q) = self.tfrx.lookupTransform('Arena', self.pattern1.frameidPosition, pts.header.stamp)
+        except tf.Exception, e:
+            rospy.logwarn('Exception transforming %s->Arena in TransformPatternPoint():  %s' % (self.pattern1.frameidPosition,e))
+        else:
+            pts.header.frame_id = 'Arena'
+            pts.point = copy.copy(self.pattern1.points[self.iPoint])
+            pts.point.x += pos[0]
+            pts.point.y += pos[1]
+        
+        return pts
                 
-                # When the pattern output is completed, go to the next pattern.
-                if self.iPoint >= len(self.signal.points):
-                    #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=%d' % (self.iPoint, self.signal.count))
-                    self.iPoint = 0
-                    self.signal.count -= 1
-                    self.UpdatePatternPoints(self.signal)
+
+    def StepNextPatternPoint(self):                    
+        #rospy.logwarn ('PG pt=%s' % [pts.point.x, pts.point.y])
+        self.iPoint += self.pattern1.direction
+        
+        # When the pattern output is completed, go to the next pattern.
+        if (len(self.pattern1.points)>0):
+            if self.iPoint >= len(self.pattern1.points):
+                #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=%d' % (self.iPoint, self.pattern1.count))
+                self.iPoint = 0
+                self.pattern1.count -= 1
+                self.UpdatePatternPoints(self.pattern1)
+
+            # When the pattern output is completed, go to the next pattern.
+            if (self.iPoint < 0):
+                #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=%d' % (self.iPoint, self.pattern1.count))
+                self.iPoint = len(self.pattern1.points)-1
+                self.pattern1.count -= 1
+                self.UpdatePatternPoints(self.pattern1)
+
 
         
     def Main(self):

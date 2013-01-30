@@ -1,7 +1,20 @@
 <launch>
-  <param name="tracking/diff_threshold"     type="double" value="20"/>   					<!-- Adjust this based on light brightness, etc, to get good contours. -->
-  <param name="tracking/dtForecast"         type="double" value="0.20"/>   					<!-- Adjust this based on light brightness, etc, to get good contours. -->
-  <param name="tracking/alphaBackground"    type="double" value="0.000001"/>   				<!-- Moving average for dynamic background. -->
-  <param name="tracking/filenameBackground" type="string" value="/cameras/background.png"/> <!-- Location of the initial background image. -->
+  <!-- Some example command-line things you can do...
+       rosparam get tracking/diff_threshold
+       rosparam set tracking/diff_threshold 18
+  -->
+
+
+  <param name="tracking/diff_threshold"     	type="double" value="60"/>   					<!-- Adjust this based on light brightness, etc, to get good contours. -->
+  <param name="tracking/dtForecast"         	type="double" value="0.10"/>   					<!-- Amount of time to look ahead for the fly position. -->
+  <param name="tracking/alphaBackground"    	type="double" value="0.0000001"/>   			<!-- Moving average for dynamic background. Smaller = slower update. -->
+  <param name="tracking/alphaForeground"    	type="double" value="0.005"/>   				<!-- Moving average for foreground objects (e.g. tracked fly appearance). -->
+  <param name="tracking/thresholdForeground"    type="double" value="70.0"/>   				<!-- Moving average for foreground objects (e.g. tracked fly appearance). -->
+  <param name="tracking/roi/height"         	type="int" value="25"/>     					<!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
+  <param name="tracking/roi/width"          	type="int" value="25"/>     					<!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
+  <param name="tracking/wingmetric_threshold"   type="double" value="300"/>   					<!-- Threshold for the wing-extension metric. -->
+  <param name="tracking/lengthBody"             type="int" value="14"/>   		    			<!-- Fly body length in pixels. -->
+  <param name="tracking/widthBody"              type="int" value="7"/>   	    				<!-- Fly body width in pixels. -->
+  <param name="tracking/filenameBackground" 	type="string" value="/cameras/background.png"/> <!-- Location of the initial background image. -->
 
 </launch>

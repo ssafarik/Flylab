@@ -3,10 +3,12 @@ from __future__ import division
 import roslib; roslib.load_manifest('arena_tf')
 import rospy
 import numpy as N
-# from pythonmodules import CircleFunctions
+from pythonmodules import CircleFunctions
 
 import cv
 from geometry_msgs.msg import PoseStamped
+
+
 
 class ButterworthFilter:
     def __init__(self, a=[1,0,0,0,0], b=[1,0,0,0,0]):
@@ -38,45 +40,52 @@ class ButterworthFilter:
         return y
 
 
-# Filter an angle that only ranges over a distance of pi.
+# Filter an angle where update values only range over a distance of pi, and where
+# the update angle can be interpreted in either direction (+0 or +-180 degrees).  
+# The actual angle can range over 2pi.  The filter keeps an internal unwrapped 
+# angle (across 2pi) with no range limits.
+#
 class LowPassHalfCircleFilter:
     def __init__(self, RC=1.0):
         self.RC = RC
-        self.t_previous = None
-        self.zf_previous = None
+        self.t = None
+        self.zf = None
+        self.zfPrev = None
 
         
+    def GetValuePrev(self):
+        return self.zfPrev
+
+
     def GetValue(self):
-        return self.zf_previous
+        return self.zf
 
 
     def SetValue(self, z):
-        self.zf_previous = z
+        self.zfPrev = self.zf
+        self.zf = z
 
 
     def Update(self, z, t):
         if not isinstance(z,float):
             z = None
             
-        if (self.zf_previous is not None) and (self.t_previous is not None): 
+        if (self.zf is not None) and (self.t is not None): 
             if (z is not None) and (t is not None):
-                # Unwrap big jumps
-                if (z - self.zf_previous) > (N.pi/2.0):
-                    self.zf_previous += N.pi
-                if (z - self.zf_previous) < (-N.pi/2.0):
-                    self.zf_previous -= N.pi
+                zUnwrapped = CircleFunctions.UnwrapHalfCircle(z, self.zf)
                     
-                dt = t - self.t_previous
+                dt = t - self.t
                 alpha = dt/(self.RC + dt)
-                zf = alpha*z + (1 - alpha)*self.zf_previous
+                zf = alpha*zUnwrapped + (1 - alpha)*self.zf
             else: # Initialized, but no measurement.
-                zf = self.zf_previous
+                zf = self.zf
         else: # Not initialized, but have a measurement.
             zf = z
 
 
-        self.t_previous = t
-        self.zf_previous = zf
+        self.zfPrev = self.zf
+        self.t = t
+        self.zf = zf
 
         return zf
 
@@ -85,42 +94,42 @@ class LowPassHalfCircleFilter:
 class LowPassCircleFilter:
     def __init__(self, RC=1.0):
         self.RC = RC
-        self.t_previous = None
-        self.zf_previous = None
+        self.t = None
+        self.zf = None
 
         
     def GetValue(self):
-        return self.zf_previous
+        return self.zf
 
 
     def SetValue(self, z):
-        self.zf_previous = z
+        self.zf = z
 
 
     def Update(self, z, t):
         if not isinstance(z,float):
             z = None
             
-        if (self.zf_previous is not None) and (self.t_previous is not None): 
+        if (self.zf is not None) and (self.t is not None): 
             if (z is not None) and (t is not None):
                 
                 # Unwrap big jumps
-                if (z - self.zf_previous) > N.pi:
-                    self.zf_previous += (2.0*N.pi)
-                if (z - self.zf_previous) < -N.pi:
-                    self.zf_previous -= (2.0*N.pi)
+                if (z - self.zf) > N.pi:
+                    self.zf += (2.0*N.pi)
+                if (z - self.zf) < -N.pi:
+                    self.zf -= (2.0*N.pi)
                     
-                dt = t - self.t_previous
+                dt = t - self.t
                 alpha = dt/(self.RC + dt)
-                zf = alpha*z + (1 - alpha)*self.zf_previous
+                zf = alpha*z + (1 - alpha)*self.zf
             else: # Initialized, but no measurement.
-                zf = self.zf_previous
+                zf = self.zf
         else: # Not initialized, but have a measurement.
             zf = z
 
 
-        self.t_previous = t
-        self.zf_previous = zf
+        self.t = t
+        self.zf = zf
 
         return zf
 
@@ -128,34 +137,34 @@ class LowPassCircleFilter:
 class LowPassFilter:
     def __init__(self, RC=1.0):
         self.RC = RC
-        self.t_previous = None
-        self.zf_previous = None
+        self.t = None
+        self.zf = None
 
         
     def GetValue(self):
-        return self.zf_previous
+        return self.zf
 
 
     def SetValue(self, z):
-        self.zf_previous = z
+        self.zf = z
 
 
     def Update(self, z, t):
         if not isinstance(z,float):
             z = None
             
-        if (self.zf_previous is not None) and (self.t_previous is not None):
+        if (self.zf is not None) and (self.t is not None):
             if (z is not None) and (t is not None):
-                dt = t - self.t_previous
+                dt = t - self.t
                 alpha = dt/(self.RC + dt)
-                zf = alpha*z + (1 - alpha)*self.zf_previous
+                zf = alpha*z + (1 - alpha)*self.zf
             else: # Initialized, but no measurement.
-                zf = self.zf_previous
+                zf = self.zf
         else: # Not initialized, but have a measurement.
             zf = z
 
-        self.t_previous = t
-        self.zf_previous = zf
+        self.t = t
+        self.zf = zf
 
         return zf
 
@@ -198,32 +207,32 @@ class KalmanFilter:
         
         
         self.measurement = cv.CreateMat(4,1,cv.GetElemType(self.kal.state_pre))
-        self.t_previous = None
-        self.z_previous = None
+        self.t = None
+        self.zf = None
 
 
     def Update(self, z, t=None):
         # z=[x,y]
         if t is not None:
-            t_new = t
+            tNew = t
         else:
-            t_new = rospy.Time.now()
+            tNew = rospy.Time.now()
             
 
         if self.initialized:
             # Update the state transition matrix for dt.
-            self.dt = t_new - self.t_previous
+            self.dt = tNew - self.t
             self.kal.transition_matrix[0,2] = self.dt
             self.kal.transition_matrix[1,3] = self.dt
             #rospy.logwarn ('KF dt=' + '*' * int(1/(20*self.dt)))
 
             # Kalman Filtering      
             state_pre = cv.KalmanPredict(self.kal)          
-            if (z is not None) and (self.z_previous is not None) and (self.dt != 0):
+            if (z is not None) and (self.zf is not None) and (self.dt != 0):
                 self.measurement[0,0] = z[0]
                 self.measurement[1,0] = z[1]
-                self.measurement[2,0] = (z[0] - self.z_previous[0]) / self.dt
-                self.measurement[3,0] = (z[1] - self.z_previous[1]) / self.dt
+                self.measurement[2,0] = (z[0] - self.zf[0]) / self.dt
+                self.measurement[3,0] = (z[1] - self.zf[1]) / self.dt
     
                 state_post = cv.KalmanCorrect(self.kal, self.measurement)
                 x = state_post[0,0]
@@ -235,9 +244,9 @@ class KalmanFilter:
                 y = state_pre[1,0]
                 vx = state_pre[2,0]
                 vy = state_pre[3,0]
-                rospy.loginfo('KF z==None -> x,y=%s' % [x,y])
+                #rospy.loginfo('KF z==None -> x,y=%s' % [x,y])
                 
-            self.z_previous = z
+            self.zf = z
 
         else: # not initialized.
             if (z is not None):
@@ -250,9 +259,9 @@ class KalmanFilter:
                 cv.Set2D(self.kal.state_post, 1, 0, z[1])
                 cv.Set2D(self.kal.state_post, 2, 0, vx)
                 cv.Set2D(self.kal.state_post, 3, 0, vy)
-                rospy.loginfo ('FLT initialized kalman filter to %s' % [z[0], z[1], vx, vy])
+                rospy.loginfo ('KF initialized kalman filter to %s' % [z[0], z[1], vx, vy])
 
-                self.z_previous = z
+                self.zf = z
                 
                 self.initialized = True
             else:
@@ -261,7 +270,7 @@ class KalmanFilter:
                 vx = None
                 vy = None
                 
-        self.t_previous = t_new
+        self.t = tNew
         
         return (x, y, vx, vy)
 
