@@ -310,11 +310,11 @@ class ContourIdentifier:
                     #    d[m,n] += 0
                     gainEcc = 10.0
                     eccmetric = gainEcc * N.abs(contourinfo_list[n].ecc - contourinfoMean_list[m].ecc) / N.max([contourinfo_list[n].ecc, contourinfoMean_list[m].ecc]) # Ranges 0 to 1.
-                    d[m,n] += eccmetric
+                    d[m,n] += 0#eccmetric
                     
                     gainArea = 0.1 
                     areametric = gainArea * N.abs(contourinfo_list[n].area - contourinfoMean_list[m].area)
-                    d[m,n] += areametric
+                    d[m,n] += 0#areametric
                     #if m<2:
                     #    rospy.logwarn('Object %s, eccmetric=%0.2f, areametric=%0.2f' % (m, eccmetric, areametric))
                     

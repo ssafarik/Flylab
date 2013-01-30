@@ -8,6 +8,8 @@ from pythonmodules import CircleFunctions
 import cv
 from geometry_msgs.msg import PoseStamped
 
+
+
 class ButterworthFilter:
     def __init__(self, a=[1,0,0,0,0], b=[1,0,0,0,0]):
         self.a = a
@@ -48,13 +50,19 @@ class LowPassHalfCircleFilter:
         self.RC = RC
         self.t = None
         self.zf = None
+        self.zfPrev = None
 
         
+    def GetValuePrev(self):
+        return self.zfPrev
+
+
     def GetValue(self):
         return self.zf
 
 
     def SetValue(self, z):
+        self.zfPrev = self.zf
         self.zf = z
 
 
@@ -75,6 +83,7 @@ class LowPassHalfCircleFilter:
             zf = z
 
 
+        self.zfPrev = self.zf
         self.t = t
         self.zf = zf
 

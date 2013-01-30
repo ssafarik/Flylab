@@ -14,6 +14,7 @@ from arena_tf.srv import *
 from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
 from sensor_msgs.msg import Image
 from std_msgs.msg import Header, ColorRGBA, Float32
+from tracking.msg import Contourinfo
 from visualization_msgs.msg import Marker
 from flycore.msg import MsgFrameState
 from pythonmodules import filters, CircleFunctions
@@ -42,21 +43,23 @@ class Fly:
         
         # Nonessential stuff to publish.
         if globalNonessential:
-            self.pubImageRoiMean = rospy.Publisher(self.name+"/image_mean", Image)
-            self.pubImageRoi     = rospy.Publisher(self.name+"/image", Image)
-            self.pubImageRoiReg  = rospy.Publisher(self.name+"/image_reg", Image)
-            self.pubImageRoiWings= rospy.Publisher(self.name+"/image_wings", Image)
-            self.pubLeftMetric   = rospy.Publisher(self.name+'/leftmetric', Float32)
-            self.pubLeft         = rospy.Publisher(self.name+'/left', Float32)
+            self.pubImageRoiMean  = rospy.Publisher(self.name+"/image_mean", Image)
+            self.pubImageRoi      = rospy.Publisher(self.name+"/image", Image)
+            self.pubImageRoiReg   = rospy.Publisher(self.name+"/image_reg", Image)
+            self.pubImageRoiWings = rospy.Publisher(self.name+"/image_wings", Image)
+            self.pubImageMask     = rospy.Publisher(self.name+"/image_mask", Image)
+            self.pubImageMaskBody     = rospy.Publisher(self.name+"/image_mask_body", Image)
+            self.pubLeftMetric    = rospy.Publisher(self.name+'/leftmetric', Float32)
+            self.pubLeft          = rospy.Publisher(self.name+'/left', Float32)
             self.pubRightMetric   = rospy.Publisher(self.name+'/rightmetric', Float32)
             self.pubRight         = rospy.Publisher(self.name+'/right', Float32)
-            self.pubMaskWings     = rospy.Publisher(self.name+"/maskwings", Image)
         
 
         self.kfState = filters.KalmanFilter()
         self.lpAngleContour = filters.LowPassHalfCircleFilter(RC=rospy.get_param('tracking/rcFilterAngle', 0.1))
         self.lpAngleContour.SetValue(0.0)
-        self.angleContourPrev = 0.0
+        self.apAngleContour = filters.LowPassHalfCircleFilter(RC=0.0)
+        self.apAngleContour.SetValue(0.0)
         self.lpOffsetMag = filters.LowPassFilter(RC=1.0)
         self.lpOffsetMag.SetValue(0.0)
         self.lpOffsetAng = filters.LowPassCircleFilter(RC=0.001)
@@ -75,9 +78,10 @@ class Fly:
         self.lpSpeed = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterSpeed', 0.2))
         self.lpSpeed.SetValue(0.0)
         self.angleOfTravelRecent = 0.0
-        self.contourinfo = None
+        self.contourinfo = Contourinfo()
         self.speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0) # Speed that counts as "traveling".
         self.speed = 0.0
+        self.angleContourUnwrapped = 0.0
 
         
         self.lpWx = filters.LowPassFilter(RC=rospy.get_param('tracking/rcFilterAngularVel', 0.05))
@@ -120,13 +124,29 @@ class Fly:
         self.areaCount = 1
         
         # Wing angle stuff.
-        self.widthRoi  = rospy.get_param ('tracking/roi/width', 15)
-        self.heightRoi = rospy.get_param ('tracking/roi/height', 15)
-        self.lengthBody = rospy.get_param ('tracking/lengthBody', 9)
-        self.widthBody = rospy.get_param ('tracking/widthBody', 5)
-        self.thresholdWingmetric  = rospy.get_param ('tracking/wingmetric_threshold', 99999)
+        self.widthRoi               = rospy.get_param ('tracking/roi/width', 15)
+        self.heightRoi              = rospy.get_param ('tracking/roi/height', 15)
+        self.lengthBody             = rospy.get_param ('tracking/lengthBody', 9)
+        self.widthBody              = rospy.get_param ('tracking/widthBody', 5)
+        self.thresholdWingmetric    = rospy.get_param ('tracking/wingmetric_threshold', 99999)
         self.npfRoiMean = None
         self.npMaskWings = None
+        self.npMaskCircle = N.zeros([self.heightRoi, self.widthRoi],dtype=N.uint8)
+        cv2.circle(self.npMaskCircle,
+                  (int(self.heightRoi/2), int(self.widthRoi/2)),
+                  int(self.heightRoi/2), 
+                  1, 
+                  cv.CV_FILLED)
+        self.metricMeanLeft  = None
+        self.metricMeanRight = None
+        
+        
+        
+        # Super-resolution image.
+        self.heightSuper = 100*self.heightRoi
+        self.widthSuper = 100*self.widthRoi
+        self.npfSuper = N.zeros([self.heightSuper, self.widthSuper]) 
+        
         
         self.robot_width = rospy.get_param ('robot/width', 1.0)
         self.robot_length = rospy.get_param ('robot/length', 1.0)
@@ -177,11 +197,10 @@ class Fly:
 
 
         angleContour         = self.lpAngleContour.GetValue()
-        angleContour_flipped = angleContour + N.pi
         
         # Compare distances between angles of (travel - contour) and (travel - flippedcontour)        
-        dist         = N.abs(CircleFunctions.DistanceCircle(angleContour,         self.angleOfTravelRecent))
-        dist_flipped = N.abs(CircleFunctions.DistanceCircle(angleContour_flipped, self.angleOfTravelRecent))
+        dist         = N.abs(CircleFunctions.DistanceCircle(angleContour,        self.angleOfTravelRecent))
+        dist_flipped = N.abs(CircleFunctions.DistanceCircle(angleContour + N.pi, self.angleOfTravelRecent))
         
         # Choose the better orientation.
         if dist < dist_flipped:
@@ -228,135 +247,175 @@ class Fly:
     #   
     def UpdateFlipState(self):
         # Update the flip filter.
-        flipvaluePre = self.GetNextFlipValue()
-            
         if (self.speed > self.speedThresholdForTravel):
             flipvaluePre = self.GetNextFlipValue()
             flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contourinfo.header.stamp.to_sec())
                 
-            # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
-            d = N.abs(CircleFunctions.DistanceCircle(self.lpAngleContour.GetValue(), self.angleContourPrev))
-            if (d > (N.pi/2.0)):
-                self.lpFlip.SetValue(-self.lpFlip.GetValue())
+#            # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
+#            d = N.abs(CircleFunctions.DistanceCircle(self.lpAngleContour.GetValue(), self.lpAngleContour.GetValuePrev()))
+#            if (d > (N.pi/2.0)):
+#                self.lpFlip.SetValue(-self.lpFlip.GetValue())
+#                rospy.logwarn('WRAP*****************************************')
 
             
 
-    def GetResolvedAngle(self):
-        angleF = self.lpAngleContour.GetValue()
-                
-        if self.lpFlip.GetValue()<0 and ('Robot' not in self.name):
-            angleResolved = (angleF + N.pi) % (2.0*N.pi)
+    def ResolveAngle(self, angle):
+        if (angle is not None):
+            if self.lpFlip.GetValue()<0 and ('Robot' not in self.name):
+                angleResolved = (angle + N.pi) % (2.0*N.pi)
+            else:
+                angleResolved = angle
+#                if 'Fly2' in self.name:
+#                    rospy.logwarn('=======================')
         else:
-            angleResolved = angleF
-
-        #if 'Fly' in self.name:
-        #    rospy.logwarn('flip=%0.1f, angleF=%0.2f, GetResolvedAngle()=%0.2f' % (self.lpFlip.GetValue(), angleF, angleResolved))
+            angleResolved = None
 
         return angleResolved
             
             
-    # CreateWingMask()
+    def ResolveRawAngle(self):
+        angle = self.apAngleContour.GetValue()
+        angleResolved = self.ResolveAngle(angle)
+
+        return angleResolved
+            
+            
+    def ResolveFilteredAngle(self):
+        angle = self.lpAngleContour.GetValue()
+        angleResolved = self.ResolveAngle(angle)
+
+        return angleResolved
+            
+            
+    # UpdateWingMask()
     # Create a mask image that only passes the fly body and both wings in any position.
-    # FUTURE: should make the body/wing dimensions automatically calculated from the fly mean image.
+    # FUTURE: should make the body/wing dimensions automatically calculated from the fly mean image, npfRoiMean.
     #
-    def CreateWingMask(self, npfRoiMean):
-        if (self.npMaskWings is None):
-            self.npMaskWings = N.zeros([self.heightRoi, self.widthRoi], dtype=N.uint8)
+    def UpdateWingMask(self, npfRoiMean):
+        self.npMaskWings = N.zeros([self.heightRoi, self.widthRoi], dtype=N.uint8)
 
 
-            # Coordinates of the body.
-            centerBody = (self.widthRoi/2-1, 
-                      self.heightRoi/2-1)
-            sizeBody = (self.lengthBody, 
-                        self.widthBody)
-            angleBody = 0.0
-            
-            # Left wing.
-            sizeLeft = (self.lengthBody*8/10, 
-                        self.lengthBody*7/10)
-            centerLeft = (centerBody[0] + self.lengthBody*1/10 - sizeLeft[0]/2,
-                      centerBody[1] - sizeLeft[1]/2)
-            angleLeft = 0.0
+        # Coordinates of the body ellipse.
+        centerBody = (self.widthRoi/2, 
+                      self.heightRoi/2)
+        sizeBody = (self.lengthBody, 
+                    self.widthBody)
+        angleBody = 0.0
+        
+        # Left wing ellipse.
+        sizeLeft = (self.lengthBody*9/10, 
+                    self.lengthBody*7/10)
+        centerLeft = (centerBody[0] - sizeLeft[0]/2 + self.lengthBody*2/10,
+                      centerBody[1] - sizeLeft[1]/2 - 1)
+        angleLeft = 0.0
 
-            # Right wing.
-            sizeRight = (self.lengthBody*8/10, 
-                         self.lengthBody*7/10)
-            centerRight = (centerBody[0] + self.lengthBody*1/10 - sizeRight[0]/2,
+        # Right wing ellipse.
+        sizeRight = (self.lengthBody*9/10, 
+                     self.lengthBody*7/10)
+        centerRight = (centerBody[0] - sizeRight[0]/2 + self.lengthBody*2/10,
                        centerBody[1] + sizeRight[1]/2)
-            angleRight = 0.0
+        angleRight = 0.0
 
 
-            # Draw ellipses on the mask.
-            cv2.ellipse(self.npMaskWings,
-                        (centerBody, sizeBody, angleBody),
-                        self.maxColor, cv.CV_FILLED)
-            cv2.ellipse(self.npMaskWings,
-                        (centerLeft, sizeLeft, angleLeft*180.0/N.pi),
-                        self.maxColor, cv.CV_FILLED)
-            cv2.ellipse(self.npMaskWings,
-                        (centerRight, sizeRight, angleRight*180.0/N.pi),
-                        self.maxColor, cv.CV_FILLED)
+        # Draw ellipses on the mask.
+        #cv2.ellipse(self.npMaskWings,
+        #            (centerBody, sizeBody, angleBody),
+        #            self.maxColor, cv.CV_FILLED)
+        cv2.ellipse(self.npMaskWings,
+                    (centerLeft, sizeLeft, angleLeft*180.0/N.pi),
+                    self.maxColor, cv.CV_FILLED)
+        cv2.ellipse(self.npMaskWings,
+                    (centerRight, sizeRight, angleRight*180.0/N.pi),
+                    self.maxColor, cv.CV_FILLED)
             
-            
+        if (npfRoiMean is not None):
+            # Mean Fly Body Mask.
+            (thresh,npMaskBody) = cv2.threshold(npfRoiMean.astype(N.uint8), rospy.get_param('tracking/thresholdForeground',25.0), 255, cv2.THRESH_BINARY_INV)
+            self.npMaskWings = cv2.bitwise_and(self.npMaskWings, npMaskBody)
+        
+    
             # Publish non-essential stuff.
             if globalNonessential:
+                npMaskWings1 = copy.copy(self.npMaskWings)
+                npMaskWings1.resize(npMaskWings1.size)
                 imgMaskWings  = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npMaskWings), 'passthrough')
-                npMaskWings1 = self.npMaskWings.resize(self.npMaskWings.size)
                 imgMaskWings.data = list(npMaskWings1)
-                self.pubMaskWings.publish(imgMaskWings)
-            
+                self.pubImageMask.publish(imgMaskWings)
+        
+                npMaskBody1 = copy.copy(npMaskBody)
+                npMaskBody1.resize(npMaskBody1.size)
+                imgMaskBody  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npMaskBody), 'passthrough')
+                imgMaskBody.data = list(npMaskBody1)
+                self.pubImageMaskBody.publish(imgMaskBody)
+    
+        
+    def UpdateFlyMean(self, npRoiReg):
+        self.alphaForeground = rospy.get_param('tracking/alphaForeground', 0.01)
+        if (self.npfRoiMean is None):
+            self.npfRoiMean = N.float32(npRoiReg)
+        cv2.accumulateWeighted(N.float32(npRoiReg), self.npfRoiMean, self.alphaForeground)
+
+        
+    def UpdateFlySuperresolution(self, npRoi, moments):
+        pass
+    
         
     # Rotate the image to 0 degrees.                    
     def RegisterImageRoi(self, npRoi):
-        # Center of mass.
-        moments = cv2.moments(npRoi)
-        xCOM  = moments['m10']/moments['m00']
-        yCOM  = moments['m01']/moments['m00']
-        
-        # Rotate it to 0-degrees.
-        angle = -self.contourinfo.angle * 180.0 / N.pi
-        T = cv2.getRotationMatrix2D((xCOM,yCOM), angle, 1.0)
-        #T[0,2] += self.widthRoi/4 # Move the fly's head further forward.
+        if (self.angleContourUnwrapped is not None):
+            # Center of mass.
+            moments = cv2.moments(npRoi)
+            xCOM  = moments['m10']/moments['m00']
+            yCOM  = moments['m01']/moments['m00']
+            
+            # Rotate the fly image to 0-degrees.
+            angleR = self.ResolveRawAngle()
+            T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, 1.0)
+            npRoiReg = cv2.warpAffine(npRoi, T, (0,0))#(self.widthRoi, self.heightRoi))
+            
+            # Super-resolution fly image.
+            self.UpdateFlySuperresolution(npRoi, moments)
 
-        npRegistered = cv2.warpAffine(npRoi, T, (self.widthRoi, self.heightRoi))
-        
-
-        return npRegistered
+        else:
+            npRoiReg = npRoi
+            
+        return npRoiReg
         
 
     # GetWingAngles()
     # Compute the left & right wing angles from the given contourinfo angle and image.
     #
     def GetWingAngles(self, contourinfo):
-        # Moving-Average image.
-        npRoi = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, "passthrough")))
-        npRoiRegistered = self.RegisterImageRoi(npRoi)
-        self.alphaForeground = rospy.get_param('tracking/alphaForeground', 0.01)
-        if (self.npfRoiMean is None):
-            self.npfRoiMean = N.float32(npRoiRegistered)
-        cv2.accumulateWeighted(N.float32(npRoiRegistered), self.npfRoiMean, self.alphaForeground)
+        npRoiIn = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, "passthrough")))
+        npRoi = npRoiIn * self.npMaskCircle
+        npRoiReg = self.RegisterImageRoi(npRoi)
 
+        # Update the wing mask.
+        self.UpdateWingMask(self.npfRoiMean)
 
-        # Create ROS images.
-        self.imgRoiReg  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npRoiRegistered), 'passthrough')
-        self.imgRoiMean = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8(self.npfRoiMean)), 'passthrough')
+        # Moving-Average fly image.
+        self.UpdateFlyMean(npRoiReg)
+
+        # Mask the input ROI.
+        npRoiReg = cv2.bitwise_and(npRoiReg, self.npMaskWings)
+        
         
         # Background Fly Subtraction.
-        diff = npRoiRegistered.astype(N.float32) - self.npfRoiMean
-        npWings = N.clip(diff, 0, N.iinfo(N.uint8).max).astype(N.uint8) 
+        diff = npRoiReg.astype(N.float32) - self.npfRoiMean*rospy.get_param('bg',1.0) # Only partially subtract the mean.
+        npWings = N.clip(diff, 0, N.iinfo(N.uint8).max).astype(N.uint8)
+        #npWings = npRoiReg 
         
-        # Apply the fly mask.
-        self.CreateWingMask(self.npfRoiMean)
-        npWings = cv2.bitwise_and(npWings, self.npMaskWings)
+        # Mask the wings.
+#        npWings = cv2.bitwise_and(npWings, self.npMaskWings)
                         
         # Create images with only pixels of left wing (i.e. image top) or right wing (i.e. image bottom).
-        npWingLeft   = N.vstack((npWings[0:self.heightRoi/2, :],
+        npWingLeft   = N.vstack((npWings[:self.heightRoi/2, :],
                                  N.zeros([self.heightRoi/2+1, self.widthRoi])))
         npWingRight  = N.vstack((N.zeros([self.heightRoi/2+1, self.widthRoi]), 
-                                 npWings[(1+self.heightRoi/2):, :]))
+                                 npWings[(self.heightRoi/2+1):, :]))
         
         # Wing moments.
-        momentsRoi = cv2.moments(npRoiRegistered)
+        momentsRoi = cv2.moments(npRoiReg)
         momentsLeft  = cv2.moments(npWingLeft)
         momentsRight = cv2.moments(npWingRight)
 
@@ -369,14 +428,14 @@ class Fly:
             yBody = 0.0
             
         try:
-            xLeft  = momentsLeft['m10']/momentsLeft['m00'] - xBody
+            xLeft  = momentsLeft['m10']/momentsLeft['m00'] - (xBody + self.lengthBody/4)
             yLeft  = momentsLeft['m01']/momentsLeft['m00'] - yBody
         except ZeroDivisionError:
             xLeft = 0.0
             yLeft = 0.0
             
         try:
-            xRight = momentsRight['m10']/momentsRight['m00'] - xBody
+            xRight = momentsRight['m10']/momentsRight['m00'] - (xBody + self.lengthBody/4)
             yRight = momentsRight['m01']/momentsRight['m00'] - yBody
         except ZeroDivisionError:
             xRight = 0.0
@@ -387,22 +446,26 @@ class Fly:
 
 
         # Metrics to distinguish wing extension from noise.
-        #etaLeftX = momentsLeft['m10']-momentsLeft['m00']*xBodyBg # Moment about the fly body, rather than about the center of mass.
-        #etaLeftY = momentsLeft['m01']-momentsLeft['m00']*yBodyBg
-        #etaRightX = momentsRight['m10']-momentsRight['m00']*xBodyBg
-        #etaRightY = momentsRight['m01']-momentsRight['m00']*yBodyBg
-        #metricLeft = N.linalg.norm([etaLeftX,etaLeftY])
-        #metricRight = N.linalg.norm([etaRightX,etaRightY])
         metricLeft = momentsLeft['m00']
         metricRight = momentsRight['m00']
+
+        # Metric mean, for thresholding.
+        if (self.metricMeanLeft is not None):
+            a = 0.01
+            self.metricMeanLeft  = (1-a)*self.metricMeanLeft  + a*metricLeft 
+            self.metricMeanRight = (1-a)*self.metricMeanRight + a*metricRight 
+        else:
+            self.metricMeanLeft  = metricLeft 
+            self.metricMeanRight = metricRight 
+            
         
         
-        if (metricLeft < self.thresholdWingmetric):
+        if (metricLeft < 2*self.metricMeanLeft):
             angleLeft = N.pi
         else:
             angleLeft  = N.arctan2(yLeft, xLeft)+N.pi
             
-        if (metricRight < self.thresholdWingmetric):
+        if (metricRight < 2*self.metricMeanRight):
             angleRight = N.pi
         else:
             angleRight = N.arctan2(yRight, xRight)+N.pi
@@ -410,9 +473,15 @@ class Fly:
 
         # Nonessential stuff to publish.
         if globalNonessential:
-            #rospy.logwarn ('%s: contour angle=% 0.2f' % (self.name, contourinfo.angle))
+            npRoiReg[momentsLeft['m01']/momentsLeft['m00'],   momentsLeft['m10']/momentsLeft['m00']] = 255.0      # Set pixel at wing center.
+            npRoiReg[momentsRight['m01']/momentsRight['m00'], momentsRight['m10']/momentsRight['m00']] = 255.0
+            
+            self.imgRoiReg  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npRoiReg), 'passthrough') 
+            self.imgRoiMean = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8(self.npfRoiMean)), 'passthrough')
+            
+            npToUse = npWingLeft
             imgWings = copy.copy(self.imgRoiReg)
-            npWings1 = npWings.astype(N.uint8).reshape(npWings.size)
+            npWings1 = npToUse.astype(N.uint8).reshape(npToUse.size)
             imgWings.data = list(npWings1)
             self.pubImageRoi.publish(contourinfo.imgRoi)
             self.pubImageRoiReg.publish(self.imgRoiReg)
@@ -430,7 +499,6 @@ class Fly:
     # Update the current state using the visual position and the computed position (if applicable)
     def Update(self, contourinfo, posesComputedExternal):
         if self.initialized:
-            self.angleContourPrev = self.lpAngleContour.GetValue()
             self.contourinfo = contourinfo
             
             # Update the position & orientation filters
@@ -460,7 +528,8 @@ class Fly:
                 (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contourinfo.x, self.contourinfo.y), contourinfo.header.stamp.to_sec())
                 (zKalman, vzKalman) = (0.0, 0.0)
                 #(xKalman,yKalman) = (self.contourinfo.x,self.contourinfo.y) # Unfiltered.
-                zf = self.lpAngleContour.Update(self.contourinfo.angle, contourinfo.header.stamp.to_sec())#self.contourinfo.header.stamp.to_sec())
+                self.lpAngleContour.Update(self.contourinfo.angle, contourinfo.header.stamp.to_sec())
+                self.apAngleContour.Update(self.contourinfo.angle, contourinfo.header.stamp.to_sec())
 
                 (angleLeft, angleRight) = self.GetWingAngles(contourinfo)
                 
@@ -499,7 +568,7 @@ class Fly:
             self.state.pose.position.x = x
             self.state.pose.position.y = y
             self.state.pose.position.z = z
-            #self.state.pose.orientation comes from self.GetResolvedAngle() later.
+            #self.state.pose.orientation comes from self.ResolveFilteredAngle() later.
             self.state.velocity.linear.x = vx
             self.state.velocity.linear.y = vy
             self.state.velocity.linear.z = vz
@@ -531,7 +600,7 @@ class Fly:
             # Update the most recent angle of travel.
             self.SetAngleOfTravel()
             self.UpdateFlipState()
-            angle = self.GetResolvedAngle()
+            angle = self.ResolveFilteredAngle()
             
             (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = tf.transformations.quaternion_about_axis(angle, (0,0,1))
                 
