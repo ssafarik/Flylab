@@ -493,10 +493,10 @@ class CalibrateStageArena():
         msgPattern.frameidAngle = 'Stage'
         msgPattern.shape = rospy.get_param('calibration/shape', 'spiral')
         msgPattern.count = -1
-        msgPattern.size = Point(x=0.7 * rospy.get_param('arena/radius_inner', 25.4), y=0)
+        msgPattern.size = Point(x=rospy.get_param('arena/radius_inner', 25.4), y=0)
         msgPattern.points = []
         msgPattern.preempt = True
-        msgPattern.param = 0
+        msgPattern.param = 0.0
         if msgPattern.shape=='spiral':
             msgPattern.hzPattern = 0.008
         else:

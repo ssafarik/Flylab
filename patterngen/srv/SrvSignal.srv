@@ -1,3 +1,4 @@
-geometry_msgs/PointStamped pts
+#geometry_msgs/PointStamped pts
+flycore/MsgFrameState       state
 ---
 bool success

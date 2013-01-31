@@ -4,8 +4,9 @@ import rospy
 import copy
 import numpy as N
 import threading
-from geometry_msgs.msg import PoseStamped, Point, PointStamped
+from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Twist
 import tf
+from flycore.msg import MsgFrameState
 
 from patterngen.msg import MsgPattern
 from patterngen.srv import *
@@ -30,6 +31,7 @@ class PatternGenXY:
         self.pattern1.size = Point(25.4, 25.4, 0.0)
         self.pattern1.preempt = True
         self.pattern1.param = 0.0
+        self.lenPattern1 = 0.0
 
         self.iPoint = 0
 
@@ -505,6 +507,20 @@ class PatternGenXY:
             rospy.logerror('PatternGen: unknown pattern')
                 
                 
+    def GetPathLength(self, points):
+        lenTotal = 0.0
+        if (len(points)>0):
+            ptCur = points[0]
+            for pt in points:
+                lenTotal += N.linalg.norm([pt.x-ptCur.x, 
+                                          pt.y-ptCur.y])
+                ptCur = pt
+                
+            lenTotal += N.linalg.norm([points[-1].x-ptCur.x, 
+                                      points[-1].y-ptCur.y])
+            
+        return lenTotal
+    
         
     # PatternGen_callback() 
     #   Receive the message that sets up a pattern generation.
@@ -528,10 +544,12 @@ class PatternGenXY:
             if self.pattern1.count==-1:
                 self.pattern1.count = 2147483640 # MAX_INT
             
-            if msgPatternGen.shape=='bypoints':
+            if self.pattern1.shape=='bypoints':
                 self.pattern1.points = msgPatternGen.points
                 
             self.UpdatePatternPoints(self.pattern1)
+            self.lenPattern1 = self.GetPathLength(self.pattern1.points)
+            
             if (len(self.pattern1.points)>0):
                 if (msgPatternGen.preempt) or (self.iPoint >= len(self.pattern1.points)) or (self.iPoint < 0):
                     if (self.pattern1.direction > 0):
@@ -557,27 +575,35 @@ class PatternGenXY:
             if self.pattern1.count>0:
                 direction = copy.copy(self.pattern1.direction)
                 bSuccess = False
-                i=0
-                while (not bSuccess):
-                    pts = self.TransformPatternPoint()
-                    
-                    try:
-                        resp = self.SignalOutput (pts)
-                    except rospy.ServiceException:
-                        bSuccess = True
-                        rospy.logwarn('SignalOutput() exception.  Reconnecting...')
-                        rospy.wait_for_service(self.stSignalInput)
-                        self.SignalOutput = rospy.ServiceProxy(self.stSignalInput, SrvSignal)
-                    else:
-                        bSuccess = resp.success
-                        if (not bSuccess):
-                            self.pattern1.direction = -direction # Back out until no longer clipped.  
-                            #rospy.logwarn('clipped')
-                    i += 1
+
+#                while (not bSuccess):
+                pts = self.TransformPatternPoint()
+                vec = self.StepNextPatternPoint()
+                a = N.arctan2(vec.y, vec.x)
+
+                speed = self.lenPattern1 * self.pattern1.hzPattern
+                velocity = Twist(linear=Point(x = speed * N.cos(a),
+                                              y = speed * N.sin(a)))
+                #rospy.logwarn('nPoints=%d, %d' % (len(self.pattern1.points), self.iPoint))
+                state=MsgFrameState(header=pts.header,
+                                    pose=Pose(position=pts.point),
+                                    velocity=velocity,
+                                    speed=speed)
+                try:
+                    resp = self.SignalOutput (state)
+                except rospy.ServiceException:
+                    bSuccess = True
+                    rospy.logwarn('SignalOutput() exception.  Reconnecting...')
+                    rospy.wait_for_service(self.stSignalInput)
+                    self.SignalOutput = rospy.ServiceProxy(self.stSignalInput, SrvSignal)
+                else:
+                    bSuccess = resp.success
+                    if (not bSuccess):
+                        self.pattern1.direction = -direction # Back out until no longer clipped.  
+                        #rospy.logwarn('clipped')
 
                         
-                    self.StepNextPatternPoint()
-                    #rospy.logwarn(self.iPoint)
+                #rospy.logwarn(self.iPoint)
 
 
 
@@ -600,6 +626,7 @@ class PatternGenXY:
 
     def StepNextPatternPoint(self):                    
         #rospy.logwarn ('PG pt=%s' % [pts.point.x, pts.point.y])
+        ptCur = self.pattern1.points[self.iPoint]
         self.iPoint += self.pattern1.direction
         
         # When the pattern output is completed, go to the next pattern.
@@ -616,7 +643,16 @@ class PatternGenXY:
                 self.iPoint = len(self.pattern1.points)-1
                 self.pattern1.count -= 1
                 self.UpdatePatternPoints(self.pattern1)
-
+            
+            ptNext = self.pattern1.points[self.iPoint]
+            
+            # Vector to the next point.
+            dPoint = Point(x=ptNext.x-ptCur.x,
+                           y=ptNext.y-ptCur.y)
+        else:
+            dPoint = Point(x=0,y=0)
+            
+        return dPoint
 
         
     def Main(self):
