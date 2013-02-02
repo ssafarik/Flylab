@@ -114,7 +114,7 @@ class CalibrateStageArena():
         
         
     def InitializeImages(self, (height,width)):
-        self.imgDisplay   = N.zeros([height, width, 3], dtype=N.uint8)
+        self.npDisplay   = N.zeros([height, width, 3], dtype=N.uint8)
         self.initialized_images = True
     
     
@@ -240,14 +240,14 @@ class CalibrateStageArena():
         t0 = rospy.Time.now().to_sec()
         if self.initialized:
             try:
-                imgInput = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
+                npInput = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
             except CvBridgeError, e:
                 rospy.logwarn('Exception CvBridgeError in image callback: %s' % e)
             
             if not self.initialized_images:
-                self.InitializeImages(imgInput.shape)
+                self.InitializeImages(npInput.shape)
             
-            self.imgDisplay = cv2.cvtColor(imgInput, cv.CV_GRAY2RGB)
+            self.npDisplay = cv2.cvtColor(npInput, cv.CV_GRAY2RGB)
             xText = 25
             yText = 25
             dyText = 20
@@ -292,21 +292,21 @@ class CalibrateStageArena():
     
                     for iPoint in range(self.pointRobot_array.shape[1]):
                         pointImage = self.PointImageFromArena(Point(x=self.pointRobot_array[0,iPoint], y=self.pointRobot_array[1,iPoint]))                        
-                        cv2.circle(self.imgDisplay, 
+                        cv2.circle(self.npDisplay, 
                                    (int(pointImage.x), int(pointImage.y)), 
                                    5, cv.CV_RGB(0,0,self.colorMax/2), cv.CV_FILLED)
                         
                         pointImage = self.PointImageFromArena(Point(x=self.pointEndEffector_array[0,iPoint], y=self.pointEndEffector_array[1,iPoint]))                        
-                        cv2.circle(self.imgDisplay, 
+                        cv2.circle(self.npDisplay, 
                                    (int(pointImage.x), int(pointImage.y)), 
                                    5, cv.CV_RGB(0,self.colorMax/2,0), cv.CV_FILLED)
                     
                     pointImage = self.PointImageFromArena(self.poseRobot.pose.position)                        
-                    cv2.circle(self.imgDisplay, 
+                    cv2.circle(self.npDisplay, 
                                (int(pointImage.x), int(pointImage.y)), 
                                3, cv.CV_RGB(0,0,self.colorMax), cv.CV_FILLED)
                     pointImage = self.PointImageFromArena(Point(x=xEndEffector, y=yEndEffector))                        
-                    cv2.circle(self.imgDisplay, 
+                    cv2.circle(self.npDisplay, 
                                (int(pointImage.x), int(pointImage.y)), 
                                3, cv.CV_RGB(0,self.colorMax,0), cv.CV_FILLED)
     
@@ -346,95 +346,91 @@ class CalibrateStageArena():
     
     
                         display_text = 'Translation = [%0.3f, %0.3f, %0.3f]' % (position[0], position[1], position[2])
-                        cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
+                        cv2.putText(self.npDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                         yText += dyText
                         display_text = 'Quaternion = [%0.3f, %0.3f, %0.3f, %0.3f]' % (quaternion[0],quaternion[1],quaternion[2],quaternion[3])
-                        cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
+                        cv2.putText(self.npDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                         yText += dyText
                         display_text = 'eccRobotMin = %0.3f, eccRobotMax = %0.3f' % (self.eccRobotMin, self.eccRobotMax)
-                        cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
+                        cv2.putText(self.npDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                         yText += dyText
                         display_text = 'areaRobotMin = %0.0f, areaRobotMax = %0.0f' % (self.areaRobotMin, self.areaRobotMax)
-                        cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
+                        cv2.putText(self.npDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                         yText += dyText
                         display_text = 'Factor = %s' % factor
-                        cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                        cv2.putText(self.npDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                         yText += dyText
                         display_text = 'Origin = %s' % origin
-                        cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                        cv2.putText(self.npDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                         yText += dyText
                         display_text = 'Direction = %s' % direction
-                        cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                        cv2.putText(self.npDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                         yText += dyText
                         display_text = 'T = [%+0.4f, %+0.4f, %+0.4f, %+0.4f]' % (T[0][0], T[0][1], T[0][2], T[0][3])
-                        cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                        cv2.putText(self.npDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                         yText += dyText
                         display_text = 'T = [%+0.4f, %+0.4f, %+0.4f, %+0.4f]' % (T[1][0], T[1][1], T[1][2], T[1][3])
-                        cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                        cv2.putText(self.npDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                         yText += dyText
                         display_text = 'T = [%+0.4f, %+0.4f, %+0.4f, %+0.4f]' % (T[2][0], T[2][1], T[2][2], T[2][3])
-                        cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                        cv2.putText(self.npDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                         yText += dyText
                         display_text = 'T = [%+0.4f, %+0.4f, %+0.4f, %+0.4f]' % (T[3][0], T[3][1], T[3][2], T[3][3])
-                        cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                        cv2.putText(self.npDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                         yText += dyText
                         
                         display_text = 'nPoints = %d' % nPoints
-                        cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                        cv2.putText(self.npDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                         yText += dyText
 
                         self.bRotateGrid = True
-                        #self.DrawOriginAxes(self.imgDisplay, self.rvec, self.tvec)
-                        #self.DrawGrid(self.imgDisplay, self.rvec, self.tvec)
+                        #self.DrawOriginAxes(self.npDisplay, self.rvec, self.tvec)
+                        #self.DrawGrid(self.npDisplay, self.rvec, self.tvec)
                     else:
                         yText += 12*dyText
                         
                             
                     yText += dyText
                     display_text = 'positionRobot = [%0.3f, %0.3f]' % (self.poseRobot.pose.position.x, self.poseRobot.pose.position.y)
-                    cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
+                    cv2.putText(self.npDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                     yText += dyText
                     display_text = 'positionEndEffector = [%0.3f, %0.3f]' % (xEndEffector, yEndEffector)
-                    cv2.putText(self.imgDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
+                    cv2.putText(self.npDisplay,display_text,(xText,yText),cv.CV_FONT_HERSHEY_TRIPLEX, 0.5,self.colorFont)
                     yText += dyText
                     
                 # End if self.initialized_endeffector
             
             
-            cv2.putText(self.imgDisplay, self.textError, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+            cv2.putText(self.npDisplay, self.textError, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
             yText += dyText
             
-            cv2.imshow('Stage/Arena Calibration', self.imgDisplay)
+            cv2.imshow('Stage/Arena Calibration', self.npDisplay)
             cv2.waitKey(3)
         t1 = rospy.Time.now().to_sec()
         rospy.logwarn('time=%f' % (t1-t0))
 
    
-    def ContourinfoLists_callback(self, contourinfo_lists):
+    def ContourinfoLists_callback(self, contourinfolists):
         if self.initialized:
-            header     = contourinfo_lists.header
-            x_list     = contourinfo_lists.x
-            y_list     = contourinfo_lists.y
-            angle_list = contourinfo_lists.angle
-            area_list  = contourinfo_lists.area
-            ecc_list   = contourinfo_lists.ecc
-            nContours  = min(len(x_list), 
-                             len(y_list), 
-                             len(angle_list), 
-                             len(area_list), 
-                             len(ecc_list))
+            header     = contourinfolists.header
+            x_list     = contourinfolists.x
+            y_list     = contourinfolists.y
+            angle_list = contourinfolists.angle
+            area_list  = contourinfolists.area
+            ecc_list   = contourinfolists.ecc
+            nContours  = len(x_list)
             
             if nContours==1:
                 self.textError = ''
                 if not self.initialized_pose:
                     self.initialized_pose = True
 
-                poseContour = PoseStamped(header=contourinfo_lists.header,
+                poseContour = PoseStamped(header=contourinfolists.header,
                                         pose=Pose(position=Point(x=x_list[0],
                                                                  y=y_list[0])) 
                                         )
 
-                self.poseRobot.header = contourinfo_lists.header
+                self.poseRobot.header = contourinfolists.header
                 self.poseRobot.header.frame_id = "Arena"
                 self.poseRobot.pose = self.PoseArenaFromImage(poseContour) # Gives the position of the robot in arena coordinates.
                 self.areaRobot = area_list[0]
@@ -488,7 +484,7 @@ class CalibrateStageArena():
         rospy.sleep(2)
         self.initialized = True
 
-        # Publish the spiral pattern message.
+        # Publish the calibration pattern.
         msgPattern.frameidPosition = 'Stage'
         msgPattern.frameidAngle = 'Stage'
         msgPattern.shape = rospy.get_param('calibration/shape', 'spiral')

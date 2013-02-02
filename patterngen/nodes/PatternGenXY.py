@@ -578,13 +578,13 @@ class PatternGenXY:
 
 #                while (not bSuccess):
                 pts = self.TransformPatternPoint()
-                vec = self.StepNextPatternPoint()
-                a = N.arctan2(vec.y, vec.x)
+                vecNext = self.StepNextPatternPoint()
+                a = N.arctan2(vecNext.y, vecNext.x)
 
                 speed = self.lenPattern1 * self.pattern1.hzPattern
                 velocity = Twist(linear=Point(x = speed * N.cos(a),
                                               y = speed * N.sin(a)))
-                #rospy.logwarn('nPoints=%d, %d' % (len(self.pattern1.points), self.iPoint))
+                #rospy.logwarn('iPoint=%d/%d, speed=% 4.1f, x=% 4.1f' % (self.iPoint, len(self.pattern1.points), speed, pts.point.x))
                 state=MsgFrameState(header=pts.header,
                                     pose=Pose(position=pts.point),
                                     velocity=velocity,

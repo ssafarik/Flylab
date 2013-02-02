@@ -45,13 +45,13 @@
   <!--                                                                    -->
   <!-- ================================================================== -->
   
-  <param name="arena_stage_x" type="double" value="0.4"/>  <!-- Adjust for stage/arena alignment here. -->
-  <param name="arena_stage_y" type="double" value="-0.8"/>  <!-- Adjust for stage/arena alignment here. -->
+  <param name="arena_stage_x" type="double" value="0.2"/>  <!-- Adjust for stage/arena alignment here. -->
+  <param name="arena_stage_y" type="double" value="0.7"/>  <!-- Adjust for stage/arena alignment here. -->
   <param name="arena_stage_z" type="double" value="0"/>
   <param name="arena_stage_qx" type="double" value="0"/>
   <param name="arena_stage_qy" type="double" value="0"/>
-  <param name="arena_stage_qz" type="double" value="-0.770"/>
-  <param name="arena_stage_qw" type="double" value="0.669"/>
+  <param name="arena_stage_qz" type="double" value="0.0"/>
+  <param name="arena_stage_qw" type="double" value="1.0"/>
 
 
 </launch>

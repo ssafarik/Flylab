@@ -21,5 +21,6 @@
 	<param name="camera/framerate" type="double" value="4"/> <!-- These are low since the processing time eventually causes ContourGenerator to hang on publishing ContourinfoLists. -->
 	<param name="camera/softwarerate" type="double" value="4"/>
 
+	<param name="motorarm/speed_max" type="double" value="20.4"/>
 	<node pkg="calibration" type="StageArena.py" name="StageArenaCalibration" />
 </launch>

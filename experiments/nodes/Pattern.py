@@ -66,11 +66,12 @@ class Experiment():
         self.experimentparams.trial.robot.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
-        self.experimentparams.trial.robot.move.pattern.shape = 'constant' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+        self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
         self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20  # Patterns per second.
-        self.experimentparams.trial.robot.move.pattern.hzPoint = 1  
+        nPoints = 400
+        self.experimentparams.trial.robot.move.pattern.hzPoint = nPoints*self.experimentparams.trial.robot.move.pattern.hzPattern  
         self.experimentparams.trial.robot.move.pattern.count = -1
-        self.experimentparams.trial.robot.move.pattern.size.x = 33
+        self.experimentparams.trial.robot.move.pattern.size.x = 32
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.timeout = -1 #self.experimentparams.trial.robot.move.pattern.count * (1.0/self.experimentparams.trial.robot.move.pattern.hzPattern)
         self.experimentparams.trial.robot.home.enabled = False

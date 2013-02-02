@@ -9,27 +9,20 @@
     <!--                                                            -->
 	<!-- ========================================================== -->
     
-	<param name="rosSimpleStep/velDefault" type="double" value="1.0" />               	<!-- Velocity to use when finding index, parking, etc. -->
-	<param name="rosSimpleStep/limitHi" type="double" value="2147483647" />           	<!-- Max absolute angle. -->
-	<param name="rosSimpleStep/limitLo" type="double" value="-2147483646" />          	<!-- Min absolute angle. -->
-	<param name="robot_description" textfile="$(find racetrack)/motorarm_urdf.xml" />  <!-- Contains 3D model of hardware. -->
+	<param name="rosSimpleStep/velDefault" 	type="double" value="1.0" />               	<!-- Velocity to use when finding index, parking, etc. -->
+	<param name="rosSimpleStep/limitHi" 	type="double" value="2147483647" />         <!-- Max absolute angle. -->
+	<param name="rosSimpleStep/limitLo" 	type="double" value="-2147483646" />        <!-- Min absolute angle. -->
+	<param name="robot_description" textfile="$(find racetrack)/motorarm_urdf.xml" />	<!-- Contains 3D model of hardware. -->
 
-	<param name="motorarm/speed_max"   type="double" value="50"/>                    	<!-- Millimeters per second of end effector. -->
-	<param name="motorarm/L1"          type="double" value="33"/>                            	<!-- Link1 length in millimeters. -->
-	<param name="motorarm/angleOffset" type="double" value="0.16"/>                	<!-- Angle offset when index switch is triggered. -->
+	<param name="motorarm/speed_max"   		type="double" value="50"/>             		<!-- Millimeters per second of end effector. -->
+	<param name="motorarm/L1"          		type="double" value="32"/>                  <!-- Link1 length in millimeters. -->
+	<param name="motorarm/angleOffset" 		type="double" value="-3.30"/>           <!-- Angle between the index switch and the 0 angle. -->
 
-<!--	<param name="motorarm/kP"      type="double" value="1.0"/>
-	<param name="motorarm/kI"      type="double" value="0.5"/>
-	<param name="motorarm/kD"      type="double" value="-0.5"/>
-	<param name="motorarm/kWindup" type="double" value="0.1"/>  
-	<param name="motorarm/maxI"    type="double" value="0.0"/>  
--->
-	
-	<param name="motorarm/kP"      type="double" value="0.3"/>
-	<param name="motorarm/kI"      type="double" value="0.0"/>
-	<param name="motorarm/kD"      type="double" value="0.25"/>
-	<param name="motorarm/kWindup" type="double" value="0.0"/>  
-	<param name="motorarm/maxI"    type="double" value="0.0"/>  
+	<param name="motorarm/kP"      			type="double" value="0.2"/>
+	<param name="motorarm/kI"      			type="double" value="0.01"/>
+	<param name="motorarm/kD"      			type="double" value="0.0"/>
+	<param name="motorarm/kWindup" 			type="double" value="0.9"/>  
+	<param name="motorarm/maxI"    			type="double" value="25.0"/>  
 	
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.0'"/>
 </launch>
