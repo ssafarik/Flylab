@@ -12,7 +12,6 @@
   <param name="tracking/thresholdForeground"    type="double" value="70.0"/>   				<!-- Moving average for foreground objects (e.g. tracked fly appearance). -->
   <param name="tracking/roi/height"         	type="int" value="25"/>     					<!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
   <param name="tracking/roi/width"          	type="int" value="25"/>     					<!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
-  <param name="tracking/wingmetric_threshold"   type="double" value="300"/>   					<!-- Threshold for the wing-extension metric. -->
   <param name="tracking/lengthBody"             type="int" value="14"/>   		    			<!-- Fly body length in pixels. -->
   <param name="tracking/widthBody"              type="int" value="7"/>   	    				<!-- Fly body width in pixels. -->
   <param name="tracking/filenameBackground" 	type="string" value="/cameras/background.png"/> <!-- Location of the initial background image. -->
