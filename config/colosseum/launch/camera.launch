@@ -10,5 +10,5 @@
 	<include file="$(find colosseum)/launch/params_camera.launch" ns="camera" />
 	<node pkg="camera_aravis" type="camnode" name="camera" />
 	<node pkg="image_proc" type="image_proc" name="image_proc" ns="camera" />
-  
+
 </launch>

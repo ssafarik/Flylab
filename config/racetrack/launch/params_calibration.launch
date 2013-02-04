@@ -25,12 +25,12 @@
 
 
   <!-- These values come from CameraArena.launch, with a checkerboard on the arena. -->
-  <param name="camera_arena_rvec_0" type="double" value="3.12"/>
-  <param name="camera_arena_rvec_1" type="double" value="-0.004"/>
-  <param name="camera_arena_rvec_2" type="double" value="0.073"/>
-  <param name="camera_arena_tvec_0" type="double" value="71.4"/> <!-- 71.4 Adjust for camera/arena alignment here. -->
-  <param name="camera_arena_tvec_1" type="double" value = "53.26"/> <!-- 53.26 Adjust for camera/arena alignment here. -->
-  <param name="camera_arena_tvec_2" type="double" value="343.9"/>
+  <param name="camera_arena_rvec_0" type="double" value="3.124"/>
+  <param name="camera_arena_rvec_1" type="double" value="-0.001"/>
+  <param name="camera_arena_rvec_2" type="double" value="0.069"/>
+  <param name="camera_arena_tvec_0" type="double" value="-1.930"/> <!-- 71.4 Adjust for camera/arena alignment here. -->
+  <param name="camera_arena_tvec_1" type="double" value = "14.562"/> <!-- 53.26 Adjust for camera/arena alignment here. -->
+  <param name="camera_arena_tvec_2" type="double" value="341.518"/>
   
 
   <!-- ================================================================== -->
@@ -45,13 +45,13 @@
   <!--                                                                    -->
   <!-- ================================================================== -->
   
-  <param name="arena_stage_x" type="double" value="0.0"/>  <!-- Adjust for stage/arena alignment here. -->
-  <param name="arena_stage_y" type="double" value="0.0"/>  <!-- Adjust for stage/arena alignment here. -->
+  <param name="arena_stage_x" type="double" value="0.2"/>  <!-- Adjust for stage/arena alignment here. -->
+  <param name="arena_stage_y" type="double" value="0.7"/>  <!-- Adjust for stage/arena alignment here. -->
   <param name="arena_stage_z" type="double" value="0"/>
   <param name="arena_stage_qx" type="double" value="0"/>
   <param name="arena_stage_qy" type="double" value="0"/>
-  <param name="arena_stage_qz" type="double" value="0.70710678"/>
-  <param name="arena_stage_qw" type="double" value="0.70710678"/>
+  <param name="arena_stage_qz" type="double" value="0.0"/>
+  <param name="arena_stage_qw" type="double" value="1.0"/>
 
 
 </launch>

@@ -45,7 +45,7 @@ NEGATIVE = 1
 
 
 
-class RosFivebar:
+class Fivebar:
 
     def __init__(self):
         self.initialized = False
@@ -118,6 +118,13 @@ class RosFivebar:
         self.names = ['joint1','joint2','joint3','joint4']
         self.jointstate1 = None
         self.jointstate2 = None
+        self.js = JointState()
+        self.js.header.seq = 0
+        self.js.header.stamp = rospy.Time.now()
+        self.js.header.frame_id = "1"
+        self.js.name = self.names
+        #self.js.velocity = [0.0, 0.0, 0.0, 0.0]
+        
         
         # Publish & Subscribe
         rospy.Service('set_stage_state',    SrvFrameState, self.SetStageState_callback)
@@ -129,18 +136,12 @@ class RosFivebar:
 
         self.subVisualPosition    = rospy.Subscriber('VisualPosition', PoseStamped, self.VisualPosition_callback)
         self.pubJointState        = rospy.Publisher('joint_states', JointState)
+        self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         self.pubMarker            = rospy.Publisher('visualization_marker', Marker)
         
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
 
-        self.js = JointState()
-        self.js.header.seq = 0
-        self.js.header.stamp = rospy.Time.now()
-        self.js.header.frame_id = "1"
-        self.js.name = self.names
-        #self.js.velocity = [0.0, 0.0, 0.0, 0.0]
-        
         self.ptsContourRefExternal = None #Point(0,0,0) # Where we want the "tool".
         self.ptsContourRef         = None
         self.ptEeSense          = Point(0,0,0)
@@ -287,6 +288,33 @@ class RosFivebar:
         return (bClipped, ptOut)
                 
                 
+    def ClipPtsToArena(self, ptsIn):        
+        isInArena = True
+        
+        # Transform to Arena frame, and clip to arena radius.
+        try:
+            ptsIn.header.stamp = self.tfrx.getLatestCommonTime('Arena', ptsIn.header.frame_id)
+            ptsArena = self.tfrx.transformPoint('Arena', ptsIn)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming to Arena frame in ClipPtsToArena()')
+            ptsArena = ptsIn
+        else:
+            (bClipped,ptClipped) = self.ClipPtToRadius(ptsArena.point, self.radiusArena)
+            if bClipped:
+                ptsArena.point = ptClipped
+                isInArena = False
+    
+        # Transform back to original frame.
+        try:
+            ptsArena.header.stamp = self.tfrx.getLatestCommonTime(ptsIn.header.frame_id, ptsArena.header.frame_id)
+            ptsOut = self.tfrx.transformPoint(ptsIn.header.frame_id, ptsArena)
+        except tf.Exception:
+            rospy.logwarn ('5B Exception transforming in ClipPtsToArena()')
+            ptsOut = ptsIn
+    
+        return (ptsOut, isInArena)
+        
+
     # Close the kinematics chain:  Get thetas 1,2,3,4 from thetas 1,2
     def Get1234xyFrom12 (self, angle1, angle2):
         # Rotate the frames from centered to east-pointing. 
@@ -555,33 +583,6 @@ class RosFivebar:
         return rvStageState.state
 
 
-    def ClipPtsToArena(self, ptsIn):        
-        isInArena = True
-        
-        # Transform to Arena frame, and clip to arena radius.
-        try:
-            ptsIn.header.stamp = self.tfrx.getLatestCommonTime('Arena', ptsIn.header.frame_id)
-            ptsArena = self.tfrx.transformPoint('Arena', ptsIn)
-        except tf.Exception:
-            rospy.logwarn ('5B Exception transforming to Arena frame in ClipPtsToArena()')
-            ptsArena = ptsIn
-        else:
-            (bClipped,ptClipped) = self.ClipPtToRadius(ptsArena.point, self.radiusArena)
-            if bClipped:
-                ptsArena.point = ptClipped
-                isInArena = False
-    
-        # Transform back to original frame.
-        try:
-            ptsArena.header.stamp = self.tfrx.getLatestCommonTime(ptsIn.header.frame_id, ptsArena.header.frame_id)
-            ptsOut = self.tfrx.transformPoint(ptsIn.header.frame_id, ptsArena)
-        except tf.Exception:
-            rospy.logwarn ('5B Exception transforming in ClipPtsToArena()')
-            ptsOut = ptsIn
-    
-        return (ptsOut, isInArena)
-        
-
     def TransformToStageFrame(self, pts):
         try:
             pts.header.stamp = self.tfrx.getLatestCommonTime('Stage', pts.header.frame_id)
@@ -627,7 +628,9 @@ class RosFivebar:
     def SignalInput_callback (self, srvSignalReq):
         rv = SrvSignalResponse()
         rv.success = True
-        self.ptsContourRefExternal = srvSignalReq.pts 
+        #self.ptsContourRefExternal = srvSignalReq.pts 
+        self.ptsContourRefExternal = PointStamped(header=srvSignalReq.state.header,
+                                                  point=srvSignalReq.state.pose.position) 
         
         
         (self.ptsContourRefExternal, isInArena) = self.ClipPtsToArena(self.ptsContourRefExternal)
@@ -637,7 +640,7 @@ class RosFivebar:
         try:
             self.speedCommandTool = self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
         except AttributeError, e:
-            rospy.logwarn('AttributeError: %s' % e)
+            rospy.logwarn('5B AttributeError: %s' % e)
             
         
         return rv
@@ -726,7 +729,7 @@ class RosFivebar:
 
                 # Publish the joint states (for rviz, etc)    
                 self.js.header.seq = self.js.header.seq + 1
-                self.js.header.stamp.secs = self.time
+                self.js.header.stamp = self.time
                 self.js.position = [angle1,angle2,angle3,angle4]
                 self.pubJointState.publish(self.js)
     
@@ -740,6 +743,7 @@ class RosFivebar:
                 state.pose.orientation.y = qEE[1]
                 state.pose.orientation.z = qEE[2]
                 state.pose.orientation.w = qEE[3]
+                self.pubEndEffector.publish (state)
 
         
                 # Publish the link transforms.
@@ -919,16 +923,16 @@ class RosFivebar:
 
             
             # Get the desired positions for each joint.
-            (angle1,angle2,angle3,angle4) = self.Get1234FromPt(self.ptEeCommand)
+            (angleNext1,angleNext2,angleNext3,angleNext4) = self.Get1234FromPt(self.ptEeCommand)
             
     
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):
                 # Cheap and wrong way to convert mm/sec to radians/sec.  Should use Jacobian.                    
-                speedMax = self.speedCommandTool * 0.0120 
+                speedNext = self.speedCommandTool * 0.0120 
 
                 # Distribute the velocity over the two joints.
-                dAngle1 = N.abs(angle1-self.jointstate1.position) # Delta theta
-                dAngle2 = N.abs(angle2-self.jointstate2.position)
+                dAngle1 = N.abs(angleNext1-self.jointstate1.position) # Delta theta
+                dAngle2 = N.abs(angleNext2-self.jointstate2.position)
                 dist = N.linalg.norm([dAngle1,dAngle2])
                 if dist != 0.0:
                     scale1 = dAngle1/dist
@@ -937,15 +941,15 @@ class RosFivebar:
                     scale1 = 0.5
                     scale2 = 0.5
                     
-                v1 = scale1 * speedMax
-                v2 = scale2 * speedMax
+                speedNext1 = scale1 * speedNext
+                speedNext2 = scale2 * speedNext
                 
                 
                 with self.lock:
                     try:
                         #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.ptsContourRef.point.x,self.ptsContourRef.point.y))
-                        self.setPositionAtVel_joint1(Header(frame_id=self.names[0]), angle1, v1)
-                        self.setPositionAtVel_joint2(Header(frame_id=self.names[1]), angle2, v2)
+                        self.setPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext1, speedNext1)
+                        self.setPositionAtVel_joint2(Header(frame_id=self.names[1]), angleNext2, speedNext2)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
                         rospy.logwarn ("5B Exception:  %s" % e)
 
@@ -973,14 +977,13 @@ class RosFivebar:
             
             self.SendTransforms()
             self.UpdateMotorCommandFromTarget()
-
             rosrate.sleep()
                 
     
 
 if __name__ == '__main__':
     try:
-        fivebar = RosFivebar()
+        fivebar = Fivebar()
     except rospy.exceptions.ROSInterruptException:
         pass
     

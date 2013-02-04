@@ -31,7 +31,7 @@ class Experiment():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-75, y=25)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
@@ -66,13 +66,14 @@ class Experiment():
         self.experimentparams.trial.robot.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
-        self.experimentparams.trial.robot.move.pattern.shape = 'square' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/30  # Patterns per second.
-        self.experimentparams.trial.robot.move.pattern.hzPoint = 60 #4/10 #1/3 #rospy.get_param('actuator/hzPoint', 20.0)  # The update rate for the target.
+        self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20  # Patterns per second.
+        nPoints = 400
+        self.experimentparams.trial.robot.move.pattern.hzPoint = nPoints*self.experimentparams.trial.robot.move.pattern.hzPattern  
         self.experimentparams.trial.robot.move.pattern.count = -1
-        self.experimentparams.trial.robot.move.pattern.size.x = 50
-        self.experimentparams.trial.robot.move.pattern.size.y = 50
-        self.experimentparams.trial.robot.move.timeout = 90 #self.experimentparams.trial.robot.move.pattern.count * (1.0/self.experimentparams.trial.robot.move.pattern.hzPattern)
+        self.experimentparams.trial.robot.move.pattern.size.x = 32
+        self.experimentparams.trial.robot.move.pattern.size.y = 0
+        self.experimentparams.trial.robot.move.timeout = -1 #self.experimentparams.trial.robot.move.pattern.count * (1.0/self.experimentparams.trial.robot.move.pattern.hzPattern)
         self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
