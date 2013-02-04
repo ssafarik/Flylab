@@ -27,11 +27,11 @@ class Experiment():
         
         self.experimentparams.save.filenamebase = "chase"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = False
+        self.experimentparams.save.video = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
@@ -110,7 +110,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 600    # 10 minutes
+        self.experimentparams.post.trigger.timeout = 180    # 10 minutes
 
         self.experimentparams.post.wait = 0.0
         

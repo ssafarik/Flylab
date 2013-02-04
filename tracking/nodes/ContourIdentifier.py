@@ -256,7 +256,12 @@ class ContourIdentifier:
             contourinfolistsOut.header.frame_id = 'Arena'
             contourinfolistsOut.x = response.xDst
             contourinfolistsOut.y = response.yDst
-    
+        else:
+            contourinfolistsOut = copy.copy(contourinfolistsIn)
+            contourinfolistsOut.header.frame_id = 'Arena'
+            contourinfolistsOut.x = []
+            contourinfolistsOut.y = []
+            
         return contourinfolistsOut
       
       

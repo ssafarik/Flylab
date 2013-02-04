@@ -27,7 +27,7 @@ class Experiment():
         
         self.experimentparams.save.filenamebase = "twoflies"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = False
+        self.experimentparams.save.video = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = False
         
