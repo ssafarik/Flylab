@@ -9,7 +9,7 @@ import geometry_msgs.msg
 import std_msgs.msg
 
 class SrvFrameStateRequest(genpy.Message):
-  _md5sum = "8ac2e11897b185b933e91584c7e46311"
+  _md5sum = "b2c56b9614d095bdfcce0b527530676e"
   _type = "flycore/SrvFrameStateRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """MsgFrameState state
@@ -22,7 +22,7 @@ string              name
 geometry_msgs/Pose  pose
 geometry_msgs/Twist velocity
 float64             speed # This is here mainly so we can show it with rxplot.
-
+Wings               wings
 
 ================================================================================
 MSG: std_msgs/Header
@@ -77,6 +77,16 @@ MSG: geometry_msgs/Vector3
 float64 x
 float64 y
 float64 z
+================================================================================
+MSG: flycore/Wings
+WingState   left
+WingState   right
+
+
+================================================================================
+MSG: flycore/WingState
+float64             angle
+
 """
   __slots__ = ['state','speed']
   _slot_types = ['flycore/MsgFrameState','float64']
@@ -133,7 +143,7 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_15d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.speed))
+      buff.write(_struct_17d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.state.wings.left.angle, _x.state.wings.right.angle, _x.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -170,8 +180,8 @@ float64 z
         self.state.name = str[start:end]
       _x = self
       start = end
-      end += 120
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.speed,) = _struct_15d.unpack(str[start:end])
+      end += 136
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.state.wings.left.angle, _x.state.wings.right.angle, _x.speed,) = _struct_17d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -199,7 +209,7 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_15d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.speed))
+      buff.write(_struct_17d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.state.wings.left.angle, _x.state.wings.right.angle, _x.speed))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -237,15 +247,15 @@ float64 z
         self.state.name = str[start:end]
       _x = self
       start = end
-      end += 120
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.speed,) = _struct_15d.unpack(str[start:end])
+      end += 136
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.state.wings.left.angle, _x.state.wings.right.angle, _x.speed,) = _struct_17d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
 _struct_3I = struct.Struct("<3I")
-_struct_15d = struct.Struct("<15d")
+_struct_17d = struct.Struct("<17d")
 """autogenerated by genpy from flycore/SrvFrameStateResponse.msg. Do not edit."""
 import sys
 python3 = True if sys.hexversion > 0x03000000 else False
@@ -257,7 +267,7 @@ import geometry_msgs.msg
 import std_msgs.msg
 
 class SrvFrameStateResponse(genpy.Message):
-  _md5sum = "9738f053fa28d511f9bcbdaa3aec1e89"
+  _md5sum = "84b304c1ea513360846b43b45d425c06"
   _type = "flycore/SrvFrameStateResponse"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """MsgFrameState state
@@ -271,7 +281,7 @@ string              name
 geometry_msgs/Pose  pose
 geometry_msgs/Twist velocity
 float64             speed # This is here mainly so we can show it with rxplot.
-
+Wings               wings
 
 ================================================================================
 MSG: std_msgs/Header
@@ -326,6 +336,16 @@ MSG: geometry_msgs/Vector3
 float64 x
 float64 y
 float64 z
+================================================================================
+MSG: flycore/Wings
+WingState   left
+WingState   right
+
+
+================================================================================
+MSG: flycore/WingState
+float64             angle
+
 """
   __slots__ = ['state']
   _slot_types = ['flycore/MsgFrameState']
@@ -379,7 +399,7 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed))
+      buff.write(_struct_16d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.state.wings.left.angle, _x.state.wings.right.angle))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -416,8 +436,8 @@ float64 z
         self.state.name = str[start:end]
       _x = self
       start = end
-      end += 112
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed,) = _struct_14d.unpack(str[start:end])
+      end += 128
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.state.wings.left.angle, _x.state.wings.right.angle,) = _struct_16d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -445,7 +465,7 @@ float64 z
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_14d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed))
+      buff.write(_struct_16d.pack(_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.state.wings.left.angle, _x.state.wings.right.angle))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -483,17 +503,17 @@ float64 z
         self.state.name = str[start:end]
       _x = self
       start = end
-      end += 112
-      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed,) = _struct_14d.unpack(str[start:end])
+      end += 128
+      (_x.state.pose.position.x, _x.state.pose.position.y, _x.state.pose.position.z, _x.state.pose.orientation.x, _x.state.pose.orientation.y, _x.state.pose.orientation.z, _x.state.pose.orientation.w, _x.state.velocity.linear.x, _x.state.velocity.linear.y, _x.state.velocity.linear.z, _x.state.velocity.angular.x, _x.state.velocity.angular.y, _x.state.velocity.angular.z, _x.state.speed, _x.state.wings.left.angle, _x.state.wings.right.angle,) = _struct_16d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
+_struct_16d = struct.Struct("<16d")
 _struct_3I = struct.Struct("<3I")
-_struct_14d = struct.Struct("<14d")
 class SrvFrameState(object):
   _type          = 'flycore/SrvFrameState'
-  _md5sum = '9109b6a2dda7b8bdea91e7ac4c4b0236'
+  _md5sum = '58f91892e773a6c77fa6e3134281ba11'
   _request_class  = SrvFrameStateRequest
   _response_class = SrvFrameStateResponse

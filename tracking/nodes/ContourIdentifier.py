@@ -229,6 +229,7 @@ class ContourIdentifier:
             contourinfolistsOut.angle = []
             contourinfolistsOut.area = []
             contourinfolistsOut.ecc = []
+            contourinfolistsOut.imgRoi = []
             
             #contourinfolistsArena = TransformContourinfoArenaFromCamera(contourinfolistsIn)
             for iContour in range(len(contourinfolistsIn.x)):
@@ -239,6 +240,7 @@ class ContourIdentifier:
                     contourinfolistsOut.angle.append(contourinfolistsIn.angle[iContour])
                     contourinfolistsOut.area.append(contourinfolistsIn.area[iContour])
                     contourinfolistsOut.ecc.append(contourinfolistsIn.ecc[iContour])
+                    contourinfolistsOut.imgRoi.append(contourinfolistsIn.imgRoi[iContour])
                     
         return contourinfolistsOut
         
@@ -254,10 +256,15 @@ class ContourIdentifier:
             contourinfolistsOut.header.frame_id = 'Arena'
             contourinfolistsOut.x = response.xDst
             contourinfolistsOut.y = response.yDst
-    
+        else:
+            contourinfolistsOut = copy.copy(contourinfolistsIn)
+            contourinfolistsOut.header.frame_id = 'Arena'
+            contourinfolistsOut.x = []
+            contourinfolistsOut.y = []
+            
         return contourinfolistsOut
       
-
+      
     # GetDistanceMatrix()
     # Get the matrix of distances between each pair of points in the two lists.  Adjust distances with
     # priorities, where smaller=better.
@@ -308,11 +315,11 @@ class ContourIdentifier:
                     #    d[m,n] += 0
                     gainEcc = 10.0
                     eccmetric = gainEcc * N.abs(contourinfo_list[n].ecc - contourinfoMean_list[m].ecc) / N.max([contourinfo_list[n].ecc, contourinfoMean_list[m].ecc]) # Ranges 0 to 1.
-                    d[m,n] += eccmetric
+                    d[m,n] += 0#eccmetric
                     
                     gainArea = 0.1 
                     areametric = gainArea * N.abs(contourinfo_list[n].area - contourinfoMean_list[m].area)
-                    d[m,n] += areametric
+                    d[m,n] += 0#areametric
                     #if m<2:
                     #    rospy.logwarn('Object %s, eccmetric=%0.2f, areametric=%0.2f' % (m, eccmetric, areametric))
                     
@@ -574,7 +581,7 @@ class ContourIdentifier:
         
         return mapContoursFromObjects
     
-
+    
     def ContourinfoLists_callback(self, contourinfolistsPixels):
         #rospy.logwarn('ContourinfoLists_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
 #        self.timePrev = rospy.Time.now().to_sec()
@@ -600,11 +607,8 @@ class ContourIdentifier:
                 self.stateEndEffector.pose.orientation.z = rotEndEffector_quat[2]
                 self.stateEndEffector.pose.orientation.w = rotEndEffector_quat[3]
 
-            #rospy.logwarn ('CI contourinfolists0 %s' % contourinfolists)
             contourinfolistsPixels = self.FilterContourinfoWithinMask(contourinfolistsPixels)
-            #rospy.logwarn ('CI contourinfolists1 %s' % contourinfolists)
             contourinfolists = self.TransformContourinfoArenaFromCamera(contourinfolistsPixels)
-            #rospy.logwarn ('CI contourinfolists2 %s' % contourinfolists)
 
             # Create a null contourinfo.
             contourinfoNone = Contourinfo()
@@ -614,6 +618,7 @@ class ContourIdentifier:
             contourinfoNone.angle = None
             contourinfoNone.area = None
             contourinfoNone.ecc = None
+            contourinfoNone.imgRoi = None
 
             # Repackage the contourinfolists into a list of contourinfos, ignoring any that are in the exclusion zone.
             self.contourinfo_list = []            
@@ -638,6 +643,7 @@ class ContourIdentifier:
                     
                     contourinfo.area   = contourinfolists.area[i]
                     contourinfo.ecc    = contourinfolists.ecc[i]
+                    contourinfo.imgRoi = contourinfolists.imgRoi[i]
                     self.contourinfo_list.append(contourinfo)
     
 
@@ -668,8 +674,9 @@ class ContourIdentifier:
                             contourinfo = contourinfoNone
                              
                         if (iRobot < len(self.objects)):
-                            self.objects[iRobot].Update(contourinfo, PoseStamped(header=self.stateEndEffector.header, 
-                                                                                 pose=self.stateEndEffector.pose))
+                            self.objects[iRobot].Update(contourinfo, 
+                                                        PoseStamped(header=self.stateEndEffector.header, 
+                                                                    pose=self.stateEndEffector.pose))
                         
                         # Write a file (for getting Kalman covariances, etc).
                         #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateEndEffector.pose.position.x,
@@ -695,7 +702,7 @@ class ContourIdentifier:
                     
                     if (iFly < len(self.objects)):
                         self.objects[iFly].Update(contourinfo, None)
-    
+                        
                     #self.stateEndEffector.header.stamp,#rospy.Time.now()
                     #rospy.loginfo ('CI update state %s contour=%s' % (iFly,contourinfo))
     
@@ -719,6 +726,7 @@ class ContourIdentifier:
                         arenastate.robot.name            = self.objects[iRobot].name
                         arenastate.robot.pose            = self.objects[iRobot].state.pose
                         arenastate.robot.velocity        = self.objects[iRobot].state.velocity
+                        arenastate.robot.wings           = self.objects[iRobot].state.wings
                         arenastate.robot.speed           = self.objects[iRobot].speed
                         #rospy.logwarn ('CI robot.position=%s, ptOffset=%s' % ([self.objects[iRobot].state.pose.position.x,
                         #                                                            self.objects[iRobot].state.pose.position.y],
@@ -728,11 +736,12 @@ class ContourIdentifier:
                 #rospy.logwarn('iFly_list=%s, len(mapContourinfoFromObject)=%d' % (self.iFly_list,len(self.mapContourinfoFromObject)))
                 for iFly in self.iFly_list:
                     if (iFly < len(self.objects)):
-                        arenastate.flies.append(MsgFrameState(header = self.objects[iFly].state.header, 
-                                                              name = self.objects[iFly].name,
-                                                              pose = self.objects[iFly].state.pose,
+                        arenastate.flies.append(MsgFrameState(header   = self.objects[iFly].state.header, 
+                                                              name     = self.objects[iFly].name,
+                                                              pose     = self.objects[iFly].state.pose,
                                                               velocity = self.objects[iFly].state.velocity,
-                                                              speed = min(50.0, self.objects[iFly].speed)))
+                                                              wings    = self.objects[iFly].state.wings,
+                                                              speed    = min(50.0, self.objects[iFly].speed)))
 
                 
                 # Publish the ArenaState.
@@ -761,11 +770,6 @@ class ContourIdentifier:
 if __name__ == '__main__':
     rospy.init_node('ContourIdentifier')
     ci = ContourIdentifier()
-
-    #try:
     rospy.spin()
-    #except:
-    #    rospy.loginfo("Shutting down")
-
-    #cv.DestroyAllWindows()
-
+    
+    

@@ -16,27 +16,31 @@ def Rerange(self, angle):
 
 # Get the distance between two angles.  Cannot be further than pi apart.
 def DistanceCircle(angle2, angle1):
-    angle1 = angle1 % (2.0*N.pi)
-    angle2 = angle2 % (2.0*N.pi)
-    dist = angle2 - angle1
-    if dist > N.pi:
-        dist = dist - (2.0*N.pi) # - dist
-    elif dist < -N.pi:
-        dist = dist + (2.0*N.pi) # + dist
-    
+    angle1b = angle1 % (2.0*N.pi)
+    angle2b = angle2 % (2.0*N.pi)
+    distb = angle2b - angle1b
+    if distb > N.pi:
+        dist = distb - (2.0*N.pi)
+    elif distb < -N.pi:
+        dist = distb + (2.0*N.pi)
+    else:
+        dist = distb
+        
     return dist
     
 # Compute the shortest distance from one angle to another, where an angle can wrap at the half-circle,
 # meaning that the arrow can be pointing either way.  Cannot be further than pi/2 apart.
 #
 def DistanceHalfCircle(angle2, angle1):
-    angle1 = angle1 % (N.pi)
-    angle2 = angle2 % (N.pi)
-    dist = angle2 - angle1
-    if dist > N.pi/2:
-        dist = dist - (N.pi)
-    elif dist < -N.pi/2:
-        dist = dist + (N.pi)
+    angle1b = angle1 % (2.0*N.pi)   # The angle1 is good on 2pi.
+    angle2b = angle2 % (N.pi)       # The angle2 might be off by pi.
+    distb = angle2b - angle1b
+    if distb > N.pi/2:
+        dist = distb - (N.pi)
+    elif distb < -N.pi/2:
+        dist = distb + (N.pi)
+    else:
+        dist = distb
         
     return dist
 
@@ -46,13 +50,17 @@ def DistanceHalfCircle(angle2, angle1):
 # If there was a jump greater than pi, it means that the new angle was
 # off by 2*pi.
 #
-def UnwrapCircle(angle, angle_prev):
-    if (angle is not None) and (angle_prev is not None):
-        delta_angle = circle_dist(angle_prev,angle)
-        unwrapped_angle = angle_prev + delta_angle
-    elif angle is not None:
-        unwrapped_angle = angle
-    return unwrapped_angle
+def UnwrapCircle(angle, anglePrev):
+    if (angle is not None):
+        if (anglePrev is not None):
+            delta = DistanceCircle(anglePrev,angle)
+            angleUnwrapped = anglePrev + delta
+        else:
+            angleUnwrapped = angle
+    else:
+        angleUnwrapped = None
+        
+    return angleUnwrapped
 
 
 # UnwrapHalfCircle()
@@ -63,21 +71,27 @@ def UnwrapCircle(angle, angle_prev):
 def UnwrapHalfCircle(angle, anglePrev):
     if (angle is not None):
         if (anglePrev is not None):
-            delta_angle = DistanceHalfCircle(angle, anglePrev)
-            angleUnwrapped = anglePrev + delta_angle
+            delta = DistanceHalfCircle(angle, anglePrev)
+            angleUnwrapped = anglePrev + delta
         else:
             angleUnwrapped = angle
-
+    else:
+        angleUnwrapped = None
+        
     return angleUnwrapped
 
 
 def DegreesFromRadians(angle):
     if angle is not None:
         return angle*180.0/N.pi
+    else:
+        return None
 
 def RadiansFromDegrees(angle):
     if angle is not None:
         return angle*N.pi/180.0
+    else:
+        return None
 
 if __name__ == '__main__':
     pi = N.pi
@@ -86,7 +100,7 @@ if __name__ == '__main__':
     for ang in range(len(start_angle)):
         start_ang = start_angle[ang]
         stop_ang = stop_angle[ang]
-        diff = circle_dist(start_ang,stop_ang)
+        diff = DistanceCircle(start_ang,stop_ang)
         print "start_angle = %s" % (str(DegreesFromRadians(start_ang)))
         print "stop_angle = %s" % (str(DegreesFromRadians(stop_ang)))
         print "diff = %s" % (str(DegreesFromRadians(diff)))

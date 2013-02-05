@@ -102,7 +102,7 @@ class Save:
 
         
         #################################################################################
-        self.versionFile = '2.6'    # Increment this when the file format changes.
+        self.versionFile = '2.7'    # Increment this when the file format changes.
         #################################################################################
 
         
@@ -388,11 +388,11 @@ class Save:
 
         # Construct a variable-length heading for the data lines, depending on the number of flies.
         self.headingsDataLeft   = 'time, triggered'
-        self.headingsDataRobot  = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot'
-        self.headingsDataFly    = ', xFly, yFly, aFly, vxFly, vyFly, vaFly'
+        self.headingsDataRobot  = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, aRobotWingLeft, aRobotWingRight'
+        self.headingsDataFly    = ', xFly, yFly, aFly, vxFly, vyFly, vaFly, aFlyWingLeft, aFlyWingRight'
         self.templateDataLeft   = '{time:0.4f}, {triggered:s}'
-        self.templateDataRobot  = ', {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}'
-        self.templateDataFly    = ', {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}'
+        self.templateDataRobot  = ', {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {aRobotWingLeft:{align}{sign}{width}.{precision}{type}}, {aRobotWingRight:{align}{sign}{width}.{precision}{type}}'
+        self.templateDataFly    = ', {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}, {aFlyWingLeft:{align}{sign}{width}.{precision}{type}}, {aFlyWingRight:{align}{sign}{width}.{precision}{type}}'
 
         self.headingsData = self.headingsDataLeft + self.headingsDataRobot
         for i in range(self.nFlies):
@@ -909,7 +909,7 @@ class Save:
 #            cmdCreateVideoFile = 'ffmpeg -f image2 -i ' + self.dirFrames + '/%06d.png -r ' + str(self.framerate) + ' ' + \
 #                                   '-sameq -s 640x480 -mbd rd -trellis 2 -cmp 2 -subcmp 2 -g 100 -bf 2 -pass 1/2 ' + \
 #                                   self.filenameVideo
-            cmdCreateVideoFile = 'avconv -i ' + self.dirFrames + '/%06d.png ' + self.filenameVideo
+            cmdCreateVideoFile = 'avconv -r 60 -i ' + self.dirFrames + '/%06d.png -r 60 ' + self.filenameVideo
             rospy.logwarn('Converting .png images to video using command:')
             rospy.logwarn (cmdCreateVideoFile)
             try:
@@ -970,17 +970,19 @@ class Save:
                                                     triggered   = str(int(self.triggered)),
                                                     )
             dataRobot = self.templateDataRobot.format(
-                                                    align       = self.format_align,
-                                                    sign        = self.format_sign,
-                                                    width       = self.format_width,
-                                                    precision   = self.format_precision,
-                                                    type        = self.format_type,
-                                                    xRobot      = stateRobot.pose.position.x,
-                                                    yRobot      = stateRobot.pose.position.y,
-                                                    aRobot      = angleRobot,
-                                                    vxRobot     = stateRobot.velocity.linear.x,
-                                                    vyRobot     = stateRobot.velocity.linear.y,
-                                                    vaRobot     = stateRobot.velocity.angular.z,
+                                                    align           = self.format_align,
+                                                    sign            = self.format_sign,
+                                                    width           = self.format_width,
+                                                    precision       = self.format_precision,
+                                                    type            = self.format_type,
+                                                    xRobot          = stateRobot.pose.position.x,
+                                                    yRobot          = stateRobot.pose.position.y,
+                                                    aRobot          = angleRobot,
+                                                    vxRobot         = stateRobot.velocity.linear.x,
+                                                    vyRobot         = stateRobot.velocity.linear.y,
+                                                    vaRobot         = stateRobot.velocity.angular.z,
+                                                    aRobotWingLeft  = stateRobot.wings.left.angle,
+                                                    aRobotWingRight = stateRobot.wings.right.angle,
                                                     )
             dataRow = dataLeft + dataRobot
 
@@ -999,17 +1001,19 @@ class Save:
 
                 # Append the fly to the data row.            
                 dataFly = self.templateDataFly.format(
-                                                   align        = self.format_align,
-                                                   sign         = self.format_sign,
-                                                   width        = self.format_width,
-                                                   precision    = self.format_precision,
-                                                   type         = self.format_type,
-                                                   xFly         = stateFly.pose.position.x,
-                                                   yFly         = stateFly.pose.position.y,
-                                                   aFly         = angleFly,
-                                                   vxFly        = stateFly.velocity.linear.x,
-                                                   vyFly        = stateFly.velocity.linear.y,
-                                                   vaFly        = stateFly.velocity.angular.z,
+                                                   align         = self.format_align,
+                                                   sign          = self.format_sign,
+                                                   width         = self.format_width,
+                                                   precision     = self.format_precision,
+                                                   type          = self.format_type,
+                                                   xFly          = stateFly.pose.position.x,
+                                                   yFly          = stateFly.pose.position.y,
+                                                   aFly          = angleFly,
+                                                   vxFly         = stateFly.velocity.linear.x,
+                                                   vyFly         = stateFly.velocity.linear.y,
+                                                   vaFly         = stateFly.velocity.angular.z,
+                                                   aFlyWingLeft  = stateFly.wings.left.angle,
+                                                   aFlyWingRight = stateFly.wings.right.angle,
                                                    )
                 dataRow += dataFly
                 
