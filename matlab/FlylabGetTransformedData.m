@@ -29,6 +29,7 @@ function [posTransformed,angleTransformed] = FlylabGetTransformedData(filedata, 
         fprintf ('iFrameChild > nObjects.\n');
     end
 
+    % Transform the data.
     if isValidParams
         posChild = posChild - posParent;
         angChild = angChild - angParent;

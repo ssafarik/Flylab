@@ -61,16 +61,16 @@ function [start,stop] = FlylabGetInteractions(filedata, iFrameParent, iFrameChil
     
 end
 
-function b=MeetsCriteria(state1, state2, criteria)
-    posParent = state1(1:2);
-    angParent = state1(3);
-    velParent = state1(4:5);
-    vaParent  = state1(6);
+function b=MeetsCriteria(stateP, stateC, criteria)
+    posParent = stateP(1:2);
+    angParent = stateP(3);
+    velParent = stateP(4:5);
+    vaParent  = stateP(6);
 
-    posChild = state2(1:2);
-    angChild = state2(3);
-    velChild = state2(4:5);
-    vaChild  = state2(6);
+    posChild = stateC(1:2);
+    angChild = stateC(3);
+    velChild = stateC(4:5);
+    vaChild  = stateC(6);
 
     % Relative position & velocity.
     pos = posParent-posChild;
@@ -85,6 +85,8 @@ function b=MeetsCriteria(state1, state2, criteria)
     switch criteria
         case 'chase'
             b=CriteriaChase(dist, angleRel, speedP, speedC, speedRel);
+        case 'proximity'
+            b=CriteriaProximity(dist, angleRel, speedP, speedC, speedRel);
         case 'fight'
             b=CriteriaFight(dist, angleRel, speedP, speedC, speedRel);
         case 'all'
@@ -102,7 +104,16 @@ function b=CriteriaChase(dist, angleRel, speedP, speedC, speedRel)
     end
 end
 
+function b=CriteriaProximity(dist, angleRel, speedP, speedC, speedRel)
+    if (dist<10)
+        b = true;
+    else
+        b = false;
+    end
+end
+
 function b=CriteriaFight(dist, angleRel, speedP, speedC, speedRel)
+    % Not yet implemented.
     b = false;
 end
 
