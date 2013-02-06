@@ -470,6 +470,7 @@ class MotorArm:
                 state.pose.orientation.w = qEE[3]
 #                self.pubEndEffector.publish (state)
 
+
                 
                 # Publish the link transforms.
                 self.tfbx.sendTransform((0.0, 0.0, 0.0), 
@@ -613,7 +614,7 @@ class MotorArm:
             
             vecPIDclipped = Point(x=ptsEeCommandClipped.point.x-self.ptEeSense.x,
                                   y=ptsEeCommandClipped.point.y-self.ptEeSense.y)
-            rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
+            #rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
             
             # Display a vector in rviz.
             ptBase = self.ptEeSense

@@ -541,6 +541,17 @@ class Fly:
         if self.initialized:
             self.contourinfo = contourinfo
             
+            # Use the computed end-effector orientation.
+            if posesComputedExternal is not None:
+                posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
+                q = posesComputed.pose.orientation
+                rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
+                angle = rpy[2]
+            else:
+                angle = contourinfo.angle
+                
+            
+
             # Update the position & orientation filters
             self.isVisible = False            
             if (self.contourinfo.x is not None) and \
@@ -568,8 +579,8 @@ class Fly:
                 (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contourinfo.x, self.contourinfo.y), contourinfo.header.stamp.to_sec())
                 (zKalman, vzKalman) = (0.0, 0.0)
                 #(xKalman,yKalman) = (self.contourinfo.x,self.contourinfo.y) # Unfiltered.
-                self.lpAngleContour.Update(self.contourinfo.angle, contourinfo.header.stamp.to_sec())
-                self.apAngleContour.Update(self.contourinfo.angle, contourinfo.header.stamp.to_sec())
+                self.lpAngleContour.Update(angle, contourinfo.header.stamp.to_sec())
+                self.apAngleContour.Update(angle, contourinfo.header.stamp.to_sec())
 
                 (angleLeft, angleRight) = self.GetWingAngles(contourinfo)
                 
@@ -640,38 +651,13 @@ class Fly:
             # Update the most recent angle of travel.
             self.SetAngleOfTravel()
             self.UpdateFlipState()
-            angle = self.ResolveFilteredAngle()
+            if 'Robot' not in self.name:
+                angle = self.ResolveFilteredAngle()
+            else:
+                pass # angle already set from above.
             
             (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = tf.transformations.quaternion_about_axis(angle, (0,0,1))
                 
-            # Update the tool offset.
-            if posesComputedExternal is not None:
-                posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
-                ptComputed = posesComputed.pose.position
-                
-                # The offset.
-                xOffset = x-ptComputed.x
-                yOffset = y-ptComputed.y
-                
-                # Filter the offset as magnitude & angle.
-                (magOffset,angleOffset)=self.PolarFromXy(xOffset,yOffset)
-                angleOffset += self.unwind
-                if angleOffset-self.angleOffsetPrev > N.pi:
-                    self.unwind -= 2.0*N.pi
-                    angleOffset -= 2.0*N.pi
-                elif angleOffset-self.angleOffsetPrev < -N.pi:
-                    self.unwind += 2.0*N.pi
-                    angleOffset += 2.0*N.pi
-                self.angleOffsetPrev = angleOffset
-                
-                angleOffsetF = self.lpOffsetAng.Update(angleOffset, contourinfo.header.stamp.to_sec())
-                (self.ptOffset.x,self.ptOffset.y) = self.XyFromPolar(N.clip(self.lpOffsetMag.Update(magOffset, contourinfo.header.stamp.to_sec()), 
-                                                                            -self.maxOffset, 
-                                                                            self.maxOffset),
-                                                                     angleOffsetF)
-            else:
-                self.ptOffset = Point(x=0, y=0, z=0)
-            
 
                 
             # Send the Raw transform.
