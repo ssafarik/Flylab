@@ -45,7 +45,9 @@ function FlylabPlotPosition(filedata, iFrameParent, iFrameChildren, iTrigger, nS
         y = pos(1:nSubsample:m, 2);
         ang=ang(1:nSubsample:m);
 
-
+        xTrig = x(iTriggerA);
+        yTrig = y(iTriggerA);
+        
         % Remove points outside a boundary.
         if iFrameParent~=0
             rMax = 30;
@@ -59,9 +61,9 @@ function FlylabPlotPosition(filedata, iFrameParent, iFrameChildren, iTrigger, nS
 
         % Draw the  positions, with circles on start and trigger.
         if ~isempty(x)
-            scatter    (x(1),         y(1),         2*pix(iFrameChild), colors(iFrameChild,:),                      's');
-            scatter    (x(iTriggerA), y(iTriggerA), 2*pix(iFrameChild), colors(iFrameChild,:),                      'o');
-            scatterPose(x,            y,              ang,              colors(iFrameChild,:), radii(iFrameChild),  markers{iFrameChild});
+            scatter    (x(1),  y(1),  2*pix(iFrameChild), colors(iFrameChild,:),                      's');
+            scatter    (xTrig, yTrig, 2*pix(iFrameChild), colors(iFrameChild,:),                      'o');
+            scatterPose(x,     y,       ang,              colors(iFrameChild,:), radii(iFrameChild),  markers{iFrameChild});
         end
 
         if iFrameParent~=0

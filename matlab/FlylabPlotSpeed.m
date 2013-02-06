@@ -3,7 +3,7 @@ dirspec = 'C:\\flyranch\\2012_12_21*';
 filespec = '*.csv';
 filenames = GetFilenames(dirspec, filespec);
 
-for i = 1:5%length(filenames)
+for i = 1:length(filenames)
     [filedata,iTrigger] = FlylabReadData(filenames{i}, -1);
 
     [m,n] = size(filedata);

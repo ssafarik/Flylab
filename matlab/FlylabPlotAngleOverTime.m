@@ -47,9 +47,9 @@ function FlylabPlotAngleOverTime(dirspec, filespec)
     % Compute the angle statistics.
     angleMean = zeros(len,1);
     angleMat = [];
-    for k = iFiles
-        angleMean = angleMean + unwrap(angleFly{k}(1:len)) - angleFly{k}(1);
-        angleMat = [angleMat, unwrap(angleFly{k}(1:len)) - angleFly{k}(1)]; % Time vertically, Files horizontally.
+    for i = iFiles
+        angleMean = angleMean + unwrap(angleFly{i}(1:len)) - angleFly{i}(1);
+        angleMat = [angleMat, unwrap(angleFly{i}(1:len)) - angleFly{i}(1)]; % Time vertically, Flies horizontally.
     end
     angleMean = angleMean / nFiles;
     angleStd = std(angleMat')' / sqrt(nFiles); % Array of std deviations over time.
@@ -62,8 +62,8 @@ function FlylabPlotAngleOverTime(dirspec, filespec)
     
     % Compute confidence intervals of mean.
     ciAll = [];
-    for k=indices
-        [h,p,ci] = ttest(angleMat(k,:)', linMean(k), 0.05);
+    for i=indices
+        [h,p,ci] = ttest(angleMat(i,:)', linMean(i), 0.05);
         ciAll = [ciAll ci];
     end
     header = FlylabReadHeader(filenames{1}); % Assume that the fly type in file #1 is the same as all files.

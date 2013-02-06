@@ -6,7 +6,8 @@ function FlylabPlotDistanceInteractions(interactions, nPre, nPost)
     % Create an array to hold the longest interaction.
     nMinLen = intmax;
     nMaxLen = 0;
-    for iInteraction=1:length(interactions)
+    [m n] = size(interactions);
+    for iInteraction=1:m
         iStart   = interactions{iInteraction,2};
         iStop    = interactions{iInteraction,3};
         nMinLen = min(nMinLen,iStop-iStart+1);
@@ -18,7 +19,8 @@ function FlylabPlotDistanceInteractions(interactions, nPre, nPost)
     
     % Process all the interactions.
     filenamePrev = '';
-    for iInteraction=1:length(interactions)
+    [m n] = size(interactions);
+    for iInteraction=1:m
         filename = interactions{iInteraction,1};
         iStart   = interactions{iInteraction,2};
         iStop    = interactions{iInteraction,3};

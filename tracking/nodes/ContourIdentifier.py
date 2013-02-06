@@ -677,7 +677,7 @@ class ContourIdentifier:
                             self.objects[iRobot].Update(contourinfo, 
                                                         PoseStamped(header=self.stateEndEffector.header, 
                                                                     pose=self.stateEndEffector.pose))
-                        
+
                         # Write a file (for getting Kalman covariances, etc).
                         #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateEndEffector.pose.position.x,
                         #                                     self.stateEndEffector.pose.position.y,
