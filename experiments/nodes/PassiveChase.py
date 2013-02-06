@@ -71,7 +71,7 @@ class ExperimentPassiveChase():
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.move.pattern.size.y = 0
-        self.experimentparams.trial.robot.move.timeout = 600
+        self.experimentparams.trial.robot.move.timeout = -1
         self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
@@ -93,11 +93,11 @@ class ExperimentPassiveChase():
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
         self.experimentparams.trial.ledpanels.timeout = -1
 
-        self.experimentparams.post.trigger.enabled = False
+        self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly1'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
-        self.experimentparams.post.trigger.speedAbsParentMin =   0.0
-        self.experimentparams.post.trigger.speedAbsParentMax = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMin = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. NEVER
         self.experimentparams.post.trigger.speedAbsChildMin  =   0.0
         self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.post.trigger.speedRelMin       =   0.0
@@ -109,7 +109,7 @@ class ExperimentPassiveChase():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = -1
+        self.experimentparams.post.trigger.timeout = 600
 
         self.experimentparams.post.wait = 0.0
         

@@ -21,8 +21,8 @@
 	<param name="motorarm/kP"      			type="double" value="0.2"/>
 	<param name="motorarm/kI"      			type="double" value="0.01"/>
 	<param name="motorarm/kD"      			type="double" value="0.0"/>
-	<param name="motorarm/kWindup" 			type="double" value="0.9"/>  
-	<param name="motorarm/maxI"    			type="double" value="25.0"/>  
+	<param name="motorarm/kWindup" 			type="double" value="0.7"/>  
+	<param name="motorarm/maxI"    			type="double" value="0.0"/>  
 	
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.0'"/>
 </launch>
