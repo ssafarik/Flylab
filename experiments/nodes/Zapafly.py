@@ -71,9 +71,9 @@ class Experiment():
         #mode='fixedpointlist'    # Laser to specific locations.
         #mode='fixedcircle'
         #mode='fixedmaze' 
-        mode='trackgrid'        # Small grid tracks flies.
+        #mode='trackgrid'        # Small grid tracks flies.
         #mode='tracknumber'      # Draw a numeral on flies.
-        #mode='trackflylogo'
+        mode='trackflylogo'
         flies_list = range(1,1+rospy.get_param('nFlies', 0))
         
         

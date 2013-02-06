@@ -79,15 +79,7 @@ class Fly:
         self.lpAngleContour.SetValue(0.0)
         self.apAngleContour = filters.LowPassHalfCircleFilter(RC=0.0)
         self.apAngleContour.SetValue(0.0)
-        self.lpOffsetMag = filters.LowPassFilter(RC=1.0)
-        self.lpOffsetMag.SetValue(0.0)
-        self.lpOffsetAng = filters.LowPassCircleFilter(RC=0.001)
-        self.lpOffsetAng.SetValue(0.0)
-        self.maxOffset = 10.0
-        self.ptOffset = Point(x=0, y=0, z=0)  # Vector from computed position to contour position (for robots only).
-        self.angleOffsetPrev = 0.0
         self.stampPrev = rospy.Time.now()
-        self.unwind = 0.0
         self.dtVelocity = rospy.Duration(dtVelocity) # Interval over which to calculate velocity.
         self.dtForecast = dtForecast
         

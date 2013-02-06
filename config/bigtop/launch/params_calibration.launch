@@ -24,12 +24,12 @@
 
 
   <!-- These values come from CameraArena.launch, with a checkerboard on the arena. They might need fiddling with after use. -->
-  <param name="camera_arena_rvec_0" type="double" value="-3.098"/>
-  <param name="camera_arena_rvec_1" type="double" value="-0.004"/>
-  <param name="camera_arena_rvec_2" type="double" value="0.033"/>
-  <param name="camera_arena_tvec_0" type="double" value="143.97"/> <!-- Adjust for arena alignment here. -->
-  <param name="camera_arena_tvec_1" type="double" value="94.10"/> <!-- Adjust for arena alignment here. -->
-  <param name="camera_arena_tvec_2" type="double" value="375.23"/>
+  <param name="camera_arena_rvec_0" type="double" value="-3.104"/>
+  <param name="camera_arena_rvec_1" type="double" value="-0.001"/>
+  <param name="camera_arena_rvec_2" type="double" value="0.030"/>
+  <param name="camera_arena_tvec_0" type="double" value="1.773"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera_arena_tvec_1" type="double" value="-6.745"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera_arena_tvec_2" type="double" value="373.504"/>
   
 
   <!-- ================================================================== -->
