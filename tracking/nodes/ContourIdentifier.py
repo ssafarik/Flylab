@@ -589,7 +589,7 @@ class ContourIdentifier:
             # Get state of the EndEffector.
             try:
                 stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
-                (transEndEffector, rotEndEffector_quat) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
+                (transEndEffector, quatEndEffector) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
             except tf.Exception, e:
                 rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
             else:
@@ -602,10 +602,10 @@ class ContourIdentifier:
                 self.stateEndEffector.pose.position.x = transEndEffector[0]
                 self.stateEndEffector.pose.position.y = transEndEffector[1]
                 self.stateEndEffector.pose.position.z = transEndEffector[2]
-                self.stateEndEffector.pose.orientation.x = rotEndEffector_quat[0]
-                self.stateEndEffector.pose.orientation.y = rotEndEffector_quat[1]
-                self.stateEndEffector.pose.orientation.z = rotEndEffector_quat[2]
-                self.stateEndEffector.pose.orientation.w = rotEndEffector_quat[3]
+                self.stateEndEffector.pose.orientation.x = quatEndEffector[0]
+                self.stateEndEffector.pose.orientation.y = quatEndEffector[1]
+                self.stateEndEffector.pose.orientation.z = quatEndEffector[2]
+                self.stateEndEffector.pose.orientation.w = quatEndEffector[3]
 
             contourinfolistsPixels = self.FilterContourinfoWithinMask(contourinfolistsPixels)
             contourinfolists = self.TransformContourinfoArenaFromCamera(contourinfolistsPixels)
