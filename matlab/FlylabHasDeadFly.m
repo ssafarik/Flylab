@@ -5,7 +5,7 @@ function isDead = FlylabHasDeadFly(filedata)
     tol = 9;    % Tolerance for fly movement.  Millimeters.
     
     [m n] = size(filedata);
-    datarange = 1:m;%ceil((m/3)):m;          % If fly was dead for the last 2/3rds of the data, then it counts as dead.
+    datarange = 1:m;
     nObjects = (n-2)/6;                 % robot is object 1, flies are 2 through N.
     isDeadFlies = ones(nObjects, 1);    % An array of flags.
     

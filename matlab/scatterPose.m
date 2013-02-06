@@ -1,4 +1,4 @@
-function scatterPose (x, y, angle, c, r, m)
+function scatterPose (x, y, angle, c, r, markers)
 % scatterPose() is a function much like scatter(), except that it also takes an angle.
 % Draws markers at x,y and angle, of the specified radius r, with the given color and marker shape.
 %
@@ -7,7 +7,7 @@ function scatterPose (x, y, angle, c, r, m)
 % angle:    List of angles.
 % r:        Radius of the markers.  Scalar.
 % c:        Color.  A single RGB triple.
-% m:        Marker shape.  Can be 'triangle', 'fly', 'robot', or 'o'
+% markers:  Marker shape.  Can be 'triangle', 'fly', 'robot', or 'o'
 % 
 
     nMarkers = length(x);
@@ -25,7 +25,7 @@ function scatterPose (x, y, angle, c, r, m)
             sin(pi)  cos(pi)];
     
     % Define the marker shape matrix.
-    if strcmpi(m,'triangle')
+    if strcmpi(markers,'triangle')
         marker = [-r -r/2;
                    r  0;
                   -r  r/2]';
@@ -33,7 +33,7 @@ function scatterPose (x, y, angle, c, r, m)
         yMarker = marker(2,:);
         zMarker = ones(1,length(xMarker));
                
-    elseif strcmpi(m,'fly')
+    elseif strcmpi(markers,'fly')
         flylogo = [-4, 14; 
                     -3, 11; 
                     -7, 7; 
@@ -104,7 +104,7 @@ function scatterPose (x, y, angle, c, r, m)
         yMarker = flylogo(2,:);
         zMarker = ones(1,length(xMarker));
         
-    elseif strcmpi(m,'robot') || strcmpi(m,'o')
+    elseif strcmpi(markers,'robot') || strcmpi(markers,'o')
         % Create a circle for the arena boundary.
         q = (0:pi/r/10:(2*pi));
         xMarker = r * cos(q);
@@ -114,22 +114,22 @@ function scatterPose (x, y, angle, c, r, m)
         fprintf ('Unrecognized marker type.\n');
     end
     xyz = [xMarker; yMarker; zMarker];
-    xyzIn = repmat(xyz, nMarkers, 1);
+    xyzMarkerIn = xyz;
+    
+    [m,n] = size(xyzMarkerIn);     
+    xyzOut = zeros(m*nMarkers, n); 
 
     
     % Construct a big transform (with T's on the diag) to move all the markers into position.
-    bigT = zeros(nMarkers*3);
     for i=1:nMarkers
         T = [cos(angle(i)), -sin(angle(i)), x(i);
              sin(angle(i)),  cos(angle(i)), y(i);
              0,              0,             1];
-        iT = (i-1)*3+1;
-        bigT(iT:iT+2,iT:iT+2) = T;
+        xyzMarkerOut = T*xyzMarkerIn;
+        xyzOut((1+(i-1)*3):((i)*3),:) = xyzMarkerOut;
     end
     
-    xyzOut = bigT * xyzIn;
-    
-    % Need to pull out the (x,y)'s.
+    % Need to pull out the (x,y)'s, where each column is one patch object.
     xOut = xyzOut( 1:3:nMarkers*3-1,    :)';
     yOut = xyzOut((1:3:nMarkers*3-1)+1, :)';
     

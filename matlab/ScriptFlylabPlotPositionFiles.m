@@ -2,17 +2,19 @@
 % Main plot is the trajectory.
 % Subplots are fly frame trajectory, and heatmap.
 
-dirspec = 'F:\\2013_01a_07*';
-filespec = '*.csv';
+%dirspec='C:\\Flyranch\Flylabdata*';
+dirspec='F:\\2013_01_02*';
+filespec='*.csv';
 
 filenames = GetFilenames(dirspec, filespec);
-nSubsample = 20;
-nPretrigger = -1;
+nSubsample = 5;
+nPretrigger = 1000;
 iArena = 0;
 iRobot = 1;
 
 for i=1:length(filenames)
     [filedata,iTrigger] = FlylabReadData(filenames{i}, nPretrigger); 
+
     fileheader = FlylabReadHeader(filenames{i});
     iFrameRobots = 1:0+fileheader.robots.nRobots;
     iFrameFlies  = 2:1+fileheader.flies.nFlies;

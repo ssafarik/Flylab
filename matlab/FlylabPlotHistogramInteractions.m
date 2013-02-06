@@ -15,7 +15,8 @@ function FlylabPlotHistogramInteractions(interactions, radius, nBins)
     
     % Process all the interactions.
     filenamePrev = '';
-    for iInteraction=1:length(interactions)
+    [m n] = size(interactions);
+    for iInteraction=1:m
         filename = interactions{iInteraction,1};
         iStart   = interactions{iInteraction,2};
         iStop    = interactions{iInteraction,3};

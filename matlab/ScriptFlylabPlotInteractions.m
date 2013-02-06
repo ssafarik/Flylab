@@ -1,12 +1,12 @@
 % This script plots all the fly/fly interactions in a set of files.
 
-dirspec='F:\\2013_01a_07*';
+dirspec='F:\\2013_01a_478*';
 filespec='*.csv';
 iFrameParent = 2;   % 1=robot, 2=fly1, 3=fly2, etc
 iFrameChild = 3;    % 1=robot, 2=fly1, 3=fly2, etc
 nMinLen = 30;       % Minimum length of an interaction.
-nPre = 0;           % Number of samples before interaction start.
-nPost = 0;          % Number of samples after interaction end.
+nPre = 10;           % Number of samples before interaction start.
+nPost = 10;          % Number of samples after interaction end.
 nSubsample = 5;     % Only plot every Nth sample.  Increase this if you get an Out-Of-Memory error.
 criteria = 'chase'; % What counts as an interaction:  'all' or 'chase'
 radius = 10;        % How big is the histogram.
