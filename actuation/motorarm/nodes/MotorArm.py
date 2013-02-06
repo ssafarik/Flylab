@@ -709,7 +709,6 @@ class MotorArm:
             self.UpdateMotorCommandFromTarget()
             rosrate.sleep()
                 
-        self.Calibrate_callback(None)
     
     
 
