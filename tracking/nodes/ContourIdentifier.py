@@ -415,8 +415,8 @@ class ContourIdentifier:
         # Robots.
         for iRobot in self.iRobot_list:
             if (self.stateEndEffector is not None):
-                xyRobotComputed = [self.stateEndEffector.pose.position.x + self.objects[iRobot].ptOffset.x,
-                                   self.stateEndEffector.pose.position.y + self.objects[iRobot].ptOffset.y]
+                xyRobotComputed = [self.stateEndEffector.pose.position.x,
+                                   self.stateEndEffector.pose.position.y]
                 #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
                 #                                          self.objects[0].state.pose.position.y]))
             elif (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible):
