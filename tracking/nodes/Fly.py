@@ -75,6 +75,8 @@ class Fly:
             self.thresholdForeground= rospy.get_param('tracking/thresholdForeground', 25.0)
 
         self.kfState = filters.KalmanFilter()
+        self.lpAngle = filters.LowPassCircleFilter(RC=rcFilterAngle)
+        self.lpAngle.SetValue(0.0)
         self.lpAngleContour = filters.LowPassHalfCircleFilter(RC=rcFilterAngle)
         self.lpAngleContour.SetValue(0.0)
         self.apAngleContour = filters.LowPassHalfCircleFilter(RC=0.0)
@@ -112,7 +114,7 @@ class Fly:
         self.state.pose.position.z = 0.0
         q = tf.transformations.quaternion_about_axis(0.0, (0,0,1))
         self.state.pose.orientation.x = q[0]    # Note: The orientation is ambiguous as to head/tail.  
-        self.state.pose.orientation.y = q[1]    #       Check the self.lpFlip sign to resolve it:  use self.ResolvedAngleFromContour().
+        self.state.pose.orientation.y = q[1]    #       Check the self.lpFlip sign to resolve it:  use self.ResolvedAngle().
         self.state.pose.orientation.z = q[2]    #
         self.state.pose.orientation.w = q[3]    #
         self.state.velocity.linear.x = 0.0
@@ -194,23 +196,25 @@ class Fly:
     #   
     def GetNextFlipValue(self):
         # Get the prior flip value.
-        flipvalueMagPrev = self.lpFlip.GetValue()
-        if flipvalueMagPrev is None:
-            flipvalueMagPrev = 0.0
-
-
-        angleContour         = self.lpAngleContour.GetValue()
-        
-        # Compare distances between angles of (travel - contour) and (travel - flippedcontour)        
-        dist         = N.abs(CircleFunctions.DistanceCircle(angleContour,        self.angleOfTravelRecent))
-        dist_flipped = N.abs(CircleFunctions.DistanceCircle(angleContour + N.pi, self.angleOfTravelRecent))
-        
-        # Choose the better orientation.
-        if dist < dist_flipped:
-            flipvalueSign =  1.0 # Not flipped
+        flipvalue = self.lpFlip.GetValue()
+        if (flipvalue is not None):
+            magFlipvalue = N.abs(flipvalue)
+            signFlipvalue = N.sign(flipvalue)
         else:
-            flipvalueSign = -1.0 # Flipped
+            magFlipvalue = 0.0
+            signFlipvalue = 1.0
 
+        if signFlipvalue==0.0:
+            signFlipvalue = 1.0
+
+
+        angle = self.GetResolvedAngleFiltered()
+        
+        # Compare distances between angles of (travel - prevorientation) and (travel - flippedprevorientation)        
+        dist_current = N.abs(CircleFunctions.DistanceCircle(angle,        self.angleOfTravelRecent))
+        dist_flipped = N.abs(CircleFunctions.DistanceCircle(angle + N.pi, self.angleOfTravelRecent))
+
+        
 
         if self.contourinfo.ecc is not None:
             eccmetric = (self.contourinfo.ecc + 1/self.contourinfo.ecc) - 1 #self.contourinfo.ecc#
@@ -218,25 +222,29 @@ class Fly:
             eccmetric = 1.0
         #rospy.logwarn('%s: eccmetric=%0.2f' % (self.name, eccmetric))
 
+        if (self.speed > self.speedThresholdForTravel):
+            if (eccmetric > 1.5):
+                magFlipvalueNew = 1.0
 
-        flipvalueMag = flipvalueMagPrev#N.abs(flipvalueMagPrev)
-        if (eccmetric > 1.5):
-            # Weight the prev/new values based on speed.                
-            #alpha = 10.0/(10.0+self.speed)
-            #flipvalueMag = (alpha * N.abs(flipvalueMagPrev)) + ((1.0-alpha) * 1.0) 
-    
-            # Either use +-1, or use the previous value.
-            if (self.speed > self.speedThresholdForTravel):
-                flipvalueMag = 1.0
+                # Choose the better orientation.
+                if (dist_flipped < dist_current):
+                    signFlipvalue = -signFlipvalue # Flipped
+
+            else:
+                magFlipvalueNew = magFlipvalue 
+
+        else:
+            magFlipvalueNew = magFlipvalue 
 
         
-        flipvalue = flipvalueSign * flipvalueMag
+        flipvalueNew = signFlipvalue * magFlipvalueNew
         
         #if 'Fly1' in self.name:
-        #    rospy.logwarn('%s: flipvalue %0.2f, %0.2f, %0.2f' % (self.name, flipvalueMagPrev,flipvalueWeighted,flipvalueNew))
+        #    rospy.logwarn('flipvalue Old,New:  % 3.2f, % 3.2f' % (flipvalue, flipvalueNew))
+        #    rospy.logwarn('angle,travel: % 3.2f, % 3.2f   dist,flipped: % 3.2f, % 3.2f' % (angle, self.angleOfTravelRecent, dist_current, dist_flipped))
 
 
-        return flipvalue
+        return flipvalueNew
     
 
         
@@ -250,10 +258,21 @@ class Fly:
     #   
     def UpdateFlipState(self):
         # Update the flip filter.
+        flipvaluePre = self.lpFlip.GetValue()
+        
         if (self.speed > self.speedThresholdForTravel):
-            flipvaluePre = self.GetNextFlipValue()
-            flipvaluePost = self.lpFlip.Update(flipvaluePre, self.contourinfo.header.stamp.to_sec())
-                
+            flipvalueNew = self.GetNextFlipValue()
+        else:
+            flipvalueNew = self.lpFlip.GetValue()
+
+        flipvaluePost = self.lpFlip.Update(flipvalueNew, self.contourinfo.header.stamp.to_sec())
+
+#        if 'Fly1' in self.name:
+#            rospy.logwarn('pre,post:  % 3.2f, % 3.2f' % (flipvaluePre, flipvaluePost))
+
+#        if N.sign(flipvaluePre) != N.sign(flipvaluePost):
+#            rospy.logwarn('flipped *******************************')
+            
 #            # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
 #            d = N.abs(CircleFunctions.DistanceCircle(self.lpAngleContour.GetValue(), self.lpAngleContour.GetValuePrev()))
 #            if (d > (N.pi/2.0)):
@@ -261,13 +280,13 @@ class Fly:
 #                rospy.logwarn('WRAP*****************************************')
 
             
-
+                
     def ResolveAngle(self, angle):
         if (angle is not None):
             if self.lpFlip.GetValue()<0 and ('Robot' not in self.name):
                 angleResolved = (angle + N.pi) % (2.0*N.pi)
             else:
-                angleResolved = angle
+                angleResolved = copy.copy(angle)
 #                if 'Fly2' in self.name:
 #                    rospy.logwarn('=======================')
         else:
@@ -276,14 +295,14 @@ class Fly:
         return angleResolved
             
             
-    def ResolveRawAngle(self):
+    def GetResolvedAngleRaw(self):
         angle = self.apAngleContour.GetValue()
         angleResolved = self.ResolveAngle(angle)
 
         return angleResolved
             
             
-    def ResolveFilteredAngle(self):
+    def GetResolvedAngleFiltered(self):
         angle = self.lpAngleContour.GetValue()
         angleResolved = self.ResolveAngle(angle)
 
@@ -379,7 +398,7 @@ class Fly:
             yCOM  = moments['m01']/moments['m00']
             
             # Rotate the fly image to 0-degrees.
-            angleR = self.ResolveRawAngle()
+            angleR = self.GetResolvedAngleRaw()
             T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, 1.0)
             npRoiReg = cv2.warpAffine(npRoi, T, (0,0))#(self.widthRoi, self.heightRoi))
             
@@ -538,9 +557,9 @@ class Fly:
                 posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
                 q = posesComputed.pose.orientation
                 rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                angle = rpy[2]
+                angleSensed = rpy[2]
             else:
-                angle = contourinfo.angle
+                angleSensed = contourinfo.angle
                 
             
 
@@ -548,8 +567,8 @@ class Fly:
             self.isVisible = False            
             if (self.contourinfo.x is not None) and \
                (self.contourinfo.y is not None) and \
-               (self.contourinfo.angle is not None) and \
-               (not N.isnan(self.contourinfo.angle)) and \
+               (angleSensed is not None) and \
+               (not N.isnan(angleSensed)) and \
                (self.contourinfo.area is not None) and \
                (self.contourinfo.ecc is not None):
                 
@@ -571,8 +590,8 @@ class Fly:
                 (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contourinfo.x, self.contourinfo.y), contourinfo.header.stamp.to_sec())
                 (zKalman, vzKalman) = (0.0, 0.0)
                 #(xKalman,yKalman) = (self.contourinfo.x,self.contourinfo.y) # Unfiltered.
-                self.lpAngleContour.Update(angle, contourinfo.header.stamp.to_sec())
-                self.apAngleContour.Update(angle, contourinfo.header.stamp.to_sec())
+                self.lpAngleContour.Update(angleSensed, contourinfo.header.stamp.to_sec())
+                self.apAngleContour.Update(angleSensed, contourinfo.header.stamp.to_sec())
 
                 (angleLeft, angleRight) = self.GetWingAngles(contourinfo)
                 
@@ -611,12 +630,18 @@ class Fly:
             self.state.pose.position.x = x
             self.state.pose.position.y = y
             self.state.pose.position.z = z
-            #self.state.pose.orientation comes from self.ResolveFilteredAngle() later.
+            #self.state.pose.orientation comes from self.GetResolvedAngleFiltered() later.
             self.state.velocity.linear.x = vx
             self.state.velocity.linear.y = vy
             self.state.velocity.linear.z = vz
             self.state.wings.left.angle = angleLeft
             self.state.wings.right.angle = angleRight
+
+            if 'Robot' not in self.name:
+                angle = self.GetResolvedAngleFiltered()
+            else:
+                angle = angleSensed
+            (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = tf.transformations.quaternion_about_axis(angle, (0,0,1))
 
 
             # Get the angular velocities.
@@ -638,19 +663,12 @@ class Fly:
                 
             speedPre = N.linalg.norm([self.state.velocity.linear.x, self.state.velocity.linear.y, self.state.velocity.linear.z])
             self.speed = self.lpSpeed.Update(speedPre, self.state.header.stamp.to_sec())
-                
 
-            # Update the most recent angle of travel.
+            
+            # Update the most recent angle of travel, and flip state.
             self.SetAngleOfTravel()
             self.UpdateFlipState()
-            if 'Robot' not in self.name:
-                angle = self.ResolveFilteredAngle()
-            else:
-                pass # angle already set from above.
             
-            (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = tf.transformations.quaternion_about_axis(angle, (0,0,1))
-                
-
                 
             # Send the Raw transform.
             if self.isVisible and (not N.isnan(self.contourinfo.angle)):

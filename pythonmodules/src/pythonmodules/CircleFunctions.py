@@ -34,13 +34,38 @@ def DistanceCircle(angle2, angle1):
 def DistanceHalfCircle(angle2, angle1):
     angle1b = angle1 % (2.0*N.pi)   # The angle1 is good on 2pi.
     angle2b = angle2 % (N.pi)       # The angle2 might be off by pi.
+    angle2c = angle2b + N.pi
+    
     distb = angle2b - angle1b
-    if distb > N.pi/2:
-        dist = distb - (N.pi)
-    elif distb < -N.pi/2:
-        dist = distb + (N.pi)
-    else:
+    distc = angle2c - angle1b
+    
+    if distb > N.pi:
+        distb -= 2*N.pi
+    if distb < -N.pi:
+        distb += 2*N.pi
+    if distc > N.pi:
+        distc -= 2*N.pi
+    if distc < -N.pi:
+        distc += 2*N.pi
+
+    if N.abs(distb) < N.abs(distc):
         dist = distb
+    else:
+        dist = distc
+                        
+#    print distb, distc
+#    if distb > N.pi/2:
+#        dist = distb - (N.pi)
+#        print "A"
+##    elif distb < -N.pi:
+##        dist = distb + (2*N.pi)
+##        print "B"
+#    elif distb < -N.pi/2:
+#        dist = distb + (N.pi)
+#        print "C"
+#    else:
+#        dist = distb
+#        print "D"
         
     return dist
 
