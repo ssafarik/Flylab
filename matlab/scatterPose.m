@@ -1,4 +1,4 @@
-function scatterPose (x, y, angle, c, r, markers)
+function scatterPose (varargin)
 % scatterPose() is a function much like scatter(), except that it also takes an angle.
 % Draws markers at x,y and angle, of the specified radius r, with the given color and marker shape.
 %
@@ -9,6 +9,23 @@ function scatterPose (x, y, angle, c, r, markers)
 % c:        Color.  A single RGB triple.
 % markers:  Marker shape.  Can be 'triangle', 'fly', 'robot', or 'o'
 % 
+    if nargin==6
+        x       = varargin{1};
+        y       = varargin{2};
+        angle   = varargin{3};
+        radius  = varargin{4};
+        c       = varargin{5};
+        markers = varargin{6};
+        face    = 'filled';
+    elseif nargin==7
+        x       = varargin{1};
+        y       = varargin{2};
+        angle   = varargin{3};
+        radius  = varargin{4};
+        c       = varargin{5};
+        markers = varargin{6};
+        face    = varargin{7};
+    end
 
     nMarkers = length(x);
     
@@ -26,13 +43,23 @@ function scatterPose (x, y, angle, c, r, markers)
     
     % Define the marker shape matrix.
     if strcmpi(markers,'triangle')
-        marker = [-r -r/2;
-                   r  0;
-                  -r  r/2]';
+        marker = [-radius -radius/2;
+                   radius  0;
+                  -radius  radius/2]';
         xMarker = marker(1,:);
         yMarker = marker(2,:);
         zMarker = ones(1,length(xMarker));
                
+    elseif strcmpi(markers,'square') || strcmpi(markers,'s')
+        marker = [-radius -radius;
+                   radius -radius;
+                   radius  radius;
+                  -radius  radius;
+                  -radius -radius]';
+        xMarker = marker(1,:);
+        yMarker = marker(2,:);
+        zMarker = ones(1,length(xMarker));
+              
     elseif strcmpi(markers,'fly')
         flylogo = [-4, 14; 
                     -3, 11; 
@@ -98,7 +125,7 @@ function scatterPose (x, y, angle, c, r, markers)
                     -7, 7; 
                     -3, 11; 
                     -4, 14]';
-        flylogo = r* flylogo / max(max(flylogo')-min(flylogo')); % Scale so max length is r.
+        flylogo = radius* flylogo / max(max(flylogo')-min(flylogo')); % Scale so max length is radius.
         flylogo = R180 * flylogo;
         xMarker = flylogo(1,:);
         yMarker = flylogo(2,:);
@@ -106,9 +133,9 @@ function scatterPose (x, y, angle, c, r, markers)
         
     elseif strcmpi(markers,'robot') || strcmpi(markers,'o')
         % Create a circle for the arena boundary.
-        q = (0:pi/r/10:(2*pi));
-        xMarker = r * cos(q);
-        yMarker = r * sin(q);
+        q = (0:pi/radius/10:(2*pi));
+        xMarker = radius * cos(q);
+        yMarker = radius * sin(q);
         zMarker = ones(1,length(xMarker));
     else
         fprintf ('Unrecognized marker type.\n');
@@ -133,8 +160,13 @@ function scatterPose (x, y, angle, c, r, markers)
     xOut = xyzOut( 1:3:nMarkers*3-1,    :)';
     yOut = xyzOut((1:3:nMarkers*3-1)+1, :)';
     
-    patch (xOut, yOut, c, 'EdgeColor', c*0.7);
-
+    if strcmpi(face,'filled')
+        patch (xOut, yOut, c, 'EdgeColor', c*0.7);
+    elseif strcmpi(face,'clear') || strcmpi(face,'transparent') || strcmpi(face,'none')
+        patch (xOut, yOut, c, 'EdgeColor', c*0.7, 'FaceColor', 'none');
+    else
+        fprintf ('Unknown face type.\n');
+    end
     
     
     

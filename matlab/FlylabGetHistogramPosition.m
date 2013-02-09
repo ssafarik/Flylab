@@ -1,5 +1,5 @@
-function histogram = FlylabGetHistogramPosition(filedata, iFrameParent, iFrameChild, radius, nBins)
-% FlylabGetHistogramPosition(filedata, iFrameParent, iFrameChild, radius, nBins)
+function histogram = FlylabGetHistogramPosition(varargin)
+% FlylabGetHistogramPosition(filedata, iFrameParent, iFrameChild, radius, nBins [,iStart, iStop])
 % Get the position histogram of the child frame in the parent frame.
 %
 % filedata:     Data from the Flylab .csv file.
@@ -9,9 +9,31 @@ function histogram = FlylabGetHistogramPosition(filedata, iFrameParent, iFrameCh
 % frameChild:   The child frame.
 %
 
-    [m,n] = size(filedata);
+    if nargin==5
+        filedata     = varargin{1};
+        iFrameParent = varargin{2};
+        iFrameChild  = varargin{3};
+        radius       = varargin{4};
+        nBins        = varargin{5};
+        iStart       = 1;
+        [iStop,n]    = size(filedata.states);
+    elseif nargin==7
+        filedata     = varargin{1};
+        iFrameParent = varargin{2};
+        iFrameChild  = varargin{3};
+        radius       = varargin{4};
+        nBins        = varargin{5};
+        iStart       = varargin{6};
+        iStop        = varargin{7};
+    else
+        fprintf ('Bad call to FlylabGetHistogramPosition().\n');
+    end
+
+    
+    [m,n] = size(filedata.states);
     if n>=14
-        [pos,angle] = FlylabGetTransformedData(filedata, iFrameParent, iFrameChild);
+        [pos2,angle] = FlylabGetTransformedStates(filedata, iFrameParent, iFrameChild);
+        pos = pos2(iStart:iStop, :);
 
         % Append two points at corners [-radius -radius]; [+radius +radius].  Clip points outside that rect.
         pos = [pos; [-radius -radius]; [+radius +radius]];

@@ -11,22 +11,25 @@ function FlylabPlotAngleOverTime(dirspec, filespec)
     nFilesMax=999;          % Set this to limit the number of files to look at.
 
     filenames = GetFilenames(dirspec, filespec);
-    [m nFiles] = size(filenames);
+    [m,nFiles] = size(filenames);
     iFiles = 1:min(nFiles,nFilesMax);
 
     fprintf ('Found %d files.\n', nFiles)
     nFiles = length(iFiles);
     fprintf ('Plotting files 1-%d.\n', nFiles)
+    timeFly = cell(nFiles,1);
+    stateFly = cell(nFiles,1);
     angleFly = cell(nFiles,1);
     lenMin = 9999999999;
     lenMax = 0;
-    nPretrigger = -1;
+
     for i = iFiles
         fprintf('File %d: %s ... ', i, filenames{i})
-        filedata = FlylabReadData(filenames{i}, nPretrigger);
+        filedata = FlylabReadFile(filenames{i});
 
-        timeFly{i} = filedata(:,1);
-        angleFly{i} = filedata(:,10);
+        stateFly{i} = FlylabGetObjectState(filedata, 2);
+        timeFly{i} = filedata.states(:,1);
+        angleFly{i} = stateFly{i}(:,3);
         lenMin = min(lenMin,length(angleFly{i}));
         lenMax = max(lenMax,length(angleFly{i}));
         fprintf ('done.\n')
@@ -66,7 +69,6 @@ function FlylabPlotAngleOverTime(dirspec, filespec)
         [h,p,ci] = ttest(angleMat(i,:)', linMean(i), 0.05);
         ciAll = [ciAll ci];
     end
-    header = FlylabReadHeader(filenames{1}); % Assume that the fly type in file #1 is the same as all files.
 
     
     %[q1 q2]=size(timeMean(indices));
@@ -87,7 +89,7 @@ function FlylabPlotAngleOverTime(dirspec, filespec)
     hold on
     plot(timeMean, linMean, '-.r');
     title(sprintf('flytype=%s,\nMean Angle Over Time When Laser On Clockwise Fly Rotation,\ntotal trial time=%0.1f hours, 95%% Confidence Interval', ...
-        header.flies.typeFlies, ...
+        filedata.header.flies.typeFlies, ...
         timeMean(n)*nFiles/60));
     ylabel('radians');
     xlabel('minutes');

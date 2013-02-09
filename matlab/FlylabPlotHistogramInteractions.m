@@ -24,21 +24,21 @@ function FlylabPlotHistogramInteractions(interactions, radius, nBins)
         % Read the file if we need to, and compute relative distances.
         if ~strcmp(filename,filenamePrev)
             fprintf ('Reading %s.\n', filename);
-            [filedata,iTrigger] = FlylabReadData(filename, -1);
+            filedata = FlylabReadFile(filename);
         end
         
         % Add the histogram from this interaction to the sum.
         iFrames = [2 3];
-        iFrameLeader = FlylabGetLeader(filedata(iStart:iStop,:), iFrames(1), iFrames(2), radius);
+        iFrameLeader = FlylabGetLeader(filedata, iFrames(1), iFrames(2), iStart, iStop, radius);
         iFrameFollower = iFrames(find(iFrames~=iFrameLeader));
-        histogramLeader = histogramLeader + FlylabGetHistogramPosition(filedata(iStart:iStop,:), iFrameLeader, iFrameFollower, radius, nBins);
-        histogramFollower = histogramFollower + FlylabGetHistogramPosition(filedata(iStart:iStop,:), iFrameFollower, iFrameLeader, radius, nBins);
+        histogramLeader   = histogramLeader   + FlylabGetHistogramPosition(filedata, iFrameLeader, iFrameFollower, radius, nBins, iStart, iStop);
+        histogramFollower = histogramFollower + FlylabGetHistogramPosition(filedata, iFrameFollower, iFrameLeader, radius, nBins, iStart, iStop);
         
         subplot(1,2,1);
         img = (histogramLeader ./ max(max(histogramLeader))) * length(hot);         
         image(img); 
         hold on; 
-        [m n]=size(img); scatterPose(n/2, m/2, pi/2, [1 1 1], 10, 'triangle');
+        [m n]=size(img); scatterPose(n/2, m/2, pi/2, 10, [1 1 1], 'triangle');
         colormap(hot);
         axis equal
         axis([0 nBins 0 nBins]);
@@ -49,7 +49,7 @@ function FlylabPlotHistogramInteractions(interactions, radius, nBins)
         img = (histogramFollower ./ max(max(histogramFollower))) * length(hot);         
         image(img); 
         hold on; 
-        [m n]=size(img); scatterPose(n/2, m/2, pi/2, [1 1 1], 10, 'triangle');
+        [m n]=size(img); scatterPose(n/2, m/2, pi/2, 10, [1 1 1], 'triangle');
         colormap(hot);
         axis equal
         axis([0 nBins 0 nBins]);

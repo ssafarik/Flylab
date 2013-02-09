@@ -28,7 +28,7 @@ function FlylabPlotDistanceInteractions(interactions, nPre, nPost)
         % Read the file if we need to, and compute relative distances.
         if ~strcmp(filename,filenamePrev)
             fprintf ('Reading %s.\n', filename);
-            [filedata,iTrigger] = FlylabReadData(filename, -1); 
+            filedata = FlylabReadFile(filename); 
             state2 = FlylabGetObjectState(filedata, 2);
             state3 = FlylabGetObjectState(filedata, 3);
             posRel = state2(:,1:2) - state3(:,1:2);
@@ -54,7 +54,7 @@ function FlylabPlotDistanceInteractions(interactions, nPre, nPost)
         title(sprintf('Avg Distance\nAligned to Start of Chase, nPre=%d, nMinLen=%d, nPost=%d', nPre, nMinLen, nPost));
 
         subplot(2,1,2);
-        range = (length(distSumEnd)-nMinLen):length(distSumEnd);
+        range = (length(distSumEnd)-nMinLen+1):length(distSumEnd);
         plot(distSumEnd(range)/iInteraction);
         yl2 = ylim;
         title(sprintf('Avg Distance\nAligned to End of Chase, nPre=%d, nMinLen=%d, nPost=%d', nPre, nMinLen, nPost));

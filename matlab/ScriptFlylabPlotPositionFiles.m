@@ -3,32 +3,38 @@
 % Subplots are fly frame trajectory, and heatmap.
 
 %dirspec='C:\\Flyranch\Flylabdata*';
-dirspec='F:\\2013_01_02*';
+dirspec = '~/FlylabData/2013_02_07*';
 filespec='*.csv';
 
 filenames = GetFilenames(dirspec, filespec);
 nSubsample = 5;
 nPretrigger = 1000;
+nPosttrigger = 0;
 iArena = 0;
 iRobot = 1;
 
 for i=1:length(filenames)
-    [filedata,iTrigger] = FlylabReadData(filenames{i}, nPretrigger); 
+    filedata = FlylabReadFile(filenames{i}); 
+    
+    % Get the start/trigger/stop indices.
+    [iTriggerStart, iTriggerEnd] = FlylabGetTrigger(filedata);
+    iStart = max(1, iTriggerStart-nPretrigger);
+    [m,n] = size(filedata.states);
+    iStop = min(iTriggerEnd+nPosttrigger, m);
 
-    fileheader = FlylabReadHeader(filenames{i});
-    iFrameRobots = 1:0+fileheader.robots.nRobots;
-    iFrameFlies  = 2:1+fileheader.flies.nFlies;
+    iFrameRobots = 1:0+filedata.header.robots.nRobots;
+    iFrameFlies  = 2:1+filedata.header.flies.nFlies;
     
     figure(1); 
     clf; 
     
     subplot(3,2,[1 2 3 4]); 
-    FlylabPlotPosition(filedata, iArena, [iFrameRobots,iFrameFlies], iTrigger, nSubsample); 
+    FlylabPlotPosition(filedata, iArena, [iFrameRobots,iFrameFlies], iTriggerStart, nSubsample, iStart, iStop); 
     title(sprintf('Arena-centered View\nFile %d: %s', i, filenames{i})); 
     
     subplot(3,2,5); 
-    if fileheader.flies.nFlies>0
-        FlylabPlotPosition(filedata, iFrameFlies(1), [iFrameRobots,iFrameFlies], iTrigger, nSubsample); 
+    if filedata.header.flies.nFlies>0
+        FlylabPlotPosition(filedata, iFrameFlies(1), [iFrameRobots,iFrameFlies], iTriggerStart, nSubsample, iStart, iStop); 
     else
         cla;
     end

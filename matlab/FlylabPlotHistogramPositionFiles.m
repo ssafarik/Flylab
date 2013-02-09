@@ -13,7 +13,7 @@ function histAll = FlylabPlotHistogramPositionFiles(dirspec, filespec, iFramePar
     nClipped = 150;
 
     filenames = GetFilenames(dirspec, filespec);
-    [m nFiles] = size(filenames);
+    [m, nFiles] = size(filenames);
     iFiles = 1:min(nFiles,nFilesMax);
 
     fprintf ('Found %d files.\n', nFiles)
@@ -22,7 +22,7 @@ function histAll = FlylabPlotHistogramPositionFiles(dirspec, filespec, iFramePar
     imgFile = cell(nFiles,1);
     for i = iFiles;
         fprintf('File %d: %s ... ', i, filenames{i})
-        [filedata, iTrigger] = FlylabReadData(filenames{i}, 0);
+        filedata = FlylabReadFile(filenames{i});
         histFile(:,:,i) = FlylabGetHistogramPosition(filedata, iFrameParent, iFrameChild, radius, nBins);
         %histFile(:,:,i) = FlylabClipByCount(histFile(:,:,i), nClipped);
         
@@ -62,7 +62,7 @@ function histAll = FlylabPlotHistogramPositionFiles(dirspec, filespec, iFramePar
      hold off;
      cla;
      image(imgIdent); 
-     hold on; [m n]=size(imgIdent); scatter([n/2],[m/2],50,'w');
+     hold on; [m,n]=size(imgIdent); scatter([n/2],[m/2],50,'w');
      colormap(hot);
      axis([0 nBins 0 nBins]);
      axis equal
@@ -70,7 +70,7 @@ function histAll = FlylabPlotHistogramPositionFiles(dirspec, filespec, iFramePar
     figure(gcf+1);
     hold off;
     image(imgBlur); 
-    hold on; [m n]=size(imgBlur); scatter([n/2],[m/2],50,'w');
+    hold on; [m,n]=size(imgBlur); scatter([n/2],[m/2],50,'w');
     colormap(hot);
     axis equal
     axis([0 nBins 0 nBins]);

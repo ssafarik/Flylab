@@ -1,12 +1,33 @@
-function FlylabPlotHistogramPosition(filedata, iFrameParent, iFrameChild, radius, nBins)
-% FlylabPlotPositionHistogram(filedata, iFrameParent, iFrameChild)
+function FlylabPlotHistogramPosition(varargin)
+% FlylabPlotPositionHistogram(filedata, iFrameParent, iFrameChild, radius, nBins [, iStart, iStop])
 % Plot a heatmap of where the fly has been.
 %
 %
 
-    nClipped = 150;
+    if nargin==5
+        filedata     = varargin{1};
+        iFrameParent = varargin{2};
+        iFrameChild  = varargin{3};
+        radius       = varargin{4};
+        nBins        = varargin{5};
+        iStart       = 1;
+        [iStop,n]    = size(filedata.states);
+    elseif nargin==7
+        filedata     = varargin{1};
+        iFrameParent = varargin{2};
+        iFrameChild  = varargin{3};
+        radius       = varargin{4};
+        nBins        = varargin{5};
+        iStart      = varargin{6};
+        iStop       = varargin{7};
+    else
+        fprintf ('Bad call to FlylabPlotHistogramPosition().\n');
+    end
 
-    histogram = FlylabGetHistogramPosition(filedata, iFrameParent, iFrameChild, radius, nBins);
+
+
+    histogram = FlylabGetHistogramPosition(filedata, iFrameParent, iFrameChild, radius, nBins, iStart, iStop);
+    %nClipped = 150;
     %histogram = FlylabClipByCount(histogram, nClipped);
 
     % Make the histogram into an image, i.e. normalize to 1.
@@ -39,7 +60,7 @@ function FlylabPlotHistogramPosition(filedata, iFrameParent, iFrameChild, radius
     hold off;
     cla;
     image(imgIdent); 
-    hold on; [m n]=size(imgIdent); scatterPose(n/2,m/2,pi/2,[1,1,1],10,'triangle');
+    hold on; [m n]=size(imgIdent); scatterPose(n/2,m/2,pi/2,10,[1,1,1],'triangle');
     colormap(hot);
     axis equal
     axis([0 nBins 0 nBins]);
@@ -49,7 +70,7 @@ function FlylabPlotHistogramPosition(filedata, iFrameParent, iFrameChild, radius
     subplot(1,2,2);
     hold off;
     image(imgBlur); 
-    hold on; [m n]=size(imgBlur); scatterPose(n/2,m/2,pi/2,[1,1,1],10,'triangle');
+    hold on; [m n]=size(imgBlur); scatterPose(n/2,m/2,pi/2,10,[1,1,1],'triangle');
     colormap(hot);
     axis equal
     axis([0 nBins 0 nBins]);

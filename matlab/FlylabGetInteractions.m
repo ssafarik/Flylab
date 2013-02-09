@@ -1,14 +1,41 @@
-function [start,stop] = FlylabGetInteractions(filedata, iFrameParent, iFrameChild, nMinLen, nPre, nPost, criteria)
-% [start,stop] = FlylabGetInteractions(filedata, iFrameParent, iFrameChild, nMinLen)
+function [start,stop] = FlylabGetInteractions(varargin)
+% [start,stop] = FlylabGetInteractions(filedata, iFrameParent, iFrameChild, nMinLen, criteria [,iStart, iStop])
 % Find the set of interaction sequences in the given data.
+% 
+% iFrameParent: Frame number of the parent object (1=Robot, 2=Fly1, etc)
+% iFrameChild:  Frame number of the child object (1=Robot, 2=Fly1, etc)
+% nMinLen:      Minimum length of a valid interaction sequence.
+% iStart:       Only consider states beginning here.
+% iStop:        Only consider states ending here.
+%
 % Each interaction sequence is defined by a start and stop index, 
 % and sequence i is given by the indices start(i) and stop(i).
-% 
-% start:    List of start-of-sequence indices.
-% stop:     List of end-of-sequence indices.
-% nMinLen:  Minimum length of a valid interaction sequence.
+%
+% start:        List of start-of-sequence indices.
+% stop:         List of end-of-sequence indices.
+%
     
-    [m,n] = size(filedata);
+    if nargin==5
+        filedata     = varargin{1};
+        iFrameParent = varargin{2};
+        iFrameChild  = varargin{3};
+        nMinLen      = varargin{4};
+        criteria     = varargin{5};
+        iStart       = 1;
+        [iStop,n]    = size(filedata.states);
+    elseif nargin==7
+        filedata     = varargin{1};
+        iFrameParent = varargin{2};
+        iFrameChild  = varargin{3};
+        nMinLen      = varargin{4};
+        criteria     = varargin{5};
+        iStart       = varargin{6};
+        iStop        = varargin{7};
+    else
+        fprintf ('Bad call to FlylabGetInteractions().\n');
+    end
+    
+    
     isValidParams = true;
     
     % Get the parent position/angle.
@@ -30,12 +57,12 @@ function [start,stop] = FlylabGetInteractions(filedata, iFrameParent, iFrameChil
     if isValidParams
         iCount = 0;
         bPrev = false;
-        for iPos=1:m
-            b = MeetsCriteria(stateP(iPos,:), stateC(iPos,:), criteria) && (iPos<m);
+        for iPos=iStart:iStop
+            b = MeetsCriteria(stateP(iPos,:), stateC(iPos,:), criteria) && (iPos<iStop);
             
             % Rising edge: save start position.
             if b && ~bPrev
-                iStart = max(0,iPos-nPre);
+                iStartInt = iPos;
             end
             
             % Duration of the interaction.
@@ -46,9 +73,9 @@ function [start,stop] = FlylabGetInteractions(filedata, iFrameParent, iFrameChil
             % Falling edge: save stop position.
             if ~b && bPrev
                 if iCount>=nMinLen
-                    iStop = min(iPos+nPost,m);
-                    start = [start iStart];
-                    stop  = [stop iStop];
+                    iStopInt = iPos;
+                    start = [start iStartInt];
+                    stop  = [stop iStopInt];
                 end
             end
             

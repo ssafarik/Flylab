@@ -6,7 +6,7 @@ function FlylabPlotAllInteractions(interactions, nPre, nPost, nSubsample)
     filenamePrev = '';
     clf; 
     iPlot = 0;
-    [m n] = size(interactions);
+    [m,n] = size(interactions);
     for iInteraction=1:m
         filename = interactions{iInteraction,1};
         iStart   = interactions{iInteraction,2};
@@ -14,12 +14,13 @@ function FlylabPlotAllInteractions(interactions, nPre, nPost, nSubsample)
 
         % Read the file if we need to.
         if ~strcmp(filename,filenamePrev)
-            [filedata,iTrigger] = FlylabReadData(filename, -1); 
+            filedata = FlylabReadFile(filename); 
         end
         
         iPlot = iPlot+1;
         subplot(4,5,iPlot); 
-        FlylabPlotPosition(filedata(iStart:iStop,:), 0, [2 3], nPre, nSubsample); 
+        iTrigger = iStart;
+        FlylabPlotPosition(filedata, 0, [2 3], iTrigger, nSubsample, iStart-nPre, iStop+nPost); 
         axis on; 
         [pth,fn,c] = fileparts(filename);
         title (sprintf('%s:%d-%d', fn, iStart, iStop)); 
