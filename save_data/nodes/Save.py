@@ -102,7 +102,7 @@ class Save:
 
         
         #################################################################################
-        self.versionFile = '2.7'    # Increment this when the file format changes.
+        self.versionFile = '2.8'    # Increment this when the file format changes.
         #################################################################################
 
         
@@ -148,6 +148,8 @@ class Save:
                                     '{trackingExclusionzoneRadius:s}'
 
         self.headingsPreRobot =     'preRobotEnabled, '\
+                                    'preRobotMovePatternFramePosition, '\
+                                    'preRobotMovePatternFrameAngle, '\
                                     'preRobotMovePatternShape, '\
                                     'preRobotMovePatternHzPattern, '\
                                     'preRobotMovePatternHzPoint, '\
@@ -155,6 +157,7 @@ class Save:
                                     'preRobotMovePatternSizeX, '\
                                     'preRobotMovePatternSizeY, '\
                                     'preRobotMovePatternParam, '\
+                                    'preRobotMovePatternDirection, '\
                                     'preRobotMoveRelTracking, '\
                                     'preRobotMoveRelOriginPosition, '\
                                     'preRobotMoveRelOriginAngle, '\
@@ -166,6 +169,8 @@ class Save:
                                     'preRobotMoveRelTolerance, ' \
                                     'preRobotMoveTimeout\n'
         self.templatePreRobot     = '{preRobotEnabled:s}, '\
+                                    '{preRobotMovePatternFramePosition:s}, '\
+                                    '{preRobotMovePatternFrameAngle:s}, '\
                                     '{preRobotMovePatternShape:s}, '\
                                     '{preRobotMovePatternHzPattern:s}, '\
                                     '{preRobotMovePatternHzPoint:s}, '\
@@ -173,6 +178,7 @@ class Save:
                                     '{preRobotMovePatternSizeX:s}, '\
                                     '{preRobotMovePatternSizeY:s}, '\
                                     '{preRobotMovePatternParam:s}, '\
+                                    '{preRobotMovePatternDirection:s}, '\
                                     '{preRobotMoveRelTracking:s}, '\
                                     '{preRobotMoveRelOriginPosition:s}, '\
                                     '{preRobotMoveRelOriginAngle:s}, '\
@@ -185,6 +191,8 @@ class Save:
                                     '{preRobotMoveTimeout:s}\n'
                                     
         self.headingsPreLaser     = 'preLaserEnabled, '\
+                                    'preLaserPatternFramePosition, '\
+                                    'preLaserPatternFrameAngle, '\
                                     'preLaserPatternShape, '\
                                     'preLaserPatternHzPattern, '\
                                     'preLaserPatternHzPoint, '\
@@ -192,11 +200,14 @@ class Save:
                                     'preLaserPatternSizeX, '\
                                     'preLaserPatternSizeY, '\
                                     'preLaserPatternParam, '\
+                                    'preLaserPatternDirection, '\
                                     'preLaserStatefilterLo, '\
                                     'preLaserStatefilterHi, '\
                                     'preLaserStatefilterCriteria, ' \
                                     'preLaserTimeout\n'
         self.templatePreLaser =     '{preLaserEnabled:s}, '\
+                                    '{preLaserPatternFramePosition:s}, '\
+                                    '{preLaserPatternFrameAngle:s}, '\
                                     '{preLaserPatternShape:s}, '\
                                     '{preLaserPatternHzPattern:s}, '\
                                     '{preLaserPatternHzPoint:s}, '\
@@ -204,6 +215,7 @@ class Save:
                                     '{preLaserPatternSizeX:s}, '\
                                     '{preLaserPatternSizeY:s}, '\
                                     '{preLaserPatternParam:s}, '\
+                                    '{preLaserPatternDirection:s}, '\
                                     '\"{preLaserStatefilterLo:s}\", '\
                                     '\"{preLaserStatefilterHi:s}\", '\
                                     '{preLaserStatefilterCriteria:s}, ' \
@@ -270,6 +282,8 @@ class Save:
         
         
         self.headingsTrialRobot =   'trialRobotEnabled, '\
+                                    'trialRobotMovePatternFramePosition, '\
+                                    'trialRobotMovePatternFrameAngle, '\
                                     'trialRobotMovePatternShape, '\
                                     'trialRobotMovePatternHzPattern, '\
                                     'trialRobotMovePatternHzPoint, '\
@@ -277,6 +291,7 @@ class Save:
                                     'trialRobotMovePatternSizeX, '\
                                     'trialRobotMovePatternSizeY, '\
                                     'trialRobotMovePatternParam, '\
+                                    'trialRobotMovePatternDirection, '\
                                     'trialRobotMoveRelTracking, '\
                                     'trialRobotMoveRelOriginPosition, '\
                                     'trialRobotMoveRelOriginAngle, '\
@@ -288,6 +303,8 @@ class Save:
                                     'trialRobotMoveRelTolerance, ' \
                                     'trialRobotMoveTimeout\n'
         self.templateTrialRobot =   '{trialRobotEnabled:s}, '\
+                                    '{trialRobotMovePatternFramePosition:s}, '\
+                                    '{trialRobotMovePatternFrameAngle:s}, '\
                                     '{trialRobotMovePatternShape:s}, '\
                                     '{trialRobotMovePatternHzPattern:s}, '\
                                     '{trialRobotMovePatternHzPoint:s}, '\
@@ -295,6 +312,7 @@ class Save:
                                     '{trialRobotMovePatternSizeX:s}, '\
                                     '{trialRobotMovePatternSizeY:s}, '\
                                     '{trialRobotMovePatternParam:s}, '\
+                                    '{trialRobotMovePatternDirection:s}, '\
                                     '{trialRobotMoveRelTracking:s}, '\
                                     '{trialRobotMoveRelOriginPosition:s}, '\
                                     '{trialRobotMoveRelOriginAngle:s}, '\
@@ -307,6 +325,8 @@ class Save:
                                     '{trialRobotMoveTimeout:s}\n'
                                     
         self.headingsTrialLaser =   'trialLaserEnabled, '\
+                                    'trialLaserPatternFramePosition, '\
+                                    'trialLaserPatternFrameAngle, '\
                                     'trialLaserPatternShape, '\
                                     'trialLaserPatternHzPattern, '\
                                     'trialLaserPatternHzPoint, '\
@@ -314,11 +334,14 @@ class Save:
                                     'trialLaserPatternSizeX, '\
                                     'trialLaserPatternSizeY, '\
                                     'trialLaserPatternParam, '\
+                                    'trialLaserPatternDirection, '\
                                     'trialLaserStatefilterLo, '\
                                     'trialLaserStatefilterHi, '\
                                     'trialLaserStatefilterCriteria, ' \
                                     'trialLaserTimeout\n'
         self.templateTrialLaser =   '{trialLaserEnabled:s}, '\
+                                    '{trialLaserPatternFramePosition:s}, '\
+                                    '{trialLaserPatternFrameAngle:s}, '\
                                     '{trialLaserPatternShape:s}, '\
                                     '{trialLaserPatternHzPattern:s}, '\
                                     '{trialLaserPatternHzPoint:s}, '\
@@ -326,6 +349,7 @@ class Save:
                                     '{trialLaserPatternSizeX:s}, '\
                                     '{trialLaserPatternSizeY:s}, '\
                                     '{trialLaserPatternParam:s}, '\
+                                    '{trialLaserPatternDirection:s}, '\
                                     '\"{trialLaserStatefilterLo:s}\", '\
                                     '\"{trialLaserStatefilterHi:s}\", '\
                                     '{trialLaserStatefilterCriteria:s}, ' \
@@ -601,6 +625,8 @@ class Save:
         #######################################################################
         paramsPreRobot = self.templatePreRobot.format(
                                                 preRobotEnabled               = str(experimentparamsReq.pre.robot.enabled),
+                                                preRobotMovePatternFramePosition = str(experimentparamsReq.pre.robot.move.pattern.frameidPosition),
+                                                preRobotMovePatternFrameAngle = str(experimentparamsReq.pre.robot.move.pattern.frameidAngle),
                                                 preRobotMovePatternShape      = str(experimentparamsReq.pre.robot.move.pattern.shape),
                                                 preRobotMovePatternHzPattern  = str(experimentparamsReq.pre.robot.move.pattern.hzPattern),
                                                 preRobotMovePatternHzPoint    = str(experimentparamsReq.pre.robot.move.pattern.hzPoint),
@@ -608,6 +634,7 @@ class Save:
                                                 preRobotMovePatternSizeX      = str(experimentparamsReq.pre.robot.move.pattern.size.x),
                                                 preRobotMovePatternSizeY      = str(experimentparamsReq.pre.robot.move.pattern.size.y),
                                                 preRobotMovePatternParam      = str(experimentparamsReq.pre.robot.move.pattern.param),
+                                                preRobotMovePatternDirection  = str(experimentparamsReq.pre.robot.move.pattern.direction),
                                                 preRobotMoveRelTracking       = str(experimentparamsReq.pre.robot.move.relative.tracking),
                                                 preRobotMoveRelOriginPosition = str(experimentparamsReq.pre.robot.move.relative.frameidOriginPosition),
                                                 preRobotMoveRelOriginAngle    = str(experimentparamsReq.pre.robot.move.relative.frameidOriginAngle),
@@ -622,6 +649,8 @@ class Save:
         
         #######################################################################
         if len(experimentparamsReq.pre.lasertrack.pattern_list) > 0:
+            patternFramePosition   = str(experimentparamsReq.pre.lasertrack.pattern_list[0].frameidPosition)
+            patternFrameAngle      = str(experimentparamsReq.pre.lasertrack.pattern_list[0].frameidAngle)
             patternShape           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].shape)
             patternHzPattern       = str(experimentparamsReq.pre.lasertrack.pattern_list[0].hzPattern)
             patternHzPoint         = str(experimentparamsReq.pre.lasertrack.pattern_list[0].hzPoint)
@@ -629,7 +658,10 @@ class Save:
             patternSizeX           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].size.x)
             patternSizeY           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].size.y)
             patternParam           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].param)
+            patternDirection       = str(experimentparamsReq.pre.lasertrack.pattern_list[0].direction)
         else:
+            patternFramePosition   = ""
+            patternFrameAngle      = ""
             patternShape           = ""
             patternHzPattern       = str(0.0)
             patternHzPoint         = str(0.0)
@@ -637,6 +669,7 @@ class Save:
             patternSizeX           = str(0.0)
             patternSizeY           = str(0.0)
             patternParam           = str(0.0)
+            patternDirection       = str(1)
 
         if len(experimentparamsReq.pre.lasertrack.statefilterHi_list) > 0:
             statefilterHi          = str(experimentparamsReq.pre.lasertrack.statefilterHi_list[0])
@@ -649,6 +682,8 @@ class Save:
 
         paramsPreLaser = self.templatePreLaser.format(
                                                 preLaserEnabled               = str(experimentparamsReq.pre.lasertrack.enabled),
+                                                preLaserPatternFramePosition  = patternFramePosition,
+                                                preLaserPatternFrameAngle     = patternFrameAngle,
                                                 preLaserPatternShape          = patternShape,
                                                 preLaserPatternHzPattern      = patternHzPattern,
                                                 preLaserPatternHzPoint        = patternHzPoint,
@@ -656,6 +691,7 @@ class Save:
                                                 preLaserPatternSizeX          = patternSizeX,
                                                 preLaserPatternSizeY          = patternSizeY,
                                                 preLaserPatternParam          = patternParam,
+                                                preLaserPatternDirection      = patternDirection,
                                                 preLaserStatefilterHi         = statefilterHi,
                                                 preLaserStatefilterLo         = statefilterLo,
                                                 preLaserStatefilterCriteria   = statefilterCriteria,
@@ -706,6 +742,8 @@ class Save:
         #######################################################################
         paramsTrialRobot = self.templateTrialRobot.format(
                                                 trialRobotEnabled               = str(experimentparamsReq.trial.robot.enabled),
+                                                trialRobotMovePatternFramePosition = str(experimentparamsReq.trial.robot.move.pattern.frameidPosition),
+                                                trialRobotMovePatternFrameAngle = str(experimentparamsReq.trial.robot.move.pattern.frameidAngle),
                                                 trialRobotMovePatternShape      = str(experimentparamsReq.trial.robot.move.pattern.shape),
                                                 trialRobotMovePatternHzPattern  = str(experimentparamsReq.trial.robot.move.pattern.hzPattern),
                                                 trialRobotMovePatternHzPoint    = str(experimentparamsReq.trial.robot.move.pattern.hzPoint),
@@ -713,6 +751,7 @@ class Save:
                                                 trialRobotMovePatternSizeX      = str(experimentparamsReq.trial.robot.move.pattern.size.x),
                                                 trialRobotMovePatternSizeY      = str(experimentparamsReq.trial.robot.move.pattern.size.y),
                                                 trialRobotMovePatternParam      = str(experimentparamsReq.trial.robot.move.pattern.param),
+                                                trialRobotMovePatternDirection  = str(experimentparamsReq.trial.robot.move.pattern.direction),
                                                 trialRobotMoveRelTracking       = str(experimentparamsReq.trial.robot.move.relative.tracking),
                                                 trialRobotMoveRelOriginPosition = str(experimentparamsReq.trial.robot.move.relative.frameidOriginPosition),
                                                 trialRobotMoveRelOriginAngle    = str(experimentparamsReq.trial.robot.move.relative.frameidOriginAngle),
@@ -727,6 +766,8 @@ class Save:
         
         #######################################################################
         if len(experimentparamsReq.trial.lasertrack.pattern_list) > 0:
+            patternFramePosition   = str(experimentparamsReq.trial.lasertrack.pattern_list[0].frameidPosition)
+            patternFrameAngle      = str(experimentparamsReq.trial.lasertrack.pattern_list[0].frameidAngle)
             patternShape           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].shape)
             patternHzPattern       = str(experimentparamsReq.trial.lasertrack.pattern_list[0].hzPattern)
             patternHzPoint         = str(experimentparamsReq.trial.lasertrack.pattern_list[0].hzPoint)
@@ -734,7 +775,10 @@ class Save:
             patternSizeX           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].size.x)
             patternSizeY           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].size.y)
             patternParam           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].param)
+            patternDirection       = str(experimentparamsReq.trial.lasertrack.pattern_list[0].direction)
         else:
+            patternFramePosition   = ""
+            patternFrameAngle      = ""
             patternShape           = ""
             patternHzPattern       = str(0.0)
             patternHzPoint         = str(0.0)
@@ -742,6 +786,7 @@ class Save:
             patternSizeX           = str(0.0)
             patternSizeY           = str(0.0)
             patternParam           = str(0.0)
+            patternDirection       = str(0)
 
         if len(experimentparamsReq.trial.lasertrack.statefilterHi_list) > 0:
             statefilterHi          = str(experimentparamsReq.trial.lasertrack.statefilterHi_list[0])
@@ -754,6 +799,8 @@ class Save:
 
         paramsTrialLaser = self.templateTrialLaser.format(
                                                 trialLaserEnabled               = str(experimentparamsReq.trial.lasertrack.enabled),
+                                                trialLaserPatternFramePosition  = patternFramePosition,
+                                                trialLaserPatternFrameAngle     = patternFrameAngle,
                                                 trialLaserPatternShape          = patternShape,
                                                 trialLaserPatternHzPattern      = patternHzPattern,
                                                 trialLaserPatternHzPoint        = patternHzPoint,
@@ -761,6 +808,7 @@ class Save:
                                                 trialLaserPatternSizeX          = patternSizeX,
                                                 trialLaserPatternSizeY          = patternSizeY,
                                                 trialLaserPatternParam          = patternParam,
+                                                trialLaserPatternDirection      = patternDirection,
                                                 trialLaserStatefilterHi         = statefilterHi,
                                                 trialLaserStatefilterLo         = statefilterLo,
                                                 trialLaserStatefilterCriteria   = statefilterCriteria,
