@@ -99,7 +99,8 @@ class Experiment():
                                                                             size       = Point(x=0,
                                                                                                y=0),
                                                                             preempt    = False,
-                                                                            param      = 3), # Peano curve level.
+                                                                            param      = 3,
+                                                                            direction  = 1), # Peano curve level.
                                                                  )
         if mode=='fixedcircle':
             # Draw a point.
@@ -113,7 +114,8 @@ class Experiment():
                                                                             size       = Point(x=80,
                                                                                                y= 0),
                                                                             preempt    = False,
-                                                                            param      = 3), # Peano curve level.
+                                                                            param      = 3,
+                                                                            direction  = 1), # Peano curve level.
                                                                  )
         if mode=='trackgrid':
             for iFly in flies_list:
@@ -127,7 +129,8 @@ class Experiment():
                                                                                 size       = Point(x=2,
                                                                                                    y=2),
                                                                                 preempt    = False,
-                                                                                param      = 3), # Peano curve level.
+                                                                                param      = 3,
+                                                                                direction  = 1), # Peano curve level.
                                                                      )
         if mode=='tracknumber':
             for iFly in flies_list:
@@ -141,7 +144,8 @@ class Experiment():
                                                                                 size       = Point(x=8,
                                                                                                    y=8),
                                                                                 preempt    = False,
-                                                                                param      = 0), # Peano curve level.
+                                                                                param      = 0,
+                                                                                direction  = 1), # Peano curve level.
                                                                      )
         if mode=='trackflylogo':
             for iFly in flies_list:
@@ -155,7 +159,8 @@ class Experiment():
                                                                                 size       = Point(x=6,
                                                                                                    y=6),
                                                                                 preempt    = False,
-                                                                                param      = 0), # Peano curve level.
+                                                                                param      = 0,
+                                                                                direction  = 1), # Peano curve level.
                                                                      )
         if mode=='fixedmaze':
             # Draw a maze.
@@ -169,7 +174,8 @@ class Experiment():
                                                                             size       = Point(x=140,
                                                                                                y=140),
                                                                             preempt    = False,
-                                                                            param      = 2), # Peano curve level.
+                                                                            param      = 2,
+                                                                            direction  = 1), # Peano curve level.
                                                                  )
         
         self.experimentparams.trial.lasertrack.timeout = -1

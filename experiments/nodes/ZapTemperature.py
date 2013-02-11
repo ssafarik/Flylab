@@ -88,7 +88,8 @@ class ExperimentZapafly():
                                                                             size       = Point(x=0,
                                                                                                y=0),
                                                                             preempt    = False,
-                                                                            param      = 2), # Peano curve level.
+                                                                            param      = 2,
+                                                                            direction  = 1), # Peano curve level.
                                                                  )
         if mode=='plategrid':
             self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
@@ -101,7 +102,8 @@ class ExperimentZapafly():
                                                                             size       = Point(x=1,
                                                                                                y=1),
                                                                             preempt    = False,
-                                                                            param      = 3), # Peano curve level.
+                                                                            param      = 3,
+                                                                            direction  = 1), # Peano curve level.
                                                                  )
         if mode=='trackgrid1':
             self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
@@ -114,7 +116,8 @@ class ExperimentZapafly():
                                                                             size       = Point(x=3,
                                                                                                y=3),
                                                                             preempt    = False,
-                                                                            param      = 2), # Peano curve level.
+                                                                            param      = 2,
+                                                                            direction  = 1), # Peano curve level.
                                                                  )
         if mode=='trackgrid':
             for iFly in range(rospy.get_param('nFlies', 0)):
@@ -128,7 +131,8 @@ class ExperimentZapafly():
                                                                                 size       = Point(x=3,
                                                                                                    y=3),
                                                                                 preempt    = False,
-                                                                                param      = 2), # Peano curve level.
+                                                                                param      = 2,
+                                                                                direction  = 1), # Peano curve level.
                                                                      )
         if mode=='tracknumber':
             for iFly in range(rospy.get_param('nFlies', 0)):
@@ -142,7 +146,8 @@ class ExperimentZapafly():
                                                                                 size       = Point(x=6,
                                                                                                    y=6),
                                                                                 preempt    = False,
-                                                                                param      = 2), # Peano curve level.
+                                                                                param      = 2,
+                                                                                direction  = 1), # Peano curve level.
                                                                      )
         if mode=='trackflylogo':
             for iFly in range(rospy.get_param('nFlies', 0)):
@@ -156,7 +161,8 @@ class ExperimentZapafly():
                                                                                 size       = Point(x=6,
                                                                                                    y=6),
                                                                                 preempt    = False,
-                                                                                param      = 2), # Peano curve level.
+                                                                                param      = 2,
+                                                                                direction  = 1), # Peano curve level.
                                                                      )
         if mode=='fixedmaze':
             # Draw a maze.
@@ -170,7 +176,8 @@ class ExperimentZapafly():
                                                                                 size       = Point(x=140,
                                                                                                    y=140),
                                                                                 preempt    = False,
-                                                                                param      = 2), # Peano curve level.
+                                                                                param      = 2,
+                                                                                direction  = 1), # Peano curve level.
                                                                      )
         if mode=='fixedpoint':
             # Draw a point.
@@ -184,7 +191,8 @@ class ExperimentZapafly():
                                                                                 size       = Point(x=0,
                                                                                                    y=0),
                                                                                 preempt    = False,
-                                                                                param      = 2), # Peano curve level.
+                                                                                param      = 2,
+                                                                                direction  = 1), # Peano curve level.
                                                                      )
         
         self.experimentparams.trial.lasertrack.timeout = -1

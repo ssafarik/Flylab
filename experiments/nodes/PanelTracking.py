@@ -83,7 +83,8 @@ class Experiment():
                                                                             size       = Point(x=2,
                                                                                                y=2),
                                                                             preempt    = False,
-                                                                            param      = 3), # Peano curve level.
+                                                                            param      = 3, # Peano curve level.
+                                                                            direction  = 1),
                                                                  )
             #self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'speed':5.0}")
             #self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'speed':0.0}")

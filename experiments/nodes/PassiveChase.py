@@ -71,6 +71,8 @@ class ExperimentPassiveChase():
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.move.pattern.size.y = 0
+        self.experimentparams.trial.robot.move.pattern.param = 0
+        self.experimentparams.trial.robot.move.pattern.direction = 1
         self.experimentparams.trial.robot.move.timeout = -1
         self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = 0.0

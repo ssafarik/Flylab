@@ -63,12 +63,16 @@ class Experiment():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'pattern'
+        self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'            # 
+        self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
         self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20
         self.experimentparams.trial.robot.move.pattern.hzPoint = 10
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.move.pattern.size.y = 0
+        self.experimentparams.trial.robot.move.pattern.param = 0
+        self.experimentparams.trial.robot.move.pattern.direction = 1
         self.experimentparams.trial.robot.move.timeout = 600
         self.experimentparams.trial.robot.home.enabled = True
         self.experimentparams.trial.robot.home.x = 0.0

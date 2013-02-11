@@ -55,6 +55,8 @@ class Experiment():
         self.experimentparams.pre.robot.move.pattern.count = -1
         self.experimentparams.pre.robot.move.pattern.size.x = 10
         self.experimentparams.pre.robot.move.pattern.size.y = 0
+        self.experimentparams.pre.robot.move.pattern.param = 0
+        self.experimentparams.pre.robot.move.pattern.direction = 1
         self.experimentparams.pre.robot.move.timeout = -1                             # When this duration has passed, then the move is over.
         self.experimentparams.pre.lasertrack.enabled = False
         self.experimentparams.pre.ledpanels.enabled = True
