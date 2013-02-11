@@ -1060,6 +1060,7 @@ class MoveRobot (smach.State):
         msgPattern.size = self.paramsIn.robot.move.pattern.size
         msgPattern.preempt = True
         msgPattern.param = 0.0#self.paramsIn.robot.move.pattern.param
+        msgPattern.direction = self.paramsIn.robot.move.pattern.direction
         self.pubPatternGen.publish (msgPattern)
                 
 
@@ -1094,6 +1095,7 @@ class MoveRobot (smach.State):
         msgPattern.size = self.paramsIn.robot.move.pattern.size
         msgPattern.preempt = True
         msgPattern.param = 0.0#self.paramsIn.robot.move.pattern.param
+        msgPattern.direction = self.paramsIn.robot.move.pattern.direction
         self.pubPatternGen.publish (msgPattern)
 
         return rv

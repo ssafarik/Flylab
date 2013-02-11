@@ -32,7 +32,7 @@ function [start,stop] = FlylabGetInteractions(varargin)
         iStart       = varargin{6};
         iStop        = varargin{7};
     else
-        fprintf ('Bad call to FlylabGetInteractions().\n');
+        fprintf ('Bad call to FlylabGetInteractions().\nParams are FlylabGetInteractions(filedata, iFrameParent, iFrameChild, nMinLen, criteria [,iStart, iStop])');
     end
     
     

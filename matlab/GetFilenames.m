@@ -3,10 +3,15 @@ function filenames = GetFilenames (dirspec, filespec)
 % Take a directory, leafdir spec, and filespec, 
 % Return a cell array of filenames.
 %
-% dirspec:   Must end with a backslash, e.g. 'E:\\' 
+% dirspec:   Must end with an asterisk, e.g. 'E:\\*', '~/FlylabData/2013_10_03*'
 %            or 'C:\\Documents and Settings\\username\\FlylabData\\2012_10_03*'
 % filespec:  May contain wildcards, e.g. 'zap*.csv'
 %
+
+    if dirspec(length(dirspec))~='*'
+        dirspec = strcat(dirspec, '*');
+    end
+    
     [base, leaf] = fileparts(dirspec);
     dirs = dir(dirspec);
     [mDirs nDirs] = size(dirs);

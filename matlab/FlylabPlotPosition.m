@@ -1,5 +1,5 @@
 function FlylabPlotPosition(varargin)
-% FlylabPlotPosition(filedata)
+% FlylabPlotPosition(filedata, iFrameParent,iFrameChildren, iTrigger, nSubsample[, iStart, iStop])
 % Plot positions of the specified object (robot=1, fly1=2, fly2=3, etc), in the given frame of reference.
 % Draws a circle on the sample given by iTrigger.
 %
@@ -21,7 +21,7 @@ function FlylabPlotPosition(varargin)
         iStart          = varargin{6};
         iStop           = varargin{7};
     else
-        fprintf ('Bad call to FlylabPlotPosition().\n');
+        fprintf ('Bad call to FlylabPlotPosition().\nParams are:  FlylabPlotPosition(filedata, iFrameParent,iFrameChildren, iTrigger, nSubsample[, iStart, iStop])\n');
     end
     
     
@@ -29,15 +29,6 @@ function FlylabPlotPosition(varargin)
     R90 = [cos(pi/2) -sin(pi/2);
            sin(pi/2)  cos(pi/2)];
 
-    % Create a circle for the arena boundary.
-    q = (0:0.01:(2*pi))';
-    r = 87;
-    xCircle = r * cos(q);
-    yCircle = r * sin(q);
-    sCircle = 1;
-    cCircle = [0 0 0];
-    mCircle = '.';
-    
     markers = {'o','triangle','triangle','triangle','triangle','triangle','triangle','triangle'};
     colors = [[1.0 0.0 0.0]; 
               [0.3 0.3 0.3]; 
@@ -71,11 +62,9 @@ function FlylabPlotPosition(varargin)
         y = pos(iStart:nSubsample:iStop, 2);
         ang=ang(iStart:nSubsample:iStop);
 
-        %iTriggerA = max(1, floor((iTrigger-iStart+1)/nSubsample));
-        %xTrig = x(iTriggerA);
-        %yTrig = y(iTriggerA);
-        xTrig = pos(iTrigger, 1); 
-        yTrig = pos(iTrigger, 2); 
+        iTriggerA = max(1, floor((iTrigger-iStart+1)/nSubsample));
+        xTrig = x(iTriggerA);
+        yTrig = y(iTriggerA);
         
         % Remove points outside a boundary.
         if iFrameParent~=0

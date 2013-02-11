@@ -29,7 +29,7 @@ function FlylabPlotHistogramInteractions(interactions, radius, nBins)
         
         % Add the histogram from this interaction to the sum.
         iFrames = [2 3];
-        iFrameLeader = FlylabGetLeader(filedata, iFrames(1), iFrames(2), iStart, iStop, radius);
+        iFrameLeader = FlylabGetLeader(filedata, iFrames(1), iFrames(2), radius, iStart, iStop);
         iFrameFollower = iFrames(find(iFrames~=iFrameLeader));
         histogramLeader   = histogramLeader   + FlylabGetHistogramPosition(filedata, iFrameLeader, iFrameFollower, radius, nBins, iStart, iStop);
         histogramFollower = histogramFollower + FlylabGetHistogramPosition(filedata, iFrameFollower, iFrameLeader, radius, nBins, iStart, iStop);
