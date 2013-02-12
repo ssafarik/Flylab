@@ -2750,7 +2750,7 @@ class ConvertCsv:
             print ('Only versions "2.2", "2.6", "2.7", "2.8", and "latest" are supported for writing.')
             
 
-    def ConvertTree(self, dirIn, dirOut):
+    def ConvertTree(self, dirIn, dirOut, whatToCopy):
         if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', 'latest']): 
             if (dirIn != dirOut):
                 names = os.listdir(dirIn)
@@ -2768,14 +2768,15 @@ class ConvertCsv:
                     try:
                         if os.path.isdir(filespecIn):
                             #print 'ConvertTree:  %s -> %s' % (filespecIn, filespecOut)
-                            self.ConvertTree(filespecIn, filespecOut)
+                            self.ConvertTree(filespecIn, filespecOut, whatToCopy)
                         else:
                             if (os.path.splitext(filespecIn)[1]=='.csv'):
                                 #print 'ConvertFile:  %s -> %s' % (filespecIn, filespecOut)
                                 self.ConvertFile(filespecIn, filespecOut)
                             else:
-                                print '%s  ->  %s:  (copied)' % (filespecIn, filespecOut)
-                                shutil.copy2(filespecIn, filespecOut)
+                                if (whatToCopy=='everything'):
+                                    print '%s  ->  %s:  (copied)' % (filespecIn, filespecOut)
+                                    shutil.copy2(filespecIn, filespecOut)
                                 
                     except (IOError, os.error) as why:
                         errors.append((filespecIn, filespecOut, str(why)))
@@ -2804,13 +2805,18 @@ if __name__ == '__main__':
     ###############################################################################################
     ###############################################################################################
     convert.versionToWrite = '2.8'  # '2.2' or '2.6' or '2.7' or '2.8' or 'latest'
-    dirIn   = '/home/ssafarik/FlylabData_oldversions'
+    dirIn   = '/home/ssafarik/FlylabData/2013_01_25'
     dirOut  = '/home/ssafarik/FlylabData_converted'
+    
+    
+    #whatToCopy = 'everything'           # Choose one of these two options.
+    whatToCopy = 'csvonly'              # Choose one of these two options.
+    
     ###############################################################################################
     ###############################################################################################
 
     
-    convert.ConvertTree(dirIn, dirOut)
+    convert.ConvertTree(dirIn, dirOut, whatToCopy)
     
     
             
