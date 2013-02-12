@@ -970,69 +970,68 @@ class ConvertCsv:
         
     def ReadHeader_V1 (self, filename):
         (versionIn, nLinesHeader, nRobots, nFlies) = self.GetFileInfo(filename)
-        #self.nHeader = 4
         
         with open(filename, 'r') as fid:
             self.AdvanceUntilField(fid, 'date_time')
             headerTxt = fid.readline()
             header = fid.readline()
 
-        fieldPre_list = header.split(',')
-        field_list = []
-        for field in fieldPre_list:
-            field_list.append(field.strip(' \n'))
-            
+        #fieldPre_list = header.split(',')
+        #field_list = []
+        #for field in fieldPre_list:
+        #    field_list.append(field.strip(' \n'))
+        field_list = self.ListFromCsv(header)    
             
 
         if versionIn=='1.0': 
-            self.param_date_time = field_list[0]
-            self.param_description = field_list[1]
-            self.param_maxTrials = field_list[2]
-            self.param_trial = field_list[3]
+            self.param_date_time                    = field_list[0]
+            self.param_description                  = field_list[1]
+            self.param_maxTrials                    = field_list[2]
+            self.param_trial                        = field_list[3]
             
-            self.param_preWait1 = field_list[4]
+            self.param_preWait1                     = field_list[4]
             
-            self.param_preTriggerDistanceMin = field_list[5]
-            self.param_preTriggerDistanceMax = field_list[6]
-            self.param_preTriggerSpeedRelMin = field_list[7]
-            self.param_preTriggerSpeedRelMax = field_list[8]
-            self.param_preTriggerAngleMin = field_list[9]
-            self.param_preTriggerAngleMax = field_list[10]
-            self.param_preTriggerAngleTest = field_list[11]
+            self.param_preTriggerDistanceMin        = field_list[5]
+            self.param_preTriggerDistanceMax        = field_list[6]
+            self.param_preTriggerSpeedRelMin        = field_list[7]
+            self.param_preTriggerSpeedRelMax        = field_list[8]
+            self.param_preTriggerAngleMin           = field_list[9]
+            self.param_preTriggerAngleMax           = field_list[10]
+            self.param_preTriggerAngleTest          = field_list[11]
             self.param_preTriggerAngleTestBilateral = field_list[12]
-            self.param_preTriggerTimeHold = field_list[13]
+            self.param_preTriggerTimeHold           = field_list[13]
 
-            self.param_postTriggerDistanceMin = field_list[14]
-            self.param_postTriggerDistanceMax = field_list[15]
-            self.param_postTriggerSpeedRelMin = field_list[16]
-            self.param_postTriggerSpeedRelMax = field_list[17]
-            self.param_postTriggerAngleMin = field_list[18]
-            self.param_postTriggerAngleMax = field_list[19]
-            self.param_postTriggerAngleTest = field_list[20]
+            self.param_postTriggerDistanceMin       = field_list[14]
+            self.param_postTriggerDistanceMax       = field_list[15]
+            self.param_postTriggerSpeedRelMin       = field_list[16]
+            self.param_postTriggerSpeedRelMax       = field_list[17]
+            self.param_postTriggerAngleMin          = field_list[18]
+            self.param_postTriggerAngleMax          = field_list[19]
+            self.param_postTriggerAngleTest         = field_list[20]
             self.param_postTriggerAngleTestBilateral = field_list[21]
-            self.param_postTriggerTimeHold = field_list[22]
+            self.param_postTriggerTimeHold          = field_list[22]
 
-            self.param_widthRobot = field_list[23]
-            self.param_heightRobot = field_list[24]
-            self.param_visibleRobot = field_list[25]
-            self.param_paintRobot = field_list[26]
-            self.param_scentRobot = field_list[27]
+            self.param_widthRobot                   = field_list[23]
+            self.param_heightRobot                  = field_list[24]
+            self.param_visibleRobot                 = field_list[25]
+            self.param_paintRobot                   = field_list[26]
+            self.param_scentRobot                   = field_list[27]
 
-            self.param_trialRobotMovePatternShape = field_list[28]
+            self.param_trialRobotMovePatternShape   = field_list[28]
             self.param_trialRobotMovePatternHzPattern = field_list[29]
             self.param_trialRobotMovePatternHzPoint = field_list[30]
-            self.param_trialRobotMovePatternCount = field_list[31]
-            self.param_trialRobotMovePatternSizeX = field_list[32]
-            self.param_trialRobotMovePatternSizeY = field_list[33]
-            self.param_trialRobotMoveRelTracking = field_list[34]
+            self.param_trialRobotMovePatternCount   = field_list[31]
+            self.param_trialRobotMovePatternSizeX   = field_list[32]
+            self.param_trialRobotMovePatternSizeY   = field_list[33]
+            self.param_trialRobotMoveRelTracking    = field_list[34]
             self.param_trialRobotMoveRelOriginPosition = field_list[35]
             self.param_trialRobotMoveRelOriginAngle = field_list[36]
-            self.param_trialRobotMoveRelDistance = field_list[37]
-            self.param_trialRobotMoveRelAngle = field_list[38]
-            self.param_trialRobotMoveRelAngleType = field_list[39]
-            self.param_trialRobotMoveRelSpeed = field_list[40]
-            self.param_trialRobotMoveRelSpeedType = field_list[41]
-            self.param_trialRobotMoveRelTolerance = field_list[42]
+            self.param_trialRobotMoveRelDistance    = field_list[37]
+            self.param_trialRobotMoveRelAngle       = field_list[38]
+            self.param_trialRobotMoveRelAngleType   = field_list[39]
+            self.param_trialRobotMoveRelSpeed       = field_list[40]
+            self.param_trialRobotMoveRelSpeedType   = field_list[41]
+            self.param_trialRobotMoveRelTolerance   = field_list[42]
     
         
 
@@ -1049,21 +1048,21 @@ class ConvertCsv:
             self.param_paintRobot                   = field_list[7]
             self.param_scentRobot                   = field_list[8]
 
-            self.param_preWait1                    = field_list[9]
+            self.param_preWait1                     = field_list[9]
             
-            self.param_preTriggerFrameidParent        = field_list[10]
-            self.param_preTriggerFrameidChild         = field_list[11]
-            self.param_preTriggerSpeedAbsParentMin    = field_list[12]
-            self.param_preTriggerSpeedAbsParentMax    = field_list[13]
-            self.param_preTriggerSpeedAbsChildMin     = field_list[14]
-            self.param_preTriggerSpeedAbsChildMax     = field_list[15]
-            self.param_preTriggerDistanceMin          = field_list[16]
-            self.param_preTriggerDistanceMax          = field_list[17]
-            self.param_preTriggerAngleMin             = field_list[18]
-            self.param_preTriggerAngleMax             = field_list[19]
-            self.param_preTriggerAngleTest            = field_list[20]
-            self.param_preTriggerAngleTestBilateral   = field_list[21]
-            self.param_preTriggerTimeHold             = field_list[22]
+            self.param_preTriggerFrameidParent      = field_list[10]
+            self.param_preTriggerFrameidChild       = field_list[11]
+            self.param_preTriggerSpeedAbsParentMin  = field_list[12]
+            self.param_preTriggerSpeedAbsParentMax  = field_list[13]
+            self.param_preTriggerSpeedAbsChildMin   = field_list[14]
+            self.param_preTriggerSpeedAbsChildMax   = field_list[15]
+            self.param_preTriggerDistanceMin        = field_list[16]
+            self.param_preTriggerDistanceMax        = field_list[17]
+            self.param_preTriggerAngleMin           = field_list[18]
+            self.param_preTriggerAngleMax           = field_list[19]
+            self.param_preTriggerAngleTest          = field_list[20]
+            self.param_preTriggerAngleTestBilateral = field_list[21]
+            self.param_preTriggerTimeHold           = field_list[22]
 
             self.param_trialRobotMovePatternShape        = field_list[23]
             self.param_trialRobotMovePatternHzPattern    = field_list[24]
@@ -1177,15 +1176,15 @@ class ConvertCsv:
                 headerPreTrigger    = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
-                headerTrialRobotTxt      = line[i]; i=i+1
-                headerTrialRobot         = line[i]; i=i+1
+                headerTrialRobotTxt = line[i]; i=i+1
+                headerTrialRobot    = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
-                headerTrialLaserTxt      = line[i]; i=i+1
-                headerTrialLaser         = line[i]; i=i+1
+                headerTrialLaserTxt = line[i]; i=i+1
+                headerTrialLaser    = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
-                headerPostTriggerTxt = line[i]; i=i+1
+                headerPostTriggerTxt= line[i]; i=i+1
                 headerPostTrigger   = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
@@ -1228,13 +1227,13 @@ class ConvertCsv:
                 headerTrialLaser    = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
-                headerPostTriggerTxt = line[i]; i=i+1
+                headerPostTriggerTxt= line[i]; i=i+1
                 headerPostTrigger   = line[i]; i=i+1
                 blank               = line[i]; i=i+1
                 
-                headerTrialLEDPanelsTxt  = line[i]; i=i+1
-                headerTrialLEDPanels     = line[i]; i=i+1
-                blank               = line[i]; i=i+1
+                headerTrialLEDPanelsTxt = line[i]; i=i+1
+                headerTrialLEDPanels    = line[i]; i=i+1
+                blank                   = line[i]; i=i+1
                 
                 headerPostWaitTxt   = line[i]; i=i+1
                 headerPostWait      = line[i]; i=i+1
@@ -1410,13 +1409,21 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-        if versionIn=='2.0':
+        ##################################################################
+        # Put the fields from each line into their respective variables.
+        ##################################################################
+
+        ### Experiment Setup
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
             self.param_maxTrials                    = field_list[2]
             self.param_trial                        = field_list[3]
             
+            
+        ### Robots
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
             field_list = self.ListFromCsv(headerRobots)
             self.param_nRobots                      = field_list[0]
             self.param_widthRobot                   = field_list[1]
@@ -1425,91 +1432,20 @@ class ConvertCsv:
             self.param_paintRobot                   = field_list[4]
             self.param_scentRobot                   = field_list[5]
 
+        
+        ### Flies
+        if (versionIn in ['2.0']):
             field_list = self.ListFromCsv(headerFlies)
             self.param_nFlies                       = field_list[0]
-            
-            field_list = self.ListFromCsv(headerPreWait1)
-            self.param_preWait1                    = field_list[0]
-            
-            field_list = self.ListFromCsv(headerPreTrigger)
-            self.param_preTriggerEnabled              = field_list[0]
-            self.param_preTriggerFrameidParent        = field_list[1]
-            self.param_preTriggerFrameidChild         = field_list[2]
-            self.param_preTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_preTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_preTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_preTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_preTriggerDistanceMin          = field_list[7]
-            self.param_preTriggerDistanceMax          = field_list[8]
-            self.param_preTriggerAngleMin             = field_list[9]
-            self.param_preTriggerAngleMax             = field_list[10]
-            self.param_preTriggerAngleTest            = field_list[11]
-            self.param_preTriggerAngleTestBilateral   = field_list[12]
-            self.param_preTriggerTimeHold             = field_list[13]
-            self.param_preTriggerTimeout              = field_list[14]
-
-            field_list = self.ListFromCsv(headerTrialRobot)
-            self.param_trialRobotEnabled             = field_list[0]
-            self.param_trialRobotMovePatternShape        = field_list[1]
-            self.param_trialRobotMovePatternHzPattern    = field_list[2]
-            self.param_trialRobotMovePatternHzPoint      = field_list[3]
-            self.param_trialRobotMovePatternCount        = field_list[4]
-            self.param_trialRobotMovePatternSizeX        = field_list[5]
-            self.param_trialRobotMovePatternSizeY        = field_list[6]
-            self.param_trialRobotMoveRelTracking         = field_list[7]
-            self.param_trialRobotMoveRelOriginPosition   = field_list[8]
-            self.param_trialRobotMoveRelOriginAngle      = field_list[9]
-            self.param_trialRobotMoveRelDistance         = field_list[10]
-            self.param_trialRobotMoveRelAngle            = field_list[11]
-            self.param_trialRobotMoveRelAngleType        = field_list[12]
-            self.param_trialRobotMoveRelSpeed            = field_list[13]
-            self.param_trialRobotMoveRelSpeedType        = field_list[14]
-            self.param_trialRobotMoveRelTolerance        = field_list[15]
-    
-            field_list = self.ListFromCsv(headerTrialLaser)
-            self.param_trialLaserEnabled                 = field_list[0]
-        
-            field_list = self.ListFromCsv(headerPostTrigger)
-            self.param_postTriggerEnabled              = field_list[0]
-            self.param_postTriggerFrameidParent        = field_list[1]
-            self.param_postTriggerFrameidChild         = field_list[2]
-            self.param_postTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_postTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_postTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_postTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_postTriggerDistanceMin          = field_list[7]
-            self.param_postTriggerDistanceMax          = field_list[8]
-            self.param_postTriggerAngleMin             = field_list[9]
-            self.param_postTriggerAngleMax             = field_list[10]
-            self.param_postTriggerAngleTest            = field_list[11]
-            self.param_postTriggerAngleTestBilateral   = field_list[12]
-            self.param_postTriggerTimeHold             = field_list[13]
-            self.param_postTriggerTimeout              = field_list[14]
-
-            field_list = self.ListFromCsv(headerPostWait)
-            self.param_postWait                     = field_list[0]
-
-
-        if versionIn=='2.1':
-            field_list = self.ListFromCsv(headerExperiment)
-            self.param_date_time                    = field_list[0]
-            self.param_description                  = field_list[1]
-            self.param_maxTrials                    = field_list[2]
-            self.param_trial                        = field_list[3]
-            
-            field_list = self.ListFromCsv(headerRobots)
-            self.param_nRobots                      = field_list[0]
-            self.param_widthRobot                   = field_list[1]
-            self.param_heightRobot                  = field_list[2]
-            self.param_visibleRobot                 = field_list[3]
-            self.param_paintRobot                   = field_list[4]
-            self.param_scentRobot                   = field_list[5]
-
+        if (versionIn in ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
             field_list = self.ListFromCsv(headerFlies)
             self.param_nFlies                       = field_list[0]
             self.param_typeFlies                    = field_list[1]
             self.param_genderFlies                  = field_list[2]
             
+
+        ### Exclusion Zone.
+        if (versionIn in ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
             field_list = self.ListFromCsv(headerTracking)
             self.param_trackingExclusionzoneEnabled     = field_list[0]
             if len(field_list)>1:
@@ -1521,455 +1457,15 @@ class ConvertCsv:
                 self.param_trackingExclusionzoneY_list      = []
                 self.param_trackingExclusionzoneRadius_list = []
 
+        
+        ### Pre Wait1
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
             field_list = self.ListFromCsv(headerPreWait1)
             self.param_preWait1                    = field_list[0]
-            
-            field_list = self.ListFromCsv(headerPreTrigger)
-            self.param_preTriggerEnabled              = field_list[0]
-            self.param_preTriggerFrameidParent        = field_list[1]
-            self.param_preTriggerFrameidChild         = field_list[2]
-            self.param_preTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_preTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_preTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_preTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_preTriggerDistanceMin          = field_list[7]
-            self.param_preTriggerDistanceMax          = field_list[8]
-            self.param_preTriggerAngleMin             = field_list[9]
-            self.param_preTriggerAngleMax             = field_list[10]
-            self.param_preTriggerAngleTest            = field_list[11]
-            self.param_preTriggerAngleTestBilateral   = field_list[12]
-            self.param_preTriggerTimeHold             = field_list[13]
-            self.param_preTriggerTimeout              = field_list[14]
 
-            field_list = self.ListFromCsv(headerTrialRobot)
-            self.param_trialRobotEnabled             = field_list[0]
-            self.param_trialRobotMovePatternShape        = field_list[1]
-            self.param_trialRobotMovePatternHzPattern    = field_list[2]
-            self.param_trialRobotMovePatternHzPoint      = field_list[3]
-            self.param_trialRobotMovePatternCount        = field_list[4]
-            self.param_trialRobotMovePatternSizeX        = field_list[5]
-            self.param_trialRobotMovePatternSizeY        = field_list[6]
-            self.param_trialRobotMovePatternParam        = field_list[7]
-            self.param_trialRobotMoveRelTracking         = field_list[8]
-            self.param_trialRobotMoveRelOriginPosition   = field_list[9]
-            self.param_trialRobotMoveRelOriginAngle      = field_list[10]
-            self.param_trialRobotMoveRelDistance         = field_list[11]
-            self.param_trialRobotMoveRelAngle            = field_list[12]
-            self.param_trialRobotMoveRelAngleType        = field_list[13]
-            self.param_trialRobotMoveRelSpeed            = field_list[14]
-            self.param_trialRobotMoveRelSpeedType        = field_list[15]
-            self.param_trialRobotMoveRelTolerance        = field_list[16]
-    
-            field_list = self.ListFromCsv(headerTrialLaser)
-            self.param_trialLaserEnabled                 = field_list[0]
-            self.param_trialLaserPatternShape            = field_list[1]
-            self.param_trialLaserPatternHzPattern        = field_list[2]
-            self.param_trialLaserPatternHzPoint          = field_list[3]
-            self.param_trialLaserPatternCount            = field_list[4]
-            self.param_trialLaserPatternSizeX            = field_list[5]
-            self.param_trialLaserPatternSizeY            = field_list[6]
-            self.param_trialLaserPatternParam            = field_list[7]
-            self.param_trialLaserStatefilterLo           = field_list[8]
-            self.param_trialLaserStatefilterHi           = field_list[9]
-            self.param_trialLaserStatefilterCriteria     = field_list[10]
         
-            field_list = self.ListFromCsv(headerPostTrigger)
-            self.param_postTriggerEnabled              = field_list[0]
-            self.param_postTriggerFrameidParent        = field_list[1]
-            self.param_postTriggerFrameidChild         = field_list[2]
-            self.param_postTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_postTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_postTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_postTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_postTriggerDistanceMin          = field_list[7]
-            self.param_postTriggerDistanceMax          = field_list[8]
-            self.param_postTriggerAngleMin             = field_list[9]
-            self.param_postTriggerAngleMax             = field_list[10]
-            self.param_postTriggerAngleTest            = field_list[11]
-            self.param_postTriggerAngleTestBilateral   = field_list[12]
-            self.param_postTriggerTimeHold             = field_list[13]
-            self.param_postTriggerTimeout              = field_list[14]
-
-            field_list = self.ListFromCsv(headerPostWait)
-            self.param_postWait                     = field_list[0]
-
-
-        if versionIn=='2.2':
-            field_list = self.ListFromCsv(headerExperiment)
-            self.param_date_time                    = field_list[0]
-            self.param_description                  = field_list[1]
-            self.param_maxTrials                    = field_list[2]
-            self.param_trial                        = field_list[3]
-            
-            field_list = self.ListFromCsv(headerRobots)
-            self.param_nRobots                      = field_list[0]
-            self.param_widthRobot                   = field_list[1]
-            self.param_heightRobot                  = field_list[2]
-            self.param_visibleRobot                 = field_list[3]
-            self.param_paintRobot                   = field_list[4]
-            self.param_scentRobot                   = field_list[5]
-
-            field_list = self.ListFromCsv(headerFlies)
-            self.param_nFlies                       = field_list[0]
-            self.param_typeFlies                    = field_list[1]
-            self.param_genderFlies                  = field_list[2]
-            
-            field_list = self.ListFromCsv(headerTracking)
-            self.param_trackingExclusionzoneEnabled     = field_list[0]
-            if len(field_list)>1:
-                self.param_trackingExclusionzoneX_list      = [field_list[1],] # BUG: X_list is actually fields 1,4,7,etc
-                self.param_trackingExclusionzoneY_list      = [field_list[2],] # BUG: X_list is actually fields 2,5,8,etc
-                self.param_trackingExclusionzoneRadius_list = [field_list[3],] # BUG: X_list is actually fields 3,6,9,etc
-            else:
-                self.param_trackingExclusionzoneX_list      = []
-                self.param_trackingExclusionzoneY_list      = []
-                self.param_trackingExclusionzoneRadius_list = []
-
-            field_list = self.ListFromCsv(headerPreWait1)
-            self.param_preWait1                    = field_list[0]
-            
-            field_list = self.ListFromCsv(headerPreTrigger)
-            self.param_preTriggerEnabled              = field_list[0]
-            self.param_preTriggerFrameidParent        = field_list[1]
-            self.param_preTriggerFrameidChild         = field_list[2]
-            self.param_preTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_preTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_preTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_preTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_preTriggerSpeedRelMin          = field_list[7]
-            self.param_preTriggerSpeedRelMax          = field_list[8]
-            self.param_preTriggerDistanceMin          = field_list[9]
-            self.param_preTriggerDistanceMax          = field_list[10]
-            self.param_preTriggerAngleMin             = field_list[11]
-            self.param_preTriggerAngleMax             = field_list[12]
-            self.param_preTriggerAngleTest            = field_list[13]
-            self.param_preTriggerAngleTestBilateral   = field_list[14]
-            self.param_preTriggerTimeHold             = field_list[15]
-            self.param_preTriggerTimeout              = field_list[16]
-
-            field_list = self.ListFromCsv(headerTrialRobot)
-            self.param_trialRobotEnabled             = field_list[0]
-            self.param_trialRobotMovePatternShape        = field_list[1]
-            self.param_trialRobotMovePatternHzPattern    = field_list[2]
-            self.param_trialRobotMovePatternHzPoint      = field_list[3]
-            self.param_trialRobotMovePatternCount        = field_list[4]
-            self.param_trialRobotMovePatternSizeX        = field_list[5]
-            self.param_trialRobotMovePatternSizeY        = field_list[6]
-            self.param_trialRobotMovePatternParam        = field_list[7]
-            self.param_trialRobotMoveRelTracking         = field_list[8]
-            self.param_trialRobotMoveRelOriginPosition   = field_list[9]
-            self.param_trialRobotMoveRelOriginAngle      = field_list[10]
-            self.param_trialRobotMoveRelDistance         = field_list[11]
-            self.param_trialRobotMoveRelAngle            = field_list[12]
-            self.param_trialRobotMoveRelAngleType        = field_list[13]
-            self.param_trialRobotMoveRelSpeed            = field_list[14]
-            self.param_trialRobotMoveRelSpeedType        = field_list[15]
-            self.param_trialRobotMoveRelTolerance        = field_list[16]
-    
-            field_list = self.ListFromCsv(headerTrialLaser)
-            self.param_trialLaserEnabled                 = field_list[0]
-            self.param_trialLaserPatternShape            = field_list[1]
-            self.param_trialLaserPatternHzPattern        = field_list[2]
-            self.param_trialLaserPatternHzPoint          = field_list[3]
-            self.param_trialLaserPatternCount            = field_list[4]
-            self.param_trialLaserPatternSizeX            = field_list[5]
-            self.param_trialLaserPatternSizeY            = field_list[6]
-            self.param_trialLaserPatternParam            = field_list[7]
-            self.param_trialLaserStatefilterLo           = field_list[8]
-            self.param_trialLaserStatefilterHi           = field_list[9]
-            self.param_trialLaserStatefilterCriteria     = field_list[10]
-        
-            field_list = self.ListFromCsv(headerPostTrigger)
-            self.param_postTriggerEnabled              = field_list[0]
-            self.param_postTriggerFrameidParent        = field_list[1]
-            self.param_postTriggerFrameidChild         = field_list[2]
-            self.param_postTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_postTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_postTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_postTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_postTriggerSpeedRelMin          = field_list[7]
-            self.param_postTriggerSpeedRelMax          = field_list[8]
-            self.param_postTriggerDistanceMin          = field_list[9]
-            self.param_postTriggerDistanceMax          = field_list[10]
-            self.param_postTriggerAngleMin             = field_list[11]
-            self.param_postTriggerAngleMax             = field_list[12]
-            self.param_postTriggerAngleTest            = field_list[13]
-            self.param_postTriggerAngleTestBilateral   = field_list[14]
-            self.param_postTriggerTimeHold             = field_list[15]
-            self.param_postTriggerTimeout              = field_list[16]
-
-            field_list = self.ListFromCsv(headerPostWait)
-            self.param_postWait                     = field_list[0]
-
-
-        if versionIn=='2.3':
-            field_list = self.ListFromCsv(headerExperiment)
-            self.param_date_time                    = field_list[0]
-            self.param_description                  = field_list[1]
-            self.param_maxTrials                    = field_list[2]
-            self.param_trial                        = field_list[3]
-            
-            field_list = self.ListFromCsv(headerRobots)
-            self.param_nRobots                      = field_list[0]
-            self.param_widthRobot                   = field_list[1]
-            self.param_heightRobot                  = field_list[2]
-            self.param_visibleRobot                 = field_list[3]
-            self.param_paintRobot                   = field_list[4]
-            self.param_scentRobot                   = field_list[5]
-
-            field_list = self.ListFromCsv(headerFlies)
-            self.param_nFlies                       = field_list[0]
-            self.param_typeFlies                    = field_list[1]
-            self.param_genderFlies                  = field_list[2]
-            
-            field_list = self.ListFromCsv(headerTracking)
-            self.param_trackingExclusionzoneEnabled     = field_list[0]
-            if len(field_list)>1:
-                self.param_trackingExclusionzoneX_list      = [field_list[1],] # BUG: X_list is actually fields 1,4,7,etc
-                self.param_trackingExclusionzoneY_list      = [field_list[2],] # BUG: X_list is actually fields 2,5,8,etc
-                self.param_trackingExclusionzoneRadius_list = [field_list[3],] # BUG: X_list is actually fields 3,6,9,etc
-            else:
-                self.param_trackingExclusionzoneX_list      = []
-                self.param_trackingExclusionzoneY_list      = []
-                self.param_trackingExclusionzoneRadius_list = []
-
-            field_list = self.ListFromCsv(headerPreWait1)
-            self.param_preWait1                    = field_list[0]
-            
-            field_list = self.ListFromCsv(headerPreTrigger)
-            self.param_preTriggerEnabled              = field_list[0]
-            self.param_preTriggerFrameidParent        = field_list[1]
-            self.param_preTriggerFrameidChild         = field_list[2]
-            self.param_preTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_preTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_preTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_preTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_preTriggerSpeedRelMin          = field_list[7]
-            self.param_preTriggerSpeedRelMax          = field_list[8]
-            self.param_preTriggerDistanceMin          = field_list[9]
-            self.param_preTriggerDistanceMax          = field_list[10]
-            self.param_preTriggerAngleMin             = field_list[11]
-            self.param_preTriggerAngleMax             = field_list[12]
-            self.param_preTriggerAngleTest            = field_list[13]
-            self.param_preTriggerAngleTestBilateral   = field_list[14]
-            self.param_preTriggerTimeHold             = field_list[15]
-            self.param_preTriggerTimeout              = field_list[16]
-
-            field_list = self.ListFromCsv(headerTrialRobot)
-            self.param_trialRobotEnabled             = field_list[0]
-            self.param_trialRobotMovePatternShape        = field_list[1]
-            self.param_trialRobotMovePatternHzPattern    = field_list[2]
-            self.param_trialRobotMovePatternHzPoint      = field_list[3]
-            self.param_trialRobotMovePatternCount        = field_list[4]
-            self.param_trialRobotMovePatternSizeX        = field_list[5]
-            self.param_trialRobotMovePatternSizeY        = field_list[6]
-            self.param_trialRobotMovePatternParam        = field_list[7]
-            self.param_trialRobotMoveRelTracking         = field_list[8]
-            self.param_trialRobotMoveRelOriginPosition   = field_list[9]
-            self.param_trialRobotMoveRelOriginAngle      = field_list[10]
-            self.param_trialRobotMoveRelDistance         = field_list[11]
-            self.param_trialRobotMoveRelAngle            = field_list[12]
-            self.param_trialRobotMoveRelAngleType        = field_list[13]
-            self.param_trialRobotMoveRelSpeed            = field_list[14]
-            self.param_trialRobotMoveRelSpeedType        = field_list[15]
-            self.param_trialRobotMoveRelTolerance        = field_list[16]
-    
-            field_list = self.ListFromCsv(headerTrialLaser)
-            self.param_trialLaserEnabled                 = field_list[0]
-            self.param_trialLaserPatternShape            = field_list[1]
-            self.param_trialLaserPatternHzPattern        = field_list[2]
-            self.param_trialLaserPatternHzPoint          = field_list[3]
-            self.param_trialLaserPatternCount            = field_list[4]
-            self.param_trialLaserPatternSizeX            = field_list[5]
-            self.param_trialLaserPatternSizeY            = field_list[6]
-            self.param_trialLaserPatternParam            = field_list[7]
-            self.param_trialLaserStatefilterLo           = field_list[8]
-            self.param_trialLaserStatefilterHi           = field_list[9]
-            self.param_trialLaserStatefilterCriteria     = field_list[10]
-        
-            field_list = self.ListFromCsv(headerTrialLEDPanels)
-            self.param_trialLEDPanelsEnabled              = field_list[0]
-            self.param_trialLEDPanelsCommand              = field_list[1]
-            self.param_trialLEDPanelsIdPattern            = field_list[2]
-            self.param_trialLEDPanelsFrameid              = field_list[3]
-            self.param_trialLEDPanelsStatefilterLo        = field_list[4]
-            self.param_trialLEDPanelsStatefilterHi        = field_list[5]
-            self.param_trialLEDPanelsStatefilterCriteria  = field_list[6]
-
-            field_list = self.ListFromCsv(headerPostTrigger)
-            self.param_postTriggerEnabled              = field_list[0]
-            self.param_postTriggerFrameidParent        = field_list[1]
-            self.param_postTriggerFrameidChild         = field_list[2]
-            self.param_postTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_postTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_postTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_postTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_postTriggerSpeedRelMin          = field_list[7]
-            self.param_postTriggerSpeedRelMax          = field_list[8]
-            self.param_postTriggerDistanceMin          = field_list[9]
-            self.param_postTriggerDistanceMax          = field_list[10]
-            self.param_postTriggerAngleMin             = field_list[11]
-            self.param_postTriggerAngleMax             = field_list[12]
-            self.param_postTriggerAngleTest            = field_list[13]
-            self.param_postTriggerAngleTestBilateral   = field_list[14]
-            self.param_postTriggerTimeHold             = field_list[15]
-            self.param_postTriggerTimeout              = field_list[16]
-
-            field_list = self.ListFromCsv(headerPostWait)
-            self.param_postWait                     = field_list[0]
-
-
-        if versionIn=='2.4' or versionIn=='2.5':    # Just the order of two sections was changed: trialLEDPanels & postTrigger.
-            field_list = self.ListFromCsv(headerExperiment)
-            self.param_date_time                    = field_list[0]
-            self.param_description                  = field_list[1]
-            self.param_maxTrials                    = field_list[2]
-            self.param_trial                        = field_list[3]
-            
-            field_list = self.ListFromCsv(headerRobots)
-            self.param_nRobots                      = field_list[0]
-            self.param_widthRobot                   = field_list[1]
-            self.param_heightRobot                  = field_list[2]
-            self.param_visibleRobot                 = field_list[3]
-            self.param_paintRobot                   = field_list[4]
-            self.param_scentRobot                   = field_list[5]
-
-            field_list = self.ListFromCsv(headerFlies)
-            self.param_nFlies                       = field_list[0]
-            self.param_typeFlies                    = field_list[1]
-            self.param_genderFlies                  = field_list[2]
-            
-            field_list = self.ListFromCsv(headerTracking)
-            self.param_trackingExclusionzoneEnabled     = field_list[0]
-            if len(field_list)>1:
-                self.param_trackingExclusionzoneX_list      = [field_list[1],] # BUG: X_list is actually fields 1,4,7,etc
-                self.param_trackingExclusionzoneY_list      = [field_list[2],] # BUG: X_list is actually fields 2,5,8,etc
-                self.param_trackingExclusionzoneRadius_list = [field_list[3],] # BUG: X_list is actually fields 3,6,9,etc
-            else:
-                self.param_trackingExclusionzoneX_list      = []
-                self.param_trackingExclusionzoneY_list      = []
-                self.param_trackingExclusionzoneRadius_list = []
-
-            field_list = self.ListFromCsv(headerPreWait1)
-            self.param_preWait1                    = field_list[0]
-            
-            field_list = self.ListFromCsv(headerPreTrigger)
-            self.param_preTriggerEnabled              = field_list[0]
-            self.param_preTriggerFrameidParent        = field_list[1]
-            self.param_preTriggerFrameidChild         = field_list[2]
-            self.param_preTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_preTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_preTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_preTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_preTriggerSpeedRelMin          = field_list[7]
-            self.param_preTriggerSpeedRelMax          = field_list[8]
-            self.param_preTriggerDistanceMin          = field_list[9]
-            self.param_preTriggerDistanceMax          = field_list[10]
-            self.param_preTriggerAngleMin             = field_list[11]
-            self.param_preTriggerAngleMax             = field_list[12]
-            self.param_preTriggerAngleTest            = field_list[13]
-            self.param_preTriggerAngleTestBilateral   = field_list[14]
-            self.param_preTriggerTimeHold             = field_list[15]
-            self.param_preTriggerTimeout              = field_list[16]
-
-            field_list = self.ListFromCsv(headerPreWait2)
-            self.param_preWait2                    = field_list[0]
-
-            field_list = self.ListFromCsv(headerTrialRobot)
-            self.param_trialRobotEnabled             = field_list[0]
-            self.param_trialRobotMovePatternShape        = field_list[1]
-            self.param_trialRobotMovePatternHzPattern    = field_list[2]
-            self.param_trialRobotMovePatternHzPoint      = field_list[3]
-            self.param_trialRobotMovePatternCount        = field_list[4]
-            self.param_trialRobotMovePatternSizeX        = field_list[5]
-            self.param_trialRobotMovePatternSizeY        = field_list[6]
-            self.param_trialRobotMovePatternParam        = field_list[7]
-            self.param_trialRobotMoveRelTracking         = field_list[8]
-            self.param_trialRobotMoveRelOriginPosition   = field_list[9]
-            self.param_trialRobotMoveRelOriginAngle      = field_list[10]
-            self.param_trialRobotMoveRelDistance         = field_list[11]
-            self.param_trialRobotMoveRelAngle            = field_list[12]
-            self.param_trialRobotMoveRelAngleType        = field_list[13]
-            self.param_trialRobotMoveRelSpeed            = field_list[14]
-            self.param_trialRobotMoveRelSpeedType        = field_list[15]
-            self.param_trialRobotMoveRelTolerance        = field_list[16]
-    
-            field_list = self.ListFromCsv(headerTrialLaser)
-            self.param_trialLaserEnabled                 = field_list[0]
-            self.param_trialLaserPatternShape            = field_list[1]
-            self.param_trialLaserPatternHzPattern        = field_list[2]
-            self.param_trialLaserPatternHzPoint          = field_list[3]
-            self.param_trialLaserPatternCount            = field_list[4]
-            self.param_trialLaserPatternSizeX            = field_list[5]
-            self.param_trialLaserPatternSizeY            = field_list[6]
-            self.param_trialLaserPatternParam            = field_list[7]
-            self.param_trialLaserStatefilterLo           = field_list[8]
-            self.param_trialLaserStatefilterHi           = field_list[9]
-            self.param_trialLaserStatefilterCriteria     = field_list[10]
-        
-            field_list = self.ListFromCsv(headerTrialLEDPanels)
-            self.param_trialLEDPanelsEnabled              = field_list[0]
-            self.param_trialLEDPanelsCommand              = field_list[1]
-            self.param_trialLEDPanelsIdPattern            = field_list[2]
-            self.param_trialLEDPanelsFrameid              = field_list[3]
-            self.param_trialLEDPanelsStatefilterLo        = field_list[4]
-            self.param_trialLEDPanelsStatefilterHi        = field_list[5]
-            self.param_trialLEDPanelsStatefilterCriteria  = field_list[6]
-
-            field_list = self.ListFromCsv(headerPostTrigger)
-            self.param_postTriggerEnabled              = field_list[0]
-            self.param_postTriggerFrameidParent        = field_list[1]
-            self.param_postTriggerFrameidChild         = field_list[2]
-            self.param_postTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_postTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_postTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_postTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_postTriggerSpeedRelMin          = field_list[7]
-            self.param_postTriggerSpeedRelMax          = field_list[8]
-            self.param_postTriggerDistanceMin          = field_list[9]
-            self.param_postTriggerDistanceMax          = field_list[10]
-            self.param_postTriggerAngleMin             = field_list[11]
-            self.param_postTriggerAngleMax             = field_list[12]
-            self.param_postTriggerAngleTest            = field_list[13]
-            self.param_postTriggerAngleTestBilateral   = field_list[14]
-            self.param_postTriggerTimeHold             = field_list[15]
-            self.param_postTriggerTimeout              = field_list[16]
-
-            field_list = self.ListFromCsv(headerPostWait)
-            self.param_postWait                     = field_list[0]
-
-
-        if (versionIn=='2.6') or (versionIn=='2.7'):
-            field_list = self.ListFromCsv(headerExperiment)
-            self.param_date_time                    = field_list[0]
-            self.param_description                  = field_list[1]
-            self.param_maxTrials                    = field_list[2]
-            self.param_trial                        = field_list[3]
-            
-            field_list = self.ListFromCsv(headerRobots)
-            self.param_nRobots                      = field_list[0]
-            self.param_widthRobot                   = field_list[1]
-            self.param_heightRobot                  = field_list[2]
-            self.param_visibleRobot                 = field_list[3]
-            self.param_paintRobot                   = field_list[4]
-            self.param_scentRobot                   = field_list[5]
-
-            field_list = self.ListFromCsv(headerFlies)
-            self.param_nFlies                       = field_list[0]
-            self.param_typeFlies                    = field_list[1]
-            self.param_genderFlies                  = field_list[2]
-            
-            field_list = self.ListFromCsv(headerTracking)
-            self.param_trackingExclusionzoneEnabled     = field_list[0]
-            if len(field_list)>1:
-                self.param_trackingExclusionzoneX_list      = [field_list[1],] # BUG: X_list is actually fields 1,4,7,etc
-                self.param_trackingExclusionzoneY_list      = [field_list[2],] # BUG: X_list is actually fields 2,5,8,etc
-                self.param_trackingExclusionzoneRadius_list = [field_list[3],] # BUG: X_list is actually fields 3,6,9,etc
-            else:
-                self.param_trackingExclusionzoneX_list      = []
-                self.param_trackingExclusionzoneY_list      = []
-                self.param_trackingExclusionzoneRadius_list = []
-
+        ### Pre Robot Move
+        if (versionIn in ['2.6', '2.7']):
             field_list = self.ListFromCsv(headerPreRobot)
             self.param_preRobotEnabled             = field_list[0]
             self.param_preRobotMovePatternShape        = field_list[1]
@@ -1988,149 +1484,7 @@ class ConvertCsv:
             self.param_preRobotMoveRelSpeed            = field_list[14]
             self.param_preRobotMoveRelSpeedType        = field_list[15]
             self.param_preRobotMoveRelTolerance        = field_list[16]
-    
-            field_list = self.ListFromCsv(headerPreLaser)
-            self.param_preLaserEnabled                 = field_list[0]
-            self.param_preLaserPatternShape            = field_list[1]
-            self.param_preLaserPatternHzPattern        = field_list[2]
-            self.param_preLaserPatternHzPoint          = field_list[3]
-            self.param_preLaserPatternCount            = field_list[4]
-            self.param_preLaserPatternSizeX            = field_list[5]
-            self.param_preLaserPatternSizeY            = field_list[6]
-            self.param_preLaserPatternParam            = field_list[7]
-            self.param_preLaserStatefilterLo           = field_list[8]
-            self.param_preLaserStatefilterHi           = field_list[9]
-            self.param_preLaserStatefilterCriteria     = field_list[10]
-        
-            field_list = self.ListFromCsv(headerPreLEDPanels)
-            self.param_preLEDPanelsEnabled              = field_list[0]
-            self.param_preLEDPanelsCommand              = field_list[1]
-            self.param_preLEDPanelsIdPattern            = field_list[2]
-            self.param_preLEDPanelsFrameid              = field_list[3]
-            self.param_preLEDPanelsStatefilterLo        = field_list[4]
-            self.param_preLEDPanelsStatefilterHi        = field_list[5]
-            self.param_preLEDPanelsStatefilterCriteria  = field_list[6]
-
-            field_list = self.ListFromCsv(headerPreWait1)
-            self.param_preWait1                    = field_list[0]
-            
-            field_list = self.ListFromCsv(headerPreTrigger)
-            self.param_preTriggerEnabled              = field_list[0]
-            self.param_preTriggerFrameidParent        = field_list[1]
-            self.param_preTriggerFrameidChild         = field_list[2]
-            self.param_preTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_preTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_preTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_preTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_preTriggerSpeedRelMin          = field_list[7]
-            self.param_preTriggerSpeedRelMax          = field_list[8]
-            self.param_preTriggerDistanceMin          = field_list[9]
-            self.param_preTriggerDistanceMax          = field_list[10]
-            self.param_preTriggerAngleMin             = field_list[11]
-            self.param_preTriggerAngleMax             = field_list[12]
-            self.param_preTriggerAngleTest            = field_list[13]
-            self.param_preTriggerAngleTestBilateral   = field_list[14]
-            self.param_preTriggerTimeHold             = field_list[15]
-            self.param_preTriggerTimeout              = field_list[16]
-
-            field_list = self.ListFromCsv(headerPreWait2)
-            self.param_preWait2                    = field_list[0]
-
-            field_list = self.ListFromCsv(headerTrialRobot)
-            self.param_trialRobotEnabled             = field_list[0]
-            self.param_trialRobotMovePatternShape        = field_list[1]
-            self.param_trialRobotMovePatternHzPattern    = field_list[2]
-            self.param_trialRobotMovePatternHzPoint      = field_list[3]
-            self.param_trialRobotMovePatternCount        = field_list[4]
-            self.param_trialRobotMovePatternSizeX        = field_list[5]
-            self.param_trialRobotMovePatternSizeY        = field_list[6]
-            self.param_trialRobotMovePatternParam        = field_list[7]
-            self.param_trialRobotMoveRelTracking         = field_list[8]
-            self.param_trialRobotMoveRelOriginPosition   = field_list[9]
-            self.param_trialRobotMoveRelOriginAngle      = field_list[10]
-            self.param_trialRobotMoveRelDistance         = field_list[11]
-            self.param_trialRobotMoveRelAngle            = field_list[12]
-            self.param_trialRobotMoveRelAngleType        = field_list[13]
-            self.param_trialRobotMoveRelSpeed            = field_list[14]
-            self.param_trialRobotMoveRelSpeedType        = field_list[15]
-            self.param_trialRobotMoveRelTolerance        = field_list[16]
-    
-            field_list = self.ListFromCsv(headerTrialLaser)
-            self.param_trialLaserEnabled                 = field_list[0]
-            self.param_trialLaserPatternShape            = field_list[1]
-            self.param_trialLaserPatternHzPattern        = field_list[2]
-            self.param_trialLaserPatternHzPoint          = field_list[3]
-            self.param_trialLaserPatternCount            = field_list[4]
-            self.param_trialLaserPatternSizeX            = field_list[5]
-            self.param_trialLaserPatternSizeY            = field_list[6]
-            self.param_trialLaserPatternParam            = field_list[7]
-            self.param_trialLaserStatefilterLo           = field_list[8]
-            self.param_trialLaserStatefilterHi           = field_list[9]
-            self.param_trialLaserStatefilterCriteria     = field_list[10]
-        
-            field_list = self.ListFromCsv(headerTrialLEDPanels)
-            self.param_trialLEDPanelsEnabled              = field_list[0]
-            self.param_trialLEDPanelsCommand              = field_list[1]
-            self.param_trialLEDPanelsIdPattern            = field_list[2]
-            self.param_trialLEDPanelsFrameid              = field_list[3]
-            self.param_trialLEDPanelsStatefilterLo        = field_list[4]
-            self.param_trialLEDPanelsStatefilterHi        = field_list[5]
-            self.param_trialLEDPanelsStatefilterCriteria  = field_list[6]
-
-            field_list = self.ListFromCsv(headerPostTrigger)
-            self.param_postTriggerEnabled              = field_list[0]
-            self.param_postTriggerFrameidParent        = field_list[1]
-            self.param_postTriggerFrameidChild         = field_list[2]
-            self.param_postTriggerSpeedAbsParentMin    = field_list[3]
-            self.param_postTriggerSpeedAbsParentMax    = field_list[4]
-            self.param_postTriggerSpeedAbsChildMin     = field_list[5]
-            self.param_postTriggerSpeedAbsChildMax     = field_list[6]
-            self.param_postTriggerSpeedRelMin          = field_list[7]
-            self.param_postTriggerSpeedRelMax          = field_list[8]
-            self.param_postTriggerDistanceMin          = field_list[9]
-            self.param_postTriggerDistanceMax          = field_list[10]
-            self.param_postTriggerAngleMin             = field_list[11]
-            self.param_postTriggerAngleMax             = field_list[12]
-            self.param_postTriggerAngleTest            = field_list[13]
-            self.param_postTriggerAngleTestBilateral   = field_list[14]
-            self.param_postTriggerTimeHold             = field_list[15]
-            self.param_postTriggerTimeout              = field_list[16]
-
-            field_list = self.ListFromCsv(headerPostWait)
-            self.param_postWait                     = field_list[0]
-
-
-        if (versionIn=='2.8'):
-            field_list = self.ListFromCsv(headerExperiment)
-            self.param_date_time                    = field_list[0]
-            self.param_description                  = field_list[1]
-            self.param_maxTrials                    = field_list[2]
-            self.param_trial                        = field_list[3]
-            
-            field_list = self.ListFromCsv(headerRobots)
-            self.param_nRobots                      = field_list[0]
-            self.param_widthRobot                   = field_list[1]
-            self.param_heightRobot                  = field_list[2]
-            self.param_visibleRobot                 = field_list[3]
-            self.param_paintRobot                   = field_list[4]
-            self.param_scentRobot                   = field_list[5]
-
-            field_list = self.ListFromCsv(headerFlies)
-            self.param_nFlies                       = field_list[0]
-            self.param_typeFlies                    = field_list[1]
-            self.param_genderFlies                  = field_list[2]
-            
-            field_list = self.ListFromCsv(headerTracking)
-            self.param_trackingExclusionzoneEnabled     = field_list[0]
-            if len(field_list)>1:
-                self.param_trackingExclusionzoneX_list      = [field_list[1],] # BUG: X_list is actually fields 1,4,7,etc
-                self.param_trackingExclusionzoneY_list      = [field_list[2],] # BUG: X_list is actually fields 2,5,8,etc
-                self.param_trackingExclusionzoneRadius_list = [field_list[3],] # BUG: X_list is actually fields 3,6,9,etc
-            else:
-                self.param_trackingExclusionzoneX_list      = []
-                self.param_trackingExclusionzoneY_list      = []
-                self.param_trackingExclusionzoneRadius_list = []
-
+        if (versionIn in ['2.8']):
             field_list = self.ListFromCsv(headerPreRobot)
             self.param_preRobotEnabled                 = field_list[0]
             self.param_preRobotMovePatternFramePosition= field_list[1]
@@ -2153,6 +1507,34 @@ class ConvertCsv:
             self.param_preRobotMoveRelSpeedType        = field_list[18]
             self.param_preRobotMoveRelTolerance        = field_list[19]
     
+        
+        ### Pre LEDPanels.
+        if (versionIn in ['2.6', '2.7', '2.8']):
+            field_list = self.ListFromCsv(headerPreLEDPanels)
+            self.param_preLEDPanelsEnabled              = field_list[0]
+            self.param_preLEDPanelsCommand              = field_list[1]
+            self.param_preLEDPanelsIdPattern            = field_list[2]
+            self.param_preLEDPanelsFrameid              = field_list[3]
+            self.param_preLEDPanelsStatefilterLo        = field_list[4]
+            self.param_preLEDPanelsStatefilterHi        = field_list[5]
+            self.param_preLEDPanelsStatefilterCriteria  = field_list[6]
+
+            
+        ### Pre Laser.
+        if (versionIn in ['2.6', '2.7']):
+            field_list = self.ListFromCsv(headerPreLaser)
+            self.param_preLaserEnabled                 = field_list[0]
+            self.param_preLaserPatternShape            = field_list[1]
+            self.param_preLaserPatternHzPattern        = field_list[2]
+            self.param_preLaserPatternHzPoint          = field_list[3]
+            self.param_preLaserPatternCount            = field_list[4]
+            self.param_preLaserPatternSizeX            = field_list[5]
+            self.param_preLaserPatternSizeY            = field_list[6]
+            self.param_preLaserPatternParam            = field_list[7]
+            self.param_preLaserStatefilterLo           = field_list[8]
+            self.param_preLaserStatefilterHi           = field_list[9]
+            self.param_preLaserStatefilterCriteria     = field_list[10]
+        if (versionIn in ['2.8']):
             field_list = self.ListFromCsv(headerPreLaser)
             self.param_preLaserEnabled                 = field_list[0]
             self.param_preLaserPatternFramePosition    = field_list[1]
@@ -2168,19 +1550,27 @@ class ConvertCsv:
             self.param_preLaserStatefilterLo           = field_list[11]
             self.param_preLaserStatefilterHi           = field_list[12]
             self.param_preLaserStatefilterCriteria     = field_list[13]
-        
-            field_list = self.ListFromCsv(headerPreLEDPanels)
-            self.param_preLEDPanelsEnabled              = field_list[0]
-            self.param_preLEDPanelsCommand              = field_list[1]
-            self.param_preLEDPanelsIdPattern            = field_list[2]
-            self.param_preLEDPanelsFrameid              = field_list[3]
-            self.param_preLEDPanelsStatefilterLo        = field_list[4]
-            self.param_preLEDPanelsStatefilterHi        = field_list[5]
-            self.param_preLEDPanelsStatefilterCriteria  = field_list[6]
 
-            field_list = self.ListFromCsv(headerPreWait1)
-            self.param_preWait1                    = field_list[0]
-            
+        
+        ### Pre Triggering.
+        if (versionIn in ['2.0', '2.1']):
+            field_list = self.ListFromCsv(headerPreTrigger)
+            self.param_preTriggerEnabled              = field_list[0]
+            self.param_preTriggerFrameidParent        = field_list[1]
+            self.param_preTriggerFrameidChild         = field_list[2]
+            self.param_preTriggerSpeedAbsParentMin    = field_list[3]
+            self.param_preTriggerSpeedAbsParentMax    = field_list[4]
+            self.param_preTriggerSpeedAbsChildMin     = field_list[5]
+            self.param_preTriggerSpeedAbsChildMax     = field_list[6]
+            self.param_preTriggerDistanceMin          = field_list[7]
+            self.param_preTriggerDistanceMax          = field_list[8]
+            self.param_preTriggerAngleMin             = field_list[9]
+            self.param_preTriggerAngleMax             = field_list[10]
+            self.param_preTriggerAngleTest            = field_list[11]
+            self.param_preTriggerAngleTestBilateral   = field_list[12]
+            self.param_preTriggerTimeHold             = field_list[13]
+            self.param_preTriggerTimeout              = field_list[14]
+        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
             field_list = self.ListFromCsv(headerPreTrigger)
             self.param_preTriggerEnabled              = field_list[0]
             self.param_preTriggerFrameidParent        = field_list[1]
@@ -2200,9 +1590,52 @@ class ConvertCsv:
             self.param_preTriggerTimeHold             = field_list[15]
             self.param_preTriggerTimeout              = field_list[16]
 
-            field_list = self.ListFromCsv(headerPreWait2)
-            self.param_preWait2                    = field_list[0]
 
+        ### Pre Wait2.
+        if (versionIn in ['2.4', '2.5', '2.6', '2.7', '2.8']):
+            field_list = self.ListFromCsv(headerPreWait2)
+            self.param_preWait2                         = field_list[0]
+
+        
+        ### Trial Robot Move.
+        if (versionIn in ['2.0']):
+            field_list = self.ListFromCsv(headerTrialRobot)
+            self.param_trialRobotEnabled                 = field_list[0]
+            self.param_trialRobotMovePatternShape        = field_list[1]
+            self.param_trialRobotMovePatternHzPattern    = field_list[2]
+            self.param_trialRobotMovePatternHzPoint      = field_list[3]
+            self.param_trialRobotMovePatternCount        = field_list[4]
+            self.param_trialRobotMovePatternSizeX        = field_list[5]
+            self.param_trialRobotMovePatternSizeY        = field_list[6]
+            self.param_trialRobotMoveRelTracking         = field_list[7]
+            self.param_trialRobotMoveRelOriginPosition   = field_list[8]
+            self.param_trialRobotMoveRelOriginAngle      = field_list[9]
+            self.param_trialRobotMoveRelDistance         = field_list[10]
+            self.param_trialRobotMoveRelAngle            = field_list[11]
+            self.param_trialRobotMoveRelAngleType        = field_list[12]
+            self.param_trialRobotMoveRelSpeed            = field_list[13]
+            self.param_trialRobotMoveRelSpeedType        = field_list[14]
+            self.param_trialRobotMoveRelTolerance        = field_list[15]
+        if (versionIn in ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7']):
+            field_list = self.ListFromCsv(headerTrialRobot)
+            self.param_trialRobotEnabled             = field_list[0]
+            self.param_trialRobotMovePatternShape        = field_list[1]
+            self.param_trialRobotMovePatternHzPattern    = field_list[2]
+            self.param_trialRobotMovePatternHzPoint      = field_list[3]
+            self.param_trialRobotMovePatternCount        = field_list[4]
+            self.param_trialRobotMovePatternSizeX        = field_list[5]
+            self.param_trialRobotMovePatternSizeY        = field_list[6]
+            self.param_trialRobotMovePatternParam        = field_list[7]
+            self.param_trialRobotMoveRelTracking         = field_list[8]
+            self.param_trialRobotMoveRelOriginPosition   = field_list[9]
+            self.param_trialRobotMoveRelOriginAngle      = field_list[10]
+            self.param_trialRobotMoveRelDistance         = field_list[11]
+            self.param_trialRobotMoveRelAngle            = field_list[12]
+            self.param_trialRobotMoveRelAngleType        = field_list[13]
+            self.param_trialRobotMoveRelSpeed            = field_list[14]
+            self.param_trialRobotMoveRelSpeedType        = field_list[15]
+            self.param_trialRobotMoveRelTolerance        = field_list[16]
+        if (versionIn in ['2.8']):
             field_list = self.ListFromCsv(headerTrialRobot)
             self.param_trialRobotEnabled                 = field_list[0]
             self.param_trialRobotMovePatternFramePosition= field_list[1]
@@ -2225,6 +1658,37 @@ class ConvertCsv:
             self.param_trialRobotMoveRelSpeedType        = field_list[18]
             self.param_trialRobotMoveRelTolerance        = field_list[19]
     
+        
+        ### Trial LEDPanels.
+        if (versionIn in ['2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
+            field_list = self.ListFromCsv(headerTrialLEDPanels)
+            self.param_trialLEDPanelsEnabled              = field_list[0]
+            self.param_trialLEDPanelsCommand              = field_list[1]
+            self.param_trialLEDPanelsIdPattern            = field_list[2]
+            self.param_trialLEDPanelsFrameid              = field_list[3]
+            self.param_trialLEDPanelsStatefilterLo        = field_list[4]
+            self.param_trialLEDPanelsStatefilterHi        = field_list[5]
+            self.param_trialLEDPanelsStatefilterCriteria  = field_list[6]
+
+    
+        ### Trial Laser.
+        if (versionIn in ['2.0']):
+            field_list = self.ListFromCsv(headerTrialLaser)
+            self.param_trialLaserEnabled                 = field_list[0]
+        if (versionIn in ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7']):
+            field_list = self.ListFromCsv(headerTrialLaser)
+            self.param_trialLaserEnabled                 = field_list[0]
+            self.param_trialLaserPatternShape            = field_list[1]
+            self.param_trialLaserPatternHzPattern        = field_list[2]
+            self.param_trialLaserPatternHzPoint          = field_list[3]
+            self.param_trialLaserPatternCount            = field_list[4]
+            self.param_trialLaserPatternSizeX            = field_list[5]
+            self.param_trialLaserPatternSizeY            = field_list[6]
+            self.param_trialLaserPatternParam            = field_list[7]
+            self.param_trialLaserStatefilterLo           = field_list[8]
+            self.param_trialLaserStatefilterHi           = field_list[9]
+            self.param_trialLaserStatefilterCriteria     = field_list[10]
+        if (versionIn in ['2.8']):
             field_list = self.ListFromCsv(headerTrialLaser)
             self.param_trialLaserEnabled                 = field_list[0]
             self.param_trialLaserPatternFramePosition    = field_list[1]
@@ -2240,16 +1704,27 @@ class ConvertCsv:
             self.param_trialLaserStatefilterLo           = field_list[11]
             self.param_trialLaserStatefilterHi           = field_list[12]
             self.param_trialLaserStatefilterCriteria     = field_list[13]
-        
-            field_list = self.ListFromCsv(headerTrialLEDPanels)
-            self.param_trialLEDPanelsEnabled              = field_list[0]
-            self.param_trialLEDPanelsCommand              = field_list[1]
-            self.param_trialLEDPanelsIdPattern            = field_list[2]
-            self.param_trialLEDPanelsFrameid              = field_list[3]
-            self.param_trialLEDPanelsStatefilterLo        = field_list[4]
-            self.param_trialLEDPanelsStatefilterHi        = field_list[5]
-            self.param_trialLEDPanelsStatefilterCriteria  = field_list[6]
 
+        
+        ### Post Triggering.
+        if (versionIn in ['2.0', '2.1']):
+            field_list = self.ListFromCsv(headerPostTrigger)
+            self.param_postTriggerEnabled              = field_list[0]
+            self.param_postTriggerFrameidParent        = field_list[1]
+            self.param_postTriggerFrameidChild         = field_list[2]
+            self.param_postTriggerSpeedAbsParentMin    = field_list[3]
+            self.param_postTriggerSpeedAbsParentMax    = field_list[4]
+            self.param_postTriggerSpeedAbsChildMin     = field_list[5]
+            self.param_postTriggerSpeedAbsChildMax     = field_list[6]
+            self.param_postTriggerDistanceMin          = field_list[7]
+            self.param_postTriggerDistanceMax          = field_list[8]
+            self.param_postTriggerAngleMin             = field_list[9]
+            self.param_postTriggerAngleMax             = field_list[10]
+            self.param_postTriggerAngleTest            = field_list[11]
+            self.param_postTriggerAngleTestBilateral   = field_list[12]
+            self.param_postTriggerTimeHold             = field_list[13]
+            self.param_postTriggerTimeout              = field_list[14]
+        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
             field_list = self.ListFromCsv(headerPostTrigger)
             self.param_postTriggerEnabled              = field_list[0]
             self.param_postTriggerFrameidParent        = field_list[1]
@@ -2269,6 +1744,9 @@ class ConvertCsv:
             self.param_postTriggerTimeHold             = field_list[15]
             self.param_postTriggerTimeout              = field_list[16]
 
+
+        ### Post Wait.
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
             field_list = self.ListFromCsv(headerPostWait)
             self.param_postWait                     = field_list[0]
 
@@ -3002,9 +2480,9 @@ class ConvertCsv:
                                                             vaRobot = fieldsIn_list[iFieldIn+5],
                                                             )
                     
-                    if (versionIn == '2.6'):
+                    if (float(versionIn) < 2.7):
                         iFieldIn += 6
-                    elif (versionIn == '2.7') or (versionIn == '2.8'):
+                    else:
                         iFieldIn += 8   # Skip the wings fields.
                         
                     lineOut += lineOutRobot
@@ -3020,9 +2498,9 @@ class ConvertCsv:
                                                             vyFly = fieldsIn_list[iFieldIn+4],
                                                             vaFly = fieldsIn_list[iFieldIn+5],
                                                             )
-                        if (versionIn == '2.6'):
+                        if (float(versionIn) < 2.7):
                             iFieldIn += 6
-                        elif (versionIn == '2.7') or (versionIn == '2.8'):
+                        else:
                             iFieldIn += 8   # Skip the wings fields.
 
                         lineOut += lineOutFly
@@ -3063,21 +2541,8 @@ class ConvertCsv:
                                                             triggered = '1',
                                                             )
                         iFieldIn = 1
-                    elif (versionIn == '2.6'):      # Use 'triggered' value from file.
+                    else:      # Use 'triggered' value from file.
                         lineOutLeft = self.templateStateLeft_V26.format(
-                                                            time = fieldsIn_list[0],
-                                                            triggered = fieldsIn_list[1],
-                                                            )
-                        iFieldIn = 2  # Skip the 'triggered' column.
-                    elif (versionIn == '2.7'):      # Use 'triggered' value from file.
-                        lineOutLeft = self.templateStateLeft_V27.format(
-                                                            time = fieldsIn_list[0],
-                                                            triggered = fieldsIn_list[1],
-                                                            )
-                        iFieldIn = 2  # Skip the 'triggered' column.
-                        
-                    elif (versionIn == '2.8'):      # Use 'triggered' value from file.
-                        lineOutLeft = self.templateStateLeft_V28.format(
                                                             time = fieldsIn_list[0],
                                                             triggered = fieldsIn_list[1],
                                                             )
@@ -3097,9 +2562,7 @@ class ConvertCsv:
                                                             )
                     if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing' columns.
                         iFieldIn += 6
-                    elif (versionIn == '2.7'):
-                        iFieldIn += 8
-                    elif (versionIn == '2.8'):
+                    else:
                         iFieldIn += 8
                         
                     lineOut += lineOutRobot
@@ -3115,11 +2578,9 @@ class ConvertCsv:
                                                             vyFly = fieldsIn_list[iFieldIn+4],
                                                             vaFly = fieldsIn_list[iFieldIn+5],
                                                             )
-                        if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing' columns.
+                        if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing angle' columns.
                             iFieldIn += 6
-                        elif (versionIn == '2.7'):
-                            iFieldIn += 8
-                        elif (versionIn == '2.8'):
+                        else:
                             iFieldIn += 8
                             
                         lineOut += lineOutFly
@@ -3156,37 +2617,23 @@ class ConvertCsv:
                     ############### Fields:  Time,Triggered
                     if (float(versionIn) < 2.6):    # Pre-2.6 had no 'triggered' column.  Use default value.
                         lineOutLeft = self.templateStateLeft_V27.format(
-                                                            time = fieldsIn_list[0],
-                                                            triggered = '1',
-                                                            )
+                                                                        time      = fieldsIn_list[0],
+                                                                        triggered = '1',
+                                                                        )
                         iFieldIn = 1
                     
-                    elif (versionIn == '2.6'):      # Use 'triggered' value from file.
-                        lineOutLeft = self.templateStateLeft_V26.format(
-                                                            time = fieldsIn_list[0],
-                                                            triggered = fieldsIn_list[1],
-                                                            )
-                        iFieldIn = 2
-
-                    elif (versionIn == '2.7'):      # Use 'triggered' value from file.
+                    else:      # Use 'triggered' value from file.
                         lineOutLeft = self.templateStateLeft_V27.format(
-                                                            time = fieldsIn_list[0],
-                                                            triggered = fieldsIn_list[1],
-                                                            )
-                        iFieldIn = 2
-                        
-                    elif (versionIn == '2.8'):      # Use 'triggered' value from file.
-                        lineOutLeft = self.templateStateLeft_V28.format(
-                                                            time = fieldsIn_list[0],
-                                                            triggered = fieldsIn_list[1],
-                                                            )
+                                                                        time      = fieldsIn_list[0],
+                                                                        triggered = fieldsIn_list[1],
+                                                                        )
                         iFieldIn = 2
                         
                     lineOut = lineOutLeft
                     
                     
                     ############### Fields:  Robot state.
-                    if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing' columns.  Use default values.
+                    if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing angle' columns.  Use default values.
                         lineOutRobot = self.templateStateRobot_V27.format(
                                                                 xRobot          = fieldsIn_list[iFieldIn+0],
                                                                 yRobot          = fieldsIn_list[iFieldIn+1],
@@ -3199,21 +2646,8 @@ class ConvertCsv:
                                                                 )
                         iFieldIn += 6
                         
-                    elif (versionIn == '2.7'):      # Use 'wing' values from file.
+                    else:      # Use 'wing angle' values from file.
                         lineOutRobot = self.templateStateRobot_V27.format(
-                                                                xRobot          = fieldsIn_list[iFieldIn+0],
-                                                                yRobot          = fieldsIn_list[iFieldIn+1],
-                                                                aRobot          = fieldsIn_list[iFieldIn+2],
-                                                                vxRobot         = fieldsIn_list[iFieldIn+3],
-                                                                vyRobot         = fieldsIn_list[iFieldIn+4],
-                                                                vaRobot         = fieldsIn_list[iFieldIn+5],
-                                                                aRobotWingLeft  = fieldsIn_list[iFieldIn+6],
-                                                                aRobotWingRight = fieldsIn_list[iFieldIn+7],
-                                                                )
-                        iFieldIn += 8
-                        
-                    elif (versionIn == '2.8'):      # Use 'wing' values from file.
-                        lineOutRobot = self.templateStateRobot_V28.format(
                                                                 xRobot          = fieldsIn_list[iFieldIn+0],
                                                                 yRobot          = fieldsIn_list[iFieldIn+1],
                                                                 aRobot          = fieldsIn_list[iFieldIn+2],
@@ -3233,31 +2667,18 @@ class ConvertCsv:
                     for iFly in range(nFlies): 
                         if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing' columns.  Use default values.
                             lineOutFly = self.templateStateFly_V27.format(
-                                                                xFly = fieldsIn_list[iFieldIn+0],
-                                                                yFly = fieldsIn_list[iFieldIn+1],
-                                                                aFly = fieldsIn_list[iFieldIn+2],
-                                                                vxFly = fieldsIn_list[iFieldIn+3],
-                                                                vyFly = fieldsIn_list[iFieldIn+4],
-                                                                vaFly = fieldsIn_list[iFieldIn+5],
+                                                                xFly        = fieldsIn_list[iFieldIn+0],
+                                                                yFly        = fieldsIn_list[iFieldIn+1],
+                                                                aFly        = fieldsIn_list[iFieldIn+2],
+                                                                vxFly       = fieldsIn_list[iFieldIn+3],
+                                                                vyFly       = fieldsIn_list[iFieldIn+4],
+                                                                vaFly       = fieldsIn_list[iFieldIn+5],
                                                                 aFlyWingLeft  = repr(N.pi),
                                                                 aFlyWingRight = repr(N.pi),
                                                                 )
                             iFieldIn += 6
-                        elif (versionIn == '2.7'):      # Use 'wing' values from file.
+                        else:      # Use 'wing angle' values from file.
                             lineOutFly = self.templateStateFly_V27.format(
-                                                                xFly          = fieldsIn_list[iFieldIn+0],
-                                                                yFly          = fieldsIn_list[iFieldIn+1],
-                                                                aFly          = fieldsIn_list[iFieldIn+2],
-                                                                vxFly         = fieldsIn_list[iFieldIn+3],
-                                                                vyFly         = fieldsIn_list[iFieldIn+4],
-                                                                vaFly         = fieldsIn_list[iFieldIn+5],
-                                                                aFlyWingLeft  = fieldsIn_list[iFieldIn+6],
-                                                                aFlyWingRight = fieldsIn_list[iFieldIn+7],
-                                                                )
-                            iFieldIn += 8
-                                
-                        elif (versionIn == '2.8'):      # Use 'wing' values from file.
-                            lineOutFly = self.templateStateFly_V28.format(
                                                                 xFly          = fieldsIn_list[iFieldIn+0],
                                                                 yFly          = fieldsIn_list[iFieldIn+1],
                                                                 aFly          = fieldsIn_list[iFieldIn+2],
@@ -3311,7 +2732,7 @@ class ConvertCsv:
     #
     def ConvertDirToDir(self, dirInBase, dirOutBase):
         
-        if (self.versionToWrite=='2.2') or (self.versionToWrite=='2.6') or (self.versionToWrite=='2.7') or (self.versionToWrite=='2.8') or (self.versionToWrite=='latest'): 
+        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', 'latest']): 
             dirsIn = glob.glob(dirInBase+'/*')
             for d in dirsIn:
                 dirLeaf = d.split('/')[-1]
@@ -3330,7 +2751,7 @@ class ConvertCsv:
             
 
     def ConvertTree(self, dirIn, dirOut):
-        if (self.versionToWrite=='2.2') or (self.versionToWrite=='2.6') or (self.versionToWrite=='2.7') or (self.versionToWrite=='2.8') or (self.versionToWrite=='latest'): 
+        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', 'latest']): 
             if (dirIn != dirOut):
                 names = os.listdir(dirIn)
             
@@ -3382,7 +2803,7 @@ if __name__ == '__main__':
     
     ###############################################################################################
     ###############################################################################################
-    convert.versionToWrite = '2.8'  # '2.2' or '2.6' or '2.7' or 'latest'
+    convert.versionToWrite = '2.8'  # '2.2' or '2.6' or '2.7' or '2.8' or 'latest'
     dirIn   = '/home/ssafarik/FlylabData_oldversions'
     dirOut  = '/home/ssafarik/FlylabData_converted'
     ###############################################################################################

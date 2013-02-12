@@ -16,7 +16,7 @@ function header = FlylabReadHeader (filename)
                     if strcmpi(values{i},'False'); values{i}=false; end;
                 end
                 if str2num(values{1}{1})<2.8
-                    fprintf('WARNING: This code only reads Flylab .csv version 2.8\n');
+                    fprintf('WARNING: This code only reads Flylab .csv version 2.8\nUse ConvertCsv.py to convert.\n');
                     % Note: to update for newer versions, change the
                     % textscan() lines below to accommodate the changed
                     % header lines.
