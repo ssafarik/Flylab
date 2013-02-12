@@ -106,10 +106,10 @@ class Save:
         #################################################################################
 
         
-        self.headingsVersionFile =  'versionFile\n'
+        self.headerVersionFileTxt = 'versionFile\n'
         self.templateVersionFile =  '{versionFile:s}\n'
         
-        self.headingsExperiment =   'date_time, '\
+        self.headerExperimentTxt =  'date_time, '\
                                     'description, '\
                                     'maxTrials, '\
                                     'trial\n'
@@ -118,7 +118,7 @@ class Save:
                                     '{maxTrials:s}, '\
                                     '{trial:s}\n'
                                   
-        self.headingsRobot =        'nRobots, '\
+        self.headerRobotTxt =       'nRobots, '\
                                     'widthRobot, '\
                                     'heightRobot, '\
                                     'visibleRobot, '\
@@ -131,15 +131,15 @@ class Save:
                                     '{paintRobot:s}, '\
                                     '{scentRobot:s}\n'
                                   
-        self.headingsFlies =        'nFlies, '\
+        self.headerFliesTxt =       'nFlies, '\
                                     'typeFlies, '\
                                     'genderFlies\n'
         self.templateFlies =        '{nFlies:s}, '\
                                     '{typeFlies:s}, '\
                                     '{genderFlies:s}\n'
 
-        self.headingsTrackingA =    'trackingExclusionzoneEnabled'
-        self.headingsTrackingB =    ', trackingExclusionzoneX, '\
+        self.headerTrackingTxtA =   'trackingExclusionzoneEnabled'
+        self.headerTrackingTxtB =   ', trackingExclusionzoneX, '\
                                     'trackingExclusionzoneY, '\
                                     'trackingExclusionzoneRadius'
         self.templateTrackingA =    '{trackingExclusionzoneEnabled:s}'
@@ -147,7 +147,7 @@ class Save:
                                     '{trackingExclusionzoneY:s}, '\
                                     '{trackingExclusionzoneRadius:s}'
 
-        self.headingsPreRobot =     'preRobotEnabled, '\
+        self.headerPreRobotTxt =    'preRobotEnabled, '\
                                     'preRobotMovePatternFramePosition, '\
                                     'preRobotMovePatternFrameAngle, '\
                                     'preRobotMovePatternShape, '\
@@ -190,7 +190,7 @@ class Save:
                                     '{preRobotMoveRelTolerance:s}, ' \
                                     '{preRobotMoveTimeout:s}\n'
                                     
-        self.headingsPreLaser     = 'preLaserEnabled, '\
+        self.headerPreLaserTxt    = 'preLaserEnabled, '\
                                     'preLaserPatternFramePosition, '\
                                     'preLaserPatternFrameAngle, '\
                                     'preLaserPatternShape, '\
@@ -221,7 +221,7 @@ class Save:
                                     '{preLaserStatefilterCriteria:s}, ' \
                                     '{preLaserTimeout:s}\n'
         
-        self.headingsPreLEDPanels = 'preLEDPanelsEnabled, '\
+        self.headerPreLEDPanelsTxt ='preLEDPanelsEnabled, '\
                                     'preLEDPanelsCommand, '\
                                     'preLEDPanelsIdPattern, '\
                                     'preLEDPanelsFrameid, '\
@@ -239,10 +239,10 @@ class Save:
                                     '{preLEDPanelsTimeout:s}\n'
 
         
-        self.headingsPreWait1 =     'preWait1\n'
+        self.headerPreWait1Txt =    'preWait1\n'
         self.templatePreWait1 =     '{preWait1:s}\n'
         
-        self.headingsPreTrigger =   'preTriggerEnabled, '\
+        self.headerPreTriggerTxt =  'preTriggerEnabled, '\
                                     'preTriggerFrameidParent, '\
                                     'preTriggerFrameidChild, '\
                                     'preTriggerSpeedAbsParentMin, '\
@@ -277,11 +277,11 @@ class Save:
                                     '{preTriggerTimeHold:s}, '\
                                     '{preTriggerTimeout:s}\n'
                                     
-        self.headingsPreWait2 =     'preWait2\n'
+        self.headerPreWait2Txt =    'preWait2\n'
         self.templatePreWait2 =     '{preWait2:s}\n'
         
         
-        self.headingsTrialRobot =   'trialRobotEnabled, '\
+        self.headerTrialRobotTxt =  'trialRobotEnabled, '\
                                     'trialRobotMovePatternFramePosition, '\
                                     'trialRobotMovePatternFrameAngle, '\
                                     'trialRobotMovePatternShape, '\
@@ -324,7 +324,7 @@ class Save:
                                     '{trialRobotMoveRelTolerance:s}, ' \
                                     '{trialRobotMoveTimeout:s}\n'
                                     
-        self.headingsTrialLaser =   'trialLaserEnabled, '\
+        self.headerTrialLaserTxt =  'trialLaserEnabled, '\
                                     'trialLaserPatternFramePosition, '\
                                     'trialLaserPatternFrameAngle, '\
                                     'trialLaserPatternShape, '\
@@ -355,7 +355,7 @@ class Save:
                                     '{trialLaserStatefilterCriteria:s}, ' \
                                     '{trialLaserTimeout:s}\n'
         
-        self.headingsTrialLEDPanels = 'trialLEDPanelsEnabled, '\
+        self.headerTrialLEDPanelsTxt = 'trialLEDPanelsEnabled, '\
                                     'trialLEDPanelsCommand, '\
                                     'trialLEDPanelsIdPattern, '\
                                     'trialLEDPanelsFrameid, '\
@@ -372,7 +372,7 @@ class Save:
                                     '{trialLEDPanelsStatefilterCriteria:s}, '\
                                     '{trialLEDPanelsTimeout:s}\n'
         
-        self.headingsPostTrigger =  'postTriggerEnabled, '\
+        self.headerPostTriggerTxt = 'postTriggerEnabled, '\
                                     'postTriggerFrameidParent, '\
                                     'postTriggerFrameidChild, '\
                                     'postTriggerSpeedAbsParentMin, '\
@@ -407,26 +407,21 @@ class Save:
                                     '{postTriggerTimeHold:s}, '\
                                     '{postTriggerTimeout:s}\n'
                                   
-        self.headingsPostWait =     'postWait\n'
+        self.headerPostWaitTxt =    'postWait\n'
         self.templatePostWait =     '{postWait:s}\n'
 
-        # Construct a variable-length heading for the data lines, depending on the number of flies.
-        self.headingsDataLeft   = 'time, triggered'
-        self.headingsDataRobot  = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, aRobotWingLeft, aRobotWingRight'
-        self.headingsDataFly    = ', xFly, yFly, aFly, vxFly, vyFly, vaFly, aFlyWingLeft, aFlyWingRight'
-        self.templateDataLeft   = '{time:0.4f}, {triggered:s}'
-        self.templateDataRobot  = ', {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {aRobotWingLeft:{align}{sign}{width}.{precision}{type}}, {aRobotWingRight:{align}{sign}{width}.{precision}{type}}'
-        self.templateDataFly    = ', {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}, {aFlyWingLeft:{align}{sign}{width}.{precision}{type}}, {aFlyWingRight:{align}{sign}{width}.{precision}{type}}'
+        # Construct a variable-length state line, depending on the number of flies.
+        self.stateLeftTxt       = 'time, triggered'
+        self.stateRobotTxt      = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, aRobotWingLeft, aRobotWingRight'
+        self.stateFlyTxt        = ', xFly, yFly, aFly, vxFly, vyFly, vaFly, aFlyWingLeft, aFlyWingRight'
+        self.templateStateLeft  = '{time:0.4f}, {triggered:s}'
+        self.templateStateRobot = ', {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {aRobotWingLeft:{align}{sign}{width}.{precision}{type}}, {aRobotWingRight:{align}{sign}{width}.{precision}{type}}'
+        self.templateStateFly   = ', {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}, {aFlyWingLeft:{align}{sign}{width}.{precision}{type}}, {aFlyWingRight:{align}{sign}{width}.{precision}{type}}'
 
-        self.headingsData = self.headingsDataLeft + self.headingsDataRobot
+        self.stateTxt = self.stateLeftTxt + self.stateRobotTxt
         for i in range(self.nFlies):
-            self.headingsData += self.headingsDataFly
-        self.headingsData += '\n'
-
-        self.templateData = self.templateDataLeft + self.templateDataRobot
-        for i in range(self.nFlies):
-            self.templateData += self.templateDataFly
-        self.templateData += '\n'
+            self.stateTxt += self.stateFlyTxt
+        self.stateTxt += '\n'
 
 
         rospy.on_shutdown(self.OnShutdown_callback)
@@ -587,16 +582,16 @@ class Save:
                                                             time.localtime(now).tm_min,
                                                             time.localtime(now).tm_sec)
         
-        paramsVersionFile = self.templateVersionFile.format(
+        headerVersionFile = self.templateVersionFile.format(
                                                 versionFile                = self.versionFile
                                                 )
-        paramsExperiment = self.templateExperiment.format(
+        headerExperiment = self.templateExperiment.format(
                                                 date_time                  = str(rospy.Time.now().to_sec()),
                                                 description                = str(experimentparamsReq.experiment.description),
                                                 maxTrials                  = str(experimentparamsReq.experiment.maxTrials),
                                                 trial                      = str(experimentparamsReq.experiment.trial),
                                                 )
-        paramsRobot = self.templateRobot.format(
+        headerRobot = self.templateRobot.format(
                                                 nRobots                    = str(self.nRobots),
                                                 widthRobot                 = str(self.widthRobot),
                                                 heightRobot                = str(self.heightRobot),
@@ -604,26 +599,26 @@ class Save:
                                                 paintRobot                 = str(self.paintRobot),
                                                 scentRobot                 = str(self.scentRobot),
                                                 )
-        paramsFlies = self.templateFlies.format(
+        headerFlies = self.templateFlies.format(
                                                 nFlies                     = str(self.nFlies),
                                                 typeFlies                  = str(self.typeFlies),
                                                 genderFlies                = str(self.genderFlies),
                                                 )
 
-        self.headingsTracking = self.headingsTrackingA
-        paramsTracking = self.templateTrackingA.format(trackingExclusionzoneEnabled = str(experimentparamsReq.tracking.exclusionzones.enabled))
+        self.headerTrackingTxt = self.headerTrackingTxtA
+        headerTracking = self.templateTrackingA.format(trackingExclusionzoneEnabled = str(experimentparamsReq.tracking.exclusionzones.enabled))
         for i in range(len(experimentparamsReq.tracking.exclusionzones.point_list)):
-            self.headingsTracking += self.headingsTrackingB
-            paramsTracking += self.templateTrackingB.format(
+            self.headerTrackingTxt += self.headerTrackingTxtB
+            headerTracking += self.templateTrackingB.format(
                                                 trackingExclusionzoneX       = str(experimentparamsReq.tracking.exclusionzones.point_list[i].x),
                                                 trackingExclusionzoneY       = str(experimentparamsReq.tracking.exclusionzones.point_list[i].y),
                                                 trackingExclusionzoneRadius  = str(experimentparamsReq.tracking.exclusionzones.radius_list[i]),
                                                 )
-        self.headingsTracking += '\n'
-        paramsTracking += '\n'
+        self.headerTrackingTxt += '\n'
+        headerTracking += '\n'
 
         #######################################################################
-        paramsPreRobot = self.templatePreRobot.format(
+        headerPreRobot = self.templatePreRobot.format(
                                                 preRobotEnabled               = str(experimentparamsReq.pre.robot.enabled),
                                                 preRobotMovePatternFramePosition = str(experimentparamsReq.pre.robot.move.pattern.frameidPosition),
                                                 preRobotMovePatternFrameAngle = str(experimentparamsReq.pre.robot.move.pattern.frameidAngle),
@@ -680,7 +675,7 @@ class Save:
             statefilterLo          = ""
             statefilterCriteria    = ""
 
-        paramsPreLaser = self.templatePreLaser.format(
+        headerPreLaser = self.templatePreLaser.format(
                                                 preLaserEnabled               = str(experimentparamsReq.pre.lasertrack.enabled),
                                                 preLaserPatternFramePosition  = patternFramePosition,
                                                 preLaserPatternFrameAngle     = patternFrameAngle,
@@ -699,7 +694,7 @@ class Save:
                                                 )
             
         #######################################################################
-        paramsPreLEDPanels = self.templatePreLEDPanels.format(
+        headerPreLEDPanels = self.templatePreLEDPanels.format(
                                                 preLEDPanelsEnabled             = str(experimentparamsReq.pre.ledpanels.enabled),
                                                 preLEDPanelsCommand             = str(experimentparamsReq.pre.ledpanels.command),
                                                 preLEDPanelsIdPattern           = str(experimentparamsReq.pre.ledpanels.idPattern),
@@ -710,11 +705,11 @@ class Save:
                                                 preLEDPanelsTimeout             = str(experimentparamsReq.pre.ledpanels.timeout),
                                                 )
         #######################################################################
-        paramsPreWait1 = self.templatePreWait1.format(
+        headerPreWait1 = self.templatePreWait1.format(
                                                 preWait1                  = str(experimentparamsReq.pre.wait1),
                                                 )
         #######################################################################
-        paramsPreTrigger = self.templatePreTrigger.format(
+        headerPreTrigger = self.templatePreTrigger.format(
                                                 preTriggerEnabled            = str(experimentparamsReq.pre.trigger.enabled),
                                                 preTriggerFrameidParent      = str(experimentparamsReq.pre.trigger.frameidParent),
                                                 preTriggerFrameidChild       = str(experimentparamsReq.pre.trigger.frameidChild),
@@ -734,13 +729,13 @@ class Save:
                                                 preTriggerTimeout            = str(experimentparamsReq.pre.trigger.timeout),
                                                 )
         #######################################################################
-        paramsPreWait2 = self.templatePreWait2.format(
+        headerPreWait2 = self.templatePreWait2.format(
                                                 preWait2                       = str(experimentparamsReq.pre.wait2),
                                                 )
 
         
         #######################################################################
-        paramsTrialRobot = self.templateTrialRobot.format(
+        headerTrialRobot = self.templateTrialRobot.format(
                                                 trialRobotEnabled               = str(experimentparamsReq.trial.robot.enabled),
                                                 trialRobotMovePatternFramePosition = str(experimentparamsReq.trial.robot.move.pattern.frameidPosition),
                                                 trialRobotMovePatternFrameAngle = str(experimentparamsReq.trial.robot.move.pattern.frameidAngle),
@@ -797,7 +792,7 @@ class Save:
             statefilterLo          = ""
             statefilterCriteria    = ""
 
-        paramsTrialLaser = self.templateTrialLaser.format(
+        headerTrialLaser = self.templateTrialLaser.format(
                                                 trialLaserEnabled               = str(experimentparamsReq.trial.lasertrack.enabled),
                                                 trialLaserPatternFramePosition  = patternFramePosition,
                                                 trialLaserPatternFrameAngle     = patternFrameAngle,
@@ -816,7 +811,7 @@ class Save:
                                                 )
             
         #######################################################################
-        paramsTrialLEDPanels = self.templateTrialLEDPanels.format(
+        headerTrialLEDPanels = self.templateTrialLEDPanels.format(
                                                 trialLEDPanelsEnabled             = str(experimentparamsReq.trial.ledpanels.enabled),
                                                 trialLEDPanelsCommand             = str(experimentparamsReq.trial.ledpanels.command),
                                                 trialLEDPanelsIdPattern           = str(experimentparamsReq.trial.ledpanels.idPattern),
@@ -828,7 +823,7 @@ class Save:
                                                 )
             
         #######################################################################
-        paramsPostTrigger = self.templatePostTrigger.format(
+        headerPostTrigger = self.templatePostTrigger.format(
                                                 postTriggerEnabled            = str(experimentparamsReq.post.trigger.enabled),
                                                 postTriggerFrameidParent      = str(experimentparamsReq.post.trigger.frameidParent),
                                                 postTriggerFrameidChild       = str(experimentparamsReq.post.trigger.frameidChild),
@@ -848,7 +843,7 @@ class Save:
                                                 postTriggerTimeout            = str(experimentparamsReq.post.trigger.timeout),
                                                 )
         #######################################################################
-        paramsPostWait = self.templatePostWait.format(
+        headerPostWait = self.templatePostWait.format(
                                                 postWait                      = str(experimentparamsReq.post.wait),
                                                 )
         #######################################################################
@@ -858,72 +853,72 @@ class Save:
             self.fid = open(self.filename, 'w')
             rospy.logwarn('SA logfile open(%s)' % self.filename)
 
-            self.fid.write(self.headingsVersionFile)
-            self.fid.write(paramsVersionFile)
+            self.fid.write(self.headerVersionFileTxt)
+            self.fid.write(headerVersionFile)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsExperiment)
-            self.fid.write(paramsExperiment)
+            self.fid.write(self.headerExperimentTxt)
+            self.fid.write(headerExperiment)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsRobot)
-            self.fid.write(paramsRobot)
+            self.fid.write(self.headerRobotTxt)
+            self.fid.write(headerRobot)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsFlies)
-            self.fid.write(paramsFlies)
+            self.fid.write(self.headerFliesTxt)
+            self.fid.write(headerFlies)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsTracking)
-            self.fid.write(paramsTracking)
+            self.fid.write(self.headerTrackingTxt)
+            self.fid.write(headerTracking)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsPreRobot)
-            self.fid.write(paramsPreRobot)
+            self.fid.write(self.headerPreRobotTxt)
+            self.fid.write(headerPreRobot)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsPreLaser)
-            self.fid.write(paramsPreLaser)
+            self.fid.write(self.headerPreLaserTxt)
+            self.fid.write(headerPreLaser)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsPreLEDPanels)
-            self.fid.write(paramsPreLEDPanels)
+            self.fid.write(self.headerPreLEDPanelsTxt)
+            self.fid.write(headerPreLEDPanels)
             self.fid.write('\n')
             
-            self.fid.write(self.headingsPreWait1)
-            self.fid.write(paramsPreWait1)
+            self.fid.write(self.headerPreWait1Txt)
+            self.fid.write(headerPreWait1)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsPreTrigger)
-            self.fid.write(paramsPreTrigger)
+            self.fid.write(self.headerPreTriggerTxt)
+            self.fid.write(headerPreTrigger)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsPreWait2)
-            self.fid.write(paramsPreWait2)
+            self.fid.write(self.headerPreWait2Txt)
+            self.fid.write(headerPreWait2)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsTrialRobot)
-            self.fid.write(paramsTrialRobot)
+            self.fid.write(self.headerTrialRobotTxt)
+            self.fid.write(headerTrialRobot)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsTrialLaser)
-            self.fid.write(paramsTrialLaser)
+            self.fid.write(self.headerTrialLaserTxt)
+            self.fid.write(headerTrialLaser)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsTrialLEDPanels)
-            self.fid.write(paramsTrialLEDPanels)
+            self.fid.write(self.headerTrialLEDPanelsTxt)
+            self.fid.write(headerTrialLEDPanels)
             self.fid.write('\n')
             
-            self.fid.write(self.headingsPostTrigger)
-            self.fid.write(paramsPostTrigger)
+            self.fid.write(self.headerPostTriggerTxt)
+            self.fid.write(headerPostTrigger)
             self.fid.write('\n')
 
-            self.fid.write(self.headingsPostWait)
-            self.fid.write(paramsPostWait)
+            self.fid.write(self.headerPostWaitTxt)
+            self.fid.write(headerPostWait)
             self.fid.write('\n')
             
             
-            self.fid.write(self.headingsData)
+            self.fid.write(self.stateTxt)
 
     
     
@@ -1007,8 +1002,8 @@ class Save:
             angleRobot = rpy[2] % (2.0 * N.pi)
 
 
-            # Start putting the data row together.
-            dataLeft = self.templateDataLeft.format(
+            # Start putting the state row together.
+            stateLeft = self.templateStateLeft.format(
                                                     align       = self.format_align,
                                                     sign        = self.format_sign,
                                                     width       = self.format_width,
@@ -1017,7 +1012,7 @@ class Save:
                                                     time        = stamp, #rospy.Time.now().to_sec(), #stateRobot.header.stamp,
                                                     triggered   = str(int(self.triggered)),
                                                     )
-            dataRobot = self.templateDataRobot.format(
+            stateRobot = self.templateStateRobot.format(
                                                     align           = self.format_align,
                                                     sign            = self.format_sign,
                                                     width           = self.format_width,
@@ -1032,7 +1027,7 @@ class Save:
                                                     aRobotWingLeft  = stateRobot.wings.left.angle,
                                                     aRobotWingRight = stateRobot.wings.right.angle,
                                                     )
-            dataRow = dataLeft + dataRobot
+            stateRow = stateLeft + stateRobot
 
 
             # Go through the flies.                
@@ -1047,8 +1042,8 @@ class Save:
                 rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
                 angleFly = rpy[2] % (2.0 * N.pi)
 
-                # Append the fly to the data row.            
-                dataFly = self.templateDataFly.format(
+                # Append the fly to the state row.            
+                stateFly = self.templateStateFly.format(
                                                    align         = self.format_align,
                                                    sign          = self.format_sign,
                                                    width         = self.format_width,
@@ -1063,15 +1058,15 @@ class Save:
                                                    aFlyWingLeft  = stateFly.wings.left.angle,
                                                    aFlyWingRight = stateFly.wings.right.angle,
                                                    )
-                dataRow += dataFly
+                stateRow += stateFly
                 
-            dataRow += '\n'
+            stateRow += '\n'
             
 
-            # Write the robot & fly data to the file.
+            # Write the robot & fly state to the file.
             with self.lockArenastate:
                 if (not self.fid.closed):
-                    self.fid.write(dataRow)
+                    self.fid.write(stateRow)
 
     
         if (self.initialized) and (self.bSavingVideo) and (self.image is not None):

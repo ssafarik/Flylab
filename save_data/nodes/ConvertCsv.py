@@ -36,7 +36,7 @@ class ConvertCsv:
         #######################################################################
         # Structure of the Header lines.
         #######################################################################
-        self.headingsExperiment_V22 =  'date_time, '\
+        self.headerExperimentTxt_V22 =  'date_time, '\
                                         'description, '\
                                         'maxTrials, '\
                                         'trial\n'
@@ -45,7 +45,7 @@ class ConvertCsv:
                                         '{maxTrials:s}, '\
                                         '{trial:s}\n'
                                   
-        self.headingsRobot_V22 =       'nRobots, '\
+        self.headerRobotTxt_V22 =       'nRobots, '\
                                         'widthRobot, '\
                                         'heightRobot, '\
                                         'visibleRobot, '\
@@ -58,15 +58,15 @@ class ConvertCsv:
                                         '{paintRobot:s}, '\
                                         '{scentRobot:s}\n'
                                   
-        self.headingsFlies_V22 =        'nFlies, '\
+        self.headerFliesTxt_V22 =        'nFlies, '\
                                         'typeFlies, '\
                                         'genderFlies\n'
         self.templateFlies_V22 =        '{nFlies:s}, '\
                                         '{typeFlies:s}, '\
                                         '{genderFlies:s}\n'
 
-        self.headingsTrackingA_V22 =    'trackingExclusionzoneEnabled'
-        self.headingsTrackingB_V22 =    ', trackingExclusionzoneX, '\
+        self.headerTrackingTxtA_V22 =    'trackingExclusionzoneEnabled'
+        self.headerTrackingTxtB_V22 =    ', trackingExclusionzoneX, '\
                                         'trackingExclusionzoneY, '\
                                         'trackingExclusionzoneRadius'
         self.templateTrackingA_V22 =    '{trackingExclusionzoneEnabled:s}'
@@ -74,10 +74,10 @@ class ConvertCsv:
                                         '{trackingExclusionzoneY:s}, '\
                                         '{trackingExclusionzoneRadius:s}'
 
-        self.headingsPreWait1_V22 =     'waitEntry\n'
+        self.headerPreWait1Txt_V22 =     'waitEntry\n'
         self.templatePreWait1_V22 =     '{preWait1:s}\n'
         
-        self.headingsPreTrigger_V22 =   'trigger1Enabled, '\
+        self.headerPreTriggerTxt_V22 =   'trigger1Enabled, '\
                                         'trigger1FrameidParent, '\
                                         'trigger1FrameidChild, '\
                                         'trigger1SpeedAbsParentMin, '\
@@ -112,7 +112,7 @@ class ConvertCsv:
                                         '{preTriggerTimeHold:s}, '\
                                         '{preTriggerTimeout:s}\n'
                                     
-        self.headingsTrialRobot_V22 =   'moverobotEnabled, '\
+        self.headerTrialRobotTxt_V22 =   'moverobotEnabled, '\
                                         'moverobotPatternShape, '\
                                         'moverobotPatternHzPattern, '\
                                         'moverobotPatternHzPoint, '\
@@ -147,7 +147,7 @@ class ConvertCsv:
                                         '{trialRobotMoveRelSpeedType:s}, '\
                                         '{trialRobotMoveRelTolerance:s}\n'
                                     
-        self.headingsTrialLaser_V22 =   'laserEnabled, '\
+        self.headerTrialLaserTxt_V22 =   'laserEnabled, '\
                                         'laserPatternShape, '\
                                         'laserPatternHzPattern, '\
                                         'laserPatternHzPoint, '\
@@ -170,7 +170,7 @@ class ConvertCsv:
                                         '\"{trialLaserStatefilterHi:s}\", '\
                                         '{trialLaserStatefilterCriteria:s}\n'
         
-        self.headingsPostTrigger_V22 =  'trigger2Enabled, '\
+        self.headerPostTriggerTxt_V22 =  'trigger2Enabled, '\
                                         'trigger2FrameidParent, '\
                                         'trigger2FrameidChild, '\
                                         'trigger2SpeedAbsParentMin, '\
@@ -205,38 +205,38 @@ class ConvertCsv:
                                         '{postTriggerTimeHold:s}, '\
                                         '{postTriggerTimeout:s}\n'
                                   
-        self.headingsPostWait_V22 =    'waitExit\n'
+        self.headerPostWaitTxt_V22 =    'waitExit\n'
         self.templatePostWait_V22 =    '{postWait:s}\n'
 
         ### The state lines.
-        self.headingsStateLeft_Vpre26    = 'time'
+        self.stateLeftTxt_Vpre26    = 'time'
+        self.stateRobotTxt_Vpre26   = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot'
+        self.stateFlyTxt_Vpre26     = ', xFly, yFly, aFly, vxFly, vyFly, vaFly'
         self.templateStateLeft_Vpre26    = '{time:s}'
-        self.headingsStateRobot_Vpre26   = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot'
         self.templateStateRobot_Vpre26   = ', {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}'
-        self.headingsStateFly_Vpre26     = ', xFly, yFly, aFly, vxFly, vyFly, vaFly'
         self.templateStateFly_Vpre26     = ', {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}'
 
 
 
         #######################################################################
-        self.headingsVersionFile_V26 = 'versionFile\n'
+        self.headerVersionFileTxt_V26 = 'versionFile\n'
         self.templateVersionFile_V26 = '{versionFile:s}\n'
         
-        self.headingsExperiment_V26 =  self.headingsExperiment_V22
+        self.headerExperimentTxt_V26 =  self.headerExperimentTxt_V22
         self.templateExperiment_V26 =  self.templateExperiment_V22
                                   
-        self.headingsRobot_V26 =       self.headingsRobot_V22
+        self.headerRobotTxt_V26 =       self.headerRobotTxt_V22
         self.templateRobots_V26 =       self.templateRobots_V22
                                   
-        self.headingsFlies_V26 =       self.headingsFlies_V22
+        self.headerFliesTxt_V26 =       self.headerFliesTxt_V22
         self.templateFlies_V26 =       self.templateFlies_V22
 
-        self.headingsTrackingA_V26 =   self.headingsTrackingA_V22
-        self.headingsTrackingB_V26 =   self.headingsTrackingB_V22
+        self.headerTrackingTxtA_V26 =   self.headerTrackingTxtA_V22
+        self.headerTrackingTxtB_V26 =   self.headerTrackingTxtB_V22
         self.templateTrackingA_V26 =   self.templateTrackingA_V22
         self.templateTrackingB_V26 =   self.templateTrackingB_V22
 
-        self.headingsPreRobot_V26 =     'preRobotEnabled, '\
+        self.headerPreRobotTxt_V26 =     'preRobotEnabled, '\
                                         'preRobotMovePatternShape, '\
                                         'preRobotMovePatternHzPattern, '\
                                         'preRobotMovePatternHzPoint, '\
@@ -271,7 +271,7 @@ class ConvertCsv:
                                         '{preRobotMoveRelSpeedType:s}, '\
                                         '{preRobotMoveRelTolerance:s}\n'
                                     
-        self.headingsPreLaser_V26 =     'preLaserEnabled, '\
+        self.headerPreLaserTxt_V26 =     'preLaserEnabled, '\
                                         'preLaserPatternShape, '\
                                         'preLaserPatternHzPattern, '\
                                         'preLaserPatternHzPoint, '\
@@ -294,7 +294,7 @@ class ConvertCsv:
                                         '\"{preLaserStatefilterHi:s}\", '\
                                         '{preLaserStatefilterCriteria:s}\n'
         
-        self.headingsPreLEDPanels_V26 = 'preLEDPanelsEnabled, '\
+        self.headerPreLEDPanelsTxt_V26 = 'preLEDPanelsEnabled, '\
                                         'preLEDPanelsCommand, '\
                                         'preLEDPanelsIdPattern, '\
                                         'preLEDPanelsFrameid, '\
@@ -309,10 +309,10 @@ class ConvertCsv:
                                         '{preLEDPanelsStatefilterHi:s}, '\
                                         '{preLEDPanelsStatefilterCriteria:s}\n'
 
-        self.headingsPreWait1_V26 =     'preWait1\n'
+        self.headerPreWait1Txt_V26 =     'preWait1\n'
         self.templatePreWait1_V26 =     '{preWait1:s}\n'
         
-        self.headingsPreTrigger_V26 =   'preTriggerEnabled, '\
+        self.headerPreTriggerTxt_V26 =   'preTriggerEnabled, '\
                                         'preTriggerFrameidParent, '\
                                         'preTriggerFrameidChild, '\
                                         'preTriggerSpeedAbsParentMin, '\
@@ -347,10 +347,10 @@ class ConvertCsv:
                                         '{preTriggerTimeHold:s}, '\
                                         '{preTriggerTimeout:s}\n'
                                     
-        self.headingsPreWait2_V26 =    'preWait2\n'
+        self.headerPreWait2Txt_V26 =    'preWait2\n'
         self.templatePreWait2_V26 =    '{preWait2:s}\n'
         
-        self.headingsTrialRobot_V26 =   'trialRobotEnabled, '\
+        self.headerTrialRobotTxt_V26 =   'trialRobotEnabled, '\
                                         'trialRobotMovePatternShape, '\
                                         'trialRobotMovePatternHzPattern, '\
                                         'trialRobotMovePatternHzPoint, '\
@@ -385,7 +385,7 @@ class ConvertCsv:
                                         '{trialRobotMoveRelSpeedType:s}, '\
                                         '{trialRobotMoveRelTolerance:s}\n'
                                     
-        self.headingsTrialLaser_V26 =   'trialLaserEnabled, '\
+        self.headerTrialLaserTxt_V26 =   'trialLaserEnabled, '\
                                         'trialLaserPatternShape, '\
                                         'trialLaserPatternHzPattern, '\
                                         'trialLaserPatternHzPoint, '\
@@ -408,7 +408,7 @@ class ConvertCsv:
                                         '\"{trialLaserStatefilterHi:s}\", '\
                                         '{trialLaserStatefilterCriteria:s}\n'
         
-        self.headingsTrialLEDPanels_V26 = 'trialLEDPanelsEnabled, '\
+        self.headerTrialLEDPanelsTxt_V26 = 'trialLEDPanelsEnabled, '\
                                         'trialLEDPanelsCommand, '\
                                         'trialLEDPanelsIdPattern, '\
                                         'trialLEDPanelsFrameid, '\
@@ -423,7 +423,7 @@ class ConvertCsv:
                                         '{trialLEDPanelsStatefilterHi:s}, '\
                                         '{trialLEDPanelsStatefilterCriteria:s}\n'
         
-        self.headingsPostTrigger_V26 =  'postTriggerEnabled, '\
+        self.headerPostTriggerTxt_V26 =  'postTriggerEnabled, '\
                                         'postTriggerFrameidParent, '\
                                         'postTriggerFrameidChild, '\
                                         'postTriggerSpeedAbsParentMin, '\
@@ -458,81 +458,81 @@ class ConvertCsv:
                                         '{postTriggerTimeHold:s}, '\
                                         '{postTriggerTimeout:s}\n'
                                   
-        self.headingsPostWait_V26 =     'postWait\n'
+        self.headerPostWaitTxt_V26 =     'postWait\n'
         self.templatePostWait_V26 =     '{postWait:s}\n'
 
 
         # The state lines.
-        self.headingsStateLeft_V26       = 'time, triggered'
-        self.templateStateLeft_V26       = '{time:s}, {triggered:s}'
-        self.headingsStateRobot_V26      = self.headingsStateRobot_Vpre26
-        self.templateStateRobot_V26      = self.templateStateRobot_Vpre26
-        self.headingsStateFly_V26        = self.headingsStateFly_Vpre26
-        self.templateStateFly_V26        = self.templateStateFly_Vpre26
+        self.stateLeftTxt_V26           = 'time, triggered'
+        self.stateRobotTxt_V26          = self.stateRobotTxt_Vpre26
+        self.stateFlyTxt_V26            = self.stateFlyTxt_Vpre26
+        self.templateStateLeft_V26      = '{time:s}, {triggered:s}'
+        self.templateStateRobot_V26     = self.templateStateRobot_Vpre26
+        self.templateStateFly_V26       = self.templateStateFly_Vpre26
 
        
        
         #######################################################################
-        self.headingsVersionFile_V27 = self.headingsVersionFile_V26
+        self.headerVersionFileTxt_V27 = self.headerVersionFileTxt_V26
         self.templateVersionFile_V27 = self.templateVersionFile_V26
-        self.headingsExperiment_V27 =  self.headingsExperiment_V26
+        self.headerExperimentTxt_V27 =  self.headerExperimentTxt_V26
         self.templateExperiment_V27 =  self.templateExperiment_V26
-        self.headingsRobot_V27 =       self.headingsRobot_V26
+        self.headerRobotTxt_V27 =       self.headerRobotTxt_V26
         self.templateRobots_V27 =      self.templateRobots_V26
-        self.headingsFlies_V27 =       self.headingsFlies_V26
+        self.headerFliesTxt_V27 =       self.headerFliesTxt_V26
         self.templateFlies_V27 =       self.templateFlies_V26
-        self.headingsTrackingA_V27 =   self.headingsTrackingA_V26
-        self.headingsTrackingB_V27 =   self.headingsTrackingB_V26
+        self.headerTrackingTxtA_V27 =   self.headerTrackingTxtA_V26
+        self.headerTrackingTxtB_V27 =   self.headerTrackingTxtB_V26
         self.templateTrackingA_V27 =   self.templateTrackingA_V26
         self.templateTrackingB_V27 =   self.templateTrackingB_V26
-        self.headingsPreRobot_V27 =    self.headingsPreRobot_V26
+        self.headerPreRobotTxt_V27 =    self.headerPreRobotTxt_V26
         self.templatePreRobot_V27 =    self.templatePreRobot_V26
-        self.headingsPreLaser_V27 =    self.headingsPreLaser_V26
+        self.headerPreLaserTxt_V27 =    self.headerPreLaserTxt_V26
         self.templatePreLaser_V27 =    self.templatePreLaser_V26
-        self.headingsPreLEDPanels_V27 =self.headingsPreLEDPanels_V26
+        self.headerPreLEDPanelsTxt_V27 =self.headerPreLEDPanelsTxt_V26
         self.templatePreLEDPanels_V27 =self.templatePreLEDPanels_V26
-        self.headingsPreWait1_V27 =    self.headingsPreWait1_V26
+        self.headerPreWait1Txt_V27 =    self.headerPreWait1Txt_V26
         self.templatePreWait1_V27 =    self.templatePreWait1_V26
-        self.headingsPreTrigger_V27 =  self.headingsPreTrigger_V26
+        self.headerPreTriggerTxt_V27 =  self.headerPreTriggerTxt_V26
         self.templatePreTrigger_V27 =  self.templatePreTrigger_V26
-        self.headingsPreWait2_V27 =    self.headingsPreWait2_V26
+        self.headerPreWait2Txt_V27 =    self.headerPreWait2Txt_V26
         self.templatePreWait2_V27 =    self.templatePreWait2_V26
-        self.headingsTrialRobot_V27 =  self.headingsTrialRobot_V26
+        self.headerTrialRobotTxt_V27 =  self.headerTrialRobotTxt_V26
         self.templateTrialRobot_V27 =  self.templateTrialRobot_V26
-        self.headingsTrialLaser_V27 =  self.headingsTrialLaser_V26
+        self.headerTrialLaserTxt_V27 =  self.headerTrialLaserTxt_V26
         self.templateTrialLaser_V27 =  self.templateTrialLaser_V26
-        self.headingsTrialLEDPanels_V27 = self.headingsTrialLEDPanels_V26
+        self.headerTrialLEDPanelsTxt_V27 = self.headerTrialLEDPanelsTxt_V26
         self.templateTrialLEDPanels_V27 = self.templateTrialLEDPanels_V26
-        self.headingsPostTrigger_V27 = self.headingsPostTrigger_V26
+        self.headerPostTriggerTxt_V27 = self.headerPostTriggerTxt_V26
         self.templatePostTrigger_V27 = self.templatePostTrigger_V26
-        self.headingsPostWait_V27 =    self.headingsPostWait_V26
+        self.headerPostWaitTxt_V27 =    self.headerPostWaitTxt_V26
         self.templatePostWait_V27 =    self.templatePostWait_V26
 
         
         # The state lines.
-        self.headingsStateLeft_V27       = self.headingsStateLeft_V26
-        self.templateStateLeft_V27       = self.templateStateLeft_V26
-        self.headingsStateRobot_V27      = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, aRobotWingLeft, aRobotWingRight'
-        self.templateStateRobot_V27      = ', {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}, {aRobotWingLeft:s}, {aRobotWingRight:s}'
-        self.headingsStateFly_V27        = ', xFly, yFly, aFly, vxFly, vyFly, vaFly, aFlyWingLeft, aFlyWingRight'
-        self.templateStateFly_V27        = ', {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}, {aFlyWingLeft:s}, {aFlyWingRight:s}'
+        self.stateLeftTxt_V27           = self.stateLeftTxt_V26
+        self.stateRobotTxt_V27          = ', xRobot, yRobot, aRobot, vxRobot, vyRobot, vaRobot, aRobotWingLeft, aRobotWingRight'
+        self.stateFlyTxt_V27            = ', xFly, yFly, aFly, vxFly, vyFly, vaFly, aFlyWingLeft, aFlyWingRight'
+        self.templateStateLeft_V27      = self.templateStateLeft_V26
+        self.templateStateRobot_V27     = ', {xRobot:s}, {yRobot:s}, {aRobot:s}, {vxRobot:s}, {vyRobot:s}, {vaRobot:s}, {aRobotWingLeft:s}, {aRobotWingRight:s}'
+        self.templateStateFly_V27       = ', {xFly:s}, {yFly:s}, {aFly:s}, {vxFly:s}, {vyFly:s}, {vaFly:s}, {aFlyWingLeft:s}, {aFlyWingRight:s}'
         
         
         
         #######################################################################
-        self.headingsVersionFile_V28 = self.headingsVersionFile_V27
+        self.headerVersionFileTxt_V28 = self.headerVersionFileTxt_V27
         self.templateVersionFile_V28 = self.templateVersionFile_V27
-        self.headingsExperiment_V28 =  self.headingsExperiment_V27
+        self.headerExperimentTxt_V28 =  self.headerExperimentTxt_V27
         self.templateExperiment_V28 =  self.templateExperiment_V27
-        self.headingsRobot_V28 =       self.headingsRobot_V27
+        self.headerRobotTxt_V28 =       self.headerRobotTxt_V27
         self.templateRobots_V28 =      self.templateRobots_V27
-        self.headingsFlies_V28 =       self.headingsFlies_V27
+        self.headerFliesTxt_V28 =       self.headerFliesTxt_V27
         self.templateFlies_V28 =       self.templateFlies_V27
-        self.headingsTrackingA_V28 =   self.headingsTrackingA_V27
-        self.headingsTrackingB_V28 =   self.headingsTrackingB_V27
+        self.headerTrackingTxtA_V28 =   self.headerTrackingTxtA_V27
+        self.headerTrackingTxtB_V28 =   self.headerTrackingTxtB_V27
         self.templateTrackingA_V28 =   self.templateTrackingA_V27
         self.templateTrackingB_V28 =   self.templateTrackingB_V27
-        self.headingsPreRobot_V28 =     'preRobotEnabled, '\
+        self.headerPreRobotTxt_V28 =     'preRobotEnabled, '\
                                         'preRobotMovePatternFramePosition, '\
                                         'preRobotMovePatternFrameAngle, '\
                                         'preRobotMovePatternShape, '\
@@ -573,7 +573,7 @@ class ConvertCsv:
                                         '{preRobotMoveRelSpeedType:s}, '\
                                         '{preRobotMoveRelTolerance:s}\n'
                                     
-        self.headingsPreLaser_V28 =     'preLaserEnabled, '\
+        self.headerPreLaserTxt_V28 =     'preLaserEnabled, '\
                                         'preLaserPatternFramePosition, '\
                                         'preLaserPatternFrameAngle, '\
                                         'preLaserPatternShape, '\
@@ -601,15 +601,15 @@ class ConvertCsv:
                                         '\"{preLaserStatefilterLo:s}\", '\
                                         '\"{preLaserStatefilterHi:s}\", '\
                                         '{preLaserStatefilterCriteria:s}\n'
-        self.headingsPreLEDPanels_V28 =self.headingsPreLEDPanels_V27
+        self.headerPreLEDPanelsTxt_V28 =self.headerPreLEDPanelsTxt_V27
         self.templatePreLEDPanels_V28 =self.templatePreLEDPanels_V27
-        self.headingsPreWait1_V28 =    self.headingsPreWait1_V27
+        self.headerPreWait1Txt_V28 =    self.headerPreWait1Txt_V27
         self.templatePreWait1_V28 =    self.templatePreWait1_V27
-        self.headingsPreTrigger_V28 =  self.headingsPreTrigger_V27
+        self.headerPreTriggerTxt_V28 =  self.headerPreTriggerTxt_V27
         self.templatePreTrigger_V28 =  self.templatePreTrigger_V27
-        self.headingsPreWait2_V28 =    self.headingsPreWait2_V27
+        self.headerPreWait2Txt_V28 =    self.headerPreWait2Txt_V27
         self.templatePreWait2_V28 =    self.templatePreWait2_V27
-        self.headingsTrialRobot_V28 =   'trialRobotEnabled, '\
+        self.headerTrialRobotTxt_V28 =   'trialRobotEnabled, '\
                                         'trialRobotMovePatternFramePosition, '\
                                         'trialRobotMovePatternFrameAngle, '\
                                         'trialRobotMovePatternShape, '\
@@ -650,7 +650,7 @@ class ConvertCsv:
                                         '{trialRobotMoveRelSpeedType:s}, '\
                                         '{trialRobotMoveRelTolerance:s}\n'
                                     
-        self.headingsTrialLaser_V28 =   'trialLaserEnabled, '\
+        self.headerTrialLaserTxt_V28 =   'trialLaserEnabled, '\
                                         'trialLaserPatternFramePosition, '\
                                         'trialLaserPatternFrameAngle, '\
                                         'trialLaserPatternShape, '\
@@ -678,21 +678,21 @@ class ConvertCsv:
                                         '\"{trialLaserStatefilterLo:s}\", '\
                                         '\"{trialLaserStatefilterHi:s}\", '\
                                         '{trialLaserStatefilterCriteria:s}\n'
-        self.headingsTrialLEDPanels_V28 = self.headingsTrialLEDPanels_V27
+        self.headerTrialLEDPanelsTxt_V28 = self.headerTrialLEDPanelsTxt_V27
         self.templateTrialLEDPanels_V28 = self.templateTrialLEDPanels_V27
-        self.headingsPostTrigger_V28 = self.headingsPostTrigger_V27
+        self.headerPostTriggerTxt_V28 = self.headerPostTriggerTxt_V27
         self.templatePostTrigger_V28 = self.templatePostTrigger_V27
-        self.headingsPostWait_V28 =    self.headingsPostWait_V27
+        self.headerPostWaitTxt_V28 =    self.headerPostWaitTxt_V27
         self.templatePostWait_V28 =    self.templatePostWait_V27
 
         
         # The state lines.
-        self.headingsStateLeft_V28       = self.headingsStateLeft_V27
-        self.templateStateLeft_V28       = self.templateStateLeft_V27
-        self.headingsStateRobot_V28      = self.headingsStateRobot_V27
-        self.templateStateRobot_V28      = self.templateStateRobot_V27
-        self.headingsStateFly_V28        = self.headingsStateFly_V27
-        self.templateStateFly_V28        = self.templateStateFly_V27
+        self.stateLeftTxt_V28           = self.stateLeftTxt_V27
+        self.stateRobotTxt_V28          = self.stateRobotTxt_V27
+        self.stateFlyTxt_V28            = self.stateFlyTxt_V27
+        self.templateStateLeft_V28      = self.templateStateLeft_V27
+        self.templateStateRobot_V28     = self.templateStateRobot_V27
+        self.templateStateFly_V28       = self.templateStateFly_V27
         
         #######################################################################
         
@@ -732,7 +732,7 @@ class ConvertCsv:
             lineHeaderState = fid.readline()
             
             
-            # Determine the version from which headings are on which lines, or from the version number.
+            # Determine the version from which header are on which lines, or from the version number.
             field = line[0].split(',')[0].strip(' \n')
             if field=='versionFile':
                 field = line[1].split(',')[0].strip(' \n')
@@ -1770,13 +1770,13 @@ class ConvertCsv:
 
 
     def WriteHeader_V22(self, filename):
-        paramsExperiment_V22 = self.templateExperiment_V22.format(
+        headerExperiment_V22 = self.templateExperiment_V22.format(
                                                 date_time                  = self.param_date_time,
                                                 description                = self.param_description,
                                                 maxTrials                  = self.param_maxTrials,
                                                 trial                      = self.param_trial,
                                                 )
-        paramsRobot_V22 = self.templateRobots_V22.format(
+        headerRobot_V22 = self.templateRobots_V22.format(
                                                 nRobots                    = self.param_nRobots,
                                                 widthRobot                 = self.param_widthRobot,
                                                 heightRobot                = self.param_heightRobot,
@@ -1784,31 +1784,31 @@ class ConvertCsv:
                                                 paintRobot                 = self.param_paintRobot,
                                                 scentRobot                 = self.param_scentRobot,
                                                 )
-        paramsFlies_V22 = self.templateFlies_V22.format(
+        headerFlies_V22 = self.templateFlies_V22.format(
                                                 nFlies                     = self.param_nFlies,
                                                 typeFlies                  = self.param_typeFlies,
                                                 genderFlies                = self.param_genderFlies,
                                                 )
 
-        self.headingsTracking_V22 = self.headingsTrackingA_V22
-        paramsTracking_V22 = self.templateTrackingA_V22.format(
+        self.headerTrackingTxt_V22 = self.headerTrackingTxtA_V22
+        headerTracking_V22 = self.templateTrackingA_V22.format(
                                                        trackingExclusionzoneEnabled = self.param_trackingExclusionzoneEnabled
                                                        )
         for i in range(len(self.param_trackingExclusionzoneX_list)):
-            self.headingsTracking_V22 += self.headingsTrackingB_V22
-            paramsTracking_V22 += self.templateTrackingB_V22.format(
+            self.headerTrackingTxt_V22 += self.headerTrackingTxtB_V22
+            headerTracking_V22 += self.templateTrackingB_V22.format(
                                                 trackingExclusionzoneX       = str(self.param_trackingExclusionzoneX_list[i]),
                                                 trackingExclusionzoneY       = str(self.param_trackingExclusionzoneY_list[i]),
                                                 trackingExclusionzoneRadius  = str(self.param_trackingExclusionzoneRadius_list[i]),
                                                 )
-        self.headingsTracking_V22 += '\n'
-        paramsTracking_V22 += '\n'
+        self.headerTrackingTxt_V22 += '\n'
+        headerTracking_V22 += '\n'
 
         #######################################################################
-        paramsPreWait1_V22 = self.templatePreWait1_V22.format(
+        headerPreWait1_V22 = self.templatePreWait1_V22.format(
                                                 preWait1                  = self.param_preWait1,
                                                 )
-        paramsPreTrigger_V22 = self.templatePreTrigger_V22.format(
+        headerPreTrigger_V22 = self.templatePreTrigger_V22.format(
                                                 preTriggerEnabled            = self.param_preTriggerEnabled,
                                                 preTriggerFrameidParent      = self.param_preTriggerFrameidParent,
                                                 preTriggerFrameidChild       = self.param_preTriggerFrameidChild,
@@ -1828,7 +1828,7 @@ class ConvertCsv:
                                                 preTriggerTimeout            = self.param_preTriggerTimeout,
                                                 )
         #######################################################################
-        paramsTrialRobot_V22 = self.templateTrialRobot_V22.format(
+        headerTrialRobot_V22 = self.templateTrialRobot_V22.format(
                                                 trialRobotEnabled               = self.param_trialRobotEnabled,
                                                 trialRobotMovePatternShape      = self.param_trialRobotMovePatternShape,
                                                 trialRobotMovePatternHzPattern  = self.param_trialRobotMovePatternHzPattern,
@@ -1848,7 +1848,7 @@ class ConvertCsv:
                                                 trialRobotMoveRelTolerance      = self.param_trialRobotMoveRelTolerance,
                                                 )
         
-        paramsTrialLaser_V22 = self.templateTrialLaser_V22.format(
+        headerTrialLaser_V22 = self.templateTrialLaser_V22.format(
                                                 trialLaserEnabled               = self.param_trialLaserEnabled,
                                                 trialLaserPatternShape          = self.param_trialLaserPatternShape,
                                                 trialLaserPatternHzPattern      = self.param_trialLaserPatternHzPattern,
@@ -1863,7 +1863,7 @@ class ConvertCsv:
                                                 )
             
         #######################################################################
-        paramsPostTrigger_V22 = self.templatePostTrigger_V22.format(
+        headerPostTrigger_V22 = self.templatePostTrigger_V22.format(
                                                 postTriggerEnabled            = str(self.param_postTriggerEnabled),
                                                 postTriggerFrameidParent      = str(self.param_postTriggerFrameidParent),
                                                 postTriggerFrameidChild       = str(self.param_postTriggerFrameidChild),
@@ -1882,49 +1882,49 @@ class ConvertCsv:
                                                 postTriggerTimeHold           = str(self.param_postTriggerTimeHold),
                                                 postTriggerTimeout            = str(self.param_postTriggerTimeout),
                                                 )
-        paramsPostWait_V22 = self.templatePostWait_V22.format(
+        headerPostWait_V22 = self.templatePostWait_V22.format(
                                                 postWait                   = str(self.param_postWait),
                                                 )
 
         with open(filename, 'w') as fid:
-            fid.write(self.headingsExperiment_V22)
-            fid.write(paramsExperiment_V22)
+            fid.write(self.headerExperimentTxt_V22)
+            fid.write(headerExperiment_V22)
             fid.write('\n')
     
-            fid.write(self.headingsRobot_V22)
-            fid.write(paramsRobot_V22)
+            fid.write(self.headerRobotTxt_V22)
+            fid.write(headerRobot_V22)
             fid.write('\n')
     
-            fid.write(self.headingsFlies_V22)
-            fid.write(paramsFlies_V22)
+            fid.write(self.headerFliesTxt_V22)
+            fid.write(headerFlies_V22)
             fid.write('\n')
     
-            fid.write(self.headingsTracking_V22)
-            fid.write(paramsTracking_V22)
+            fid.write(self.headerTrackingTxt_V22)
+            fid.write(headerTracking_V22)
             fid.write('\n')
     
-            fid.write(self.headingsPreWait1_V22)
-            fid.write(paramsPreWait1_V22)
+            fid.write(self.headerPreWait1Txt_V22)
+            fid.write(headerPreWait1_V22)
             fid.write('\n')
     
-            fid.write(self.headingsPreTrigger_V22)
-            fid.write(paramsPreTrigger_V22)
+            fid.write(self.headerPreTriggerTxt_V22)
+            fid.write(headerPreTrigger_V22)
             fid.write('\n')
     
-            fid.write(self.headingsTrialRobot_V22)
-            fid.write(paramsTrialRobot_V22)
+            fid.write(self.headerTrialRobotTxt_V22)
+            fid.write(headerTrialRobot_V22)
             fid.write('\n')
     
-            fid.write(self.headingsTrialLaser_V22)
-            fid.write(paramsTrialLaser_V22)
+            fid.write(self.headerTrialLaserTxt_V22)
+            fid.write(headerTrialLaser_V22)
             fid.write('\n')
     
-            fid.write(self.headingsPostTrigger_V22)
-            fid.write(paramsPostTrigger_V22)
+            fid.write(self.headerPostTriggerTxt_V22)
+            fid.write(headerPostTrigger_V22)
             fid.write('\n')
     
-            fid.write(self.headingsPostWait_V22)
-            fid.write(paramsPostWait_V22)
+            fid.write(self.headerPostWaitTxt_V22)
+            fid.write(headerPostWait_V22)
             fid.write('\n')
             
             fid.write('\n')
@@ -1937,16 +1937,16 @@ class ConvertCsv:
 
 
     def WriteHeader_V26(self, filename):
-        paramsVersionFile_V26 = self.templateVersionFile_V26.format(
+        headerVersionFile_V26 = self.templateVersionFile_V26.format(
                                                 versionFile              = '2.6',
                                                 ) 
-        paramsExperiment_V26 = self.templateExperiment_V26.format(
+        headerExperiment_V26 = self.templateExperiment_V26.format(
                                                 date_time                  = self.param_date_time,
                                                 description                = self.param_description,
                                                 maxTrials                  = self.param_maxTrials,
                                                 trial                      = self.param_trial,
                                                 )
-        paramsRobot_V26 = self.templateRobots_V26.format(
+        headerRobot_V26 = self.templateRobots_V26.format(
                                                 nRobots                    = self.param_nRobots,
                                                 widthRobot                 = self.param_widthRobot,
                                                 heightRobot                = self.param_heightRobot,
@@ -1954,28 +1954,28 @@ class ConvertCsv:
                                                 paintRobot                 = self.param_paintRobot,
                                                 scentRobot                 = self.param_scentRobot,
                                                 )
-        paramsFlies_V26 = self.templateFlies_V26.format(
+        headerFlies_V26 = self.templateFlies_V26.format(
                                                 nFlies                     = self.param_nFlies,
                                                 typeFlies                  = self.param_typeFlies,
                                                 genderFlies                = self.param_genderFlies,
                                                 )
 
-        self.headingsTracking_V26 = self.headingsTrackingA_V26
-        paramsTracking_V26 = self.templateTrackingA_V26.format(
+        self.headerTrackingTxt_V26 = self.headerTrackingTxtA_V26
+        headerTracking_V26 = self.templateTrackingA_V26.format(
                                                        trackingExclusionzoneEnabled = self.param_trackingExclusionzoneEnabled
                                                        )
         for i in range(len(self.param_trackingExclusionzoneX_list)):
-            self.headingsTracking_V26 += self.headingsTrackingB_V26
-            paramsTracking_V26 += self.templateTrackingB_V26.format(
+            self.headerTrackingTxt_V26 += self.headerTrackingTxtB_V26
+            headerTracking_V26 += self.templateTrackingB_V26.format(
                                                 trackingExclusionzoneX       = str(self.param_trackingExclusionzoneX_list[i]),
                                                 trackingExclusionzoneY       = str(self.param_trackingExclusionzoneY_list[i]),
                                                 trackingExclusionzoneRadius  = str(self.param_trackingExclusionzoneRadius_list[i]),
                                                 )
-        self.headingsTracking_V26 += '\n'
-        paramsTracking_V26 += '\n'
+        self.headerTrackingTxt_V26 += '\n'
+        headerTracking_V26 += '\n'
 
         #######################################################################
-        paramsPreRobot_V26 = self.templatePreRobot_V26.format(
+        headerPreRobot_V26 = self.templatePreRobot_V26.format(
                                                 preRobotEnabled               = self.param_preRobotEnabled,
                                                 preRobotMovePatternShape      = self.param_preRobotMovePatternShape,
                                                 preRobotMovePatternHzPattern  = self.param_preRobotMovePatternHzPattern,
@@ -1994,7 +1994,7 @@ class ConvertCsv:
                                                 preRobotMoveRelSpeedType      = self.param_preRobotMoveRelSpeedType,
                                                 preRobotMoveRelTolerance      = self.param_preRobotMoveRelTolerance,
                                                 )
-        paramsPreLaser_V26 = self.templatePreLaser_V26.format(
+        headerPreLaser_V26 = self.templatePreLaser_V26.format(
                                                 preLaserEnabled               = self.param_preLaserEnabled,
                                                 preLaserPatternShape          = self.param_preLaserPatternShape,
                                                 preLaserPatternHzPattern      = self.param_preLaserPatternHzPattern,
@@ -2007,7 +2007,7 @@ class ConvertCsv:
                                                 preLaserStatefilterLo         = self.param_preLaserStatefilterLo,
                                                 preLaserStatefilterCriteria   = self.param_preLaserStatefilterCriteria,
                                                 )
-        paramsPreLEDPanels_V26 = self.templatePreLEDPanels_V26.format(
+        headerPreLEDPanels_V26 = self.templatePreLEDPanels_V26.format(
                                                 preLEDPanelsEnabled = self.param_preLEDPanelsEnabled,
                                                 preLEDPanelsCommand = self.param_preLEDPanelsCommand,
                                                 preLEDPanelsIdPattern = self.param_preLEDPanelsIdPattern,
@@ -2018,10 +2018,10 @@ class ConvertCsv:
                                                 )
         
         #######################################################################
-        paramsPreWait1_V26 = self.templatePreWait1_V26.format(
+        headerPreWait1_V26 = self.templatePreWait1_V26.format(
                                                 preWait1                  = self.param_preWait1,
                                                 )
-        paramsPreTrigger_V26 = self.templatePreTrigger_V26.format(
+        headerPreTrigger_V26 = self.templatePreTrigger_V26.format(
                                                 preTriggerEnabled            = self.param_preTriggerEnabled,
                                                 preTriggerFrameidParent      = self.param_preTriggerFrameidParent,
                                                 preTriggerFrameidChild       = self.param_preTriggerFrameidChild,
@@ -2040,11 +2040,11 @@ class ConvertCsv:
                                                 preTriggerTimeHold           = self.param_preTriggerTimeHold,
                                                 preTriggerTimeout            = self.param_preTriggerTimeout,
                                                 )
-        paramsPreWait2_V26 = self.templatePreWait2_V26.format(
+        headerPreWait2_V26 = self.templatePreWait2_V26.format(
                                                 preWait2                  = self.param_preWait2,
                                                 )
         #######################################################################
-        paramsTrialRobot_V26 = self.templateTrialRobot_V26.format(
+        headerTrialRobot_V26 = self.templateTrialRobot_V26.format(
                                                 trialRobotEnabled               = self.param_trialRobotEnabled,
                                                 trialRobotMovePatternShape      = self.param_trialRobotMovePatternShape,
                                                 trialRobotMovePatternHzPattern  = self.param_trialRobotMovePatternHzPattern,
@@ -2064,7 +2064,7 @@ class ConvertCsv:
                                                 trialRobotMoveRelTolerance      = self.param_trialRobotMoveRelTolerance,
                                                 )
         
-        paramsTrialLaser_V26 = self.templateTrialLaser_V26.format(
+        headerTrialLaser_V26 = self.templateTrialLaser_V26.format(
                                                 trialLaserEnabled               = self.param_trialLaserEnabled,
                                                 trialLaserPatternShape          = self.param_trialLaserPatternShape,
                                                 trialLaserPatternHzPattern      = self.param_trialLaserPatternHzPattern,
@@ -2077,7 +2077,7 @@ class ConvertCsv:
                                                 trialLaserStatefilterLo         = self.param_trialLaserStatefilterLo,
                                                 trialLaserStatefilterCriteria   = self.param_trialLaserStatefilterCriteria,
                                                 )
-        paramsTrialLEDPanels_V26 = self.templateTrialLEDPanels_V26.format(
+        headerTrialLEDPanels_V26 = self.templateTrialLEDPanels_V26.format(
                                                 trialLEDPanelsEnabled           = self.param_trialLEDPanelsEnabled,
                                                 trialLEDPanelsCommand           = self.param_trialLEDPanelsCommand,
                                                 trialLEDPanelsIdPattern         = self.param_trialLEDPanelsIdPattern,
@@ -2088,7 +2088,7 @@ class ConvertCsv:
                                                 )
             
         #######################################################################
-        paramsPostTrigger_V26 = self.templatePostTrigger_V26.format(
+        headerPostTrigger_V26 = self.templatePostTrigger_V26.format(
                                                 postTriggerEnabled            = str(self.param_postTriggerEnabled),
                                                 postTriggerFrameidParent      = str(self.param_postTriggerFrameidParent),
                                                 postTriggerFrameidChild       = str(self.param_postTriggerFrameidChild),
@@ -2107,73 +2107,73 @@ class ConvertCsv:
                                                 postTriggerTimeHold           = str(self.param_postTriggerTimeHold),
                                                 postTriggerTimeout            = str(self.param_postTriggerTimeout),
                                                 )
-        paramsPostWait_V26 = self.templatePostWait_V26.format(
+        headerPostWait_V26 = self.templatePostWait_V26.format(
                                                 postWait                   = str(self.param_postWait),
                                                 )
 
         with open(filename, 'w') as fid:
-            fid.write(self.headingsVersionFile_V26)
-            fid.write(paramsVersionFile_V26)
+            fid.write(self.headerVersionFileTxt_V26)
+            fid.write(headerVersionFile_V26)
             fid.write('\n')
     
-            fid.write(self.headingsExperiment_V26)
-            fid.write(paramsExperiment_V26)
+            fid.write(self.headerExperimentTxt_V26)
+            fid.write(headerExperiment_V26)
             fid.write('\n')
     
-            fid.write(self.headingsRobot_V26)
-            fid.write(paramsRobot_V26)
+            fid.write(self.headerRobotTxt_V26)
+            fid.write(headerRobot_V26)
             fid.write('\n')
     
-            fid.write(self.headingsFlies_V26)
-            fid.write(paramsFlies_V26)
+            fid.write(self.headerFliesTxt_V26)
+            fid.write(headerFlies_V26)
             fid.write('\n')
     
-            fid.write(self.headingsTracking_V26)
-            fid.write(paramsTracking_V26)
+            fid.write(self.headerTrackingTxt_V26)
+            fid.write(headerTracking_V26)
             fid.write('\n')
     
-            fid.write(self.headingsPreRobot_V26)
-            fid.write(paramsPreRobot_V26)
+            fid.write(self.headerPreRobotTxt_V26)
+            fid.write(headerPreRobot_V26)
             fid.write('\n')
     
-            fid.write(self.headingsPreLaser_V26)
-            fid.write(paramsPreLaser_V26)
+            fid.write(self.headerPreLaserTxt_V26)
+            fid.write(headerPreLaser_V26)
             fid.write('\n')
     
-            fid.write(self.headingsPreLEDPanels_V26)
-            fid.write(paramsPreLEDPanels_V26)
+            fid.write(self.headerPreLEDPanelsTxt_V26)
+            fid.write(headerPreLEDPanels_V26)
             fid.write('\n')
     
-            fid.write(self.headingsPreWait1_V26)
-            fid.write(paramsPreWait1_V26)
+            fid.write(self.headerPreWait1Txt_V26)
+            fid.write(headerPreWait1_V26)
             fid.write('\n')
     
-            fid.write(self.headingsPreTrigger_V26)
-            fid.write(paramsPreTrigger_V26)
+            fid.write(self.headerPreTriggerTxt_V26)
+            fid.write(headerPreTrigger_V26)
             fid.write('\n')
     
-            fid.write(self.headingsPreWait2_V26)
-            fid.write(paramsPreWait2_V26)
+            fid.write(self.headerPreWait2Txt_V26)
+            fid.write(headerPreWait2_V26)
             fid.write('\n')
     
-            fid.write(self.headingsTrialRobot_V26)
-            fid.write(paramsTrialRobot_V26)
+            fid.write(self.headerTrialRobotTxt_V26)
+            fid.write(headerTrialRobot_V26)
             fid.write('\n')
     
-            fid.write(self.headingsTrialLaser_V26)
-            fid.write(paramsTrialLaser_V26)
+            fid.write(self.headerTrialLaserTxt_V26)
+            fid.write(headerTrialLaser_V26)
             fid.write('\n')
     
-            fid.write(self.headingsTrialLEDPanels_V26)
-            fid.write(paramsTrialLEDPanels_V26)
+            fid.write(self.headerTrialLEDPanelsTxt_V26)
+            fid.write(headerTrialLEDPanels_V26)
             fid.write('\n')
     
-            fid.write(self.headingsPostTrigger_V26)
-            fid.write(paramsPostTrigger_V26)
+            fid.write(self.headerPostTriggerTxt_V26)
+            fid.write(headerPostTrigger_V26)
             fid.write('\n')
     
-            fid.write(self.headingsPostWait_V26)
-            fid.write(paramsPostWait_V26)
+            fid.write(self.headerPostWaitTxt_V26)
+            fid.write(headerPostWait_V26)
             fid.write('\n')
             
 
@@ -2182,16 +2182,16 @@ class ConvertCsv:
         
 
     def WriteHeader_V28(self, filename):
-        paramsVersionFile_V28 = self.templateVersionFile_V28.format(
+        headerVersionFile_V28 = self.templateVersionFile_V28.format(
                                                 versionFile              = '2.8',
                                                 ) 
-        paramsExperiment_V28 = self.templateExperiment_V28.format(
+        headerExperiment_V28 = self.templateExperiment_V28.format(
                                                 date_time                  = self.param_date_time,
                                                 description                = self.param_description,
                                                 maxTrials                  = self.param_maxTrials,
                                                 trial                      = self.param_trial,
                                                 )
-        paramsRobot_V28 = self.templateRobots_V28.format(
+        headerRobot_V28 = self.templateRobots_V28.format(
                                                 nRobots                    = self.param_nRobots,
                                                 widthRobot                 = self.param_widthRobot,
                                                 heightRobot                = self.param_heightRobot,
@@ -2199,28 +2199,28 @@ class ConvertCsv:
                                                 paintRobot                 = self.param_paintRobot,
                                                 scentRobot                 = self.param_scentRobot,
                                                 )
-        paramsFlies_V28 = self.templateFlies_V28.format(
+        headerFlies_V28 = self.templateFlies_V28.format(
                                                 nFlies                     = self.param_nFlies,
                                                 typeFlies                  = self.param_typeFlies,
                                                 genderFlies                = self.param_genderFlies,
                                                 )
 
-        self.headingsTracking_V28 = self.headingsTrackingA_V28
-        paramsTracking_V28 = self.templateTrackingA_V28.format(
+        self.headerTrackingTxt_V28 = self.headerTrackingTxtA_V28
+        headerTracking_V28 = self.templateTrackingA_V28.format(
                                                        trackingExclusionzoneEnabled = self.param_trackingExclusionzoneEnabled
                                                        )
         for i in range(len(self.param_trackingExclusionzoneX_list)):
-            self.headingsTracking_V28 += self.headingsTrackingB_V28
-            paramsTracking_V28 += self.templateTrackingB_V28.format(
+            self.headerTrackingTxt_V28 += self.headerTrackingTxtB_V28
+            headerTracking_V28 += self.templateTrackingB_V28.format(
                                                 trackingExclusionzoneX       = str(self.param_trackingExclusionzoneX_list[i]),
                                                 trackingExclusionzoneY       = str(self.param_trackingExclusionzoneY_list[i]),
                                                 trackingExclusionzoneRadius  = str(self.param_trackingExclusionzoneRadius_list[i]),
                                                 )
-        self.headingsTracking_V28 += '\n'
-        paramsTracking_V28 += '\n'
+        self.headerTrackingTxt_V28 += '\n'
+        headerTracking_V28 += '\n'
 
         #######################################################################
-        paramsPreRobot_V28 = self.templatePreRobot_V28.format(
+        headerPreRobot_V28 = self.templatePreRobot_V28.format(
                                                 preRobotEnabled               = self.param_preRobotEnabled,
                                                 preRobotMovePatternFramePosition= self.param_preRobotMovePatternFramePosition,
                                                 preRobotMovePatternFrameAngle = self.param_preRobotMovePatternFrameAngle,
@@ -2242,7 +2242,7 @@ class ConvertCsv:
                                                 preRobotMoveRelSpeedType      = self.param_preRobotMoveRelSpeedType,
                                                 preRobotMoveRelTolerance      = self.param_preRobotMoveRelTolerance,
                                                 )
-        paramsPreLaser_V28 = self.templatePreLaser_V28.format(
+        headerPreLaser_V28 = self.templatePreLaser_V28.format(
                                                 preLaserEnabled               = self.param_preLaserEnabled,
                                                 preLaserPatternFramePosition  = self.param_preLaserPatternFramePosition,
                                                 preLaserPatternFrameAngle     = self.param_preLaserPatternFrameAngle,
@@ -2258,7 +2258,7 @@ class ConvertCsv:
                                                 preLaserStatefilterLo         = self.param_preLaserStatefilterLo,
                                                 preLaserStatefilterCriteria   = self.param_preLaserStatefilterCriteria,
                                                 )
-        paramsPreLEDPanels_V28 = self.templatePreLEDPanels_V28.format(
+        headerPreLEDPanels_V28 = self.templatePreLEDPanels_V28.format(
                                                 preLEDPanelsEnabled = self.param_preLEDPanelsEnabled,
                                                 preLEDPanelsCommand = self.param_preLEDPanelsCommand,
                                                 preLEDPanelsIdPattern = self.param_preLEDPanelsIdPattern,
@@ -2269,10 +2269,10 @@ class ConvertCsv:
                                                 )
         
         #######################################################################
-        paramsPreWait1_V28 = self.templatePreWait1_V28.format(
+        headerPreWait1_V28 = self.templatePreWait1_V28.format(
                                                 preWait1                  = self.param_preWait1,
                                                 )
-        paramsPreTrigger_V28 = self.templatePreTrigger_V28.format(
+        headerPreTrigger_V28 = self.templatePreTrigger_V28.format(
                                                 preTriggerEnabled            = self.param_preTriggerEnabled,
                                                 preTriggerFrameidParent      = self.param_preTriggerFrameidParent,
                                                 preTriggerFrameidChild       = self.param_preTriggerFrameidChild,
@@ -2291,11 +2291,11 @@ class ConvertCsv:
                                                 preTriggerTimeHold           = self.param_preTriggerTimeHold,
                                                 preTriggerTimeout            = self.param_preTriggerTimeout,
                                                 )
-        paramsPreWait2_V28 = self.templatePreWait2_V28.format(
+        headerPreWait2_V28 = self.templatePreWait2_V28.format(
                                                 preWait2                  = self.param_preWait2,
                                                 )
         #######################################################################
-        paramsTrialRobot_V28 = self.templateTrialRobot_V28.format(
+        headerTrialRobot_V28 = self.templateTrialRobot_V28.format(
                                                 trialRobotEnabled               = self.param_trialRobotEnabled,
                                                 trialRobotMovePatternFramePosition= self.param_trialRobotMovePatternFramePosition,
                                                 trialRobotMovePatternFrameAngle = self.param_trialRobotMovePatternFrameAngle,
@@ -2318,7 +2318,7 @@ class ConvertCsv:
                                                 trialRobotMoveRelTolerance      = self.param_trialRobotMoveRelTolerance,
                                                 )
         
-        paramsTrialLaser_V28 = self.templateTrialLaser_V28.format(
+        headerTrialLaser_V28 = self.templateTrialLaser_V28.format(
                                                 trialLaserEnabled               = self.param_trialLaserEnabled,
                                                 trialLaserPatternFramePosition  = self.param_trialLaserPatternFramePosition,
                                                 trialLaserPatternFrameAngle     = self.param_trialLaserPatternFrameAngle,
@@ -2334,7 +2334,7 @@ class ConvertCsv:
                                                 trialLaserStatefilterLo         = self.param_trialLaserStatefilterLo,
                                                 trialLaserStatefilterCriteria   = self.param_trialLaserStatefilterCriteria,
                                                 )
-        paramsTrialLEDPanels_V28 = self.templateTrialLEDPanels_V28.format(
+        headerTrialLEDPanels_V28 = self.templateTrialLEDPanels_V28.format(
                                                 trialLEDPanelsEnabled           = self.param_trialLEDPanelsEnabled,
                                                 trialLEDPanelsCommand           = self.param_trialLEDPanelsCommand,
                                                 trialLEDPanelsIdPattern         = self.param_trialLEDPanelsIdPattern,
@@ -2345,7 +2345,7 @@ class ConvertCsv:
                                                 )
             
         #######################################################################
-        paramsPostTrigger_V28 = self.templatePostTrigger_V28.format(
+        headerPostTrigger_V28 = self.templatePostTrigger_V28.format(
                                                 postTriggerEnabled            = str(self.param_postTriggerEnabled),
                                                 postTriggerFrameidParent      = str(self.param_postTriggerFrameidParent),
                                                 postTriggerFrameidChild       = str(self.param_postTriggerFrameidChild),
@@ -2364,73 +2364,73 @@ class ConvertCsv:
                                                 postTriggerTimeHold           = str(self.param_postTriggerTimeHold),
                                                 postTriggerTimeout            = str(self.param_postTriggerTimeout),
                                                 )
-        paramsPostWait_V28 = self.templatePostWait_V28.format(
+        headerPostWait_V28 = self.templatePostWait_V28.format(
                                                 postWait                   = str(self.param_postWait),
                                                 )
 
         with open(filename, 'w') as fid:
-            fid.write(self.headingsVersionFile_V28)
-            fid.write(paramsVersionFile_V28)
+            fid.write(self.headerVersionFileTxt_V28)
+            fid.write(headerVersionFile_V28)
             fid.write('\n')
     
-            fid.write(self.headingsExperiment_V28)
-            fid.write(paramsExperiment_V28)
+            fid.write(self.headerExperimentTxt_V28)
+            fid.write(headerExperiment_V28)
             fid.write('\n')
     
-            fid.write(self.headingsRobot_V28)
-            fid.write(paramsRobot_V28)
+            fid.write(self.headerRobotTxt_V28)
+            fid.write(headerRobot_V28)
             fid.write('\n')
     
-            fid.write(self.headingsFlies_V28)
-            fid.write(paramsFlies_V28)
+            fid.write(self.headerFliesTxt_V28)
+            fid.write(headerFlies_V28)
             fid.write('\n')
     
-            fid.write(self.headingsTracking_V28)
-            fid.write(paramsTracking_V28)
+            fid.write(self.headerTrackingTxt_V28)
+            fid.write(headerTracking_V28)
             fid.write('\n')
     
-            fid.write(self.headingsPreRobot_V28)
-            fid.write(paramsPreRobot_V28)
+            fid.write(self.headerPreRobotTxt_V28)
+            fid.write(headerPreRobot_V28)
             fid.write('\n')
     
-            fid.write(self.headingsPreLaser_V28)
-            fid.write(paramsPreLaser_V28)
+            fid.write(self.headerPreLaserTxt_V28)
+            fid.write(headerPreLaser_V28)
             fid.write('\n')
     
-            fid.write(self.headingsPreLEDPanels_V28)
-            fid.write(paramsPreLEDPanels_V28)
+            fid.write(self.headerPreLEDPanelsTxt_V28)
+            fid.write(headerPreLEDPanels_V28)
             fid.write('\n')
     
-            fid.write(self.headingsPreWait1_V28)
-            fid.write(paramsPreWait1_V28)
+            fid.write(self.headerPreWait1Txt_V28)
+            fid.write(headerPreWait1_V28)
             fid.write('\n')
     
-            fid.write(self.headingsPreTrigger_V28)
-            fid.write(paramsPreTrigger_V28)
+            fid.write(self.headerPreTriggerTxt_V28)
+            fid.write(headerPreTrigger_V28)
             fid.write('\n')
     
-            fid.write(self.headingsPreWait2_V28)
-            fid.write(paramsPreWait2_V28)
+            fid.write(self.headerPreWait2Txt_V28)
+            fid.write(headerPreWait2_V28)
             fid.write('\n')
     
-            fid.write(self.headingsTrialRobot_V28)
-            fid.write(paramsTrialRobot_V28)
+            fid.write(self.headerTrialRobotTxt_V28)
+            fid.write(headerTrialRobot_V28)
             fid.write('\n')
     
-            fid.write(self.headingsTrialLaser_V28)
-            fid.write(paramsTrialLaser_V28)
+            fid.write(self.headerTrialLaserTxt_V28)
+            fid.write(headerTrialLaser_V28)
             fid.write('\n')
     
-            fid.write(self.headingsTrialLEDPanels_V28)
-            fid.write(paramsTrialLEDPanels_V28)
+            fid.write(self.headerTrialLEDPanelsTxt_V28)
+            fid.write(headerTrialLEDPanels_V28)
             fid.write('\n')
     
-            fid.write(self.headingsPostTrigger_V28)
-            fid.write(paramsPostTrigger_V28)
+            fid.write(self.headerPostTriggerTxt_V28)
+            fid.write(headerPostTrigger_V28)
             fid.write('\n')
     
-            fid.write(self.headingsPostWait_V28)
-            fid.write(paramsPostWait_V28)
+            fid.write(self.headerPostWaitTxt_V28)
+            fid.write(headerPostWait_V28)
             fid.write('\n')
             
 
@@ -2446,11 +2446,11 @@ class ConvertCsv:
             with open(filenameOut, 'a') as fidOut:
                 
                 # Write the new heading line.
-                headingsState = self.headingsStateLeft_Vpre26 + self.headingsStateRobot_Vpre26
+                stateTxt = self.stateLeftTxt_Vpre26 + self.stateRobotTxt_Vpre26
                 for i in range(nFlies):
-                    headingsState += self.headingsStateFly_Vpre26
-                headingsState += '\n'
-                fidOut.write(headingsState)    
+                    stateTxt += self.stateFlyTxt_Vpre26
+                stateTxt += '\n'
+                fidOut.write(stateTxt)    
                 
                 
                 # Write the state lines.
@@ -2459,7 +2459,7 @@ class ConvertCsv:
 
 
                     ############### Fields:  Time,Triggered
-                    lineOutLeft = self.templateStateLeft_Vpre26.format(
+                    stateLeft = self.templateStateLeft_Vpre26.format(
                                                                     time = fieldsIn_list[0],
                                                                     )
                     if (float(versionIn) < 2.6):
@@ -2467,11 +2467,11 @@ class ConvertCsv:
                     else:
                         iFieldIn = 2  # Skip the 'triggered' column.
                         
-                    lineOut = lineOutLeft
+                    state = stateLeft
 
                         
                     ############### Fields:  Robot state.
-                    lineOutRobot = self.templateStateRobot_Vpre26.format(
+                    stateRobot = self.templateStateRobot_Vpre26.format(
                                                             xRobot = fieldsIn_list[iFieldIn+0],
                                                             yRobot = fieldsIn_list[iFieldIn+1],
                                                             aRobot = fieldsIn_list[iFieldIn+2],
@@ -2485,12 +2485,12 @@ class ConvertCsv:
                     else:
                         iFieldIn += 8   # Skip the wings fields.
                         
-                    lineOut += lineOutRobot
+                    state += stateRobot
                     
                     
                     ############### Fields:  Fly state.
                     for iFly in range(nFlies): 
-                        lineOutFly = self.templateStateFly_Vpre26.format(
+                        stateFly = self.templateStateFly_Vpre26.format(
                                                             xFly = fieldsIn_list[iFieldIn+0],
                                                             yFly = fieldsIn_list[iFieldIn+1],
                                                             aFly = fieldsIn_list[iFieldIn+2],
@@ -2503,12 +2503,12 @@ class ConvertCsv:
                         else:
                             iFieldIn += 8   # Skip the wings fields.
 
-                        lineOut += lineOutFly
+                        state += stateFly
                         
                         
                     ############### End of the line.
-                    lineOut += '\n'
-                    fidOut.write(lineOut)
+                    state += '\n'
+                    fidOut.write(state)
                     
 
     # Write the state lines from any-version input file to a 2.6 version output file.
@@ -2523,11 +2523,11 @@ class ConvertCsv:
             with open(filenameOut, 'a') as fidOut:
                 
                 # Write the new heading line.
-                headingsState = self.headingsStateLeft_V26 + self.headingsStateRobot_V26
+                stateTxt = self.stateLeftTxt_V26 + self.stateRobotTxt_V26
                 for i in range(nFlies):
-                    headingsState += self.headingsStateFly_V26
-                headingsState += '\n'
-                fidOut.write(headingsState)    
+                    stateTxt += self.stateFlyTxt_V26
+                stateTxt += '\n'
+                fidOut.write(stateTxt)    
                 
                 
                 # Write the state lines.
@@ -2536,23 +2536,23 @@ class ConvertCsv:
 
                     ############### Fields:  Time,Triggered
                     if (float(versionIn) < 2.6):
-                        lineOutLeft = self.templateStateLeft_V26.format(
+                        stateLeft = self.templateStateLeft_V26.format(
                                                             time = fieldsIn_list[0],
                                                             triggered = '1',
                                                             )
                         iFieldIn = 1
                     else:      # Use 'triggered' value from file.
-                        lineOutLeft = self.templateStateLeft_V26.format(
+                        stateLeft = self.templateStateLeft_V26.format(
                                                             time = fieldsIn_list[0],
                                                             triggered = fieldsIn_list[1],
                                                             )
                         iFieldIn = 2  # Skip the 'triggered' column.
                         
-                    lineOut = lineOutLeft
+                    state = stateLeft
 
                         
                     ############### Fields:  Robot state.
-                    lineOutRobot = self.templateStateRobot_V26.format(
+                    stateRobot = self.templateStateRobot_V26.format(
                                                             xRobot = fieldsIn_list[iFieldIn+0],
                                                             yRobot = fieldsIn_list[iFieldIn+1],
                                                             aRobot = fieldsIn_list[iFieldIn+2],
@@ -2565,12 +2565,12 @@ class ConvertCsv:
                     else:
                         iFieldIn += 8
                         
-                    lineOut += lineOutRobot
+                    state += stateRobot
 
                     
                     ############### Fields:  Fly state.
                     for iFly in range(nFlies): 
-                        lineOutFly = self.templateStateFly_V26.format(
+                        stateFly = self.templateStateFly_V26.format(
                                                             xFly = fieldsIn_list[iFieldIn+0],
                                                             yFly = fieldsIn_list[iFieldIn+1],
                                                             aFly = fieldsIn_list[iFieldIn+2],
@@ -2583,12 +2583,12 @@ class ConvertCsv:
                         else:
                             iFieldIn += 8
                             
-                        lineOut += lineOutFly
+                        state += stateFly
 
                         
                     ############### End of the line.
-                    lineOut += '\n'
-                    fidOut.write(lineOut)
+                    state += '\n'
+                    fidOut.write(state)
 
 
     # Write the state lines from any-version input file to a 2.7 version output file.
@@ -2603,11 +2603,11 @@ class ConvertCsv:
             with open(filenameOut, 'a') as fidOut:
                 
                 # Write the new heading line.
-                headingsState = self.headingsStateLeft_V27 + self.headingsStateRobot_V27
+                stateTxt = self.stateLeftTxt_V27 + self.stateRobotTxt_V27
                 for i in range(nFlies):
-                    headingsState += self.headingsStateFly_V27
-                headingsState += '\n'
-                fidOut.write(headingsState)    
+                    stateTxt += self.stateFlyTxt_V27
+                stateTxt += '\n'
+                fidOut.write(stateTxt)    
                 
                 
                 # Write the state lines.
@@ -2616,38 +2616,38 @@ class ConvertCsv:
 
                     ############### Fields:  Time,Triggered
                     if (float(versionIn) < 2.6):    # Pre-2.6 had no 'triggered' column.  Use default value.
-                        lineOutLeft = self.templateStateLeft_V27.format(
+                        stateLeft = self.templateStateLeft_V27.format(
                                                                         time      = fieldsIn_list[0],
                                                                         triggered = '1',
                                                                         )
                         iFieldIn = 1
                     
                     else:      # Use 'triggered' value from file.
-                        lineOutLeft = self.templateStateLeft_V27.format(
+                        stateLeft = self.templateStateLeft_V27.format(
                                                                         time      = fieldsIn_list[0],
                                                                         triggered = fieldsIn_list[1],
                                                                         )
                         iFieldIn = 2
                         
-                    lineOut = lineOutLeft
+                    state = stateLeft
                     
                     
                     ############### Fields:  Robot state.
                     if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing angle' columns.  Use default values.
-                        lineOutRobot = self.templateStateRobot_V27.format(
+                        stateRobot = self.templateStateRobot_V27.format(
                                                                 xRobot          = fieldsIn_list[iFieldIn+0],
                                                                 yRobot          = fieldsIn_list[iFieldIn+1],
                                                                 aRobot          = fieldsIn_list[iFieldIn+2],
                                                                 vxRobot         = fieldsIn_list[iFieldIn+3],
                                                                 vyRobot         = fieldsIn_list[iFieldIn+4],
                                                                 vaRobot         = fieldsIn_list[iFieldIn+5],
-                                                                aRobotWingLeft  = repr(N.pi),
-                                                                aRobotWingRight = repr(N.pi),
+                                                                aRobotWingLeft  = '%5.3f' % N.pi,
+                                                                aRobotWingRight = '%5.3f' % N.pi,
                                                                 )
                         iFieldIn += 6
                         
                     else:      # Use 'wing angle' values from file.
-                        lineOutRobot = self.templateStateRobot_V27.format(
+                        stateRobot = self.templateStateRobot_V27.format(
                                                                 xRobot          = fieldsIn_list[iFieldIn+0],
                                                                 yRobot          = fieldsIn_list[iFieldIn+1],
                                                                 aRobot          = fieldsIn_list[iFieldIn+2],
@@ -2660,25 +2660,25 @@ class ConvertCsv:
                         iFieldIn += 8
                         
                         
-                    lineOut += lineOutRobot
+                    state += stateRobot
                     
 
                     ############### Fields:  Fly state.
                     for iFly in range(nFlies): 
                         if (float(versionIn) < 2.7):    # Pre-2.7 had no 'wing' columns.  Use default values.
-                            lineOutFly = self.templateStateFly_V27.format(
+                            stateFly = self.templateStateFly_V27.format(
                                                                 xFly        = fieldsIn_list[iFieldIn+0],
                                                                 yFly        = fieldsIn_list[iFieldIn+1],
                                                                 aFly        = fieldsIn_list[iFieldIn+2],
                                                                 vxFly       = fieldsIn_list[iFieldIn+3],
                                                                 vyFly       = fieldsIn_list[iFieldIn+4],
                                                                 vaFly       = fieldsIn_list[iFieldIn+5],
-                                                                aFlyWingLeft  = repr(N.pi),
-                                                                aFlyWingRight = repr(N.pi),
+                                                                aFlyWingLeft  = '%5.3f' % N.pi,
+                                                                aFlyWingRight = '%5.3f' % N.pi,
                                                                 )
                             iFieldIn += 6
                         else:      # Use 'wing angle' values from file.
-                            lineOutFly = self.templateStateFly_V27.format(
+                            stateFly = self.templateStateFly_V27.format(
                                                                 xFly          = fieldsIn_list[iFieldIn+0],
                                                                 yFly          = fieldsIn_list[iFieldIn+1],
                                                                 aFly          = fieldsIn_list[iFieldIn+2],
@@ -2690,11 +2690,11 @@ class ConvertCsv:
                                                                 )
                             iFieldIn += 8
                                 
-                        lineOut += lineOutFly
+                        state += stateFly
 
                     ############### End of the line.
-                    lineOut += '\n'
-                    fidOut.write(lineOut)
+                    state += '\n'
+                    fidOut.write(state)
 
 
     def WriteStateLines_V28(self, filenameIn, filenameOut):
