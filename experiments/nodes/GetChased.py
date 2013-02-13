@@ -56,8 +56,9 @@ class Experiment():
         self.experimentparams.pre.robot.move.pattern.size.y = 0
         self.experimentparams.pre.robot.move.pattern.param = 0
         self.experimentparams.pre.robot.move.pattern.direction = 1
-        self.experimentparams.pre.robot.move.timeout = -1                             # When this duration has passed, then the move is over.
+
         self.experimentparams.pre.lasertrack.enabled = False
+        
         self.experimentparams.pre.ledpanels.enabled = True
         self.experimentparams.pre.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.pre.ledpanels.idPattern = 1
@@ -67,8 +68,7 @@ class Experiment():
         self.experimentparams.pre.ledpanels.statefilterHi = ''
         self.experimentparams.pre.ledpanels.statefilterLo = ''
         self.experimentparams.pre.ledpanels.statefilterCriteria = ''
-        self.experimentparams.pre.ledpanels.timeout = -1
-
+        
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = True
         self.experimentparams.pre.trigger.frameidParent = 'Fly1'
@@ -103,12 +103,10 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.speed = 5.2
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.trial.robot.move.timeout = -1
         self.experimentparams.trial.robot.home.enabled = True
         self.experimentparams.trial.robot.home.x = 60.0
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.timeout = -1
         self.experimentparams.trial.robot.home.tolerance = 2
         
         
@@ -123,7 +121,6 @@ class Experiment():
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
-        self.experimentparams.trial.ledpanels.timeout = -1
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly1'

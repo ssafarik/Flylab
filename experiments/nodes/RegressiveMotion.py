@@ -74,12 +74,10 @@ class ExperimentRegressiveMotion():
         self.experimentparams.trial.robot.move.relative.speed = 30
         self.experimentparams.trial.robot.move.relative.speedType = 'random'
         self.experimentparams.trial.robot.move.relative.tolerance = 2
-        self.experimentparams.trial.robot.move.timeout = 3
         self.experimentparams.trial.robot.home.enabled = True
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.timeout = -1
         self.experimentparams.trial.robot.home.tolerance = 2
         
         
@@ -92,15 +90,14 @@ class ExperimentRegressiveMotion():
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
-        self.experimentparams.trial.ledpanels.timeout = -1
 
         self.experimentparams.post.trigger.enabled = False
         self.experimentparams.post.trigger.frameidParent = 'Fly1'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.distanceMin = 0.0
         self.experimentparams.post.trigger.distanceMax = 999.0
-        self.experimentparams.post.trigger.speedAbsParentMin =   0.0
-        self.experimentparams.post.trigger.speedAbsParentMax = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMin = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. NEVER
         self.experimentparams.post.trigger.speedAbsChildMin  =   0.0
         self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.post.trigger.speedRelMin       =   0.0
@@ -110,7 +107,7 @@ class ExperimentRegressiveMotion():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = -1
+        self.experimentparams.post.trigger.timeout = 3
 
         self.experimentparams.post.wait = 0.0
         

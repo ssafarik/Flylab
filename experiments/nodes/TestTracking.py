@@ -72,12 +72,10 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.speed = 50
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = 2
-        self.experimentparams.trial.robot.move.timeout = -1
         self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.timeout = -1
         self.experimentparams.trial.robot.home.tolerance = 2
         
         
@@ -92,7 +90,6 @@ class Experiment():
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
-        self.experimentparams.trial.ledpanels.timeout = -1
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly1'

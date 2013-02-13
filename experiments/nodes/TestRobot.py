@@ -32,7 +32,7 @@ class ExperimentChase():
         self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
-        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=50.0, y=68.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
@@ -68,12 +68,10 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.pattern.param = 0
         self.experimentparams.trial.robot.move.pattern.direction = 1
-        self.experimentparams.trial.robot.move.timeout = -1
         self.experimentparams.trial.robot.home.enabled = True
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.timeout = -1
         self.experimentparams.trial.robot.home.tolerance = 2
 
         self.experimentparams.trial.lasertrack.enabled = False

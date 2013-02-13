@@ -179,7 +179,6 @@ class ExperimentZapresponse():
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
         
-        self.experimentparams.trial.lasertrack.timeout = -1
         
         self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
@@ -188,7 +187,6 @@ class ExperimentZapresponse():
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
-        self.experimentparams.trial.ledpanels.timeout = -1
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.distanceMin = 999.0

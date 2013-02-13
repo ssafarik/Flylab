@@ -102,7 +102,7 @@ class Save:
 
         
         #################################################################################
-        self.versionFile = '2.8'    # Increment this when the file format changes.
+        self.versionFile = '2.81'    # Increment this when the file format changes.
         #################################################################################
 
         
@@ -166,8 +166,7 @@ class Save:
                                     'preRobotMoveRelAngleType, '\
                                     'preRobotMoveRelSpeed, '\
                                     'preRobotMoveRelSpeedType, '\
-                                    'preRobotMoveRelTolerance, ' \
-                                    'preRobotMoveTimeout\n'
+                                    'preRobotMoveRelTolerance\n'
         self.templatePreRobot     = '{preRobotEnabled:s}, '\
                                     '{preRobotMovePatternFramePosition:s}, '\
                                     '{preRobotMovePatternFrameAngle:s}, '\
@@ -187,8 +186,7 @@ class Save:
                                     '{preRobotMoveRelAngleType:s}, '\
                                     '{preRobotMoveRelSpeed:s}, '\
                                     '{preRobotMoveRelSpeedType:s}, '\
-                                    '{preRobotMoveRelTolerance:s}, ' \
-                                    '{preRobotMoveTimeout:s}\n'
+                                    '{preRobotMoveRelTolerance:s}\n'
                                     
         self.headerPreLaserTxt    = 'preLaserEnabled, '\
                                     'preLaserPatternFramePosition, '\
@@ -203,8 +201,7 @@ class Save:
                                     'preLaserPatternDirection, '\
                                     'preLaserStatefilterLo, '\
                                     'preLaserStatefilterHi, '\
-                                    'preLaserStatefilterCriteria, ' \
-                                    'preLaserTimeout\n'
+                                    'preLaserStatefilterCriteria\n'
         self.templatePreLaser =     '{preLaserEnabled:s}, '\
                                     '{preLaserPatternFramePosition:s}, '\
                                     '{preLaserPatternFrameAngle:s}, '\
@@ -218,8 +215,7 @@ class Save:
                                     '{preLaserPatternDirection:s}, '\
                                     '\"{preLaserStatefilterLo:s}\", '\
                                     '\"{preLaserStatefilterHi:s}\", '\
-                                    '{preLaserStatefilterCriteria:s}, ' \
-                                    '{preLaserTimeout:s}\n'
+                                    '{preLaserStatefilterCriteria:s}\n'
         
         self.headerPreLEDPanelsTxt ='preLEDPanelsEnabled, '\
                                     'preLEDPanelsCommand, '\
@@ -227,16 +223,14 @@ class Save:
                                     'preLEDPanelsFrameid, '\
                                     'preLEDPanelsStatefilterLo, '\
                                     'preLEDPanelsStatefilterHi, '\
-                                    'preLEDPanelsStatefilterCriteria, '\
-                                    'preLEDPanelsTimeout\n'
+                                    'preLEDPanelsStatefilterCriteria\n'
         self.templatePreLEDPanels = '{preLEDPanelsEnabled:s}, '\
                                     '{preLEDPanelsCommand:s}, '\
                                     '{preLEDPanelsIdPattern:s}, '\
                                     '{preLEDPanelsFrameid:s}, '\
                                     '{preLEDPanelsStatefilterLo:s}, '\
                                     '{preLEDPanelsStatefilterHi:s}, '\
-                                    '{preLEDPanelsStatefilterCriteria:s}, '\
-                                    '{preLEDPanelsTimeout:s}\n'
+                                    '{preLEDPanelsStatefilterCriteria:s}\n'
 
         
         self.headerPreWait1Txt =    'preWait1\n'
@@ -300,8 +294,7 @@ class Save:
                                     'trialRobotMoveRelAngleType, '\
                                     'trialRobotMoveRelSpeed, '\
                                     'trialRobotMoveRelSpeedType, '\
-                                    'trialRobotMoveRelTolerance, ' \
-                                    'trialRobotMoveTimeout\n'
+                                    'trialRobotMoveRelTolerance\n'
         self.templateTrialRobot =   '{trialRobotEnabled:s}, '\
                                     '{trialRobotMovePatternFramePosition:s}, '\
                                     '{trialRobotMovePatternFrameAngle:s}, '\
@@ -321,8 +314,7 @@ class Save:
                                     '{trialRobotMoveRelAngleType:s}, '\
                                     '{trialRobotMoveRelSpeed:s}, '\
                                     '{trialRobotMoveRelSpeedType:s}, '\
-                                    '{trialRobotMoveRelTolerance:s}, ' \
-                                    '{trialRobotMoveTimeout:s}\n'
+                                    '{trialRobotMoveRelTolerance:s}\n'
                                     
         self.headerTrialLaserTxt =  'trialLaserEnabled, '\
                                     'trialLaserPatternFramePosition, '\
@@ -337,8 +329,7 @@ class Save:
                                     'trialLaserPatternDirection, '\
                                     'trialLaserStatefilterLo, '\
                                     'trialLaserStatefilterHi, '\
-                                    'trialLaserStatefilterCriteria, ' \
-                                    'trialLaserTimeout\n'
+                                    'trialLaserStatefilterCriteria\n'
         self.templateTrialLaser =   '{trialLaserEnabled:s}, '\
                                     '{trialLaserPatternFramePosition:s}, '\
                                     '{trialLaserPatternFrameAngle:s}, '\
@@ -352,8 +343,7 @@ class Save:
                                     '{trialLaserPatternDirection:s}, '\
                                     '\"{trialLaserStatefilterLo:s}\", '\
                                     '\"{trialLaserStatefilterHi:s}\", '\
-                                    '{trialLaserStatefilterCriteria:s}, ' \
-                                    '{trialLaserTimeout:s}\n'
+                                    '{trialLaserStatefilterCriteria:s}\n'
         
         self.headerTrialLEDPanelsTxt = 'trialLEDPanelsEnabled, '\
                                     'trialLEDPanelsCommand, '\
@@ -361,16 +351,14 @@ class Save:
                                     'trialLEDPanelsFrameid, '\
                                     'trialLEDPanelsStatefilterLo, '\
                                     'trialLEDPanelsStatefilterHi, '\
-                                    'trialLEDPanelsStatefilterCriteria, '\
-                                    'trialLEDPanelsTimeout\n'
+                                    'trialLEDPanelsStatefilterCriteria\n'
         self.templateTrialLEDPanels = '{trialLEDPanelsEnabled:s}, '\
                                     '{trialLEDPanelsCommand:s}, '\
                                     '{trialLEDPanelsIdPattern:s}, '\
                                     '{trialLEDPanelsFrameid:s}, '\
                                     '{trialLEDPanelsStatefilterLo:s}, '\
                                     '{trialLEDPanelsStatefilterHi:s}, '\
-                                    '{trialLEDPanelsStatefilterCriteria:s}, '\
-                                    '{trialLEDPanelsTimeout:s}\n'
+                                    '{trialLEDPanelsStatefilterCriteria:s}\n'
         
         self.headerPostTriggerTxt = 'postTriggerEnabled, '\
                                     'postTriggerFrameidParent, '\
@@ -639,7 +627,6 @@ class Save:
                                                 preRobotMoveRelSpeed          = str(experimentparamsReq.pre.robot.move.relative.speed),
                                                 preRobotMoveRelSpeedType      = str(experimentparamsReq.pre.robot.move.relative.speedType),
                                                 preRobotMoveRelTolerance      = str(experimentparamsReq.pre.robot.move.relative.tolerance),
-                                                preRobotMoveTimeout           = str(experimentparamsReq.pre.robot.move.timeout),
                                                 )
         
         #######################################################################
@@ -690,7 +677,6 @@ class Save:
                                                 preLaserStatefilterHi         = statefilterHi,
                                                 preLaserStatefilterLo         = statefilterLo,
                                                 preLaserStatefilterCriteria   = statefilterCriteria,
-                                                preLaserTimeout               = str(experimentparamsReq.pre.lasertrack.timeout),
                                                 )
             
         #######################################################################
@@ -702,7 +688,6 @@ class Save:
                                                 preLEDPanelsStatefilterLo       = str(experimentparamsReq.pre.ledpanels.statefilterLo),
                                                 preLEDPanelsStatefilterHi       = str(experimentparamsReq.pre.ledpanels.statefilterHi),
                                                 preLEDPanelsStatefilterCriteria = str(experimentparamsReq.pre.ledpanels.statefilterCriteria),
-                                                preLEDPanelsTimeout             = str(experimentparamsReq.pre.ledpanels.timeout),
                                                 )
         #######################################################################
         headerPreWait1 = self.templatePreWait1.format(
@@ -756,7 +741,6 @@ class Save:
                                                 trialRobotMoveRelSpeed          = str(experimentparamsReq.trial.robot.move.relative.speed),
                                                 trialRobotMoveRelSpeedType      = str(experimentparamsReq.trial.robot.move.relative.speedType),
                                                 trialRobotMoveRelTolerance      = str(experimentparamsReq.trial.robot.move.relative.tolerance),
-                                                trialRobotMoveTimeout           = str(experimentparamsReq.trial.robot.move.timeout),
                                                 )
         
         #######################################################################
@@ -807,7 +791,6 @@ class Save:
                                                 trialLaserStatefilterHi         = statefilterHi,
                                                 trialLaserStatefilterLo         = statefilterLo,
                                                 trialLaserStatefilterCriteria   = statefilterCriteria,
-                                                trialLaserTimeout               = str(experimentparamsReq.trial.lasertrack.timeout),
                                                 )
             
         #######################################################################
@@ -819,7 +802,6 @@ class Save:
                                                 trialLEDPanelsStatefilterLo       = str(experimentparamsReq.trial.ledpanels.statefilterLo),
                                                 trialLEDPanelsStatefilterHi       = str(experimentparamsReq.trial.ledpanels.statefilterHi),
                                                 trialLEDPanelsStatefilterCriteria = str(experimentparamsReq.trial.ledpanels.statefilterCriteria),
-                                                trialLEDPanelsTimeout             = str(experimentparamsReq.trial.ledpanels.timeout),
                                                 )
             
         #######################################################################

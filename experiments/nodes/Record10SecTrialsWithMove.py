@@ -73,12 +73,10 @@ class Experiment():
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.pattern.param = 0
         self.experimentparams.trial.robot.move.pattern.direction = 1
-        self.experimentparams.trial.robot.move.timeout = 600
         self.experimentparams.trial.robot.home.enabled = True
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.timeout = -1
         self.experimentparams.trial.robot.home.tolerance = 2
         
         
@@ -91,13 +89,12 @@ class Experiment():
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
-        self.experimentparams.trial.ledpanels.timeout = -1
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly1'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.speedAbsParentMin = 999.0
-        self.experimentparams.post.trigger.speedAbsParentMax = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. NEVER
         self.experimentparams.post.trigger.speedAbsChildMin  =   0.0
         self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.post.trigger.speedRelMin       =   0.0
@@ -109,7 +106,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 0
+        self.experimentparams.post.trigger.timeout = 10
 
         self.experimentparams.post.wait = 0.0
         

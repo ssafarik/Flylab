@@ -6,7 +6,7 @@ import struct
 
 
 class HomeSettings(genpy.Message):
-  _md5sum = "7ed82ede88cbba66af66a81228a10223"
+  _md5sum = "c94d2761583b9371f578776b5f3f9c23"
   _type = "experiments/HomeSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool          enabled
@@ -14,13 +14,12 @@ float64       x
 float64       y
 float64       speed
 float64       tolerance
-float64       timeout
 
 
 
 """
-  __slots__ = ['enabled','x','y','speed','tolerance','timeout']
-  _slot_types = ['bool','float64','float64','float64','float64','float64']
+  __slots__ = ['enabled','x','y','speed','tolerance']
+  _slot_types = ['bool','float64','float64','float64','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -30,7 +29,7 @@ float64       timeout
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       enabled,x,y,speed,tolerance,timeout
+       enabled,x,y,speed,tolerance
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -49,15 +48,12 @@ float64       timeout
         self.speed = 0.
       if self.tolerance is None:
         self.tolerance = 0.
-      if self.timeout is None:
-        self.timeout = 0.
     else:
       self.enabled = False
       self.x = 0.
       self.y = 0.
       self.speed = 0.
       self.tolerance = 0.
-      self.timeout = 0.
 
   def _get_types(self):
     """
@@ -72,7 +68,7 @@ float64       timeout
     """
     try:
       _x = self
-      buff.write(_struct_B5d.pack(_x.enabled, _x.x, _x.y, _x.speed, _x.tolerance, _x.timeout))
+      buff.write(_struct_B4d.pack(_x.enabled, _x.x, _x.y, _x.speed, _x.tolerance))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -85,8 +81,8 @@ float64       timeout
       end = 0
       _x = self
       start = end
-      end += 41
-      (_x.enabled, _x.x, _x.y, _x.speed, _x.tolerance, _x.timeout,) = _struct_B5d.unpack(str[start:end])
+      end += 33
+      (_x.enabled, _x.x, _x.y, _x.speed, _x.tolerance,) = _struct_B4d.unpack(str[start:end])
       self.enabled = bool(self.enabled)
       return self
     except struct.error as e:
@@ -101,7 +97,7 @@ float64       timeout
     """
     try:
       _x = self
-      buff.write(_struct_B5d.pack(_x.enabled, _x.x, _x.y, _x.speed, _x.tolerance, _x.timeout))
+      buff.write(_struct_B4d.pack(_x.enabled, _x.x, _x.y, _x.speed, _x.tolerance))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -115,12 +111,12 @@ float64       timeout
       end = 0
       _x = self
       start = end
-      end += 41
-      (_x.enabled, _x.x, _x.y, _x.speed, _x.tolerance, _x.timeout,) = _struct_B5d.unpack(str[start:end])
+      end += 33
+      (_x.enabled, _x.x, _x.y, _x.speed, _x.tolerance,) = _struct_B4d.unpack(str[start:end])
       self.enabled = bool(self.enabled)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_B5d = struct.Struct("<B5d")
+_struct_B4d = struct.Struct("<B4d")

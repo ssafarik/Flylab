@@ -9,13 +9,12 @@ import experiments.msg
 import patterngen.msg
 
 class MoveSettings(genpy.Message):
-  _md5sum = "e88b0a4362e5657bfafbffd4b49641e0"
+  _md5sum = "e58c64c086bac41eb92ad10845bd21cd"
   _type = "experiments/MoveSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """string                    mode  # 'pattern' or 'relative'
 MoveRelative              relative
 patterngen/MsgPattern     pattern
-float64                   timeout
 
 
 ================================================================================
@@ -55,8 +54,8 @@ float64 y
 float64 z
 
 """
-  __slots__ = ['mode','relative','pattern','timeout']
-  _slot_types = ['string','experiments/MoveRelative','patterngen/MsgPattern','float64']
+  __slots__ = ['mode','relative','pattern']
+  _slot_types = ['string','experiments/MoveRelative','patterngen/MsgPattern']
 
   def __init__(self, *args, **kwds):
     """
@@ -66,7 +65,7 @@ float64 z
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       mode,relative,pattern,timeout
+       mode,relative,pattern
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -81,13 +80,10 @@ float64 z
         self.relative = experiments.msg.MoveRelative()
       if self.pattern is None:
         self.pattern = patterngen.msg.MsgPattern()
-      if self.timeout is None:
-        self.timeout = 0.
     else:
       self.mode = ''
       self.relative = experiments.msg.MoveRelative()
       self.pattern = patterngen.msg.MsgPattern()
-      self.timeout = 0.
 
   def _get_types(self):
     """
@@ -162,7 +158,7 @@ float64 z
         _x = val1
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
       _x = self
-      buff.write(_struct_3dBdid.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.timeout))
+      buff.write(_struct_3dBdi.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -280,8 +276,8 @@ float64 z
         self.pattern.points.append(val1)
       _x = self
       start = end
-      end += 45
-      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.timeout,) = _struct_3dBdid.unpack(str[start:end])
+      end += 37
+      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction,) = _struct_3dBdi.unpack(str[start:end])
       self.pattern.preempt = bool(self.pattern.preempt)
       return self
     except struct.error as e:
@@ -356,7 +352,7 @@ float64 z
         _x = val1
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
       _x = self
-      buff.write(_struct_3dBdid.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.timeout))
+      buff.write(_struct_3dBdi.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -475,8 +471,8 @@ float64 z
         self.pattern.points.append(val1)
       _x = self
       start = end
-      end += 45
-      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.timeout,) = _struct_3dBdid.unpack(str[start:end])
+      end += 37
+      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction,) = _struct_3dBdi.unpack(str[start:end])
       self.pattern.preempt = bool(self.pattern.preempt)
       return self
     except struct.error as e:
@@ -485,7 +481,7 @@ float64 z
 _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
-_struct_3dBdid = struct.Struct("<3dBdid")
 _struct_2d = struct.Struct("<2d")
 _struct_2di = struct.Struct("<2di")
+_struct_3dBdi = struct.Struct("<3dBdi")
 _struct_3d = struct.Struct("<3d")

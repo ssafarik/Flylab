@@ -6,5 +6,4 @@ string                  frame_id                # Which frame to track.
 string                  statefilterHi   		
 string                  statefilterLo	 		# Contains a string to be interpreted as a dict.  Operation will only be enabled for fly states between these two entries.
 string                  statefilterCriteria	    # "inclusive" or "exclusive"
-float64                 timeout
 

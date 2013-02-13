@@ -335,9 +335,10 @@ class ResetHardware (smach.State):
             
 
             while self.arenastate is None:
-                if userdata.experimentparamsIn.trial.robot.home.timeout != -1:
-                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.trial.robot.home.timeout:
-                        return 'timeout'
+                #if userdata.experimentparamsIn.trial.robot.home.timeout != -1:
+                #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.trial.robot.home.timeout:
+                #        return 'timeout'
+                    
                 #if self.preempt_requested():
                 #    self.service_preempt()
                 #    return 'preempt'
@@ -381,10 +382,10 @@ class ResetHardware (smach.State):
                     break
                 
                 
-                if userdata.experimentparamsIn.trial.robot.home.timeout != -1:
-                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.trial.robot.home.timeout:
-                        rv = 'timeout'
-                        break
+                #if userdata.experimentparamsIn.trial.robot.home.timeout != -1:
+                #    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.trial.robot.home.timeout:
+                #        rv = 'timeout'
+                #        break
                 
                 self.rosrate.sleep()
 
@@ -894,9 +895,9 @@ class MoveRobot (smach.State):
             self.timeStart = rospy.Time.now()
     
             while self.arenastate is None:
-                if self.paramsIn.robot.move.timeout != -1:
-                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.robot.move.timeout:
-                        return 'timeout'
+                #if self.paramsIn.robot.move.timeout != -1:
+                #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.robot.move.timeout:
+                #        return 'timeout'
                 
                 if self.preempt_requested():
                     rospy.loginfo('preempt requested: MoveRobot()')
@@ -1028,10 +1029,10 @@ class MoveRobot (smach.State):
                 break
 
             
-            if self.paramsIn.robot.move.timeout != -1:
-                if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > self.paramsIn.robot.move.timeout:
-                    rv = 'timeout'
-                    break
+            #if self.paramsIn.robot.move.timeout != -1:
+            #    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > self.paramsIn.robot.move.timeout:
+            #        rv = 'timeout'
+            #        break
             
             self.rosrate.sleep()
 
@@ -1073,10 +1074,10 @@ class MoveRobot (smach.State):
                 break
 
             
-            if self.paramsIn.robot.move.timeout != -1:
-                if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.robot.move.timeout:
-                    rv = 'timeout'
-                    break
+            #if self.paramsIn.robot.move.timeout != -1:
+            #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.robot.move.timeout:
+            #        rv = 'timeout'
+            #        break
             
             self.rosrate.sleep()
 
@@ -1465,10 +1466,10 @@ class Lasertrack (smach.State):
                     rv = 'preempt'
                     break
     
-                if self.paramsIn.lasertrack.timeout != -1:
-                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.lasertrack.timeout:
-                        rv = 'timeout'
-                        break
+                #if self.paramsIn.lasertrack.timeout != -1:
+                #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.lasertrack.timeout:
+                #        rv = 'timeout'
+                #        break
                 
                 self.rosrate.sleep()
 
@@ -1898,10 +1899,10 @@ class LEDPanels (smach.State):
                     rv = 'preempt'
                     break
     
-                if self.paramsIn.ledpanels.timeout != -1:
-                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.ledpanels.timeout:
-                        rv = 'timeout'
-                        break
+                #if self.paramsIn.ledpanels.timeout != -1:
+                #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.ledpanels.timeout:
+                #        rv = 'timeout'
+                #        break
                 
                 self.rosrate.sleep()
 
