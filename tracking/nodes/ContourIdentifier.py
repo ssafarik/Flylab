@@ -40,7 +40,7 @@ class ContourIdentifier:
 
     def __init__(self):
         self.initialized = False
-        self.stateEndEffector = None  # If no robot exists, this will remain as None.  Set in EndEffector callback.
+        self.stateEndEffector = None  # If no robot exists, this will remain as None.  Set in ContourinfoLists_callback.
         self.nFlies = rospy.get_param('nFlies', 0)
         self.nRobots = rospy.get_param('nRobots', 0)
         
@@ -118,12 +118,11 @@ class ContourIdentifier:
         except (rospy.ServiceException, IOError), e:
             print "Service call failed: %s"%e
 
-        # Open a file for saving raw data.
-        self.fidRobot = open("/tmp/robot.csv", 'w')
-        self.fidRobot.write("xendeffector, yendeffector, xfiltered, yfiltered, xcontour, ycontour\n")
-
-        self.fidFly = open("/tmp/fly.csv", 'w')
-        self.fidFly.write("xraw, yraw, xfiltered, yfiltered\n")
+        # Open files for saving raw data.
+        #self.fidRobot = open("/tmp/robot.csv", 'w')
+        #self.fidRobot.write("xendeffector, yendeffector, xfiltered, yfiltered, xcontour, ycontour\n")
+        #self.fidFly = open("/tmp/fly.csv", 'w')
+        #self.fidFly.write("xraw, yraw, xfiltered, yfiltered\n")
 
         rospy.on_shutdown(self.OnShutdown_callback)
 
@@ -132,8 +131,9 @@ class ContourIdentifier:
 
 
     def OnShutdown_callback(self):
-        self.fidRobot.close()
-        self.fidFly.close()
+        #self.fidRobot.close()
+        #self.fidFly.close()
+        pass
         
 
     # TrackingCommand_callback()
@@ -587,25 +587,26 @@ class ContourIdentifier:
 #        self.timePrev = rospy.Time.now().to_sec()
         if self.initialized:
             # Get state of the EndEffector.
-            try:
-                stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
-                (transEndEffector, quatEndEffector) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
-            except tf.Exception, e:
-                rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
-            else:
-                if self.stateEndEffector is None:
-                    self.ResetFlyObjects() # When first data, need to reset all the fly objects due to tracking of robot contour as a fly, hence having an extra object.
-                    self.stateEndEffector = MsgFrameState()
-                    
-                self.stateEndEffector.header.stamp = stamp
-                self.stateEndEffector.header.frame_id = 'Arena'
-                self.stateEndEffector.pose.position.x = transEndEffector[0]
-                self.stateEndEffector.pose.position.y = transEndEffector[1]
-                self.stateEndEffector.pose.position.z = transEndEffector[2]
-                self.stateEndEffector.pose.orientation.x = quatEndEffector[0]
-                self.stateEndEffector.pose.orientation.y = quatEndEffector[1]
-                self.stateEndEffector.pose.orientation.z = quatEndEffector[2]
-                self.stateEndEffector.pose.orientation.w = quatEndEffector[3]
+            if self.nRobots>0:
+                try:
+                    stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
+                    (transEndEffector, quatEndEffector) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
+                except tf.Exception, e:
+                    rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
+                else:
+                    if self.stateEndEffector is None:
+                        self.ResetFlyObjects() # When first data, need to reset all the fly objects due to tracking of robot contour as a fly, hence having an extra object.
+                        self.stateEndEffector = MsgFrameState()
+                        
+                    self.stateEndEffector.header.stamp = stamp
+                    self.stateEndEffector.header.frame_id = 'Arena'
+                    self.stateEndEffector.pose.position.x = transEndEffector[0]
+                    self.stateEndEffector.pose.position.y = transEndEffector[1]
+                    self.stateEndEffector.pose.position.z = transEndEffector[2]
+                    self.stateEndEffector.pose.orientation.x = quatEndEffector[0]
+                    self.stateEndEffector.pose.orientation.y = quatEndEffector[1]
+                    self.stateEndEffector.pose.orientation.z = quatEndEffector[2]
+                    self.stateEndEffector.pose.orientation.w = quatEndEffector[3]
 
             contourinfolistsPixels = self.FilterContourinfoWithinMask(contourinfolistsPixels)
             contourinfolists = self.TransformContourinfoArenaFromCamera(contourinfolistsPixels)
