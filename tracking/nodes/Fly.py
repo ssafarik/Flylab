@@ -51,6 +51,7 @@ class Fly:
             self.pubImageMask     = rospy.Publisher(self.name+"/image_mask", Image)
             self.pubImageMaskBody = rospy.Publisher(self.name+"/image_mask_body", Image)
             self.pubLeftMetric    = rospy.Publisher(self.name+'/leftmetric', Float32)
+            self.pubLeftMetricMean= rospy.Publisher(self.name+'/leftmetricmean', Float32)
             self.pubLeft          = rospy.Publisher(self.name+'/left', Float32)
             self.pubRightMetric   = rospy.Publisher(self.name+'/rightmetric', Float32)
             self.pubRight         = rospy.Publisher(self.name+'/right', Float32)
@@ -482,7 +483,7 @@ class Fly:
 
         # Metric mean, for thresholding.
         if (self.metricMeanLeft is not None):
-            a = 0.01
+            a = 0.001
             self.metricMeanLeft  = (1-a)*self.metricMeanLeft  + a*metricLeft 
             self.metricMeanRight = (1-a)*self.metricMeanRight + a*metricRight 
         else:
@@ -539,6 +540,7 @@ class Fly:
             self.pubImageRoiMean.publish(self.imgRoiMean)
             self.pubImageRoiWings.publish(imgWings)
             self.pubLeftMetric.publish(metricLeft)
+            self.pubLeftMetricMean.publish(3*self.metricMeanLeft)
             self.pubRightMetric.publish(metricRight)
             self.pubLeft.publish(angleLeft)
             self.pubRight.publish(angleRight)

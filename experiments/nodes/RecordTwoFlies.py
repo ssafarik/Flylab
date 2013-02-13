@@ -21,7 +21,7 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Record Fly-On-Fly Behavior"
+        self.experimentparams.experiment.description = "Hot Fly-On-Fly Action"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
