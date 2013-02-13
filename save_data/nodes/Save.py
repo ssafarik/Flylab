@@ -97,7 +97,7 @@ class Save:
         self.format_align = ">"
         self.format_sign = " "
         self.format_width = "7"
-        self.format_precision = "2"
+        self.format_precision = "3"
         self.format_type = "f"
 
         
