@@ -4,8 +4,9 @@ function header = FlylabReadHeader (filename)
 % Return a struct containing all the various fields.
 %
 
+    bSuccess = false;
     fid = fopen(filename);
-    
+
     while (1)
         headings = textscan(fid,'%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q',1,'Delimiter',',');
         switch headings{1}{1}
@@ -15,13 +16,13 @@ function header = FlylabReadHeader (filename)
                     if strcmpi(values{i},'True'); values{i}=true; end;
                     if strcmpi(values{i},'False'); values{i}=false; end;
                 end
-                if str2num(values{1}{1})<2.81
-                    fprintf('WARNING: This code only reads Flylab .csv version 2.81\nUse ConvertCsv.py to convert.\n');
-                    % Note: to update for newer versions, change the
-                    % textscan() lines below to accommodate the changed
-                    % header lines.
-                end
                 structVersion = struct(headings{1}{1},values{1});
+
+                if strcmp(values{1}{1},'2.81')
+                    bSuccess = true;
+                else
+                    break;
+                end
                 
             
             case 'date_time'
@@ -273,25 +274,38 @@ function header = FlylabReadHeader (filename)
  
     % Build the output structure.
     header = struct();
-    topfields = fieldnames(structTop);
-    for i = 1:length(topfields)
-        header = setfield(header, topfields{i}, getfield(structTop,topfields{i}));
+    if bSuccess
+        topfields = fieldnames(structTop);
+        for i = 1:length(topfields)
+            header = setfield(header, topfields{i}, getfield(structTop,topfields{i}));
+        end
+        header.version               = structVersion;
+        header.robots                = structRobots;
+        header.flies                 = structFlies;
+        header.trackingExclusionzone = structTrackingExclusionzone;
+        header.preRobot              = structPreRobot;
+        header.preLaser              = structPreLaser;
+        header.preLEDPanels          = structPreLEDPanels;
+        header.preWait1              = structPreWait1;
+        header.preTrigger            = structPreTrigger;
+        header.preWait2              = structPreWait2;
+        header.trialRobot            = structTrialRobot;
+        header.trialLaser            = structTrialLaser;
+        header.trialLEDPanels        = structTrialLEDPanels;
+        header.postTrigger           = structPostTrigger;
+        header.postWait              = structPostWait;
+    else
+        fprintf('WARNING: This code only reads Flylab .csv version 2.81\n');
+        try
+            fprintf('%s is a version %s file.\n', filename, values{1}{1});
+        catch
+            fprintf('%s is an older version file.\n', filename);
+        end
+        fprintf('Use ConvertCsv.py to convert.\n');
+        % Note: to update for newer versions, change the
+        % textscan() lines above to accommodate the changed
+        % header lines.
     end
-    header.version               = structVersion;
-    header.robots                = structRobots;
-    header.flies                 = structFlies;
-    header.trackingExclusionzone = structTrackingExclusionzone;
-    header.preRobot              = structPreRobot;
-    header.preLaser              = structPreLaser;
-    header.preLEDPanels          = structPreLEDPanels;
-    header.preWait1              = structPreWait1;
-    header.preTrigger            = structPreTrigger;
-    header.preWait2              = structPreWait2;
-    header.trialRobot            = structTrialRobot;
-    header.trialLaser            = structTrialLaser;
-    header.trialLEDPanels        = structTrialLEDPanels;
-    header.postTrigger           = structPostTrigger;
-    header.postWait              = structPostWait;
     
     fclose(fid);
                 

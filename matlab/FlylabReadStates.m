@@ -6,4 +6,9 @@ function statesOut = FlylabReadStates (filename)
 % statesOut:    All the states.
 %
 
-    statesOut = csvread(filename, 49, 0);
+    try
+        statesOut = csvread(filename, 49, 0);
+    catch
+        statesOut = []; % Empty file.
+    end
+    
