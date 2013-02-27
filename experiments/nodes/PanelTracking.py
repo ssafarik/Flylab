@@ -70,35 +70,10 @@ class Experiment():
         
         
         self.experimentparams.trial.lasertrack.enabled = False
-        self.experimentparams.trial.lasertrack.pattern_list = []
-        self.experimentparams.trial.lasertrack.statefilterHi_list = []
-        self.experimentparams.trial.lasertrack.statefilterLo_list = []
-        self.experimentparams.trial.lasertrack.statefilterCriteria_list = []
-        for iFly in range(rospy.get_param('nFlies', 0)):#range(3):#
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(shape      = 'grid',
-                                                                            frameid   = 'Fly%dForecast' % (iFly+1),
-                                                                            hzPattern  = 40.0,
-                                                                            hzPoint    = 1000.0,
-                                                                            count      = 1,
-                                                                            size       = Point(x=2,
-                                                                                               y=2),
-                                                                            preempt    = False,
-                                                                            param      = 3, # Peano curve level.
-                                                                            direction  = 1),
-                                                                 )
-            #self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'speed':5.0}")
-            #self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'speed':0.0}")
-            #self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'velocity':{'linear':{'x':+6,'y':+6}}}")
-            #self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
-            #self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
-            #self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
-            self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'pose':{'position':{'x':-25, 'y':-25}}}")  # This is the cool zone.
-            self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'pose':{'position':{'x':-50, 'y':-50}}}")
-            self.experimentparams.trial.lasertrack.statefilterCriteria_list.append("exclusive")
         
         self.experimentparams.trial.ledpanels.enabled = True
-        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 2
+        self.experimentparams.trial.ledpanels.command = 'trackview'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = 1
         self.experimentparams.trial.ledpanels.origin.x = 10
         self.experimentparams.trial.ledpanels.origin.y = 0
         self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
