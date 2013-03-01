@@ -107,7 +107,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 180    # 10 minutes
+        self.experimentparams.post.trigger.timeout = 600    # 10 minutes
 
         self.experimentparams.post.wait = 0.0
         
