@@ -23,6 +23,7 @@ gRate = 50  # This is the loop rate at which the experiment states run.
 #######################################################################################################
 class Reset (smach.State):
     def __init__(self, tfrx=None):
+        self.tfrx = tfrx
         smach.State.__init__(self, 
                              outcomes=['success','disabled','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
@@ -150,6 +151,7 @@ class Reset (smach.State):
 #######################################################################################################
 class Action (smach.State):
     def __init__(self, mode='trial', tfrx=None):
+        self.tfrx = tfrx
         smach.State.__init__(self, 
                              outcomes=['success','disabled','preempt','aborted'],
                              input_keys=['experimentparamsIn'])
@@ -330,14 +332,14 @@ class Action (smach.State):
                     
             elif (self.paramsIn.robot.move.relative.angleType=='constant'):
                 if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
-                    angleBase = GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
+                    angleBase = self.GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
                     angleRel = self.paramsIn.robot.move.relative.angle
                 # else we already computed the angle.
 
             elif (self.paramsIn.robot.move.relative.angleType=='current'):
                 if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
-                    angleBase = GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
-                    angleRel = GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOriginAngle, 'Robot')
+                    angleBase = self.GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
+                    angleRel = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOriginAngle, 'Robot')
                     if (angleRel is None):
                         angleRel = 0.0
                 # else we already computed the angle.
@@ -367,12 +369,12 @@ class Action (smach.State):
                 doMove = True
                 # Compute target point in workspace (i.e. Arena) coordinates.
                 #ptOrigin = N.array([posOrigin.x, posOrigin.y])
-                ptOrigin = GetPositionFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginPosition)
+                ptOrigin = self.GetPositionFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginPosition)
                 if (ptOrigin is not None):
                     d = self.paramsIn.robot.move.relative.distance
                     ptRelative = d * N.array([N.cos(angle), N.sin(angle)])
                     ptTarget = ptOrigin[0:2] + ptRelative
-                    self.ptTarget = ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
+                    self.ptTarget = self.ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
 
                     # Send the command.
                     self.goal.state.header = self.arenastate.robot.header

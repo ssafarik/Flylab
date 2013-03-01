@@ -22,9 +22,23 @@ from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
 from visualization_msgs.msg import Marker
 
+
+################################################################
+# To add a new hardware component, do the following:
+# 1. Create a file ExperimentLib_______.py (see the others for examples)
+# 2. Import it into this file
+# 3. Add it to the g_actions_dict below.
+#
+
 import ExperimentLibRobot
 import ExperimentLibGalvos
 import ExperimentLibLEDPanels
+
+g_actions_dict = {'ROBOT' : ExperimentLibRobot, 
+                  'GALVOS' : ExperimentLibGalvos,
+                  'LEDPANELS' : ExperimentLibLEDPanels}
+################################################################
+
 
 
 gRate = 50  # This is the loop rate at which the experiment states run.
@@ -119,170 +133,6 @@ class NewExperiment (smach.State):
 # End class NewExperiment()
 
 
-
-#######################################################################################################
-#######################################################################################################
-class ResetHardware (smach.State):
-    def __init__(self):
-
-        smach.State.__init__(self, 
-                             outcomes=['success','disabled','timeout','preempt','aborted'],
-                             input_keys=['experimentparamsIn'])
-
-        self.arenastate = None
-        self.rosrate = rospy.Rate(gRate)
-
-        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
-        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
-
-        rospy.on_shutdown(self.OnShutdown_callback)
-        
-        
-        # Command messages.
-        self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
-
-
-    def CommandExperiment_callback(self, msgString):
-        self.commandExperiment = msgString.data
-            
-        
-    def OnShutdown_callback(self):
-        pass
-        
-        
-    def ArenaState_callback(self, arenastate):
-        self.arenastate = arenastate
-
-
-
-    def execute(self, userdata):
-        rospy.loginfo("EL State ResetHardware(%s)" % [userdata.experimentparamsIn.trial.robot.home.enabled, userdata.experimentparamsIn.trial.robot.home.x, userdata.experimentparamsIn.trial.robot.home.y])
-
-        # Reset the various hardware.
-        rv1 = self.ResetRobot(userdata)
-        rv2 = self.ResetLEDPanels(userdata)
-        
-        
-        # Figure out what happened.
-        if ('aborted' in [rv1,rv2]):
-            rv = 'aborted'
-        elif ('timeout' in [rv1,rv2]):
-            rv = 'timeout'
-        elif rv1=='disabled' and rv2=='disabled':
-            rv = 'disabled'
-        else:
-            rv = 'success'
-            
-        #rospy.loginfo ('EL Exiting ResetHardware()')
-        return rv
-    
-        
-    def ResetRobot(self, userdata):
-        rv = 'disabled'
-        if (userdata.experimentparamsIn.trial.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
-            self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
-            self.action.wait_for_server()
-            self.goal = ActionStageStateGoal()
-            self.SetStageState = None
-            self.timeStart = rospy.Time.now()
-    
-            rospy.wait_for_service('set_stage_state')
-            try:
-                self.SetStageState = rospy.ServiceProxy('set_stage_state', SrvFrameState)
-            except rospy.ServiceException, e:
-                print "Service call failed: %s"%e
-            
-
-            while self.arenastate is None:
-                #if userdata.experimentparamsIn.trial.robot.home.timeout != -1:
-                #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > userdata.experimentparamsIn.trial.robot.home.timeout:
-                #        return 'timeout'
-                    
-                #if self.preempt_requested():
-                #    self.service_preempt()
-                #    return 'preempt'
-                rospy.sleep(1.0)
-    
-                if (self.commandExperiment=='exitnow'):
-                    return 'aborted'
-    
-    
-            # Send the command.
-            self.goal.state.header = self.arenastate.robot.header
-            #self.goal.state.header.stamp = rospy.Time.now()
-            self.goal.state.pose.position.x = userdata.experimentparamsIn.trial.robot.home.x
-            self.goal.state.pose.position.y = userdata.experimentparamsIn.trial.robot.home.y
-            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                        pose=self.goal.state.pose),
-                                                    speed = userdata.experimentparamsIn.trial.robot.home.speed))
-
-            rv = 'aborted'
-            while not rospy.is_shutdown():
-                # Are we there yet?
-                
-                ptRobot = N.array([self.arenastate.robot.pose.position.x, 
-                                   self.arenastate.robot.pose.position.y])
-                ptTarget = N.array([self.goal.state.pose.position.x,
-                                    self.goal.state.pose.position.y])                
-                r = N.linalg.norm(ptRobot-ptTarget)
-                rospy.loginfo ('EL ResetHardware() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
-                
-                
-                if (r <= userdata.experimentparamsIn.trial.robot.home.tolerance):
-                    rospy.sleep(0.5) # Allow some settling time.
-                    rv = 'success'
-                    break
-                
-                
-                if self.preempt_requested():
-                    rospy.loginfo('preempt requested: ResetRobot()')
-                    self.service_preempt()
-                    rv = 'preempt'
-                    break
-                
-                
-                #if userdata.experimentparamsIn.trial.robot.home.timeout != -1:
-                #    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > userdata.experimentparamsIn.trial.robot.home.timeout:
-                #        rv = 'timeout'
-                #        break
-                
-                self.rosrate.sleep()
-
-                if (self.commandExperiment=='exitnow'):
-                    rv = 'aborted'
-                    break
-                
-        return rv
-        
-
-    # Init the LEDPanels to either off, or to the pretrial state, depending on what's enabled.
-    def ResetLEDPanels(self, userdata):
-        rv = 'disabled'
-        if (userdata.experimentparamsIn.pre.ledpanels.enabled):
-            rv = 'success'
-            msgPanelsCommand = MsgPanelsCommand(command='stop')
-            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
-
-            msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', 
-                                                arg1=userdata.experimentparamsIn.pre.ledpanels.idPattern)
-            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
-
-            msgPanelsCommand = MsgPanelsCommand(command='set_position', 
-                                                arg1=userdata.experimentparamsIn.pre.ledpanels.origin.x, 
-                                                arg2=userdata.experimentparamsIn.pre.ledpanels.origin.y)  # Set (x,y) position for the experiment.
-            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
-        else:
-            msgPanelsCommand = MsgPanelsCommand(command='all_off')
-            self.pubLEDPanelsCommand.publish (msgPanelsCommand)
-            
-
-        return rv
-# End class ResetHardware()        
-
-        
 
 #######################################################################################################
 #######################################################################################################
@@ -705,9 +555,7 @@ class TriggerOnTime (smach.State):
 class ExperimentLib():
     def __init__(self, experimentparams=None, newexperiment_callback=None, newtrial_callback=None, endtrial_callback=None):
         
-        self.actions_dict = {'ROBOT' : ExperimentLibRobot, 
-                             'GALVOS' : ExperimentLibGalvos,
-                             'LEDPANELS' : ExperimentLibLEDPanels}
+        self.actions_dict = g_actions_dict
         
         self.xHome = 0
         self.yHome = 0
@@ -934,7 +782,7 @@ class ExperimentLib():
         rv = 'success'
         for (name,classHardware) in self.actions_dict.iteritems():
             if (name in outcome_map):
-                if outcome_map[label] == 'aborted':
+                if outcome_map[name] == 'aborted':
                     rv = 'aborted'
                     
         return rv

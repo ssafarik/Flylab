@@ -27,9 +27,9 @@ class Experiment():
         
         self.experimentparams.save.filenamebase = "chase"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = True
+        self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
-        self.experimentparams.save.onlyWhileTriggered = True
+        self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
