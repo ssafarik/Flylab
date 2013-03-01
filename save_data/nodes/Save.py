@@ -630,17 +630,17 @@ class Save:
                                                 )
         
         #######################################################################
-        if len(experimentparamsReq.pre.lasertrack.pattern_list) > 0:
-            patternFramePosition   = str(experimentparamsReq.pre.lasertrack.pattern_list[0].frameidPosition)
-            patternFrameAngle      = str(experimentparamsReq.pre.lasertrack.pattern_list[0].frameidAngle)
-            patternShape           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].shape)
-            patternHzPattern       = str(experimentparamsReq.pre.lasertrack.pattern_list[0].hzPattern)
-            patternHzPoint         = str(experimentparamsReq.pre.lasertrack.pattern_list[0].hzPoint)
-            patternCount           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].count)
-            patternSizeX           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].size.x)
-            patternSizeY           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].size.y)
-            patternParam           = str(experimentparamsReq.pre.lasertrack.pattern_list[0].param)
-            patternDirection       = str(experimentparamsReq.pre.lasertrack.pattern_list[0].direction)
+        if len(experimentparamsReq.pre.lasergalvos.pattern_list) > 0:
+            patternFramePosition   = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].frameidPosition)
+            patternFrameAngle      = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].frameidAngle)
+            patternShape           = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].shape)
+            patternHzPattern       = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].hzPattern)
+            patternHzPoint         = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].hzPoint)
+            patternCount           = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].count)
+            patternSizeX           = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].size.x)
+            patternSizeY           = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].size.y)
+            patternParam           = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].param)
+            patternDirection       = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].direction)
         else:
             patternFramePosition   = ""
             patternFrameAngle      = ""
@@ -653,17 +653,17 @@ class Save:
             patternParam           = str(0.0)
             patternDirection       = str(1)
 
-        if len(experimentparamsReq.pre.lasertrack.statefilterHi_list) > 0:
-            statefilterHi          = str(experimentparamsReq.pre.lasertrack.statefilterHi_list[0])
-            statefilterLo          = str(experimentparamsReq.pre.lasertrack.statefilterLo_list[0])
-            statefilterCriteria    = str(experimentparamsReq.pre.lasertrack.statefilterCriteria_list[0])
+        if len(experimentparamsReq.pre.lasergalvos.statefilterHi_list) > 0:
+            statefilterHi          = str(experimentparamsReq.pre.lasergalvos.statefilterHi_list[0])
+            statefilterLo          = str(experimentparamsReq.pre.lasergalvos.statefilterLo_list[0])
+            statefilterCriteria    = str(experimentparamsReq.pre.lasergalvos.statefilterCriteria_list[0])
         else:
             statefilterHi          = ""
             statefilterLo          = ""
             statefilterCriteria    = ""
 
         headerPreLaser = self.templatePreLaser.format(
-                                                preLaserEnabled               = str(experimentparamsReq.pre.lasertrack.enabled),
+                                                preLaserEnabled               = str(experimentparamsReq.pre.lasergalvos.enabled),
                                                 preLaserPatternFramePosition  = patternFramePosition,
                                                 preLaserPatternFrameAngle     = patternFrameAngle,
                                                 preLaserPatternShape          = patternShape,
@@ -744,17 +744,17 @@ class Save:
                                                 )
         
         #######################################################################
-        if len(experimentparamsReq.trial.lasertrack.pattern_list) > 0:
-            patternFramePosition   = str(experimentparamsReq.trial.lasertrack.pattern_list[0].frameidPosition)
-            patternFrameAngle      = str(experimentparamsReq.trial.lasertrack.pattern_list[0].frameidAngle)
-            patternShape           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].shape)
-            patternHzPattern       = str(experimentparamsReq.trial.lasertrack.pattern_list[0].hzPattern)
-            patternHzPoint         = str(experimentparamsReq.trial.lasertrack.pattern_list[0].hzPoint)
-            patternCount           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].count)
-            patternSizeX           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].size.x)
-            patternSizeY           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].size.y)
-            patternParam           = str(experimentparamsReq.trial.lasertrack.pattern_list[0].param)
-            patternDirection       = str(experimentparamsReq.trial.lasertrack.pattern_list[0].direction)
+        if len(experimentparamsReq.trial.lasergalvos.pattern_list) > 0:
+            patternFramePosition   = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].frameidPosition)
+            patternFrameAngle      = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].frameidAngle)
+            patternShape           = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].shape)
+            patternHzPattern       = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].hzPattern)
+            patternHzPoint         = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].hzPoint)
+            patternCount           = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].count)
+            patternSizeX           = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].size.x)
+            patternSizeY           = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].size.y)
+            patternParam           = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].param)
+            patternDirection       = str(experimentparamsReq.trial.lasergalvos.pattern_list[0].direction)
         else:
             patternFramePosition   = ""
             patternFrameAngle      = ""
@@ -767,17 +767,17 @@ class Save:
             patternParam           = str(0.0)
             patternDirection       = str(0)
 
-        if len(experimentparamsReq.trial.lasertrack.statefilterHi_list) > 0:
-            statefilterHi          = str(experimentparamsReq.trial.lasertrack.statefilterHi_list[0])
-            statefilterLo          = str(experimentparamsReq.trial.lasertrack.statefilterLo_list[0])
-            statefilterCriteria    = str(experimentparamsReq.trial.lasertrack.statefilterCriteria_list[0])
+        if len(experimentparamsReq.trial.lasergalvos.statefilterHi_list) > 0:
+            statefilterHi          = str(experimentparamsReq.trial.lasergalvos.statefilterHi_list[0])
+            statefilterLo          = str(experimentparamsReq.trial.lasergalvos.statefilterLo_list[0])
+            statefilterCriteria    = str(experimentparamsReq.trial.lasergalvos.statefilterCriteria_list[0])
         else:
             statefilterHi          = ""
             statefilterLo          = ""
             statefilterCriteria    = ""
 
         headerTrialLaser = self.templateTrialLaser.format(
-                                                trialLaserEnabled               = str(experimentparamsReq.trial.lasertrack.enabled),
+                                                trialLaserEnabled               = str(experimentparamsReq.trial.lasergalvos.enabled),
                                                 trialLaserPatternFramePosition  = patternFramePosition,
                                                 trialLaserPatternFrameAngle     = patternFrameAngle,
                                                 trialLaserPatternShape          = patternShape,
