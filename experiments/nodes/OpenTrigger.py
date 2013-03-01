@@ -36,7 +36,7 @@ class ExperimentOpenTrigger():
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
         self.experimentparams.pre.robot.enabled = False
-        self.experimentparams.pre.lasertrack.enabled = False
+        self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
         self.experimentparams.pre.wait1 = 0.0
         
@@ -61,7 +61,7 @@ class ExperimentOpenTrigger():
         self.experimentparams.pre.wait2 = 0.0
         
 
-        # .robot.move, .lasertrack, and .post.trigger all run concurrently.
+        # .robot.move, .lasergalvos, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'relative'
@@ -81,7 +81,7 @@ class ExperimentOpenTrigger():
         self.experimentparams.trial.robot.home.tolerance = 2
         
         
-        self.experimentparams.trial.lasertrack.enabled = False
+        self.experimentparams.trial.lasergalvos.enabled = False
         
         self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 

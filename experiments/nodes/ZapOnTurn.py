@@ -38,7 +38,7 @@ class ExperimentZapOnTurn():
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
         self.experimentparams.pre.robot.enabled = False
-        self.experimentparams.pre.lasertrack.enabled = False
+        self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
         
         self.experimentparams.pre.wait1 = 0.0
@@ -62,18 +62,18 @@ class ExperimentZapOnTurn():
         self.experimentparams.pre.wait2 = 0.0
         
 
-        # .robot, .lasertrack, .ledpanels, and .post.trigger all run concurrently.
+        # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = False
         
         
-        self.experimentparams.trial.lasertrack.enabled = True
-        self.experimentparams.trial.lasertrack.pattern_list = []
-        self.experimentparams.trial.lasertrack.statefilterLo_list = []
-        self.experimentparams.trial.lasertrack.statefilterHi_list = []
-        self.experimentparams.trial.lasertrack.statefilterCriteria_list = []
+        self.experimentparams.trial.lasergalvos.enabled = True
+        self.experimentparams.trial.lasergalvos.pattern_list = []
+        self.experimentparams.trial.lasergalvos.statefilterLo_list = []
+        self.experimentparams.trial.lasergalvos.statefilterHi_list = []
+        self.experimentparams.trial.lasergalvos.statefilterCriteria_list = []
         for iFly in range(rospy.get_param('nFlies', 0)):
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+            self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                                 frameidPosition   = 'Fly%dForecast' % (iFly+1),
                                                                                 frameidAngle   = 'Fly%dForecast' % (iFly+1),
                                                                                 shape      = 'grid',
@@ -86,15 +86,15 @@ class ExperimentZapOnTurn():
                                                                                 param      = 3,
                                                                                 direction  = 1), # Peano curve level.
                                                                                 )
-            #self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'speed':5.0}")
-            #self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'speed':0.0}")
-            #self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'velocity':{'linear':{'x':+6,'y':+6}}}")
-            #self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
-            self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
-            self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
-            #self.experimentparams.trial.lasertrack.statefilterHi_list.append("{'pose':{'position':{'x':+999, 'y':999}}}")
-            #self.experimentparams.trial.lasertrack.statefilterLo_list.append("{'pose':{'position':{'x':-999, 'y':0}}}")
-            self.experimentparams.trial.lasertrack.statefilterCriteria_list.append("inclusive")
+            #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'speed':5.0}")
+            #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'speed':0.0}")
+            #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'velocity':{'linear':{'x':+6,'y':+6}}}")
+            #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
+            self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
+            self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
+            #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'pose':{'position':{'x':+999, 'y':999}}}")
+            #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'pose':{'position':{'x':-999, 'y':0}}}")
+            self.experimentparams.trial.lasergalvos.statefilterCriteria_list.append("inclusive")
         
         self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
@@ -149,7 +149,7 @@ class ExperimentZapOnTurn():
     def Endtrial_callback(self, userdata):
         userdata.experimentparamsOut = userdata.experimentparamsIn
         #if userdata.experimentparamsIn.experiment.trial > 10:
-        #    userdata.experimentparamsOut.lasertrack.enabled = False
+        #    userdata.experimentparamsOut.lasergalvos.enabled = False
             
         return 'success'
         

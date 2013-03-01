@@ -2,7 +2,6 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
-import actionlib
 import copy
 import numpy as N
 import smach
@@ -11,37 +10,31 @@ import tf
 
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
 from std_msgs.msg import Header, ColorRGBA, String
-from stage_action_server.msg import *
-from pythonmodules import filters
 from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from experiments.srv import Trigger, ExperimentParams
-from galvodirector.msg import MsgGalvoCommand
-from LEDPanels.msg import MsgPanelsCommand
 from tracking.msg import ArenaState
-from patterngen.msg import MsgPattern
 from visualization_msgs.msg import Marker
 
 
 ################################################################
 # To add a new hardware component, do the following:
 # 1. Create a file ExperimentLib_______.py (see the others for examples)
-# 2. Import it into this file
-# 3. Add it to the g_actions_dict below.
+# 2. Import it into this file, as below.
+# 3. Add it to the g_actions_dict, as below.
 #
 
 import ExperimentLibRobot
-import ExperimentLibGalvos
+import ExperimentLibLaserGalvos
 import ExperimentLibLEDPanels
 
 g_actions_dict = {'ROBOT' : ExperimentLibRobot, 
-                  'GALVOS' : ExperimentLibGalvos,
+                  'LASERGALVOS' : ExperimentLibLaserGalvos,
                   'LEDPANELS' : ExperimentLibLEDPanels}
 ################################################################
 
 
 
-gRate = 50  # This is the loop rate at which the experiment states run.
 g_tfrx = None
 
 #######################################################################################################
@@ -247,7 +240,7 @@ class TriggerOnStates (smach.State):
                              input_keys=['experimentparamsIn'])
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
-        self.rosrate = rospy.Rate(gRate)
+        self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)

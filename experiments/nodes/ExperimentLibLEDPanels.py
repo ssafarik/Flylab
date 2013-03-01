@@ -6,23 +6,17 @@ import actionlib
 import copy
 import numpy as N
 import smach
-import smach_ros
 import tf
 
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
 from std_msgs.msg import Header, ColorRGBA, String
-from stage_action_server.msg import *
-from pythonmodules import filters
 from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from experiments.srv import Trigger, ExperimentParams
-from galvodirector.msg import MsgGalvoCommand
 from LEDPanels.msg import MsgPanelsCommand
 from tracking.msg import ArenaState
-from patterngen.msg import MsgPattern
 from visualization_msgs.msg import Marker
 
-gRate = 50  # This is the loop rate at which the experiment states run.
 
 #######################################################################################################
 #######################################################################################################
@@ -34,7 +28,7 @@ class Reset (smach.State):
                              input_keys=['experimentparamsIn'])
 
         self.arenastate = None
-        self.rosrate = rospy.Rate(gRate)
+        self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
@@ -62,17 +56,10 @@ class Reset (smach.State):
 
 
 
+    # Init the LEDPanels to either off, or to the pretrial state, depending on what's requested.
     def execute(self, userdata):
         rospy.loginfo("EL State ResetLEDPanels()")
 
-        # Reset the various hardware.
-        rv = self.ResetLEDPanels(userdata)
-            
-        return rv
-    
-        
-    # Init the LEDPanels to either off, or to the pretrial state, depending on what's enabled.
-    def ResetLEDPanels(self, userdata):
         rv = 'disabled'
         if (userdata.experimentparamsIn.pre.ledpanels.enabled):
             rv = 'success'
@@ -93,13 +80,13 @@ class Reset (smach.State):
             
 
         return rv
-# End class ResetHardware()        
+# End class Reset()        
 
         
 
 #######################################################################################################
 #######################################################################################################
-# LEDPanels()
+# Action()
 # 
 # Control the LEDPanels according to the experimentparams.  
 # This smach state allows enabling the panels only when the given object's state (i.e. Fly state) is 
@@ -116,7 +103,7 @@ class Action (smach.State):
         self.mode = mode
         
         # If this rate is too fast, then we get panel glitches.  50Hz=ok, 100Hz=not.  Alternatively could use the serial port rtscts, but it doesn't seem to be supported.
-        self.rosrate = rospy.Rate(gRate)    
+        self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))    
         
         self.arenastate = None
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
@@ -526,7 +513,7 @@ class Action (smach.State):
                 
                 
         return rv
-# End class LEDPanels()
+# End class Action()
 
             
             

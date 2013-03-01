@@ -6,7 +6,6 @@ import actionlib
 import copy
 import numpy as N
 import smach
-import smach_ros
 import tf
 
 from geometry_msgs.msg import Point, PointStamped
@@ -17,7 +16,6 @@ from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
 
-gRate = 50  # This is the loop rate at which the experiment states run.
 
 #######################################################################################################
 #######################################################################################################
@@ -29,7 +27,7 @@ class Reset (smach.State):
                              input_keys=['experimentparamsIn'])
 
         self.arenastate = None
-        self.rosrate = rospy.Rate(gRate)
+        self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
@@ -158,7 +156,7 @@ class Action (smach.State):
 
         self.mode = mode
         self.arenastate = None
-        self.rosrate = rospy.Rate(gRate)
+        self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)

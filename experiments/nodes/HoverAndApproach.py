@@ -48,7 +48,7 @@ class Experiment():
         self.experimentparams.pre.robot.move.pattern.size.y = 0
         self.experimentparams.pre.robot.move.pattern.direction = 1
 
-        self.experimentparams.pre.lasertrack.enabled = False
+        self.experimentparams.pre.lasergalvos.enabled = False
         
         self.experimentparams.pre.ledpanels.enabled = True
         self.experimentparams.pre.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
@@ -82,7 +82,7 @@ class Experiment():
         self.experimentparams.pre.wait2 = 0.0
         
 
-        # .robot, .lasertrack, .ledpanels, and .post.trigger all run concurrently.
+        # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'relative'                        # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
@@ -102,7 +102,7 @@ class Experiment():
         self.experimentparams.trial.robot.home.tolerance = 2
         
         
-        self.experimentparams.trial.lasertrack.enabled = False
+        self.experimentparams.trial.lasergalvos.enabled = False
         
         self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 

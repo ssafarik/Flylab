@@ -41,7 +41,7 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.radius_list = [7.0]
         
         self.experimentparams.pre.robot.enabled = False
-        self.experimentparams.pre.lasertrack.enabled = False
+        self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
         self.experimentparams.pre.wait1 = 0.5
         self.experimentparams.pre.trigger.enabled = False
@@ -64,12 +64,12 @@ class Experiment():
         self.experimentparams.pre.wait2 = 0.0
         
         
-        # .robot, .lasertrack, .ledpanels, and .post.trigger all run concurrently.
+        # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = False
         
         
-        self.experimentparams.trial.lasertrack.enabled = False
+        self.experimentparams.trial.lasergalvos.enabled = False
         
         self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'trackview'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
@@ -152,10 +152,10 @@ class Experiment():
         # Rotate the points in the statefilter strings by R.  (Convert string to dict, rotate, then convert dict back to string).
         statefilterHi_list = []
         statefilterLo_list = []
-        for iFilter in range(len(userdata.experimentparamsIn.lasertrack.statefilterLo_list)):
+        for iFilter in range(len(userdata.experimentparamsIn.lasergalvos.statefilterLo_list)):
             # Convert strings to dicts.
-            statefilterHi_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterHi_list[iFilter])
-            statefilterLo_dict = eval(userdata.experimentparamsIn.lasertrack.statefilterLo_list[iFilter])
+            statefilterHi_dict = eval(userdata.experimentparamsIn.lasergalvos.statefilterHi_list[iFilter])
+            statefilterLo_dict = eval(userdata.experimentparamsIn.lasergalvos.statefilterLo_list[iFilter])
 
             # Rotate
             if 'pose' in statefilterLo_dict:
@@ -182,8 +182,8 @@ class Experiment():
 
         # Save the results into the output.            
         experimentparamsOut = userdata.experimentparamsIn
-        experimentparamsOut.lasertrack.statefilterLo_list = statefilterLo_list
-        experimentparamsOut.lasertrack.statefilterHi_list = statefilterHi_list
+        experimentparamsOut.lasergalvos.statefilterLo_list = statefilterLo_list
+        experimentparamsOut.lasergalvos.statefilterHi_list = statefilterHi_list
         userdata.experimentparamsOut = experimentparamsOut
         
         return 'success'

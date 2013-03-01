@@ -6,23 +6,15 @@ import actionlib
 import copy
 import numpy as N
 import smach
-import smach_ros
 import tf
 
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
 from std_msgs.msg import Header, ColorRGBA, String
-from stage_action_server.msg import *
-from pythonmodules import filters
 from flycore.msg import MsgFrameState, TrackingCommand
-from flycore.srv import SrvFrameState, SrvFrameStateRequest
-from experiments.srv import Trigger, ExperimentParams
 from galvodirector.msg import MsgGalvoCommand
-from LEDPanels.msg import MsgPanelsCommand
 from tracking.msg import ArenaState
-from patterngen.msg import MsgPattern
 from visualization_msgs.msg import Marker
 
-gRate = 50  # This is the loop rate at which the experiment states run.
 
 #######################################################################################################
 #######################################################################################################
@@ -33,11 +25,10 @@ class Reset (smach.State):
                              input_keys=['experimentparamsIn'])
 
         self.arenastate = None
-        self.rosrate = rospy.Rate(gRate)
+        self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
-        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -71,13 +62,13 @@ class Reset (smach.State):
         return rv
     
         
-# End class ResetHardware()        
+# End class Reset()        
 
         
 
 #######################################################################################################
 #######################################################################################################
-# Lasertrack()
+# Lasergalvos()
 # 
 # Control the laser according to the experimentparams.  Turns off when done.
 # This state allows enabling the laser only when the given object's state (i.e. Fly state) is 
@@ -92,7 +83,7 @@ class Action (smach.State):
                              input_keys=['experimentparamsIn'])
         
         self.mode = mode
-        self.rosrate = rospy.Rate(gRate)
+        self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
         self.arenastate = None
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
 
@@ -289,10 +280,10 @@ class Action (smach.State):
         if self.mode == 'trial':
             self.paramsIn = userdata.experimentparamsIn.trial
 
-        for pattern in self.paramsIn.lasertrack.pattern_list:
-            rospy.loginfo("EL State Lasertrack(%s)" % pattern)
+        for pattern in self.paramsIn.lasergalvos.pattern_list:
+            rospy.loginfo("EL State Lasergalvos(%s)" % pattern)
 
-        if self.paramsIn.lasertrack.enabled:
+        if self.paramsIn.lasergalvos.enabled:
             rv = 'aborted'
             self.timeStart = rospy.Time.now()
     
@@ -300,12 +291,12 @@ class Action (smach.State):
             command = MsgGalvoCommand()
             command.enable_laser = True
             command.units = 'millimeters' # 'millimeters' or 'volts'
-            command.pattern_list = self.paramsIn.lasertrack.pattern_list
+            command.pattern_list = self.paramsIn.lasergalvos.pattern_list
 
             # Determine if we're showing patterns only for certain states.            
-            nPatterns = len(self.paramsIn.lasertrack.pattern_list)
-            if len(self.paramsIn.lasertrack.statefilterLo_list) == nPatterns and \
-               len(self.paramsIn.lasertrack.statefilterHi_list) == nPatterns:
+            nPatterns = len(self.paramsIn.lasergalvos.pattern_list)
+            if len(self.paramsIn.lasergalvos.statefilterLo_list) == nPatterns and \
+               len(self.paramsIn.lasergalvos.statefilterHi_list) == nPatterns:
                 isStatefiltered = True
             else:
                 isStatefiltered = False
@@ -328,12 +319,12 @@ class Action (smach.State):
                     bFilterStateChanged = False
                     for iPattern in range(nPatterns):
                         # Get the pattern.
-                        pattern = self.paramsIn.lasertrack.pattern_list[iPattern]
+                        pattern = self.paramsIn.lasergalvos.pattern_list[iPattern]
 
                         # Convert strings to dicts.
-                        statefilterLo_dict = eval(self.paramsIn.lasertrack.statefilterLo_list[iPattern])
-                        statefilterHi_dict = eval(self.paramsIn.lasertrack.statefilterHi_list[iPattern])
-                        statefilterCriteria = self.paramsIn.lasertrack.statefilterCriteria_list[iPattern]
+                        statefilterLo_dict = eval(self.paramsIn.lasergalvos.statefilterLo_list[iPattern])
+                        statefilterHi_dict = eval(self.paramsIn.lasergalvos.statefilterHi_list[iPattern])
+                        statefilterCriteria = self.paramsIn.lasergalvos.statefilterCriteria_list[iPattern]
                 
                         # If possible, take the pose &/or velocity &/or speed from arenastate, else use transform via ROS.
                         pose = None
@@ -418,7 +409,7 @@ class Action (smach.State):
                         command.pattern_list = []
                         for iPattern in range(nPatterns):
                             if bInStatefilterRange[iPattern]:
-                                pattern = self.paramsIn.lasertrack.pattern_list[iPattern]
+                                pattern = self.paramsIn.lasergalvos.pattern_list[iPattern]
                                 command.pattern_list.append(pattern)
                     
                         if len(command.pattern_list)>0:
@@ -432,13 +423,13 @@ class Action (smach.State):
                 
                 
                 if self.preempt_requested():
-                    rospy.loginfo('preempt requested: Lasertrack()')
+                    rospy.loginfo('preempt requested: Lasergalvos()')
                     self.service_preempt()
                     rv = 'preempt'
                     break
     
-                #if self.paramsIn.lasertrack.timeout != -1:
-                #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.lasertrack.timeout:
+                #if self.paramsIn.lasergalvos.timeout != -1:
+                #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.lasergalvos.timeout:
                 #        rv = 'timeout'
                 #        break
                 
@@ -460,7 +451,7 @@ class Action (smach.State):
         
                 
         return rv
-# End class Lasertrack()
+# End class Action()
     
 
             

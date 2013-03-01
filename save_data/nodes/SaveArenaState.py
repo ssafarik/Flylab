@@ -176,7 +176,7 @@ class SaveArenaState:
                                     '{moverobotRelSpeedType:s}, '\
                                     '{moverobotRelTolerance:s}\n'
                                     
-        self.headingsLasertrack =   'laserEnabled, '\
+        self.headingsLasergalvos =  'laserEnabled, '\
                                     'laserPatternShape, '\
                                     'laserPatternHzPattern, '\
                                     'laserPatternHzPoint, '\
@@ -187,7 +187,7 @@ class SaveArenaState:
                                     'laserStatefilterLo, '\
                                     'laserStatefilterHi, '\
                                     'laserStatefilterCriteria\n'
-        self.templateLasertrack =   '{laserEnabled:s}, '\
+        self.templateLasergalvos =  '{laserEnabled:s}, '\
                                     '{laserPatternShape:s}, '\
                                     '{laserPatternHzPattern:s}, '\
                                     '{laserPatternHzPoint:s}, '\
@@ -394,14 +394,14 @@ class SaveArenaState:
                                                     moverobotRelTolerance      = str(experimentparamsReq.move.relative.tolerance),
                                                     )
             
-            if len(experimentparamsReq.lasertrack.pattern_list) > 0:
-                patternShape           = str(experimentparamsReq.lasertrack.pattern_list[0].shape)
-                patternHzPattern       = str(experimentparamsReq.lasertrack.pattern_list[0].hzPattern)
-                patternHzPoint         = str(experimentparamsReq.lasertrack.pattern_list[0].hzPoint)
-                patternCount           = str(experimentparamsReq.lasertrack.pattern_list[0].count)
-                patternSizeX           = str(experimentparamsReq.lasertrack.pattern_list[0].size.x)
-                patternSizeY           = str(experimentparamsReq.lasertrack.pattern_list[0].size.y)
-                patternParam           = str(experimentparamsReq.lasertrack.pattern_list[0].param)
+            if len(experimentparamsReq.lasergalvos.pattern_list) > 0:
+                patternShape           = str(experimentparamsReq.lasergalvos.pattern_list[0].shape)
+                patternHzPattern       = str(experimentparamsReq.lasergalvos.pattern_list[0].hzPattern)
+                patternHzPoint         = str(experimentparamsReq.lasergalvos.pattern_list[0].hzPoint)
+                patternCount           = str(experimentparamsReq.lasergalvos.pattern_list[0].count)
+                patternSizeX           = str(experimentparamsReq.lasergalvos.pattern_list[0].size.x)
+                patternSizeY           = str(experimentparamsReq.lasergalvos.pattern_list[0].size.y)
+                patternParam           = str(experimentparamsReq.lasergalvos.pattern_list[0].param)
             else:
                 patternShape           = "",
                 patternHzPattern       = str(0.0),
@@ -411,17 +411,17 @@ class SaveArenaState:
                 patternSizeY           = str(0.0),
                 patternParam           = str(0.0),
 
-            if len(experimentparamsReq.lasertrack.statefilterHi_list) > 0:
-                statefilterHi          = '\"' + str(experimentparamsReq.lasertrack.statefilterHi_list[0]) + '\"'
-                statefilterLo          = '\"' + str(experimentparamsReq.lasertrack.statefilterLo_list[0]) + '\"'
-                statefilterCriteria    = str(experimentparamsReq.lasertrack.statefilterCriteria_list[0])
+            if len(experimentparamsReq.lasergalvos.statefilterHi_list) > 0:
+                statefilterHi          = '\"' + str(experimentparamsReq.lasergalvos.statefilterHi_list[0]) + '\"'
+                statefilterLo          = '\"' + str(experimentparamsReq.lasergalvos.statefilterLo_list[0]) + '\"'
+                statefilterCriteria    = str(experimentparamsReq.lasergalvos.statefilterCriteria_list[0])
             else:
                 statefilterHi          = ""
                 statefilterLo          = ""
                 statefilterCriteria    = ""
 
-            paramsLasertrack = self.templateLasertrack.format(
-                                                    laserEnabled               = str(experimentparamsReq.lasertrack.enabled),
+            paramsLasergalvos = self.templateLasergalvos.format(
+                                                    laserEnabled               = str(experimentparamsReq.lasergalvos.enabled),
                                                     laserPatternShape          = patternShape,
                                                     laserPatternHzPattern      = patternHzPattern,
                                                     laserPatternHzPoint        = patternHzPoint,
@@ -489,8 +489,8 @@ class SaveArenaState:
                 self.fid.write(paramsMoveRobot)
                 self.fid.write('\n')
 
-                self.fid.write(self.headingsLasertrack)
-                self.fid.write(paramsLasertrack)
+                self.fid.write(self.headingsLasergalvos)
+                self.fid.write(paramsLasergalvos)
                 self.fid.write('\n')
 
                 self.fid.write(self.headingsTriggerExit)

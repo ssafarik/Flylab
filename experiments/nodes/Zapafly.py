@@ -38,7 +38,7 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
         self.experimentparams.pre.robot.enabled = False
-        self.experimentparams.pre.lasertrack.enabled = False
+        self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
         self.experimentparams.pre.wait1 = 0.0
         
@@ -63,7 +63,7 @@ class Experiment():
         self.experimentparams.pre.wait2 = 0.0
         
         
-        # .robot, .lasertrack, .ledpanels, and .post.trigger all run concurrently.
+        # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = False
         
@@ -77,14 +77,14 @@ class Experiment():
         flies_list = range(1,1+rospy.get_param('nFlies', 0))
         
         
-        self.experimentparams.trial.lasertrack.enabled = True
-        self.experimentparams.trial.lasertrack.pattern_list = []
-        self.experimentparams.trial.lasertrack.statefilterLo_list = []
-        self.experimentparams.trial.lasertrack.statefilterHi_list = []
-        self.experimentparams.trial.lasertrack.statefilterCriteria_list = []
+        self.experimentparams.trial.lasergalvos.enabled = True
+        self.experimentparams.trial.lasergalvos.pattern_list = []
+        self.experimentparams.trial.lasergalvos.statefilterLo_list = []
+        self.experimentparams.trial.lasergalvos.statefilterHi_list = []
+        self.experimentparams.trial.lasergalvos.statefilterCriteria_list = []
         if mode=='fixedpointlist':
             # Draw a point.
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+            self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                             frameidPosition   = 'Arena',
                                                                             frameidAngle   = 'Arena',
                                                                             shape      = 'bypoints',
@@ -104,7 +104,7 @@ class Experiment():
                                                                  )
         if mode=='fixedcircle':
             # Draw a point.
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+            self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                             frameidPosition   = 'Arena',
                                                                             frameidAngle   = 'Arena',
                                                                             shape      = 'circle',
@@ -119,7 +119,7 @@ class Experiment():
                                                                  )
         if mode=='trackgrid':
             for iFly in flies_list:
-                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                                 frameidPosition   = 'Fly%dForecast' % iFly,
                                                                                 frameidAngle   = 'Fly%dForecast' % iFly,
                                                                                 shape      = 'grid',
@@ -134,7 +134,7 @@ class Experiment():
                                                                      )
         if mode=='tracknumber':
             for iFly in flies_list:
-                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                                 frameidPosition   = 'Fly%dForecast' % iFly,
                                                                                 frameidAngle   = 'Fly%dForecast' % iFly,
                                                                                 shape      = '%s' % iFly,
@@ -149,7 +149,7 @@ class Experiment():
                                                                      )
         if mode=='trackflylogo':
             for iFly in flies_list:
-                self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+                self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                                 frameidPosition   = 'Fly%dForecast' % iFly,
                                                                                 frameidAngle   = 'Fly%dForecast' % iFly,
                                                                                 shape      = 'flylogo',
@@ -164,7 +164,7 @@ class Experiment():
                                                                      )
         if mode=='fixedmaze':
             # Draw a maze.
-            self.experimentparams.trial.lasertrack.pattern_list.append(MsgPattern(
+            self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                             frameidPosition   = 'Arena',
                                                                             frameidAngle   = 'Arena',
                                                                             shape      = 'grid',
