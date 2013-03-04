@@ -27,16 +27,16 @@ class Experiment():
         
         self.experimentparams.save.filenamebase = "chase"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = True
+        self.experimentparams.save.video = False
         self.experimentparams.save.bag = False
-        self.experimentparams.save.onlyWhileTriggered = True
+        self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
         self.experimentparams.pre.robot.enabled = False
-        self.experimentparams.pre.lasertrack.enabled = False
+        self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = False
@@ -59,7 +59,7 @@ class Experiment():
         self.experimentparams.pre.wait2 = 0.0
         
 
-        # .robot.move, .lasertrack, and .triggerExit all run concurrently.
+        # .robot.move, .lasergalvos, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'relative'        
@@ -79,7 +79,7 @@ class Experiment():
         self.experimentparams.trial.robot.home.tolerance = 2
         
         
-        self.experimentparams.trial.lasertrack.enabled = False
+        self.experimentparams.trial.lasergalvos.enabled = False
         
         self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
@@ -107,7 +107,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 180    # 10 minutes
+        self.experimentparams.post.trigger.timeout = 600    # 10 minutes
 
         self.experimentparams.post.wait = 0.0
         
