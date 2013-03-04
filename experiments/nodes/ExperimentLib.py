@@ -22,6 +22,8 @@ from visualization_msgs.msg import Marker
 # 1. Create a file ExperimentLib_______.py (see the others for examples)
 # 2. Import it into this file, as below.
 # 3. Add it to the g_actions_dict, as below.
+# 4. Add a section for the new stuff in the experimentparams structure, i.e. files in the experiments/msg directory.
+# 5. Modify save_data/nodes/Save.py to save the new stuff as appropriate.
 #
 
 import ExperimentLibRobot
@@ -34,8 +36,6 @@ g_actions_dict = {'ROBOT' : ExperimentLibRobot,
 ################################################################
 
 
-
-g_tfrx = None
 
 #######################################################################################################
 #######################################################################################################
@@ -146,7 +146,7 @@ class NewTrial (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
         
@@ -187,18 +187,6 @@ class NewTrial (smach.State):
                 rospy.sleep(1)
             rospy.logwarn ('**************************************** Experiment continuing.')
 
-        if (self.commandExperiment=='stage/calibrate'):
-            rospy.logwarn ('**************************************** Calibrating...')
-            rospy.wait_for_service('calibrate_stage')
-            try:
-                Calibrate = rospy.ServiceProxy('calibrate_stage', SrvFrameState)
-            except rospy.ServiceException, e:
-                rospy.logwarn ("FAILED to attach to calibrate_stage service: %s" % e)
-            else:
-                Calibrate(SrvFrameStateRequest())
-            self.commandExperiment = 'continue'
-            rospy.logwarn ('**************************************** Experiment continuing.')
-            
         if (self.commandExperiment=='exit') or (self.commandExperiment=='exitnow'):
             return rv
 
@@ -253,7 +241,7 @@ class TriggerOnStates (smach.State):
     
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
@@ -507,7 +495,7 @@ class TriggerOnTime (smach.State):
 
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 

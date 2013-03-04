@@ -47,10 +47,10 @@
             <signal name="clicked" handler="BtnContinue_clicked_cb" swapped="no"/>
           </object>
           <packing>
-            <property name="left_attach">2</property>
-            <property name="right_attach">3</property>
-            <property name="top_attach">1</property>
-            <property name="bottom_attach">2</property>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+            <property name="top_attach">2</property>
+            <property name="bottom_attach">3</property>
           </packing>
         </child>
         <child>
@@ -171,20 +171,7 @@
           <placeholder/>
         </child>
         <child>
-          <object class="GtkButton" id="btnCalibrateMotors">
-            <property name="label" translatable="yes">Calibrate Motors After This Trial</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_action_appearance">False</property>
-            <signal name="clicked" handler="BtnCalibrateMotors_clicked_cb" swapped="no"/>
-          </object>
-          <packing>
-            <property name="left_attach">2</property>
-            <property name="right_attach">3</property>
-            <property name="top_attach">2</property>
-            <property name="bottom_attach">3</property>
-          </packing>
+          <placeholder/>
         </child>
       </object>
     </child>

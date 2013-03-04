@@ -37,7 +37,7 @@ class Reset (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
@@ -57,13 +57,6 @@ class Reset (smach.State):
     def execute(self, userdata):
         rospy.loginfo("EL State ResetRobot(%s)" % [userdata.experimentparamsIn.trial.robot.home.enabled, userdata.experimentparamsIn.trial.robot.home.x, userdata.experimentparamsIn.trial.robot.home.y])
 
-        # Reset the various hardware.
-        rv = self.ResetRobot(userdata)
-        
-        return rv
-    
-        
-    def ResetRobot(self, userdata):
         rv = 'disabled'
         if (userdata.experimentparamsIn.trial.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
             self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
@@ -141,7 +134,7 @@ class Reset (smach.State):
         return rv
         
 
-# End class ResetHardware()        
+# End class Reset()        
 
         
 
@@ -174,7 +167,7 @@ class Action (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
@@ -476,7 +469,7 @@ class Action (smach.State):
         self.pubPatternGen.publish (msgPattern)
 
         return rv
-# End class MoveRobot()        
+# End class Action()        
 
 
 
