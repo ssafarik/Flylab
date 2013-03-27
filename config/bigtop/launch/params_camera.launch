@@ -11,6 +11,7 @@
   <param name="framerate"       type="double" value="60"/>
   <param name="triggersource"   type="int"    value="0"/>
   <param name="softwarerate"    type="double" value="100"/>
+  <param name="mtu"             type="int"    value="8192"/>
 
 
 </launch>
