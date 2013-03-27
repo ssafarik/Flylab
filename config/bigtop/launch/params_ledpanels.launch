@@ -10,6 +10,7 @@
 	<param name="ledpanels/radius" type="double" value="120.0"/>
 	<param name="ledpanels/xpanels" type="int" value="24"/>
 	<param name="ledpanels/ypanels" type="int" value="3"/>
+	<param name="ledpanels/serialport" type="string" value="/dev/ttyUSB0"/>
 	
 
 

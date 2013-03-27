@@ -8,7 +8,7 @@
 	<!-- ========================================================== -->
 
 	<include file="$(find bigtop)/launch/params_camera.launch" ns="camera" />
-	<node name="camera" pkg="camera1394v2" type="camera1394v2_node" />
+	<node pkg="camera_aravis" type="camnode" name="camera" />
 	<node name="image_proc" pkg="image_proc" type="image_proc" ns="camera" />
   
 </launch>
