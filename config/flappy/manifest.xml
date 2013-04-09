@@ -1,0 +1,16 @@
+<package>
+  <description brief="flappy">
+
+     flappy
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/flappy</url>
+
+  <depend package="camera_aravis"/>
+
+</package>
+
+

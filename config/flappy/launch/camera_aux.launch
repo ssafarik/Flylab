@@ -1,0 +1,14 @@
+<launch>
+
+	<!-- ========================================================== -->
+	<!-- Configuration of the auxillary camera attached to FLAPPY.  -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the flappy.launch file, and point here              -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+
+	<include file="$(find flappy)/launch/params_camera_aux.launch" ns="camera_aux" />
+	<node pkg="camera_aravis"  type="camnode"      name="camera_aux" />
+	<node pkg="image_view"     type="image_view"   name="image_view_aux" args="image:=camera_aux/image_raw" />  
+	
+</launch>
