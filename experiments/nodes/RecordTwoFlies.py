@@ -113,7 +113,7 @@ class Experiment():
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
                                                          newexperiment_callback = self.Newexperiment_callback, 
-                                                         newtrial_callback = self.Newtrial_callback, 
+                                                         newtrial_callback = self.Starttrial_callback, 
                                                          endtrial_callback = self.Endtrial_callback)
 
 
@@ -128,7 +128,7 @@ class Experiment():
         
 
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
-    def Newtrial_callback(self, userdata):
+    def Starttrial_callback(self, userdata):
         userdata.experimentparamsOut = userdata.experimentparamsIn
         return 'success'
 

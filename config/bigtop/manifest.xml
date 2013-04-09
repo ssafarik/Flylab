@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/bigtop</url>
 
-  <depend package="camera1394v2"/>
+  <depend package="camera_aravis"/>
   <depend package="galvodirector"/>
   <depend package="patterngen"/>
 

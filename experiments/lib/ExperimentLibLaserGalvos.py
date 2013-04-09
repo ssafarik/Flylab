@@ -236,8 +236,8 @@ class Action (smach.State):
                                                   speed = speed)
     
                             bInStatefilterRangePrev[iPattern] = bInStatefilterRange[iPattern]
-                            bInStatefilterRange[iPattern] = self.Statefilter.InStatefilterRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
-                            self.Statefilter.PublishStatefilterMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                            bInStatefilterRange[iPattern] = self.Statefilter.InRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                            self.Statefilter.PublishMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
                             
                             # If any of the filter states have changed, then we need to update them all.
                             if bInStatefilterRangePrev[iPattern] != bInStatefilterRange[iPattern]:
@@ -270,9 +270,22 @@ class Action (smach.State):
     
                 self.rosrate.sleep()
 
+
+                # Handle commands.
+                if (self.commandExperiment=='continue'):
+                    pass
+                
+                elif (self.commandExperiment=='pause'):
+                    pass
+                
+                elif (self.commandExperiment=='exit'):
+                    pass
+                
                 if (self.commandExperiment=='exitnow'):
                     rv = 'aborted'
                     break
+                
+            # end while()
                 
         else:
             rv = 'disabled'

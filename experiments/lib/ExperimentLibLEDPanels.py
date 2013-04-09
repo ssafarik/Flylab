@@ -172,7 +172,8 @@ class Action (smach.State):
             command.arg1 = self.paramsIn.ledpanels.idPattern
             self.pubLEDPanelsCommand.publish(command)
     
-            # Operate panels until preempt or timeout.        
+    
+            # Loop sending commands to the panels, until preempt or timeout.        
             while not rospy.is_shutdown():
                 # If possible, take the pose &/or velocity &/or speed from arenastate, else use transform via ROS.
                 pose = None
@@ -251,8 +252,8 @@ class Action (smach.State):
                                               speed = speed)
 
                         bInStatefilterRangePrev = bInStatefilterRange
-                        bInStatefilterRange = self.Statefilter.InStatefilterRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
-                        self.Statefilter.PublishStatefilterMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                        bInStatefilterRange = self.Statefilter.InRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
+                        self.Statefilter.PublishMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
                         
                     # Check if the filter state has changed.
                     if bInStatefilterRangePrev != bInStatefilterRange:
@@ -309,7 +310,6 @@ class Action (smach.State):
                         else:
                             angle = N.arctan2(y2,x2) % (2.0*N.pi)
                         
-                        #rospy.logwarn('(x1,y1)=%f,%f,       (x2,y2)=%f,%f,      angle=%f' % (x1,y1,x2,y2,angle))
                         if N.isfinite(angle):
                             x = xmax * angle / (2.0*N.pi)
                             y = 0
@@ -335,6 +335,17 @@ class Action (smach.State):
     
                 self.rosrate.sleep()
 
+
+                # Handle commands.
+                if (self.commandExperiment=='continue'):
+                    pass
+                
+                elif (self.commandExperiment=='pause'):
+                    pass
+                
+                elif (self.commandExperiment=='exit'):
+                    pass
+                
                 if (self.commandExperiment=='exitnow'):
                     rv = 'aborted'
                     break
