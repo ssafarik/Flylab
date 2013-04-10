@@ -183,13 +183,13 @@ class LEDPanels():
             p1 = subprocess.Popen(["dmesg"], stdout=subprocess.PIPE)
             p2 = subprocess.Popen(["grep", "FTDI USB Serial Device"], stdin=p1.stdout, stdout=subprocess.PIPE)
             output = p2.communicate()[0]    
-
+            output = output.replace('\n', ' ')
+            
             serialport = None  
             for token in output.split(' '):
                 if 'tty' in token:
                     serialport = '/dev/' + token
                     break
-            
             
         return serialport
               
