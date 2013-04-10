@@ -3,8 +3,8 @@
 % Subplots are fly frame trajectory, and heatmap.
 
 %dirspec='C:\\Flyranch\Flylabdata*';
-dirspec = '~/FlylabData/2013_02_07*';
-filespec='*.csv';
+dirspec = '~/FlylabData/2013_03_05*';
+filespec='zap20130305180539.csv'; %'*.csv';
 
 filenames = GetFilenames(dirspec, filespec);
 nSubsample = 5;

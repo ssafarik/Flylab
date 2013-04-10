@@ -34,8 +34,8 @@ class Experiment():
         self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.tracking.exclusionzones.enabled = False
-        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
-        self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [1]
         
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
@@ -72,12 +72,12 @@ class Experiment():
         #mode='fixedcircle'
         #mode='fixedmaze' 
         #mode='trackgrid'        # Small grid tracks flies.
-        #mode='tracknumber'      # Draw a numeral on flies.
-        mode='trackflylogo'
+        mode='tracknumber'      # Draw a numeral on flies.
+        #mode='trackflylogo'
         flies_list = range(1,1+rospy.get_param('nFlies', 0))
         
         
-        self.experimentparams.trial.lasergalvos.enabled = True
+        self.experimentparams.trial.lasergalvos.enabled = False
         self.experimentparams.trial.lasergalvos.pattern_list = []
         self.experimentparams.trial.lasergalvos.statefilterLo_list = []
         self.experimentparams.trial.lasergalvos.statefilterHi_list = []
@@ -201,7 +201,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 1800
+        self.experimentparams.post.trigger.timeout = -1
 
         self.experimentparams.post.wait = 0.0
         
