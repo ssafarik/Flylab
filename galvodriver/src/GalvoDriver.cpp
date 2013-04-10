@@ -9,6 +9,8 @@
 #include <boost/thread.hpp>
 #include <NIDAQmx.h>
 
+#include "std_msgs/Int32.h"
+
 using namespace std;
 
 #ifndef NULL
@@ -126,7 +128,6 @@ int32 CVICALLBACK OnEveryNSamples_callback (TaskHandle hTask, int32 eventType, u
 	g_timeHeartbeat = ros::Time::now().toSec();
 	
 	
-	//cout << "CB";
 	// If there was an error in a prior DAQmx call, then reset the device.
 	if (g_bNeedToReset)
 		ResetDAQ();
@@ -255,7 +256,7 @@ void WritePoints(TaskHandle hTask)
 	
 	// Write to the (offboard) buffer.
 	e = DAQmxWriteAnalogF64 (hTask, g_nPointsPointcloudEx, FALSE, 0.0, DAQmx_Val_GroupByScanNumber, g_pPointcloudExPoints, &nPointsWritten, NULL);
-	//ROS_WARN("WriteAnalogF64");
+	//ROS_WARN("WriteAnalogF64 wrote %d points.", nPointsWritten);
 	HandleDAQError(e);
 } // WritePoints()
 
@@ -479,7 +480,6 @@ int main(int argc, char **argv)
 	
 	ros::Subscriber subGalvoPoints = node.subscribe("GalvoDriver/pointcloud", 2, GalvoPointCloud_callback);
 	ROS_WARN ("Listening on GalvoDriver/pointcloud, hzPoint=%0.2f", g_hzPoint);
-
 	ros::Publisher	pubHeartbeat = node.advertise<std_msgs::Time>("heartbeat", 10);
 
 	ResetDAQ();

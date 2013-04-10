@@ -14,7 +14,7 @@ class Statefilter:
     # PublishStatefilterMarkers()
     # Publish markers to show where the state filter regions are located.
     #  
-    def PublishStatefilterMarkers(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
+    def PublishMarkers(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
         if 'pose' in statefilterLo_dict:
             poseLo_dict = statefilterLo_dict['pose'] 
             poseHi_dict = statefilterHi_dict['pose']
@@ -70,7 +70,7 @@ class Statefilter:
     # using a MsgFrameState, since we need the dict to only contain the entries
     # we care about, and the MsgFrameState always contains them all.
     #  
-    def InStatefilterRange(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
+    def InRange(self, state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria):
         rv = True
         if 'pose' in statefilterLo_dict:
             poseLo_dict = statefilterLo_dict['pose'] 

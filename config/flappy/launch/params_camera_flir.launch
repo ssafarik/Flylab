@@ -1,0 +1,21 @@
+<launch>
+  <param name="guid"            type="string" value="FLIR Systems AB-" />
+  
+  <param name="Acquire"             type="int"     value="1"/>
+  <param name="ExposureAuto"        type="int"     value="0"/>
+  <param name="GainAuto"            type="int"     value="0"/>
+  <param name="ExposureTimeAbs"     type="double"  value="200"/>
+  <param name="GainRaw"             type="double"  value="100"/>
+  <param name="AcquisitionMode"     type="string"  value="Continuous"/>
+  <param name="AcquisitionFrameRate" type="double" value="40"/>
+  <param name="TriggerMode"         type="string"  value="Off"/>
+  <param name="TriggerSource"       type="string"  value="Line1"/>
+  <param name="softwaretriggerrate" type="double"  value="100"/>
+  <param name="frame_id"            type="string"  value="camera_flir" />
+
+  <param name="mtu"                 type="int"     value="8000"/>
+  <param name="IRFormat"            type="string"  value="TemperatureLinear10mK" />
+
+
+
+</launch>
