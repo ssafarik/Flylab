@@ -1,19 +1,18 @@
 <launch>
-  <param name="guid"            type="string" value="Basler-21237826" />
-  <param name="video_mode"      type="string" value="format7_mode0" />
-  <param name="frame_id"        type="string" value="camera_aux" />
-  <param name="camera_info_url" type="string" value="file:///21237826.yaml" />
+  <param name="guid"                 type="string" value="Basler-21237826" />
   
-  <param name="autoexposure"    type="int"    value="0"/>
-  <param name="autogain"        type="int"    value="0"/>
-  <param name="exposure"        type="double" value="200"/>
-  <param name="gain"            type="double" value="100"/>
-  <param name="acquisitionmode" type="int"    value="0"/>
-  <param name="framerate"       type="double" value="40"/>
-  <param name="triggersource"   type="int"    value="0"/>
-  <param name="softwarerate"    type="double" value="100"/>
-  <param name="mtu"             type="int"    value="8192"/>
-
+  <param name="Acquire"              type="bool"   value="true"/>
+  <param name="ExposureAuto"         type="string" value="Off"/>
+  <param name="GainAuto"             type="string" value="Off"/>
+  <param name="ExposureTimeAbs"      type="double" value="200"/>
+  <param name="GainRaw"              type="int"    value="100"/>
+  <param name="AcquisitionMode"      type="string" value="Continuous"/>
+  <param name="AcquisitionFrameRate" type="double" value="40"/>
+  <param name="TriggerMode"          type="string" value="Off"/>
+  <param name="TriggerSource"        type="string" value="Line1"/>
+  <param name="softwaretriggerrate"  type="double" value="100"/>
+  <param name="frame_id"             type="string" value="camera_aux" />
+  <param name="mtu"                  type="int"    value="8000"/>
 
 
 </launch>
