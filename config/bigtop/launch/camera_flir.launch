@@ -1,7 +1,7 @@
 <launch>
 
 	<!-- ========================================================== -->
-	<!-- Configuration of the auxillary camera attached to BIGTOP.  -->
+	<!-- Configuration of the thermal camera attached to BIGTOP.    -->
     <!-- Don't launch this file directly.                           -->
     <!-- Launch the bigtop.launch file, and point here              -->
     <!-- from there.                                                -->
@@ -9,6 +9,7 @@
 
 	<include file="$(find bigtop)/launch/params_camera_flir.launch" ns="camera_flir" />
 	<node name="camera_flir"     pkg="camera_aravis"  type="camnode"      />
-	<node name="image_view_flir" pkg="image_view"     type="image_view"   args="image:=camera_flir/image_raw" />  
+    <node name="image_analysis"  pkg="ImageAnalysis"  type="ImageAnalysis" ns="camera_flir" />
+    <node name="view_flir"       pkg="image_view"     type="image_view"    ns="camera_flir" args="image:=image_analysis" />  
 	
 </launch>

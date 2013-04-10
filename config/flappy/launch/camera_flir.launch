@@ -8,7 +8,8 @@
 	<!-- ========================================================== -->
 
 	<include file="$(find flappy)/launch/params_camera_flir.launch" ns="camera_flir" />
-	<node pkg="camera_aravis"  type="camnode"      name="camera_flir" />
-	<node pkg="image_view"     type="image_view"   name="image_view_flir" args="image:=camera_flir/image_raw" />  
+	<node pkg="camera_aravis"  type="camnode"       name="camera_flir" />
+    <node name="image_analysis"  pkg="ImageAnalysis"       type="ImageAnalysis" ns="camera_flir" />
+    <node name="view_analysis"   pkg="image_view"          type="image_view"    ns="camera_flir" args="image:=image_analysis" />  
 	
 </launch>
