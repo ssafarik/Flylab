@@ -2,7 +2,7 @@
 #include <image_transport/image_transport.h>
 #include <opencv/cvwimage.h>
 #include <opencv/highgui.h>
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
 
 //
 // This ROS node takes a filename as a command-line argument, and publishes it to camera/image_rect.  
@@ -54,3 +54,4 @@ int main(int argc, char** argv)
 		loop_rate.sleep();
 	}
 }
+

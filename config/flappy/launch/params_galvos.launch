@@ -1,0 +1,33 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the laser galvo parameters for the FLAPPY -->
+    <!--                                                            -->
+    <!-- Edit this file to describe the galvo hardware.             -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the flappy.launch file, and point here              -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+
+	<param name="galvodriver/hzPoint" type="double" value="250000.0"/>
+	<param name="galvodriver/hzUSB" type="double" value="45.0"/>  <!-- The fastest that the DAQ can be updated over USB.  Galvodriver makes sure to stay slower than this rate. -->
+    <param name="galvodirector/xBeamsink" type="double" value="0.0" />  <!-- volts -->
+    <param name="galvodirector/yBeamsink" type="double" value="-10.0" />  <!-- volts -->
+
+<!--  The 785nm IR laser... needs an adjustment like:  yv = my * ym .* sin(ym*(pi/180)/33.33) + by - ym/20.4 + 0.1  -->
+    <param name="galvodirector/mx" type="double" value="0.0506807" />
+    <param name="galvodirector/bx" type="double" value="-0.6616871" />
+    <param name="galvodirector/my" type="double" value="-0.0496085" />
+    <param name="galvodirector/by" type="double" value="3.3768726" />
+
+<!-- The red laser -->
+<!-- 
+    <param name="galvodirector/mx" type="double" value="0.0508658" /> 
+    <param name="galvodirector/bx" type="double" value="-0.2821050" />
+    <param name="galvodirector/my" type="double" value="-0.048" /> 
+    <param name="galvodirector/by" type="double" value="3.5408037" />
+-->
+    
+
+</launch>
+	

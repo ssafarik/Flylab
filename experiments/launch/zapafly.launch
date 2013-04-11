@@ -6,7 +6,7 @@
     <!-- experiment.                                                -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments chase.launch                         -->
+    <!-- roslaunch experiments zapafly.launch                       -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 

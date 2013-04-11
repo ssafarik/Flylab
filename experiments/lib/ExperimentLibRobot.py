@@ -37,7 +37,7 @@ class Reset (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
@@ -57,13 +57,6 @@ class Reset (smach.State):
     def execute(self, userdata):
         rospy.loginfo("EL State ResetRobot(%s)" % [userdata.experimentparamsIn.trial.robot.home.enabled, userdata.experimentparamsIn.trial.robot.home.x, userdata.experimentparamsIn.trial.robot.home.y])
 
-        # Reset the various hardware.
-        rv = self.ResetRobot(userdata)
-        
-        return rv
-    
-        
-    def ResetRobot(self, userdata):
         rv = 'disabled'
         if (userdata.experimentparamsIn.trial.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
             self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
@@ -141,7 +134,7 @@ class Reset (smach.State):
         return rv
         
 
-# End class ResetHardware()        
+# End class Reset()        
 
         
 
@@ -174,7 +167,7 @@ class Action (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
@@ -193,7 +186,7 @@ class Action (smach.State):
     def GetAngleFrame (self, arenastate, frameid):
         stamp = arenastate.robot.header.stamp
         if len(arenastate.flies)>0:
-            stamp = max(stamp,arenastate.robot.header.stamp)
+            stamp = max(stamp,arenastate.flies[0].header.stamp)
     
         if self.tfrx.canTransform('Arena', frameid, stamp):        
             (trans,q) = self.tfrx.lookupTransform('Arena', frameid, stamp)
@@ -214,7 +207,7 @@ class Action (smach.State):
                                   point=Point(x=0.0, y=0.0, z=0.0))
             pointP = self.tfrx.transformPoint(frameidParent, pointC)
         except tf.Exception, e:
-            #rospy.logwarn('Exception in GetFrameToFrame():  %s' % e)
+            #rospy.logwarn('Exception in GetAngleFrameToFrame():  %s' % e)
             pass
         else:
             angleToChild = N.arctan2(pointP.point.y, pointP.point.x) % (2.0*N.pi)
@@ -271,10 +264,6 @@ class Action (smach.State):
             self.timeStart = rospy.Time.now()
     
             while self.arenastate is None:
-                #if self.paramsIn.robot.move.timeout != -1:
-                #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.robot.move.timeout:
-                #        return 'timeout'
-                
                 if self.preempt_requested():
                     rospy.loginfo('preempt requested: MoveRobot()')
                     self.service_preempt()
@@ -412,6 +401,17 @@ class Action (smach.State):
             
             self.rosrate.sleep()
 
+
+            # Handle commands.
+            if (self.commandExperiment=='continue'):
+                pass
+            
+            elif (self.commandExperiment=='pause'):
+                pass
+            
+            elif (self.commandExperiment=='exit'):
+                pass
+            
             if (self.commandExperiment=='exitnow'):
                 rv = 'aborted'
                 break
@@ -457,9 +457,21 @@ class Action (smach.State):
             
             self.rosrate.sleep()
 
+
+            # Handle commands.
+            if (self.commandExperiment=='continue'):
+                pass
+            
+            elif (self.commandExperiment=='pause'):
+                pass
+            
+            elif (self.commandExperiment=='exit'):
+                pass
+            
             if (self.commandExperiment=='exitnow'):
                 rv = 'aborted'
                 break
+
 
         # Turn off the pattern
         msgPattern.shape = self.paramsIn.robot.move.pattern.shape
@@ -476,7 +488,7 @@ class Action (smach.State):
         self.pubPatternGen.publish (msgPattern)
 
         return rv
-# End class MoveRobot()        
+# End class Action()        
 
 
 

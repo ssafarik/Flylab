@@ -64,11 +64,6 @@ class FlylabGUI:
             rospy.sleep(1)
             sys.exit(0)
     
-    def BtnCalibrateMotors_clicked_cb(self, widget):
-    	if not rospy.is_shutdown():
-    		command = String(data='stage/calibrate')
-    		self.pubExperimentCommand.publish(command)
-    
     def BtnSaveBackground_clicked_cb(self, widget):
     	if not rospy.is_shutdown():
     		command = TrackingCommand(command='savebackground')

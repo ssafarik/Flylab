@@ -10,6 +10,7 @@ import tf
 
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
 from std_msgs.msg import Header, ColorRGBA, String
+from std_srvs.srv import Empty
 from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from experiments.srv import Trigger, ExperimentParams
@@ -22,6 +23,8 @@ from visualization_msgs.msg import Marker
 # 1. Create a file ExperimentLib_______.py (see the others for examples)
 # 2. Import it into this file, as below.
 # 3. Add it to the g_actions_dict, as below.
+# 4. Add a section for the new stuff in the experimentparams structure, i.e. files in the experiments/msg directory.
+# 5. Modify save_data/nodes/Save.py to save the new stuff as appropriate.
 #
 
 import ExperimentLibRobot
@@ -34,8 +37,6 @@ g_actions_dict = {'ROBOT' : ExperimentLibRobot,
 ################################################################
 
 
-
-g_tfrx = None
 
 #######################################################################################################
 #######################################################################################################
@@ -67,13 +68,13 @@ class TriggerService():
             
         
 
-# NewTrialService()
-# Sends new_trial commands to a list of services.
-# When you call NewTrialService.notify(), then for each in the list, we call the ".../new_trial" services with the given "experimentparams" parameter.
+# TrialStartService()
+# Sends trial_start commands to a list of services.
+# When you call TrialStartService.notify(), then for each in the list, we call the ".../trial_start" services with the given "experimentparams" parameter.
 #
-class NewTrialService():
+class TrialStartService():
     def __init__(self):
-        self.services = {"save/new_trial": None}
+        self.services = {"save/trial_start": None}
     
     def attach(self):
         for key in self.services:
@@ -88,16 +89,66 @@ class NewTrialService():
         for key,callback in self.services.iteritems():
             if callback is not None:
                 callback(experimentparams)
-# End class NewTrialService()
+# End class TrialStartService()
+
+    
+
+# TrialEndService()
+# Sends trial_end commands to a list of services.
+# When you call TrialEndService.notify(), then for each in the list, we call the ".../trial_end" services with the given "experimentparams" parameter.
+#
+class TrialEndService():
+    def __init__(self):
+        self.services = {"save/trial_end": None}
+    
+    def attach(self):
+        for key in self.services:
+            #rospy.logwarn('Waiting for service: %s' % key)
+            rospy.wait_for_service(key)
+            try:
+                self.services[key] = rospy.ServiceProxy(key, ExperimentParams)
+            except rospy.ServiceException, e:
+                rospy.logwarn ("FAILED %s: %s" % (key,e))
+        
+    def notify(self, experimentparams):
+        for key,callback in self.services.iteritems():
+            if callback is not None:
+                callback(experimentparams)
+# End class TrialEndService()
+
+    
+
+# ExperimentEndService()
+# Sends trial_end commands to a list of services.
+# When you call TrialEndService.notify(), then for each in the list, we call the ".../trial_end" services with the given "experimentparams" parameter.
+#
+class ExperimentEndService():
+    def __init__(self):
+        self.services = {"save/wait_until_done": None}
+    
+    def attach(self):
+        for key in self.services:
+            #rospy.logwarn('Waiting for service: %s' % key)
+            rospy.wait_for_service(key)
+            try:
+                self.services[key] = rospy.ServiceProxy(key, ExperimentParams)
+            except rospy.ServiceException, e:
+                rospy.logwarn ("FAILED %s: %s" % (key,e))
+        
+    def notify(self, experimentparams):
+        for key,callback in self.services.iteritems():
+            if callback is not None:
+                callback(experimentparams)
+# End class ExperimentEndService()
 
     
 
 #######################################################################################################
 #######################################################################################################
-class NewExperiment (smach.State):
+class StartExperiment (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['success','preempt','aborted'],
+                             outcomes=['success','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
 
@@ -112,7 +163,7 @@ class NewExperiment (smach.State):
 
     def execute(self, userdata):
         experimentparams = userdata.experimentparamsIn
-        rospy.loginfo("EL State NewExperiment(%s)" % experimentparams)
+        rospy.loginfo("EL State StartExperiment(%s)" % experimentparams)
 
         experimentparams.experiment.trial = experimentparams.experiment.trial-1 
         userdata.experimentparamsOut = experimentparams
@@ -121,53 +172,65 @@ class NewExperiment (smach.State):
             if self.arenastate is not None:
                 break
             
-        #rospy.loginfo ('EL Exiting NewExperiment()')
+        #rospy.loginfo ('EL Exiting StartExperiment()')
         return 'success'
-# End class NewExperiment()
+# End class StartExperiment()
 
 
 
 #######################################################################################################
 #######################################################################################################
-# NewTrial() - Increments the trial number, untriggers, and calls the 
+class EndExperiment (smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+                             outcomes=['success','aborted'],
+                             input_keys=['experimentparamsIn'],
+                             output_keys=['experimentparamsOut'])
+
+        self.ExperimentEndService = ExperimentEndService()
+        self.ExperimentEndService.attach()
+        
+        
+
+    def execute(self, userdata):
+        experimentparams = userdata.experimentparamsIn
+        rospy.loginfo("EL State EndExperiment(%s)" % experimentparams)
+
+        userdata.experimentparamsOut = experimentparams
+        
+        self.ExperimentEndService.notify(experimentparams)
+            
+        #rospy.loginfo ('EL Exiting EndExperiment()')
+        return 'success'
+# End class EndExperiment()
+
+
+
+#######################################################################################################
+#######################################################################################################
+# StartTrial() - Increments the trial number, untriggers, and calls the 
 #              new_trial service (which begins recording).
 #
 # Experiment may be paused & restarted via the commandlines:
 # rostopic pub -1 experiment/command std_msgs/String pause
 # rostopic pub -1 experiment/command std_msgs/String run
 #
-class NewTrial (smach.State):
+class StartTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
-                             outcomes=['continue','exit','preempt','aborted'],
+                             outcomes=['continue','exit','aborted'],
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
         
-        # Command messages.
-        self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
-
         
-        self.Trigger = TriggerService()
-        self.Trigger.attach()
+        self.TriggerService = TriggerService()
+        self.TriggerService.attach()
         
-        self.NewTrial = NewTrialService()
-        self.NewTrial.attach()
+        self.TrialStartService = TrialStartService()
+        self.TrialStartService.attach()
 
 
-    def CommandExperiment_callback(self, msgString):
-        if msgString.data in self.commandExperiment_list:
-            self.commandExperiment = msgString.data
-            if 'now' in self.commandExperiment:
-                rospy.logwarn ('Experiment received command: "%s".' % self.commandExperiment)
-            else:
-                rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.commandExperiment)
-        else:
-            rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.commandExperiment_list))
-            
-        
     def execute(self, userdata):
         rv = 'exit'
         experimentparams = userdata.experimentparamsIn
@@ -176,32 +239,10 @@ class NewTrial (smach.State):
             if (experimentparams.experiment.maxTrials < experimentparams.experiment.trial):
                 return rv
 
-        rospy.loginfo ('EL State NewTrial(%s)' % experimentparams.experiment.trial)
+        rospy.loginfo ('EL State StartTrial(%s)' % experimentparams.experiment.trial)
 
-        self.Trigger.notify(False)
+        self.TriggerService.notify(False)
         
-        # Handle various commands sent in via messages.
-        if (self.commandExperiment=='pause'):
-            rospy.logwarn ('**************************************** Experiment paused at NewTrial...')
-            while (self.commandExperiment != 'continue'):
-                rospy.sleep(1)
-            rospy.logwarn ('**************************************** Experiment continuing.')
-
-        if (self.commandExperiment=='stage/calibrate'):
-            rospy.logwarn ('**************************************** Calibrating...')
-            rospy.wait_for_service('calibrate_stage')
-            try:
-                Calibrate = rospy.ServiceProxy('calibrate_stage', SrvFrameState)
-            except rospy.ServiceException, e:
-                rospy.logwarn ("FAILED to attach to calibrate_stage service: %s" % e)
-            else:
-                Calibrate(SrvFrameStateRequest())
-            self.commandExperiment = 'continue'
-            rospy.logwarn ('**************************************** Experiment continuing.')
-            
-        if (self.commandExperiment=='exit') or (self.commandExperiment=='exitnow'):
-            return rv
-
 
         # Set up the tracking exclusion zones.    
         userdata.experimentparamsOut = experimentparams
@@ -213,14 +254,83 @@ class NewTrial (smach.State):
 
         # Tell everyone that the trial is starting.
         try:
-            self.NewTrial.notify(experimentparams)
+            self.TrialStartService.notify(experimentparams)
             rv = 'continue'
         except rospy.ServiceException:
             rv = 'aborted'
 
-        #rospy.loginfo ('EL Exiting NewTrial()')
+
+        #rospy.loginfo ('EL Exiting StartTrial()')
         return rv
-# End class NewTrial()
+# End class StartTrial()
+
+
+
+#######################################################################################################
+#######################################################################################################
+# EndTrial() - Calls the trial_end service (which finishes recording).
+#
+# Experiment may be paused & restarted via the commandlines:
+# rostopic pub -1 experiment/command std_msgs/String pause
+# rostopic pub -1 experiment/command std_msgs/String run
+#
+class EndTrial (smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+                             outcomes=['continue','exit','aborted'],
+                             input_keys=['experimentparamsIn'],
+                             output_keys=['experimentparamsOut'])
+        
+        # Command messages.
+        self.commandExperiment = 'continue'
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+
+        
+        self.TrialEndService = TrialEndService()
+        self.TrialEndService.attach()
+
+
+    def CommandExperiment_callback(self, msgString):
+        if msgString.data in self.commandExperiment_list:
+            self.commandExperiment = msgString.data
+            if 'now' in self.commandExperiment:
+                rospy.logwarn ('Experiment received command: "%s".' % self.commandExperiment)
+            else:
+                rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.commandExperiment)
+        else:
+            rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.commandExperiment_list))
+        
+            
+        
+    def execute(self, userdata):
+        rv = 'exit'
+        experimentparams = userdata.experimentparamsIn
+
+        rospy.loginfo ('EL State EndTrial(%s)' % experimentparams.experiment.trial)
+
+        # Tell everyone that the trial is ending.
+        try:
+            self.TrialEndService.notify(experimentparams)
+            rv = 'continue'
+        except rospy.ServiceException:
+            rv = 'aborted'
+
+
+        # Handle various user commands.
+        if (self.commandExperiment=='pause'):
+            rospy.logwarn ('**************************************** Experiment paused after EndTrial...')
+            while (self.commandExperiment != 'continue'):
+                rospy.sleep(1)
+            rospy.logwarn ('**************************************** Experiment continuing.')
+
+
+        if (self.commandExperiment=='exit') or (self.commandExperiment=='exitnow'):
+            rv = 'exit'
+
+        #rospy.loginfo ('EL Exiting EndTrial()')
+        return rv
+# End class EndTrial()
 
 
 
@@ -245,15 +355,15 @@ class TriggerOnStates (smach.State):
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
-        self.Trigger = TriggerService()
-        self.Trigger.attach()
+        self.TriggerService = TriggerService()
+        self.TriggerService.attach()
     
         self.nRobots = rospy.get_param('nRobots', 0)
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
     
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
@@ -351,7 +461,7 @@ class TriggerOnStates (smach.State):
                         return 'timeout'
                 #if self.preempt_requested():
                 #    self.service_preempt()
-                #    self.Trigger.notify(False)
+                #    self.TriggerService.notify(False)
                 #    return 'preempt'
                 rospy.sleep(1.0)
     
@@ -477,10 +587,10 @@ class TriggerOnStates (smach.State):
         #rospy.logwarn ('rv=%s', rv)
         #rospy.logwarn ('self.mode=%s', self.mode)
         #if rv!='aborted' and self.mode=='pre':
-        #    self.Trigger.notify(True)
+        #    self.TriggerService.notify(True)
         try:
             if self.mode=='pre':
-                self.Trigger.notify(True)
+                self.TriggerService.notify(True)
                 
         except rospy.ServiceException:
             rv = 'aborted'
@@ -498,16 +608,16 @@ class TriggerOnTime (smach.State):
         self.tfrx = tfrx
         self.mode = mode
         smach.State.__init__(self, 
-                             outcomes=['success','preempt','aborted'],
+                             outcomes=['success','aborted'],
                              input_keys=['experimentparamsIn'])
 
-        self.Trigger = TriggerService()
-        self.Trigger.attach()
+        self.TriggerService = TriggerService()
+        self.TriggerService.attach()
         
 
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'stage/calibrate', 'exit', 'exitnow']
+        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
@@ -533,7 +643,7 @@ class TriggerOnTime (smach.State):
 
         #try:
         #    if rv!='aborted' and ('pre' in self.mode):
-        #        self.Trigger.notify(True)
+        #        self.TriggerService.notify(True)
         #except rospy.ServiceException:
         #    rv = 'aborted'
 
@@ -546,15 +656,15 @@ class TriggerOnTime (smach.State):
 #######################################################################################################
 #######################################################################################################
 class ExperimentLib():
-    def __init__(self, experimentparams=None, newexperiment_callback=None, newtrial_callback=None, endtrial_callback=None):
+    def __init__(self, experimentparams=None, startexperiment_callback=None, starttrial_callback=None, endtrial_callback=None):
         
         self.actions_dict = g_actions_dict
         
         self.xHome = 0
         self.yHome = 0
 
-        self.Trigger = TriggerService()
-        self.Trigger.attach()
+        self.TriggerService = TriggerService()
+        self.TriggerService.attach()
         self.tfrx = tf.TransformListener()
         
         # Create the state machine.
@@ -570,7 +680,6 @@ class ExperimentLib():
             smach.StateMachine.add('PREWAIT1', 
                                    TriggerOnTime(mode='pre1', tfrx=self.tfrx),
                                    transitions={'success':'PRETRIGGER',   # Trigger service signal goes True.
-                                                'preempt':'preempt',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
@@ -588,7 +697,6 @@ class ExperimentLib():
             smach.StateMachine.add('PREWAIT2', 
                                    TriggerOnTime(mode='pre2', tfrx=self.tfrx),
                                    transitions={'success':'success',   # Trigger service signal goes True.
-                                                'preempt':'preempt',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
         
@@ -639,25 +747,24 @@ class ExperimentLib():
         # Now create the main state machine.
         ##############################################
         with self.smachTop:
-            ################################################################################### NEWEXPERIMENT ->  NEWEXPERIMENTCALLBACK or RESETHARDWARE
-            if newexperiment_callback is not None:
-                stateAfterNewExperiment = 'NEWEXPERIMENTCALLBACK'
+            ################################################################################### STARTEXPERIMENT ->  STARTEXPERIMENTCALLBACK or RESETHARDWARE
+            if startexperiment_callback is not None:
+                stateAfterStartExperiment = 'STARTEXPERIMENTCALLBACK'
             else:
-                stateAfterNewExperiment = 'RESETHARDWARE'
+                stateAfterStartExperiment = 'RESETHARDWARE'
 
-            smach.StateMachine.add('NEWEXPERIMENT',
-                                   NewExperiment(),
-                                   transitions={'success':stateAfterNewExperiment,
-                                                'preempt':'aborted',
+            smach.StateMachine.add('STARTEXPERIMENT',
+                                   StartExperiment(),
+                                   transitions={'success':stateAfterStartExperiment,
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
 
 
-            ################################################################################### NEWEXPERIMENTCALLBACK -> RESETHARDWARE
-            if newexperiment_callback is not None:
-                smach.StateMachine.add('NEWEXPERIMENTCALLBACK', 
-                                       smach.CBState(newexperiment_callback, 
+            ################################################################################### STARTEXPERIMENTCALLBACK -> RESETHARDWARE
+            if startexperiment_callback is not None:
+                smach.StateMachine.add('STARTEXPERIMENTCALLBACK', 
+                                       smach.CBState(startexperiment_callback, 
                                                      outcomes = ['success','aborted'],
                                                      input_keys = ['experimentparamsIn'],
                                                      output_keys = ['experimentparamsOut']),
@@ -668,11 +775,11 @@ class ExperimentLib():
 
 
 
-            ################################################################################### RESETHARDWARE -> (NEWTRIALCALLBACK or NEWTRIAL)
-            if newtrial_callback is not None:
-                stateAfterResetHardware = 'NEWTRIALCALLBACK'
+            ################################################################################### RESETHARDWARE -> (STARTTRIALCALLBACK or STARTTRIAL)
+            if starttrial_callback is not None:
+                stateAfterResetHardware = 'STARTTRIALCALLBACK'
             else:
-                stateAfterResetHardware = 'NEWTRIAL'
+                stateAfterResetHardware = 'STARTTRIAL'
 
             smach.StateMachine.add('RESETHARDWARE',                         
                                    smachReset,
@@ -682,25 +789,24 @@ class ExperimentLib():
                                    remapping={'experimentparamsIn':'experimentparams'})
 
 
-            ################################################################################### NEWTRIALCALLBACK -> NEWTRIAL
-            if newtrial_callback is not None:
-                smach.StateMachine.add('NEWTRIALCALLBACK', 
-                                       smach.CBState(newtrial_callback, 
+            ################################################################################### STARTTRIALCALLBACK -> STARTTRIAL
+            if starttrial_callback is not None:
+                smach.StateMachine.add('STARTTRIALCALLBACK', 
+                                       smach.CBState(starttrial_callback, 
                                                      outcomes = ['success','aborted'],
                                                      input_keys = ['experimentparamsIn'],
                                                      output_keys = ['experimentparamsOut']),
-                                       transitions={'success':'NEWTRIAL',
+                                       transitions={'success':'STARTTRIAL',
                                                     'aborted':'aborted'},
                                        remapping={'experimentparamsIn':'experimentparams',
                                                   'experimentparamsOut':'experimentparams'})
 
 
-            ################################################################################### NEWTRIAL -> PRE
-            smach.StateMachine.add('NEWTRIAL',                         
-                                   NewTrial(),
+            ################################################################################### STARTTRIAL -> PRE
+            smach.StateMachine.add('STARTTRIAL',                         
+                                   StartTrial(),
                                    transitions={'continue':'PRE',         # Trigger service signal goes False.
-                                                'exit':'success',           # Trigger service signal goes False.
-                                                'preempt':'aborted',
+                                                'exit':'ENDEXPERIMENT',           # Trigger service signal goes False.
                                                 'aborted':'aborted'},       # Trigger service signal goes False.
                                    remapping={'experimentparamsIn':'experimentparams',
                                               'experimentparamsOut':'experimentparams'})
@@ -739,22 +845,40 @@ class ExperimentLib():
             smach.StateMachine.add('POST', 
                                    TriggerOnTime(mode='post', tfrx=self.tfrx),
                                    transitions={'success':stateAfterWaitPost,
-                                                'preempt':'aborted',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
 
-            ################################################################################### ENDTRIALCALLBACK -> RESETHARDWARE
+            ################################################################################### ENDTRIALCALLBACK -> ENDTRIAL
             if endtrial_callback is not None:
                 smach.StateMachine.add('ENDTRIALCALLBACK', 
                                        smach.CBState(endtrial_callback, 
                                                      outcomes = ['success','aborted'],
                                                      input_keys = ['experimentparamsIn'],
                                                      output_keys = ['experimentparamsOut']),
-                                       transitions={'success':'RESETHARDWARE',
+                                       transitions={'success':'ENDTRIAL',
                                                     'aborted':'aborted'},
                                        remapping={'experimentparamsIn':'experimentparams',
                                                   'experimentparamsOut':'experimentparams'})
+
+            ################################################################################### ENDTRIAL -> RESETHARDWARE or ENDEXPERIMENT
+            smach.StateMachine.add('ENDTRIAL',                         
+                                   EndTrial(),
+                                   transitions={'continue':'RESETHARDWARE',         
+                                                'exit':'ENDEXPERIMENT',           
+                                                'aborted':'aborted'},       
+                                   remapping={'experimentparamsIn':'experimentparams',
+                                              'experimentparamsOut':'experimentparams'})
+
+
+            ################################################################################### ENDEXPERIMENT ->  end
+            smach.StateMachine.add('ENDEXPERIMENT',
+                                   EndExperiment(),
+                                   transitions={'success':'success',
+                                                'aborted':'aborted'},
+                                   remapping={'experimentparamsIn':'experimentparams',
+                                              'experimentparamsOut':'experimentparams'})
+
 
         self.sis = smach_ros.IntrospectionServer('sis_experiment',
                                                  self.smachTop,
@@ -877,7 +1001,7 @@ class ExperimentLib():
                     rv = 'aborted'
 
 
-        #self.Trigger.notify(False)
+        #self.TriggerService.notify(False)
         
         return rv
 
@@ -982,7 +1106,7 @@ class ExperimentLib():
 
 
 
-        self.Trigger.notify(False)
+        self.TriggerService.notify(False)
         
         return rv
 

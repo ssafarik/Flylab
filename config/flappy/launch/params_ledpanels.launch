@@ -1,0 +1,18 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the LEDPANELS                             -->
+    <!--                                                            -->
+    <!-- Don't launch this file directly.                           -->
+    <!-- Launch the flappy.launch file, and point here              -->
+    <!-- from there.                                                -->
+	<!-- ========================================================== -->
+
+	<param name="ledpanels/radius" type="double" value="120.0"/>
+	<param name="ledpanels/xpanels" type="int" value="24"/>
+	<param name="ledpanels/ypanels" type="int" value="3"/>
+	<param name="ledpanels/serialport" type="string" value="/dev/ttyUSB0"/>
+	
+
+
+</launch>
+	

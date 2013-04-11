@@ -34,8 +34,8 @@ class Experiment():
         self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.tracking.exclusionzones.enabled = False
-        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
-        self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [1]
         
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
@@ -72,12 +72,12 @@ class Experiment():
         #mode='fixedcircle'
         #mode='fixedmaze' 
         #mode='trackgrid'        # Small grid tracks flies.
-        #mode='tracknumber'      # Draw a numeral on flies.
-        mode='trackflylogo'
+        mode='tracknumber'      # Draw a numeral on flies.
+        #mode='trackflylogo'
         flies_list = range(1,1+rospy.get_param('nFlies', 0))
         
         
-        self.experimentparams.trial.lasergalvos.enabled = True
+        self.experimentparams.trial.lasergalvos.enabled = False
         self.experimentparams.trial.lasergalvos.pattern_list = []
         self.experimentparams.trial.lasergalvos.statefilterLo_list = []
         self.experimentparams.trial.lasergalvos.statefilterHi_list = []
@@ -201,14 +201,14 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 1800
+        self.experimentparams.post.trigger.timeout = -1
 
         self.experimentparams.post.wait = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
-                                                         newexperiment_callback = self.Newexperiment_callback, 
-                                                         newtrial_callback = self.Newtrial_callback, 
-                                                         endtrial_callback = self.Endtrial_callback)
+                                                         startexperiment_callback = self.StartExperiment_callback, 
+                                                         starttrial_callback = self.StartTrial_callback, 
+                                                         endtrial_callback = self.EndTrial_callback)
 
 
 
@@ -217,17 +217,17 @@ class Experiment():
         
 
     # This function gets called at the start of a new experiment.  Use this to do any one-time initialization of hardware, etc.
-    def Newexperiment_callback(self, userdata):
+    def StartExperiment_callback(self, userdata):
         return 'success'
         
 
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
-    def Newtrial_callback(self, userdata):
+    def StartTrial_callback(self, userdata):
         userdata.experimentparamsOut = userdata.experimentparamsIn
         return 'success'
 
     # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
-    def Endtrial_callback(self, userdata):
+    def EndTrial_callback(self, userdata):
         userdata.experimentparamsOut = userdata.experimentparamsIn
         return 'success'
         

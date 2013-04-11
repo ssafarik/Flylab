@@ -7,6 +7,7 @@ import numpy as N
 
 from LEDPanels.msg import MsgPanelsCommand
 from LEDPanels.srv import *
+import subprocess
 
 
 #######################################################################################################
@@ -29,8 +30,6 @@ class LEDPanels():
         
         self.subPanelsCommand = rospy.Subscriber('LEDPanels/command', MsgPanelsCommand, self.PanelsCommand_callback)
         rospy.on_shutdown(self.OnShutdown_callback)
-        serialport = rospy.get_param('ledpanels/serialport', '/dev/ttyUSB0')
-        self.serial = serial.Serial(serialport, baudrate=921600, rtscts=False, dsrdtr=False) # 8N1
         
         self.commands = {
                          'start':              {'id': 0x20, 'args': [], 'help': 'start(), Start display.'},
@@ -166,19 +165,44 @@ class LEDPanels():
         self.srvGetVersion = rospy.Service('get_version', SrvGetVersion, self.GetVersion_callback)        
         self.srvGetADCValue = rospy.Service('get_adc_value', SrvGetADCValue, self.GetADCValue_callback)        
 
+        self.serialport = self.DiscoverSerialPort() 
+        if (self.serialport is not None):
+            self.serial = serial.Serial(self.serialport, baudrate=921600, rtscts=False, dsrdtr=False) # 8N1
+            self.initialized = True
+        else:
+            rospy.logerr('LEDPanels serial port was not specified as a ROS parameter, nor was it found automatically.')
+            
 
-        self.initialized = True
+    # Figure out which serial port the panels controller is attached to.
+    # If a ROS param is set, then use it.  Otherwise try to find it automatically.
+    # The ideitifying characteristic is the string "FTDI USB Serial Device" in the dmesg output.
+    def DiscoverSerialPort(self):
+        serialport = rospy.get_param('ledpanels/serialport', 'unspecified')
 
-
+        if (serialport=='unspecified'):
+            p1 = subprocess.Popen(["dmesg"], stdout=subprocess.PIPE)
+            p2 = subprocess.Popen(["grep", "FTDI USB Serial Device"], stdin=p1.stdout, stdout=subprocess.PIPE)
+            output = p2.communicate()[0]    
+            output = output.replace('\n', ' ')
+            
+            serialport = None  
+            for token in output.split(' '):
+                if 'tty' in token:
+                    serialport = '/dev/' + token
+                    break
+            
+        return serialport
+              
+        
     def MakeSurePortIsOpen(self):
         while not self.serial.isOpen():
             try:
-                rospy.logwarn ('LEDPanels: Serial port trying to open...')
+                rospy.logwarn ('LEDPanels: Trying to open serial port %s ...' % self.serialport)
                 self.serial.open()
             except serial.SerialException:
                 rospy.sleep(1)
             else:
-                rospy.logwarn ('LEDPanels: Serial port opened.')
+                rospy.logwarn ('LEDPanels: Opened serial port %s' % self.serialport)
     
         
     # Sends the get_version command to the LED controller, and returns the response.
@@ -315,9 +339,9 @@ class LEDPanels():
                 try:
                     self.serial.write(''.join(serialbytes_list))
                 except serial.SerialException, e:
-                    rospy.logwarn ('LEDPanels: Serial write failed: %s' % e)
+                    rospy.logwarn ('LEDPanels: Write FAILED to serial port %s: %s' % (self.serialport, e))
                 else:
-                    rospy.logwarn ('LEDPanels: Serial write succeeded.')
+                    rospy.logwarn ('LEDPanels: Write succeeded to serial port %s.' % self.serialport)
 
     def Main(self):
         panelcommand = MsgPanelsCommand(command='all_off')

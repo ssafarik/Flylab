@@ -28,9 +28,10 @@ from patterngen.msg import MsgPattern
 # 3. Turn off any illumination so that only the laser is seen.
 # 4. Turn down the laser brightness so each spot looks like a fly.
 # 5. Turn off the laser.
-# 5. roslaunch galvodirector calibrator.launch
-# 5. Turn on the laser.
-# 6. Transfer the calculated numbers to GalvoDirector.py.
+# 6. Click on galvodriver (Windows machine) w/ roscore already running
+# 7. roslaunch galvodirector calibrator.launch
+# 8. Turn on the laser.
+# 9. Transfer the calculated numbers to params_galvos.launch (not GalvoDirector.py)
 #
 ###############################################################################
 ###############################################################################
@@ -90,7 +91,7 @@ class GalvoCalibrator:
                             Point(x=2.5, y=3.0), 
                             Point(x=3.0, y=3.0), 
                             Point(x=3.5, y=3.0), 
-                            Point(x=4.0, y=3.0), 
+                            #Point(x=4.0, y=3.0), 
                             
                             Point(x=-4.0, y=3.5),
                             Point(x=-3.0, y=3.5),
@@ -102,7 +103,7 @@ class GalvoCalibrator:
                             Point(x=2.5, y=3.5), 
                             Point(x=3.0, y=3.5), 
                             Point(x=3.5, y=3.5), 
-                            Point(x=4.0, y=3.5), 
+                            #Point(x=4.0, y=3.5), 
                             
                             #Point(x=-5.0, y=4.0),
                             #Point(x=-4.5, y=4.0),
@@ -133,7 +134,7 @@ class GalvoCalibrator:
                             Point(x=1.0, y=5.0), 
                             Point(x=2.0, y=5.0), 
                             Point(x=3.0, y=5.0), 
-                            Point(x=3.5, y=5.0), 
+                            #Point(x=3.5, y=5.0), 
                             
                             Point(x=-3.5, y=5.5),
                             Point(x=-3.0, y=5.5),
@@ -234,6 +235,7 @@ class GalvoCalibrator:
         command.enable_laser = True
         command.pattern_list = [pattern,]
         command.units = 'volts' #'millimeters' # 'volts' #
+
         self.pubGalvoCommand.publish(command)
         
     
@@ -267,7 +269,10 @@ class GalvoCalibrator:
         rospy.logwarn ('Find the median values, and enter them in params_galvos.launch')
         rospy.logwarn ('mx, bx, my, by:')
         plt.figure(1)
+        
+        rospy.logwarn ('Sleeping for 20 seconds...')
         rospy.sleep(20)
+        rospy.logwarn ('Running.')
         
         while not rospy.is_shutdown():
             # Send all the input points.  The arenastate callback collects the output points into self.caldata.
