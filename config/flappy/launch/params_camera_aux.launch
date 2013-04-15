@@ -1,5 +1,5 @@
 <launch>
-  <param name="guid"            type="string" value="Basler-21285878" />
+  <param name="guid"                 type="string" value="Basler-21285878" />
   
   <param name="Acquire"              type="bool"   value="true"/>
   <param name="ExposureAuto"         type="string" value="Off"/>

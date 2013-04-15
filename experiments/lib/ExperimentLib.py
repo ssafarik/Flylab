@@ -7,6 +7,7 @@ import numpy as N
 import smach
 import smach_ros
 import tf
+import time
 
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
 from std_msgs.msg import Header, ColorRGBA, String
@@ -46,7 +47,7 @@ g_actions_dict = {'ROBOT' : ExperimentLibRobot,
 #
 class TriggerService():
     def __init__(self):
-        self.services = {"save/trigger": None}
+        self.services = {"savearenastate/trigger": None, "saveimages/trigger": None}
         
     def attach(self):
         for key in self.services:
@@ -74,7 +75,7 @@ class TriggerService():
 #
 class TrialStartService():
     def __init__(self):
-        self.services = {"save/trial_start": None}
+        self.services = {'savearenastate/trial_start': None, 'saveimages/trial_start': None}
     
     def attach(self):
         for key in self.services:
@@ -99,7 +100,7 @@ class TrialStartService():
 #
 class TrialEndService():
     def __init__(self):
-        self.services = {"save/trial_end": None}
+        self.services = {'savearenastate/trial_end': None, 'saveimages/trial_end': None}
     
     def attach(self):
         for key in self.services:
@@ -124,7 +125,7 @@ class TrialEndService():
 #
 class ExperimentEndService():
     def __init__(self):
-        self.services = {"save/wait_until_done": None}
+        self.services = {'savearenastate/wait_until_done': None, 'saveimages/wait_until_done': None}
     
     def attach(self):
         for key in self.services:
@@ -238,6 +239,16 @@ class StartTrial (smach.State):
         if (experimentparams.experiment.maxTrials != -1):
             if (experimentparams.experiment.maxTrials < experimentparams.experiment.trial):
                 return rv
+
+        now = rospy.Time.now().to_sec()
+        experimentparams.save.filenamepart = "%s%04d%02d%02d%02d%02d%02d" % (experimentparams.save.filenamebase, 
+                                                                             time.localtime(now).tm_year,
+                                                                             time.localtime(now).tm_mon,
+                                                                             time.localtime(now).tm_mday,
+                                                                             time.localtime(now).tm_hour,
+                                                                             time.localtime(now).tm_min,
+                                                                             time.localtime(now).tm_sec)
+        
 
         rospy.loginfo ('EL State StartTrial(%s)' % experimentparams.experiment.trial)
 

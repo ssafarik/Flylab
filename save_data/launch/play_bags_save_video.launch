@@ -1,6 +1,0 @@
-<launch>
-  <param name="save_image_frame" type="string" value="/camera/image_display"/>
-  <param name="save_video_format" type="string" value="mpeg1"/>
-  <node pkg="save_data" type="PlayBags.py" name="PlayBags" />
-  <node pkg="save_data" type="SaveVideo.py" name="SaveVideo" />
-</launch>

@@ -7,12 +7,11 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<include file="$(find flappy)/launch/params_camera.launch" ns="camera" />
-
-	<node name="camera"         pkg="camera_aravis"  type="camnode"       />
-	<node name="image_proc"     pkg="image_proc"     type="image_proc"    ns="camera" />
-    <node name="image_analysis" pkg="ImageAnalysis"  type="ImageAnalysis" ns="camera" />
-    <node name="view_tracking"  pkg="image_view"     type="image_view"    ns="camera"  args="image:=image_raw" />  
-    <node name="view_analysis"  pkg="image_view"     type="image_view"    ns="camera"  args="image:=image_analysis" />  
+	<include file="$(find flappy)/launch/params_camera.launch"              ns="camera" />
+	<node name="camera"           pkg="camera_aravis"  type="camnode"       />
+	<node name="image_proc"       pkg="image_proc"     type="image_proc"    ns="camera" />
+    <node name="image_analysis"   pkg="ImageAnalysis"  type="ImageAnalysis" ns="camera" />
+    <node name="view_tracking"    pkg="image_view"     type="image_view"    ns="camera"  args="image:=image_raw" />  
+    <node name="view_analysis"    pkg="image_view"     type="image_view"    ns="camera"  args="image:=image_analysis" />  
   
 </launch>

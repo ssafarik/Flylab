@@ -19,6 +19,7 @@
 	<include file="$(find flies)/launch/flygender_unspecified.launch" />
 
 	<!-- ***  The Experiment  *** -->
+    <param name="save/imagetopic" type="string" value="camera_flir/image_analysis"/>
 	<node pkg="experiments" type="TestTracking.py" name="Experiment" required="true" />
   
 </launch>
