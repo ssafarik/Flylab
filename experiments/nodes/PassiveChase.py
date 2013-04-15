@@ -66,7 +66,7 @@ class ExperimentPassiveChase():
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'            # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/40
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20
         self.experimentparams.trial.robot.move.pattern.hzPoint = 100
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)

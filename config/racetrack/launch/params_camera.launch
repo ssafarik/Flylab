@@ -1,16 +1,17 @@
 <launch>
-  <param name="frame_id" type="string" value="Camera0" />
-  <param name="camera_info_url" type="string" value="file:///home/sweta/.ros/camera_info/21250031.yaml" />
+  <!-- <param name="guid"                 type="string" value="Basler-21250031" /> Defaults to first camera. -->
   
-  <param name="autoexposure" type="int" value="0"/>
-  <param name="autogain" type="int" value="0"/>
-  <param name="exposure" type="double" value="3000"/>
-  <param name="gain" type="double" value="100"/>
-  <param name="acquisitionmode" type="int" value="0"/>
-  <param name="framerate" type="double" value="50"/>
-  <param name="triggersource" type="int" value="0"/>
-  <param name="softwarerate" type="double" value="50"/>
-  <param name="mtu"             type="int"    value="8192"/>
-
+  <param name="Acquire"              type="bool"   value="true"/>
+  <param name="ExposureAuto"         type="string" value="Off"/>
+  <param name="GainAuto"             type="string" value="Off"/>
+  <param name="ExposureTimeAbs"      type="double" value="3000"/>
+  <param name="GainRaw"              type="int"    value="100"/>
+  <param name="AcquisitionMode"      type="string" value="Continuous"/>
+  <param name="AcquisitionFrameRate" type="double" value="50"/>
+  <param name="TriggerMode"          type="string" value="Off"/>
+  <param name="TriggerSource"        type="string" value="Line1"/>
+  <param name="softwaretriggerrate"  type="double" value="100"/>
+  <param name="frame_id"             type="string" value="Camera0" />
+  <param name="mtu"                  type="int"    value="8000"/>
 
 </launch>
