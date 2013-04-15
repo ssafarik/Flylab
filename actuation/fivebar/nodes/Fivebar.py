@@ -146,7 +146,7 @@ class Fivebar:
         self.ptsContourRef         = None
         self.ptEeSense          = Point(0,0,0)
         self.ptEeCommand        = Point(0,0,0) # Where to command the end-effector.
-        self.posesContourSense  = PoseStamped() # Visual position of the tool.
+        self.posesContourStage  = PoseStamped() # Visual position of the tool.
         self.vecEeError         = Point(0,0,0)
         self.vecEeErrorPrev     = Point(0,0,0)
         self.vecEeDError        = Point(0,0,0)
@@ -566,13 +566,10 @@ class Fivebar:
         while not self.initializedServices:
             rospy.sleep(0.1)
             
-        x = 0.0
-        y = 0.0
-        
         rvStageState = SrvFrameStateResponse()
         if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
-            rvStageState.state.header = self.posesContourSense.header
-            rvStageState.state.pose = self.posesContourSense.pose
+            rvStageState.state.header = self.posesContourStage.header
+            rvStageState.state.pose = self.posesContourStage.pose
             rvStageState.state.velocity.linear.x = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.y = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.z = 0.0 # BUG: This should come from the hardware.
@@ -661,7 +658,7 @@ class Fivebar:
         # Transform to Stage frame.
         try:
             posesContour.header.stamp = self.tfrx.getLatestCommonTime('Stage', posesContour.header.frame_id)
-            self.posesContourSense = self.tfrx.transformPose('Stage', posesContour)
+            self.posesContourStage = self.tfrx.transformPose('Stage', posesContour)
         except tf.Exception:
             rospy.logwarn ('5B Exception transforming to Stage frame in VisualPosition_callback()')
         
@@ -834,9 +831,9 @@ class Fivebar:
                                                 points=[Point(x=state.pose.position.x, 
                                                               y=state.pose.position.y, 
                                                               z=state.pose.position.z),
-                                                        Point(x=self.posesContourSense.pose.position.x, 
-                                                              y=self.posesContourSense.pose.position.y, 
-                                                              z=self.posesContourSense.pose.position.z)])
+                                                        Point(x=self.posesContourStage.pose.position.x, 
+                                                              y=self.posesContourStage.pose.position.y, 
+                                                              z=self.posesContourStage.pose.position.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -859,8 +856,8 @@ class Fivebar:
             self.kD *= self.kAll
             
             # The contour error.
-            self.vecEeError.x = self.ptsContourRef.point.x - self.posesContourSense.pose.position.x
-            self.vecEeError.y = self.ptsContourRef.point.y - self.posesContourSense.pose.position.y
+            self.vecEeError.x = self.ptsContourRef.point.x - self.posesContourStage.pose.position.x
+            self.vecEeError.y = self.ptsContourRef.point.y - self.posesContourStage.pose.position.y
 
             # PID control of the contour error.
             self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
