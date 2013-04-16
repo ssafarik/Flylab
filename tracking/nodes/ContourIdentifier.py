@@ -751,8 +751,9 @@ class ContourIdentifier:
                 
                 # Publish the EndEffectorOffset.
                 if (0 in self.iRobot_list) and (0 < len(self.objects)):
-                    self.pubVisualPosition.publish(PoseStamped(header=self.objects[0].state.header,
-                                                               pose=self.objects[0].state.pose))
+#                     self.pubVisualPosition.publish(PoseStamped(header=self.objects[0].state.header,
+#                                                                pose=self.objects[0].state.pose))
+                    self.pubVisualState.publish(self.objects[0].state)
                 
                 
                 # Publish a marker to indicate the size of the arena.

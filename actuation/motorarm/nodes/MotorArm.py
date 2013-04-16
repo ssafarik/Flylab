@@ -59,7 +59,7 @@ class MotorArm:
         rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
-        self.subVisualPosition    = rospy.Subscriber('VisualPosition', PoseStamped, self.VisualPosition_callback)
+        self.subVisualState       = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
         self.pubJointState        = rospy.Publisher('joint_states', JointState)
         #self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         self.pubMarker            = rospy.Publisher('visualization_marker', Marker)
@@ -67,11 +67,10 @@ class MotorArm:
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
 
-        self.ptsContourRefExternal = None #Point(0,0,0) # Where we want the 'tool'.
-        self.ptsContourRef         = None
+        self.stateRef           = MsgFrameState()
+        self.stateVisual        = MsgFrameState() # Visual position of the tool.
         self.ptEeSense          = Point(0,0,0)
         self.ptEeCommand        = Point(0,0,0) # Where to command the end-effector.
-        self.posesContourSense  = PoseStamped() # Visual position of the tool.
         self.vecEeError         = Point(0,0,0)
         self.vecEeErrorPrev     = Point(0,0,0)
         self.vecEeDError        = Point(0,0,0)
@@ -81,7 +80,7 @@ class MotorArm:
         self.unwind = 0.0
         self.anglePrev = 0.0
         self.speedCommandTool = None 
-        self.speedStageMax  = rospy.get_param('motorarm/speed_max', 200.0)
+        self.speedCommandMax  = rospy.get_param('motorarm/speed_max', 200.0)
         
         self.timePrev = rospy.Time.now()
         self.time = rospy.Time.now()
@@ -138,26 +137,77 @@ class MotorArm:
         self.initializedServices = True
         
 
-    def TransformToFrame(self, frame_id, pts, vels=None):
+    # Transform a PointStamped to the given frame.
+    def TransformPointToFrame(self, frame_id, pts):
         try:
             pts.header.stamp = self.tfrx.getLatestCommonTime(frame_id, pts.header.frame_id)
             ptsOut = self.tfrx.transformPoint(frame_id, pts)
         except tf.Exception:
-            rospy.logwarn ('MA Exception1 transforming in TransformToFrame()')
+            rospy.logwarn ('MA Exception transforming in TransformPointToFrame()')
             ptsOut = pts
-        
-        if (vels is None):
-            rv = ptsOut
-        else
-            try:
-                velsOut = vels #self.tfrx.lookupTwist(frame_id, vels)
-            except tf.Exception:
-                rospy.logwarn ('MA Exception2 transforming in TransformToFrame()')
-                velsOut = vels
-                
-            rv = (ptsOut, velsOut)
             
-        return rv
+        return ptsOut
+
+        
+    # Transform a MsgFrameState to the given frame.
+    def TransformStateToFrame(self, frame_id, state, doClipToArena=True):
+        stateOut = MsgFrameState()
+
+        # Get the time.        
+        try:
+            stamp = self.tfrx.getLatestCommonTime(frame_id, state.header.frame_id)
+        except tf.Exception:
+            rospy.logwarn ('MA Exception1 transforming in TransformStateToFrame()')
+
+
+        # Transform the pose
+        poses = PoseStamped(header=state.header,
+                            poses=state.pose) 
+        poses.header.stamp = stamp
+        if (doClipToArena):
+            pts = PointStamped(header=poses.header, point=state.pose.position)
+            (poses.position, isInArena) = self.ClipPtsToArena(pts)
+        else:
+            isInArena = True
+            
+        try:
+            posesOut = self.tfrx.transformPose(frame_id, poses)
+        except tf.Exception:
+            rospy.logwarn ('MA Exception2 transforming in TransformStateToFrame()')
+            posesOut = poses
+        stateOut.header = posesOut.header
+        stateOut.pose = posesOut.pose
+        
+        
+        # Transform the linear velocity
+        v3s = Vector3Stamped(header=state.header,
+                             vector=state.velocity.linear) 
+        v3s.header.stamp = stamp
+        try:
+            v3sOut = self.tfrx.transformVector3(frame_id, v3s)
+        except tf.Exception:
+            rospy.logwarn ('MA Exception3 transforming in TransformStateToFrame()')
+            v3sOut = v3s
+        stateOut.velocity.linear = v3sOut
+                
+                
+        # Transform the angular velocity
+        v3s = Vector3Stamped(header=state.header,
+                             vector=state.velocity.angular) 
+        v3s.header.stamp = stamp
+        try:
+            v3sOut = self.tfrx.transformVector3(frame_id, v3s)
+        except tf.Exception:
+            rospy.logwarn ('MA Exception4 transforming in TransformStateToFrame()')
+            v3sOut = v3s
+        stateOut.velocity.angular = v3sOut
+                
+                
+        # Transform the speed.
+        stateOut.speed = state.speed
+        
+            
+        return (stateOut, isInArena)
         
 
             
@@ -211,7 +261,7 @@ class MotorArm:
         isInReachable = True
         
         # Transform to Arena frame.
-        ptsStage = self.TransformToFrame('Stage', ptsIn)
+        ptsStage = self.TransformPointToFrame('Stage', ptsIn)
 
         # Clip to arena radius.
         (ptClipped,bClipped) = self.ClipPtToReachable(ptsStage.point)
@@ -220,7 +270,7 @@ class MotorArm:
             isInReachable = False
     
         # Transform back to original frame.
-        ptsOut = self.TransformToFrame(ptsIn.header.frame_id, ptsStage)
+        ptsOut = self.TransformPointToFrame(ptsIn.header.frame_id, ptsStage)
     
         return (ptsOut, isInReachable)
         
@@ -229,7 +279,7 @@ class MotorArm:
         isInArena = True
         
         # Transform to Arena frame.
-        ptsArena = self.TransformToFrame('Arena', ptsIn)
+        ptsArena = self.TransformPointToFrame('Arena', ptsIn)
 
         # Clip to arena radius.
         (ptClipped,bClipped) = self.ClipPtToArena(ptsArena.point)
@@ -238,7 +288,7 @@ class MotorArm:
             isInArena = False
     
         # Transform back to original frame.
-        ptsOut = self.TransformToFrame(ptsIn.header.frame_id, ptsArena)
+        ptsOut = self.TransformPointToFrame(ptsIn.header.frame_id, ptsArena)
     
         return (ptsOut, isInArena)
         
@@ -295,8 +345,8 @@ class MotorArm:
             #(x,y) = self.GetXyFrom12 (self.jointstate1.position, self.jointstate2.position)
             
             #rvStageState.state.header.stamp = rospy.Time.now()
-            rvStageState.state.header = self.posesContourSense.header
-            rvStageState.state.pose = self.posesContourSense.pose 
+            rvStageState.state.header = self.stateVisual.header
+            rvStageState.state.pose = self.stateVisual.pose 
             rvStageState.state.velocity.linear.x = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.y = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.z = 0.0 # BUG: This should come from the hardware.
@@ -314,19 +364,20 @@ class MotorArm:
         while not self.initialized:
             rospy.sleep(0.5)
             
-        self.ptsContourRefExternal = PointStamped(header=reqStageState.state.header,
-                                                  point=reqStageState.state.pose.position)
-        
-        (self.ptsContourRefExternal, isInArena) = self.ClipPtsToArena(self.ptsContourRefExternal)
-        self.ptsContourRef = self.TransformToFrame('Stage', self.ptsContourRefExternal)
+        (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', reqStageState.state)
+#         ptsContourRefExternal = PointStamped(header=reqStageState.state.header,
+#                                                   point=reqStageState.state.pose.position)
+#         
+#         (ptsContourRefExternal, isInArena) = self.ClipPtsToArena(ptsContourRefExternal)
+#         self.ptsContourRef = self.TransformPointToFrame('Stage', ptsContourRefExternal)
 
 
-        #rospy.logwarn('MA ptsContourRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsContourRef.point.x,self.ptsContourRef.point.y,self.ptsContourRefExternal.point.x,self.ptsContourRefExternal.point.y))
-        if reqStageState.speed is not None:
-            self.speedCommandTool = reqStageState.speed # Requested speed for positioning.
+        #rospy.logwarn('MA ptsContourRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsContourRef.point.x,self.ptsContourRef.point.y,ptsContourRefExternal.point.x,ptsContourRefExternal.point.y))
+        if self.stateRef.speed is not None:
+            self.speedContourRef = self.stateRef.speed # Requested speed for positioning.
         else:
-            self.speedCommandTool = self.speedStageMax
-        #rospy.logwarn('MA reqStageState.speed=%s' % reqStageState.speed)
+            self.speedContourRef = self.speedCommandMax
+
 
         rvStageState = SrvFrameStateResponse()
         rvStageState.state.pose.position.x = reqStageState.state.pose.position.x
@@ -338,18 +389,22 @@ class MotorArm:
 
     def SignalInput_callback (self, srvSignalReq):
         rv = SrvSignalResponse()
-        rv.success = True
-        self.ptsContourRefExternal = PointStamped(header=srvSignalReq.state.header,
-                                                  point=srvSignalReq.state.pose.position) 
         
-        (self.ptsContourRefExternal, isInArena) = self.ClipPtsToArena(self.ptsContourRefExternal)
-        self.ptsContourRef = self.TransformToFrame('Stage', self.ptsContourRefExternal)
+        (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', srvSignalReq.state)
         rv.success = isInArena
-
-        try:
-            self.speedCommandTool = self.speedStageMax #srvSignalReq.state.speed #self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
-        except AttributeError, e:
-            rospy.logwarn('MA AttributeError: %s' % e)
+#         # Position
+#         ptsContourRefExternal = PointStamped(header=srvSignalReq.state.header,
+#                                              point=srvSignalReq.state.pose.position) 
+#         (ptsContourRefExternal, isInArena) = self.ClipPtsToArena(ptsContourRefExternal)
+#         self.ptsContourRef = self.TransformPointToFrame('Stage', ptsContourRefExternal)
+#         rv.success = isInArena
+# 
+#         self.vLinContourRefExternal = Vector3Stamped(header=srvSignalReq.state.header,
+#                                              vector=srvSignalReq.state.velocity.linear)
+#         
+#         self.speedContourRef = srvSignalReq.state.speed
+# 
+#         self.speedCommandTool = self.speedCommandMax #srvSignalReq.state.speed #self.speedCommandMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
             
         #rospy.logwarn('speed=% 6.1f' % self.speedCommandTool)
         
@@ -367,13 +422,14 @@ class MotorArm:
         return ptNew
     
 
-    def VisualPosition_callback(self, posesContour):
+    def VisualState_callback(self, state):
         # Transform to Stage frame.
-        try:
-            posesContour.header.stamp = self.tfrx.getLatestCommonTime('Stage', posesContour.header.frame_id)
-            self.posesContourSense = self.tfrx.transformPose('Stage', posesContour)
-        except tf.Exception:
-            rospy.logwarn ('MA Exception transforming to Stage frame in VisualPosition_callback()')
+#         try:
+#             posesContour.header.stamp = self.tfrx.getLatestCommonTime('Stage', posesContour.header.frame_id)
+#             self.posesContourSense = self.tfrx.transformPose('Stage', posesContour)
+#         except tf.Exception:
+#             rospy.logwarn ('MA Exception transforming to Stage frame in VisualState_callback()')
+        self.stateVisual = self.TransformStateToFrame('Stage', state, doClipArena=False)
         
         
     def HomeStage_callback(self, reqStageState):
@@ -451,7 +507,7 @@ class MotorArm:
                 (angleStage, xStage, yStage) = self.Get1xyFromAngle(self.jointstate1.position)
                 ptsStage = PointStamped(header=Header(frame_id='Stage'),
                                         point=Point(x=xStage, y=yStage, z=0.0))
-                ptsArena = self.TransformToFrame('Arena', ptsStage)
+                ptsArena = self.TransformPointToFrame('Arena', ptsStage)
                 self.ptEeSense = ptsStage.point
 #                rospy.logwarn('eeSense: % 4.1f -> (% 4.1f, % 4.1f)' % (self.jointstate1.position, self.ptEeSense.x, self.ptEeSense.y))
 
@@ -501,15 +557,15 @@ class MotorArm:
                 
                 
                 # Frame Target
-                if self.ptsContourRef is not None:
-                    markerTarget = Marker(header=self.ptsContourRef.header,
+                if self.stateRef.pose.position is not None:
+                    markerTarget = Marker(header=self.stateRef.header,
                                           ns='target',
                                           id=2,
                                           type=Marker.SPHERE,
                                           action=0,
-                                          pose=Pose(position=Point(x=self.ptsContourRef.point.x, 
-                                                                   y=self.ptsContourRef.point.y, 
-                                                                   z=self.ptsContourRef.point.z)),
+                                          pose=Pose(position=Point(x=self.stateRef.pose.position.x, 
+                                                                   y=self.stateRef.pose.position.y, 
+                                                                   z=self.stateRef.pose.position.z)),
                                           scale=Vector3(x=3.0,
                                                         y=3.0,
                                                         z=3.0),
@@ -536,9 +592,9 @@ class MotorArm:
                                               points=[Point(x=state.pose.position.x, 
                                                             y=state.pose.position.y, 
                                                             z=state.pose.position.z),
-                                                        Point(x=self.posesContourSense.pose.position.x, 
-                                                              y=self.posesContourSense.pose.position.y, 
-                                                              z=self.posesContourSense.pose.position.z)])
+                                                        Point(x=self.stateVisual.pose.position.x, 
+                                                              y=self.stateVisual.pose.position.y, 
+                                                              z=self.stateVisual.pose.position.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -548,7 +604,7 @@ class MotorArm:
     #
     def UpdateMotorCommandFromTarget(self):
         #rospy.loginfo ('MA ptToolRef=%s' % self.ptToolRef)
-        if self.ptsContourRef is not None:
+        if self.stateRef is not None:
             # PID Gains & Parameters.
 #            self.kP      = rospy.get_param('motorarm/kP', 1.0)
 #            self.kI      = rospy.get_param('motorarm/kI', 0.0)
@@ -564,8 +620,8 @@ class MotorArm:
             # The contour error.
             self.vecEeErrorPrev.x = self.vecEeError.x 
             self.vecEeErrorPrev.y = self.vecEeError.y 
-            self.vecEeError.x = self.ptsContourRef.point.x - self.posesContourSense.pose.position.x
-            self.vecEeError.y = self.ptsContourRef.point.y - self.posesContourSense.pose.position.y
+            self.vecEeError.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
+            self.vecEeError.y = self.stateRef.pose.position.y - self.stateVisual.pose.position.y
 
             # PID control of the contour error.
             self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
@@ -600,15 +656,15 @@ class MotorArm:
             # Get the command for the hardware, clipped to arena coords.
             ptEeCommandRaw = Point(x = self.ptEeSense.x + vecPID.x,
                                    y = self.ptEeSense.y + vecPID.y)
-            ptsEeCommandRaw = PointStamped(header=Header(stamp=self.posesContourSense.header.stamp,
+            ptsEeCommandRaw = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
                                                          frame_id='Stage'),
                                            point=ptEeCommandRaw)
             
             (ptsEeCommandArena, isInArena) = self.ClipPtsToArena(ptsEeCommandRaw)
             (ptsEeCommandClipped, isInReachable) = self.ClipPtsToReachable(ptsEeCommandArena)
             self.ptEeCommand = ptsEeCommandClipped.point
-#            rospy.logwarn('contourRef:(% 4.1f, % 4.1f), contourSense:(% 4.1f, % 4.1f)' % (self.ptsContourRef.point.x, self.ptsContourRef.point.y, 
-#                                                                                          self.posesContourSense.pose.position.x, self.posesContourSense.pose.position.y))
+#            rospy.logwarn('contourRef:(% 4.1f, % 4.1f), contourSense:(% 4.1f, % 4.1f)' % (self.stateRef.pose.position.x, self.stateRef.pose.position.y, 
+#                                                                                          self.stateVisual.pose.position.x, self.stateVisual.pose.position.y))
 #            rospy.logwarn('(% 4.1f, % 4.1f)' % (self.ptEeCommand.x, self.ptEeCommand.y))
             
 
@@ -677,14 +733,17 @@ class MotorArm:
             
             
             self.angleNext = self.Get1FromPt(self.ptEeCommand)
+
             
-            # Compute deltas for speed calc.
-            if (self.jointstate1 is not None):
-                #self.speedCommandTool = rospy.get_param('motorarm/speed_max', 123)
-                speedNext = (self.speedCommandTool / self.L1) * (self.T/self.dt) # Convert linear speed (mm/sec) to angular speed (rad/sec).
-                #rospy.logwarn('self.angleNext=% 3.2f, lin/ang speedNext=% 3.2f/% 3.2f' % (self.angleNext, self.speedCommandTool, speedNext))
-                rospy.logwarn('dAngle=% 3.3f, dt=% f,  a/t=% f' % (self.angleNext-self.anglePrev, self.dt, (self.angleNext-self.anglePrev)/self.dt))
+            speedNext = (self.speedCommandTool / self.L1) * (self.T/self.dt) # Convert linear speed (mm/sec) to angular speed (rad/sec).
+
+
+            #rospy.logwarn('self.angleNext=% 3.2f, lin/ang speedNext=% 3.2f/% 3.2f' % (self.angleNext, self.speedCommandTool, speedNext))
+            rospy.logwarn('dAngle=% 3.3f, dt=% f,  a/t=% f' % (self.angleNext-self.anglePrev, self.dt, (self.angleNext-self.anglePrev)/self.dt))
                 
+                
+            # Send the motor command.            
+            if (self.jointstate1 is not None):
                 with self.lock:
                     try:
                         self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), self.angleNext, speedNext)
