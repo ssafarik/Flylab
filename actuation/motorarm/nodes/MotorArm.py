@@ -30,6 +30,7 @@ class MotorArm:
 
         # Link lengths (millimeters)
         self.L1             = rospy.get_param('motorarm/L1', 9.9) # Length of link1
+        self.T              = rospy.get_param('motorarm/T', 1/80) # Nominal motor update period, i.e. sample rate.
 
         # PID Gains & Parameters.
         self.kP             = rospy.get_param('motorarm/kP', 1.0)
@@ -70,7 +71,7 @@ class MotorArm:
         self.ptsContourRef         = None
         self.ptEeSense          = Point(0,0,0)
         self.ptEeCommand        = Point(0,0,0) # Where to command the end-effector.
-        self.posesContourStage  = PoseStamped() # Visual position of the tool.
+        self.posesContourSense  = PoseStamped() # Visual position of the tool.
         self.vecEeError         = Point(0,0,0)
         self.vecEeErrorPrev     = Point(0,0,0)
         self.vecEeDError        = Point(0,0,0)
@@ -84,6 +85,9 @@ class MotorArm:
         
         self.timePrev = rospy.Time.now()
         self.time = rospy.Time.now()
+        
+        self.anglePrev = 0.0
+        self.angleNext = 0.0
 
         self.request = SrvFrameStateRequest()
         self.request.state.header.frame_id = 'Stage'
@@ -134,15 +138,27 @@ class MotorArm:
         self.initializedServices = True
         
 
-    def TransformToFrame(self, frame_id, pts):
+    def TransformToFrame(self, frame_id, pts, vels=None):
         try:
             pts.header.stamp = self.tfrx.getLatestCommonTime(frame_id, pts.header.frame_id)
             ptsOut = self.tfrx.transformPoint(frame_id, pts)
         except tf.Exception:
-            rospy.logwarn ('MA Exception transforming in TransformToFrame()')
+            rospy.logwarn ('MA Exception1 transforming in TransformToFrame()')
             ptsOut = pts
         
-        return ptsOut
+        if (vels is None):
+            rv = ptsOut
+        else
+            try:
+                velsOut = vels #self.tfrx.lookupTwist(frame_id, vels)
+            except tf.Exception:
+                rospy.logwarn ('MA Exception2 transforming in TransformToFrame()')
+                velsOut = vels
+                
+            rv = (ptsOut, velsOut)
+            
+        return rv
+        
 
             
     def ClipVecToMag (self, pt, magMax):
@@ -279,8 +295,8 @@ class MotorArm:
             #(x,y) = self.GetXyFrom12 (self.jointstate1.position, self.jointstate2.position)
             
             #rvStageState.state.header.stamp = rospy.Time.now()
-            rvStageState.state.header = self.posesContourStage.header
-            rvStageState.state.pose = self.posesContourStage.pose 
+            rvStageState.state.header = self.posesContourSense.header
+            rvStageState.state.pose = self.posesContourSense.pose 
             rvStageState.state.velocity.linear.x = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.y = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.z = 0.0 # BUG: This should come from the hardware.
@@ -355,7 +371,7 @@ class MotorArm:
         # Transform to Stage frame.
         try:
             posesContour.header.stamp = self.tfrx.getLatestCommonTime('Stage', posesContour.header.frame_id)
-            self.posesContourStage = self.tfrx.transformPose('Stage', posesContour)
+            self.posesContourSense = self.tfrx.transformPose('Stage', posesContour)
         except tf.Exception:
             rospy.logwarn ('MA Exception transforming to Stage frame in VisualPosition_callback()')
         
@@ -520,9 +536,9 @@ class MotorArm:
                                               points=[Point(x=state.pose.position.x, 
                                                             y=state.pose.position.y, 
                                                             z=state.pose.position.z),
-                                                        Point(x=self.posesContourStage.pose.position.x, 
-                                                              y=self.posesContourStage.pose.position.y, 
-                                                              z=self.posesContourStage.pose.position.z)])
+                                                        Point(x=self.posesContourSense.pose.position.x, 
+                                                              y=self.posesContourSense.pose.position.y, 
+                                                              z=self.posesContourSense.pose.position.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -548,8 +564,8 @@ class MotorArm:
             # The contour error.
             self.vecEeErrorPrev.x = self.vecEeError.x 
             self.vecEeErrorPrev.y = self.vecEeError.y 
-            self.vecEeError.x = self.ptsContourRef.point.x - self.posesContourStage.pose.position.x
-            self.vecEeError.y = self.ptsContourRef.point.y - self.posesContourStage.pose.position.y
+            self.vecEeError.x = self.ptsContourRef.point.x - self.posesContourSense.pose.position.x
+            self.vecEeError.y = self.ptsContourRef.point.y - self.posesContourSense.pose.position.y
 
             # PID control of the contour error.
             self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
@@ -578,18 +594,13 @@ class MotorArm:
             self.vecEeIError.x -= self.kWindup * vecExcessI.x
             self.vecEeIError.y -= self.kWindup * vecExcessI.y
             
-            # Print the PID component values.
-            magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
-            magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
-            magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
-            magPID = N.linalg.norm([vecPID.x, vecPID.y])
             
 
 
             # Get the command for the hardware, clipped to arena coords.
             ptEeCommandRaw = Point(x = self.ptEeSense.x + vecPID.x,
                                    y = self.ptEeSense.y + vecPID.y)
-            ptsEeCommandRaw = PointStamped(header=Header(stamp=self.posesContourStage.header.stamp,
+            ptsEeCommandRaw = PointStamped(header=Header(stamp=self.posesContourSense.header.stamp,
                                                          frame_id='Stage'),
                                            point=ptEeCommandRaw)
             
@@ -597,11 +608,17 @@ class MotorArm:
             (ptsEeCommandClipped, isInReachable) = self.ClipPtsToReachable(ptsEeCommandArena)
             self.ptEeCommand = ptsEeCommandClipped.point
 #            rospy.logwarn('contourRef:(% 4.1f, % 4.1f), contourSense:(% 4.1f, % 4.1f)' % (self.ptsContourRef.point.x, self.ptsContourRef.point.y, 
-#                                                                                          self.posesContourStage.pose.position.x, self.posesContourStage.pose.position.y))
+#                                                                                          self.posesContourSense.pose.position.x, self.posesContourSense.pose.position.y))
 #            rospy.logwarn('(% 4.1f, % 4.1f)' % (self.ptEeCommand.x, self.ptEeCommand.y))
             
-            vecPIDclipped = Point(x=ptsEeCommandClipped.point.x-self.ptEeSense.x,
-                                  y=ptsEeCommandClipped.point.y-self.ptEeSense.y)
+
+            # Print the PID component values.
+            #magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
+            #magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
+            #magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
+            #magPID = N.linalg.norm([vecPID.x, vecPID.y])
+            #vecPIDclipped = Point(x=ptsEeCommandClipped.point.x-self.ptEeSense.x,
+            #                      y=ptsEeCommandClipped.point.y-self.ptEeSense.y)
             #rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
             
             # Display a vector in rviz.
@@ -659,17 +676,18 @@ class MotorArm:
 
             
             
-            angleNext = self.Get1FromPt(self.ptEeCommand)
+            self.angleNext = self.Get1FromPt(self.ptEeCommand)
             
             # Compute deltas for speed calc.
             if (self.jointstate1 is not None):
                 #self.speedCommandTool = rospy.get_param('motorarm/speed_max', 123)
-                speedNext = self.speedCommandTool / self.L1 # Convert linear speed to angular speed.
-                #rospy.logwarn('angleNext=% 3.2f, lin/ang speedNext=% 3.2f/% 3.2f' % (angleNext, self.speedCommandTool, speedNext))
+                speedNext = (self.speedCommandTool / self.L1) * (self.T/self.dt) # Convert linear speed (mm/sec) to angular speed (rad/sec).
+                #rospy.logwarn('self.angleNext=% 3.2f, lin/ang speedNext=% 3.2f/% 3.2f' % (self.angleNext, self.speedCommandTool, speedNext))
+                rospy.logwarn('dAngle=% 3.3f, dt=% f,  a/t=% f' % (self.angleNext-self.anglePrev, self.dt, (self.angleNext-self.anglePrev)/self.dt))
                 
                 with self.lock:
                     try:
-                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext, speedNext)
+                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), self.angleNext, speedNext)
                     except (rospy.ServiceException, IOError), e:
                         rospy.logwarn ('MA FAILED %s'%e)
 
@@ -686,12 +704,13 @@ class MotorArm:
         self.initialized = True
 
         # Process messages forever.
-        rosrate = rospy.Rate(80)
+        rosrate = rospy.Rate(1/self.T)
         #try:
         while not rospy.is_shutdown():
             self.time = rospy.Time.now()
             self.dt = self.time - self.timePrev
             self.timePrev = self.time
+            self.anglePrev = self.angleNext
 
             #rospy.logwarn('jointstate1=%s' % self.jointstate1)
             self.SendTransforms()
