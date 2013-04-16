@@ -28,7 +28,6 @@ class ExperimentPassiveChase():
         self.experimentparams.save.filenamebase = "passivechase"
         self.experimentparams.save.arenastate = True
         self.experimentparams.save.video = True
-        self.experimentparams.save.bag = False
         self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.tracking.exclusionzones.enabled = False

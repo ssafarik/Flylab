@@ -30,7 +30,7 @@ class MotorArm:
 
         # Link lengths (millimeters)
         self.L1             = rospy.get_param('motorarm/L1', 9.9) # Length of link1
-        self.T              = rospy.get_param('motorarm/T', 1/80) # Nominal motor update period, i.e. sample rate.
+        self.T              = rospy.get_param('motorarm/T', 1/40) # Nominal motor update period, i.e. sample rate.
 
         # PID Gains & Parameters.
         self.kP             = rospy.get_param('motorarm/kP', 1.0)
@@ -79,7 +79,7 @@ class MotorArm:
         self.vecEeIErrorClipped = Point(0,0,0)
         
         self.unwind = 0.0
-        self.anglePrev = 0.0
+        self.angleInvKinPrev = 0.0
         self.speedCommandTool = None 
         self.speedStageMax  = rospy.get_param('motorarm/speed_max', 200.0)
         
@@ -148,7 +148,7 @@ class MotorArm:
         
         if (vels is None):
             rv = ptsOut
-        else
+        else:
             try:
                 velsOut = vels #self.tfrx.lookupTwist(frame_id, vels)
             except tf.Exception:
@@ -266,15 +266,15 @@ class MotorArm:
         angle = (N.arctan2(y,x) % (2.0*N.pi)) + self.unwind
 #        angle -= N.pi
         
-        if (angle-self.anglePrev) > N.pi: # Clockwise across zero.
+        if (angle-self.angleInvKinPrev) > N.pi: # Clockwise across zero.
             angle -= 2.0*N.pi
             self.unwind -= 2.0*N.pi
             
-        elif (angle-self.anglePrev) < -N.pi: # CCW across zero.
+        elif (angle-self.angleInvKinPrev) < -N.pi: # CCW across zero.
             angle += 2.0*N.pi
             self.unwind += 2.0*N.pi 
         
-        self.anglePrev = angle
+        self.angleInvKinPrev = angle
         
         #rospy.logwarn('angle=%0.2f, unwind=%0.2f' % (angle, self.unwind))
         return angle
@@ -613,13 +613,13 @@ class MotorArm:
             
 
             # Print the PID component values.
-            #magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
-            #magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
-            #magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
-            #magPID = N.linalg.norm([vecPID.x, vecPID.y])
-            #vecPIDclipped = Point(x=ptsEeCommandClipped.point.x-self.ptEeSense.x,
-            #                      y=ptsEeCommandClipped.point.y-self.ptEeSense.y)
-            #rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
+#            magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
+#            magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
+#            magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
+#            magPID = N.linalg.norm([vecPID.x, vecPID.y])
+#            vecPIDclipped = Point(x=ptsEeCommandClipped.point.x-self.ptEeSense.x,
+#                                  y=ptsEeCommandClipped.point.y-self.ptEeSense.y)
+#            rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
             
             # Display a vector in rviz.
             ptBase = self.ptEeSense
@@ -681,9 +681,9 @@ class MotorArm:
             # Compute deltas for speed calc.
             if (self.jointstate1 is not None):
                 #self.speedCommandTool = rospy.get_param('motorarm/speed_max', 123)
-                speedNext = (self.speedCommandTool / self.L1) * (self.T/self.dt) # Convert linear speed (mm/sec) to angular speed (rad/sec).
+                speedNext = (self.speedCommandTool / self.L1)# * (self.T/self.dt.to_sec()) # Convert linear speed (mm/sec) to angular speed (rad/sec).
                 #rospy.logwarn('self.angleNext=% 3.2f, lin/ang speedNext=% 3.2f/% 3.2f' % (self.angleNext, self.speedCommandTool, speedNext))
-                rospy.logwarn('dAngle=% 3.3f, dt=% f,  a/t=% f' % (self.angleNext-self.anglePrev, self.dt, (self.angleNext-self.anglePrev)/self.dt))
+                #rospy.logwarn('% f, dAngle=% f, dt=% f,  a/t=% f' % (self.angleNext, self.angleNext-self.anglePrev, self.dt.to_sec(), (self.angleNext-self.anglePrev)/self.dt.to_sec()))
                 
                 with self.lock:
                     try:
