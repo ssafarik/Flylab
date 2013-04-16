@@ -583,7 +583,8 @@ class PatternGenXY:
 
                 speed = self.lenPattern1 * self.pattern1.hzPattern
                 velocity = Twist(linear=Point(x = speed * N.cos(a),
-                                              y = speed * N.sin(a)))
+                                              y = speed * N.sin(a))) # BUG: We're ignoring angular velocity.
+                
                 #rospy.logwarn('iPoint=%d/%d, speed=% 4.1f, x=% 4.1f' % (self.iPoint, len(self.pattern1.points), speed, pts.point.x))
                 state=MsgFrameState(header=pts.header,
                                     pose=Pose(position=pts.point),
