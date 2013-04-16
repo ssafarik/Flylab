@@ -62,7 +62,7 @@ class ContourIdentifier:
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
         self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists', ContourinfoLists, self.ContourinfoLists_callback, queue_size=queue_size_contours)
         self.pubArenaState          = rospy.Publisher('ArenaState', ArenaState)
-        self.pubVisualPosition      = rospy.Publisher('VisualPosition', PoseStamped)
+        self.pubVisualState         = rospy.Publisher('VisualState', MsgFrameState)
         
         # Poses
         self.poseRobot = Pose()

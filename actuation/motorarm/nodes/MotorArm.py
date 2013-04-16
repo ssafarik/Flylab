@@ -7,7 +7,7 @@ import serial
 import tf
 import threading
 import PyKDL
-from geometry_msgs.msg import Point, PointStamped, Pose, PoseStamped, Vector3
+from geometry_msgs.msg import Point, PointStamped, Pose, PoseStamped, Vector3, Vector3Stamped
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
@@ -162,18 +162,23 @@ class MotorArm:
 
         # Transform the pose
         poses = PoseStamped(header=state.header,
-                            poses=state.pose) 
+                            pose=state.pose) 
         poses.header.stamp = stamp
         if (doClipToArena):
             pts = PointStamped(header=poses.header, point=state.pose.position)
-            (poses.position, isInArena) = self.ClipPtsToArena(pts)
+            (pts, isInArena) = self.ClipPtsToArena(pts)
+            poses.pose.position = pts.point
         else:
             isInArena = True
             
+        poses.header.stamp = stamp
         try:
             posesOut = self.tfrx.transformPose(frame_id, poses)
-        except tf.Exception:
-            rospy.logwarn ('MA Exception2 transforming in TransformStateToFrame()')
+        except tf.Exception, e:
+            rospy.logwarn ('MA Exception2 transforming in TransformStateToFrame(): %s' % e)
+#            rospy.logwarn(frame_id)
+#            rospy.logwarn(stamp)
+#            rospy.logwarn(repr(poses))
             posesOut = poses
         stateOut.header = posesOut.header
         stateOut.pose = posesOut.pose
@@ -429,7 +434,7 @@ class MotorArm:
 #             self.posesContourSense = self.tfrx.transformPose('Stage', posesContour)
 #         except tf.Exception:
 #             rospy.logwarn ('MA Exception transforming to Stage frame in VisualState_callback()')
-        self.stateVisual = self.TransformStateToFrame('Stage', state, doClipArena=False)
+        (self.stateVisual, isInArena) = self.TransformStateToFrame('Stage', state, doClipToArena=False)
         
         
     def HomeStage_callback(self, reqStageState):
@@ -735,11 +740,11 @@ class MotorArm:
             self.angleNext = self.Get1FromPt(self.ptEeCommand)
 
             
-            speedNext = (self.speedCommandTool / self.L1) * (self.T/self.dt) # Convert linear speed (mm/sec) to angular speed (rad/sec).
+            speedNext = (self.speedCommandMax / self.L1) #* (self.T/self.dt) # Convert linear speed (mm/sec) to angular speed (rad/sec).
 
 
             #rospy.logwarn('self.angleNext=% 3.2f, lin/ang speedNext=% 3.2f/% 3.2f' % (self.angleNext, self.speedCommandTool, speedNext))
-            rospy.logwarn('dAngle=% 3.3f, dt=% f,  a/t=% f' % (self.angleNext-self.anglePrev, self.dt, (self.angleNext-self.anglePrev)/self.dt))
+            #rospy.logwarn('dAngle=% 3.3f, dt=% f,  a/t=% f' % (self.angleNext-self.anglePrev, self.dt.to_sec(), (self.angleNext-self.anglePrev)/self.dt.to_sec()))
                 
                 
             # Send the motor command.            
