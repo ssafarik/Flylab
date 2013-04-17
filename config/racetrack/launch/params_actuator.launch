@@ -16,10 +16,16 @@
 
 	<param name="motorarm/speed_max"   		type="double" value="50"/>             		<!-- Millimeters per second of end effector. -->
 	<param name="motorarm/L1"          		type="double" value="32"/>                  <!-- Link1 length in millimeters. -->
-	<param name="motorarm/angleOffset" 		type="double" value="-3.30"/>           <!-- Angle between the index switch and the 0 angle. -->
+	<param name="motorarm/angleOffset" 		type="double" value="-3.30"/>               <!-- Angle between the index switch and the 0 angle. -->
+
+<!--
+	<param name="motorarm/kP"      			type="double" value="1.0"/>
+	<param name="motorarm/kI"      			type="double" value="0.0"/>
+	<param name="motorarm/kD"      			type="double" value="0.0"/>
+	-->
 
 	<param name="motorarm/kP"      			type="double" value="0.2"/>
-	<param name="motorarm/kI"      			type="double" value="0.6"/>
+	<param name="motorarm/kI"      			type="double" value="0.3"/>
 	<param name="motorarm/kD"      			type="double" value="0.0"/>
 	<param name="motorarm/kWindup" 			type="double" value="0.7"/>  
 	<param name="motorarm/maxI"    			type="double" value="0.0"/>  

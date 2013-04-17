@@ -30,7 +30,7 @@ class MotorArm:
 
         # Link lengths (millimeters)
         self.L1 = rospy.get_param('motorarm/L1', 9.9)  # Length of link1
-        self.T = rospy.get_param('motorarm/T', 1 / 2)  # Nominal motor update period, i.e. sample rate.
+        self.T = rospy.get_param('motorarm/T', 1 / 40)  # Nominal motor update period, i.e. sample rate.
 
         # PID Gains & Parameters.
         self.kP = rospy.get_param('motorarm/kP', 1.0)
@@ -89,6 +89,11 @@ class MotorArm:
         self.angleNext = 0.0
         self.speedNextFiltered = 0.0
         self.dAFiltered = 0.0
+        self.dASum = 0.0
+        self.xMin = 99999
+        self.xMax = 0
+        self.yMin = 99999
+        self.yMax = 0
         
         self.request = SrvFrameStateRequest()
         self.request.state.header.frame_id = 'Stage'
@@ -169,6 +174,7 @@ class MotorArm:
             if (doClipToArena):
                 pts = PointStamped(header=poses.header, point=state.pose.position)
                 (pts, isInArena) = self.ClipPtsToArena(pts)
+                #(pts, isInReachable) = self.ClipPtsToReachable(pts)
                 poses.pose.position = pts.point
             else:
                 isInArena = True
@@ -341,22 +347,14 @@ class MotorArm:
     
     def GetStageState (self):
         while not self.initializedServices:
-            rospy.sleep(0.1)
+            rospy.sleep(0.5)
             
         rvStageState = SrvFrameStateResponse()
         if (self.jointstate1 is not None):                    
             # rospy.loginfo ('MA self.jointstate1=%s' % self.jointstate1)
             # (x,y) = self.GetXyFrom12 (self.jointstate1.position, self.jointstate2.position)
             
-            # rvStageState.state.header.stamp = rospy.Time.now()
-            rvStageState.state.header = self.stateVisual.header
-            rvStageState.state.pose = self.stateVisual.pose 
-            rvStageState.state.velocity.linear.x = 0.0  # BUG: This should come from the hardware.
-            rvStageState.state.velocity.linear.y = 0.0  # BUG: This should come from the hardware.
-            rvStageState.state.velocity.linear.z = 0.0  # BUG: This should come from the hardware.
-            rvStageState.state.velocity.angular.x = 0.0  # BUG: This should come from the hardware.
-            rvStageState.state.velocity.angular.y = 0.0  # BUG: This should come from the hardware.
-            rvStageState.state.velocity.angular.z = 0.0  # BUG: This should come from the hardware.
+            rvStageState.state = self.stateVisual
         
         return rvStageState.state
 
@@ -626,6 +624,10 @@ class MotorArm:
             self.vecEeErrorPrev.y = self.vecEeError.y 
             self.vecEeError.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
             self.vecEeError.y = self.stateRef.pose.position.y - self.stateVisual.pose.position.y
+#            (pt, isInReachable) = self.ClipPtToReachable(self.stateVisual.pose.position)
+#            self.vecEeError.x = self.stateRef.pose.position.x - pt.x
+#            self.vecEeError.y = self.stateRef.pose.position.y - pt.y
+#            rospy.logwarn('% 3.2f, % 3.2f' % (pt.x, pt.y))
 
             # PID control of the contour error.
             self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
@@ -740,9 +742,12 @@ class MotorArm:
 
             self.angleNext = self.Get1FromPt(self.ptEeCommand)
             angleSense = self.Get1FromPt(self.ptEeSense)
+            angleRef = self.Get1FromPt(self.stateRef.pose.position)
 
-            dA = self.angleNext-angleSense
+            #dA = self.angleNext-angleSense
+            dA = angleRef-angleSense
             self.dAFiltered = alpha*dA + (1-alpha)*self.dAFiltered
+            
             
             speedAngularMax = (self.speedLinearMax / self.L1)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
             speedNext = min(N.abs(dA) / self.dt.to_sec(), speedAngularMax)
@@ -750,9 +755,20 @@ class MotorArm:
             # Filter the speed
             self.speedNextFiltered = alpha*speedNext + (1-alpha)*self.speedNextFiltered
             
-            #rospy.logwarn('dA=% 3.4f, dAF=% 3.4f, dt=% 3.4f, speedNext=% 3.3f, % 3.3f' % (dA, self.dAFiltered, self.dt.to_sec(), speedNext, self.speedNextFiltered))
-            
+#            rospy.logwarn('vecError.x: % 3.4f, % 3.4f   .y: % 3.4f, % 3.4f' % (self.vecEeError.x, self.ptEeCommand.x-self.ptEeSense.x, 
+#                                                                               self.vecEeError.y, self.ptEeCommand.y-self.ptEeSense.y))
 
+#            rospy.logwarn('% 3.4f % 3.4f' % (self.angleNext, angleSense))
+#            rospy.logwarn('angles: % 3.4f, % 3.4f' % (self.jointstate1.position, angleSense))
+
+#            self.dASum += dA
+#            rospy.logwarn('dA=% 3.4f,% 3.4f, dAF=% 3.4f, dt=% 3.4f, speedNext=% 3.3f, % 3.3f' % (dA, self.dASum, self.dAFiltered, self.dt.to_sec(), speedNext, self.speedNextFiltered))
+            
+#            self.xMin = min(self.xMin, self.stateVisual.pose.position.x)
+#            self.xMax = max(self.xMax, self.stateVisual.pose.position.x)
+#            self.yMin = min(self.yMin, self.stateVisual.pose.position.y)
+#            self.yMax = max(self.yMax, self.stateVisual.pose.position.y)
+#            rospy.logwarn('L1:  % 3.2f' % ((self.xMax-self.xMin+self.yMax-self.yMin)/4))
 
             # rospy.logwarn('self.angleNext=% 3.2f, lin/ang speedNext=% 3.2f/% 3.2f' % (self.angleNext, self.speedCommandTool, speedNext))
             # rospy.logwarn('dAngle=% 3.3f, dt=% f,  a/t=% f' % (self.angleNext-self.anglePrev, self.dt.to_sec(), (self.angleNext-self.anglePrev)/self.dt.to_sec()))
