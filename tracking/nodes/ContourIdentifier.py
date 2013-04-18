@@ -93,19 +93,36 @@ class ContourIdentifier:
         self.contouranglePrev = 0.0
         
         self.pubMarker = rospy.Publisher('visualization_marker', Marker)
-        self.markerArena = Marker(header=Header(stamp = rospy.Time.now(),
+        self.markerArenaOuter = Marker(header=Header(stamp = rospy.Time.now(),
                                                 frame_id='/Arena'),
-                                  ns='arena',
+                                  ns='arenaOuter',
                                   id=0,
-                                  type=3, #CYLINDER,
+                                  type=Marker.CYLINDER,
                                   action=0,
                                   pose=Pose(position=Point(x=0, 
                                                            y=0, 
                                                            z=0)),
-                                  scale=Vector3(x=self.radiusArenaOuter*2.0,
-                                                y=self.radiusArenaOuter*2.0,
+                                  scale=Vector3(x=self.radiusArenaOuter*2.0*1.05,
+                                                y=self.radiusArenaOuter*2.0*1.05,
                                                 z=0.01),
-                                  color=ColorRGBA(a=0.1,
+                                  color=ColorRGBA(a=0.05,
+                                                  r=1.0,
+                                                  g=1.0,
+                                                  b=1.0),
+                                  lifetime=rospy.Duration(1.0))
+        self.markerArenaInner = Marker(header=Header(stamp = rospy.Time.now(),
+                                                frame_id='/Arena'),
+                                  ns='arenaInner',
+                                  id=1,
+                                  type=Marker.CYLINDER,
+                                  action=0,
+                                  pose=Pose(position=Point(x=0, 
+                                                           y=0, 
+                                                           z=0)),
+                                  scale=Vector3(x=self.radiusArenaInner*2.0*1.05,
+                                                y=self.radiusArenaInner*2.0*1.05,
+                                                z=0.01),
+                                  color=ColorRGBA(a=0.05,
                                                   r=1.0,
                                                   g=1.0,
                                                   b=1.0),
@@ -156,8 +173,8 @@ class ContourIdentifier:
                     self.markerExclusionzone_list.append(Marker(header=Header(stamp = rospy.Time.now(),
                                                                               frame_id='Arena'),
                                                                 ns='exclusionzone_%d' % i,
-                                                                id=0,
-                                                                type=3, #CYLINDER,
+                                                                id=100+i,
+                                                                type=Marker.CYLINDER,
                                                                 action=0,
                                                                 pose=Pose(position=Point(x=self.pointExclusionzone_list[i].x, 
                                                                                          y=self.pointExclusionzone_list[i].y, 
@@ -757,8 +774,10 @@ class ContourIdentifier:
                 
                 
                 # Publish a marker to indicate the size of the arena.
-                self.markerArena.header.stamp = contourinfolists.header.stamp
-                self.pubMarker.publish(self.markerArena)
+                self.markerArenaOuter.header.stamp = contourinfolists.header.stamp
+                self.markerArenaInner.header.stamp = contourinfolists.header.stamp
+                self.pubMarker.publish(self.markerArenaOuter)
+                self.pubMarker.publish(self.markerArenaInner)
                 
                 # Publish markers for all the exclusionzones.
                 if self.enabledExclusionzone:

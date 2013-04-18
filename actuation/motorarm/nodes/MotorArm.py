@@ -9,7 +9,7 @@ import threading
 import PyKDL
 from geometry_msgs.msg import Point, PointStamped, Pose, PoseStamped, Vector3, Vector3Stamped
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Header, ColorRGBA
+from std_msgs.msg import Header, ColorRGBA, String
 from visualization_msgs.msg import Marker
 from rosSimpleStep.srv import SrvCalibrate, SrvJointState, SrvSetZero
 from flycore.msg import MsgFrameState
@@ -30,7 +30,7 @@ class MotorArm:
 
         # Link lengths (millimeters)
         self.L1 = rospy.get_param('motorarm/L1', 9.9)  # Length of link1
-        self.T = rospy.get_param('motorarm/T', 1 / 40)  # Nominal motor update period, i.e. sample rate.
+        self.T = rospy.get_param('motorarm/T', 1 / 50)  # Nominal motor update period, i.e. sample rate.
 
         # PID Gains & Parameters.
         self.kP = rospy.get_param('motorarm/kP', 1.0)
@@ -58,6 +58,11 @@ class MotorArm:
         rospy.Service('calibrate_stage', SrvFrameState, self.Calibrate_callback)
         rospy.Service('signal_input', SrvSignal, self.SignalInput_callback)  # For receiving input from a signal generator.
 
+
+        # Command messages.
+        self.command = 'run'
+        self.command_list = ['run','exit']
+        self.subCommand = rospy.Subscriber('motorarm/command', String, self.Command_callback)
 
         self.subVisualState = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
         self.pubJointState = rospy.Publisher('joint_states', JointState)
@@ -87,8 +92,9 @@ class MotorArm:
         
         self.anglePrev = 0.0
         self.angleNext = 0.0
-        self.speedNextFiltered = 0.0
+        self.speedNextFiltered = None
         self.dAFiltered = 0.0
+        self.dA2Filtered = 0.0
         self.dASum = 0.0
         self.xMin = 99999
         self.xMax = 0
@@ -100,6 +106,11 @@ class MotorArm:
         self.request.state.pose.position.x = 0.0
         self.request.state.pose.position.y = 0.0
         self.request.state.pose.position.z = 0.0
+
+
+    def Command_callback(self, msgString):
+        self.command = msgString.data
+            
 
 
     def LoadServices(self):
@@ -123,6 +134,13 @@ class MotorArm:
         rospy.wait_for_service(stSrv)
         try:
             self.SetPositionAtVel_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
+        except (rospy.ServiceException, IOError), e:
+            rospy.loginfo ('MA FAILED %s: %s' % (stSrv, e))
+
+        stSrv = 'srvSetVelocity_' + self.names[0]
+        rospy.wait_for_service(stSrv)
+        try:
+            self.SetVelocity_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
             rospy.loginfo ('MA FAILED %s: %s' % (stSrv, e))
 
@@ -259,9 +277,6 @@ class MotorArm:
         return (ptOut, bClipped)
                 
 
-    def ClipPtToArena(self, pt):
-        return self.ClipPtToRadius(pt, self.radiusArena * 1.1)
-                
     # Clip the tool to the hardware limit.
     def ClipPtToReachable(self, pt):
         return self.ClipPtOntoCircle(pt, self.radiusReachable) 
@@ -273,7 +288,7 @@ class MotorArm:
         # Transform to Arena frame.
         ptsStage = self.TransformPointToFrame('Stage', ptsIn)
 
-        # Clip to arena radius.
+        # Clip to reachable radius.
         (ptClipped, bClipped) = self.ClipPtToReachable(ptsStage.point)
         if bClipped:
             ptsStage.point = ptClipped
@@ -292,7 +307,7 @@ class MotorArm:
         ptsArena = self.TransformPointToFrame('Arena', ptsIn)
 
         # Clip to arena radius.
-        (ptClipped, bClipped) = self.ClipPtToArena(ptsArena.point)
+        (ptClipped, bClipped) = self.ClipPtToRadius(ptsArena.point, self.radiusArena)
         if bClipped:
             ptsArena.point = ptClipped
             isInArena = False
@@ -622,8 +637,14 @@ class MotorArm:
             # The contour error.
             self.vecEeErrorPrev.x = self.vecEeError.x 
             self.vecEeErrorPrev.y = self.vecEeError.y 
+            
             self.vecEeError.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
             self.vecEeError.y = self.stateRef.pose.position.y - self.stateVisual.pose.position.y
+#            (ptRef, b) = self.ClipPtToReachable(self.stateRef.pose.position)
+#            (ptVisual, b) = self.ClipPtToReachable(self.stateVisual.pose.position)
+#            self.vecEeError.x = ptRef.x - ptVisual.x
+#            self.vecEeError.y = ptRef.y - ptVisual.y
+
 #            (pt, isInReachable) = self.ClipPtToReachable(self.stateVisual.pose.position)
 #            self.vecEeError.x = self.stateRef.pose.position.x - pt.x
 #            self.vecEeError.y = self.stateRef.pose.position.y - pt.y
@@ -667,8 +688,8 @@ class MotorArm:
                                            point=ptEeCommandRaw)
             
             (ptsEeCommandArena, isInArena) = self.ClipPtsToArena(ptsEeCommandRaw)
-            (ptsEeCommandClipped, isInReachable) = self.ClipPtsToReachable(ptsEeCommandArena)
-            self.ptEeCommand = ptsEeCommandClipped.point
+            (ptsEeCommandReachable, isInReachable) = self.ClipPtsToReachable(ptsEeCommandRaw)
+            self.ptEeCommand = ptsEeCommandReachable.point #ptsEeCommandClipped.point
 #            rospy.logwarn('contourRef:(% 4.1f, % 4.1f), contourSense:(% 4.1f, % 4.1f)' % (self.stateRef.pose.position.x, self.stateRef.pose.position.y, 
 #                                                                                          self.stateVisual.pose.position.x, self.stateVisual.pose.position.y))
 #            rospy.logwarn('(% 4.1f, % 4.1f)' % (self.ptEeCommand.x, self.ptEeCommand.y))
@@ -684,8 +705,8 @@ class MotorArm:
 #            rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
             
             # Display a vector in rviz.
-            ptBase = self.ptEeSense
-            ptEnd = self.ptEeCommand
+            ptBase = self.ptEeSense #ptsEeCommandRaw.point #self.stateRef.pose.position #self.ptEeSense
+            ptEnd = self.ptEeCommand #ptsEeCommandArena.point #self.stateVisual.pose.position #self.ptEeCommand
             markerCommand = Marker(header=Header(stamp=self.time,
                                                 frame_id='Stage'),
                                   ns='command',
@@ -738,22 +759,31 @@ class MotorArm:
 
             
             
-            alpha = self.dt.to_sec() / 1 # 1-sec LPF time constant.
+#            alpha = self.dt.to_sec() / 1 # 2-sec LPF time constant.
+            alpha = 1 #self.T / 1 # LPF time constant.
 
-            self.angleNext = self.Get1FromPt(self.ptEeCommand)
+            angleCommand = self.Get1FromPt(self.ptEeCommand)
             angleSense = self.Get1FromPt(self.ptEeSense)
             angleRef = self.Get1FromPt(self.stateRef.pose.position)
-
-            #dA = self.angleNext-angleSense
-            dA = angleRef-angleSense
+            angleVisual = self.Get1FromPt(self.stateVisual.pose.position)
+            
+            self.angleNext = angleCommand
+            #self.angleNext = angleRef
+            dA = self.angleNext-angleSense
             self.dAFiltered = alpha*dA + (1-alpha)*self.dAFiltered
             
+            dA2 = angleRef-angleVisual
+            self.dA2Filtered = alpha*dA2 + (1-alpha)*self.dA2Filtered
             
             speedAngularMax = (self.speedLinearMax / self.L1)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
-            speedNext = min(N.abs(dA) / self.dt.to_sec(), speedAngularMax)
-
+            #speedNext = min(N.abs(dA) / self.T, speedAngularMax)
+            speedNext = N.sign(dA) * min(N.abs(dA) / self.T, speedAngularMax)
+            #rospy.logwarn('speedNext = min(% 3.3f, % 3.3f)' % (dA / self.T, speedAngularMax))
             # Filter the speed
-            self.speedNextFiltered = alpha*speedNext + (1-alpha)*self.speedNextFiltered
+            if (self.speedNextFiltered is not None):
+                self.speedNextFiltered = alpha*speedNext + (1-alpha)*self.speedNextFiltered
+            else:
+                self.speedNextFiltered = speedNext
             
 #            rospy.logwarn('vecError.x: % 3.4f, % 3.4f   .y: % 3.4f, % 3.4f' % (self.vecEeError.x, self.ptEeCommand.x-self.ptEeSense.x, 
 #                                                                               self.vecEeError.y, self.ptEeCommand.y-self.ptEeSense.y))
@@ -761,9 +791,11 @@ class MotorArm:
 #            rospy.logwarn('% 3.4f % 3.4f' % (self.angleNext, angleSense))
 #            rospy.logwarn('angles: % 3.4f, % 3.4f' % (self.jointstate1.position, angleSense))
 
-#            self.dASum += dA
-#            rospy.logwarn('dA=% 3.4f,% 3.4f, dAF=% 3.4f, dt=% 3.4f, speedNext=% 3.3f, % 3.3f' % (dA, self.dASum, self.dAFiltered, self.dt.to_sec(), speedNext, self.speedNextFiltered))
-            
+            self.dASum += dA
+            #rospy.logwarn('dA=% 3.4f,% 3.4f, dAF=% 3.4f, % 3.4f, dASum=% 3.2f, dt=% 3.4f, speedNext=% 3.3f, % 3.3f' % (dA, dA2, self.dAFiltered, self.dA2Filtered, self.dASum, self.dt.to_sec(), speedNext, self.speedNextFiltered))
+
+#            rospy.logwarn('speedNext=% 3.3f, % 3.3f' % (speedNext, self.speedNextFiltered))            
+
 #            self.xMin = min(self.xMin, self.stateVisual.pose.position.x)
 #            self.xMax = max(self.xMax, self.stateVisual.pose.position.x)
 #            self.yMin = min(self.yMin, self.stateVisual.pose.position.y)
@@ -778,7 +810,8 @@ class MotorArm:
             if (self.jointstate1 is not None):
                 with self.lock:
                     try:
-                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), self.angleNext, speedNext)
+                        #self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), self.angleNext, self.speedNextFiltered)
+                        self.SetVelocity_joint1(Header(frame_id=self.names[0]), self.angleNext, self.speedNextFiltered)
                     except (rospy.ServiceException, IOError), e:
                         rospy.logwarn ('MA FAILED %s' % e)
 
@@ -797,7 +830,7 @@ class MotorArm:
         # Process messages forever.
         rosrate = rospy.Rate(1 / self.T)
         # try:
-        while not rospy.is_shutdown():
+        while (not rospy.is_shutdown()) and (self.command != 'exit'):
             self.time = rospy.Time.now()
             self.dt = self.time - self.timePrev
             self.timePrev = self.time
