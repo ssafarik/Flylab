@@ -134,7 +134,7 @@ class Fivebar:
         rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
-        self.subVisualPosition    = rospy.Subscriber('VisualPosition', PoseStamped, self.VisualPosition_callback)
+        self.subVisualState    = rospy.Subscriber('VisualState', PoseStamped, self.VisualState_callback)
         self.pubJointState        = rospy.Publisher('joint_states', JointState)
         self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         self.pubMarker            = rospy.Publisher('visualization_marker', Marker)
@@ -142,11 +142,12 @@ class Fivebar:
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
 
-        self.ptsContourRefExternal = None #Point(0,0,0) # Where we want the "tool".
-        self.ptsContourRef         = None
+        self.stateRef = MsgFrameState()
+        self.stateVisual = MsgFrameState()  # Visual position of the tool.
+        #self.ptsContourRefExternal = None #Point(0,0,0) # Where we want the "tool".
+        #self.ptsContourRef         = None
         self.ptEeSense          = Point(0,0,0)
-        self.ptEeCommand        = Point(0,0,0) # Where to command the end-effector.
-        self.posesContourStage  = PoseStamped() # Visual position of the tool.
+        #self.posesContourStage  = PoseStamped() # Visual position of the tool.
         self.vecEeError         = Point(0,0,0)
         self.vecEeErrorPrev     = Point(0,0,0)
         self.vecEeDError        = Point(0,0,0)
@@ -154,8 +155,8 @@ class Fivebar:
         self.vecEeIErrorClipped = Point(0,0,0)
         self.vecAntiwindup      = Point(0,0,0)
         
-        self.speedCommandTool = None 
-        self.speedStageMax = rospy.get_param('fivebar/speed_max', 200.0)
+        self.speedContourRef = None 
+        self.speedLinearMax = rospy.get_param('fivebar/speed_max', 200.0)
         
         self.timePrev = rospy.Time.now()
         self.time = rospy.Time.now()
@@ -568,8 +569,8 @@ class Fivebar:
             
         rvStageState = SrvFrameStateResponse()
         if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
-            rvStageState.state.header = self.posesContourStage.header
-            rvStageState.state.pose = self.posesContourStage.pose
+            rvStageState.state.header = self.stateVisual.header
+            rvStageState.state.pose = self.stateVisual.pose
             rvStageState.state.velocity.linear.x = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.y = 0.0 # BUG: This should come from the hardware.
             rvStageState.state.velocity.linear.z = 0.0 # BUG: This should come from the hardware.
@@ -580,15 +581,80 @@ class Fivebar:
         return rvStageState.state
 
 
-    def TransformToStageFrame(self, pts):
+    # Transform a PointStamped to the given frame.
+    def TransformPointToFrame(self, frame_id, pts):
         try:
-            pts.header.stamp = self.tfrx.getLatestCommonTime('Stage', pts.header.frame_id)
-            ptsOut = self.tfrx.transformPoint('Stage', pts)
+            pts.header.stamp = self.tfrx.getLatestCommonTime(frame_id, pts.header.frame_id)
+            ptsOut = self.tfrx.transformPoint(frame_id, pts)
         except tf.Exception:
-            rospy.logwarn ('5B Exception transforming in TransformToStageFrame()')
+            rospy.logwarn ('5B Exception transforming in TransformPointToFrame()')
             ptsOut = pts
-        
+            
         return ptsOut
+
+        
+    # Transform a MsgFrameState to the given frame.
+    def TransformStateToFrame(self, frame_id, state, doClipToArena=True):
+        stateOut = MsgFrameState()
+        isInArena = True
+
+        # Get the time.        
+        try:
+            stamp = self.tfrx.getLatestCommonTime(frame_id, state.header.frame_id)
+        except tf.Exception, e:
+            rospy.logwarn ('5B Exception1 transforming in TransformStateToFrame(): %s' % e)
+        else:
+            # Transform the pose
+            poses = PoseStamped(header=state.header,
+                                pose=state.pose) 
+            poses.header.stamp = stamp
+            if (doClipToArena):
+                pts = PointStamped(header=poses.header, point=state.pose.position)
+                (pts, isInArena) = self.ClipPtsToArena(pts)
+                poses.pose.position = pts.point
+            else:
+                isInArena = True
+                
+            poses.header.stamp = stamp
+            try:
+                posesOut = self.tfrx.transformPose(frame_id, poses)
+            except tf.Exception, e:
+                rospy.logwarn ('5B Exception2 transforming in TransformStateToFrame(): %s' % e)
+                posesOut = poses
+            stateOut.header = posesOut.header
+            stateOut.pose = posesOut.pose
+            
+            
+            # Transform the linear velocity
+            v3s = Vector3Stamped(header=state.header,
+                                 vector=state.velocity.linear) 
+            v3s.header.stamp = stamp
+            try:
+                v3sOut = self.tfrx.transformVector3(frame_id, v3s)
+            except tf.Exception, e:
+                rospy.logwarn ('5B Exception3 transforming in TransformStateToFrame(): %s' % e)
+                v3sOut = v3s
+            stateOut.velocity.linear = v3sOut
+                    
+                    
+            # Transform the angular velocity
+            v3s = Vector3Stamped(header=state.header,
+                                 vector=state.velocity.angular) 
+            v3s.header.stamp = stamp
+            try:
+                v3sOut = self.tfrx.transformVector3(frame_id, v3s)
+            except tf.Exception, e:
+                rospy.logwarn ('5B Exception4 transforming in TransformStateToFrame(): %s' % e)
+                v3sOut = v3s
+            stateOut.velocity.angular = v3sOut
+                    
+                    
+            # Transform the speed.
+            stateOut.speed = state.speed
+            
+            
+        return (stateOut, isInArena)
+        
 
             
     # SetStageState_callback()
@@ -598,18 +664,19 @@ class Fivebar:
         while not self.initialized:
             rospy.sleep(0.5)
             
-        self.ptsContourRefExternal = PointStamped(header=reqStageState.state.header,
-                                                  point=reqStageState.state.pose.position)
-        
-        (self.ptsContourRefExternal, isInArena) = self.ClipPtsToArena(self.ptsContourRefExternal)
-        self.ptsContourRef = self.TransformToStageFrame(self.ptsContourRefExternal)
+        (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', reqStageState.state)
+#         ptsContourRefExternal = PointStamped(header=reqStageState.state.header,
+#                                                   point=reqStageState.state.pose.position)
+#         
+#         (ptsContourRefExternal, isInArena) = self.ClipPtsToArena(ptsContourRefExternal)
+#         self.ptsContourRef = self.TransformPointToFrame('Stage', ptsContourRefExternal)
 
 
-        #rospy.logwarn('5B ptsContourRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsContourRef.point.x,self.ptsContourRef.point.y,self.ptsContourRefExternal.point.x,self.ptsContourRefExternal.point.y))
-        if reqStageState.speed is not None:
-            self.speedCommandTool = reqStageState.speed # Requested speed for positioning.
+        #rospy.logwarn('5B ptsContourRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsContourRef.point.x,self.ptsContourRef.point.y,ptsContourRefExternal.point.x,ptsContourRefExternal.point.y))
+        if self.stateRef.speed is not None:
+            self.speedContourRef = self.stateRef.speed # Requested speed for positioning.
         else:
-            self.speedCommandTool = self.speedStageMax
+            self.speedContourRef = self.speedLinearMax
         #rospy.logwarn('5B reqStageState.speed=%s' % reqStageState.speed)
 
         rvStageState = SrvFrameStateResponse()
@@ -624,20 +691,22 @@ class Fivebar:
     # If the point falls outside the workspace, then clip it to the workspace, and return False.
     def SignalInput_callback (self, srvSignalReq):
         rv = SrvSignalResponse()
-        rv.success = True
-        #self.ptsContourRefExternal = srvSignalReq.pts 
-        self.ptsContourRefExternal = PointStamped(header=srvSignalReq.state.header,
-                                                  point=srvSignalReq.state.pose.position) 
         
-        
-        (self.ptsContourRefExternal, isInArena) = self.ClipPtsToArena(self.ptsContourRefExternal)
-        self.ptsContourRef = self.TransformToStageFrame(self.ptsContourRefExternal)
+        (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', srvSignalReq.state)
         rv.success = isInArena
-        
-        try:
-            self.speedCommandTool = self.speedStageMax #self.speedCommandTool #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
-        except AttributeError, e:
-            rospy.logwarn('5B AttributeError: %s' % e)
+#         #ptsContourRefExternal = srvSignalReq.pts 
+#         ptsContourRefExternal = PointStamped(header=srvSignalReq.state.header,
+#                                                   point=srvSignalReq.state.pose.position) 
+#         
+#         
+#         (ptsContourRefExternal, isInArena) = self.ClipPtsToArena(ptsContourRefExternal)
+#         self.ptsContourRef = self.TransformPointToFrame('Stage', ptsContourRefExternal)
+#         rv.success = isInArena
+#         
+#         try:
+#             self.speedContourRef = self.speedLinearMax #self.speedContourRef #5.0 * (1.0/self.dtPoint) # Robot travels to target at twice the target speed.
+#         except AttributeError, e:
+#             rospy.logwarn('5B AttributeError: %s' % e)
             
         
         return rv
@@ -654,13 +723,14 @@ class Fivebar:
         return ptNew
     
 
-    def VisualPosition_callback(self, posesContour):
+    def VisualState_callback(self, posesContour):
         # Transform to Stage frame.
-        try:
-            posesContour.header.stamp = self.tfrx.getLatestCommonTime('Stage', posesContour.header.frame_id)
-            self.posesContourStage = self.tfrx.transformPose('Stage', posesContour)
-        except tf.Exception:
-            rospy.logwarn ('5B Exception transforming to Stage frame in VisualPosition_callback()')
+#         try:
+#             posesContour.header.stamp = self.tfrx.getLatestCommonTime('Stage', posesContour.header.frame_id)
+#             self.posesContourStage = self.tfrx.transformPose('Stage', posesContour)
+#         except tf.Exception:
+#             rospy.logwarn ('5B Exception transforming to Stage frame in VisualState_callback()')
+        (self.stateVisual, isInArena) = self.TransformStateToFrame('Stage', state, doClipToArena=False)
         
         
     def HomeStage_callback(self, reqStageState):
@@ -795,16 +865,16 @@ class Fivebar:
 
                 
                 # Frame Target
-                if self.ptsContourRef is not None:
-                    markerTarget = Marker(header=self.ptsContourRef.header, #Header(stamp = state.header.stamp,
+                if self.stateRef is not None:
+                    markerTarget = Marker(header=self.stateRef.header, #Header(stamp = state.header.stamp,
                                                                             #frame_id='Stage'),
                                           ns='target',
                                           id=0,
                                           type=Marker.SPHERE,
                                           action=0,
-                                          pose=Pose(position=Point(x=self.ptsContourRef.point.x, 
-                                                                   y=self.ptsContourRef.point.y, 
-                                                                   z=self.ptsContourRef.point.z)),
+                                          pose=Pose(position=Point(x=self.stateRef.pose.position.x, 
+                                                                   y=self.stateRef.pose.position.y, 
+                                                                   z=self.stateRef.pose.position.z)),
                                           scale=Vector3(x=3.0,
                                                         y=3.0,
                                                         z=3.0),
@@ -831,9 +901,9 @@ class Fivebar:
                                                 points=[Point(x=state.pose.position.x, 
                                                               y=state.pose.position.y, 
                                                               z=state.pose.position.z),
-                                                        Point(x=self.posesContourStage.pose.position.x, 
-                                                              y=self.posesContourStage.pose.position.y, 
-                                                              z=self.posesContourStage.pose.position.z)])
+                                                        Point(x=self.stateVisual.pose.position.x, 
+                                                              y=self.stateVisual.pose.position.y, 
+                                                              z=self.stateVisual.pose.position.z)])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -842,7 +912,7 @@ class Fivebar:
     #   Updates the motor command with the current target.
     #
     def UpdateMotorCommandFromTarget(self):
-        if self.ptsContourRef is not None:
+        if self.stateRef is not None:
             # PID Gains & Parameters.
             self.kP      = rospy.get_param('fivebar/kP', 1.0)
             self.kI      = rospy.get_param('fivebar/kI', 0.0)
@@ -856,8 +926,8 @@ class Fivebar:
             self.kD *= self.kAll
             
             # The contour error.
-            self.vecEeError.x = self.ptsContourRef.point.x - self.posesContourStage.pose.position.x
-            self.vecEeError.y = self.ptsContourRef.point.y - self.posesContourStage.pose.position.y
+            self.vecEeError.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
+            self.vecEeError.y = self.stateRef.pose.position.y - self.stateVisual.pose.position.y
 
             # PID control of the contour error.
             self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
@@ -886,16 +956,18 @@ class Fivebar:
 
 
             # Get the command for the hardware.
-            self.ptEeCommand.x = vecPID.x + self.ptEeSense.x
-            self.ptEeCommand.y = vecPID.y + self.ptEeSense.y
+            ptEeCommandRaw = Point(x=self.ptEeSense.x + vecPID.x,
+                                   y=self.ptEeSense.y + vecPID.y)
+            ptsEeCommandRaw = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
+                                                         frame_id='Stage'),
+                                           point=ptEeCommandRaw)
+            (ptsEeCommandClipped, isInArena) = self.ClipPtsToArena(ptsEeCommandRaw)
+            #(ptsEeCommandClipped, isInReachable) = self.ClipPtsToReachable(ptsEeCommandArena)
+            self.ptEeCommand = ptsEeCommandClipped.point
+            
             self.vecEeErrorPrev.x = self.vecEeError.x 
             self.vecEeErrorPrev.y = self.vecEeError.y 
             
-            # Transform to arena coords, clip, & back to stage.
-            (pts, isInArena) = self.ClipPtsToArena(PointStamped(header=Header(stamp=self.ptsContourRef.header.stamp,
-                                                                              frame_id='Stage'),
-                                                                point=self.ptEeCommand))
-            self.ptEeCommand = pts.point
             
             
             # Display a vector in rviz.
@@ -924,8 +996,8 @@ class Fivebar:
             
     
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):
-                # Cheap and wrong way to convert mm/sec to radians/sec.  Should use Jacobian.                    
-                speedNext = self.speedCommandTool * 0.0120 
+                # Cheap and wrong way to convert mm/sec to radians/sec.  Should use Jacobian.
+                speedNext = self.speedContourRef * 0.0120 
 
                 # Distribute the velocity over the two joints.
                 dAngle1 = N.abs(angleNext1-self.jointstate1.position) # Delta theta
@@ -944,7 +1016,7 @@ class Fivebar:
                 
                 with self.lock:
                     try:
-                        #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.ptsContourRef.point.x,self.ptsContourRef.point.y))
+                        #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.stateRef.pose.position.x,self.stateRef.pose.position.y))
                         self.setPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext1, speedNext1)
                         self.setPositionAtVel_joint2(Header(frame_id=self.names[1]), angleNext2, speedNext2)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:

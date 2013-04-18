@@ -534,6 +534,7 @@ class PatternGenXY:
             self.pattern1.hzPoint           = msgPatternGen.hzPoint
             self.pattern1.count             = msgPatternGen.count
             self.pattern1.size              = msgPatternGen.size
+            self.pattern1.param             = msgPatternGen.param
             self.pattern1.direction         = msgPatternGen.direction # Forward (+1) or reverse (-1) through the pattern points.
             if (self.pattern1.direction==0):
                 self.pattern1.direction = 1 
@@ -576,7 +577,6 @@ class PatternGenXY:
                 direction = copy.copy(self.pattern1.direction)
                 bSuccess = False
 
-#                while (not bSuccess):
                 pts = self.TransformPatternPoint()
                 vecNext = self.StepNextPatternPoint()
                 a = N.arctan2(vecNext.y, vecNext.x)
@@ -590,18 +590,11 @@ class PatternGenXY:
                                     pose=Pose(position=pts.point),
                                     velocity=velocity,
                                     speed=speed)
-                try:
-                    resp = self.SignalOutput (state)
-                except rospy.ServiceException:
-                    bSuccess = True
-                    rospy.logwarn('SignalOutput() exception.  Reconnecting...')
-                    rospy.wait_for_service(self.stSignalInput)
-                    self.SignalOutput = rospy.ServiceProxy(self.stSignalInput, SrvSignal)
-                else:
-                    bSuccess = resp.success
-                    if (not bSuccess):
-                        self.pattern1.direction = -direction # Back out until no longer clipped.  
-                        #rospy.logwarn('clipped')
+                resp = self.SignalOutput (state)
+                bSuccess = resp.success
+                if (not bSuccess):
+                    self.pattern1.direction = -direction # Back out until no longer clipped.  
+                    #rospy.logwarn('clipped')
 
                         
                 #rospy.logwarn(self.iPoint)
@@ -640,7 +633,7 @@ class PatternGenXY:
 
             # When the pattern output is completed, go to the next pattern.
             if (self.iPoint < 0):
-                #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=%d' % (self.iPoint, self.pattern1.count))
+                #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=size %d' % (self.iPoint, self.pattern1.count))
                 self.iPoint = len(self.pattern1.points)-1
                 self.pattern1.count -= 1
                 self.UpdatePatternPoints(self.pattern1)
