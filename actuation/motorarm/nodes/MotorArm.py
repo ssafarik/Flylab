@@ -11,7 +11,7 @@ from geometry_msgs.msg import Point, PointStamped, Pose, PoseStamped, Vector3, V
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header, ColorRGBA, String
 from visualization_msgs.msg import Marker
-from rosSimpleStep.srv import SrvCalibrate, SrvJointState, SrvSetZero
+from rosSimpleStep.srv import SrvCalibrate, SrvJointState
 from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest, SrvFrameStateResponse
 from patterngen.srv import SrvSignal, SrvSignalResponse
@@ -47,16 +47,16 @@ class MotorArm:
         self.js = JointState()
         self.js.header.seq = 0
         self.js.header.stamp = rospy.Time.now()
-        self.js.header.frame_id = 'Stage'
+        self.js.header.frame_id = 'motor'
         self.js.name = self.names
         # self.js.velocity = [0.0]
         
         # Publish & Subscribe
-        rospy.Service('set_stage_state', SrvFrameState, self.SetStageState_callback)
-        rospy.Service('get_stage_state', SrvFrameState, self.GetStageState_callback)
-        rospy.Service('home_stage', SrvFrameState, self.HomeStage_callback)
-        rospy.Service('calibrate_stage', SrvFrameState, self.Calibrate_callback)
-        rospy.Service('signal_input', SrvSignal, self.SignalInput_callback)  # For receiving input from a signal generator.
+        rospy.Service('set_stage_state',    SrvFrameState, self.SetStageState_callback)
+        rospy.Service('get_stage_state',    SrvFrameState, self.GetStageState_callback)
+        rospy.Service('home_stage',         SrvFrameState, self.HomeStage_callback)
+        rospy.Service('calibrate_stage',    SrvFrameState, self.Calibrate_callback)
+        rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
         # Command messages.
@@ -151,13 +151,6 @@ class MotorArm:
         except (rospy.ServiceException, IOError), e:
             rospy.loginfo ('MA FAILED %s: %s' % (stSrv, e))
 
-        stSrv = 'srvSetZero_' + self.names[0]
-        rospy.wait_for_service(stSrv)
-        try:
-            self.SetZero_joint1 = rospy.ServiceProxy(stSrv, SrvSetZero)
-        except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ('MA FAILED %s: %s' % (stSrv, e))
-
 
         self.initializedServices = True
         
@@ -239,14 +232,14 @@ class MotorArm:
         
 
             
-    def ClipVecToMag (self, pt, magMax):
+    def ClipPtMag (self, pt, magMax):
         magPt = N.linalg.norm([pt.x, pt.y, pt.z])
         if magPt > magMax:
             r = magMax / magPt
         else:
             r = 1.0
             
-        return Point(r * pt.x, r * pt.y, r * pt.z)
+        return Point(r*pt.x, r*pt.y, r*pt.z)
             
         
     # Clip the point onto the given circle.
@@ -285,7 +278,7 @@ class MotorArm:
     def ClipPtsToReachable(self, ptsIn):        
         isInReachable = True
         
-        # Transform to Arena frame.
+        # Transform to Stage frame.
         ptsStage = self.TransformPointToFrame('Stage', ptsIn)
 
         # Clip to reachable radius.
@@ -319,7 +312,7 @@ class MotorArm:
         
 
     # Forward kinematics:  Get x,y from angle 1
-    def Get1xyFromAngle (self, angle):
+    def Get1xyFrom1 (self, angle):
         # Rotate the frames from centered to east-pointing. 
         x = self.L1 * N.cos(angle)  # +N.pi)
         y = self.L1 * N.sin(angle)  # +N.pi)
@@ -327,6 +320,8 @@ class MotorArm:
         return (angle, x, y)
     
     
+    # Inverse Kinematics: Get theta 1 from the (x,y) end-effector position,
+    # where (x,y) is in the coordinate frame of the workspace center.
     def Get1FromPt (self, pt):
         angle = self.Get1FromXy(pt.x, pt.y)
         
@@ -366,9 +361,6 @@ class MotorArm:
             
         rvStageState = SrvFrameStateResponse()
         if (self.jointstate1 is not None):                    
-            # rospy.loginfo ('MA self.jointstate1=%s' % self.jointstate1)
-            # (x,y) = self.GetXyFrom12 (self.jointstate1.position, self.jointstate2.position)
-            
             rvStageState.state = self.stateVisual
         
         return rvStageState.state
@@ -404,6 +396,8 @@ class MotorArm:
         return rvStageState
     
 
+    # Take the target point from a signal generator, and set it as the tool reference.  
+    # If the point falls outside the workspace, then clip it to the workspace, and return False.
     def SignalInput_callback (self, srvSignalReq):
         rv = SrvSignalResponse()
         
@@ -412,6 +406,8 @@ class MotorArm:
 #         # Position
 #         ptsContourRefExternal = PointStamped(header=srvSignalReq.state.header,
 #                                              point=srvSignalReq.state.pose.position) 
+#         
+#         
 #         (ptsContourRefExternal, isInArena) = self.ClipPtsToArena(ptsContourRefExternal)
 #         self.ptsContourRef = self.TransformPointToFrame('Stage', ptsContourRefExternal)
 #         rv.success = isInArena
@@ -521,26 +517,22 @@ class MotorArm:
                 # rospy.logwarn('MA joint1=% 3.1f' % self.jointstate1.position)
             
             if (self.jointstate1 is not None):                 
-                (angleStage, xStage, yStage) = self.Get1xyFromAngle(self.jointstate1.position)
-                ptsStage = PointStamped(header=Header(frame_id='Stage'),
-                                        point=Point(x=xStage, y=yStage, z=0.0))
-                #ptsArena = self.TransformPointToFrame('Arena', ptsStage)
-                self.ptEeSense = ptsStage.point
+                (angle1, self.ptEeSense.x, self.ptEeSense.y) = self.Get1xyFrom1(self.jointstate1.position)
 #                rospy.logwarn('eeSense: % 4.1f -> (% 4.1f, % 4.1f)' % (self.jointstate1.position, self.ptEeSense.x, self.ptEeSense.y))
 
                 # Publish the joint states (for rviz, etc)    
                 self.js.header.seq = self.js.header.seq + 1
                 self.js.header.stamp = self.time
-                self.js.position = [angleStage]
+                self.js.position = [angle1]
                 self.pubJointState.publish(self.js)
     
-                qEE = tf.transformations.quaternion_from_euler(0.0, 0.0, angleStage)
+                qEE = tf.transformations.quaternion_from_euler(0.0, 0.0, angle1)
                 state = MsgFrameState()
                 state.header.stamp = self.time
                 state.header.frame_id = 'Stage'
-                state.pose.position.x = ptsStage.point.x
-                state.pose.position.y = ptsStage.point.y
-                state.pose.position.z = ptsStage.point.z
+                state.pose.position.x = self.ptEeSense.x
+                state.pose.position.y = self.ptEeSense.y
+                state.pose.position.z = self.ptEeSense.z
                 state.pose.orientation.x = qEE[0]
                 state.pose.orientation.y = qEE[1]
                 state.pose.orientation.z = qEE[2]
@@ -552,14 +544,14 @@ class MotorArm:
                 # Publish the link transforms.
                 self.tfbx.sendTransform((0.0, 0.0, 0.0),
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
-                                        self.time,
+                                        state.header.stamp,
                                         'link0',  # child
                                         'Stage'  # parent
                                         )
 
                 self.tfbx.sendTransform((0.0, 0.0, 0.0),
                                         qEE,
-                                        self.time,
+                                        state.header.stamp,
                                         'link1',  # child
                                         'link0'  # parent
                                         )
@@ -567,14 +559,14 @@ class MotorArm:
                 # Frame EndEffector
                 self.tfbx.sendTransform((state.pose.position.x, state.pose.position.y, state.pose.position.z),
                                         qEE,
-                                        self.time,
+                                        state.header.stamp,
                                         'EndEffector',  # child
                                         state.header.frame_id  # parent
                                         )
                 
                 
                 # Frame Target
-                if self.stateRef.pose.position is not None:
+                if self.stateRef is not None:
                     markerTarget = Marker(header=self.stateRef.header,
                                           ns='target',
                                           id=2,
@@ -620,15 +612,14 @@ class MotorArm:
     #   Updates the motor command with the current target.
     #
     def UpdateMotorCommandFromTarget(self):
-        # rospy.loginfo ('MA ptToolRef=%s' % self.ptToolRef)
         if self.stateRef is not None:
             # PID Gains & Parameters.
-#            self.kP = rospy.get_param('motorarm/kP', 1.0)
-#            self.kI = rospy.get_param('motorarm/kI', 0.0)
-#            self.kD = rospy.get_param('motorarm/kD', 0.0)
-#            self.maxI = rospy.get_param('motorarm/maxI', 40.0)
+#            self.kP      = rospy.get_param('motorarm/kP', 1.0)
+#            self.kI      = rospy.get_param('motorarm/kI', 0.0)
+#            self.kD      = rospy.get_param('motorarm/kD', 0.0)
+#            self.maxI    = rospy.get_param('motorarm/maxI', 40.0)
 #            self.kWindup = rospy.get_param('motorarm/kWindup', 0.0)
-#            self.kAll = rospy.get_param('motorarm/kAll', 1.0)
+#            self.kAll    = rospy.get_param('motorarm/kAll', 1.0)
 #            
 #            self.kP *= self.kAll
 #            self.kI *= self.kAll
@@ -655,8 +646,9 @@ class MotorArm:
             self.vecEeIError.y = self.vecEeIError.y + self.vecEeError.y
             self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
             self.vecEeDError.y = self.vecEeError.y - self.vecEeErrorPrev.y
-            vecPID = Point(x=self.kP * self.vecEeError.x + self.kI * self.vecEeIError.x + self.kD * self.vecEeDError.x,
-                           y=self.kP * self.vecEeError.y + self.kI * self.vecEeIError.y + self.kD * self.vecEeDError.y)
+            vecPID = Point(x=self.kP*self.vecEeError.x + self.kI*self.vecEeIError.x + self.kD*self.vecEeDError.x,
+                           y=self.kP*self.vecEeError.y + self.kI*self.vecEeIError.y + self.kD*self.vecEeDError.y,
+                           z=0.0)
             
             # Clip the integral error to the reachable workspace (prevents accumulating error due to singularity in radial direction).
             (ptClipped, bClipped) = self.ClipPtToReachable(Point(x=self.ptEeSense.x + self.kI * self.vecEeIError.x,
@@ -670,7 +662,7 @@ class MotorArm:
             
             
             # Anti-windup
-            self.vecEeIErrorClipped = self.ClipVecToMag (self.vecEeIError, self.maxI)
+            self.vecEeIErrorClipped = self.ClipPtMag (self.vecEeIError, self.maxI)
             vecExcessI = Point(self.vecEeIError.x - self.vecEeIErrorClipped.x,
                                self.vecEeIError.y - self.vecEeIErrorClipped.y,
                                self.vecEeIError.z - self.vecEeIErrorClipped.z)
@@ -822,14 +814,13 @@ class MotorArm:
         
 
         
-    def Mainloop(self):
+    def Main(self):
         self.LoadServices()
         self.Calibrate_callback(None)
         self.initialized = True
 
         # Process messages forever.
         rosrate = rospy.Rate(1 / self.T)
-        # try:
         while (not rospy.is_shutdown()) and (self.command != 'exit'):
             self.time = rospy.Time.now()
             self.dt = self.time - self.timePrev
@@ -847,7 +838,7 @@ class MotorArm:
 if __name__ == '__main__':
     try:
         motorarm = MotorArm()
-        motorarm.Mainloop()
+        motorarm.Main()
     except rospy.exceptions.ROSInterruptException: 
         pass
     
