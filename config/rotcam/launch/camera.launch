@@ -8,7 +8,8 @@
     <!-- ========================================================== -->
 
     <include file="$(find rotcam)/launch/params_camera.launch" ns="camera" />
-    <node pkg="camera_aravis" type="camnode" name="camera" />
-    <node pkg="image_proc" type="image_proc" name="image_proc" ns="camera" />
+    <node name="camera"           pkg="camera_aravis"  type="camnode"       />
+    <node name="image_proc"       pkg="image_proc"     type="image_proc"  ns="camera" />
     
 </launch>
+
