@@ -1,5 +1,5 @@
 function histAll = FlylabPlotHistogramPositionFiles(dirspec, filespec, iFrameParent, iFrameChild)
-% FlylabPlotPositionHistogramFiles(dirspec)
+% FlylabPlotPositionHistogramFiles(dirspec, filespec, iFrameParent, iFrameChild)
 % Take a set of directories of .csv files (as written by Flylab), and 
 % plot a heatmap of where the fly has been.  Does not recurse directories.
 %

@@ -6,19 +6,20 @@ import struct
 
 
 class SaveSettings(genpy.Message):
-  _md5sum = "cf6b14570cfdb33db28349f094aac277"
+  _md5sum = "2cf1ea67fe7f09eafce85b1deebc017a"
   _type = "experiments/SaveSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """string   filenamebase           # The first part of the filename, before the timestamp, e.g. 'test'.
-string   filenamepart           # The filename (without the extension), with the base and timestamp, e.g. 'test20130309031415'.  This field is set by the code.
+string   filenamebasestamped    # The filename (without the extension), with the base and timestamp, e.g. 'test20130309031415'.  This field is set by the code.
+string[] imagetopic_list        # List of image topics to save.
 bool     arenastate
-bool     video
+bool     images
 bool     onlyWhileTriggered
 
 
 """
-  __slots__ = ['filenamebase','filenamepart','arenastate','video','onlyWhileTriggered']
-  _slot_types = ['string','string','bool','bool','bool']
+  __slots__ = ['filenamebase','filenamebasestamped','imagetopic_list','arenastate','images','onlyWhileTriggered']
+  _slot_types = ['string','string','string[]','bool','bool','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -28,7 +29,7 @@ bool     onlyWhileTriggered
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       filenamebase,filenamepart,arenastate,video,onlyWhileTriggered
+       filenamebase,filenamebasestamped,imagetopic_list,arenastate,images,onlyWhileTriggered
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -39,19 +40,22 @@ bool     onlyWhileTriggered
       #message fields cannot be None, assign default values for those that are
       if self.filenamebase is None:
         self.filenamebase = ''
-      if self.filenamepart is None:
-        self.filenamepart = ''
+      if self.filenamebasestamped is None:
+        self.filenamebasestamped = ''
+      if self.imagetopic_list is None:
+        self.imagetopic_list = []
       if self.arenastate is None:
         self.arenastate = False
-      if self.video is None:
-        self.video = False
+      if self.images is None:
+        self.images = False
       if self.onlyWhileTriggered is None:
         self.onlyWhileTriggered = False
     else:
       self.filenamebase = ''
-      self.filenamepart = ''
+      self.filenamebasestamped = ''
+      self.imagetopic_list = []
       self.arenastate = False
-      self.video = False
+      self.images = False
       self.onlyWhileTriggered = False
 
   def _get_types(self):
@@ -72,14 +76,22 @@ bool     onlyWhileTriggered
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.filenamepart
+      _x = self.filenamebasestamped
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      length = len(self.imagetopic_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.imagetopic_list:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
       _x = self
-      buff.write(_struct_3B.pack(_x.arenastate, _x.video, _x.onlyWhileTriggered))
+      buff.write(_struct_3B.pack(_x.arenastate, _x.images, _x.onlyWhileTriggered))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -105,15 +117,30 @@ bool     onlyWhileTriggered
       start = end
       end += length
       if python3:
-        self.filenamepart = str[start:end].decode('utf-8')
+        self.filenamebasestamped = str[start:end].decode('utf-8')
       else:
-        self.filenamepart = str[start:end]
+        self.filenamebasestamped = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.imagetopic_list = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.imagetopic_list.append(val1)
       _x = self
       start = end
       end += 3
-      (_x.arenastate, _x.video, _x.onlyWhileTriggered,) = _struct_3B.unpack(str[start:end])
+      (_x.arenastate, _x.images, _x.onlyWhileTriggered,) = _struct_3B.unpack(str[start:end])
       self.arenastate = bool(self.arenastate)
-      self.video = bool(self.video)
+      self.images = bool(self.images)
       self.onlyWhileTriggered = bool(self.onlyWhileTriggered)
       return self
     except struct.error as e:
@@ -133,14 +160,22 @@ bool     onlyWhileTriggered
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self.filenamepart
+      _x = self.filenamebasestamped
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      length = len(self.imagetopic_list)
+      buff.write(_struct_I.pack(length))
+      for val1 in self.imagetopic_list:
+        length = len(val1)
+        if python3 or type(val1) == unicode:
+          val1 = val1.encode('utf-8')
+          length = len(val1)
+        buff.write(struct.pack('<I%ss'%length, length, val1))
       _x = self
-      buff.write(_struct_3B.pack(_x.arenastate, _x.video, _x.onlyWhileTriggered))
+      buff.write(_struct_3B.pack(_x.arenastate, _x.images, _x.onlyWhileTriggered))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -167,15 +202,30 @@ bool     onlyWhileTriggered
       start = end
       end += length
       if python3:
-        self.filenamepart = str[start:end].decode('utf-8')
+        self.filenamebasestamped = str[start:end].decode('utf-8')
       else:
-        self.filenamepart = str[start:end]
+        self.filenamebasestamped = str[start:end]
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      self.imagetopic_list = []
+      for i in range(0, length):
+        start = end
+        end += 4
+        (length,) = _struct_I.unpack(str[start:end])
+        start = end
+        end += length
+        if python3:
+          val1 = str[start:end].decode('utf-8')
+        else:
+          val1 = str[start:end]
+        self.imagetopic_list.append(val1)
       _x = self
       start = end
       end += 3
-      (_x.arenastate, _x.video, _x.onlyWhileTriggered,) = _struct_3B.unpack(str[start:end])
+      (_x.arenastate, _x.images, _x.onlyWhileTriggered,) = _struct_3B.unpack(str[start:end])
       self.arenastate = bool(self.arenastate)
-      self.video = bool(self.video)
+      self.images = bool(self.images)
       self.onlyWhileTriggered = bool(self.onlyWhileTriggered)
       return self
     except struct.error as e:

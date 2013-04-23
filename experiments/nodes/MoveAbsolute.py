@@ -27,8 +27,8 @@ class ExperimentMoveAbsolute():
         
         self.experimentparams.save.filenamebase = "center"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = False
-        self.experimentparams.save.bag = False
+        self.experimentparams.save.images = False
+        self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.tracking.exclusionzones.enabled = False
