@@ -1020,13 +1020,13 @@ class Fivebar:
             self.ptEeCommand = ptsEeCommandReachable.point #ptsEeCommandClipped.point
             
             # Print the PID component values.
-#            magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
-#            magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
-#            magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
-#            magPID = N.linalg.norm([vecPID.x, vecPID.y])
-#            vecPIDclipped = Point(x=ptsEeCommandClipped.point.x-self.ptEeSense.x,
-#                                  y=ptsEeCommandClipped.point.y-self.ptEeSense.y)
-#            rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
+            magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
+            magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
+            magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
+            magPID = N.linalg.norm([vecPID.x, vecPID.y])
+            vecPIDclipped = Point(x=self.ptEeCommand.x-self.ptEeSense.x,
+                                  y=self.ptEeCommand.y-self.ptEeSense.y)
+            rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
             
             # Display a vector in rviz.
             ptBase = self.ptEeSense
@@ -1084,15 +1084,13 @@ class Fivebar:
             
             # Get the desired positions for each joint.
             (angleCommand1,angleCommand2,angleCommand3,angleCommand4) = self.Get1234FromPt(self.ptEeCommand)
-            (angleSense1,angleSense2,angleSense3,angleSense4) = self.Get1234FromPt(self.ptEeSense)
+            (angleSense1,  angleSense2,  angleSense3,  angleSense4)   = self.Get1234FromPt(self.ptEeSense)
             
-            self.angleNext1 = angleCommand1
-            dA1 = self.angleNext1-angleSense1
+            dA1 = angleCommand1-angleSense1
             speedAngularMax1 = (self.speedLinearMax / self.L1)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
             speedNext1 = N.sign(dA1) * min(N.abs(dA1) / self.T, speedAngularMax1)
             
-            self.angleNext2 = angleCommand2
-            dA2 = self.angleNext2-angleSense2
+            dA2 = angleCommand2-angleSense2
             speedAngularMax2 = (self.speedLinearMax / self.L2)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
             speedNext2 = N.sign(dA2) * min(N.abs(dA2) / self.T, speedAngularMax2)
     
@@ -1121,8 +1119,8 @@ class Fivebar:
                         #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.stateRef.pose.position.x,self.stateRef.pose.position.y))
                         #self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext1, speedNext1)
                         #self.SetPositionAtVel_joint2(Header(frame_id=self.names[1]), angleNext2, speedNext2)
-                        self.SetVelocity_joint1(Header(frame_id=self.names[0]), self.angleNext1, speedNext1)
-                        self.SetVelocity_joint2(Header(frame_id=self.names[1]), self.angleNext2, speedNext2)
+                        self.SetVelocity_joint1(Header(frame_id=self.names[0]), angleCommand1, speedNext1)
+                        self.SetVelocity_joint2(Header(frame_id=self.names[1]), angleCommand2, speedNext2)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
                         rospy.logwarn ("5B Exception:  %s" % e)
 

@@ -60,11 +60,19 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
+
+# Four points step response.
+#        self.experimentparams.trial.robot.move.pattern.shape = 'square'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+#        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/16               # Patterns per second.
+#        self.experimentparams.trial.robot.move.pattern.hzPoint = 1/4                   # Points per second in the pattern.
+
+# Smooth circle.
         self.experimentparams.trial.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/10               # Patterns per second.
-        self.experimentparams.trial.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20               # Patterns per second.
+        self.experimentparams.trial.robot.move.pattern.hzPoint = 50                   # Points per second in the pattern.
+
         self.experimentparams.trial.robot.move.pattern.count = -1
-        self.experimentparams.trial.robot.move.pattern.size.x = 10
+        self.experimentparams.trial.robot.move.pattern.size.x = 40
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.pattern.param = 0
         self.experimentparams.trial.robot.move.pattern.direction = 1

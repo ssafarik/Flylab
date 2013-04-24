@@ -6,20 +6,20 @@ import struct
 
 
 class SaveSettings(genpy.Message):
-  _md5sum = "2cf1ea67fe7f09eafce85b1deebc017a"
+  _md5sum = "59b00783dd362ae55fcb8aa8513a561e"
   _type = "experiments/SaveSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """string   filenamebase           # The first part of the filename, before the timestamp, e.g. 'test'.
-string   filenamebasestamped    # The filename (without the extension), with the base and timestamp, e.g. 'test20130309031415'.  This field is set by the code.
-string[] imagetopic_list        # List of image topics to save.
+string   filenamebasestamped    # The filenamebase (without the extension), plus the timestamp, e.g. 'test20130309031415'.  This field is set by the code.
 bool     arenastate
 bool     images
+string[] imagetopic_list        # List of image topics to save.
 bool     onlyWhileTriggered
 
 
 """
-  __slots__ = ['filenamebase','filenamebasestamped','imagetopic_list','arenastate','images','onlyWhileTriggered']
-  _slot_types = ['string','string','string[]','bool','bool','bool']
+  __slots__ = ['filenamebase','filenamebasestamped','arenastate','images','imagetopic_list','onlyWhileTriggered']
+  _slot_types = ['string','string','bool','bool','string[]','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -29,7 +29,7 @@ bool     onlyWhileTriggered
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       filenamebase,filenamebasestamped,imagetopic_list,arenastate,images,onlyWhileTriggered
+       filenamebase,filenamebasestamped,arenastate,images,imagetopic_list,onlyWhileTriggered
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -42,20 +42,20 @@ bool     onlyWhileTriggered
         self.filenamebase = ''
       if self.filenamebasestamped is None:
         self.filenamebasestamped = ''
-      if self.imagetopic_list is None:
-        self.imagetopic_list = []
       if self.arenastate is None:
         self.arenastate = False
       if self.images is None:
         self.images = False
+      if self.imagetopic_list is None:
+        self.imagetopic_list = []
       if self.onlyWhileTriggered is None:
         self.onlyWhileTriggered = False
     else:
       self.filenamebase = ''
       self.filenamebasestamped = ''
-      self.imagetopic_list = []
       self.arenastate = False
       self.images = False
+      self.imagetopic_list = []
       self.onlyWhileTriggered = False
 
   def _get_types(self):
@@ -82,6 +82,8 @@ bool     onlyWhileTriggered
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_2B.pack(_x.arenastate, _x.images))
       length = len(self.imagetopic_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.imagetopic_list:
@@ -90,8 +92,7 @@ bool     onlyWhileTriggered
           val1 = val1.encode('utf-8')
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
-      _x = self
-      buff.write(_struct_3B.pack(_x.arenastate, _x.images, _x.onlyWhileTriggered))
+      buff.write(_struct_B.pack(self.onlyWhileTriggered))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -120,6 +121,12 @@ bool     onlyWhileTriggered
         self.filenamebasestamped = str[start:end].decode('utf-8')
       else:
         self.filenamebasestamped = str[start:end]
+      _x = self
+      start = end
+      end += 2
+      (_x.arenastate, _x.images,) = _struct_2B.unpack(str[start:end])
+      self.arenastate = bool(self.arenastate)
+      self.images = bool(self.images)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -135,12 +142,9 @@ bool     onlyWhileTriggered
         else:
           val1 = str[start:end]
         self.imagetopic_list.append(val1)
-      _x = self
       start = end
-      end += 3
-      (_x.arenastate, _x.images, _x.onlyWhileTriggered,) = _struct_3B.unpack(str[start:end])
-      self.arenastate = bool(self.arenastate)
-      self.images = bool(self.images)
+      end += 1
+      (self.onlyWhileTriggered,) = _struct_B.unpack(str[start:end])
       self.onlyWhileTriggered = bool(self.onlyWhileTriggered)
       return self
     except struct.error as e:
@@ -166,6 +170,8 @@ bool     onlyWhileTriggered
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
+      _x = self
+      buff.write(_struct_2B.pack(_x.arenastate, _x.images))
       length = len(self.imagetopic_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.imagetopic_list:
@@ -174,8 +180,7 @@ bool     onlyWhileTriggered
           val1 = val1.encode('utf-8')
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
-      _x = self
-      buff.write(_struct_3B.pack(_x.arenastate, _x.images, _x.onlyWhileTriggered))
+      buff.write(_struct_B.pack(self.onlyWhileTriggered))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -205,6 +210,12 @@ bool     onlyWhileTriggered
         self.filenamebasestamped = str[start:end].decode('utf-8')
       else:
         self.filenamebasestamped = str[start:end]
+      _x = self
+      start = end
+      end += 2
+      (_x.arenastate, _x.images,) = _struct_2B.unpack(str[start:end])
+      self.arenastate = bool(self.arenastate)
+      self.images = bool(self.images)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -220,16 +231,14 @@ bool     onlyWhileTriggered
         else:
           val1 = str[start:end]
         self.imagetopic_list.append(val1)
-      _x = self
       start = end
-      end += 3
-      (_x.arenastate, _x.images, _x.onlyWhileTriggered,) = _struct_3B.unpack(str[start:end])
-      self.arenastate = bool(self.arenastate)
-      self.images = bool(self.images)
+      end += 1
+      (self.onlyWhileTriggered,) = _struct_B.unpack(str[start:end])
       self.onlyWhileTriggered = bool(self.onlyWhileTriggered)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_3B = struct.Struct("<3B")
+_struct_B = struct.Struct("<B")
+_struct_2B = struct.Struct("<2B")
