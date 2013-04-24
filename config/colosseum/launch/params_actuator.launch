@@ -9,12 +9,12 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<param name="robot_description" textfile="$(find fivebar)/Fivebar_urdf_mm.xml" />
+	<param name="robot_description"        textfile="$(find fivebar)/Fivebar_urdf_mm.xml" />
 	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />
-	<param name="rosSimpleStep/limitHi" type="double" value="6.283185" />
-	<param name="rosSimpleStep/limitLo" type="double" value="-6.283185" />
-	<param name="fivebar/speed_max" type="double" value="200.0"/>
-	<param name="actuator/hzPoint" type="double" value="100.0"/>
+	<param name="rosSimpleStep/limitHi"    type="double" value="6.283185" />
+	<param name="rosSimpleStep/limitLo"    type="double" value="-6.283185" />
+	<param name="fivebar/speed_max"        type="double" value="200.0"/>
+	<param name="fivebar/T"                type="double" value="0.02"/>
 
 	<param name="fivebar/linkwidth" type="double" value="25.4"/>  <!-- Affects the smallest closing angle. -->
 	<param name="fivebar/L0" type="double" value="266.7"/>  <!-- Distance between motor shafts -->

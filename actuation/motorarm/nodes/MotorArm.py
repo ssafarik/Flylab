@@ -84,7 +84,6 @@ class MotorArm:
         
         self.unwind = 0.0
         self.angleInvKinPrev = 0.0
-        self.speedCommandTool = None 
         self.speedLinearMax = rospy.get_param('motorarm/speed_max', 200.0)
         
         self.timePrev = rospy.Time.now()

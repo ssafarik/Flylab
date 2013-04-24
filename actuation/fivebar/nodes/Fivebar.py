@@ -60,7 +60,7 @@ class Fivebar:
         self.L3 = rospy.get_param('fivebar/L3', 1.0) # Link 3
         self.L4 = rospy.get_param('fivebar/L4', 1.0) # Link 4
 
-        self.T = rospy.get_param('motorarm/T', 1 / 50)  # Nominal motor update period, i.e. sample rate.
+        self.T = rospy.get_param('fivebar/T', 1 / 50)  # Nominal motor update period, i.e. sample rate.
 
         # PID Gains & Parameters.
         self.kP = rospy.get_param('fivebar/kP', 0.1)
@@ -157,7 +157,6 @@ class Fivebar:
         
         self.unwind = 0.0
         self.angleInvKinPrev = 0.0
-        self.speedCommandTool = None 
         self.speedLinearMax = rospy.get_param('fivebar/speed_max', 200.0)
         
         self.timePrev = rospy.Time.now()
@@ -393,7 +392,7 @@ class Fivebar:
             ptOut = pt
             bClipped = False
         
-        return (bClipped, ptOut)
+        return (ptOut, bClipped)
                 
                 
     def ClipPtsToReachable(self, ptsIn):        
@@ -528,7 +527,7 @@ class Fivebar:
     # and (angle1,angle2)==(0,0) maps to (x,y)==(0,0).
     #
     def Get1234FromPt (self, pt):
-        (bClipped, ptClipped) = self.ClipPtToReachable(pt)
+        (ptClipped, bClipped) = self.ClipPtToReachable(pt)
 
         # Flip the axes if necessary.
         x = ptClipped.x
@@ -800,10 +799,10 @@ class Fivebar:
         rospy.loginfo ('5B Calibrating: q1origin=%s, q1park=%s, q2origin=%s, q2park=%s' % (q1origin, q1park, q2origin, q2park))
         with self.lock:
             try:
-                rv = self.calibrate_joint1(NEGATIVE, q1origin, q1park, True)
+                rv = self.Calibrate_joint1(NEGATIVE, q1origin, q1park, True)
                 rospy.loginfo ('5B Calibrated joint1')
                 q1index = rv.position
-                rv = self.calibrate_joint2(POSITIVE, q2origin, q2park, True)
+                rv = self.Calibrate_joint2(POSITIVE, q2origin, q2park, True)
                 rospy.loginfo ('5B Calibrated joint2')
                 q2index = rv.position
             except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
@@ -972,16 +971,16 @@ class Fivebar:
     def UpdateMotorCommandFromTarget(self):
         if self.stateRef is not None:
             # PID Gains & Parameters.
-#            self.kP      = rospy.get_param('fivebar/kP', 1.0)
-#            self.kI      = rospy.get_param('fivebar/kI', 0.0)
-#            self.kD      = rospy.get_param('fivebar/kD', 0.0)
-#            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
-#            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
-#            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
-#            
-#            self.kP *= self.kAll
-#            self.kI *= self.kAll
-#            self.kD *= self.kAll
+            self.kP      = rospy.get_param('fivebar/kP', 1.0)
+            self.kI      = rospy.get_param('fivebar/kI', 0.0)
+            self.kD      = rospy.get_param('fivebar/kD', 0.0)
+            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
+            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
+            
+            self.kP *= self.kAll
+            self.kI *= self.kAll
+            self.kD *= self.kAll
             
             # The contour error.
             self.vecEeErrorPrev.x = self.vecEeError.x 
@@ -1084,33 +1083,46 @@ class Fivebar:
 
             
             # Get the desired positions for each joint.
-            (angleNext1,angleNext2,angleNext3,angleNext4) = self.Get1234FromPt(self.ptEeCommand)
+            (angleCommand1,angleCommand2,angleCommand3,angleCommand4) = self.Get1234FromPt(self.ptEeCommand)
+            (angleSense1,angleSense2,angleSense3,angleSense4) = self.Get1234FromPt(self.ptEeSense)
             
+            self.angleNext1 = angleCommand1
+            dA1 = self.angleNext1-angleSense1
+            speedAngularMax1 = (self.speedLinearMax / self.L1)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
+            speedNext1 = N.sign(dA1) * min(N.abs(dA1) / self.T, speedAngularMax1)
+            
+            self.angleNext2 = angleCommand2
+            dA2 = self.angleNext2-angleSense2
+            speedAngularMax2 = (self.speedLinearMax / self.L2)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
+            speedNext2 = N.sign(dA2) * min(N.abs(dA2) / self.T, speedAngularMax2)
     
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):
-                # Cheap and wrong way to convert mm/sec to radians/sec.  Should use Jacobian.
-                speedNext = self.speedContourRef * 0.0120 
-
-                # Distribute the velocity over the two joints.
-                dAngle1 = N.abs(angleNext1-self.jointstate1.position) # Delta theta
-                dAngle2 = N.abs(angleNext2-self.jointstate2.position)
-                dist = N.linalg.norm([dAngle1,dAngle2])
-                if dist != 0.0:
-                    scale1 = dAngle1/dist
-                    scale2 = dAngle2/dist
-                else:
-                    scale1 = 0.5
-                    scale2 = 0.5
-                    
-                speedNext1 = scale1 * speedNext
-                speedNext2 = scale2 * speedNext
+#                # Cheap and wrong way to convert mm/sec to radians/sec.  Should use Jacobian.
+#                #speedNext = self.speedContourRef * 0.0120 
+#                speedNext = self.stateRef.speed * 0.0120 
+#
+#                # Distribute the velocity over the two joints.
+#                dAngle1 = N.abs(angleNext1-self.jointstate1.position) # Delta theta
+#                dAngle2 = N.abs(angleNext2-self.jointstate2.position)
+#                dist = N.linalg.norm([dAngle1,dAngle2])
+#                if dist != 0.0:
+#                    scale1 = dAngle1/dist
+#                    scale2 = dAngle2/dist
+#                else:
+#                    scale1 = 0.5
+#                    scale2 = 0.5
+#                    
+#                speedNext1 = scale1 * speedNext
+#                speedNext2 = scale2 * speedNext
                 
                 
                 with self.lock:
                     try:
                         #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.stateRef.pose.position.x,self.stateRef.pose.position.y))
-                        self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext1, speedNext1)
-                        self.SetPositionAtVel_joint2(Header(frame_id=self.names[1]), angleNext2, speedNext2)
+                        #self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext1, speedNext1)
+                        #self.SetPositionAtVel_joint2(Header(frame_id=self.names[1]), angleNext2, speedNext2)
+                        self.SetVelocity_joint1(Header(frame_id=self.names[0]), self.angleNext1, speedNext1)
+                        self.SetVelocity_joint2(Header(frame_id=self.names[1]), self.angleNext2, speedNext2)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
                         rospy.logwarn ("5B Exception:  %s" % e)
 
