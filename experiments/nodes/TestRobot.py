@@ -48,7 +48,7 @@ class ExperimentChase():
         # .robot.move, .lasergalvos, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
-        self.experimentparams.trial.robot.move.mode = 'relative'        
+        self.experimentparams.trial.robot.move.mode = 'pattern'        
         self.experimentparams.trial.robot.move.relative.tracking = False
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Robot"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
@@ -94,7 +94,7 @@ class ExperimentChase():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 5
+        self.experimentparams.post.trigger.timeout = -1
         self.experimentparams.post.wait = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 

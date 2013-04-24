@@ -278,7 +278,9 @@ class Action (smach.State):
             if self.paramsIn.robot.move.mode=='relative':
                 rv = self.MoveRelative()
             else:
+                rospy.logwarn('rv = self.MovePattern()')
                 rv = self.MovePattern()
+                rospy.logwarn('rv = self.MovePattern() Done.')
         else:
             rv = 'disabled'
             

@@ -9,7 +9,7 @@ import experiments.msg
 import patterngen.msg
 
 class MoveSettings(genpy.Message):
-  _md5sum = "e58c64c086bac41eb92ad10845bd21cd"
+  _md5sum = "69634f05ada7eaee3facb463000e5b09"
   _type = "experiments/MoveSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """string                    mode  # 'pattern' or 'relative'
@@ -43,6 +43,7 @@ geometry_msgs/Point   size              # (x,y) dimensions.
 bool				  preempt           # Should this message restart an in-progress pattern.
 float64               param             # An extra shape-dependent parameter, if needed (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
 int32                 direction         # Step forward (+1) or reverse (-1) through the pattern points.
+bool				  isDirty			# Set internally to True when the points need regenerating.
  
 
 
@@ -158,7 +159,7 @@ float64 z
         _x = val1
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
       _x = self
-      buff.write(_struct_3dBdi.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction))
+      buff.write(_struct_3dBdiB.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.pattern.isDirty))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -276,9 +277,10 @@ float64 z
         self.pattern.points.append(val1)
       _x = self
       start = end
-      end += 37
-      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction,) = _struct_3dBdi.unpack(str[start:end])
+      end += 38
+      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.pattern.isDirty,) = _struct_3dBdiB.unpack(str[start:end])
       self.pattern.preempt = bool(self.pattern.preempt)
+      self.pattern.isDirty = bool(self.pattern.isDirty)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -352,7 +354,7 @@ float64 z
         _x = val1
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
       _x = self
-      buff.write(_struct_3dBdi.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction))
+      buff.write(_struct_3dBdiB.pack(_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.pattern.isDirty))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -471,9 +473,10 @@ float64 z
         self.pattern.points.append(val1)
       _x = self
       start = end
-      end += 37
-      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction,) = _struct_3dBdi.unpack(str[start:end])
+      end += 38
+      (_x.pattern.size.x, _x.pattern.size.y, _x.pattern.size.z, _x.pattern.preempt, _x.pattern.param, _x.pattern.direction, _x.pattern.isDirty,) = _struct_3dBdiB.unpack(str[start:end])
       self.pattern.preempt = bool(self.pattern.preempt)
+      self.pattern.isDirty = bool(self.pattern.isDirty)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -481,7 +484,7 @@ float64 z
 _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
+_struct_3dBdiB = struct.Struct("<3dBdiB")
 _struct_2d = struct.Struct("<2d")
 _struct_2di = struct.Struct("<2di")
-_struct_3dBdi = struct.Struct("<3dBdi")
 _struct_3d = struct.Struct("<3d")
