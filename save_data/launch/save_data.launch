@@ -1,5 +1,0 @@
-<launch>
-  <node pkg="save_data" type="Save.py" name="Save" />
-  <!-- <node pkg="save_data" type="SaveArenaState.py" name="SaveArenaState" /> -->
-  <!-- <node pkg="save_data" type="SaveVideo.py" name="SaveVideo" /> -->
-</launch>

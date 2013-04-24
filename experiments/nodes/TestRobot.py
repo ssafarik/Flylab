@@ -28,8 +28,8 @@ class ExperimentChase():
         
         self.experimentparams.save.filenamebase = "test"
         self.experimentparams.save.arenastate = False
-        self.experimentparams.save.video = False
-        self.experimentparams.save.bag = False
+        self.experimentparams.save.images = False
+        self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.tracking.exclusionzones.enabled = False
@@ -48,7 +48,7 @@ class ExperimentChase():
         # .robot.move, .lasergalvos, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
-        self.experimentparams.trial.robot.move.mode = 'relative'        
+        self.experimentparams.trial.robot.move.mode = 'pattern'        
         self.experimentparams.trial.robot.move.relative.tracking = False
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Robot"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
@@ -60,11 +60,19 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
+
+# Four points step response.
+#        self.experimentparams.trial.robot.move.pattern.shape = 'square'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+#        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/16               # Patterns per second.
+#        self.experimentparams.trial.robot.move.pattern.hzPoint = 1/4                   # Points per second in the pattern.
+
+# Smooth circle.
         self.experimentparams.trial.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/10               # Patterns per second.
-        self.experimentparams.trial.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20               # Patterns per second.
+        self.experimentparams.trial.robot.move.pattern.hzPoint = 50                   # Points per second in the pattern.
+
         self.experimentparams.trial.robot.move.pattern.count = -1
-        self.experimentparams.trial.robot.move.pattern.size.x = 10
+        self.experimentparams.trial.robot.move.pattern.size.x = 40
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.pattern.param = 0
         self.experimentparams.trial.robot.move.pattern.direction = 1
@@ -94,7 +102,7 @@ class ExperimentChase():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 5
+        self.experimentparams.post.trigger.timeout = -1
         self.experimentparams.post.wait = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 

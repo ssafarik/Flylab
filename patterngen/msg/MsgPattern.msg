@@ -9,5 +9,6 @@ geometry_msgs/Point   size              # (x,y) dimensions.
 bool				  preempt           # Should this message restart an in-progress pattern.
 float64               param             # An extra shape-dependent parameter, if needed (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
 int32                 direction         # Step forward (+1) or reverse (-1) through the pattern points.
+bool				  isDirty			# Set internally to True when the points need regenerating.
  
 

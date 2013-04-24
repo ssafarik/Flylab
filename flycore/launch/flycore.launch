@@ -7,11 +7,11 @@
     <!--                                                            -->
 	<!-- ========================================================== -->
   
-	<include file="$(find save_data)/launch/save_data.launch" />
-	<include file="$(find arena_tf)/launch/arena_tf.launch" />
-	<include file="$(find tracking)/launch/tracking.launch" />
-	<include file="$(find ui)/launch/ui.launch" />
-	<include file="$(find stage_action_server)/launch/stage_action_server.launch" />
+	<include file="$(find save)/launch/main.launch" />
+	<include file="$(find arena_tf)/launch/main.launch" />
+	<include file="$(find tracking)/launch/main.launch" />
+	<include file="$(find ui)/launch/main.launch" />
+	<include file="$(find stage_action_server)/launch/main.launch" />
 	<node pkg="patterngen" type="PatternGenXY.py" name="PatternGen" />
   
 </launch>

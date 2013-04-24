@@ -9,12 +9,12 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-	<param name="robot_description" textfile="$(find fivebar)/Fivebar_urdf_mm.xml" />
+	<param name="robot_description"        textfile="$(find fivebar)/Fivebar_urdf_mm.xml" />
 	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />
-	<param name="rosSimpleStep/limitHi" type="double" value="6.283185" />
-	<param name="rosSimpleStep/limitLo" type="double" value="-6.283185" />
-	<param name="fivebar/speed_max" type="double" value="200.0"/>
-	<param name="actuator/hzPoint" type="double" value="100.0"/>
+	<param name="rosSimpleStep/limitHi"    type="double" value="6.283185" />
+	<param name="rosSimpleStep/limitLo"    type="double" value="-6.283185" />
+	<param name="fivebar/speed_max"        type="double" value="200.0"/>
+	<param name="fivebar/T"                type="double" value="0.02"/>
 
 	<param name="fivebar/linkwidth" type="double" value="25.4"/>  <!-- Affects the smallest closing angle. -->
 	<param name="fivebar/L0" type="double" value="266.7"/>  <!-- Distance between motor shafts -->
@@ -34,20 +34,31 @@
 
 	<!-- Good PID gains for step response. -->
 	<!--
+	<param name="fivebar/kP"      type="double" value="0.2"/>
+	<param name="fivebar/kI"      type="double" value="0.00"/>
+	<param name="fivebar/kD"      type="double" value="0.3"/>
+	<param name="fivebar/maxI"    type="double" value="0.0"/>  
+	<param name="fivebar/kWindup" type="double" value="1.0"/>  
 	-->
 
 	<!-- Good PID gains for both step AND ramp response. -->
 	<!--
+	<param name="fivebar/kP"      type="double" value="0.2"/>
+	<param name="fivebar/kI"      type="double" value="0.001"/>
+	<param name="fivebar/kD"      type="double" value="0.2"/>
+	<param name="fivebar/maxI"    type="double" value="0"/>  
+	<param name="fivebar/kWindup" type="double" value="0.7"/>  
 	-->
+
 	
 	<!-- Good PID gains to follow a walking fly. -->
 	<!--
 	-->
 	<param name="fivebar/kP"      type="double" value="0.2"/>
-	<param name="fivebar/kI"      type="double" value="0.002"/>
-	<param name="fivebar/kD"      type="double" value="0.4"/>
-	<param name="fivebar/maxI"    type="double" value="60.0"/>  
-	<param name="fivebar/kWindup" type="double" value="1.0"/>  
+	<param name="fivebar/kI"      type="double" value="0.001"/>
+	<param name="fivebar/kD"      type="double" value="0.2"/>
+	<param name="fivebar/maxI"    type="double" value="0"/>  
+	<param name="fivebar/kWindup" type="double" value="0.7"/>  
 
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A'"/>
 	<node name="joint2" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint2' --id='0.0.B'"/>

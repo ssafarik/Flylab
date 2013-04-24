@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import division
-import roslib; roslib.load_manifest('save_data')
+import roslib; roslib.load_manifest('save')
 import rospy
 
 import tf
@@ -8,12 +8,6 @@ import sys
 import time, os, subprocess
 import threading
 import numpy as N
-
-from geometry_msgs.msg import PoseStamped
-from sensor_msgs.msg import Image
-from std_srvs.srv import Empty
-import cv
-from cv_bridge import CvBridge, CvBridgeError
 
 from flycore.msg import MsgFrameState
 from experiments.srv import Trigger, ExperimentParams
@@ -35,7 +29,7 @@ def Chdir(dir):
 #  At the end of each trial, a video is made.  
 # There should be one video frame per line in the .csv
 #
-class Save:
+class SaveArenastate:
     def __init__(self):
         self.initialized = False
         self.dirWorking_base = os.path.expanduser("~/FlylabData")
@@ -47,8 +41,8 @@ class Save:
         self.dirWorking = self.dirWorking_base + "/" + self.dirRelative
         Chdir(self.dirWorking)
 
-        self.triggered = False
-        self.saveOnlyWhileTriggered = False # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
+        self.bTriggered = False
+        self.bSaveOnlyWhileTriggered = False # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
 
         self.nFlies         = rospy.get_param("nFlies", 0)
         self.typeFlies      = rospy.get_param("fly/type", "unspecified")
@@ -60,42 +54,17 @@ class Save:
         self.paintRobot     = str(rospy.get_param("robot/paint", "blackoxide"))
         self.scentRobot     = str(rospy.get_param("robot/scent", "unscented"))
 
-        rospy.Service('save/trial_start', ExperimentParams, self.TrialStart_callback)
-        rospy.Service('save/trial_end', ExperimentParams, self.TrialEnd_callback)
-        rospy.Service('save/trigger', Trigger, self.Trigger_callback)
-        rospy.Service('save/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
 
-        
-        ############# Video stuff
-        self.fileNull = open('/dev/null', 'w')
-        self.iFrame = 0
-
-        self.topicVideo = rospy.get_param("save/videotopic", 'camera/image_rect')
-        self.subImage = rospy.Subscriber(self.topicVideo, Image, self.Image_callback)
-        
-        self.bridge = CvBridge()
-
-        self.image = None
-        self.filenameVideo = None
-        self.saveVideo = False
-        self.bSavingVideo = False
-        self.processVideoConversion = None
-
-        #self.nRepeatFrames = int(rospy.get_param('save/video_image_repeat_count'))
-        self.sizeImage = None
-
-        
         
         ############# Arenastate/CSV stuff
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.sub_arenastate = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
         self.lockArenastate = threading.Lock()
-        self.lockVideo = threading.Lock()
         
         self.filename = None
         self.fid = None
-        self.saveArenastate = False
+        self.bSaveArenastate = False
         self.bSavingArenastate = False
 
         self.format_align = ">"
@@ -418,6 +387,13 @@ class Save:
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
+        # Offer some services.
+        rospy.Service('savearenastate/init',            ExperimentParams, self.Init_callback)
+        rospy.Service('savearenastate/trial_start',     ExperimentParams, self.TrialStart_callback)
+        rospy.Service('savearenastate/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        rospy.Service('savearenastate/trigger',         Trigger,          self.Trigger_callback)
+        rospy.Service('savearenastate/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+
         self.initialized = True
 
 
@@ -427,12 +403,15 @@ class Save:
                 self.fid.close()
                 rospy.logwarn('SA logfile close()')
 
-        with self.lockVideo:
-            if (self.fileNull is not None) and (not self.fileNull.closed):
-                self.fileNull.close()
-                self.fileNull = None
-            
         
+
+    # Service callback to perform initialization that requires experimentparams, e.g. subscribing to image topics.
+    def Init_callback(self, experimentparams):
+        self.save = experimentparams.save
+
+        return True
+
+
 
     # Trigger_callback() 
     #    This gets called when the triggering state changes, either a trigger state has succeeded,
@@ -444,44 +423,31 @@ class Save:
 
             bRisingEdge = False
             bFallingEdge = False
-            if self.triggered != reqTrigger.triggered:
-                self.triggered = reqTrigger.triggered
-                if self.triggered: # Rising edge.
+            if self.bTriggered != reqTrigger.triggered:
+                self.bTriggered = reqTrigger.triggered
+                if self.bTriggered: # Rising edge.
                     bRisingEdge = True
                 else:
                     bFallingEdge = True
 
 
-            if (self.saveOnlyWhileTriggered) and (self.saveArenastate):
+            if (self.bSaveOnlyWhileTriggered) and (self.bSaveArenastate):
                 if (reqTrigger.triggered):
                     self.bSavingArenastate = True
                 else:
                     self.bSavingArenastate = False
             
-            if (self.saveOnlyWhileTriggered) and (self.saveVideo):
-                if (reqTrigger.triggered):
-                    self.bSavingVideo = True
-                else:
-                    self.bSavingVideo = False
-            
-        
+
             # At the end of a run, close the file if we're no longer saving.
-            if (self.saveOnlyWhileTriggered):
-                if (self.saveArenastate):
+            if (self.bSaveOnlyWhileTriggered):
+                if (self.bSaveArenastate):
                     with self.lockArenastate:
                         if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
                             self.fid.close()
                             rospy.logwarn('SA logfile close()')
     
-                if (self.saveVideo):                    
-                    if (bRisingEdge):
-                        self.ResetFrameCounter()
-                            
-                    if (bFallingEdge) and (self.filenameVideo is not None):
-                        self.WriteVideoFromFrames()
-                    
             
-        return self.triggered
+        return self.bTriggered
         
 
     # TrialStart_callback()
@@ -490,63 +456,20 @@ class Save:
     # Returns with a file open.
     # 
     def TrialStart_callback(self, experimentparamsReq):
-        self.saveArenastate = experimentparamsReq.save.arenastate
-        self.saveVideo = experimentparamsReq.save.video
+        self.bSaveArenastate = experimentparamsReq.save.arenastate
         
         if (self.initialized):
-            self.saveOnlyWhileTriggered = experimentparamsReq.save.onlyWhileTriggered
+            self.bSaveOnlyWhileTriggered = experimentparamsReq.save.onlyWhileTriggered
 
-            if (self.saveArenastate):
+            if (self.bSaveArenastate):
                 # Determine if we should be saving.
-                if (self.saveOnlyWhileTriggered):
+                if (self.bSaveOnlyWhileTriggered):
                     self.bSavingArenastate = False
                 else:
                     self.bSavingArenastate = True
                 
                 self.OpenCsvAndWriteHeader(experimentparamsReq)
 
-
-            if (self.saveVideo):
-                self.ResetFrameCounter()
-    
-                # Determine if we should be saving.
-                if (self.saveOnlyWhileTriggered):
-                    self.bSavingVideo = False
-                else:
-                    self.bSavingVideo = True
-                
-                
-                now = rospy.Time.now().to_sec()
-                self.dirFrames = "%s%04d%02d%02d%02d%02d%02d" % (experimentparamsReq.save.filenamebase, 
-                                                                time.localtime(now).tm_year,
-                                                                time.localtime(now).tm_mon,
-                                                                time.localtime(now).tm_mday,
-                                                                time.localtime(now).tm_hour,
-                                                                time.localtime(now).tm_min,
-                                                                time.localtime(now).tm_sec)
-    
-                self.dirBase = os.path.expanduser("~/FlylabData")
-                Chdir(self.dirBase)
-                self.dirVideo = self.dirBase + "/" + time.strftime("%Y_%m_%d")
-                Chdir(self.dirVideo)
-                #self.dirFrames = self.dirVideo + "/frames"
-                #Chdir(self.dirFrames)
-                # At this point we should be in ~/FlylabData/YYYYmmdd/images
-                
-                try:
-                    os.mkdir(self.dirFrames)
-                except OSError, e:
-                    rospy.logwarn ('Cannot create directory %s: %s' % (self.dirFrames,e))
-    
-            
-                self.filenameVideo = "%s/%s%04d%02d%02d%02d%02d%02d.mov" % (self.dirVideo,
-                                                                experimentparamsReq.save.filenamebase, 
-                                                                time.localtime(now).tm_year,
-                                                                time.localtime(now).tm_mon,
-                                                                time.localtime(now).tm_mday,
-                                                                time.localtime(now).tm_hour,
-                                                                time.localtime(now).tm_min,
-                                                                time.localtime(now).tm_sec)
 
                 
         return True
@@ -557,7 +480,7 @@ class Save:
     # 
     def TrialEnd_callback(self, experimentparamsReq):
         if (self.initialized):
-            if (self.saveArenastate):
+            if (self.bSaveArenastate):
                 # Close old .csv file if there was one.
                 with self.lockArenastate:
                     if (self.fid is not None) and (not self.fid.closed):
@@ -565,24 +488,20 @@ class Save:
                         rospy.logwarn('SA logfile close()')
                     
 
-            if (self.saveVideo):
-                # If there are prior frames to convert, then convert them.
-                if (self.filenameVideo is not None):
-                    self.WriteVideoFromFrames()
-                
         return True
                 
                 
     def OpenCsvAndWriteHeader(self, experimentparamsReq):                
         #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
-        now = rospy.Time.now().to_sec()
-        self.filename = "%s%04d%02d%02d%02d%02d%02d.csv" % (experimentparamsReq.save.filenamebase, 
-                                                            time.localtime(now).tm_year,
-                                                            time.localtime(now).tm_mon,
-                                                            time.localtime(now).tm_mday,
-                                                            time.localtime(now).tm_hour,
-                                                            time.localtime(now).tm_min,
-                                                            time.localtime(now).tm_sec)
+#         now = rospy.Time.now().to_sec()
+#         self.filename = "%s%04d%02d%02d%02d%02d%02d.csv" % (experimentparamsReq.save.filenamebase, 
+#                                                             time.localtime(now).tm_year,
+#                                                             time.localtime(now).tm_mon,
+#                                                             time.localtime(now).tm_mday,
+#                                                             time.localtime(now).tm_hour,
+#                                                             time.localtime(now).tm_min,
+#                                                             time.localtime(now).tm_sec)
+        self.filename = "%s.csv" % experimentparamsReq.save.filenamebasestamped
         
         headerVersionFile = self.templateVersionFile.format(
                                                 versionFile                = self.versionFile
@@ -919,79 +838,6 @@ class Save:
     
     
 
-    def get_imagenames(self, dir):
-        proc_ls_png = subprocess.Popen('ls ' + dir + '/*.png',
-                                    shell=True,
-                                    stdout=subprocess.PIPE,
-                                    stderr=self.fileNull)
-        out = proc_ls_png.stdout.readlines()
-        imagenames = [s.rstrip() for s in out]
-        return imagenames
-    
-
-    def WriteVideoFromFrames(self):
-        with self.lockVideo:
-            
-            # Rewrite all the image files, with duplicate frames to simulate slow-motion.
-            #Chdir(self.dirImage)
-            #imagenames = self.get_imagenames(self.dirImage)
-            #iFrame = 0
-            #for imagename in imagenames:
-            #    Chdir(self.dirFrames)
-            #    image = cv.LoadImage(imagename)
-            #    Chdir(self.dirFrames2)
-            #    for iRepeat in range(self.nRepeatFrames):
-            #        filenameImage = "{num:06d}.png".format(num=iFrame)
-            #        cv.SaveImage(filenameImage, image)
-            #        iFrame += 1
-    
-#            cmdCreateVideoFile = 'ffmpeg -f image2 -i ' + self.dirFrames + '/%06d.png -r ' + str(self.framerate) + ' ' + \
-#                                   '-sameq -s 640x480 -mbd rd -trellis 2 -cmp 2 -subcmp 2 -g 100 -bf 2 -pass 1/2 ' + \
-#                                   self.filenameVideo
-            cmdCreateVideoFile = 'avconv -r 60 -i ' + self.dirFrames + '/%06d.png -r 60 ' + self.filenameVideo
-            rospy.logwarn('Converting .png images to video using command:')
-            rospy.logwarn (cmdCreateVideoFile)
-            try:
-                #subprocess.check_call(cmdCreateVideoFile, shell=True)
-                self.processVideoConversion = subprocess.Popen(cmdCreateVideoFile, shell=True)
-            except:
-                rospy.logerr('Exception running avconv')
-                
-            rospy.logwarn('Saved %s' % (self.filenameVideo))
-            self.filenameVideo = None
-
-
-
-    def WaitUntilDone_callback(self, experimentparams):
-        if self.processVideoConversion is not None:
-            self.processVideoConversion.wait()
-
-        return True
-
-            
-                    
-    def ResetFrameCounter(self):
-        #try:
-        #    rospy.logwarn('Deleting frame images.')
-        #    subprocess.call('rm '+self.dirFrames+'/*.png', shell=True)
-        #except OSError:
-        #    pass
-        
-        self.iFrame = 0
-
-
-    def WriteFilePng(self, cvimage):
-        if self.sizeImage is None:
-            self.sizeImage = cv.GetSize(cvimage)
-        filenameImage = self.dirFrames+"/{num:06d}.png".format(num=self.iFrame)
-        cv.SaveImage(filenameImage, cvimage)
-        self.iFrame += 1
-
-
-    def Image_callback(self, image):
-            self.image = image
-
-
     def ArenaState_callback(self, arenastate):
         if (self.initialized) and (self.bSavingArenastate) and (self.fid is not None):
 
@@ -1015,7 +861,7 @@ class Save:
                                                     precision   = self.format_precision,
                                                     type        = self.format_type,
                                                     time        = stamp, #rospy.Time.now().to_sec(), #stateRobot.header.stamp,
-                                                    triggered   = str(int(self.triggered)),
+                                                    triggered   = str(int(self.bTriggered)),
                                                     )
             stateRobot = self.templateStateRobot.format(
                                                     align           = self.format_align,
@@ -1073,17 +919,11 @@ class Save:
                 if (not self.fid.closed):
                     self.fid.write(stateRow)
 
-    
-        if (self.initialized) and (self.bSavingVideo) and (self.image is not None):
-            with self.lockVideo:
-                # Convert ROS image to OpenCV image
-                try:
-                  cv_image = cv.GetImage(self.bridge.imgmsg_to_cv(self.image, "passthrough"))
-                except CvBridgeError, e:
-                  print e
-                # cv.CvtColor(cv_image, self.im_display, cv.CV_GRAY2RGB)
-    
-                self.WriteFilePng(cv_image)
+
+    def WaitUntilDone_callback(self, experimentparams):
+        return True
+
+            
 
     
     def Main(self):
@@ -1092,6 +932,6 @@ class Save:
 
 if __name__ == '__main__':
     rospy.init_node('Save', log_level=rospy.INFO)
-    save = Save()
-    save.Main()
+    savearenastate = SaveArenastate()
+    savearenastate.Main()
     

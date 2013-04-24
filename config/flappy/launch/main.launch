@@ -21,8 +21,8 @@
 	<!-- <include file="$(find galvodirector)/launch/main.launch" /> -->
 
 	
-    <include file="$(find flappy)/launch/camera_aux.launch" />
-    <!-- <include file="$(find flappy)/launch/camera_tracking.launch" /> -->
+    <!-- <include file="$(find flappy)/launch/camera_aux.launch" /> -->
+    <include file="$(find flappy)/launch/camera_tracking.launch" /> 
     <include file="$(find flappy)/launch/camera_flir.launch" />
    
     <node pkg="dynamic_reconfigure" type="reconfigure_gui" name="reconfigure_gui" />

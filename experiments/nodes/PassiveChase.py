@@ -27,8 +27,8 @@ class ExperimentPassiveChase():
         
         self.experimentparams.save.filenamebase = "passivechase"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = True
-        self.experimentparams.save.bag = False
+        self.experimentparams.save.images = True
+        self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.tracking.exclusionzones.enabled = False
@@ -72,9 +72,9 @@ class ExperimentPassiveChase():
         self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.pattern.param = 0
-        self.experimentparams.trial.robot.move.pattern.direction = -1
-        self.experimentparams.trial.robot.home.enabled = False
-        self.experimentparams.trial.robot.home.x = 0.0
+        self.experimentparams.trial.robot.move.pattern.direction = 1
+        self.experimentparams.trial.robot.home.enabled = True
+        self.experimentparams.trial.robot.home.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
         self.experimentparams.trial.robot.home.tolerance = 2
@@ -109,7 +109,7 @@ class ExperimentPassiveChase():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 300
+        self.experimentparams.post.trigger.timeout = 600
 
         self.experimentparams.post.wait = 0.0
         
