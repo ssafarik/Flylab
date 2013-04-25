@@ -3,11 +3,6 @@ from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
 import numpy as N
-#!/usr/bin/env python
-from __future__ import division
-import roslib; roslib.load_manifest('experiments')
-import rospy
-import numpy as N
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiments.srv import *
@@ -34,8 +29,8 @@ class ExperimentZapafly():
         
         self.experimentparams.save.filenamebase = "zap"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = False
-        self.experimentparams.save.bag = False
+        self.experimentparams.save.images = False
+        self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.tracking.exclusionzones.enabled = False

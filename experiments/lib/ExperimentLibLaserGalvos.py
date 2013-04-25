@@ -57,8 +57,11 @@ class Reset (smach.State):
     def execute(self, userdata):
         rospy.loginfo("EL State ResetGalvos()")
 
-        # Reset the various hardware.
-        rv = 'success'
+        if (userdata.experimentparamsIn.trial.lasergalvos.enabled):
+            # Reset the various hardware.
+            rv = 'success'
+        else:
+            rv = 'disabled'
             
         #rospy.loginfo ('EL Exiting ResetHardware()')
         return rv

@@ -8,7 +8,7 @@ import geometry_msgs.msg
 import patterngen.msg
 
 class MsgGalvoCommand(genpy.Message):
-  _md5sum = "50d1b31b801356464d6459ca215967f0"
+  _md5sum = "ac77d5c156ba5779dd456cde4a1c944e"
   _type = "galvodirector/MsgGalvoCommand"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool 						enable_laser
@@ -29,6 +29,7 @@ geometry_msgs/Point   size              # (x,y) dimensions.
 bool				  preempt           # Should this message restart an in-progress pattern.
 float64               param             # An extra shape-dependent parameter, if needed (hilbert->level, peano->level, spiral->pitch, raster->gridpitch).
 int32                 direction         # Step forward (+1) or reverse (-1) through the pattern points.
+bool				  isDirty			# Set internally to True when the points need regenerating.
  
 
 
@@ -116,7 +117,7 @@ float64 z
         _x = _v1
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
-        buff.write(_struct_Bdi.pack(_x.preempt, _x.param, _x.direction))
+        buff.write(_struct_BdiB.pack(_x.preempt, _x.param, _x.direction, _x.isDirty))
       _x = self.units
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -194,9 +195,10 @@ float64 z
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         _x = val1
         start = end
-        end += 13
-        (_x.preempt, _x.param, _x.direction,) = _struct_Bdi.unpack(str[start:end])
+        end += 14
+        (_x.preempt, _x.param, _x.direction, _x.isDirty,) = _struct_BdiB.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
+        val1.isDirty = bool(val1.isDirty)
         self.pattern_list.append(val1)
       start = end
       end += 4
@@ -252,7 +254,7 @@ float64 z
         _x = _v3
         buff.write(_struct_3d.pack(_x.x, _x.y, _x.z))
         _x = val1
-        buff.write(_struct_Bdi.pack(_x.preempt, _x.param, _x.direction))
+        buff.write(_struct_BdiB.pack(_x.preempt, _x.param, _x.direction, _x.isDirty))
       _x = self.units
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -331,9 +333,10 @@ float64 z
         (_x.x, _x.y, _x.z,) = _struct_3d.unpack(str[start:end])
         _x = val1
         start = end
-        end += 13
-        (_x.preempt, _x.param, _x.direction,) = _struct_Bdi.unpack(str[start:end])
+        end += 14
+        (_x.preempt, _x.param, _x.direction, _x.isDirty,) = _struct_BdiB.unpack(str[start:end])
         val1.preempt = bool(val1.preempt)
+        val1.isDirty = bool(val1.isDirty)
         self.pattern_list.append(val1)
       start = end
       end += 4
@@ -349,7 +352,7 @@ float64 z
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_Bdi = struct.Struct("<Bdi")
+_struct_BdiB = struct.Struct("<BdiB")
 _struct_B = struct.Struct("<B")
 _struct_2di = struct.Struct("<2di")
 _struct_3d = struct.Struct("<3d")

@@ -41,8 +41,8 @@ class SaveArenastate:
         self.dirWorking = self.dirWorking_base + "/" + self.dirRelative
         Chdir(self.dirWorking)
 
-        self.triggered = False
-        self.saveOnlyWhileTriggered = False # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
+        self.bTriggered = False
+        self.bSaveOnlyWhileTriggered = False # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
 
         self.nFlies         = rospy.get_param("nFlies", 0)
         self.typeFlies      = rospy.get_param("fly/type", "unspecified")
@@ -54,10 +54,6 @@ class SaveArenastate:
         self.paintRobot     = str(rospy.get_param("robot/paint", "blackoxide"))
         self.scentRobot     = str(rospy.get_param("robot/scent", "unscented"))
 
-        rospy.Service('savearenastate/trial_start', ExperimentParams, self.TrialStart_callback)
-        rospy.Service('savearenastate/trial_end', ExperimentParams, self.TrialEnd_callback)
-        rospy.Service('savearenastate/trigger', Trigger, self.Trigger_callback)
-        rospy.Service('savearenastate/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
 
         
         ############# Arenastate/CSV stuff
@@ -68,7 +64,7 @@ class SaveArenastate:
         
         self.filename = None
         self.fid = None
-        self.saveArenastate = False
+        self.bSaveArenastate = False
         self.bSavingArenastate = False
 
         self.format_align = ">"
@@ -391,6 +387,13 @@ class SaveArenastate:
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
+        # Offer some services.
+        rospy.Service('savearenastate/init',            ExperimentParams, self.Init_callback)
+        rospy.Service('savearenastate/trial_start',     ExperimentParams, self.TrialStart_callback)
+        rospy.Service('savearenastate/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        rospy.Service('savearenastate/trigger',         Trigger,          self.Trigger_callback)
+        rospy.Service('savearenastate/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+
         self.initialized = True
 
 
@@ -402,6 +405,14 @@ class SaveArenastate:
 
         
 
+    # Service callback to perform initialization that requires experimentparams, e.g. subscribing to image topics.
+    def Init_callback(self, experimentparams):
+        self.save = experimentparams.save
+
+        return True
+
+
+
     # Trigger_callback() 
     #    This gets called when the triggering state changes, either a trigger state has succeeded,
     #     or a trial run has concluded.
@@ -412,15 +423,15 @@ class SaveArenastate:
 
             bRisingEdge = False
             bFallingEdge = False
-            if self.triggered != reqTrigger.triggered:
-                self.triggered = reqTrigger.triggered
-                if self.triggered: # Rising edge.
+            if self.bTriggered != reqTrigger.triggered:
+                self.bTriggered = reqTrigger.triggered
+                if self.bTriggered: # Rising edge.
                     bRisingEdge = True
                 else:
                     bFallingEdge = True
 
 
-            if (self.saveOnlyWhileTriggered) and (self.saveArenastate):
+            if (self.bSaveOnlyWhileTriggered) and (self.bSaveArenastate):
                 if (reqTrigger.triggered):
                     self.bSavingArenastate = True
                 else:
@@ -428,15 +439,15 @@ class SaveArenastate:
             
 
             # At the end of a run, close the file if we're no longer saving.
-            if (self.saveOnlyWhileTriggered):
-                if (self.saveArenastate):
+            if (self.bSaveOnlyWhileTriggered):
+                if (self.bSaveArenastate):
                     with self.lockArenastate:
                         if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
                             self.fid.close()
                             rospy.logwarn('SA logfile close()')
     
             
-        return self.triggered
+        return self.bTriggered
         
 
     # TrialStart_callback()
@@ -445,15 +456,14 @@ class SaveArenastate:
     # Returns with a file open.
     # 
     def TrialStart_callback(self, experimentparamsReq):
-        self.saveArenastate = experimentparamsReq.save.arenastate
-        self.saveVideo = experimentparamsReq.save.video
+        self.bSaveArenastate = experimentparamsReq.save.arenastate
         
         if (self.initialized):
-            self.saveOnlyWhileTriggered = experimentparamsReq.save.onlyWhileTriggered
+            self.bSaveOnlyWhileTriggered = experimentparamsReq.save.onlyWhileTriggered
 
-            if (self.saveArenastate):
+            if (self.bSaveArenastate):
                 # Determine if we should be saving.
-                if (self.saveOnlyWhileTriggered):
+                if (self.bSaveOnlyWhileTriggered):
                     self.bSavingArenastate = False
                 else:
                     self.bSavingArenastate = True
@@ -470,7 +480,7 @@ class SaveArenastate:
     # 
     def TrialEnd_callback(self, experimentparamsReq):
         if (self.initialized):
-            if (self.saveArenastate):
+            if (self.bSaveArenastate):
                 # Close old .csv file if there was one.
                 with self.lockArenastate:
                     if (self.fid is not None) and (not self.fid.closed):
@@ -491,7 +501,7 @@ class SaveArenastate:
 #                                                             time.localtime(now).tm_hour,
 #                                                             time.localtime(now).tm_min,
 #                                                             time.localtime(now).tm_sec)
-        self.filename = "%s.csv" % experimentparamsReq.save.filenamepart
+        self.filename = "%s.csv" % experimentparamsReq.save.filenamebasestamped
         
         headerVersionFile = self.templateVersionFile.format(
                                                 versionFile                = self.versionFile
@@ -851,7 +861,7 @@ class SaveArenastate:
                                                     precision   = self.format_precision,
                                                     type        = self.format_type,
                                                     time        = stamp, #rospy.Time.now().to_sec(), #stateRobot.header.stamp,
-                                                    triggered   = str(int(self.triggered)),
+                                                    triggered   = str(int(self.bTriggered)),
                                                     )
             stateRobot = self.templateStateRobot.format(
                                                     align           = self.format_align,
