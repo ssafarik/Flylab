@@ -169,7 +169,6 @@ class ContourGenerator:
               
                 #self.histModel = cv2.calcHist([N.uint8(self.matBackground)], [0], N.uint8(self.matMask), [255], [0,255])
                 #rospy.logwarn (self.histModel)
-                self.imgBuffer = N.zeros([self.imgCamera.shape[0], self.imgCamera.shape[1]], dtype=N.uint8)
                 
             self.initialized = True
             
@@ -457,7 +456,8 @@ class ContourGenerator:
             if self.initialized:        
                 # Check for new diff_threshold value
                 self.diff_threshold = rospy.get_param("tracking/diff_threshold", 50)
-    
+                
+                # Create the mask.
                 radiusMask = int(rospy.get_param("camera/mask/radius", 9999)) 
                 if radiusMask != self.radiusMask:
                     self.radiusMask = radiusMask 
@@ -468,30 +468,25 @@ class ContourGenerator:
                               self.color_max, 
                               cv.CV_FILLED)
                 
-                # Mask the camera image.
-                self.imgCamera = cv2.bitwise_and(self.imgCamera, self.imgMask)
-                
                 # Normalize the histogram.
-                #self.imgBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8)
                 if self.bEqualizeHist:
                     self.imgCamera = cv2.equalizeHist(self.imgCamera)
                 
                 
                 if self.bUseBackgroundSubtraction:
-                    # Update the background image
+                    # Update the background.
                     #rospy.logwarn('types: %s' % [type(N.float32(self.imgCamera)), type(self.imgfBackground), type(self.alphaBackground)])
                     self.alphaBackground = rospy.get_param('tracking/alphaBackground', 0.01) # Alpha value for moving average background.
                     cv2.accumulateWeighted(N.float32(self.imgCamera), self.imgfBackground, self.alphaBackground)
                     self.imgBackground = N.uint8(self.imgfBackground)
     
-                    # Subtract background
-                    #self.imgBuffer = N.zeros([self.matCamera.height, self.matCamera.width], dtype=N.uint8)
+                    # Create the foreground.
                     if self.bEqualizeHist:
-                        imgBuffer = cv2.equalizeHist(self.imgBackground)
+                        imgBackgroundEq = cv2.equalizeHist(self.imgBackground)
                     else:
-                        imgBuffer = self.imgBackground
+                        imgBackgroundEq = self.imgBackground
     
-                    self.imgBackground2 = imgBuffer
+                    self.imgBackground2 = imgBackgroundEq
                     self.imgForeground = cv2.absdiff(self.imgCamera, self.imgBackground2)
                 else:
                     self.imgForeground = self.imgCamera
@@ -504,18 +499,22 @@ class ContourGenerator:
                                                  cv2.THRESH_TOZERO)
     
                 
+                # Mask the threshold image.
+                self.imgThreshold = cv2.bitwise_and(self.imgThreshold, self.imgMask)
+                
                 # Get the ContourinfoLists.
                 (self.contourinfolists, self.contours) = self.ContourinfoListsFromImage(self.imgThreshold, self.imgForeground)    # Modifies self.imgThreshold
                 self.pubContourinfoLists.publish(self.contourinfolists)
                 
                 # Convert to color for display image
                 if self.pubImageProcessed.get_num_connections() > 0:
+                    # Mask the camera image, and convert it to color.
+                    self.imgCamera = cv2.bitwise_and(self.imgCamera, self.imgMask)
                     self.imgProcessed = cv2.cvtColor(self.imgCamera, cv.CV_GRAY2RGB)
                     
                     # Draw contours on Processed image.
                     if self.contours:
                         cv2.drawContours(self.imgProcessed, self.contours, -1, cv.CV_RGB(0,0,self.color_max), thickness=1, maxLevel=1)
-                    
                     
                 
                 # Publish processed image
