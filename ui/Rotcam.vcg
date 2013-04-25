@@ -1,0 +1,249 @@
+Arena.Enabled=0
+Arena.Length=30
+Arena.Radius=0.2
+Arena.Reference\ Frame=/Arena
+Background\ ColorB=0
+Background\ ColorG=0
+Background\ ColorR=0
+Camera\ Config=1.5048 4.70585 210.746 1.78587 3.60599 -2.87451
+Camera\ Type=rviz::OrbitViewController
+CameraAxes.Enabled=0
+CameraAxes.Length=30
+CameraAxes.Radius=0.2
+CameraAxes.Reference\ Frame=/Camera
+EndEffector.Enabled=0
+EndEffector.Length=13
+EndEffector.Radius=0.2
+EndEffector.Reference\ Frame=/EndEffector
+Fixed\ Frame=/Arena
+Fly1.Enabled=1
+Fly1.Length=5
+Fly1.Radius=2
+Fly1.Reference\ Frame=/Fly1
+Fly10.Enabled=1
+Fly10.Length=5
+Fly10.Radius=1
+Fly10.Reference\ Frame=/Fly10
+Fly11.Enabled=1
+Fly11.Length=5
+Fly11.Radius=1
+Fly11.Reference\ Frame=/Fly11
+Fly12.Enabled=1
+Fly12.Length=5
+Fly12.Radius=1
+Fly12.Reference\ Frame=/Fly12
+Fly1Contour.Enabled=0
+Fly1Contour.Length=7
+Fly1Contour.Radius=0.5
+Fly1Contour.Reference\ Frame=/Fly1Contour
+Fly2.Enabled=1
+Fly2.Length=5
+Fly2.Radius=1
+Fly2.Reference\ Frame=/Fly2
+Fly3.Enabled=1
+Fly3.Length=5
+Fly3.Radius=1
+Fly3.Reference\ Frame=/Fly3
+Fly4.Enabled=1
+Fly4.Length=5
+Fly4.Radius=1
+Fly4.Reference\ Frame=/Fly4
+Fly5.Enabled=1
+Fly5.Length=5
+Fly5.Radius=1
+Fly5.Reference\ Frame=/Fly5
+Fly6.Enabled=1
+Fly6.Length=5
+Fly6.Radius=1
+Fly6.Reference\ Frame=/Fly6
+Fly7.Enabled=1
+Fly7.Length=5
+Fly7.Radius=1
+Fly7.Reference\ Frame=/Fly7
+Fly8.Enabled=1
+Fly8.Length=5
+Fly8.Radius=1
+Fly8.Reference\ Frame=/Fly8
+Fly9.Enabled=1
+Fly9.Length=5
+Fly9.Radius=1
+Fly9.Reference\ Frame=/Fly9
+Grid.Alpha=0.5
+Grid.Cell\ Size=10
+Grid.ColorB=0.5
+Grid.ColorG=0.5
+Grid.ColorR=0.5
+Grid.Enabled=1
+Grid.Line\ Style=0
+Grid.Line\ Width=0.03
+Grid.Normal\ Cell\ Count=0
+Grid.OffsetX=0
+Grid.OffsetY=0
+Grid.OffsetZ=0
+Grid.Plane=0
+Grid.Plane\ Cell\ Count=20
+Grid.Reference\ Frame=/Arena
+PointCloud..AxisColorAutocompute\ Value\ Bounds=1
+PointCloud..AxisColorAxis=2
+PointCloud..AxisColorMax\ Value=10
+PointCloud..AxisColorMin\ Value=-10
+PointCloud..AxisColorUse\ Fixed\ Frame=1
+PointCloud..FlatColorColorB=1
+PointCloud..FlatColorColorG=1
+PointCloud..FlatColorColorR=1
+PointCloud..IntensityAutocompute\ Intensity\ Bounds=1
+PointCloud..IntensityChannel\ Name=intensity
+PointCloud..IntensityMax\ ColorB=1
+PointCloud..IntensityMax\ ColorG=1
+PointCloud..IntensityMax\ ColorR=1
+PointCloud..IntensityMax\ Intensity=0
+PointCloud..IntensityMin\ ColorB=0
+PointCloud..IntensityMin\ ColorG=0
+PointCloud..IntensityMin\ ColorR=0
+PointCloud..IntensityMin\ Intensity=0
+PointCloud..IntensityUse\ full\ RGB\ spectrum=0
+PointCloud.Alpha=1
+PointCloud.Billboard\ Size=0.01
+PointCloud.Color\ Transformer=Intensity
+PointCloud.Decay\ Time=0
+PointCloud.Enabled=1
+PointCloud.Position\ Transformer=XYZ
+PointCloud.Queue\ Size=10
+PointCloud.Selectable=1
+PointCloud.Style=1
+PointCloud.Topic=/GalvoDriver/pointcloudmm
+Property\ Grid\ Splitter=488,78
+Property\ Grid\ State=expanded=.Global Options;splitterratio=0.588406
+QMainWindow=000000ff00000000fd00000003000000000000011d00000288fc0200000002fb000000100044006900730070006c006100790073010000001d00000288000000ee00fffffffb0000000c00430061006d0065007200610000000334000000d70000000000000000000000010000013100000316fc0200000003fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073000000001d000000700000006700fffffffb0000000a00560069006500770073000000001d00000316000000bb00fffffffb0000001200530065006c0065006300740069006f006e000000001d000001b90000006700ffffff00000003000003b70000003efc0100000001fb0000000800540069006d00650100000000000003b7000002bf00ffffff000002940000028800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+Robot\ Model.Alpha=0.2
+Robot\ Model.Collision\ Enabled=0
+Robot\ Model.Enabled=0
+Robot\ Model.Robot\ Description=robot_description
+Robot\ Model.TF\ Prefix=
+Robot\ Model.Update\ Interval=0.02
+Robot\ Model.Visual\ Enabled=1
+Robot.Enabled=0
+Robot.Length=0.75
+Robot.Radius=0.2
+Robot.Reference\ Frame=/Robot
+RobotContour.Enabled=0
+RobotContour.Length=7
+RobotContour.Radius=0.5
+RobotContour.Reference\ Frame=/RobotContour
+Stage.Enabled=0
+Stage.Length=30
+Stage.Radius=0.22
+Stage.Reference\ Frame=/Stage
+TF.All\ Enabled=0
+TF.Enabled=0
+TF.Frame\ Timeout=15
+TF.Marker\ Scale=40
+TF.Show\ Arrows=0
+TF.Show\ Axes=0
+TF.Show\ Names=1
+TF.Update\ Interval=0
+Target\ Frame=/Arena
+Target.Enabled=1
+Target.Marker\ Topic=visualization_marker
+Target.Queue\ Size=100
+Target.arena=1
+Tool\ 2D\ Nav\ GoalTopic=goal
+Tool\ 2D\ Pose\ EstimateTopic=initialpose
+contour0.Enabled=0
+contour0.Length=5
+contour0.Radius=0.5
+contour0.Reference\ Frame=/contour0
+contour1.Enabled=0
+contour1.Length=5
+contour1.Radius=0.5
+contour1.Reference\ Frame=/contour1
+link5.Enabled=0
+link5.Length=1
+link5.Radius=0.1
+link5.Reference\ Frame=/link5
+[Display0]
+ClassName=rviz::GridDisplay
+Name=Grid
+[Display1]
+ClassName=rviz::TFDisplay
+Name=TF
+[Display10]
+ClassName=rviz::AxesDisplay
+Name=CameraAxes
+[Display11]
+ClassName=rviz::AxesDisplay
+Name=contour0
+[Display12]
+ClassName=rviz::AxesDisplay
+Name=contour1
+[Display13]
+ClassName=rviz::AxesDisplay
+Name=link5
+[Display14]
+ClassName=rviz::AxesDisplay
+Name=Fly1
+[Display15]
+ClassName=rviz::AxesDisplay
+Name=Fly2
+[Display16]
+ClassName=rviz::AxesDisplay
+Name=Fly3
+[Display17]
+ClassName=rviz::AxesDisplay
+Name=Fly4
+[Display18]
+ClassName=rviz::AxesDisplay
+Name=Fly5
+[Display19]
+ClassName=rviz::AxesDisplay
+Name=Fly6
+[Display2]
+ClassName=rviz::RobotModelDisplay
+Name=Robot Model
+[Display20]
+ClassName=rviz::AxesDisplay
+Name=Fly7
+[Display21]
+ClassName=rviz::AxesDisplay
+Name=Fly8
+[Display22]
+ClassName=rviz::AxesDisplay
+Name=Fly9
+[Display23]
+ClassName=rviz::AxesDisplay
+Name=Fly10
+[Display24]
+ClassName=rviz::PointCloudDisplay
+Name=PointCloud
+[Display25]
+ClassName=rviz::AxesDisplay
+Name=Fly11
+[Display26]
+ClassName=rviz::AxesDisplay
+Name=Fly12
+[Display3]
+ClassName=rviz::AxesDisplay
+Name=Stage
+[Display4]
+ClassName=rviz::AxesDisplay
+Name=Arena
+[Display5]
+ClassName=rviz::AxesDisplay
+Name=Robot
+[Display6]
+ClassName=rviz::AxesDisplay
+Name=Fly1Contour
+[Display7]
+ClassName=rviz::AxesDisplay
+Name=RobotContour
+[Display8]
+ClassName=rviz::AxesDisplay
+Name=EndEffector
+[Display9]
+ClassName=rviz::MarkerDisplay
+Name=Target
+[Window]
+Height=777
+Width=959
+X=687
+Y=32
