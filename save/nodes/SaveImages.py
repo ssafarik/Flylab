@@ -195,12 +195,12 @@ class SaveImages:
             with self.lockImage:
                 # Convert ROS image to OpenCV image
                 try:
-                  cv_image = cv.GetImage(self.cvbridge.imgmsg_to_cv(image, "passthrough"))
+                  matImage = cv.GetImage(self.cvbridge.imgmsg_to_cv(image, "passthrough"))
                 except CvBridgeError, e:
                   print e
-                # cv.CvtColor(cv_image, self.im_display, cv.CV_GRAY2RGB)
+                # cv.CvtColor(matImage, self.im_display, cv.CV_GRAY2RGB)
     
-                self.WriteImageFile(cv_image, imagetopic)
+                self.WriteImageFile(matImage, imagetopic)
 
         
     def get_imagenames(self, dir):
@@ -223,22 +223,24 @@ class SaveImages:
         
 
 
-    def WriteImageFile(self, cvimage, imagetopic):
-        filenameImage = self.dirFrames[imagetopic]+"/{num:06d}.{ext:s}".format(num=self.iFrame[imagetopic], ext=self.imageext)
-
-        cv.SaveImage(filenameImage, cvimage)
-        self.iFrame[imagetopic] += 1
+    def WriteImageFile(self, matImage, imagetopic):
+        if (imagetopic in self.dirFrames):
+            filenameImage = self.dirFrames[imagetopic]+"/{num:06d}.{ext:s}".format(num=self.iFrame[imagetopic], ext=self.imageext)
+    
+            cv.SaveImage(filenameImage, matImage)
+            self.iFrame[imagetopic] += 1
 
 
     def WriteVideoFromFrames(self, filenameVideo, imagetopic):
         with self.lockVideo:
-            cmdCreateVideoFile = 'avconv -r 60 -i %s/%%06d.%s -r 60 %s' % (self.dirFrames[imagetopic], self.imageext, filenameVideo)
-            rospy.logwarn('Converting images to video using command:')
-            rospy.logwarn (cmdCreateVideoFile)
-            try:
-                self.processVideoConversion[imagetopic] = subprocess.Popen(cmdCreateVideoFile, shell=True)
-            except:
-                rospy.logerr('Exception running avconv')
+            if (imagetopic in self.dirFrames):
+                cmdCreateVideoFile = 'avconv -r 60 -i %s/%%06d.%s -r 60 %s' % (self.dirFrames[imagetopic], self.imageext, filenameVideo)
+                rospy.logwarn('Converting images to video using command:')
+                rospy.logwarn (cmdCreateVideoFile)
+                try:
+                    self.processVideoConversion[imagetopic] = subprocess.Popen(cmdCreateVideoFile, shell=True)
+                except:
+                    rospy.logerr('Exception running avconv')
                 
 
 

@@ -1,0 +1,18 @@
+<launch>
+    <!-- ========================================================== -->
+    <!-- Where to get the input for the Flylab,                     -->
+    <!--                                                            -->
+    <!-- For example, from the camera & background.png,             -->
+    <!-- or from a .bag file that contains all of those.            -->
+    <!--                                                            -->
+    <!-- ========================================================== -->
+
+    <include file="$(find rotcam)/launch/camera.launch" />
+    <include file="$(find rotcam)/launch/backgroundfile.launch" />
+    
+<!--    <include file="$(find rotcam)/launch/bag.launch" />   -->
+
+	
+</launch>
+	
+	

@@ -14,7 +14,7 @@
     <param name="tracking/queue_size_contours" type="int" value="2"/>
     
 
-    <param name="tracking/nContoursMax"					type="int" value="15"/>
+    <param name="tracking/nContoursMax"					type="int"    value="15"/>
     <param name="tracking/distanceDuplicateContour"		type="double" value="0.1"/>
     <param name="tracking/areaContourMin"				type="double" value="1.001"/>
     <param name="tracking/speedThresholdForTravel" 		type="double" value="4.0"/>
@@ -25,7 +25,8 @@
     <param name="tracking/rcFilterFlip"            		type="double" value="3.0"/>
 
 
-    <node pkg="tracking" type="ContourGenerator.py" name="ContourGenerator" />
-    <node pkg="tracking" type="ContourIdentifier.py" name="ContourIdentifier" />
+    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+    <node name="ContourGenerator"  pkg="tracking" type="ContourGenerator.py" />
+    <node name="ContourIdentifier" pkg="tracking" type="ContourIdentifier.py" />
 	
 </launch>
