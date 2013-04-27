@@ -151,29 +151,23 @@ class ContourGenerator:
                       self.color_max, 
                       cv.CV_FILLED)
             
-            # Wait for the background image from a callback.
-            if self.bUseBackgroundSubtraction:
-                while (self.matBackgroundFile is None):
-                    rospy.loginfo('Waiting for background file.')
-                    rospy.sleep(0.5)
-                self.matBackground = self.matBackgroundFile
-                self.matfBackground = N.float32(self.matBackground)
-                
-            else:
-                self.matBackground = N.zeros([self.camerainfo.height, self.camerainfo.width], dtype=N.uint8)
                 
             self.initialized = True
 
 
     def ImageBackgroundFile_callback (self, image):
-        while (not self.preinit):
-            rospy.loginfo('Waiting for preinit.')
-            rospy.sleep(0.1)
-            
-        try:
-            self.matBackgroundFile = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
-        except CvBridgeError, e:
-            rospy.logwarn ('Exception converting background image from ROS to opencv:  %s' % e)
+        if (self.bUseBackgroundSubtraction):
+            while (not self.preinit):
+                rospy.loginfo('Waiting for preinit.')
+                rospy.sleep(0.1)
+                
+            try:
+                self.matBackground = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
+            except CvBridgeError, e:
+                rospy.logwarn ('Exception converting background image from ROS to opencv:  %s' % e)
+                self.matBackground = None
+            else:
+                self.matfBackground = N.float32(self.matBackground)
         
         
     def CameraInfo_callback (self, msgCameraInfo):
@@ -472,7 +466,7 @@ class ContourGenerator:
                 self.matCamera = cv2.equalizeHist(self.matCamera)
             
             
-            if self.bUseBackgroundSubtraction:
+            if (self.bUseBackgroundSubtraction) and (self.matBackground is not None):
                 # Update the background.
                 #rospy.logwarn('types: %s' % [type(N.float32(self.matCamera)), type(self.matfBackground), type(self.alphaBackground)])
                 self.alphaBackground = rospy.get_param('tracking/alphaBackground', 0.01) # Alpha value for moving average background.
@@ -529,7 +523,7 @@ class ContourGenerator:
                     rospy.logwarn ('Exception %s' % e)
             
             # Publish background image
-            if (self.pubImageBackground.get_num_connections() > 0) and (self.bUseBackgroundSubtraction):
+            if (self.pubImageBackground.get_num_connections() > 0) and (self.bUseBackgroundSubtraction) and (self.matBackground is not None):
                 try:
                     image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), "passthrough")
                     image2.header.stamp = image.header.stamp
