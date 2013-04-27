@@ -392,22 +392,21 @@ class Fly:
         
     # Rotate the image to 0 degrees.                    
     def RegisterImageRoi(self, npRoi):
+        npRoiReg = npRoi
         if (self.angleContourUnwrapped is not None):
             # Center of mass.
             moments = cv2.moments(npRoi)
-            xCOM  = moments['m10']/moments['m00']
-            yCOM  = moments['m01']/moments['m00']
-            
-            # Rotate the fly image to 0-degrees.
-            angleR = self.GetResolvedAngleRaw()
-            T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, 1.0)
-            npRoiReg = cv2.warpAffine(npRoi, T, (0,0))#(self.widthRoi, self.heightRoi))
-            
-            # Super-resolution fly image.
-            self.UpdateFlySuperresolution(npRoi, moments)
-
-        else:
-            npRoiReg = npRoi
+            if (moments['m00'] != 0.0):
+                xCOM  = moments['m10']/moments['m00']
+                yCOM  = moments['m01']/moments['m00']
+                
+                # Rotate the fly image to 0-degrees.
+                angleR = self.GetResolvedAngleRaw()
+                T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, 1.0)
+                npRoiReg = cv2.warpAffine(npRoi, T, (0,0))#(self.widthRoi, self.heightRoi))
+                
+                # Super-resolution fly image.
+                self.UpdateFlySuperresolution(npRoi, moments)
             
         return npRoiReg
         
