@@ -7,9 +7,11 @@
     <!--                                                            -->
     <!-- ========================================================== -->
 
+    <!-- Get input from the camera, and from the background image file. -->
     <include file="$(find rotcam)/launch/camera.launch" />
-    <include file="$(find rotcam)/launch/backgroundfile.launch" />
+    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
     
+    <!-- Get input from a pre-recorded bag file. -->
 <!--    <include file="$(find rotcam)/launch/bag.launch" />   -->
 
 	
