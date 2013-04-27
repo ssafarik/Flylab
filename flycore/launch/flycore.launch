@@ -1,6 +1,6 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- FLYCORE:  Required Nodes for Flylab.                     -->
+	<!-- FLYCORE:  Required Nodes for Flylab.                       -->
     <!--                                                            -->
     <!-- Don't launch this file directly.                           -->
     <!-- Include this file in your main launch file.                -->
