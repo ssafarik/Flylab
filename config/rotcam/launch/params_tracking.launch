@@ -6,4 +6,6 @@
   <param name="tracking/speedThresholdForTravel"    type="double" value="1.0"/>
   <param name="tracking/areaContourMin"             type="double" value="10"/>
 
+  <param name="camera/image_background2/compressed/format" type="string" value="png"/>
+  
 </launch>

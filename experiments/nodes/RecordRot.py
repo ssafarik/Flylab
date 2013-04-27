@@ -27,7 +27,8 @@ class Experiment():
         
         self.experimentparams.save.filenamebase = "rotcam"
         self.experimentparams.save.arenastate = True
-        self.experimentparams.save.video = True
+        self.experimentparams.save.images = False
+        self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.tracking.exclusionzones.enabled = False

@@ -14,7 +14,7 @@
     <include file="$(find flybowls)/launch/rotbowl_24mm.launch" /> 
 
     <include file="$(find rotcam)/launch/camera.launch" />
-	
+	<node name="republish_bg" pkg="image_transport" type="republish" args="raw in:=camera/image_background out:=camera/image_background2" />
 </launch>
 	
 	
