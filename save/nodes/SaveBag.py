@@ -17,13 +17,6 @@ from flycore.msg import MsgFrameState
 from experiment_srvs.srv import Trigger, ExperimentParams
 
 
-def Chdir(dir):
-    try:
-        os.chdir(dir)
-    except (OSError):
-        os.mkdir(dir)
-        os.chdir(dir)
-
 
 ###############################################################################
 # Save() is a ROS node.  It saves Image messages from a list of topics to image files (.png, .bmp, etc).
@@ -34,15 +27,19 @@ def Chdir(dir):
 class SaveBag:
     def __init__(self):
         self.initialized = False
-        self.dirWorking_base = os.path.expanduser("~/FlylabData")
-        Chdir(self.dirWorking_base)
 
         # Create new directory each day
-        self.dirRelative = time.strftime("%Y_%m_%d")
-        self.dirWorking = self.dirWorking_base + "/" + self.dirRelative
-        Chdir(self.dirWorking)
+        self.dirBase = os.path.expanduser('~/FlylabData')
+        self.dirBag = self.dirBase + '/' + time.strftime('%Y_%m_%d')
 
-        self.filename = None
+        # Make sure path exists.
+        try:
+            os.makedirs(self.dirBag)
+        except OSError:
+            pass
+
+
+        self.filenameBag = None
         self.fid = None
         self.bSaveBag = False
         self.bSaveOnlyWhileTriggered = False # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
@@ -94,8 +91,14 @@ class SaveBag:
         
         if (self.paramsSave.bag):                
             # Get the directory:  dirBag = 'FlylabData/YYYY_MM_DD'
-            self.dirBase = os.path.expanduser("~/FlylabData")
-            self.dirBag = self.dirBase + "/" + time.strftime("%Y_%m_%d")
+            self.dirBag = self.dirBase + '/' + time.strftime('%Y_%m_%d')
+
+            # Make sure path exists.
+            try:
+                os.makedirs(self.dirBag)
+            except OSError:
+                pass
+            
             self.filenameBag = '%s%s.bag' % (self.paramsSave.filenamebase, self.paramsSave.timestamp) 
     
         

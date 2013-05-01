@@ -17,13 +17,6 @@ from flycore.msg import MsgFrameState
 from experiment_srvs.srv import Trigger, ExperimentParams
 
 
-def Chdir(dir):
-    try:
-        os.chdir(dir)
-    except (OSError):
-        os.mkdir(dir)
-        os.chdir(dir)
-
 
 ###############################################################################
 # Save() is a ROS node.  It saves Image messages from a list of topics to image files (.png, .bmp, etc).
@@ -34,13 +27,18 @@ def Chdir(dir):
 class SaveImages:
     def __init__(self):
         self.initialized = False
-        self.dirWorking_base = os.path.expanduser("~/FlylabData")
-        Chdir(self.dirWorking_base)
 
         # Create new directory each day
-        self.dirRelative = time.strftime("%Y_%m_%d")
-        self.dirWorking = self.dirWorking_base + "/" + self.dirRelative
-        Chdir(self.dirWorking)
+        self.dirBase = os.path.expanduser("~/FlylabData")
+        self.dirWorking = self.dirBase + "/" + time.strftime("%Y_%m_%d")
+
+        # Make sure dir exists.
+        try:
+            os.makedirs(self.dirWorking)
+        except OSError:
+            pass
+        
+
 
         self.fileErrors = open('/dev/null', 'w')
 
@@ -59,7 +57,7 @@ class SaveImages:
 
         # All the per-topic stuff.
         self.subImage = {}          # All the subscriptions.
-        self.filenameVideo = {}     # The video filename of each imagetopic.
+        self.fullpathVideo_dict = {}     # The video filename of each imagetopic.
         self.dirFrames = {}         # The directory of each imagetopic.
         self.iFrame = {}            # The frame counter for each imagetopic.
         self.processVideoConversion = {}
@@ -114,17 +112,21 @@ class SaveImages:
         self.bSaveOnlyWhileTriggered = self.paramsSave.onlyWhileTriggered
         
         if (self.paramsSave.png):                
-            # Go to the directory:  dirVideo = 'FlylabData/YYYY_MM_DD'
-            self.dirBase = os.path.expanduser("~/FlylabData")
-            Chdir(self.dirBase)
-            self.dirVideo = self.dirBase + "/" + time.strftime("%Y_%m_%d")
-            Chdir(self.dirVideo)
+            # Get the directory:  dirWorking = '~/FlylabData/YYYY_MM_DD'
+            self.dirWorking = self.dirBase + "/" + time.strftime("%Y_%m_%d")
+            
+            # Make sure dir exists.
+            try:
+                os.makedirs(self.dirWorking)
+            except OSError:
+                pass
+
                 
             # Initialize vars for each imagetopic.
-            # Make a subdir and video filename for each timestamped imagetopic:  dirFrames['image_raw'] = 'test20130418131415_camera_image_raw'
+            # Make a subdir and video filename for each timestamped imagetopic:  dirFrames['image_raw'] = '/home/user/FlylabData/YYYY_MM_DD/test20130418131415_camera_image_raw'
             for (imagetopic,value) in self.subImage.iteritems():
-                self.dirFrames[imagetopic] = self.paramsSave.filenamebase + self.paramsSave.timestamp + '_' + imagetopic.replace('/','_')
-                self.filenameVideo[imagetopic] = "%s/%s.mov" % (self.dirVideo, self.dirFrames[imagetopic]) 
+                self.dirFrames[imagetopic] = self.dirWorking + '/' + self.paramsSave.filenamebase + self.paramsSave.timestamp + '_' + imagetopic.replace('/','_')
+                self.fullpathVideo_dict[imagetopic] = "%s/%s.mov" % (self.dirWorking, self.dirFrames[imagetopic]) 
                 self.iFrame[imagetopic] = 0
     
                 try:
@@ -193,11 +195,11 @@ class SaveImages:
 
             
         # If there are videos to make, then make them.
-        for (imagetopic,filenameVideo) in self.filenameVideo.iteritems():
-            self.WriteVideoFromFrames(filenameVideo, imagetopic)
+        for (imagetopic,fullpathVideo) in self.fullpathVideo_dict.iteritems():
+            self.WriteVideoFromFrames(fullpathVideo, imagetopic)
             self.iFrame[imagetopic] = 0
             
-        self.filenameVideo = {}
+        self.fullpathVideo_dict = {}
                 
                 
         return True
@@ -244,10 +246,10 @@ class SaveImages:
             self.iFrame[imagetopic] += 1
 
 
-    def WriteVideoFromFrames(self, filenameVideo, imagetopic):
+    def WriteVideoFromFrames(self, fullpathVideo, imagetopic):
         with self.lockVideo:
             if (imagetopic in self.dirFrames):
-                cmdCreateVideoFile = 'avconv -r 60 -i %s/%%06d.%s -same_quant -r 60 %s' % (self.dirFrames[imagetopic], self.imageext, filenameVideo)
+                cmdCreateVideoFile = 'avconv -r 60 -i %s/%%06d.%s -same_quant -r 60 %s' % (self.dirFrames[imagetopic], self.imageext, fullpathVideo)
                 rospy.logwarn('Converting images to video using command:')
                 rospy.logwarn (cmdCreateVideoFile)
                 try:
