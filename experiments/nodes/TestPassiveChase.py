@@ -28,7 +28,7 @@ class ExperimentPassiveChase():
         self.experimentparams.save.filenamebase = "testpassivechase"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
-        self.experimentparams.save.png = False
+        self.experimentparams.save.mov = False
         self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.tracking.exclusionzones.enabled = False

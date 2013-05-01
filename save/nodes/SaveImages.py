@@ -56,7 +56,7 @@ class SaveImages:
         self.paramsSave = None
 
         # All the per-topic stuff.
-        self.subImage = {}          # All the subscriptions.
+        self.subImage_dict = {}          # All the subscriptions.
         self.fullpathVideo_dict = {}     # The video filename of each imagetopic.
         self.dirFrames = {}         # The directory of each imagetopic.
         self.iFrame = {}            # The frame counter for each imagetopic.
@@ -88,7 +88,7 @@ class SaveImages:
         
         for imagetopic in self.paramsSave.imagetopic_list:
             rospy.loginfo('Subscribing to %s' % imagetopic)
-            self.subImage[imagetopic] = rospy.Subscriber(imagetopic, Image, self.Image_callback, callback_args=imagetopic)
+            self.subImage_dict[imagetopic] = rospy.Subscriber(imagetopic, Image, self.Image_callback, callback_args=imagetopic)
 
         return True
 
@@ -111,7 +111,7 @@ class SaveImages:
         self.paramsSave = experimentparams.save
         self.bSaveOnlyWhileTriggered = self.paramsSave.onlyWhileTriggered
         
-        if (self.paramsSave.png):                
+        if (self.paramsSave.mov):                
             # Get the directory:  dirWorking = '~/FlylabData/YYYY_MM_DD'
             self.dirWorking = self.dirBase + '/' + time.strftime('%Y_%m_%d')
             
@@ -123,8 +123,8 @@ class SaveImages:
 
                 
             # Initialize vars for each imagetopic.
-            # Make a subdir and video filename for each timestamped imagetopic:  dirFrames['image_raw'] = '/home/user/FlylabData/YYYY_MM_DD/test20130418131415_camera_image_raw'
-            for (imagetopic,value) in self.subImage.iteritems():
+            # Make a subdir and video filename for each timestamped imagetopic:  dirFrames['camera/image_raw'] = '/home/user/FlylabData/YYYY_MM_DD/test20130418131415_camera_image_raw'
+            for (imagetopic,value) in self.subImage_dict.iteritems():
                 self.dirFrames[imagetopic] = self.dirWorking + '/' + self.paramsSave.filenamebase + self.paramsSave.timestamp + '_' + imagetopic.replace('/','_')
                 self.fullpathVideo_dict[imagetopic] = '%s.mov' % (self.dirFrames[imagetopic]) 
                 self.iFrame[imagetopic] = 0
@@ -137,7 +137,7 @@ class SaveImages:
                 
             # Should we be saving?
             bSaveImagesPrev = self.bSaveImages
-            if (self.paramsSave.png) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
+            if (self.paramsSave.mov) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
                 self.bSaveImages = True
             else:
                 self.bSaveImages = False
@@ -163,7 +163,7 @@ class SaveImages:
             
         # Should we be saving?
         bSaveImagesPrev = self.bSaveImages
-        if (self.paramsSave.png) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
+        if (self.paramsSave.mov) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
             self.bSaveImages = True
         else:
             self.bSaveImages = False
@@ -184,7 +184,7 @@ class SaveImages:
 
         # Should we be saving?
         bSaveImagesPrev = self.bSaveImages
-        if (self.paramsSave.png) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
+        if (self.paramsSave.mov) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
             self.bSaveImages = True
         else:
             self.bSaveImages = False
@@ -199,6 +199,7 @@ class SaveImages:
             self.WriteVideoFromFrames(fullpathVideo, imagetopic)
             self.iFrame[imagetopic] = 0
             
+        
         self.fullpathVideo_dict = {}
                 
                 
@@ -228,16 +229,6 @@ class SaveImages:
         return imagenames
     
 
-    def DeleteFrameFiles(self):
-        #try:
-        #    rospy.logwarn('Deleting frame files.')
-        #    subprocess.call('rm '+self.dirFrames+'/*.png', shell=True)
-        #except OSError:
-        #    pass
-        pass
-        
-
-
     def WriteImageFile(self, matImage, imagetopic):
         if (imagetopic in self.dirFrames):
             filenameImage = self.dirFrames[imagetopic]+'/{num:06d}.{ext:s}'.format(num=self.iFrame[imagetopic], ext=self.imageext)
@@ -249,7 +240,8 @@ class SaveImages:
     def WriteVideoFromFrames(self, fullpathVideo, imagetopic):
         with self.lockVideo:
             if (imagetopic in self.dirFrames):
-                cmdCreateVideoFile = 'avconv -r 60 -i %s/%%06d.%s -same_quant -r 60 %s' % (self.dirFrames[imagetopic], self.imageext, fullpathVideo)
+                # Run avconv, and then remove all the png files.
+                cmdCreateVideoFile = 'avconv -r 60 -i %s/%%06d.%s -same_quant -r 60 %s && rm -rf %s' % (self.dirFrames[imagetopic], self.imageext, fullpathVideo, self.dirFrames[imagetopic])
                 rospy.logwarn('Converting images to video using command:')
                 rospy.logwarn (cmdCreateVideoFile)
                 try:

@@ -28,7 +28,7 @@ class ExperimentRegressiveMotion():
         self.experimentparams.save.filenamebase = "regress"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
-        self.experimentparams.save.png = False
+        self.experimentparams.save.mov = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
