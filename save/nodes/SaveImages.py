@@ -29,8 +29,8 @@ class SaveImages:
         self.initialized = False
 
         # Create new directory each day
-        self.dirBase = os.path.expanduser("~/FlylabData")
-        self.dirWorking = self.dirBase + "/" + time.strftime("%Y_%m_%d")
+        self.dirBase = os.path.expanduser('~/FlylabData')
+        self.dirWorking = self.dirBase + '/' + time.strftime('%Y_%m_%d')
 
         # Make sure dir exists.
         try:
@@ -113,7 +113,7 @@ class SaveImages:
         
         if (self.paramsSave.png):                
             # Get the directory:  dirWorking = '~/FlylabData/YYYY_MM_DD'
-            self.dirWorking = self.dirBase + "/" + time.strftime("%Y_%m_%d")
+            self.dirWorking = self.dirBase + '/' + time.strftime('%Y_%m_%d')
             
             # Make sure dir exists.
             try:
@@ -126,7 +126,7 @@ class SaveImages:
             # Make a subdir and video filename for each timestamped imagetopic:  dirFrames['image_raw'] = '/home/user/FlylabData/YYYY_MM_DD/test20130418131415_camera_image_raw'
             for (imagetopic,value) in self.subImage.iteritems():
                 self.dirFrames[imagetopic] = self.dirWorking + '/' + self.paramsSave.filenamebase + self.paramsSave.timestamp + '_' + imagetopic.replace('/','_')
-                self.fullpathVideo_dict[imagetopic] = "%s/%s.mov" % (self.dirWorking, self.dirFrames[imagetopic]) 
+                self.fullpathVideo_dict[imagetopic] = '%s.mov' % (self.dirFrames[imagetopic]) 
                 self.iFrame[imagetopic] = 0
     
                 try:
@@ -210,7 +210,7 @@ class SaveImages:
             with self.lockImage:
                 # Convert ROS image to OpenCV image
                 try:
-                  matImage = cv.GetImage(self.cvbridge.imgmsg_to_cv(image, "passthrough"))
+                  matImage = cv.GetImage(self.cvbridge.imgmsg_to_cv(image, 'passthrough'))
                 except CvBridgeError, e:
                   print e
                 # cv.CvtColor(matImage, self.im_display, cv.CV_GRAY2RGB)
@@ -240,7 +240,7 @@ class SaveImages:
 
     def WriteImageFile(self, matImage, imagetopic):
         if (imagetopic in self.dirFrames):
-            filenameImage = self.dirFrames[imagetopic]+"/{num:06d}.{ext:s}".format(num=self.iFrame[imagetopic], ext=self.imageext)
+            filenameImage = self.dirFrames[imagetopic]+'/{num:06d}.{ext:s}'.format(num=self.iFrame[imagetopic], ext=self.imageext)
     
             cv.SaveImage(filenameImage, matImage)
             self.iFrame[imagetopic] += 1
