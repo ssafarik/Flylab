@@ -401,7 +401,7 @@ class SaveArenastate:
         with self.lockArenastate:
             if (self.fid is not None) and (not self.fid.closed):
                 self.fid.close()
-                rospy.logwarn('SA logfile close()')
+                rospy.logwarn('Closed csv file.')
 
         
 
@@ -446,7 +446,7 @@ class SaveArenastate:
                 with self.lockArenastate:
                     if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
                         self.fid.close()
-                        rospy.logwarn('SA logfile close()')
+                        rospy.logwarn('Closed csv file.')
 
             
         return self.bTriggered
@@ -491,7 +491,7 @@ class SaveArenastate:
             with self.lockArenastate:
                 if (self.fid is not None) and (not self.fid.closed):
                     self.fid.close()
-                    rospy.logwarn('SA logfile close()')
+                    rospy.logwarn('Closed csv file.')
                     
 
         return True
@@ -772,7 +772,7 @@ class SaveArenastate:
 
         with self.lockArenastate:
             self.fid = open(self.filename, 'w')
-            rospy.logwarn('SA logfile open(%s)' % self.filename)
+            rospy.logwarn('Saving csv file:  %s' % self.filename)
 
             self.fid.write(self.headerVersionFileTxt)
             self.fid.write(headerVersionFile)

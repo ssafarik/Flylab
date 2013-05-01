@@ -71,7 +71,6 @@ class SaveBag:
 
     # Service callback to perform initialization that requires experimentparams, e.g. subscribing to image topics.
     def Init_callback(self, experimentparams):
-        rospy.logwarn('Init_callback')
         self.paramsSave = experimentparams.save
         
         return True
@@ -87,7 +86,6 @@ class SaveBag:
     # TrialStart_callback()
     # 
     def TrialStart_callback(self, experimentparams):
-        rospy.logwarn('TrialStart_callback')
         while (not self.initialized):
             rospy.sleep(0.5)
             
@@ -126,7 +124,6 @@ class SaveBag:
     #    Set the trigger state, and detect edges.
     #
     def Trigger_callback(self, reqTrigger):
-        rospy.logwarn('Trigger_callback %s' % reqTrigger.triggered)
         while (not self.initialized):
             rospy.sleep(0.5)
 
@@ -158,7 +155,6 @@ class SaveBag:
     # TrialEnd_callback()
     # 
     def TrialEnd_callback(self, experimentparams):
-        rospy.logwarn('TrialEnd_callback')
         while (not self.initialized):
             rospy.sleep(0.5)
 
@@ -184,6 +180,7 @@ class SaveBag:
 
     def StartBag(self):
         if (self.processRosbag is None):
+            rospy.logwarn('Saving bag file: %s' % (self.dirBag+'/'+self.filenameBag))
             topic1 = 'camera/image_rect/compressed'
             topic2 = 'camera/image_backgroundinit'
             topic3 = 'camera/camera_info'
@@ -196,6 +193,7 @@ class SaveBag:
             self.processRosbag.send_signal(subprocess.signal.SIGINT)
             self.processRosbag.wait()
             self.processRosbag = None
+            rospy.logwarn('Closed bag file.')
                 
 
     def Main(self):
