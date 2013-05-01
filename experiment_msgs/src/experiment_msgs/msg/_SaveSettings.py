@@ -6,20 +6,20 @@ import struct
 
 
 class SaveSettings(genpy.Message):
-  _md5sum = "8298fd172f8d8390bbb47f3e831e2d08"
+  _md5sum = "9f42134d01c98b81874175e6d4923a2d"
   _type = "experiment_msgs/SaveSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """string   filenamebase           # The first part of the filename, before the timestamp, e.g. 'test'.
 string   timestamp              # The timestamp in string form, e.g. '20130309031415'.  This field is set by the code.
 bool     csv                    # Should we save the Arenastate to .csv?
 bool     bag                    # Should we save system input to .bag?  (i.e. camera/image_rect, etc)
-bool     png                    # Should we save image topics to .png files?
-bool     onlyWhileTriggered     # Save all the trial data, or just from trial-start to trial-end?
+bool     mov                    # Should we make an .mov file from the listed image topics?
 string[] imagetopic_list        # List of image topics to save to .png files (if saving png).
+bool     onlyWhileTriggered     # Save all the trial data, or just from trial-start to trial-end?
 
 """
-  __slots__ = ['filenamebase','timestamp','csv','bag','png','onlyWhileTriggered','imagetopic_list']
-  _slot_types = ['string','string','bool','bool','bool','bool','string[]']
+  __slots__ = ['filenamebase','timestamp','csv','bag','mov','imagetopic_list','onlyWhileTriggered']
+  _slot_types = ['string','string','bool','bool','bool','string[]','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -29,7 +29,7 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       filenamebase,timestamp,csv,bag,png,onlyWhileTriggered,imagetopic_list
+       filenamebase,timestamp,csv,bag,mov,imagetopic_list,onlyWhileTriggered
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -46,20 +46,20 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
         self.csv = False
       if self.bag is None:
         self.bag = False
-      if self.png is None:
-        self.png = False
-      if self.onlyWhileTriggered is None:
-        self.onlyWhileTriggered = False
+      if self.mov is None:
+        self.mov = False
       if self.imagetopic_list is None:
         self.imagetopic_list = []
+      if self.onlyWhileTriggered is None:
+        self.onlyWhileTriggered = False
     else:
       self.filenamebase = ''
       self.timestamp = ''
       self.csv = False
       self.bag = False
-      self.png = False
-      self.onlyWhileTriggered = False
+      self.mov = False
       self.imagetopic_list = []
+      self.onlyWhileTriggered = False
 
   def _get_types(self):
     """
@@ -86,7 +86,7 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_4B.pack(_x.csv, _x.bag, _x.png, _x.onlyWhileTriggered))
+      buff.write(_struct_3B.pack(_x.csv, _x.bag, _x.mov))
       length = len(self.imagetopic_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.imagetopic_list:
@@ -95,6 +95,7 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
           val1 = val1.encode('utf-8')
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
+      buff.write(_struct_B.pack(self.onlyWhileTriggered))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -125,12 +126,11 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
         self.timestamp = str[start:end]
       _x = self
       start = end
-      end += 4
-      (_x.csv, _x.bag, _x.png, _x.onlyWhileTriggered,) = _struct_4B.unpack(str[start:end])
+      end += 3
+      (_x.csv, _x.bag, _x.mov,) = _struct_3B.unpack(str[start:end])
       self.csv = bool(self.csv)
       self.bag = bool(self.bag)
-      self.png = bool(self.png)
-      self.onlyWhileTriggered = bool(self.onlyWhileTriggered)
+      self.mov = bool(self.mov)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -146,6 +146,10 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
         else:
           val1 = str[start:end]
         self.imagetopic_list.append(val1)
+      start = end
+      end += 1
+      (self.onlyWhileTriggered,) = _struct_B.unpack(str[start:end])
+      self.onlyWhileTriggered = bool(self.onlyWhileTriggered)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -171,7 +175,7 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_4B.pack(_x.csv, _x.bag, _x.png, _x.onlyWhileTriggered))
+      buff.write(_struct_3B.pack(_x.csv, _x.bag, _x.mov))
       length = len(self.imagetopic_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.imagetopic_list:
@@ -180,6 +184,7 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
           val1 = val1.encode('utf-8')
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
+      buff.write(_struct_B.pack(self.onlyWhileTriggered))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -211,12 +216,11 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
         self.timestamp = str[start:end]
       _x = self
       start = end
-      end += 4
-      (_x.csv, _x.bag, _x.png, _x.onlyWhileTriggered,) = _struct_4B.unpack(str[start:end])
+      end += 3
+      (_x.csv, _x.bag, _x.mov,) = _struct_3B.unpack(str[start:end])
       self.csv = bool(self.csv)
       self.bag = bool(self.bag)
-      self.png = bool(self.png)
-      self.onlyWhileTriggered = bool(self.onlyWhileTriggered)
+      self.mov = bool(self.mov)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -232,9 +236,14 @@ string[] imagetopic_list        # List of image topics to save to .png files (if
         else:
           val1 = str[start:end]
         self.imagetopic_list.append(val1)
+      start = end
+      end += 1
+      (self.onlyWhileTriggered,) = _struct_B.unpack(str[start:end])
+      self.onlyWhileTriggered = bool(self.onlyWhileTriggered)
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
 
 _struct_I = genpy.struct_I
-_struct_4B = struct.Struct("<4B")
+_struct_3B = struct.Struct("<3B")
+_struct_B = struct.Struct("<B")

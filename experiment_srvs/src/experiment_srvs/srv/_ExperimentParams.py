@@ -10,7 +10,7 @@ import patterngen.msg
 import experiment_msgs.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "3331b34a75cc6f16d49659faff65e342"
+  _md5sum = "fae670538b064f3daf85938836ee9e06"
   _type = "experiment_srvs/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """experiment_msgs/ExperimentSettings  experiment
@@ -33,9 +33,9 @@ string   filenamebase           # The first part of the filename, before the tim
 string   timestamp              # The timestamp in string form, e.g. '20130309031415'.  This field is set by the code.
 bool     csv                    # Should we save the Arenastate to .csv?
 bool     bag                    # Should we save system input to .bag?  (i.e. camera/image_rect, etc)
-bool     png                    # Should we save image topics to .png files?
-bool     onlyWhileTriggered     # Save all the trial data, or just from trial-start to trial-end?
+bool     mov                    # Should we make an .mov file from the listed image topics?
 string[] imagetopic_list        # List of image topics to save to .png files (if saving png).
+bool     onlyWhileTriggered     # Save all the trial data, or just from trial-start to trial-end?
 
 ================================================================================
 MSG: flycore/TrackingCommand
@@ -256,7 +256,7 @@ float64 			       wait
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_4B.pack(_x.save.csv, _x.save.bag, _x.save.png, _x.save.onlyWhileTriggered))
+      buff.write(_struct_3B.pack(_x.save.csv, _x.save.bag, _x.save.mov))
       length = len(self.save.imagetopic_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.save.imagetopic_list:
@@ -265,6 +265,7 @@ float64 			       wait
           val1 = val1.encode('utf-8')
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
+      buff.write(_struct_B.pack(self.save.onlyWhileTriggered))
       _x = self.tracking.command
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -688,12 +689,11 @@ float64 			       wait
         self.save.timestamp = str[start:end]
       _x = self
       start = end
-      end += 4
-      (_x.save.csv, _x.save.bag, _x.save.png, _x.save.onlyWhileTriggered,) = _struct_4B.unpack(str[start:end])
+      end += 3
+      (_x.save.csv, _x.save.bag, _x.save.mov,) = _struct_3B.unpack(str[start:end])
       self.save.csv = bool(self.save.csv)
       self.save.bag = bool(self.save.bag)
-      self.save.png = bool(self.save.png)
-      self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
+      self.save.mov = bool(self.save.mov)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -709,6 +709,10 @@ float64 			       wait
         else:
           val1 = str[start:end]
         self.save.imagetopic_list.append(val1)
+      start = end
+      end += 1
+      (self.save.onlyWhileTriggered,) = _struct_B.unpack(str[start:end])
+      self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -1393,7 +1397,7 @@ float64 			       wait
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
-      buff.write(_struct_4B.pack(_x.save.csv, _x.save.bag, _x.save.png, _x.save.onlyWhileTriggered))
+      buff.write(_struct_3B.pack(_x.save.csv, _x.save.bag, _x.save.mov))
       length = len(self.save.imagetopic_list)
       buff.write(_struct_I.pack(length))
       for val1 in self.save.imagetopic_list:
@@ -1402,6 +1406,7 @@ float64 			       wait
           val1 = val1.encode('utf-8')
           length = len(val1)
         buff.write(struct.pack('<I%ss'%length, length, val1))
+      buff.write(_struct_B.pack(self.save.onlyWhileTriggered))
       _x = self.tracking.command
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -1826,12 +1831,11 @@ float64 			       wait
         self.save.timestamp = str[start:end]
       _x = self
       start = end
-      end += 4
-      (_x.save.csv, _x.save.bag, _x.save.png, _x.save.onlyWhileTriggered,) = _struct_4B.unpack(str[start:end])
+      end += 3
+      (_x.save.csv, _x.save.bag, _x.save.mov,) = _struct_3B.unpack(str[start:end])
       self.save.csv = bool(self.save.csv)
       self.save.bag = bool(self.save.bag)
-      self.save.png = bool(self.save.png)
-      self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
+      self.save.mov = bool(self.save.mov)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -1847,6 +1851,10 @@ float64 			       wait
         else:
           val1 = str[start:end]
         self.save.imagetopic_list.append(val1)
+      start = end
+      end += 1
+      (self.save.onlyWhileTriggered,) = _struct_B.unpack(str[start:end])
+      self.save.onlyWhileTriggered = bool(self.save.onlyWhileTriggered)
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -2505,7 +2513,6 @@ float64 			       wait
 _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
-_struct_2di = struct.Struct("<2di")
 _struct_BdiB = struct.Struct("<BdiB")
 _struct_dB = struct.Struct("<dB")
 _struct_10d = struct.Struct("<10d")
@@ -2513,8 +2520,9 @@ _struct_2d = struct.Struct("<2d")
 _struct_3dBdi2B4dB = struct.Struct("<3dBdi2B4dB")
 _struct_B3dB = struct.Struct("<B3dB")
 _struct_B3d = struct.Struct("<B3d")
+_struct_3B = struct.Struct("<3B")
 _struct_i3d = struct.Struct("<i3d")
-_struct_4B = struct.Struct("<4B")
+_struct_2di = struct.Struct("<2di")
 _struct_2i = struct.Struct("<2i")
 _struct_3d = struct.Struct("<3d")
 """autogenerated by genpy from experiment_srvs/ExperimentParamsResponse.msg. Do not edit."""
@@ -2621,6 +2629,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiment_srvs/ExperimentParams'
-  _md5sum = 'ec9bdd3adb5f2f77c1d50601b80c11c5'
+  _md5sum = 'caec98a37acd2638098435d95ea51cca'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse
