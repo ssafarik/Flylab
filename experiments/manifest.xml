@@ -18,6 +18,7 @@
   <depend package="visualization_msgs"/>
 
   <depend package="config" />
+  <depend package="experiment_srvs"/>
   <depend package="flycore" />
   <depend package="galvodirector" />
   <depend package="LEDPanels" />

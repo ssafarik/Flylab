@@ -13,7 +13,7 @@
   <depend package="std_msgs"/>
   <depend package="geometry_msgs"/>
   
-  <depend package="experiments"/>
+  <depend package="experiment_srvs"/>
   <depend package="flycore"/>
   <depend package="tracking"/>
   <depend package="patterngen"/>

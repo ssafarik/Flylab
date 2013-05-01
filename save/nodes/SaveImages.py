@@ -14,7 +14,7 @@ import cv
 from cv_bridge import CvBridge, CvBridgeError
 
 from flycore.msg import MsgFrameState
-from experiments.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams
 
 
 def Chdir(dir):
@@ -55,7 +55,7 @@ class SaveImages:
         self.bSaveOnlyWhileTriggered = False # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
         self.bTriggered = False
         #self.imagetopic = rospy.get_param('save/imagetopic', 'camera/image_rect')
-        self.save = None
+        self.paramsSave = None
 
         # All the per-topic stuff.
         self.subImage = {}          # All the subscriptions.
@@ -86,9 +86,9 @@ class SaveImages:
 
     # Service callback to perform initialization that requires experimentparams, e.g. subscribing to image topics.
     def Init_callback(self, experimentparams):
-        self.save = experimentparams.save
+        self.paramsSave = experimentparams.save
         
-        for imagetopic in self.save.imagetopic_list:
+        for imagetopic in self.paramsSave.imagetopic_list:
             rospy.loginfo('Subscribing to %s' % imagetopic)
             self.subImage[imagetopic] = rospy.Subscriber(imagetopic, Image, self.Image_callback, callback_args=imagetopic)
 
@@ -107,14 +107,13 @@ class SaveImages:
     # TrialStart_callback()
     # 
     def TrialStart_callback(self, experimentparams):
-        self.bSaveImages = False
         while (not self.initialized):
             rospy.sleep(0.5)
             
-        self.save = experimentparams.save
-        self.bSaveOnlyWhileTriggered = self.save.onlyWhileTriggered
+        self.paramsSave = experimentparams.save
+        self.bSaveOnlyWhileTriggered = self.paramsSave.onlyWhileTriggered
         
-        if (self.save.images):                
+        if (self.paramsSave.png):                
             # Go to the directory:  dirVideo = 'FlylabData/YYYY_MM_DD'
             self.dirBase = os.path.expanduser("~/FlylabData")
             Chdir(self.dirBase)
@@ -124,7 +123,7 @@ class SaveImages:
             # Initialize vars for each imagetopic.
             # Make a subdir and video filename for each timestamped imagetopic:  dirFrames['image_raw'] = 'test20130418131415_camera_image_raw'
             for (imagetopic,value) in self.subImage.iteritems():
-                self.dirFrames[imagetopic] = self.save.filenamebasestamped+'_'+imagetopic.replace('/','_')
+                self.dirFrames[imagetopic] = self.paramsSave.filenamebase + self.paramsSave.timestamp + '_' + imagetopic.replace('/','_')
                 self.filenameVideo[imagetopic] = "%s/%s.mov" % (self.dirVideo, self.dirFrames[imagetopic]) 
                 self.iFrame[imagetopic] = 0
     
@@ -134,10 +133,16 @@ class SaveImages:
                     rospy.logwarn ('Cannot create directory %s: %s' % (self.dirFrames[imagetopic],e))
         
                 
-        if (self.save.images) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
-            self.bSaveImages = True
-        else:
-            self.bSaveImages = False
+            # Should we be saving?
+            bSaveImagesPrev = self.bSaveImages
+            if (self.paramsSave.png) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
+                self.bSaveImages = True
+            else:
+                self.bSaveImages = False
+    
+            # Edge detection for save start/stop.            
+            bRisingEdge = (not bSaveImagesPrev) and (self.bSaveImages)
+            bFallingEdge = (bSaveImagesPrev) and (not self.bSaveImages)
             
 
             
@@ -148,25 +153,23 @@ class SaveImages:
     #    Set the trigger state, and detect edges.
     #
     def Trigger_callback(self, reqTrigger):
-        self.bSaveImages = False
         while (not self.initialized):
             rospy.sleep(0.5)
 
-        bRisingEdge = False
-        bFallingEdge = False
-        if self.bTriggered != reqTrigger.triggered:
-            self.bTriggered = reqTrigger.triggered
-            if self.bTriggered: # Rising edge.
-                bRisingEdge = True
-            else:
-                bFallingEdge = True
+        self.bTriggered = reqTrigger.triggered
 
-
-        if (self.save.images) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
+            
+        # Should we be saving?
+        bSaveImagesPrev = self.bSaveImages
+        if (self.paramsSave.png) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
             self.bSaveImages = True
         else:
             self.bSaveImages = False
-            
+
+        # Edge detection for save start/stop.            
+        bRisingEdge = (not bSaveImagesPrev) and (self.bSaveImages)
+        bFallingEdge = (bSaveImagesPrev) and (not self.bSaveImages)
+
         
         return self.bTriggered
         
@@ -174,17 +177,27 @@ class SaveImages:
     # TrialEnd_callback()
     # 
     def TrialEnd_callback(self, experimentparams):
-        self.bSaveImages = False
         while (not self.initialized):
             rospy.sleep(0.5)
 
-        if (self.save.images):
-            # If there are frame files to convert, then convert them.
-            for (imagetopic,filenameVideo) in self.filenameVideo.iteritems():
-                self.WriteVideoFromFrames(filenameVideo, imagetopic)
-                self.iFrame[imagetopic] = 0
-                
-            self.filenameVideo = {}
+        # Should we be saving?
+        bSaveImagesPrev = self.bSaveImages
+        if (self.paramsSave.png) and ((self.bSaveOnlyWhileTriggered and self.bTriggered) or (not self.bSaveOnlyWhileTriggered)):
+            self.bSaveImages = True
+        else:
+            self.bSaveImages = False
+
+        # Edge detection for save start/stop.            
+        bRisingEdge = (not bSaveImagesPrev) and (self.bSaveImages)
+        bFallingEdge = (bSaveImagesPrev) and (not self.bSaveImages)
+
+            
+        # If there are videos to make, then make them.
+        for (imagetopic,filenameVideo) in self.filenameVideo.iteritems():
+            self.WriteVideoFromFrames(filenameVideo, imagetopic)
+            self.iFrame[imagetopic] = 0
+            
+        self.filenameVideo = {}
                 
                 
         return True
@@ -234,7 +247,7 @@ class SaveImages:
     def WriteVideoFromFrames(self, filenameVideo, imagetopic):
         with self.lockVideo:
             if (imagetopic in self.dirFrames):
-                cmdCreateVideoFile = 'avconv -r 60 -i %s/%%06d.%s -r 60 %s' % (self.dirFrames[imagetopic], self.imageext, filenameVideo)
+                cmdCreateVideoFile = 'avconv -r 60 -i %s/%%06d.%s -same_quant -r 60 %s' % (self.dirFrames[imagetopic], self.imageext, filenameVideo)
                 rospy.logwarn('Converting images to video using command:')
                 rospy.logwarn (cmdCreateVideoFile)
                 try:
@@ -250,7 +263,7 @@ class SaveImages:
         
 
 if __name__ == '__main__':
-    rospy.init_node('Save', log_level=rospy.INFO)
+    rospy.init_node('SaveImages', log_level=rospy.INFO)
     saveimages = SaveImages()
     saveimages.Main()
     

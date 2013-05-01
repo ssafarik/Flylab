@@ -1,0 +1,17 @@
+<package>
+  <description brief="experiment_srvs">
+
+     experiment_srvs
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/experiment_srvs</url>
+
+  <depend package="experiment_msgs" />
+  <depend package="flycore" />
+
+</package>
+
+

@@ -20,6 +20,7 @@
   <depend package="image_transport"/> 
   <rosdep name="opencv2.3"/>
     
+  <depend package="experiment_srvs"/>
   <depend package="flycore"/>
   <depend package="arena_tf"/>
   <depend package="pythonmodules"/>

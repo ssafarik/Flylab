@@ -1,0 +1,9 @@
+experiment_msgs/ExperimentSettings  experiment
+experiment_msgs/SaveSettings        save
+flycore/TrackingCommand             tracking
+experiment_msgs/PreSettings         pre
+experiment_msgs/TrialSettings       trial
+experiment_msgs/PostSettings        post
+---
+bool 				                succeeded
+

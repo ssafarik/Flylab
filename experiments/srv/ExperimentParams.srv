@@ -1,9 +1,0 @@
-ExperimentSettings 	       experiment
-SaveSettings 		       save
-flycore/TrackingCommand    tracking
-PreSettings                pre
-TrialSettings              trial
-PostSettings               post
----
-bool 				       succeeded
-

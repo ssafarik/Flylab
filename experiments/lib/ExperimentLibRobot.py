@@ -13,8 +13,8 @@ from std_msgs.msg import Header, String
 from stage_action_server.msg import *
 from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
-from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
+from tracking.msg import ArenaState
 
 
 #######################################################################################################
