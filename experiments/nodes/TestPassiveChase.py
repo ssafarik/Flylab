@@ -29,6 +29,7 @@ class ExperimentPassiveChase():
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
+        self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.tracking.exclusionzones.enabled = False
@@ -66,8 +67,8 @@ class ExperimentPassiveChase():
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'            # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20
-        self.experimentparams.trial.robot.move.pattern.hzPoint = 50
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/40
+        self.experimentparams.trial.robot.move.pattern.hzPoint = 100
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.move.pattern.size.y = 0
@@ -109,7 +110,7 @@ class ExperimentPassiveChase():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 300
+        self.experimentparams.post.trigger.timeout = 60
 
         self.experimentparams.post.wait = 0.0
         

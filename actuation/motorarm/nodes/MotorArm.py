@@ -672,8 +672,11 @@ class MotorArm:
 
 
             # Get the command for the hardware, clipped to arena coords.
-            ptEeCommandRaw = Point(x=self.ptEeSense.x + vecPID.x,
-                                   y=self.ptEeSense.y + vecPID.y)
+#            ptEeCommandRaw = Point(x=self.ptEeSense.x + vecPID.x,
+#                                   y=self.ptEeSense.y + vecPID.y)
+            a = 0.9 #rospy.get_param('/a', 0.9)
+            ptEeCommandRaw = Point(x=(a*self.ptEeSense.x+(1-a)*self.stateVisual.pose.position.x) + vecPID.x,
+                                   y=(a*self.ptEeSense.y+(1-a)*self.stateVisual.pose.position.y) + vecPID.y)
             ptsEeCommandRaw = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
                                                          frame_id='Stage'),
                                            point=ptEeCommandRaw)
