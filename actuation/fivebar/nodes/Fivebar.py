@@ -146,7 +146,7 @@ class Fivebar:
         self.tfbx = tf.TransformBroadcaster()
 
         self.stateRef = MsgFrameState()
-        self.stateVisual = MsgFrameState()  # Visual position of the tool.
+        self.stateVisual = None #MsgFrameState(header=Header(stamp=rospy.Time.now(), frame_id='Stage'), name='Robot')  # Visual position of the tool.
         self.ptEeSense = Point(0, 0, 0)
         self.ptEeCommand = Point(0, 0, 0)  # Where to command the end-effector.
         self.vecEeError = Point(0, 0, 0)
@@ -299,6 +299,8 @@ class Fivebar:
         except tf.Exception, e:
             rospy.logwarn ('5B Exception1 transforming in TransformStateToFrame(): %s' % e)
         else:
+            stateOut.name = state.name
+            
             # Transform the pose
             poses = PoseStamped(header=state.header,
                                 pose=state.pose) 
@@ -329,7 +331,7 @@ class Fivebar:
             except tf.Exception, e:
                 rospy.logwarn ('5B Exception3 transforming in TransformStateToFrame(): %s' % e)
                 v3sOut = v3s
-            stateOut.velocity.linear = v3sOut
+            stateOut.velocity.linear = v3sOut.vector
                     
                     
             # Transform the angular velocity
@@ -341,7 +343,7 @@ class Fivebar:
             except tf.Exception, e:
                 rospy.logwarn ('5B Exception4 transforming in TransformStateToFrame(): %s' % e)
                 v3sOut = v3s
-            stateOut.velocity.angular = v3sOut
+            stateOut.velocity.angular = v3sOut.vector
                     
                     
             # Transform the speed.
@@ -693,6 +695,7 @@ class Fivebar:
     #   Updates the target command.
     #
     def SetStageState_callback(self, reqStageState):
+        #rospy.logwarn('SetStageState_callback(): %s' % reqStageState)
         while not self.initialized:
             rospy.sleep(0.5)
             
@@ -722,6 +725,7 @@ class Fivebar:
     # Take the target point from a signal generator, and set it as the tool reference.  
     # If the point falls outside the workspace, then clip it to the workspace, and return False.
     def SignalInput_callback (self, srvSignalReq):
+        #rospy.logwarn('SignalInput_callback(): %s' % srvSignalReq)
         rv = SrvSignalResponse()
         
         (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', srvSignalReq.state)
@@ -762,6 +766,7 @@ class Fivebar:
 #             self.posesContourSense = self.tfrx.transformPose('Stage', posesContour)
 #         except tf.Exception:
 #             rospy.logwarn ('5B Exception transforming to Stage frame in VisualState_callback()')
+        #rospy.logwarn('VisualState_callback: %s' % state)
         (self.stateVisual, isInArena) = self.TransformStateToFrame('Stage', state, doClipToArena=False)
         
         
@@ -811,6 +816,11 @@ class Fivebar:
 
         rvStageState = self.GetStageState()
         rospy.loginfo ('5B Calibrate_callback rvStageState=%s' % rvStageState)
+        
+        # Set zero velocity after calibration.
+#        (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', rvStageState)
+        self.stateRef = rvStageState
+
         return rvStageState
     
 
@@ -942,6 +952,7 @@ class Fivebar:
                                           lifetime=rospy.Duration(1.0))
                     self.pubMarker.publish(markerTarget)
 
+                if self.stateVisual is not None:
                     markerToolOffset = Marker(header=state.header,
                                               ns='tooloffset',
                                               id=1,
@@ -970,129 +981,138 @@ class Fivebar:
     #
     def UpdateMotorCommandFromTarget(self):
         if self.stateRef is not None:
+            #rospy.logwarn('stateRef: %s' % self.stateRef)
             # PID Gains & Parameters.
-            self.kP      = rospy.get_param('fivebar/kP', 1.0)
-            self.kI      = rospy.get_param('fivebar/kI', 0.0)
-            self.kD      = rospy.get_param('fivebar/kD', 0.0)
-            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
-            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
-            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
-            
-            self.kP *= self.kAll
-            self.kI *= self.kAll
-            self.kD *= self.kAll
+#            self.kP      = rospy.get_param('fivebar/kP', 1.0)
+#            self.kI      = rospy.get_param('fivebar/kI', 0.0)
+#            self.kD      = rospy.get_param('fivebar/kD', 0.0)
+#            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
+#            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+#            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
+#            
+#            self.kP *= self.kAll
+#            self.kI *= self.kAll
+#            self.kD *= self.kAll
             
             # The contour error.
             self.vecEeErrorPrev.x = self.vecEeError.x 
             self.vecEeErrorPrev.y = self.vecEeError.y 
             
-            self.vecEeError.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
-            self.vecEeError.y = self.stateRef.pose.position.y - self.stateVisual.pose.position.y
+            if (self.stateRef is not None) and (self.stateVisual is not None):
+                self.vecEeError.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
+                self.vecEeError.y = self.stateRef.pose.position.y - self.stateVisual.pose.position.y
+                
 
-            # PID control of the contour error.
-            self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
-            self.vecEeIError.y = self.vecEeIError.y + self.vecEeError.y
-            self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
-            self.vecEeDError.y = self.vecEeError.y - self.vecEeErrorPrev.y
-            vecPID = Point(x=self.kP*self.vecEeError.x + self.kI*self.vecEeIError.x + self.kD*self.vecEeDError.x,
-                           y=self.kP*self.vecEeError.y + self.kI*self.vecEeIError.y + self.kD*self.vecEeDError.y,
-                           z=0.0)
+                # PID control of the contour error.
+                self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
+                self.vecEeIError.y = self.vecEeIError.y + self.vecEeError.y
+                self.vecEeDError.x = self.vecEeError.x - self.vecEeErrorPrev.x
+                self.vecEeDError.y = self.vecEeError.y - self.vecEeErrorPrev.y
+                vecPID = Point(x=self.kP*self.vecEeError.x + self.kI*self.vecEeIError.x + self.kD*self.vecEeDError.x,
+                               y=self.kP*self.vecEeError.y + self.kI*self.vecEeIError.y + self.kD*self.vecEeDError.y,
+                               z=0.0)
+                
+                # Anti-windup
+                self.vecEeIErrorClipped = self.ClipPtMag (self.vecEeIError, self.maxI)
+                vecExcessI = Point(self.vecEeIError.x - self.vecEeIErrorClipped.x,
+                                   self.vecEeIError.y - self.vecEeIErrorClipped.y,
+                                   self.vecEeIError.z - self.vecEeIErrorClipped.z)
+                self.vecEeIError.x -= self.kWindup * vecExcessI.x
+                self.vecEeIError.y -= self.kWindup * vecExcessI.y
+                
+    
+    
+    
+                # Get the command for the hardware, clipped to arena coords.
+                ptEeCommandRaw = Point(x=self.ptEeSense.x + vecPID.x,
+                                       y=self.ptEeSense.y + vecPID.y)
+                ptsEeCommandRaw = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
+                                                             frame_id='Stage'),
+                                               point=ptEeCommandRaw)
+                (ptsEeCommandArena, isInArena) = self.ClipPtsToArena(ptsEeCommandRaw)
+                (ptsEeCommandReachable, isInReachable) = self.ClipPtsToReachable(ptsEeCommandRaw)
+                self.ptEeCommand = ptsEeCommandReachable.point #ptsEeCommandClipped.point
             
-            # Anti-windup
-            self.vecEeIErrorClipped = self.ClipPtMag (self.vecEeIError, self.maxI)
-            vecExcessI = Point(self.vecEeIError.x - self.vecEeIErrorClipped.x,
-                               self.vecEeIError.y - self.vecEeIErrorClipped.y,
-                               self.vecEeIError.z - self.vecEeIErrorClipped.z)
-            self.vecEeIError.x -= self.kWindup * vecExcessI.x
-            self.vecEeIError.y -= self.kWindup * vecExcessI.y
+                # Print the PID component values.
+#                magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
+#                magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
+#                magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
+#                magPID = N.linalg.norm([vecPID.x, vecPID.y])
+#                vecPIDclipped = Point(x=self.ptEeCommand.x-self.ptEeSense.x,
+#                                      y=self.ptEeCommand.y-self.ptEeSense.y)
+#                rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
             
-
-
-
-            # Get the command for the hardware, clipped to arena coords.
-            ptEeCommandRaw = Point(x=self.ptEeSense.x + vecPID.x,
-                                   y=self.ptEeSense.y + vecPID.y)
-            ptsEeCommandRaw = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
-                                                         frame_id='Stage'),
-                                           point=ptEeCommandRaw)
-            (ptsEeCommandArena, isInArena) = self.ClipPtsToArena(ptsEeCommandRaw)
-            (ptsEeCommandReachable, isInReachable) = self.ClipPtsToReachable(ptsEeCommandRaw)
-            self.ptEeCommand = ptsEeCommandReachable.point #ptsEeCommandClipped.point
+                # Display a vector in rviz.
+                ptBase = self.ptEeSense
+                ptEnd = self.ptEeCommand
+                markerCommand = Marker(header=Header(stamp=self.time,
+                                                    frame_id='Stage'),
+                                      ns='command',
+                                      id=1,
+                                      type=Marker.ARROW,
+                                      action=0,
+                                      scale=Vector3(x=0.1,  # Shaft diameter
+                                                    y=0.2,  # Head diameter
+                                                    z=0.0),
+                                      color=ColorRGBA(a=0.9,
+                                                      r=0.5,
+                                                      g=1.0,
+                                                      b=0.5),
+                                      lifetime=rospy.Duration(1.0),
+                                      points=[ptBase, ptEnd])
+                self.pubMarker.publish(markerCommand)
             
-            # Print the PID component values.
-            magP = N.linalg.norm([self.vecEeError.x, self.vecEeError.y])
-            magI = N.linalg.norm([self.vecEeIError.x, self.vecEeIError.y])
-            magD = N.linalg.norm([self.vecEeDError.x, self.vecEeDError.y])
-            magPID = N.linalg.norm([vecPID.x, vecPID.y])
-            vecPIDclipped = Point(x=self.ptEeCommand.x-self.ptEeSense.x,
-                                  y=self.ptEeCommand.y-self.ptEeSense.y)
-            rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
-            
-            # Display a vector in rviz.
-            ptBase = self.ptEeSense
-            ptEnd = self.ptEeCommand
-            markerCommand = Marker(header=Header(stamp=self.time,
-                                                frame_id='Stage'),
-                                  ns='command',
-                                  id=1,
-                                  type=Marker.ARROW,
-                                  action=0,
-                                  scale=Vector3(x=0.1,  # Shaft diameter
-                                                y=0.2,  # Head diameter
-                                                z=0.0),
-                                  color=ColorRGBA(a=0.9,
-                                                  r=0.5,
-                                                  g=1.0,
-                                                  b=0.5),
-                                  lifetime=rospy.Duration(1.0),
-                                  points=[ptBase, ptEnd])
-            self.pubMarker.publish(markerCommand)
-            
-#            # Display P,I,D vectors in rviz.
-#            ptBase = self.ptEeSense
-#            ptEnd = Point(x = self.ptEeSense.x + self.kP*self.vecEeError.x,
-#                          y = self.ptEeSense.y + self.kP*self.vecEeError.y)
-#            markerCommand= Marker(header=Header(stamp = self.time, frame_id='Stage'),
-#                                  ns='P',
-#                                  id=5, type=Marker.ARROW, action=0,
-#                                  scale=Vector3(x=0.1, y=0.2, z=0.0),
-#                                  color=ColorRGBA(a=0.9, r=1.0, g=0.0, b=0.0),
-#                                  lifetime=rospy.Duration(1.0), points=[ptBase, ptEnd])
-#            self.pubMarker.publish(markerCommand)
+#                # Display P,I,D vectors in rviz.
+#                ptBase = self.ptEeSense
+#                ptEnd = Point(x = self.ptEeSense.x + self.kP*self.vecEeError.x,
+#                              y = self.ptEeSense.y + self.kP*self.vecEeError.y)
+#                markerCommand= Marker(header=Header(stamp = self.time, frame_id='Stage'),
+#                                      ns='P',
+#                                      id=5, type=Marker.ARROW, action=0,
+#                                      scale=Vector3(x=0.1, y=0.2, z=0.0),
+#                                      color=ColorRGBA(a=0.9, r=1.0, g=0.0, b=0.0),
+#                                      lifetime=rospy.Duration(1.0), points=[ptBase, ptEnd])
+#                self.pubMarker.publish(markerCommand)
 #            
-#            ptBase = self.ptEeSense
-#            ptEnd = Point(x = self.ptEeSense.x + self.kI*self.vecEeIError.x,
-#                          y = self.ptEeSense.y + self.kI*self.vecEeIError.y)
-#            markerCommand= Marker(header=Header(stamp = self.time, frame_id='Stage'),
-#                                  ns='I',
-#                                  id=6, type=Marker.ARROW, action=0,
-#                                  scale=Vector3(x=0.1, y=0.2, z=0.0),
-#                                  color=ColorRGBA(a=0.9, r=0.0, g=1.0, b=0.0),
-#                                  lifetime=rospy.Duration(1.0), points=[ptBase, ptEnd])
-#            self.pubMarker.publish(markerCommand)
-#            ptBase = self.ptEeSense
-#            ptEnd = Point(x = self.ptEeSense.x + self.kD*self.vecEeDError.x,
-#                          y = self.ptEeSense.y + self.kD*self.vecEeDError.y)
-#            markerCommand= Marker(header=Header(stamp = self.time, frame_id='Stage'),
-#                                  ns='D',
-#                                  id=7, type=Marker.ARROW, action=0,
-#                                  scale=Vector3(x=0.1, y=0.2, z=0.0),
-#                                  color=ColorRGBA(a=0.9, r=0.0, g=0.0, b=1.0),
-#                                  lifetime=rospy.Duration(1.0), points=[ptBase, ptEnd])
-#            self.pubMarker.publish(markerCommand)
+#                ptBase = self.ptEeSense
+#                ptEnd = Point(x = self.ptEeSense.x + self.kI*self.vecEeIError.x,
+#                              y = self.ptEeSense.y + self.kI*self.vecEeIError.y)
+#                markerCommand= Marker(header=Header(stamp = self.time, frame_id='Stage'),
+#                                      ns='I',
+#                                      id=6, type=Marker.ARROW, action=0,
+#                                      scale=Vector3(x=0.1, y=0.2, z=0.0),
+#                                      color=ColorRGBA(a=0.9, r=0.0, g=1.0, b=0.0),
+#                                      lifetime=rospy.Duration(1.0), points=[ptBase, ptEnd])
+#                self.pubMarker.publish(markerCommand)
+#                ptBase = self.ptEeSense
+#                ptEnd = Point(x = self.ptEeSense.x + self.kD*self.vecEeDError.x,
+#                              y = self.ptEeSense.y + self.kD*self.vecEeDError.y)
+#                markerCommand= Marker(header=Header(stamp = self.time, frame_id='Stage'),
+#                                      ns='D',
+#                                      id=7, type=Marker.ARROW, action=0,
+#                                      scale=Vector3(x=0.1, y=0.2, z=0.0),
+#                                      color=ColorRGBA(a=0.9, r=0.0, g=0.0, b=1.0),
+#                                      lifetime=rospy.Duration(1.0), points=[ptBase, ptEnd])
+#                self.pubMarker.publish(markerCommand)
 
             
-            # Get the desired positions for each joint.
-            (angleCommand1,angleCommand2,angleCommand3,angleCommand4) = self.Get1234FromPt(self.ptEeCommand)
-            (angleSense1,  angleSense2,  angleSense3,  angleSense4)   = self.Get1234FromPt(self.ptEeSense)
-            
-            dA1 = angleCommand1-angleSense1
-            speedAngularMax1 = (self.speedLinearMax / self.L1)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
-            speedNext1 = N.sign(dA1) * min(N.abs(dA1) / self.T, speedAngularMax1)
-            
-            dA2 = angleCommand2-angleSense2
-            speedAngularMax2 = (self.speedLinearMax / self.L2)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
-            speedNext2 = N.sign(dA2) * min(N.abs(dA2) / self.T, speedAngularMax2)
+                # Get the desired positions for each joint.
+                (angleCommand1,angleCommand2,angleCommand3,angleCommand4) = self.Get1234FromPt(self.ptEeCommand)
+                (angleSense1,  angleSense2,  angleSense3,  angleSense4)   = self.Get1234FromPt(self.ptEeSense)
+                
+                dA1 = angleCommand1-angleSense1
+                speedAngularMax1 = (self.speedLinearMax / self.L1)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
+                speedNext1 = N.sign(dA1) * min(N.abs(dA1) / self.T, speedAngularMax1)
+                
+                dA2 = angleCommand2-angleSense2
+                speedAngularMax2 = (self.speedLinearMax / self.L2)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
+                speedNext2 = N.sign(dA2) * min(N.abs(dA2) / self.T, speedAngularMax2)
+            else:
+                angleCommand1 = 0.0
+                angleCommand2 = 0.0
+                speedNext1 = 0.0
+                speedNext2 = 0.0
+                
     
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):
 #                # Cheap and wrong way to convert mm/sec to radians/sec.  Should use Jacobian.

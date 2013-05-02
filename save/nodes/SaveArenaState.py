@@ -31,7 +31,7 @@ class SaveArenastate:
         # Make sure dir exists.
         try:
             os.makedirs(self.dirCsv)
-        except OSError:
+        except OSError, e:
             pass
 
 

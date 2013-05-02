@@ -13,7 +13,7 @@
 	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />
 	<param name="rosSimpleStep/limitHi"    type="double" value="6.283185" />
 	<param name="rosSimpleStep/limitLo"    type="double" value="-6.283185" />
-	<param name="fivebar/speed_max"        type="double" value="200.0"/>
+	<param name="fivebar/speed_max"        type="double" value="50.0"/>
 	<param name="fivebar/T"                type="double" value="0.02"/>
 
 	<param name="fivebar/linkwidth" type="double" value="25.4"/>  <!-- Affects the smallest closing angle. -->

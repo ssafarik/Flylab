@@ -136,6 +136,8 @@ class ContourGenerator:
             self.matMask              = N.zeros([self.height, self.width], dtype=N.uint8)
             self.matForeground        = N.zeros([self.height, self.width], dtype=N.uint8)
             self.matThreshold         = N.zeros([self.height, self.width], dtype=N.uint8)
+            self.matfBackground       = N.zeros([self.height, self.width], dtype=N.float32)
+            
 
             
             
