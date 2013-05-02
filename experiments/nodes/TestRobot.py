@@ -62,15 +62,16 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
 
+        if (False):
 # Four points step response.
-#        self.experimentparams.trial.robot.move.pattern.shape = 'square'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-#        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/16               # Patterns per second.
-#        self.experimentparams.trial.robot.move.pattern.hzPoint = 1/4                   # Points per second in the pattern.
-
+            self.experimentparams.trial.robot.move.pattern.shape = 'square'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+            self.experimentparams.trial.robot.move.pattern.hzPattern = 1/16               # Patterns per second.
+            self.experimentparams.trial.robot.move.pattern.hzPoint = 1/4                   # Points per second in the pattern.
+        else:
 # Smooth circle.
-        self.experimentparams.trial.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20               # Patterns per second.
-        self.experimentparams.trial.robot.move.pattern.hzPoint = 50                   # Points per second in the pattern.
+            self.experimentparams.trial.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+            self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20               # Patterns per second.
+            self.experimentparams.trial.robot.move.pattern.hzPoint = 50                   # Points per second in the pattern.
 
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = 30

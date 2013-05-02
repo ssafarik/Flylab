@@ -69,6 +69,7 @@ class Fivebar:
         self.maxI = rospy.get_param('fivebar/maxI', 40.0)
         self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
 
+        self.rDragF = 0.0
 
         # Parking spot (millimeters)
         self.xPark = 0.0
@@ -135,7 +136,7 @@ class Fivebar:
         # Command messages.
         self.command = 'run'
         self.command_list = ['run','exit']
-        self.subCommand = rospy.Subscriber('motorarm/command', String, self.Command_callback)
+        self.subCommand = rospy.Subscriber('fivebar/command', String, self.Command_callback)
 
         self.subVisualState = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
         self.pubJointState = rospy.Publisher('joint_states', JointState)
@@ -354,6 +355,16 @@ class Fivebar:
         
 
             
+    def ScalePtMag (self, pt, mag):
+        magPt = N.linalg.norm([pt.x, pt.y, pt.z])
+        if magPt != 0:
+            r = mag / magPt
+        else:
+            r = mag
+            
+        return Point(r*pt.x, r*pt.y, r*pt.z)
+            
+        
     def ClipPtMag (self, pt, magMax):
         magPt = N.linalg.norm([pt.x, pt.y, pt.z])
         if magPt > magMax:
@@ -983,16 +994,16 @@ class Fivebar:
         if self.stateRef is not None:
             #rospy.logwarn('stateRef: %s' % self.stateRef)
             # PID Gains & Parameters.
-            self.kP      = rospy.get_param('fivebar/kP', 1.0)
-            self.kI      = rospy.get_param('fivebar/kI', 0.0)
-            self.kD      = rospy.get_param('fivebar/kD', 0.0)
-            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
-            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
-            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
-            
-            self.kP *= self.kAll
-            self.kI *= self.kAll
-            self.kD *= self.kAll
+#            self.kP      = rospy.get_param('fivebar/kP', 1.0)
+#            self.kI      = rospy.get_param('fivebar/kI', 0.0)
+#            self.kD      = rospy.get_param('fivebar/kD', 0.0)
+#            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
+#            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+#            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
+#            
+#            self.kP *= self.kAll
+#            self.kI *= self.kAll
+#            self.kD *= self.kAll
             
             # The contour error.
             self.vecEeErrorPrev.x = self.vecEeError.x 
@@ -1001,7 +1012,7 @@ class Fivebar:
             if (self.stateRef is not None) and (self.stateVisual is not None):
                 self.vecEeError.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
                 self.vecEeError.y = self.stateRef.pose.position.y - self.stateVisual.pose.position.y
-                
+
 
                 # PID control of the contour error.
                 self.vecEeIError.x = self.vecEeIError.x + self.vecEeError.x
@@ -1024,8 +1035,10 @@ class Fivebar:
     
     
                 # Get the command for the hardware, clipped to arena coords.
-                ptEeCommandRaw = Point(x=self.ptEeSense.x + vecPID.x,
-                                       y=self.ptEeSense.y + vecPID.y)
+                a = 0.9 #rospy.get_param('/a', 0.9)
+                ptEeCommandRaw = Point(x=(a*self.ptEeSense.x+(1-a)*self.stateVisual.pose.position.x) + vecPID.x,
+                                       y=(a*self.ptEeSense.y+(1-a)*self.stateVisual.pose.position.y) + vecPID.y)
+                
                 ptsEeCommandRaw = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
                                                              frame_id='Stage'),
                                                point=ptEeCommandRaw)
