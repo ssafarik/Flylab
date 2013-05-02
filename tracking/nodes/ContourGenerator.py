@@ -33,7 +33,9 @@ class ContourGenerator:
     def __init__(self):
         
         # Image Initialization
-        self.preinit = False
+        self.initConstructor = False
+        self.initBackground = False
+        self.initImages = False
         self.initialized = False
         
         self.lock = threading.Lock()
@@ -124,7 +126,7 @@ class ContourGenerator:
         rospy.Service('tracking/trigger',         Trigger,          self.Trigger_callback)
         rospy.Service('tracking/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
 
-        self.preinit = True
+        self.initConstructor = True
         
 
     def InitializeImages(self):
@@ -136,9 +138,6 @@ class ContourGenerator:
             self.matMask              = N.zeros([self.height, self.width], dtype=N.uint8)
             self.matForeground        = N.zeros([self.height, self.width], dtype=N.uint8)
             self.matThreshold         = N.zeros([self.height, self.width], dtype=N.uint8)
-            self.matfBackground       = N.zeros([self.height, self.width], dtype=N.float32)
-            
-
             
             
             if self.bUseTransforms:
@@ -223,8 +222,8 @@ class ContourGenerator:
 
 
     def ImageBackgroundInit_callback (self, image):
-        while (not self.preinit):
-            rospy.loginfo('Waiting for preinit.')
+        while (not self.initConstructor):
+            rospy.loginfo('Waiting for initConstructor.')
             rospy.sleep(0.1)
         
             
@@ -236,18 +235,21 @@ class ContourGenerator:
                 self.matBackground = None
             else:
                 self.matfBackground = N.float32(self.matBackground)
+                self.initBackground = True
         else:
             self.selfPublishedBackground = False
         
         
     def CameraInfo_callback (self, msgCameraInfo):
         #with self.lock:
-            if self.preinit:
+            if self.initConstructor:
                 self.camerainfo = msgCameraInfo
                 
                 if not self.initialized:
                     self.InitializeImages()
             
+                if (self.initImages and self.initBackground):
+                    self.initialized = True
             
     # TrackingCommand_callback()
     # Receives commands to change the tracking behavior.
@@ -503,7 +505,7 @@ class ContourGenerator:
         #rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
         #self.timePrev = rospy.Time.now().to_sec()
 
-        if not self.preinit:
+        if not self.initConstructor:
             return
 
         self.header = image.header
@@ -515,8 +517,12 @@ class ContourGenerator:
         except CvBridgeError, e:
             rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
         
-        if not self.initialized:
+        if not self.initImages:
             self.InitializeImages()
+            
+        if (self.initImages and self.initBackground):
+            self.initialized = True
+            
 
         if self.initialized:        
             # Check for new diff_threshold value
