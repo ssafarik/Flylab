@@ -30,7 +30,7 @@
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Exit after the current trial finishes.</property>
             <property name="use_action_appearance">False</property>
-            <signal name="clicked" handler="BtnExit_clicked_cb" swapped="no"/>
+            <signal name="clicked" handler="BtnExitAfterTrial_clicked_cb" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">3</property>
@@ -64,7 +64,7 @@
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Pause after the current trial finishes.</property>
             <property name="use_action_appearance">False</property>
-            <signal name="clicked" handler="BtnPause_clicked_cb" swapped="no"/>
+            <signal name="clicked" handler="BtnPauseAfterTrial_clicked_cb" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">1</property>

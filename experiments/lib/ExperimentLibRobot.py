@@ -35,7 +35,7 @@ class Reset (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
@@ -57,7 +57,7 @@ class Reset (smach.State):
 
         rv = 'disabled'
         if (userdata.experimentparamsIn.trial.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
-            self.goal = MsgFrameState()
+            self.target = MsgFrameState()
             self.SetStageState = None
             self.timeStart = rospy.Time.now()
     
@@ -83,12 +83,12 @@ class Reset (smach.State):
     
     
             # Send the command.
-            self.goal.state.header = self.arenastate.robot.header
-            #self.goal.state.header.stamp = rospy.Time.now()
-            self.goal.state.pose.position.x = userdata.experimentparamsIn.trial.robot.home.x
-            self.goal.state.pose.position.y = userdata.experimentparamsIn.trial.robot.home.y
-            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                        pose=self.goal.state.pose),
+            self.target.header = self.arenastate.robot.header
+            #self.target.header.stamp = rospy.Time.now()
+            self.target.pose.position.x = userdata.experimentparamsIn.trial.robot.home.x
+            self.target.pose.position.y = userdata.experimentparamsIn.trial.robot.home.y
+            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
+                                                                        pose=self.target.pose),
                                                     speed = userdata.experimentparamsIn.trial.robot.home.speed))
 
             rv = 'aborted'
@@ -97,8 +97,8 @@ class Reset (smach.State):
                 
                 ptRobot = N.array([self.arenastate.robot.pose.position.x, 
                                    self.arenastate.robot.pose.position.y])
-                ptTarget = N.array([self.goal.state.pose.position.x,
-                                    self.goal.state.pose.position.y])                
+                ptTarget = N.array([self.target.pose.position.x,
+                                    self.target.pose.position.y])                
                 r = N.linalg.norm(ptRobot-ptTarget)
                 rospy.loginfo ('EL ResetHardware() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
                 
@@ -151,7 +151,7 @@ class Action (smach.State):
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
         self.pubPatternGen = rospy.Publisher('SetPattern', MsgPattern, latch=True)
 
-        self.goal = MsgFrameState()
+        self.target = MsgFrameState()
         self.SetStageState = None
 
         self.radiusMovement = float(rospy.get_param("arena/radius_inner","25.4"))
@@ -161,7 +161,7 @@ class Action (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
@@ -358,14 +358,14 @@ class Action (smach.State):
                     self.ptTarget = self.ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
 
                     # Send the command.
-                    self.goal.state.header = self.arenastate.robot.header
-                    self.goal.state.pose.position.x = self.ptTarget[0]
-                    self.goal.state.pose.position.y = self.ptTarget[1]
+                    self.target.header = self.arenastate.robot.header
+                    self.target.pose.position.x = self.ptTarget[0]
+                    self.target.pose.position.y = self.ptTarget[1]
                     #rospy.logwarn (self.ptTarget)
                     try:
                         if (doMove):
-                            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                                        pose=self.goal.state.pose),
+                            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
+                                                                                        pose=self.target.pose),
                                                                     speed = speedTarget))
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException), e:
                         rospy.logwarn ('EL Exception calling set_stage_state(): %s' % e)

@@ -5,6 +5,7 @@ import copy
 import numpy as N
 import threading
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Twist
+from std_msgs.msg import String
 import tf
 from flycore.msg import MsgFrameState
 
@@ -42,6 +43,11 @@ class PatternGenXY:
         self.dtPoint = rospy.Duration(1/self.pattern1.hzPoint)
         self.ratePoint = rospy.Rate(self.pattern1.hzPoint)
         
+
+        self.command = 'continue'
+        self.command_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
+        
+        self.subCommand          = rospy.Subscriber('broadcast/command', String, self.Command_callback)
         self.subSetPattern       = rospy.Subscriber('SetPattern', MsgPattern, self.SetPattern_callback)
         self.srvGetPatternPoints = rospy.Service('GetPatternPoints', SrvGetPatternPoints, self.GetPatternPoints_callback)
         self.tfrx = tf.TransformListener()
@@ -58,6 +64,10 @@ class PatternGenXY:
         rospy.loginfo('Passed: '+self.stSignalInput)
         
         
+
+
+    def Command_callback(self, msgString):
+        self.command = msgString.data
 
 
     def GetPointsConstant(self, pattern):
@@ -657,7 +667,9 @@ class PatternGenXY:
         
     def Main(self):
         while not rospy.is_shutdown():
-            self.SendSignalPoint()
+            if (self.command != 'pause_now'):
+                self.SendSignalPoint()
+                
             self.ratePoint.sleep()
 
 

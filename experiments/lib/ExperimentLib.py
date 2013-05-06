@@ -227,7 +227,7 @@ class EndTrial (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
         self.pubCommand = rospy.Publisher('broadcast/command', String)
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
         self.bSelfPublished = False
@@ -320,7 +320,7 @@ class TriggerOnStates (smach.State):
     
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
@@ -570,7 +570,7 @@ class TriggerOnTime (smach.State):
 
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
