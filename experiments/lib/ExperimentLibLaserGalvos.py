@@ -278,10 +278,14 @@ class Action (smach.State):
                 if (self.commandExperiment=='continue'):
                     pass
                 
-                elif (self.commandExperiment=='pause_after_trial'):
+                if (self.commandExperiment=='pause_now'):
+                    while (self.commandExperiment=='pause_now'):
+                        rospy.sleep(0.5)
+
+                if (self.commandExperiment=='pause_after_trial'):
                     pass
                 
-                elif (self.commandExperiment=='exit_after_trial'):
+                if (self.commandExperiment=='exit_after_trial'):
                     pass
                 
                 if (self.commandExperiment=='exit_now'):

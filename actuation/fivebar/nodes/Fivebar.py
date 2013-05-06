@@ -134,8 +134,8 @@ class Fivebar:
 
 
         # Command messages.
-        self.command = 'run'
-        self.command_list = ['run','exit_now']
+        self.command = 'continue'
+        self.command_list = ['continue','exit_now']
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.Command_callback)
 
         self.subVisualState = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
@@ -1175,12 +1175,22 @@ class Fivebar:
         rosrate = rospy.Rate(1 / self.T)
 
         while (not rospy.is_shutdown()) and (self.command != 'exit_now'):
-            self.time = rospy.Time.now()
-            self.dt = self.time - self.timePrev
-            self.timePrev = self.time
-            
-            self.SendTransforms()
-            self.UpdateMotorCommandFromTarget()
+            if (self.command != 'pause_now'):
+                self.time = rospy.Time.now()
+                self.dt = self.time - self.timePrev
+                self.timePrev = self.time
+                
+                self.SendTransforms()
+                self.UpdateMotorCommandFromTarget()
+            else:
+                (angleSense1,  angleSense2,  angleSense3,  angleSense4)   = self.Get1234FromPt(self.ptEeSense)
+                with self.lock:
+                    try:
+                        self.SetVelocity_joint1(Header(frame_id=self.names[0]), angleSense1, 0.0)
+                        self.SetVelocity_joint2(Header(frame_id=self.names[1]), angleSense2, 0.0)
+                    except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
+                        rospy.logwarn ("5B Exception:  %s" % e)
+                
             rosrate.sleep()
                 
     

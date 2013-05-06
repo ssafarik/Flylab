@@ -824,18 +824,25 @@ class MotorArm:
         # Process messages forever.
         rosrate = rospy.Rate(1 / self.T)
         while (not rospy.is_shutdown()) and (self.command != 'exit_now'):
-            self.time = rospy.Time.now()
-            self.dt = self.time - self.timePrev
-            self.timePrev = self.time
-            self.anglePrev = self.angleNext
-
-            # rospy.logwarn('jointstate1=%s' % self.jointstate1)
-            self.SendTransforms()
-            self.UpdateMotorCommandFromTarget()
+            if (self.command != 'pause_now'):
+                self.time = rospy.Time.now()
+                self.dt = self.time - self.timePrev
+                self.timePrev = self.time
+                self.anglePrev = self.angleNext
+    
+                # rospy.logwarn('jointstate1=%s' % self.jointstate1)
+                self.SendTransforms()
+                self.UpdateMotorCommandFromTarget()
+            else:
+                angleSense1   = self.Get1FromPt(self.ptEeSense)
+                with self.lock:
+                    try:
+                        self.SetVelocity_joint1(Header(frame_id=self.names[0]), angleSense1, 0.0)
+                    except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
+                        rospy.logwarn ("5B Exception:  %s" % e)
             rosrate.sleep()
                 
-    
-    
+        
 
 if __name__ == '__main__':
     try:

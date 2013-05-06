@@ -228,7 +228,9 @@ class EndTrial (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.pubCommand = rospy.Publisher('broadcast/command', String)
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.bSelfPublished = False
 
         
         self.TrialEndServices = NotifyServices(services={'savearenastate/trial_end': None, 'saveimages/trial_end': None, 'savebag/trial_end': None}, type=ExperimentParams) #TrialEndServices()
@@ -236,14 +238,17 @@ class EndTrial (smach.State):
 
 
     def CommandExperiment_callback(self, msgString):
-        if msgString.data in self.commandExperiment_list:
-            self.commandExperiment = msgString.data
-            if 'now' in self.commandExperiment:
-                rospy.logwarn ('Experiment received command: "%s".' % self.commandExperiment)
+        if (not self.bSelfPublished):
+            if msgString.data in self.commandExperiment_list:
+                self.commandExperiment = msgString.data
+                if '_after_trial' in self.commandExperiment:
+                    rospy.logwarn ('Experiment received command: "%s".  Will take effect after this trial.' % self.commandExperiment)
+                else:
+                    rospy.logwarn ('Experiment received command: "%s".' % self.commandExperiment)
             else:
-                rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.commandExperiment)
+                rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.commandExperiment_list))
         else:
-            rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.commandExperiment_list))
+            self.bSelfPublished = False
         
             
         
@@ -263,12 +268,20 @@ class EndTrial (smach.State):
 
         # Handle various user commands.
         if (self.commandExperiment=='pause_after_trial'):
-            rospy.logwarn ('**************************************** Experiment paused after EndTrial...')
+            self.bSelfPublished = True
+            self.pubCommand('pause_now')
+            rospy.logwarn ('**************************************** Experiment paused at EndTrial...')
             while (self.commandExperiment != 'continue'):
                 rospy.sleep(1)
             rospy.logwarn ('**************************************** Experiment continuing.')
 
+        
+        # Tell everyone else to exit now.
+        if (self.commandExperiment=='exit_after_trial'):
+            self.bSelfPublished = True
+            self.pubCommand('exit_now')
 
+            
         if (self.commandExperiment=='exit_after_trial') or (self.commandExperiment=='exit_now'):
             rv = 'exit'
 
