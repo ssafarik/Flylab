@@ -146,8 +146,11 @@ class EndExperiment (smach.State):
 #              new_trial service (which begins recording).
 #
 # Experiment may be paused & restarted via the commandlines:
-# rostopic pub -1 experiment/command std_msgs/String pause
-# rostopic pub -1 experiment/command std_msgs/String run
+# rostopic pub -1 broadcast/command std_msgs/String pause_now
+# rostopic pub -1 broadcast/command std_msgs/String pause_after_trial 
+# rostopic pub -1 broadcast/command std_msgs/String continue
+# rostopic pub -1 broadcast/command std_msgs/String exit_now
+# rostopic pub -1 broadcast/command std_msgs/String exit_after_trial
 #
 class StartTrial (smach.State):
     def __init__(self):
@@ -224,8 +227,8 @@ class EndTrial (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
         
         self.TrialEndServices = NotifyServices(services={'savearenastate/trial_end': None, 'saveimages/trial_end': None, 'savebag/trial_end': None}, type=ExperimentParams) #TrialEndServices()
@@ -259,14 +262,14 @@ class EndTrial (smach.State):
 
 
         # Handle various user commands.
-        if (self.commandExperiment=='pause'):
+        if (self.commandExperiment=='pause_after_trial'):
             rospy.logwarn ('**************************************** Experiment paused after EndTrial...')
             while (self.commandExperiment != 'continue'):
                 rospy.sleep(1)
             rospy.logwarn ('**************************************** Experiment continuing.')
 
 
-        if (self.commandExperiment=='exit') or (self.commandExperiment=='exitnow'):
+        if (self.commandExperiment=='exit_after_trial') or (self.commandExperiment=='exit_now'):
             rv = 'exit'
 
         #rospy.loginfo ('EL Exiting EndTrial()')
@@ -304,8 +307,8 @@ class TriggerOnStates (smach.State):
     
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -507,7 +510,7 @@ class TriggerOnStates (smach.State):
                     
                     #rospy.loginfo('EL duration=%s' % duration)
                 
-                if (self.commandExperiment=='exitnow'):
+                if (self.commandExperiment=='exit_now'):
                     rv = 'aborted'
                     break
 
@@ -554,8 +557,8 @@ class TriggerOnTime (smach.State):
 
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -575,7 +578,7 @@ class TriggerOnTime (smach.State):
         rv = 'success'
         rospy.sleep(duration)
 
-        if (self.commandExperiment=='exitnow'):
+        if (self.commandExperiment=='exit_now'):
             rv = 'aborted'
 
         #try:

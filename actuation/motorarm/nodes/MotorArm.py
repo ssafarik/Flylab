@@ -61,8 +61,8 @@ class MotorArm:
 
         # Command messages.
         self.command = 'run'
-        self.command_list = ['run','exit']
-        self.subCommand = rospy.Subscriber('motorarm/command', String, self.Command_callback)
+        self.command_list = ['run','exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.Command_callback)
 
         self.subVisualState = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
         self.pubJointState = rospy.Publisher('joint_states', JointState)
@@ -823,7 +823,7 @@ class MotorArm:
 
         # Process messages forever.
         rosrate = rospy.Rate(1 / self.T)
-        while (not rospy.is_shutdown()) and (self.command != 'exit'):
+        while (not rospy.is_shutdown()) and (self.command != 'exit_now'):
             self.time = rospy.Time.now()
             self.dt = self.time - self.timePrev
             self.timePrev = self.time

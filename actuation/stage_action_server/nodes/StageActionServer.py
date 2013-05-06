@@ -53,11 +53,17 @@ class StageActionServer(object):
         except (rospy.exceptions.ROSInterruptException, rospy.ServiceException), e:
             print "Service call failed: %s" % e
         
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.Command_callback)
         
+        
+        self.goal = None
+        self.command = None
         self.tolerance = 1.0             # mm
-        self.initialized = True
     
     
+    def Command_callback(self, msgString):
+        self.command = msgString.data
+            
     
     def Goal_callback(self, goal):
         while not self.initialized:
@@ -128,16 +134,14 @@ class StageActionServer(object):
                         stateArena = ActionStageStateResult(state=MsgFrameState(header=poseArena.header, pose=poseArena.pose))
                         self._as.publish_feedback(stateArena)
             
-            
             self.rosRate.sleep()
-                                     
-        
-    def MainLoop(self):
-        rospy.spin()
-
+            
+def Main():
+    rospy.spin()
+                                         
 
 if __name__ == '__main__':
     node = StageActionServer()
-    node.MainLoop()
+    node.Main()
       
 

@@ -10,8 +10,9 @@
       <object class="GtkTable" id="table1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="border_width">9</property>
         <property name="n_rows">6</property>
-        <property name="n_columns">5</property>
+        <property name="n_columns">4</property>
         <property name="column_spacing">9</property>
         <property name="row_spacing">9</property>
         <child>
@@ -22,11 +23,12 @@
           </object>
         </child>
         <child>
-          <object class="GtkButton" id="btnExit">
+          <object class="GtkButton" id="btnExitAfterTrial">
             <property name="label" translatable="yes">Exit After This Trial</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Exit after the current trial finishes.</property>
             <property name="use_action_appearance">False</property>
             <signal name="clicked" handler="BtnExit_clicked_cb" swapped="no"/>
           </object>
@@ -43,6 +45,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Continue running.</property>
             <property name="use_action_appearance">False</property>
             <signal name="clicked" handler="BtnContinue_clicked_cb" swapped="no"/>
           </object>
@@ -54,11 +57,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="btnPause">
+          <object class="GtkButton" id="btnPauseAfterTrial">
             <property name="label" translatable="yes">Pause After This Trial</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Pause after the current trial finishes.</property>
             <property name="use_action_appearance">False</property>
             <signal name="clicked" handler="BtnPause_clicked_cb" swapped="no"/>
           </object>
@@ -70,19 +74,33 @@
           </packing>
         </child>
         <child>
+          <object class="GtkButton" id="btnPauseNow">
+            <property name="label" translatable="yes">Pause Now</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Pause the trial immediately.</property>
+            <property name="use_action_appearance">False</property>
+            <signal name="clicked" handler="BtnPauseNow_clicked_cb" swapped="no"/>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkButton" id="btnExitNow">
             <property name="label" translatable="yes">Exit Now</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Exit immediately.</property>
             <property name="use_action_appearance">False</property>
             <signal name="clicked" handler="BtnExitNow_clicked_cb" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">3</property>
             <property name="right_attach">4</property>
-            <property name="top_attach">2</property>
-            <property name="bottom_attach">3</property>
           </packing>
         </child>
         <child>
@@ -95,35 +113,23 @@
             <signal name="clicked" handler="BtnSaveBackground_clicked_cb" swapped="no"/>
           </object>
           <packing>
-            <property name="left_attach">3</property>
-            <property name="right_attach">4</property>
-            <property name="top_attach">4</property>
-            <property name="bottom_attach">5</property>
+            <property name="top_attach">5</property>
+            <property name="bottom_attach">6</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
+          <object class="GtkButton" id="btnEstablishBackground">
+            <property name="label" translatable="yes">Establish New Background</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="use_action_appearance">False</property>
+            <signal name="clicked" handler="BtnEstablishBackground_clicked_cb" swapped="no"/>
+          </object>
+          <packing>
+            <property name="top_attach">4</property>
+            <property name="bottom_attach">5</property>
+          </packing>
         </child>
         <child>
           <placeholder/>

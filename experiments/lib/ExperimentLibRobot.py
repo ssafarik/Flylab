@@ -2,7 +2,6 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
-import actionlib
 import copy
 import numpy as N
 import smach
@@ -10,7 +9,6 @@ import tf
 
 from geometry_msgs.msg import Point, PointStamped
 from std_msgs.msg import Header, String
-from stage_action_server.msg import *
 from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from patterngen.msg import MsgPattern
@@ -37,8 +35,8 @@ class Reset (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -59,9 +57,7 @@ class Reset (smach.State):
 
         rv = 'disabled'
         if (userdata.experimentparamsIn.trial.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
-            self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
-            self.action.wait_for_server()
-            self.goal = ActionStageStateGoal()
+            self.goal = MsgFrameState()
             self.SetStageState = None
             self.timeStart = rospy.Time.now()
     
@@ -82,7 +78,7 @@ class Reset (smach.State):
                 #    return 'preempt'
                 rospy.sleep(1.0)
     
-                if (self.commandExperiment=='exitnow'):
+                if (self.commandExperiment=='exit_now'):
                     return 'aborted'
     
     
@@ -127,7 +123,7 @@ class Reset (smach.State):
                 
                 self.rosrate.sleep()
 
-                if (self.commandExperiment=='exitnow'):
+                if (self.commandExperiment=='exit_now'):
                     rv = 'aborted'
                     break
                 
@@ -155,9 +151,7 @@ class Action (smach.State):
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
         self.pubPatternGen = rospy.Publisher('SetPattern', MsgPattern, latch=True)
 
-        self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
-        self.action.wait_for_server()
-        self.goal = ActionStageStateGoal()
+        self.goal = MsgFrameState()
         self.SetStageState = None
 
         self.radiusMovement = float(rospy.get_param("arena/radius_inner","25.4"))
@@ -167,8 +161,8 @@ class Action (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -269,7 +263,7 @@ class Action (smach.State):
                     self.service_preempt()
                     return 'preempt'
                 
-                if (self.commandExperiment=='exitnow'):
+                if (self.commandExperiment=='exit_now'):
                     return 'aborted'
 
                 rospy.sleep(1.0)
@@ -406,13 +400,13 @@ class Action (smach.State):
             if (self.commandExperiment=='continue'):
                 pass
             
-            elif (self.commandExperiment=='pause'):
+            elif (self.commandExperiment=='pause_after_trial'):
                 pass
             
-            elif (self.commandExperiment=='exit'):
+            elif (self.commandExperiment=='exit_after_trial'):
                 pass
             
-            if (self.commandExperiment=='exitnow'):
+            if (self.commandExperiment=='exit_now'):
                 rv = 'aborted'
                 break
 
@@ -462,13 +456,13 @@ class Action (smach.State):
             if (self.commandExperiment=='continue'):
                 pass
             
-            elif (self.commandExperiment=='pause'):
+            elif (self.commandExperiment=='pause_after_trial'):
                 pass
             
-            elif (self.commandExperiment=='exit'):
+            elif (self.commandExperiment=='exit_after_trial'):
                 pass
             
-            if (self.commandExperiment=='exitnow'):
+            if (self.commandExperiment=='exit_now'):
                 rv = 'aborted'
                 break
 
