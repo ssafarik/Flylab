@@ -90,7 +90,7 @@ class BackgroundImage:
     #
     def TrackingCommand_callback(self, trackingcommand):
         #with self.lock:
-            if trackingcommand.command == 'savebackground':
+            if trackingcommand.command == 'save_background':
                 rospy.logwarn ('Saving new background image %s' % self.filenameBackground)
                 self.matBackground = self.SubscribeOneImage('camera/image_background')
                 cv2.imwrite(self.filenameBackground, self.matBackground)

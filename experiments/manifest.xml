@@ -23,7 +23,6 @@
   <depend package="galvodirector" />
   <depend package="LEDPanels" />
   <depend package="patterngen" />
-  <depend package="stage_action_server" />
   <depend package="tracking" />
  
 </package>
