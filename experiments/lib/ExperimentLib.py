@@ -269,7 +269,7 @@ class EndTrial (smach.State):
         # Handle various user commands.
         if (self.commandExperiment=='pause_after_trial'):
             self.bSelfPublished = True
-            self.pubCommand('pause_now')
+            self.pubCommand.publish('pause_now')
             rospy.logwarn ('**************************************** Experiment paused at EndTrial...')
             while (self.commandExperiment != 'continue'):
                 rospy.sleep(1)
@@ -279,7 +279,7 @@ class EndTrial (smach.State):
         # Tell everyone else to exit now.
         if (self.commandExperiment=='exit_after_trial'):
             self.bSelfPublished = True
-            self.pubCommand('exit_now')
+            self.pubCommand.publish('exit_now')
 
             
         if (self.commandExperiment=='exit_after_trial') or (self.commandExperiment=='exit_now'):
