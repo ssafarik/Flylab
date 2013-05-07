@@ -61,8 +61,8 @@ class MotorArm:
 
         # Command messages.
         self.command = 'run'
-        self.command_list = ['run','exit']
-        self.subCommand = rospy.Subscriber('motorarm/command', String, self.Command_callback)
+        self.command_list = ['run','exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.Command_callback)
 
         self.subVisualState = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
         self.pubJointState = rospy.Publisher('joint_states', JointState)
@@ -672,8 +672,11 @@ class MotorArm:
 
 
             # Get the command for the hardware, clipped to arena coords.
-            ptEeCommandRaw = Point(x=self.ptEeSense.x + vecPID.x,
-                                   y=self.ptEeSense.y + vecPID.y)
+#            ptEeCommandRaw = Point(x=self.ptEeSense.x + vecPID.x,
+#                                   y=self.ptEeSense.y + vecPID.y)
+            a = 0.9 #rospy.get_param('/a', 0.9)
+            ptEeCommandRaw = Point(x=(a*self.ptEeSense.x+(1-a)*self.stateVisual.pose.position.x) + vecPID.x,
+                                   y=(a*self.ptEeSense.y+(1-a)*self.stateVisual.pose.position.y) + vecPID.y)
             ptsEeCommandRaw = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
                                                          frame_id='Stage'),
                                            point=ptEeCommandRaw)
@@ -820,19 +823,26 @@ class MotorArm:
 
         # Process messages forever.
         rosrate = rospy.Rate(1 / self.T)
-        while (not rospy.is_shutdown()) and (self.command != 'exit'):
-            self.time = rospy.Time.now()
-            self.dt = self.time - self.timePrev
-            self.timePrev = self.time
-            self.anglePrev = self.angleNext
-
-            # rospy.logwarn('jointstate1=%s' % self.jointstate1)
-            self.SendTransforms()
-            self.UpdateMotorCommandFromTarget()
+        while (not rospy.is_shutdown()) and (self.command != 'exit_now'):
+            if (self.command != 'pause_now'):
+                self.time = rospy.Time.now()
+                self.dt = self.time - self.timePrev
+                self.timePrev = self.time
+                self.anglePrev = self.angleNext
+    
+                # rospy.logwarn('jointstate1=%s' % self.jointstate1)
+                self.SendTransforms()
+                self.UpdateMotorCommandFromTarget()
+            else:
+                angleSense1   = self.Get1FromPt(self.ptEeSense)
+                with self.lock:
+                    try:
+                        self.SetVelocity_joint1(Header(frame_id=self.names[0]), angleSense1, 0.0)
+                    except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
+                        rospy.logwarn ("5B Exception:  %s" % e)
             rosrate.sleep()
                 
-    
-    
+        
 
 if __name__ == '__main__':
     try:

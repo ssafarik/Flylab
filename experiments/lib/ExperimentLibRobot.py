@@ -2,7 +2,6 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
-import actionlib
 import copy
 import numpy as N
 import smach
@@ -10,11 +9,10 @@ import tf
 
 from geometry_msgs.msg import Point, PointStamped
 from std_msgs.msg import Header, String
-from stage_action_server.msg import *
 from flycore.msg import MsgFrameState
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
-from tracking.msg import ArenaState
 from patterngen.msg import MsgPattern
+from tracking.msg import ArenaState
 
 
 #######################################################################################################
@@ -37,8 +35,8 @@ class Reset (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -59,9 +57,7 @@ class Reset (smach.State):
 
         rv = 'disabled'
         if (userdata.experimentparamsIn.trial.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
-            self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
-            self.action.wait_for_server()
-            self.goal = ActionStageStateGoal()
+            self.target = MsgFrameState()
             self.SetStageState = None
             self.timeStart = rospy.Time.now()
     
@@ -82,17 +78,17 @@ class Reset (smach.State):
                 #    return 'preempt'
                 rospy.sleep(1.0)
     
-                if (self.commandExperiment=='exitnow'):
+                if (self.commandExperiment=='exit_now'):
                     return 'aborted'
     
     
             # Send the command.
-            self.goal.state.header = self.arenastate.robot.header
-            #self.goal.state.header.stamp = rospy.Time.now()
-            self.goal.state.pose.position.x = userdata.experimentparamsIn.trial.robot.home.x
-            self.goal.state.pose.position.y = userdata.experimentparamsIn.trial.robot.home.y
-            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                        pose=self.goal.state.pose),
+            self.target.header = self.arenastate.robot.header
+            #self.target.header.stamp = rospy.Time.now()
+            self.target.pose.position.x = userdata.experimentparamsIn.trial.robot.home.x
+            self.target.pose.position.y = userdata.experimentparamsIn.trial.robot.home.y
+            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
+                                                                        pose=self.target.pose),
                                                     speed = userdata.experimentparamsIn.trial.robot.home.speed))
 
             rv = 'aborted'
@@ -101,8 +97,8 @@ class Reset (smach.State):
                 
                 ptRobot = N.array([self.arenastate.robot.pose.position.x, 
                                    self.arenastate.robot.pose.position.y])
-                ptTarget = N.array([self.goal.state.pose.position.x,
-                                    self.goal.state.pose.position.y])                
+                ptTarget = N.array([self.target.pose.position.x,
+                                    self.target.pose.position.y])                
                 r = N.linalg.norm(ptRobot-ptTarget)
                 rospy.loginfo ('EL ResetHardware() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
                 
@@ -127,7 +123,7 @@ class Reset (smach.State):
                 
                 self.rosrate.sleep()
 
-                if (self.commandExperiment=='exitnow'):
+                if (self.commandExperiment=='exit_now'):
                     rv = 'aborted'
                     break
                 
@@ -155,9 +151,7 @@ class Action (smach.State):
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
         self.pubPatternGen = rospy.Publisher('SetPattern', MsgPattern, latch=True)
 
-        self.action = actionlib.SimpleActionClient('StageActionServer', ActionStageStateAction)
-        self.action.wait_for_server()
-        self.goal = ActionStageStateGoal()
+        self.target = MsgFrameState()
         self.SetStageState = None
 
         self.radiusMovement = float(rospy.get_param("arena/radius_inner","25.4"))
@@ -167,8 +161,8 @@ class Action (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -269,7 +263,7 @@ class Action (smach.State):
                     self.service_preempt()
                     return 'preempt'
                 
-                if (self.commandExperiment=='exitnow'):
+                if (self.commandExperiment=='exit_now'):
                     return 'aborted'
 
                 rospy.sleep(1.0)
@@ -278,9 +272,7 @@ class Action (smach.State):
             if self.paramsIn.robot.move.mode=='relative':
                 rv = self.MoveRelative()
             else:
-                rospy.logwarn('rv = self.MovePattern()')
                 rv = self.MovePattern()
-                rospy.logwarn('rv = self.MovePattern() Done.')
         else:
             rv = 'disabled'
             
@@ -366,14 +358,14 @@ class Action (smach.State):
                     self.ptTarget = self.ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
 
                     # Send the command.
-                    self.goal.state.header = self.arenastate.robot.header
-                    self.goal.state.pose.position.x = self.ptTarget[0]
-                    self.goal.state.pose.position.y = self.ptTarget[1]
+                    self.target.header = self.arenastate.robot.header
+                    self.target.pose.position.x = self.ptTarget[0]
+                    self.target.pose.position.y = self.ptTarget[1]
                     #rospy.logwarn (self.ptTarget)
                     try:
                         if (doMove):
-                            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.goal.state.header, 
-                                                                                        pose=self.goal.state.pose),
+                            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
+                                                                                        pose=self.target.pose),
                                                                     speed = speedTarget))
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException), e:
                         rospy.logwarn ('EL Exception calling set_stage_state(): %s' % e)
@@ -408,13 +400,17 @@ class Action (smach.State):
             if (self.commandExperiment=='continue'):
                 pass
             
-            elif (self.commandExperiment=='pause'):
+            if (self.commandExperiment=='pause_now'):
+                while (self.commandExperiment=='pause_now'):
+                    rospy.sleep(0.5)
+
+            if (self.commandExperiment=='pause_after_trial'):
                 pass
             
-            elif (self.commandExperiment=='exit'):
+            if (self.commandExperiment=='exit_after_trial'):
                 pass
             
-            if (self.commandExperiment=='exitnow'):
+            if (self.commandExperiment=='exit_now'):
                 rv = 'aborted'
                 break
 
@@ -464,13 +460,17 @@ class Action (smach.State):
             if (self.commandExperiment=='continue'):
                 pass
             
-            elif (self.commandExperiment=='pause'):
+            if (self.commandExperiment=='pause_now'):
+                while (self.commandExperiment=='pause_now'):
+                    rospy.sleep(0.5)
+
+            if (self.commandExperiment=='pause_after_trial'):
                 pass
             
-            elif (self.commandExperiment=='exit'):
+            if (self.commandExperiment=='exit_after_trial'):
                 pass
             
-            if (self.commandExperiment=='exitnow'):
+            if (self.commandExperiment=='exit_now'):
                 rv = 'aborted'
                 break
 

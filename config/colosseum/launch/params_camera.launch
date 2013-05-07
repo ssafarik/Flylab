@@ -7,7 +7,7 @@
   <param name="ExposureTimeAbs"      type="double" value="1400"/>
   <param name="Gain"                 type="double" value="100"/>
   <param name="AcquisitionMode"      type="string" value="Continuous"/>
-  <param name="AcquisitionFrameRate" type="double" value="60"/>
+  <param name="AcquisitionFrameRate" type="double" value="100"/>
   <param name="TriggerMode"          type="string" value="Off"/>
   <param name="TriggerSource"        type="string" value="Line1"/>
   <param name="softwaretriggerrate"  type="double" value="100"/>

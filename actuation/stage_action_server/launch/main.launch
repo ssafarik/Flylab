@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="stage_action_server" type="StageActionServer.py" name="StageActionServer"/>
-</launch>

@@ -16,8 +16,18 @@
 	<include file="$(find motorarm)/launch/motorarm.launch" />
 	<include file="$(find racetrack)/launch/params_actuator.launch" />
 
-	<include file="$(find racetrack)/launch/camera.launch" />
 	
+    <!-- Choose A or B -->    
+    <!-- A:  Get input from the camera, and from the background image file. -->
+    <include file="$(find racetrack)/launch/camera_tracking.launch" />
+    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+    
+    <!-- B:  Get input from a pre-recorded bag file. -->
+<!--
+    <node name="playbag" pkg="rosbag" type="play" args="-l /home/ssafarik/FlylabData/2013_04_30/test20130430171030.bag" />
+    <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
+-->
+
 </launch>
 	
 	

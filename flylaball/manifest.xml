@@ -1,0 +1,42 @@
+<package>
+  <description brief="flylaball">
+
+     flylaball
+
+  </description>
+  <author>Steve Safarik</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/flylaball</url>
+
+  <depend package="rospy"/>
+  <depend package="geometry_msgs"/>
+  <depend package="std_msgs"/>
+  <depend package="actionlib"/>
+  <depend package="smach"/>
+  <depend package="smach_ros"/>
+  <depend package="visualization_msgs"/>
+
+  
+  <depend package="fivebar" />
+  <depend package="motorarm" />
+
+  <depend package="arena_tf" />
+  <depend package="calibration" />
+  <depend package="config" />
+  <depend package="experiment_msgs" />
+  <depend package="experiments"/>
+  <depend package="experiment_srvs"/>
+  <depend package="flycore" />
+  <depend package="galvodirector" />
+  <depend package="image_gui" />
+  <depend package="LEDPanels" />
+  <depend package="patterngen" />
+  <depend package="pythonmodules" />
+  <depend package="save" />
+  <depend package="tracking" />
+  <depend package="ui" />
+
+</package>
+
+

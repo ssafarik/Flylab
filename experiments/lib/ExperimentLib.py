@@ -12,9 +12,10 @@ import time
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
 from std_msgs.msg import Header, ColorRGBA, String
 from std_srvs.srv import Empty
+
+from experiment_srvs.srv import Trigger, ExperimentParams
 from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
-from experiments.srv import Trigger, ExperimentParams
 from tracking.msg import ArenaState
 from visualization_msgs.msg import Marker
 
@@ -57,7 +58,7 @@ class NotifyServices():
             try:
                 self.services[key] = rospy.ServiceProxy(key, self.type)
             except rospy.ServiceException, e:
-                rospy.logwarn ("FAILED %s: %s" % (key,e))
+                rospy.logwarn ('FAILED %s: %s' % (key,e))
             #rospy.logwarn('Attached service: %s' % key)
             
         
@@ -79,7 +80,7 @@ class StartExperiment (smach.State):
                              output_keys=['experimentparamsOut'])
 
 
-        self.ExperimentStartServices = NotifyServices(services={'savearenastate/init': None, 'saveimages/init': None}, type=ExperimentParams) #ExperimentStartServices()
+        self.ExperimentStartServices = NotifyServices(services={'savearenastate/init': None, 'saveimages/init': None, 'savebag/init': None}, type=ExperimentParams) #ExperimentStartServices()
         self.ExperimentStartServices.attach()
 
         self.arenastate = None
@@ -93,7 +94,7 @@ class StartExperiment (smach.State):
 
     def execute(self, userdata):
         experimentparams = userdata.experimentparamsIn
-        rospy.loginfo("EL State StartExperiment(%s)" % experimentparams)
+        rospy.loginfo('EL State StartExperiment(%s)' % experimentparams)
 
         experimentparams.experiment.trial = experimentparams.experiment.trial-1 
         userdata.experimentparamsOut = experimentparams
@@ -120,14 +121,14 @@ class EndExperiment (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
 
-        self.ExperimentEndServices = NotifyServices(services={'savearenastate/wait_until_done': None, 'saveimages/wait_until_done': None}, type=ExperimentParams) #ExperimentEndServices()
+        self.ExperimentEndServices = NotifyServices(services={'savearenastate/wait_until_done': None, 'saveimages/wait_until_done': None, 'savebag/wait_until_done': None}, type=ExperimentParams) #ExperimentEndServices()
         self.ExperimentEndServices.attach()
         
         
 
     def execute(self, userdata):
         experimentparams = userdata.experimentparamsIn
-        rospy.loginfo("EL State EndExperiment(%s)" % experimentparams)
+        rospy.loginfo('EL State EndExperiment(%s)' % experimentparams)
 
         userdata.experimentparamsOut = experimentparams
         
@@ -145,8 +146,11 @@ class EndExperiment (smach.State):
 #              new_trial service (which begins recording).
 #
 # Experiment may be paused & restarted via the commandlines:
-# rostopic pub -1 experiment/command std_msgs/String pause
-# rostopic pub -1 experiment/command std_msgs/String run
+# rostopic pub -1 broadcast/command std_msgs/String pause_now
+# rostopic pub -1 broadcast/command std_msgs/String pause_after_trial 
+# rostopic pub -1 broadcast/command std_msgs/String continue
+# rostopic pub -1 broadcast/command std_msgs/String exit_now
+# rostopic pub -1 broadcast/command std_msgs/String exit_after_trial
 #
 class StartTrial (smach.State):
     def __init__(self):
@@ -157,10 +161,10 @@ class StartTrial (smach.State):
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
         
         
-        self.TriggerServices = NotifyServices(services={"savearenastate/trigger": None, "saveimages/trigger": None}, type=Trigger) #TriggerServices()
+        self.TriggerServices = NotifyServices(services={'savearenastate/trigger': None, 'saveimages/trigger': None, 'savebag/trigger': None, 'tracking/trigger': None}, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
         
-        self.TrialStartServices = NotifyServices(services={'savearenastate/trial_start': None, 'saveimages/trial_start': None}, type=ExperimentParams) #TrialStartServices()
+        self.TrialStartServices = NotifyServices(services={'savearenastate/trial_start': None, 'saveimages/trial_start': None, 'savebag/trial_start': None, 'tracking/trial_start': None}, type=ExperimentParams) #TrialStartServices()
         self.TrialStartServices.attach()
 
 
@@ -173,19 +177,16 @@ class StartTrial (smach.State):
                 return rv
 
         now = rospy.Time.now().to_sec()
-        experimentparams.save.filenamebasestamped = "%s%04d%02d%02d%02d%02d%02d" % (experimentparams.save.filenamebase, 
-                                                                             time.localtime(now).tm_year,
-                                                                             time.localtime(now).tm_mon,
-                                                                             time.localtime(now).tm_mday,
-                                                                             time.localtime(now).tm_hour,
-                                                                             time.localtime(now).tm_min,
-                                                                             time.localtime(now).tm_sec)
+        experimentparams.save.timestamp = '%04d%02d%02d%02d%02d%02d' % (time.localtime(now).tm_year,
+                                                                        time.localtime(now).tm_mon,
+                                                                        time.localtime(now).tm_mday,
+                                                                        time.localtime(now).tm_hour,
+                                                                        time.localtime(now).tm_min,
+                                                                        time.localtime(now).tm_sec)
         
 
         rospy.loginfo ('EL State StartTrial(%s)' % experimentparams.experiment.trial)
 
-        self.TriggerServices.notify(False)
-        
 
         # Set up the tracking exclusion zones.    
         userdata.experimentparamsOut = experimentparams
@@ -226,23 +227,28 @@ class EndTrial (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.pubCommand = rospy.Publisher('broadcast/command', String)
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.bSelfPublished = False
 
         
-        self.TrialEndServices = NotifyServices(services={'savearenastate/trial_end': None, 'saveimages/trial_end': None}, type=ExperimentParams) #TrialEndServices()
+        self.TrialEndServices = NotifyServices(services={'savearenastate/trial_end': None, 'saveimages/trial_end': None, 'savebag/trial_end': None}, type=ExperimentParams) #TrialEndServices()
         self.TrialEndServices.attach()
 
 
     def CommandExperiment_callback(self, msgString):
-        if msgString.data in self.commandExperiment_list:
-            self.commandExperiment = msgString.data
-            if 'now' in self.commandExperiment:
-                rospy.logwarn ('Experiment received command: "%s".' % self.commandExperiment)
+        if (not self.bSelfPublished):
+            if msgString.data in self.commandExperiment_list:
+                self.commandExperiment = msgString.data
+                if '_after_trial' in self.commandExperiment:
+                    rospy.logwarn ('Experiment received command: "%s".  Will take effect after this trial.' % self.commandExperiment)
+                else:
+                    rospy.logwarn ('Experiment received command: "%s".' % self.commandExperiment)
             else:
-                rospy.logwarn ('Experiment received command: "%s".  Will take effect at next trial.' % self.commandExperiment)
+                rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.commandExperiment_list))
         else:
-            rospy.logwarn ('Experiment received unknown command: "%s".  Valid commands are %s' % (msgString.data, self.commandExperiment_list))
+            self.bSelfPublished = False
         
             
         
@@ -261,14 +267,22 @@ class EndTrial (smach.State):
 
 
         # Handle various user commands.
-        if (self.commandExperiment=='pause'):
-            rospy.logwarn ('**************************************** Experiment paused after EndTrial...')
+        if (self.commandExperiment=='pause_after_trial'):
+            self.bSelfPublished = True
+            self.pubCommand.publish('pause_now')
+            rospy.logwarn ('**************************************** Experiment paused at EndTrial...')
             while (self.commandExperiment != 'continue'):
                 rospy.sleep(1)
             rospy.logwarn ('**************************************** Experiment continuing.')
 
+        
+        # Tell everyone else to exit now.
+        if (self.commandExperiment=='exit_after_trial'):
+            self.bSelfPublished = True
+            self.pubCommand.publish('exit_now')
 
-        if (self.commandExperiment=='exit') or (self.commandExperiment=='exitnow'):
+            
+        if (self.commandExperiment=='exit_after_trial') or (self.commandExperiment=='exit_now'):
             rv = 'exit'
 
         #rospy.loginfo ('EL Exiting EndTrial()')
@@ -298,7 +312,7 @@ class TriggerOnStates (smach.State):
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
-        self.TriggerServices = NotifyServices(services={"savearenastate/trigger": None, "saveimages/trigger": None}, type=Trigger) #TriggerServices()
+        self.TriggerServices = NotifyServices(services={'savearenastate/trigger': None, 'saveimages/trigger': None, 'savebag/trigger': None, 'tracking/trigger': None}, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
     
         self.nRobots = rospy.get_param('nRobots', 0)
@@ -306,8 +320,8 @@ class TriggerOnStates (smach.State):
     
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -384,7 +398,7 @@ class TriggerOnStates (smach.State):
 
 
     def execute(self, userdata):
-        rospy.loginfo("EL State TriggerOnStates(%s)" % (self.mode))
+        rospy.loginfo('EL State TriggerOnStates(%s)' % (self.mode))
 
         if self.mode == 'pre':
             trigger = userdata.experimentparamsIn.pre.trigger
@@ -509,7 +523,7 @@ class TriggerOnStates (smach.State):
                     
                     #rospy.loginfo('EL duration=%s' % duration)
                 
-                if (self.commandExperiment=='exitnow'):
+                if (self.commandExperiment=='exit_now'):
                     rv = 'aborted'
                     break
 
@@ -529,15 +543,11 @@ class TriggerOnStates (smach.State):
 
         #rospy.logwarn ('rv=%s', rv)
         #rospy.logwarn ('self.mode=%s', self.mode)
-        #if rv!='aborted' and self.mode=='pre':
-        #    self.TriggerServices.notify(True)
-        try:
-            if self.mode=='pre':
-                self.TriggerServices.notify(True)
+        if self.mode=='pre':
+            self.TriggerServices.notify(True)
+        if self.mode=='post':
+            self.TriggerServices.notify(False)
                 
-        except rospy.ServiceException:
-            rv = 'aborted'
-            
         #rospy.loginfo ('EL Exiting TriggerOnStates()')
         return rv
 # End class TriggerOnStates()
@@ -554,14 +564,14 @@ class TriggerOnTime (smach.State):
                              outcomes=['success','aborted'],
                              input_keys=['experimentparamsIn'])
 
-        self.TriggerServices = NotifyServices(services={"savearenastate/trigger": None, "saveimages/trigger": None}, type=Trigger) #TriggerServices()
+        self.TriggerServices = NotifyServices(services={'savearenastate/trigger': None, 'saveimages/trigger': None, 'savebag/trigger': None, 'tracking/trigger': None}, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
         
 
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -576,17 +586,19 @@ class TriggerOnTime (smach.State):
         else:
             duration = userdata.experimentparamsIn.post.wait
 
-        rospy.loginfo("EL State TriggerOnTime(%s, %s)" % (self.mode, duration))
+        rospy.loginfo('EL State TriggerOnTime(%s, %s)' % (self.mode, duration))
             
         rv = 'success'
         rospy.sleep(duration)
 
-        if (self.commandExperiment=='exitnow'):
+        if (self.commandExperiment=='exit_now'):
             rv = 'aborted'
 
         #try:
         #    if rv!='aborted' and ('pre' in self.mode):
         #        self.TriggerServices.notify(True)
+        #    if rv!='aborted' and ('post' in self.mode):
+        #        self.TriggerServices.notify(False)
         #except rospy.ServiceException:
         #    rv = 'aborted'
 
@@ -606,7 +618,7 @@ class ExperimentLib():
         self.xHome = 0
         self.yHome = 0
 
-        self.TriggerServices = NotifyServices(services={"savearenastate/trigger": None, "saveimages/trigger": None}, type=Trigger) #TriggerServices()
+        self.TriggerServices = NotifyServices(services={'savearenastate/trigger': None, 'saveimages/trigger': None, 'savebag/trigger': None, 'tracking/trigger': None}, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
         self.tfrx = tf.TransformListener()
         
@@ -644,7 +656,7 @@ class ExperimentLib():
                                    remapping={'experimentparamsIn':'experimentparams'})
         
         
-        # Create the "Pre" concurrency state.  This is where the pre qualifier runs alongside the pre actions.
+        # Create the 'Pre' concurrency state.  This is where the pre qualifier runs alongside the pre actions.
         ################################################################################### Pre qualifiers & trials.
         smachPre = smach.Concurrence(outcomes = ['success','disabled','timeout','aborted'],
                                        default_outcome = 'aborted',
@@ -659,7 +671,7 @@ class ExperimentLib():
                                       classHardware.Action (mode='pre', tfrx=self.tfrx))
 
         
-        # Create the main "Trials" concurrency state.
+        # Create the main 'Trials' concurrency state.
         ################################################################################### TRIAL
         smachTrial = smach.Concurrence(outcomes = ['success','disabled','aborted'],
                                          default_outcome = 'aborted',
@@ -674,7 +686,7 @@ class ExperimentLib():
                                   TriggerOnStates(mode='post', tfrx=self.tfrx))
 
 
-        # Create the "RESET" concurrency state.
+        # Create the 'RESET' concurrency state.
         ################################################################################### RESET
         smachReset = smach.Concurrence(outcomes = ['success','disabled','aborted'],
                                          default_outcome = 'aborted',
@@ -835,7 +847,7 @@ class ExperimentLib():
         self.smachTop.request_preempt()
         
         
-    # Gets called after all "reset" states are terminated.
+    # Gets called after all 'reset' states are terminated.
     # If any states aborted, then abort.
     def AllResetTerm_callback(self, outcome_map):
         #rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
@@ -849,7 +861,7 @@ class ExperimentLib():
 
         
 
-    # Gets called upon ANY "pre" state termination.
+    # Gets called upon ANY 'pre' state termination.
     # If any of the states either succeeds or times-out, then we're done (i.e. preempt the other states).
     def AnyPreTerm_callback(self, outcome_map):
         #rospy.logwarn('AnyPreTerm_callback(%s)' % repr(outcome_map))
@@ -880,7 +892,7 @@ class ExperimentLib():
         return rv
     
 
-    # Gets called after all "pre" states are terminated.
+    # Gets called after all 'pre' states are terminated.
     def AllPreTerm_callback(self, outcome_map):
         #rospy.logwarn('AllPreTerm_callback(%s)' % repr(outcome_map))
         rv = 'aborted'
@@ -944,13 +956,11 @@ class ExperimentLib():
                     rv = 'aborted'
 
 
-        #self.TriggerServices.notify(False)
-        
         return rv
 
         
 
-    # Gets called upon ANY "trial" state termination.
+    # Gets called upon ANY 'trial' state termination.
     def AnyTrialTerm_callback(self, outcome_map):
         #rospy.logwarn('AnyTrialTerm_callback(%s)' % repr(outcome_map))
         rv = False
@@ -982,7 +992,7 @@ class ExperimentLib():
         return rv
     
 
-    # Gets called after all "trial" states are terminated.
+    # Gets called after all 'trial' states are terminated.
     def AllTrialTerm_callback(self, outcome_map):
         #rospy.logwarn('AllTrialTerm_callback(%s)' % repr(outcome_map))
         rv = 'aborted'
@@ -1049,8 +1059,6 @@ class ExperimentLib():
 
 
 
-        self.TriggerServices.notify(False)
-        
         return rv
 
         

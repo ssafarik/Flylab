@@ -10,36 +10,30 @@ import threading
 import numpy as N
 
 from flycore.msg import MsgFrameState
-from experiments.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams
 from tracking.msg import ArenaState
 
 
-def Chdir(dir):
-    try:
-        os.chdir(dir)
-    except (OSError):
-        os.mkdir(dir)
-        os.chdir(dir)
 
 
 ###############################################################################
-# Save() is a ROS node.  It saves Arenastate messages into .csv files, 
-# and saves Image messages to .png files.
-#
-#  At the end of each trial, a video is made.  
-# There should be one video frame per line in the .csv
+# Save() is a ROS node.  It saves Arenastate messages into .csv files.
 #
 class SaveArenastate:
     def __init__(self):
         self.initialized = False
-        self.dirWorking_base = os.path.expanduser("~/FlylabData")
-        Chdir(self.dirWorking_base)
-
 
         # Create new directory each day
-        self.dirRelative = time.strftime("%Y_%m_%d")
-        self.dirWorking = self.dirWorking_base + "/" + self.dirRelative
-        Chdir(self.dirWorking)
+        self.dirWorking_base = os.path.expanduser("~/FlylabData")
+        self.dirDay = time.strftime("%Y_%m_%d")
+        self.dirCsv = self.dirWorking_base + "/" + self.dirDay
+
+        # Make sure dir exists.
+        try:
+            os.makedirs(self.dirCsv)
+        except OSError, e:
+            pass
+
 
         self.bTriggered = False
         self.bSaveOnlyWhileTriggered = False # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
@@ -62,7 +56,7 @@ class SaveArenastate:
 
         self.lockArenastate = threading.Lock()
         
-        self.filename = None
+        self.filenameCsv = None
         self.fid = None
         self.bSaveArenastate = False
         self.bSavingArenastate = False
@@ -401,13 +395,13 @@ class SaveArenastate:
         with self.lockArenastate:
             if (self.fid is not None) and (not self.fid.closed):
                 self.fid.close()
-                rospy.logwarn('SA logfile close()')
+                rospy.logwarn('Closed csv file.')
 
         
 
     # Service callback to perform initialization that requires experimentparams, e.g. subscribing to image topics.
     def Init_callback(self, experimentparams):
-        self.save = experimentparams.save
+        self.paramsSave = experimentparams.save
 
         return True
 
@@ -419,33 +413,35 @@ class SaveArenastate:
     #    Closes the .csv file if no longer saving.
     #
     def Trigger_callback(self, reqTrigger):
-        if (self.initialized):
+        while (not self.initialized):
+            rospy.sleep(0.5)
 
-            bRisingEdge = False
-            bFallingEdge = False
-            if self.bTriggered != reqTrigger.triggered:
-                self.bTriggered = reqTrigger.triggered
-                if self.bTriggered: # Rising edge.
-                    bRisingEdge = True
-                else:
-                    bFallingEdge = True
+        bRisingEdge = False
+        bFallingEdge = False
+        if self.bTriggered != reqTrigger.triggered:
+            if reqTrigger.triggered: # Rising edge.
+                bRisingEdge = True
+            else:
+                bFallingEdge = True
+                
+        self.bTriggered = reqTrigger.triggered
 
 
-            if (self.bSaveOnlyWhileTriggered) and (self.bSaveArenastate):
-                if (reqTrigger.triggered):
-                    self.bSavingArenastate = True
-                else:
-                    self.bSavingArenastate = False
-            
+        if (self.bSaveOnlyWhileTriggered) and (self.bSaveArenastate):
+            if (reqTrigger.triggered):
+                self.bSavingArenastate = True
+            else:
+                self.bSavingArenastate = False
+        
 
-            # At the end of a run, close the file if we're no longer saving.
-            if (self.bSaveOnlyWhileTriggered):
-                if (self.bSaveArenastate):
-                    with self.lockArenastate:
-                        if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
-                            self.fid.close()
-                            rospy.logwarn('SA logfile close()')
-    
+        # At the end of a run, close the file if we're no longer saving.
+        if (self.bSaveOnlyWhileTriggered):
+            if (self.bSaveArenastate):
+                with self.lockArenastate:
+                    if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
+                        self.fid.close()
+                        rospy.logwarn('Closed csv file.')
+
             
         return self.bTriggered
         
@@ -456,19 +452,21 @@ class SaveArenastate:
     # Returns with a file open.
     # 
     def TrialStart_callback(self, experimentparamsReq):
-        self.bSaveArenastate = experimentparamsReq.save.arenastate
+        self.bSaveArenastate = experimentparamsReq.save.csv
         
-        if (self.initialized):
-            self.bSaveOnlyWhileTriggered = experimentparamsReq.save.onlyWhileTriggered
+        while (not self.initialized):
+            rospy.sleep(0.5)
 
-            if (self.bSaveArenastate):
-                # Determine if we should be saving.
-                if (self.bSaveOnlyWhileTriggered):
-                    self.bSavingArenastate = False
-                else:
-                    self.bSavingArenastate = True
-                
-                self.OpenCsvAndWriteHeader(experimentparamsReq)
+        self.bSaveOnlyWhileTriggered = experimentparamsReq.save.onlyWhileTriggered
+
+        if (self.bSaveArenastate):
+            # Determine if we should be saving.
+            if (self.bSaveOnlyWhileTriggered):
+                self.bSavingArenastate = False
+            else:
+                self.bSavingArenastate = True
+            
+            self.OpenCsvAndWriteHeader(experimentparamsReq)
 
 
                 
@@ -479,29 +477,22 @@ class SaveArenastate:
     # Close old .csv file if there was one.
     # 
     def TrialEnd_callback(self, experimentparamsReq):
-        if (self.initialized):
-            if (self.bSaveArenastate):
-                # Close old .csv file if there was one.
-                with self.lockArenastate:
-                    if (self.fid is not None) and (not self.fid.closed):
-                        self.fid.close()
-                        rospy.logwarn('SA logfile close()')
+        while (not self.initialized):
+            rospy.sleep(0.5)
+
+        if (self.bSaveArenastate):
+            # Close old .csv file if there was one.
+            with self.lockArenastate:
+                if (self.fid is not None) and (not self.fid.closed):
+                    self.fid.close()
+                    rospy.logwarn('Closed csv file.')
                     
 
         return True
                 
                 
     def OpenCsvAndWriteHeader(self, experimentparamsReq):                
-        #self.filename = "%s%04d.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.experiment.trial)
-#         now = rospy.Time.now().to_sec()
-#         self.filename = "%s%04d%02d%02d%02d%02d%02d.csv" % (experimentparamsReq.save.filenamebase, 
-#                                                             time.localtime(now).tm_year,
-#                                                             time.localtime(now).tm_mon,
-#                                                             time.localtime(now).tm_mday,
-#                                                             time.localtime(now).tm_hour,
-#                                                             time.localtime(now).tm_min,
-#                                                             time.localtime(now).tm_sec)
-        self.filename = "%s.csv" % experimentparamsReq.save.filenamebasestamped
+        self.filenameCsv = "%s%s.csv" % (experimentparamsReq.save.filenamebase, experimentparamsReq.save.timestamp)
         
         headerVersionFile = self.templateVersionFile.format(
                                                 versionFile                = self.versionFile
@@ -765,8 +756,9 @@ class SaveArenastate:
 
 
         with self.lockArenastate:
-            self.fid = open(self.filename, 'w')
-            rospy.logwarn('SA logfile open(%s)' % self.filename)
+            fullpathCsv = self.dirCsv+'/'+self.filenameCsv
+            self.fid = open(fullpathCsv, 'w')
+            rospy.logwarn('Saving csv file:  %s' % fullpathCsv)
 
             self.fid.write(self.headerVersionFileTxt)
             self.fid.write(headerVersionFile)
@@ -931,7 +923,7 @@ class SaveArenastate:
         
 
 if __name__ == '__main__':
-    rospy.init_node('Save', log_level=rospy.INFO)
+    rospy.init_node('SaveArenastate', log_level=rospy.INFO)
     savearenastate = SaveArenastate()
     savearenastate.Main()
     

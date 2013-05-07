@@ -32,42 +32,52 @@ class FlylabGUI:
     	self.builder.add_from_file(self.gladefile)
     	self.builder.connect_signals(self) #Connect GUI event functions.
     	
-    	self.pubExperimentCommand = rospy.Publisher('experiment/command', String)
-        self.subExperimentCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+    	self.pubBroadcastCommand = rospy.Publisher('broadcast/command', String)
+        self.subBroadcastCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
     	self.pubTrackingCommand   = rospy.Publisher('tracking/command', TrackingCommand)
 
 
     def CommandExperiment_callback(self, msgString):
-        if (msgString.data=='exitnow'):
+        if (msgString.data=='exit_now'):
             sys.exit(0)
     	
     
-    def BtnPause_clicked_cb(self, widget):
-    	if not rospy.is_shutdown():
-    		command = String(data='pause')
-    		self.pubExperimentCommand.publish(command)
+    def BtnPauseAfterTrial_clicked_cb(self, widget):
+        if not rospy.is_shutdown():
+            command = String(data='pause_after_trial')
+            self.pubBroadcastCommand.publish(command)
+    
+    def BtnPauseNow_clicked_cb(self, widget):
+        if not rospy.is_shutdown():
+            command = String(data='pause_now')
+            self.pubBroadcastCommand.publish(command)
     
     def BtnContinue_clicked_cb(self, widget):
     	if not rospy.is_shutdown():
     		command = String(data='continue')
-    		self.pubExperimentCommand.publish(command)
+    		self.pubBroadcastCommand.publish(command)
     
-    def BtnExit_clicked_cb(self, widget):
+    def BtnExitAfterTrial_clicked_cb(self, widget):
         if not rospy.is_shutdown():
-            command = String(data='exit')
-            self.pubExperimentCommand.publish(command)
+            command = String(data='exit_after_trial')
+            self.pubBroadcastCommand.publish(command)
     
     def BtnExitNow_clicked_cb(self, widget):
         if not rospy.is_shutdown():
-            command = String(data='exitnow')
-            self.pubExperimentCommand.publish(command)
+            command = String(data='exit_now')
+            self.pubBroadcastCommand.publish(command)
             rospy.sleep(1)
             sys.exit(0)
     
     def BtnSaveBackground_clicked_cb(self, widget):
-    	if not rospy.is_shutdown():
-    		command = TrackingCommand(command='savebackground')
-    		self.pubTrackingCommand.publish(command)
+        if not rospy.is_shutdown():
+            command = TrackingCommand(command='save_background')
+            self.pubTrackingCommand.publish(command)
+    
+    def BtnEstablishBackground_clicked_cb(self, widget):
+        if not rospy.is_shutdown():
+            command = TrackingCommand(command='establish_background')
+            self.pubTrackingCommand.publish(command)
     
     def MainWindow_destroy_cb(self, widget):
     	sys.exit(0)

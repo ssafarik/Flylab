@@ -5,7 +5,7 @@ import rospy
 import numpy as N
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
-from experiments.srv import *
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from LEDPanels.msg import MsgPanelsCommand
@@ -26,8 +26,9 @@ class Experiment():
         self.experimentparams.experiment.trial = 1
         
         self.experimentparams.save.filenamebase = "test"
-        self.experimentparams.save.arenastate = True
-        self.experimentparams.save.images = True
+        self.experimentparams.save.csv = True
+        self.experimentparams.save.bag = True
+        self.experimentparams.save.mov = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         
@@ -107,7 +108,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 600
+        self.experimentparams.post.trigger.timeout = 30
 
         self.experimentparams.post.wait = 0.0
         

@@ -1,0 +1,20 @@
+<launch>
+    <!-- ========================================================== -->
+    <!-- Where to get the input for the Flylab,                     -->
+    <!--                                                            -->
+    <!-- For example, from the camera & background.png,             -->
+    <!-- or from a .bag file that contains all of those.            -->
+    <!--                                                            -->
+    <!-- ========================================================== -->
+
+    <!-- Get input from the camera, and from the background image file. -->
+    <include file="$(find rotcam)/launch/camera.launch" />
+    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+    
+    <!-- Get input from a pre-recorded bag file. -->
+<!--    <include file="$(find rotcam)/launch/bag.launch" />   -->
+
+	
+</launch>
+	
+	

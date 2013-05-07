@@ -5,5 +5,6 @@
 
     <node pkg="save" type="SaveArenaState.py" name="SaveArenastate" />
     <node pkg="save" type="SaveImages.py" name="SaveImages" />
+    <node pkg="save" type="SaveBag.py" name="SaveBag" />
     
 </launch>

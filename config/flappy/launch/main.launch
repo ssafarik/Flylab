@@ -14,7 +14,6 @@
 
     <!-- <include file="$(find flappy)/launch/params_ledpanels.launch" /> -->
     <!-- <include file="$(find flappy)/launch/params_galvos.launch" /> -->
-    <!-- <include file="$(find flappy)/launch/camera_tracking.launch" /> -->
 
 	<!-- <include file="$(find flybowls)/launch/heatbowl_85mm.launch" />  -->
 	<!-- <include file="$(find LEDPanels)/launch/main.launch" /> -->
@@ -22,10 +21,23 @@
 
 	
     <!-- <include file="$(find flappy)/launch/camera_aux.launch" /> -->
-    <include file="$(find flappy)/launch/camera_tracking.launch" /> 
-    <include file="$(find flappy)/launch/camera_flir.launch" />
+    <!-- <include file="$(find flappy)/launch/camera_flir.launch" /> -->
    
     <node pkg="dynamic_reconfigure" type="reconfigure_gui" name="reconfigure_gui" />
+
+
+
+    <!-- Choose A or B -->    
+    <!-- A:  Get input from the camera, and from the background image file. -->
+    <include file="$(find flappy)/launch/camera_tracking.launch" />
+    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+    
+    <!-- B:  Get input from a pre-recorded bag file. -->
+<!--
+    <node name="playbag" pkg="rosbag" type="play" args="-l /home/ssafarik/FlylabData/2013_04_30/test20130430171030.bag" />
+    <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
+-->
+     
 
 	
 </launch>

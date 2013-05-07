@@ -11,8 +11,6 @@ import tf
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
 from std_msgs.msg import Header, ColorRGBA, String
 from flycore.msg import MsgFrameState, TrackingCommand
-from flycore.srv import SrvFrameState, SrvFrameStateRequest
-from experiments.srv import Trigger, ExperimentParams
 from LEDPanels.msg import MsgPanelsCommand
 from tracking.msg import ArenaState
 from visualization_msgs.msg import Marker
@@ -41,8 +39,8 @@ class Reset (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -123,8 +121,8 @@ class Action (smach.State):
         
         # Command messages.
         self.commandExperiment = 'continue'
-        self.commandExperiment_list = ['continue','pause', 'exit', 'exitnow']
-        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
+        self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
+        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
 
 
@@ -340,13 +338,17 @@ class Action (smach.State):
                 if (self.commandExperiment=='continue'):
                     pass
                 
-                elif (self.commandExperiment=='pause'):
+                if (self.commandExperiment=='pause_now'):
+                    while (self.commandExperiment=='pause_now'):
+                        rospy.sleep(0.5)
+
+                if (self.commandExperiment=='pause_after_trial'):
                     pass
                 
-                elif (self.commandExperiment=='exit'):
+                if (self.commandExperiment=='exit_after_trial'):
                     pass
                 
-                if (self.commandExperiment=='exitnow'):
+                if (self.commandExperiment=='exit_now'):
                     rv = 'aborted'
                     break
                 

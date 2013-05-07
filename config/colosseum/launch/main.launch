@@ -11,13 +11,23 @@
 	
 	<include file="$(find LEDPanels)/launch/main.launch" />
 	<include file="$(find fivebar)/launch/fivebar.launch" />
-	<include file="$(find colosseum)/launch/camera.launch" />
 
 	<include file="$(find flybowls)/launch/heatbowl_50mm.launch" /> 
 	<include file="$(find colosseum)/launch/params_calibration.launch" />
 	<include file="$(find colosseum)/launch/params_tracking.launch" />
 	<include file="$(find colosseum)/launch/params_actuator.launch" />
 	<include file="$(find colosseum)/launch/params_ledpanels.launch" />
+
+    <!-- Choose A or B -->    
+    <!-- A:  Get input from the camera, and from the background image file. -->
+    <include file="$(find colosseum)/launch/camera_tracking.launch" />
+    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+    
+    <!-- B:  Get input from a pre-recorded bag file. -->
+<!--
+    <node name="playbag" pkg="rosbag" type="play" args="-l /home/ssafarik/FlylabData/2013_04_30/test20130430171030.bag" />
+    <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
+-->
 
 </launch>
 	
