@@ -76,8 +76,8 @@ class ContourGenerator:
         if self.bUseTransforms:
             self.tfrx = tf.TransformListener()
         
-        self.alphaBackground = rospy.get_param('tracking/alphaBackground', 0.01) # Alpha value for moving average background.
-        self.alphaBackgroundEstablish = 0.05 # Alpha value to use when establishing a new background automatically. 
+        self.alphaBackground          = rospy.get_param('tracking/alphaBackground', 0.01) # Alpha value for moving average background.
+        self.alphaBackgroundEstablish = rospy.get_param('tracking/alphaBackgroundEstablish', 0.05) # Alpha value to use when establishing a new background automatically. 
 
         self.widthRoi  = rospy.get_param ('tracking/roi/width', 15)
         self.heightRoi = rospy.get_param ('tracking/roi/height', 15)
@@ -263,6 +263,7 @@ class ContourGenerator:
         self.command = trackingcommand.command
         if (self.command=='establish_background'):
             self.bEstablishBackground = True
+            self.nContoursEstablish = int(trackingcommand.param)
             rospy.logwarn('establish_background started...')
         
     
@@ -676,18 +677,18 @@ class ContourGenerator:
                 self.pubImageRviz.publish(image2)
                 
 
-            # When automatically making a new background, determine if the background has stabilized, and then save it.                
-            if (self.bEstablishBackground) and (self.nContours==0):
-                self.nZeroContours += 1
+            # When automatically establishing a new background, determine if the background has stabilized.                
+            if (self.bEstablishBackground) and (self.nContours==self.nContoursEstablish):
+                self.nContoursEstablished += 1
             else:
-                self.nZeroContours = 0
+                self.nContoursEstablished = 0
               
-            # Stabilized when more than three time constants worth of background.  
-            if (self.nZeroContours > 3/self.alphaBackgroundEstablish):
-                self.pubTrackingCommand.publish(TrackingCommand(command='save_background'))
+            # Stabilized when more than three time-constants worth of background.  
+            if (self.nContoursEstablished > 3/self.alphaBackgroundEstablish):
+                #self.pubTrackingCommand.publish(TrackingCommand(command='save_background')) # Let the user manually save it when they're happy with it.
+                rospy.logwarn('establish_background Finished.  Click <Save Background Image> if it\'s acceptable.')
                 self.bEstablishBackground = False
-                self.nZeroContours = 0
-                rospy.logwarn('establish_background finished.')
+                self.nContoursEstablished = 0
 
 
 
