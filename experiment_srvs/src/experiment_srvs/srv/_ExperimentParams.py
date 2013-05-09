@@ -10,7 +10,7 @@ import patterngen.msg
 import experiment_msgs.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "fae670538b064f3daf85938836ee9e06"
+  _md5sum = "ac3366e329653e1404b8bcba5c1d5aba"
   _type = "experiment_srvs/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """experiment_msgs/ExperimentSettings  experiment
@@ -39,8 +39,10 @@ bool     onlyWhileTriggered     # Save all the trial data, or just from trial-st
 
 ================================================================================
 MSG: flycore/TrackingCommand
-string                command          # 'setexclusionzones' or 'savebackground'
+string                command          # 'setexclusionzones' or 'save_background'
 flycore/CircleZones   exclusionzones
+string                param            # An extra parameter if a command needs it (e.g. save_background specifies a number of contours).
+
 
 ================================================================================
 MSG: flycore/CircleZones
@@ -282,6 +284,12 @@ float64 			       wait
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
       buff.write(struct.pack(pattern, *self.tracking.exclusionzones.radius_list))
+      _x = self.tracking.param
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_struct_dB.pack(_x.pre.wait1, _x.pre.trigger.enabled))
       _x = self.pre.trigger.frameidParent
@@ -744,6 +752,15 @@ float64 			       wait
       start = end
       end += struct.calcsize(pattern)
       self.tracking.exclusionzones.radius_list = struct.unpack(pattern, str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.tracking.param = str[start:end].decode('utf-8')
+      else:
+        self.tracking.param = str[start:end]
       _x = self
       start = end
       end += 9
@@ -1423,6 +1440,12 @@ float64 			       wait
       buff.write(_struct_I.pack(length))
       pattern = '<%sd'%length
       buff.write(self.tracking.exclusionzones.radius_list.tostring())
+      _x = self.tracking.param
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.pack('<I%ss'%length, length, _x))
       _x = self
       buff.write(_struct_dB.pack(_x.pre.wait1, _x.pre.trigger.enabled))
       _x = self.pre.trigger.frameidParent
@@ -1886,6 +1909,15 @@ float64 			       wait
       start = end
       end += struct.calcsize(pattern)
       self.tracking.exclusionzones.radius_list = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=length)
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.tracking.param = str[start:end].decode('utf-8')
+      else:
+        self.tracking.param = str[start:end]
       _x = self
       start = end
       end += 9
@@ -2629,6 +2661,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiment_srvs/ExperimentParams'
-  _md5sum = 'caec98a37acd2638098435d95ea51cca'
+  _md5sum = '16be195079183c63e94a0f20ec68e573'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse

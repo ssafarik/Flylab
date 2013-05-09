@@ -42,25 +42,20 @@ class FlylabGUI:
             sys.exit(0)
     	
     
-    def BtnPauseAfterTrial_clicked_cb(self, widget):
-        if not rospy.is_shutdown():
-            command = String(data='pause_after_trial')
-            self.pubBroadcastCommand.publish(command)
-    
     def BtnPauseNow_clicked_cb(self, widget):
         if not rospy.is_shutdown():
             command = String(data='pause_now')
+            self.pubBroadcastCommand.publish(command)
+    
+    def BtnPauseAfterTrial_clicked_cb(self, widget):
+        if not rospy.is_shutdown():
+            command = String(data='pause_after_trial')
             self.pubBroadcastCommand.publish(command)
     
     def BtnContinue_clicked_cb(self, widget):
     	if not rospy.is_shutdown():
     		command = String(data='continue')
     		self.pubBroadcastCommand.publish(command)
-    
-    def BtnExitAfterTrial_clicked_cb(self, widget):
-        if not rospy.is_shutdown():
-            command = String(data='exit_after_trial')
-            self.pubBroadcastCommand.publish(command)
     
     def BtnExitNow_clicked_cb(self, widget):
         if not rospy.is_shutdown():
@@ -69,16 +64,25 @@ class FlylabGUI:
             rospy.sleep(1)
             sys.exit(0)
     
+    def BtnExitAfterTrial_clicked_cb(self, widget):
+        if not rospy.is_shutdown():
+            command = String(data='exit_after_trial')
+            self.pubBroadcastCommand.publish(command)
+    
+    def BtnEstablishBackground_clicked_cb(self, widget):
+        if not rospy.is_shutdown():
+            spin = self.builder.get_object('spinContours')
+            nContours = spin.get_property('text') # This is the number of objects on screen when the background is being established.
+            
+            command = TrackingCommand(command='establish_background', param=nContours)
+            self.pubTrackingCommand.publish(command)
+    
     def BtnSaveBackground_clicked_cb(self, widget):
         if not rospy.is_shutdown():
             command = TrackingCommand(command='save_background')
             self.pubTrackingCommand.publish(command)
     
-    def BtnEstablishBackground_clicked_cb(self, widget):
-        if not rospy.is_shutdown():
-            command = TrackingCommand(command='establish_background')
-            self.pubTrackingCommand.publish(command)
-    
+
     def MainWindow_destroy_cb(self, widget):
     	sys.exit(0)
 
