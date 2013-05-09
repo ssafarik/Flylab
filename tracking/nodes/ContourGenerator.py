@@ -192,6 +192,7 @@ class ContourGenerator:
                 imgBackground = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
                 imgBackground.header.stamp = self.header.stamp
                 self.pubImageBackgroundInit.publish(imgBackground)
+                self.selfPublishedBackground = True
             except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
                 rospy.logwarn ('Exception %s' % e)
             
