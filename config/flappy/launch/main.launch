@@ -30,14 +30,14 @@
     <!-- Choose A or B -->
     
     <!-- A -->  
+<!--      
     <include file="$(find flappy)/launch/input_live.launch" />
+-->
     
     <!-- B -->
-<!--      
     <include file="$(find flappy)/launch/input_bag.launch" >
         <arg name="bagfile" value="/home/ssafarik/FlylabData/2013_04_30/test20130430171030.bag" />
     </include> 
--->
         
     
      
