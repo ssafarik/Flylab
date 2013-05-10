@@ -46,10 +46,9 @@ class ContourGenerator:
         self.header = None
         self.matCamera = None
         self.matBackground = None
-        self.matBackgroundInit = None
         
         self.command = None # Valid values:  None, or 'establish_background'
-        self.bEstablishBackground = False
+        self.bEstablishBackground = False # Gets set to true when user requests to establish a new background automatically.
         
         # Messages
         self.camerainfo = None
@@ -57,6 +56,7 @@ class ContourGenerator:
         
         #self.subCameraInfo          = rospy.Subscriber('camera/camera_info', CameraInfo, self.CameraInfo_callback)
         self.subImageRect           = rospy.Subscriber('camera/image_rect', Image, self.Image_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
+        self.subImageBackgroundFile = rospy.Subscriber('camera/image_backgroundfile', Image, self.ImageBackgroundInit_callback, queue_size=1, buff_size=262144, tcp_nodelay=True) # The image from disk needs to come in on a different topic so it doesn't go directly into the bag file.
         self.subImageBackgroundInit = rospy.Subscriber('camera/image_backgroundinit', Image, self.ImageBackgroundInit_callback, queue_size=1, buff_size=262144, tcp_nodelay=True)
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
         
@@ -191,6 +191,7 @@ class ContourGenerator:
             try:
                 imgBackground = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
                 imgBackground.header.stamp = self.header.stamp
+                rospy.logwarn ('TrialStart_callback publish()')
                 self.pubImageBackgroundInit.publish(imgBackground)
                 self.selfPublishedBackground = True
             except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
@@ -212,6 +213,7 @@ class ContourGenerator:
                 try:
                     imgBackground = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
                     imgBackground.header.stamp = self.header.stamp
+                    rospy.logwarn ('Trigger_callback publish()')
                     self.pubImageBackgroundInit.publish(imgBackground)
                     self.selfPublishedBackground = True
                 except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:

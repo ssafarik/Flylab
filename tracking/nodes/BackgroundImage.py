@@ -32,7 +32,7 @@ class BackgroundImage:
         
         # Messages
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
-        self.pubImageBackgroundInit = rospy.Publisher("camera/image_backgroundinit", Image, latch=True)     # Published each time the background image file gets read.
+        self.pubImageBackgroundFile = rospy.Publisher("camera/image_backgroundfile", Image, latch=True)     # Published each time the background image file gets read.
         
         self.filenameBackground = os.path.expanduser(rospy.get_param('tracking/filenameBackground', '~/background.png'))
 
@@ -50,7 +50,7 @@ class BackgroundImage:
             bSuccess = cv2.imwrite(self.filenameBackground, self.matBackground)
             rospy.logwarn ('Saving new background image %s:  %s.' % (self.filenameBackground, 'Succeeded' if bSuccess else 'FAILED'))
             
-        self.PublishBackgroundInit(self.matBackground)
+        self.PublishBackgroundFile(self.matBackground)
             
         self.initialized = True
 
@@ -73,14 +73,14 @@ class BackgroundImage:
             rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
         
         
-    def PublishBackgroundInit(self, imgBackground):
+    def PublishBackgroundFile(self, imgBackground):
         try:
             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(imgBackground), "passthrough")
             image2.header.stamp = rospy.Time.now() #image.header.stamp
-            self.pubImageBackgroundInit.publish(image2)
+            self.pubImageBackgroundFile.publish(image2)
             del image2
         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
-            rospy.logwarn ('Exception in PublishBackgroundInit(): %s' % e)
+            rospy.logwarn ('Exception in PublishBackgroundFile(): %s' % e)
             
 
         
