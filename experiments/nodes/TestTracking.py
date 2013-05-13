@@ -28,7 +28,7 @@ class Experiment():
         self.experimentparams.save.filenamebase = "test"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
-        self.experimentparams.save.mov = True
+        self.experimentparams.save.mov = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         

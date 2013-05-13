@@ -1,0 +1,8 @@
+<launch>
+
+    <!-- A:  Get input from the camera, and from the background image file. -->
+
+    <include file="$(find flappy)/launch/camera_tracking.launch" />
+    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+    
+</launch>

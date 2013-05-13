@@ -20,7 +20,6 @@
   
   <depend package="fivebar" />
   <depend package="motorarm" />
-  <depend package="stage_action_server" />
 
   <depend package="arena_tf" />
   <depend package="calibration" />

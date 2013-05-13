@@ -187,7 +187,8 @@ class SaveBag:
             topic1 = 'camera/image_rect/compressed'
             topic2 = 'camera/image_backgroundinit'
             topic3 = 'camera/camera_info'
-            cmdline = ['rosbag','record','-O',self.dirBag+'/'+self.filenameBag, topic1, topic2, topic3]
+            topic4 = 'tracking/command'
+            cmdline = ['rosbag','record','-O',self.dirBag+'/'+self.filenameBag, topic1, topic2, topic3, topic4]
             self.processRosbag = subprocess.Popen(cmdline)
 
     
