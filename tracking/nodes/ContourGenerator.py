@@ -76,8 +76,7 @@ class ContourGenerator:
         if self.bUseTransforms:
             self.tfrx = tf.TransformListener()
         
-        self.alphaBackground          = rospy.get_param('tracking/alphaBackground', 0.01) # Alpha value for moving average background.
-        self.alphaBackgroundEstablish = rospy.get_param('tracking/alphaBackgroundEstablish', 0.05) # Alpha value to use when establishing a new background automatically. 
+        self.rcBackgroundEstablish = rospy.get_param('tracking/rcBackgroundEstablish', 1.0) # Alpha value to use when establishing a new background automatically. 
 
         self.widthRoi  = rospy.get_param ('tracking/roi/width', 15)
         self.heightRoi = rospy.get_param ('tracking/roi/height', 15)
@@ -122,7 +121,7 @@ class ContourGenerator:
         # Mask Info
         self.radiusMask = int(rospy.get_param('camera/mask/radius', 9999))
 
-        self.timePrev = rospy.Time.now().to_sec()
+        self.stampPrev = rospy.Time.now()
         
         rospy.Service('tracking/init',            ExperimentParams, self.Init_callback)
         rospy.Service('tracking/trial_start',     ExperimentParams, self.TrialStart_callback)
@@ -513,6 +512,10 @@ class ContourGenerator:
     def Image_callback(self, image):
         #rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
         #self.timePrev = rospy.Time.now().to_sec()
+        
+        self.dt = image.header.stamp - self.stampPrev
+        self.stampPrev = image.header.stamp
+        
 
         if not self.initConstructor:
             return
@@ -554,13 +557,15 @@ class ContourGenerator:
             
             
             # Update the background.
-            #rospy.logwarn('types: %s' % [type(N.float32(self.matCamera)), type(self.matfBackground), type(self.alphaBackground)])
+            #rospy.logwarn('types: %s' % [type(N.float32(self.matCamera)), type(self.matfBackground), type(self.rcBackground)])
             if (self.bEstablishBackground):
-                self.alphaBackground = self.alphaBackgroundEstablish
+                rcBackground = self.rcBackgroundEstablish
             else:
-                self.alphaBackground = rospy.get_param('tracking/alphaBackground', 0.00001) # Alpha value for moving average background.
-
-            cv2.accumulateWeighted(N.float32(self.matCamera), self.matfBackground, self.alphaBackground)
+                rcBackground = rospy.get_param('tracking/rcBackground', 2500) # Time constant for moving average background.
+            
+            alphaBackground = 1 - N.exp(-self.dt.to_sec() / rcBackground)
+            
+            cv2.accumulateWeighted(N.float32(self.matCamera), self.matfBackground, alphaBackground)
             self.matBackground = N.uint8(self.matfBackground)
 
             # Create the foreground.
@@ -684,8 +689,8 @@ class ContourGenerator:
             else:
                 self.nContoursEstablished = 0
               
-            # Stabilized when more than three time-constants worth of background.  
-            if (self.nContoursEstablished > 3/self.alphaBackgroundEstablish):
+            # Stabilized when more than six time-constants worth of background.  
+            if (self.nContoursEstablished > 3*(rcBackground/self.dt.to_sec())):
                 #self.pubTrackingCommand.publish(TrackingCommand(command='save_background')) # Let the user manually save it when they're happy with it.
                 rospy.logwarn('establish_background Finished.  Click <Save Background Image> if it\'s acceptable.')
                 self.bEstablishBackground = False

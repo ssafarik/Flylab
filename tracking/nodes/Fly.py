@@ -21,7 +21,7 @@ from flycore.msg import MsgFrameState
 from pythonmodules import filters, CircleFunctions
 
 
-globalNonessential = False   # Publish nonessential stuff?
+globalNonessential = True   # Publish nonessential stuff?
 globalLock = threading.Lock()
 
         
@@ -63,16 +63,16 @@ class Fly:
             dtForecast              = rospy.get_param('tracking/dtForecast',0.15)
             rcFilterFlip            = rospy.get_param('tracking/rcFilterFlip', 3.0)
             rcFilterSpeed           = rospy.get_param('tracking/rcFilterSpeed', 0.2)
-            speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0)
+            speedThresholdForTravel = rospy.get_param('tracking/speedThresholdForTravel', 5.0)
             rcFilterAngularVel      = rospy.get_param('tracking/rcFilterAngularVel', 0.05)
-            self.widthRoi           = rospy.get_param ('tracking/roi/width', 15)
-            self.heightRoi          = rospy.get_param ('tracking/roi/height', 15)
-            self.lengthBody         = rospy.get_param ('tracking/lengthBody', 9)
-            self.widthBody          = rospy.get_param ('tracking/widthBody', 5)
-            self.robot_width        = rospy.get_param ('robot/width', 1.0)
-            self.robot_length       = rospy.get_param ('robot/length', 1.0)
-            self.robot_height       = rospy.get_param ('robot/height', 1.0)
-            self.alphaForeground    = rospy.get_param('tracking/alphaForeground', 0.01)
+            self.widthRoi           = rospy.get_param('tracking/roi/width', 15)
+            self.heightRoi          = rospy.get_param('tracking/roi/height', 15)
+            self.lengthBody         = rospy.get_param('tracking/lengthBody', 9)
+            self.widthBody          = rospy.get_param('tracking/widthBody', 5)
+            self.robot_width        = rospy.get_param('robot/width', 1.0)
+            self.robot_length       = rospy.get_param('robot/length', 1.0)
+            self.robot_height       = rospy.get_param('robot/height', 1.0)
+            self.rcForeground       = rospy.get_param('tracking/rcForeground', 1.0)
             self.thresholdForeground= rospy.get_param('tracking/thresholdForeground', 25.0)
 
         self.kfState = filters.KalmanFilter()
@@ -85,6 +85,7 @@ class Fly:
         self.stampPrev = rospy.Time.now()
         self.dtVelocity = rospy.Duration(dtVelocity) # Interval over which to calculate velocity.
         self.dtForecast = dtForecast
+        self.stampPrev = rospy.Time.now()
         
         # Orientation detection stuff.
         self.lpFlip = filters.LowPassFilter(RC=rcFilterFlip)
@@ -379,11 +380,12 @@ class Fly:
     def UpdateFlyMean(self, npRoiReg):
         #global globalLock
         #with globalLock:
-        #    self.alphaForeground = rospy.get_param('tracking/alphaForeground', 0.01)
+        #    self.rcForeground = rospy.get_param('tracking/rcForeground', 0.01)
+        alphaForeground = 1 - N.exp(-self.dt.to_sec() / self.rcForeground)
 
         if (self.npfRoiMean is None):
             self.npfRoiMean = N.float32(npRoiReg)
-        cv2.accumulateWeighted(N.float32(npRoiReg), self.npfRoiMean, self.alphaForeground)
+        cv2.accumulateWeighted(N.float32(npRoiReg), self.npfRoiMean, alphaForeground)
 
         
     def UpdateFlySuperresolution(self, npRoi, moments):
@@ -552,6 +554,9 @@ class Fly:
     def Update(self, contourinfo, posesComputedExternal):
         if self.initialized:
             self.contourinfo = contourinfo
+            
+            self.dt = self.contourinfo.header.stamp - self.stampPrev
+            self.stampPrev = self.contourinfo.header.stamp
             
             # Use the computed end-effector orientation.
             if posesComputedExternal is not None:
