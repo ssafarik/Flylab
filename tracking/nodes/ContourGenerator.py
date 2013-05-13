@@ -451,12 +451,10 @@ class ContourGenerator:
         if contours is not None:
             (NEXT,PREV,CHILD,PARENT)=(0,1,2,3)
             iContour = 0
-            while (True):    # While there's a next contour. 
+            while (0<=iContour) and (iContour<length(contours)): 
                 contour = contours[iContour]
                 self.AppendContourinfoListsFromContour(contour, matForeground) # self.nContours++ gets incremented inside function.
                 iContour = hierarchy[0][iContour][NEXT]
-                if iContour<0:
-                    break
                     
         
         # Put lists into contourinfolists.
