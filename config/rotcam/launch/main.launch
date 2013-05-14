@@ -15,15 +15,17 @@
 
 
     <!-- Choose A or B -->    
-    <!-- A:  Get input from the camera, and from the background image file. -->
+    <!-- A:  Get input from the camera and the background image file. -->
+<!--
     <include file="$(find rotcam)/launch/camera_tracking.launch" />
     <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+-->
     
     <!-- B:  Get input from a pre-recorded bag file. -->
 <!--
-    <node name="playbag" pkg="rosbag" type="play" args="-l /home/ssafarik/bags/A/rot1mD.bag" />
-    <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
+    <node name="playbag" pkg="rosbag" type="play" args="-l -r 10 /home/rancher/FlylabData/2013_05_04/*.bag" />
 -->
+    <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
      
 	
 </launch>

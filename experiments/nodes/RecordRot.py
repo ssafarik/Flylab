@@ -39,10 +39,10 @@ class Experiment():
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
-        self.experimentparams.pre.wait1 = 1.0
+        self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = 'Fly1'
-        self.experimentparams.pre.trigger.frameidChild = 'Robot'
+        self.experimentparams.pre.trigger.frameidParent = 'Arena'
+        self.experimentparams.pre.trigger.frameidChild = 'Fly1'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
@@ -59,38 +59,9 @@ class Experiment():
         self.experimentparams.pre.trigger.timeout = -1
         self.experimentparams.pre.wait2 = 0.0
         
-
-        # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
-        # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = False
-        self.experimentparams.trial.robot.move.mode = 'relative'
-        self.experimentparams.trial.robot.move.relative.tracking = True
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Arena"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Arena"
-        self.experimentparams.trial.robot.move.relative.distance = 50
-        self.experimentparams.trial.robot.move.relative.angle =  90.0 * N.pi / 180.0
-        self.experimentparams.trial.robot.move.relative.angleType = 'constant'
-        self.experimentparams.trial.robot.move.relative.speed = 50
-        self.experimentparams.trial.robot.move.relative.speedType = 'constant'
-        self.experimentparams.trial.robot.move.relative.tolerance = 2
-        self.experimentparams.trial.robot.home.enabled = False
-        self.experimentparams.trial.robot.home.x = 0.0
-        self.experimentparams.trial.robot.home.y = 0.0
-        self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.tolerance = 2
-        
-        
         self.experimentparams.trial.lasergalvos.enabled = False
-        
         self.experimentparams.trial.ledpanels.enabled = False
-        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.origin.x = 0 
-        self.experimentparams.trial.ledpanels.origin.y = 0 
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
-        self.experimentparams.trial.ledpanels.statefilterHi = ''
-        self.experimentparams.trial.ledpanels.statefilterLo = ''
-        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly1'
@@ -108,7 +79,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 30
+        self.experimentparams.post.trigger.timeout = 1800
 
         self.experimentparams.post.wait = 0.0
         

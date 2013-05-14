@@ -15,21 +15,21 @@
   <!-- =================================================================== -->
   
   <!-- The mask circle in camera coordinates (i.e. pixels).    -->
-  <param name="camera/mask/x" type="double" value="321"/>
-  <param name="camera/mask/y" type="double" value="259"/>
-  <param name="camera/mask/radius" type="double" value="232"/>
+  <param name="camera/mask/x" type="double" value="354"/>
+  <param name="camera/mask/y" type="double" value="244"/>
+  <param name="camera/mask/radius" type="double" value="245"/>
 
   <param name="calibration/checker_size" type="double" value="5.0" />
 
 
 
   <!-- These values come from CameraArena.launch, with a checkerboard on the arena. -->
-  <param name="camera_arena_rvec_0" type="double" value="3.055"/>
-  <param name="camera_arena_rvec_1" type="double" value="0.002"/>
-  <param name="camera_arena_rvec_2" type="double" value="-0.002"/>
-  <param name="camera_arena_tvec_0" type="double" value="28.510"/> <!-- Adjust for camera/arena alignment here. -->
-  <param name="camera_arena_tvec_1" type="double" value="-0.853"/> <!-- Adjust for camera/arena alignment here. -->
-  <param name="camera_arena_tvec_2" type="double" value="535.39"/>
+  <param name="camera_arena_rvec_0" type="double" value="-3.037"/>
+  <param name="camera_arena_rvec_1" type="double" value="0.007"/>
+  <param name="camera_arena_rvec_2" type="double" value="0.128"/>
+  <param name="camera_arena_tvec_0" type="double" value="39.946"/> <!-- Adjust for camera/arena alignment here. -->
+  <param name="camera_arena_tvec_1" type="double" value="-3.419"/> <!-- Adjust for camera/arena alignment here. -->
+  <param name="camera_arena_tvec_2" type="double" value="668.153"/>
   
 
 </launch>

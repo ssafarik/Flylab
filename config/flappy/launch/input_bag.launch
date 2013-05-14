@@ -1,0 +1,9 @@
+<launch>
+    <!-- B:  Get input from a pre-recorded bag file. -->
+
+    <arg name="bagfile" />
+    
+<!--    <node name="playbag" pkg="rosbag" type="play" args="$(bagfile)" /> -->
+    <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
+</launch>
+   

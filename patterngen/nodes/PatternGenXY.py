@@ -666,7 +666,7 @@ class PatternGenXY:
 
         
     def Main(self):
-        while not rospy.is_shutdown():
+        while (not rospy.is_shutdown()) and (self.command != 'exit_now'):
             if (self.command != 'pause_now'):
                 self.SendSignalPoint()
                 

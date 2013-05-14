@@ -23,20 +23,23 @@
     <!-- <include file="$(find flappy)/launch/camera_aux.launch" /> -->
     <!-- <include file="$(find flappy)/launch/camera_flir.launch" /> -->
    
-    <node pkg="dynamic_reconfigure" type="reconfigure_gui" name="reconfigure_gui" />
+    <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" />
 
 
 
-    <!-- Choose A or B -->    
-    <!-- A:  Get input from the camera, and from the background image file. -->
-    <include file="$(find flappy)/launch/camera_tracking.launch" />
-    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+    <!-- Choose A or B -->
     
-    <!-- B:  Get input from a pre-recorded bag file. -->
-<!--
-    <node name="playbag" pkg="rosbag" type="play" args="-l /home/ssafarik/FlylabData/2013_04_30/test20130430171030.bag" />
-    <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
+    <!-- A -->  
+    <include file="$(find flappy)/launch/input_live.launch" />
+    
+    <!-- B -->
+<!--      
+    <include file="$(find flappy)/launch/input_bag.launch" >
+        <arg name="bagfile" value="/home/ssafarik/FlylabData/2013_04_30/test20130430171030.bag" />
+    </include> 
 -->
+        
+    
      
 
 	
