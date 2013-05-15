@@ -6,47 +6,103 @@ import cv2
 import numpy as N
 import tf
 from sensor_msgs.msg import Image, CameraInfo
+from arena_tf.msg import CalibrationCamera
 import arena_tf.srv
+from experiment_srvs.srv import Trigger, ExperimentParams
+
 
 
 class TransformServerArenaCamera:
     def __init__(self):
         self.initialized = False
+        self.initConstructor = False
+        self.initCalibration = False
+        
         self.camerainfo = None
+        self.calibration = None
         rospy.init_node('TransformServerArenaCamera')
         
         self.tfbx = tf.TransformBroadcaster()
 
-        self.rvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
-        self.tvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
         
-        self.xMask = rospy.get_param('camera/mask/x', 0.0) 
-        self.yMask = rospy.get_param('camera/mask/y', 0.0) 
-        self.zMask = rospy.get_param('camera/mask/z', 0.0) 
 
         self.Hinv = N.identity(3)
-        self.subCameraInfo = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
+        self.subCameraInfo           = rospy.Subscriber("camera/camera_info",           CameraInfo,        self.CameraInfo_callback)
+        self.subCalibrationOriginate = rospy.Subscriber('camera/calibration_originate', CalibrationCamera, self.Calibration_callback)
+        self.subCalibrationSet       = rospy.Subscriber('camera/calibration_set',       CalibrationCamera, self.Calibration_callback)
+        self.pubCalibrationSet       = rospy.Publisher('camera/calibration_set',        CalibrationCamera, latch=True)
+        self.selfPublishedCalibration = False
 
         rospy.Service('camera_from_arena', arena_tf.srv.ArenaCameraConversion, self.CameraFromArena_callback)
         rospy.Service('arena_from_camera', arena_tf.srv.ArenaCameraConversion, self.ArenaFromCamera_callback)
         
-        self.initialized = True
+        rospy.Service('transformserverarenacamera/init',            ExperimentParams, self.Init_callback)
+        rospy.Service('transformserverarenacamera/trial_start',     ExperimentParams, self.TrialStart_callback)
+        rospy.Service('transformserverarenacamera/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        rospy.Service('transformserverarenacamera/trigger',         Trigger,          self.Trigger_callback)
+        rospy.Service('transformserverarenacamera/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        
+        
+        self.initConstructor = True
 
 
+    # Receive calibration values (wherever they came from), and republish them (for the bag file).
+    # Either:
+    # -- file -> params -> calibration_originator.py -> here and bagfile.
+    # or
+    # -- bagfile -> here.
+    def Calibration_callback (self, calibration):
+        while (not self.initConstructor):
+            rospy.loginfo('Waiting for initConstructor.')
+            rospy.sleep(0.1)
+        
+            
+        if (not self.selfPublishedCalibration):
+            self.calibration = calibration
+            self.initCalibration = True
+        else:
+            self.selfPublishedCalibration = False
+
+
+    def Init_callback(self, experimentparams):
+        return True
+
+    # TrialStart_callback()
+    # Publishes the calibration.
+    #
+    def TrialStart_callback(self, experimentparams):
+        while (not self.initialized):
+            rospy.sleep(0.5)
+
+        if (self.calibration is not None):
+            self.selfPublishedCalibration = True
+            self.pubCalibrationSet.publish(self.calibration)
+            
+        return True
+                
+                
+    def Trigger_callback(self, reqTrigger):
+        return True
+    
+    def TrialEnd_callback(self, experimentparams):
+        return True
+
+    def WaitUntilDone_callback(self, experimentparams):
+        return True
+        
+        
+        
+        
     def CameraInfo_callback (self, camerainfo):
-        if (self.initialized) and (self.camerainfo is None):
+        if (self.initCalibration) and (self.camerainfo is None):
             K = N.reshape(N.array(camerainfo.K),[3,3])
             P = N.reshape(N.array(camerainfo.P),[3,4])
             
-            self.rvec[0] = rospy.get_param('/camera_arena_rvec_0')
-            self.rvec[1] = rospy.get_param('/camera_arena_rvec_1')
-            self.rvec[2] = rospy.get_param('/camera_arena_rvec_2')
-            self.tvec[0] = rospy.get_param('/camera_arena_tvec_0')
-            self.tvec[1] = rospy.get_param('/camera_arena_tvec_1')
-            self.tvec[2] = rospy.get_param('/camera_arena_tvec_2')
     
-            (R,jacobian) = cv2.Rodrigues(self.rvec)
-            T = tf.transformations.translation_matrix(self.tvec)         # 4x4, for a 3D transform.
+            rvec = N.array([self.calibration.arena_rvec_0, self.calibration.arena_rvec_1, self.calibration.arena_rvec_2], dtype=N.float32)
+            tvec = N.array([self.calibration.arena_tvec_0, self.calibration.arena_tvec_1, self.calibration.arena_tvec_2], dtype=N.float32)
+            (R,jacobian) = cv2.Rodrigues(rvec)
+            T = tf.transformations.translation_matrix(tvec)         # 4x4, for a 3D transform.
     
             # Make a 2D [R|T] transform.  Drop the Z coord.
             RT = N.zeros((3,3))
@@ -68,11 +124,13 @@ class TransformServerArenaCamera:
 #            rospy.logwarn(RT)
 #            rospy.logwarn(self.Hinv)
 #            rospy.logwarn(self.H)
+            self.initialized = True
+            
         self.camerainfo = camerainfo
             
 
     def CameraFromArena_callback(self, req):
-        if (self.camerainfo is not None):
+        if (self.initialized) and (self.camerainfo is not None):
             point_count = min(len(req.xSrc), len(req.ySrc))
             xSrc = list(req.xSrc)
             ySrc = list(req.ySrc)
@@ -94,7 +152,7 @@ class TransformServerArenaCamera:
                 'yDst': yDst}
 
     def ArenaFromCamera_callback(self, req):
-        if (self.camerainfo is not None):
+        if (self.initialized) and (self.camerainfo is not None):
             point_count = min(len(req.xSrc), len(req.ySrc))
             xSrc = list(req.xSrc)
             ySrc = list(req.ySrc)
@@ -116,7 +174,7 @@ class TransformServerArenaCamera:
         
 
     def SendTransforms(self):      
-        if (self.camerainfo is not None):
+        if (self.initialized) and (self.camerainfo is not None):
             stamp = self.camerainfo.header.stamp 
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
@@ -130,9 +188,9 @@ class TransformServerArenaCamera:
                                     (0,0,0,1), 
                                     stamp, 
                                     "ImageRect", "ImageRaw")
-            self.tfbx.sendTransform((self.xMask,
-                                     self.yMask,
-                                     self.zMask),
+            self.tfbx.sendTransform((self.calibration.xMask,
+                                     self.calibration.yMask,
+                                     0.0),
                                     (0,0,0,1), 
                                     stamp, 
                                     "Arena", "ImageRect")
@@ -140,15 +198,13 @@ class TransformServerArenaCamera:
         
     def Main(self):
         rate = rospy.Rate(100)
-        try:
-            while not rospy.is_shutdown():
-                try:
-                    self.SendTransforms()
-                    rate.sleep()
-                except tf.Exception:
-                    rospy.logwarn ('Exception in TransformServerArenaCamera()')
-        except:
-            print "Shutting down"
+        while not rospy.is_shutdown():
+            try:
+                self.SendTransforms()
+                rate.sleep()
+            except tf.Exception:
+                rospy.logwarn ('Exception in TransformServerArenaCamera()')
+                
 
 
 if __name__ == "__main__":

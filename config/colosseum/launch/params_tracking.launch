@@ -6,7 +6,7 @@
   <param name="tracking/thresholdForeground"        type="double" value="70.0"/>                   <!-- Threshold for foreground objects detection. -->
   <param name="tracking/filenameBackground"         type="string" value="~/background.png"/>       <!-- Location of the initial background image. -->
   <param name="tracking/speedThresholdForTravel"    type="double" value="5.0"/>
-  <param name="tracking/areaContourMin"             type="double" value="10"/>
+  <param name="tracking/areaContourMin"             type="double" value="4"/>
   <param name="tracking/roi/height"                 type="int" value="25"/>                        <!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
   <param name="tracking/roi/width"                  type="int" value="25"/>                        <!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
   <param name="tracking/wingmetric_threshold"       type="double" value="300"/>                    <!-- Threshold for the wing-extension metric. -->

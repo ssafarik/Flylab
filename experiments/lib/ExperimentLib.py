@@ -38,7 +38,13 @@ g_actions_dict = {'ROBOT' : ExperimentLibRobot,
                   'LEDPANELS' : ExperimentLibLEDPanels}
 ################################################################
 
-
+# The notify_list contains those service basenames to call for each experiment: .../init, .../trial_start, .../trigger, .../trial_end, .../wait_until_done, 
+g_notify_list = ['savearenastate', 
+                 'saveimages', 
+                 'savebag', 
+                 'tracking', 
+                 'transformserverarenacamera', 
+                 'transformserverarenastage']
 
 #######################################################################################################
 #######################################################################################################
@@ -80,7 +86,11 @@ class StartExperiment (smach.State):
                              output_keys=['experimentparamsOut'])
 
 
-        self.ExperimentStartServices = NotifyServices(services={'savearenastate/init': None, 'saveimages/init': None, 'savebag/init': None}, type=ExperimentParams) #ExperimentStartServices()
+        services = {}
+        for name in g_notify_list:
+            services[name+'/init'] = None
+             
+        self.ExperimentStartServices = NotifyServices(services=services, type=ExperimentParams) #ExperimentStartServices()
         self.ExperimentStartServices.attach()
 
         self.arenastate = None
@@ -121,7 +131,11 @@ class EndExperiment (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
 
-        self.ExperimentEndServices = NotifyServices(services={'savearenastate/wait_until_done': None, 'saveimages/wait_until_done': None, 'savebag/wait_until_done': None}, type=ExperimentParams) #ExperimentEndServices()
+        services = {}
+        for name in g_notify_list:
+            services[name+'/wait_until_done'] = None
+            
+        self.ExperimentEndServices = NotifyServices(services=services, type=ExperimentParams) #ExperimentEndServices()
         self.ExperimentEndServices.attach()
         
         
@@ -161,10 +175,18 @@ class StartTrial (smach.State):
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
         
         
-        self.TriggerServices = NotifyServices(services={'savearenastate/trigger': None, 'saveimages/trigger': None, 'savebag/trigger': None, 'tracking/trigger': None}, type=Trigger) #TriggerServices()
+        services = {}
+        for name in g_notify_list:
+            services[name+'/trigger'] = None
+
+        self.TriggerServices = NotifyServices(services=services, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
         
-        self.TrialStartServices = NotifyServices(services={'savearenastate/trial_start': None, 'saveimages/trial_start': None, 'savebag/trial_start': None, 'tracking/trial_start': None}, type=ExperimentParams) #TrialStartServices()
+        services = {}
+        for name in g_notify_list:
+            services[name+'/trial_start'] = None
+
+        self.TrialStartServices = NotifyServices(services=services, type=ExperimentParams) #TrialStartServices()
         self.TrialStartServices.attach()
 
 
@@ -233,7 +255,11 @@ class EndTrial (smach.State):
         self.bSelfPublished = False
 
         
-        self.TrialEndServices = NotifyServices(services={'savearenastate/trial_end': None, 'saveimages/trial_end': None, 'savebag/trial_end': None}, type=ExperimentParams) #TrialEndServices()
+        services = {}
+        for name in g_notify_list:
+            services[name+'/trial_end'] = None
+
+        self.TrialEndServices = NotifyServices(services=services, type=ExperimentParams) #TrialEndServices()
         self.TrialEndServices.attach()
 
 
@@ -312,7 +338,11 @@ class TriggerOnStates (smach.State):
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
-        self.TriggerServices = NotifyServices(services={'savearenastate/trigger': None, 'saveimages/trigger': None, 'savebag/trigger': None, 'tracking/trigger': None}, type=Trigger) #TriggerServices()
+        services = {}
+        for name in g_notify_list:
+            services[name+'/trigger'] = None
+
+        self.TriggerServices = NotifyServices(services=services, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
     
         self.nRobots = rospy.get_param('nRobots', 0)
@@ -564,7 +594,11 @@ class TriggerOnTime (smach.State):
                              outcomes=['success','aborted'],
                              input_keys=['experimentparamsIn'])
 
-        self.TriggerServices = NotifyServices(services={'savearenastate/trigger': None, 'saveimages/trigger': None, 'savebag/trigger': None, 'tracking/trigger': None}, type=Trigger) #TriggerServices()
+        services = {}
+        for name in g_notify_list:
+            services[name+'/trigger'] = None
+
+        self.TriggerServices = NotifyServices(services=services, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
         
 
@@ -618,7 +652,11 @@ class ExperimentLib():
         self.xHome = 0
         self.yHome = 0
 
-        self.TriggerServices = NotifyServices(services={'savearenastate/trigger': None, 'saveimages/trigger': None, 'savebag/trigger': None, 'tracking/trigger': None}, type=Trigger) #TriggerServices()
+        services = {}
+        for name in g_notify_list:
+            services[name+'/trigger'] = None
+
+        self.TriggerServices = NotifyServices(services=services, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
         self.tfrx = tf.TransformListener()
         
