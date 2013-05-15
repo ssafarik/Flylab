@@ -29,7 +29,7 @@ class Experiment():
         
         self.experimentparams.save.filenamebase = "foodnavi"
         self.experimentparams.save.csv = True
-        self.experimentparams.save.bag = False
+        self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
@@ -202,7 +202,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = -1
+        self.experimentparams.post.trigger.timeout = 1800
 
         self.experimentparams.post.wait = 0.0
         
