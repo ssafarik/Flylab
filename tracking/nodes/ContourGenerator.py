@@ -688,7 +688,7 @@ class ContourGenerator:
                 self.nContoursEstablished = 0
               
             # Stabilized when more than six time-constants worth of background.  
-            if (self.nContoursEstablished > 3*(rcBackground/self.dt.to_sec())):
+            if (self.nContoursEstablished > 2*(rcBackground/self.dt.to_sec())):
                 #self.pubTrackingCommand.publish(TrackingCommand(command='save_background')) # Let the user manually save it when they're happy with it.
                 rospy.logwarn('establish_background Finished.  Click <Save Background Image> if it\'s acceptable.')
                 self.bEstablishBackground = False
