@@ -23,11 +23,11 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Laser tracks all flies for 30min"
+        self.experimentparams.experiment.description = "Navigation between two food spots"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zap"
+        self.experimentparams.save.filenamebase = "foodnavi"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False

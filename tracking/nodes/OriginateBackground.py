@@ -18,12 +18,12 @@ from flycore.msg import TrackingCommand
 ###############################################################################
 ###############################################################################
 ###############################################################################
-# The class BackgroundImage simply reads and writes a background image file.
+# The class OriginateBackground simply reads and writes a background image file.
 # The purpose is that since the background is input to the system, we want 
 # to be able to change whether we use the image coming from disk, or the image 
 # coming from a .bag file.
 #
-class BackgroundImage:
+class OriginateBackground:
 
     def __init__(self):
 
@@ -32,7 +32,7 @@ class BackgroundImage:
         
         # Messages
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
-        self.pubImageBackgroundFile = rospy.Publisher("camera/image_backgroundfile", Image, latch=True)     # Published each time the background image file gets read.
+        self.pubImageBackgroundFile = rospy.Publisher('camera/image_background_originate', Image, latch=True)     # Published each time the background image file gets read.
         
         self.filenameBackground = os.path.expanduser(rospy.get_param('tracking/filenameBackground', '~/background.png'))
 
@@ -101,9 +101,9 @@ class BackgroundImage:
       
 
 def main(args):
-    rospy.init_node('BackgroundImage')
+    rospy.init_node('OriginateBackground')
     try:
-        bg = BackgroundImage()
+        bg = OriginateBackground()
         bg.Main()
     except rospy.exceptions.ROSInterruptException:
         rospy.loginfo("Shutting down")

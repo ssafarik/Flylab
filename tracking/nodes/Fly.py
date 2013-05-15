@@ -21,7 +21,7 @@ from flycore.msg import MsgFrameState
 from pythonmodules import filters, CircleFunctions
 
 
-globalNonessential = False   # Publish nonessential stuff?
+globalNonessential = True   # Publish nonessential stuff?
 globalLock = threading.Lock()
 
         
@@ -50,6 +50,7 @@ class Fly:
             self.pubImageRoiWings = rospy.Publisher(self.name+"/image_wings", Image)
             self.pubImageMask     = rospy.Publisher(self.name+"/image_mask", Image)
             self.pubImageMaskBody = rospy.Publisher(self.name+"/image_mask_body", Image)
+            self.pubImageSuper    = rospy.Publisher(self.name+'/image_super', Image)
             self.pubLeftMetric    = rospy.Publisher(self.name+'/leftmetric', Float32)
             self.pubLeftMetricMean= rospy.Publisher(self.name+'/leftmetricmean', Float32)
             self.pubLeft          = rospy.Publisher(self.name+'/left', Float32)
@@ -63,16 +64,16 @@ class Fly:
             dtForecast              = rospy.get_param('tracking/dtForecast',0.15)
             rcFilterFlip            = rospy.get_param('tracking/rcFilterFlip', 3.0)
             rcFilterSpeed           = rospy.get_param('tracking/rcFilterSpeed', 0.2)
-            speedThresholdForTravel = rospy.get_param ('tracking/speedThresholdForTravel', 5.0)
+            speedThresholdForTravel = rospy.get_param('tracking/speedThresholdForTravel', 5.0)
             rcFilterAngularVel      = rospy.get_param('tracking/rcFilterAngularVel', 0.05)
-            self.widthRoi           = rospy.get_param ('tracking/roi/width', 15)
-            self.heightRoi          = rospy.get_param ('tracking/roi/height', 15)
-            self.lengthBody         = rospy.get_param ('tracking/lengthBody', 9)
-            self.widthBody          = rospy.get_param ('tracking/widthBody', 5)
-            self.robot_width        = rospy.get_param ('robot/width', 1.0)
-            self.robot_length       = rospy.get_param ('robot/length', 1.0)
-            self.robot_height       = rospy.get_param ('robot/height', 1.0)
-            self.alphaForeground    = rospy.get_param('tracking/alphaForeground', 0.01)
+            self.widthRoi           = rospy.get_param('tracking/roi/width', 15)
+            self.heightRoi          = rospy.get_param('tracking/roi/height', 15)
+            self.lengthBody         = rospy.get_param('tracking/lengthBody', 9)
+            self.widthBody          = rospy.get_param('tracking/widthBody', 5)
+            self.robot_width        = rospy.get_param('robot/width', 1.0)
+            self.robot_length       = rospy.get_param('robot/length', 1.0)
+            self.robot_height       = rospy.get_param('robot/height', 1.0)
+            self.rcForeground       = rospy.get_param('tracking/rcForeground', 1.0)
             self.thresholdForeground= rospy.get_param('tracking/thresholdForeground', 25.0)
 
         self.kfState = filters.KalmanFilter()
@@ -85,6 +86,7 @@ class Fly:
         self.stampPrev = rospy.Time.now()
         self.dtVelocity = rospy.Duration(dtVelocity) # Interval over which to calculate velocity.
         self.dtForecast = dtForecast
+        self.stampPrev = rospy.Time.now()
         
         # Orientation detection stuff.
         self.lpFlip = filters.LowPassFilter(RC=rcFilterFlip)
@@ -379,16 +381,48 @@ class Fly:
     def UpdateFlyMean(self, npRoiReg):
         #global globalLock
         #with globalLock:
-        #    self.alphaForeground = rospy.get_param('tracking/alphaForeground', 0.01)
+        #    self.rcForeground = rospy.get_param('tracking/rcForeground', 0.01)
+        alphaForeground = 1 - N.exp(-self.dt.to_sec() / self.rcForeground)
 
         if (self.npfRoiMean is None):
             self.npfRoiMean = N.float32(npRoiReg)
-        cv2.accumulateWeighted(N.float32(npRoiReg), self.npfRoiMean, self.alphaForeground)
+        cv2.accumulateWeighted(N.float32(npRoiReg), self.npfRoiMean, alphaForeground)
 
         
     def UpdateFlySuperresolution(self, npRoi, moments):
-        pass
+        if globalNonessential:
+            if (moments['m00'] != 0.0):
+                xCOM  = moments['m10']/moments['m00']
+                yCOM  = moments['m01']/moments['m00']
+                
+#                 rospy.logwarn('-------------------------------------------------------')
+                # Rotate the fly image to 0-degrees, and the size of the super image.
+                angleR = self.GetResolvedAngleRaw()
+                scale = self.widthSuper/npRoi.shape[1]
+                xCenter = self.widthSuper/2+xCOM
+                yCenter = self.heightSuper/2+yCOM
+                #T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, scale)
+                #T = N.array([[scale*N.cos(angleR), -scale*N.sin(angleR), xCenter], [scale*N.sin(angleR), scale*N.cos(angleR), yCenter]])
+                T = cv2.getRotationMatrix2D((xCOM,yCOM), 0, self.widthSuper/npRoi.shape[1])
+                L = T.tolist()
+                L.append([0.0, 0.0, 1.0])
+                T2 = N.array(L)
+
+#                 self.npfSuper = cv2.warpAffine(npRoi, T, (self.widthSuper,self.heightSuper))
+                for x in range(npRoi.shape[1]):
+                    for y in range(npRoi.shape[0]):
+                        (x2,y2,z2) = N.dot(T2, N.array([x,y,1]))
+#                        (x2,y2) = N.dot(T, N.array([x,y,1]))
+                        x2 += xCenter
+                        y2 += yCenter
+                        if (0<=x2<self.widthSuper) and (0<=y2<self.heightSuper): 
+                            self.npfSuper[int(x2),int(y2)] = npRoi[x,y]
+                            #rospy.logwarn('(xCOM,yCOM)=(%d,%d), angle=%3.2f, (%d,%d) -> (%d,%d): %d' % (xCOM,yCOM,angleR,x,y,int(x2),int(y2), npRoi[x,y]))
     
+                imgSuper  = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8(self.npfSuper)), 'passthrough')
+                self.pubImageSuper.publish(imgSuper)
+
+        
         
     # Rotate the image to 0 degrees.                    
     def RegisterImageRoi(self, npRoi):
@@ -406,7 +440,7 @@ class Fly:
                 npRoiReg = cv2.warpAffine(npRoi, T, (0,0))#(self.widthRoi, self.heightRoi))
                 
                 # Super-resolution fly image.
-                self.UpdateFlySuperresolution(npRoi, moments)
+                self.UpdateFlySuperresolution(npRoiReg, moments)
             
         return npRoiReg
         
@@ -552,6 +586,9 @@ class Fly:
     def Update(self, contourinfo, posesComputedExternal):
         if self.initialized:
             self.contourinfo = contourinfo
+            
+            self.dt = self.contourinfo.header.stamp - self.stampPrev
+            self.stampPrev = self.contourinfo.header.stamp
             
             # Use the computed end-effector orientation.
             if posesComputedExternal is not None:

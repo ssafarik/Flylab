@@ -1,9 +1,12 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of TEST TRACKING.                            -->
+	<!-- Configuration of the ZAP-A-FLY experiment.                 -->
+    <!--                                                            -->
+    <!-- Edit this file to contain the elements of the particular   -->
+    <!-- experiment.                                                -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments testtracking.launch                  -->
+    <!-- roslaunch experiments zapafly.launch                       -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 
@@ -12,14 +15,14 @@
 	
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find robots)/launch/robot_0625h_0625w.launch" />
 	<include file="$(find robots)/launch/robots_0.launch" />
-	<include file="$(find flies)/launch/flies_2.launch" />
+	<include file="$(find flies)/launch/flies_1.launch" />
 	<include file="$(find flies)/launch/flytype_unspecified.launch" />
 	<include file="$(find flies)/launch/flygender_unspecified.launch" />
 
 	<!-- ***  The Experiment  *** -->
-    <param name="save/imagetopic" type="string" value="camera_flir/image_analysis"/>
-	<node pkg="experiments" type="TestTracking.py" name="Experiment" required="true" />
+	<node pkg="experiments" type="Foodnavi.py" name="Experiment" required="true" />
+
+	
   
 </launch>

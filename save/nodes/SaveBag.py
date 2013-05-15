@@ -63,7 +63,7 @@ class SaveBag:
 
 
     def OnShutdown_callback(self):
-        self.StopBag()
+        self.StopRecordingBag()
         
 
     # Service callback to perform initialization that requires experimentparams, e.g. subscribing to image topics.
@@ -116,7 +116,7 @@ class SaveBag:
 
 
         if (bRisingEdge):
-            self.StartBag()
+            self.StartRecordingBag()
             
 
             
@@ -146,10 +146,10 @@ class SaveBag:
 
 
         if (bRisingEdge):
-            self.StartBag()
+            self.StartRecordingBag()
         
         if (bFallingEdge):
-            self.StopBag()
+            self.StopRecordingBag()
         
         
         return self.bTriggered
@@ -172,27 +172,29 @@ class SaveBag:
 
 
         if (bRisingEdge):
-            self.StartBag()
+            self.StartRecordingBag()
         
         if (bFallingEdge):
-            self.StopBag()
+            self.StopRecordingBag()
                 
                 
         return True
 
 
-    def StartBag(self):
+    def StartRecordingBag(self):
         if (self.processRosbag is None):
             rospy.logwarn('Saving bag file: %s' % (self.dirBag+'/'+self.filenameBag))
-            topic1 = 'camera/image_rect/compressed'
-            topic2 = 'camera/image_backgroundinit'
-            topic3 = 'camera/camera_info'
-            topic4 = 'tracking/command'
-            cmdline = ['rosbag','record','-O',self.dirBag+'/'+self.filenameBag, topic1, topic2, topic3, topic4]
+            topic1 = 'camera/image_background_set'
+            topic2 = 'camera/calibration_set'
+            topic3 = 'stage/calibration_set'
+            topic4 = 'camera/camera_info'
+            topic5 = 'camera/image_rect/compressed'
+            topic6 = 'tracking/command'
+            cmdline = ['rosbag','record','-O',self.dirBag+'/'+self.filenameBag, topic1, topic2, topic3, topic4, topic5, topic6]
             self.processRosbag = subprocess.Popen(cmdline)
 
     
-    def StopBag(self):
+    def StopRecordingBag(self):
         if (self.processRosbag is not None):
             self.processRosbag.send_signal(subprocess.signal.SIGINT)
             self.processRosbag.wait()
