@@ -53,23 +53,23 @@ g_notify_list = ['savearenastate',
 # When you call NotifyServices.notify(), then for each in the list, we call the given services with the given parameter.
 #
 class NotifyServices():
-    def __init__(self, services={}, type=None):
-        self.services = services
+    def __init__(self, services_dict={}, type=None):
+        self.services_dict = services_dict
         self.type = type
         
     def attach(self):
-        for key in self.services:
+        for key in self.services_dict:
             #rospy.logwarn('Waiting for service: %s' % key)
             rospy.wait_for_service(key)
             try:
-                self.services[key] = rospy.ServiceProxy(key, self.type)
+                self.services_dict[key] = rospy.ServiceProxy(key, self.type)
             except rospy.ServiceException, e:
                 rospy.logwarn ('FAILED %s: %s' % (key,e))
             #rospy.logwarn('Attached service: %s' % key)
             
         
     def notify(self, param):
-        for key,callback in self.services.iteritems():
+        for key,callback in self.services_dict.iteritems():
             if callback is not None:
                 callback(param)
 # End class NotifyServices()
@@ -86,11 +86,11 @@ class StartExperiment (smach.State):
                              output_keys=['experimentparamsOut'])
 
 
-        services = {}
+        services_dict = {}
         for name in g_notify_list:
-            services[name+'/init'] = None
+            services_dict[name+'/init'] = None
              
-        self.ExperimentStartServices = NotifyServices(services=services, type=ExperimentParams) #ExperimentStartServices()
+        self.ExperimentStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParams) #ExperimentStartServices()
         self.ExperimentStartServices.attach()
 
         self.arenastate = None
@@ -131,11 +131,11 @@ class EndExperiment (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
 
-        services = {}
+        services_dict = {}
         for name in g_notify_list:
-            services[name+'/wait_until_done'] = None
+            services_dict[name+'/wait_until_done'] = None
             
-        self.ExperimentEndServices = NotifyServices(services=services, type=ExperimentParams) #ExperimentEndServices()
+        self.ExperimentEndServices = NotifyServices(services_dict=services_dict, type=ExperimentParams) #ExperimentEndServices()
         self.ExperimentEndServices.attach()
         
         
@@ -175,18 +175,18 @@ class StartTrial (smach.State):
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
         
         
-        services = {}
+        services_dict = {}
         for name in g_notify_list:
-            services[name+'/trigger'] = None
+            services_dict[name+'/trigger'] = None
 
-        self.TriggerServices = NotifyServices(services=services, type=Trigger) #TriggerServices()
+        self.TriggerServices = NotifyServices(services_dict=services_dict, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
         
-        services = {}
+        services_dict = {}
         for name in g_notify_list:
-            services[name+'/trial_start'] = None
+            services_dict[name+'/trial_start'] = None
 
-        self.TrialStartServices = NotifyServices(services=services, type=ExperimentParams) #TrialStartServices()
+        self.TrialStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParams) #TrialStartServices()
         self.TrialStartServices.attach()
 
 
@@ -255,11 +255,11 @@ class EndTrial (smach.State):
         self.bSelfPublished = False
 
         
-        services = {}
+        services_dict = {}
         for name in g_notify_list:
-            services[name+'/trial_end'] = None
+            services_dict[name+'/trial_end'] = None
 
-        self.TrialEndServices = NotifyServices(services=services, type=ExperimentParams) #TrialEndServices()
+        self.TrialEndServices = NotifyServices(services_dict=services_dict, type=ExperimentParams) #TrialEndServices()
         self.TrialEndServices.attach()
 
 
@@ -338,11 +338,11 @@ class TriggerOnStates (smach.State):
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
-        services = {}
+        services_dict = {}
         for name in g_notify_list:
-            services[name+'/trigger'] = None
+            services_dict[name+'/trigger'] = None
 
-        self.TriggerServices = NotifyServices(services=services, type=Trigger) #TriggerServices()
+        self.TriggerServices = NotifyServices(services_dict=services_dict, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
     
         self.nRobots = rospy.get_param('nRobots', 0)
@@ -594,11 +594,11 @@ class TriggerOnTime (smach.State):
                              outcomes=['success','aborted'],
                              input_keys=['experimentparamsIn'])
 
-        services = {}
+        services_dict = {}
         for name in g_notify_list:
-            services[name+'/trigger'] = None
+            services_dict[name+'/trigger'] = None
 
-        self.TriggerServices = NotifyServices(services=services, type=Trigger) #TriggerServices()
+        self.TriggerServices = NotifyServices(services_dict=services_dict, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
         
 
@@ -652,11 +652,11 @@ class ExperimentLib():
         self.xHome = 0
         self.yHome = 0
 
-        services = {}
+        services_dict = {}
         for name in g_notify_list:
-            services[name+'/trigger'] = None
+            services_dict[name+'/trigger'] = None
 
-        self.TriggerServices = NotifyServices(services=services, type=Trigger) #TriggerServices()
+        self.TriggerServices = NotifyServices(services_dict=services_dict, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
         self.tfrx = tf.TransformListener()
         

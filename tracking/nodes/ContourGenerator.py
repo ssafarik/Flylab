@@ -123,11 +123,12 @@ class ContourGenerator:
 
         self.stampPrev = rospy.Time.now()
         
-        rospy.Service('tracking/init',            ExperimentParams, self.Init_callback)
-        rospy.Service('tracking/trial_start',     ExperimentParams, self.TrialStart_callback)
-        rospy.Service('tracking/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        rospy.Service('tracking/trigger',         Trigger,          self.Trigger_callback)
-        rospy.Service('tracking/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services = {}
+        self.services['tracking/init'] = rospy.Service('tracking/init',            ExperimentParams, self.Init_callback)
+        self.services['tracking/trial_start'] = rospy.Service('tracking/trial_start',     ExperimentParams, self.TrialStart_callback)
+        self.services['tracking/trial_end'] = rospy.Service('tracking/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        self.services['tracking/trigger'] = rospy.Service('tracking/trigger',         Trigger,          self.Trigger_callback)
+        self.services['tracking/wait_until_done'] = rospy.Service('tracking/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
 
         self.initConstructor = True
         
@@ -698,6 +699,11 @@ class ContourGenerator:
 
     def Main(self):
         rospy.spin()
+
+#         # Shutdown all the services we offered.
+#         for key in self.services:
+#             self.services[key].shutdown()
+        
       
 
 def main(args):

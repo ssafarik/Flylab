@@ -162,8 +162,9 @@ class LEDPanels():
 
 
         # A few commands need to run as services, since they return data back to the caller.
-        self.srvGetVersion = rospy.Service('get_version', SrvGetVersion, self.GetVersion_callback)        
-        self.srvGetADCValue = rospy.Service('get_adc_value', SrvGetADCValue, self.GetADCValue_callback)        
+        self.services = {}
+        self.services['get_version'] = self.srvGetVersion = rospy.Service('get_version', SrvGetVersion, self.GetVersion_callback)        
+        self.services['get_adc_value'] = rospy.Service('get_adc_value', SrvGetADCValue, self.GetADCValue_callback)        
 
         self.serialport = self.DiscoverSerialPort() 
         if (self.serialport is not None):
@@ -347,6 +348,11 @@ class LEDPanels():
         panelcommand = MsgPanelsCommand(command='all_off')
         self.PanelsCommand_callback(panelcommand)
         rospy.spin()
+
+#        # Shutdown all the services we offered.
+#        for key in self.services:
+#            self.services[key].shutdown()
+            
             
 
 

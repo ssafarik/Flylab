@@ -1,7 +1,0 @@
-<launch>
-    <!-- Don't launch this file directly.  Launch stage.launch, and point to this from there. -->
-    
-	<node name="nullmotor" pkg="nullmotor" type="nullmotor.py" />
-
-</launch>
-
