@@ -21,7 +21,7 @@ from flycore.msg import MsgFrameState
 from pythonmodules import filters, CircleFunctions
 
 
-globalNonessential = True   # Publish nonessential stuff?
+globalNonessential = False   # Publish nonessential stuff?
 globalLock = threading.Lock()
 
         
