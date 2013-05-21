@@ -17,7 +17,9 @@
     <!-- Choose A or B -->    
     <!-- A:  Get input from the camera and the background image file. -->
     <include file="$(find rotcam)/launch/camera_tracking.launch" />
-    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+    <node name="OriginateBackground"         pkg="tracking" type="OriginateBackground.py" />
+    <node name="OriginateCalibrationCamera"  pkg="arena_tf" type="OriginateCalibrationCamera.py" />
+    <node name="OriginateCalibrationStage"   pkg="arena_tf" type="OriginateCalibrationStage.py" />
     
     <!-- B:  Get input from a pre-recorded bag file. -->
 <!--

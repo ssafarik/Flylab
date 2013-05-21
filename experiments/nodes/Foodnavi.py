@@ -23,13 +23,13 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Laser tracks all flies for 30min"
+        self.experimentparams.experiment.description = "Navigation between two food spots"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zap"
+        self.experimentparams.save.filenamebase = "foodnavi"
         self.experimentparams.save.csv = True
-        self.experimentparams.save.bag = False
+        self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
@@ -202,8 +202,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = -1
-
+        self.experimentparams.post.trigger.timeout = 43200
         self.experimentparams.post.wait = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 

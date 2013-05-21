@@ -20,11 +20,13 @@
     <!-- Choose A or B -->    
     <!-- A:  Get input from the camera, and from the background image file. -->
     <include file="$(find racetrack)/launch/camera_tracking.launch" />
-    <node name="BackgroundImage"   pkg="tracking" type="BackgroundImage.py" />
+    <node name="OriginateBackground"         pkg="tracking" type="OriginateBackground.py" />
+    <node name="OriginateCalibrationCamera"  pkg="arena_tf" type="OriginateCalibrationCamera.py" />
+    <node name="OriginateCalibrationStage"   pkg="arena_tf" type="OriginateCalibrationStage.py" />
     
     <!-- B:  Get input from a pre-recorded bag file. -->
 <!--
-    <node name="playbag" pkg="rosbag" type="play" args="-l /home/ssafarik/FlylabData/2013_04_30/test20130430171030.bag" />
+    <node name="playbag" pkg="rosbag" type="play" args="-l /home/sweta/FlylabData/2013_05_06/passivechase20130506113828.bag" />
     <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
 -->
 

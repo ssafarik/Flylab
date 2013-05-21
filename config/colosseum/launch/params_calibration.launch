@@ -27,12 +27,12 @@
 
 
   <!-- These values come from CameraArena.launch, with a checkerboard on the arena. -->
-  <param name="camera_arena_rvec_0" type="double" value="-3.129"/>
-  <param name="camera_arena_rvec_1" type="double" value="-0.000"/>
-  <param name="camera_arena_rvec_2" type="double" value="0.031"/>
-  <param name="camera_arena_tvec_0" type="double" value="2.715"/> 
-  <param name="camera_arena_tvec_1" type="double" value="3.183"/> 
-  <param name="camera_arena_tvec_2" type="double" value="313.200"/>
+  <param name="camera/arena_rvec_0" type="double" value="-3.129"/>
+  <param name="camera/arena_rvec_1" type="double" value="-0.000"/>
+  <param name="camera/arena_rvec_2" type="double" value="0.031"/>
+  <param name="camera/arena_tvec_0" type="double" value="2.715"/> 
+  <param name="camera/arena_tvec_1" type="double" value="3.183"/> 
+  <param name="camera/arena_tvec_2" type="double" value="313.200"/>
   
 
   <!-- ================================================================== -->
@@ -48,13 +48,13 @@
   <!-- ================================================================== -->
   
   <!-- These values come from StageArena.launch. -->
-  <param name="arena_stage_x" type="double" value="-1.0"/>
-  <param name="arena_stage_y" type="double" value="3.0"/> 
-  <param name="arena_stage_z" type="double" value="0.0"/>
-  <param name="arena_stage_qx" type="double" value="0.0"/>
-  <param name="arena_stage_qy" type="double" value="0.0"/>
-  <param name="arena_stage_qz" type="double" value="0.98"/>
-  <param name="arena_stage_qw" type="double" value="-0.02"/>
+  <param name="stage/arena_x" type="double" value="-1.0"/>
+  <param name="stage/arena_y" type="double" value="3.0"/> 
+  <param name="stage/arena_z" type="double" value="0.0"/>
+  <param name="stage/arena_qx" type="double" value="0.0"/>
+  <param name="stage/arena_qy" type="double" value="0.0"/>
+  <param name="stage/arena_qz" type="double" value="0.98"/>
+  <param name="stage/arena_qw" type="double" value="-0.02"/>
 
 
 </launch>
