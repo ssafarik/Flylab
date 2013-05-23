@@ -212,7 +212,7 @@ class KalmanFilter:
 
 
     def Update(self, z, t=None):
-        # z=[x,y]
+        # note: z=(x,y)
         if t is not None:
             tNew = t
         else:
