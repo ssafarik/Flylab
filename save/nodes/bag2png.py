@@ -13,8 +13,14 @@ import sys
 import Image
 import rospy
 import rosbag
+import cv
+
+sys.path.insert(0,'/opt/ros/fuerte/stacks/vision_opencv/cv_bridge/src') # There's probably a better way to find cv_bridge.
+import cv_bridge
 
 iImage = 0
+cvbridge = cv_bridge.CvBridge()
+
 
 if (len(sys.argv)>=2):
 
@@ -26,18 +32,27 @@ if (len(sys.argv)>=2):
         topicToSave = 'image_rect'
     
         
-    for topic, msg, t in bag.read_messages(topicToSave):
-        if topic.endswith(topicToSave):
-            if msg.encoding=='mono8':
-                im = Image.fromstring('L',(msg.width, msg.height), msg.data)
-                if im:
-                    im.save('%06d.png' % (iImage))
-                iImage += 1
-            else:
-                rospy.logwarn ('Only image encoding==mono8 is supported.  This one has %s' % msg.encoding)
+    for (topic, msg, t) in bag.read_messages(topicToSave):
+#        if topic.endswith(topicToSave):
+        if msg.encoding=='mono8':
+            filename = '%06d.png' % iImage
+
+#            image = Image.fromstring('L',(msg.width, msg.height), msg.data)
+#            image.save(filename)
+
+            # Way faster to use opencv for saving...
+            matImage = cv.GetImage(cvbridge.imgmsg_to_cv(msg, 'passthrough'))
+            cv.SaveImage(filename, matImage)
+
+                
+            rospy.logwarn ('Wrote %s' % filename)
+            iImage += 1
+        else:
+            rospy.logwarn ('Only image encoding==mono8 is supported.  This one has %s' % msg.encoding)
                 
     if (iImage==0):
-        rospy.logwarn('Please specify an image topic.  Topics in %s are:' % sys.argv[1])
+        rospy.logwarn('Please specify an image topic:  bag2png filename.bag imagetopic')
+        rospy.logwarn('Topics in %s are:' % sys.argv[1])
         for (i,c) in bag._connections.iteritems():
             rospy.logwarn(c.topic)
             
