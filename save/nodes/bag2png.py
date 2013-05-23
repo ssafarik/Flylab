@@ -18,13 +18,15 @@ iImage = 0
 
 if (len(sys.argv)>=2):
 
+    bag = rosbag.Bag(sys.argv[1])
+    
     if (len(sys.argv)>=3):
         topicToSave = sys.argv[2]
     else:
         topicToSave = 'image_rect'
     
         
-    for topic, msg, t in rosbag.Bag(sys.argv[1]).read_messages():
+    for topic, msg, t in bag.read_messages(topicToSave):
         if topic.endswith(topicToSave):
             if msg.encoding=='mono8':
                 im = Image.fromstring('L',(msg.width, msg.height), msg.data)
@@ -33,8 +35,13 @@ if (len(sys.argv)>=2):
                 iImage += 1
             else:
                 rospy.logwarn ('Only image encoding==mono8 is supported.  This one has %s' % msg.encoding)
+                
+    if (iImage==0):
+        rospy.logwarn('Please specify an image topic.  Topics in %s are:' % sys.argv[1])
+        for (i,c) in bag._connections.iteritems():
+            rospy.logwarn(c.topic)
+            
 else:
     rospy.logwarn ('Please specify the .bag filename:  bag2png filename.bag [imagetopic]')
-    rospy.logwarn (' for example')
-    rospy.logwarn ('                                   bag2png asdf.bag image_rect')
+    
     
