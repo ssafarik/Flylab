@@ -53,11 +53,12 @@ class SaveBag:
         rospy.on_shutdown(self.OnShutdown_callback)
         
         # Offer some services.
-        rospy.Service('savebag/init',            ExperimentParams, self.Init_callback)
-        rospy.Service('savebag/trial_start',     ExperimentParams, self.TrialStart_callback)
-        rospy.Service('savebag/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        rospy.Service('savebag/trigger',         Trigger,          self.Trigger_callback)
-        rospy.Service('savebag/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services = {}
+        self.services['savebag/init']            = rospy.Service('savebag/init',            ExperimentParams, self.Init_callback)
+        self.services['savebag/trial_start']     = rospy.Service('savebag/trial_start',     ExperimentParams, self.TrialStart_callback)
+        self.services['savebag/trial_end']       = rospy.Service('savebag/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        self.services['savebag/trigger']         = rospy.Service('savebag/trigger',         Trigger,          self.Trigger_callback)
+        self.services['savebag/wait_until_done'] = rospy.Service('savebag/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
         
         self.initialized = True
 
@@ -204,6 +205,12 @@ class SaveBag:
 
     def Main(self):
         rospy.spin()
+
+#         # Shutdown all the services we offered.
+#         for key in self.services:
+#             self.services[key].shutdown()
+            
+        
         
 
 if __name__ == '__main__':

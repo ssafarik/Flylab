@@ -126,11 +126,12 @@ class Fivebar:
         
         
         # Publish & Subscribe
-        rospy.Service('set_stage_state',    SrvFrameState, self.SetStageState_callback)
-        rospy.Service('get_stage_state',    SrvFrameState, self.GetStageState_callback)
-        rospy.Service('home_stage',         SrvFrameState, self.HomeStage_callback)
-        rospy.Service('calibrate_stage',    SrvFrameState, self.Calibrate_callback)
-        rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
+        self.services = {}
+        self.services['set_stage_state'] = rospy.Service('set_stage_state',    SrvFrameState, self.SetStageState_callback)
+        self.services['get_stage_state'] = rospy.Service('get_stage_state',    SrvFrameState, self.GetStageState_callback)
+        self.services['home_stage']      = rospy.Service('home_stage',         SrvFrameState, self.HomeStage_callback)
+        self.services['calibrate_stage'] = rospy.Service('calibrate_stage',    SrvFrameState, self.Calibrate_callback)
+        self.services['signal_input']    = rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
         # Command messages.
@@ -1192,7 +1193,12 @@ class Fivebar:
                         rospy.logwarn ("5B Exception:  %s" % e)
                 
             rosrate.sleep()
-                
+            
+            
+        # Shutdown all the services we offered.
+        for key in self.services:
+            self.services[key].shutdown()
+            
     
 
 if __name__ == '__main__':

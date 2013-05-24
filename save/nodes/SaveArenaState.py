@@ -382,11 +382,12 @@ class SaveArenastate:
         rospy.on_shutdown(self.OnShutdown_callback)
         
         # Offer some services.
-        rospy.Service('savearenastate/init',            ExperimentParams, self.Init_callback)
-        rospy.Service('savearenastate/trial_start',     ExperimentParams, self.TrialStart_callback)
-        rospy.Service('savearenastate/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        rospy.Service('savearenastate/trigger',         Trigger,          self.Trigger_callback)
-        rospy.Service('savearenastate/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services = {}
+        self.services['savearenastate/init'] = rospy.Service('savearenastate/init',            ExperimentParams, self.Init_callback)
+        self.services['savearenastate/trial_start'] = rospy.Service('savearenastate/trial_start',     ExperimentParams, self.TrialStart_callback)
+        self.services['savearenastate/trial_end'] = rospy.Service('savearenastate/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        self.services['savearenastate/trigger'] = rospy.Service('savearenastate/trigger',         Trigger,          self.Trigger_callback)
+        self.services['savearenastate/wait_until_done'] = rospy.Service('savearenastate/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
 
         self.initialized = True
 
@@ -920,6 +921,11 @@ class SaveArenastate:
     
     def Main(self):
         rospy.spin()
+
+#        # Shutdown all the services we offered.
+#        for key in self.services:
+#            self.services[key].shutdown()
+
         
 
 if __name__ == '__main__':

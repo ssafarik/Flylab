@@ -49,8 +49,10 @@ class PatternGenXY:
         
         self.subCommand          = rospy.Subscriber('broadcast/command', String, self.Command_callback)
         self.subSetPattern       = rospy.Subscriber('SetPattern', MsgPattern, self.SetPattern_callback)
-        self.srvGetPatternPoints = rospy.Service('GetPatternPoints', SrvGetPatternPoints, self.GetPatternPoints_callback)
         self.tfrx = tf.TransformListener()
+        
+        self.services = {}
+        self.services['GetPatternPoints'] = rospy.Service('GetPatternPoints', SrvGetPatternPoints, self.GetPatternPoints_callback)
         
         
         # Load stage services.
@@ -671,6 +673,12 @@ class PatternGenXY:
                 self.SendSignalPoint()
                 
             self.ratePoint.sleep()
+
+        # Shutdown all the services we offered.
+        for key in self.services:
+            self.services[key].shutdown()
+            
+            
 
 
 if __name__ == '__main__':

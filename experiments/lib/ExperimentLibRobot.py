@@ -29,6 +29,7 @@ class Reset (smach.State):
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
+        self.SetStageState = None
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -45,7 +46,7 @@ class Reset (smach.State):
         
     def OnShutdown_callback(self):
         pass
-        
+    
         
     def ArenaState_callback(self, arenastate):
         self.arenastate = arenastate
@@ -58,14 +59,14 @@ class Reset (smach.State):
         rv = 'disabled'
         if (userdata.experimentparamsIn.trial.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
             self.target = MsgFrameState()
-            self.SetStageState = None
             self.timeStart = rospy.Time.now()
     
-            rospy.wait_for_service('set_stage_state')
-            try:
-                self.SetStageState = rospy.ServiceProxy('set_stage_state', SrvFrameState)
-            except rospy.ServiceException, e:
-                print "Service call failed: %s"%e
+            if (self.SetStageState is None):
+                rospy.wait_for_service('set_stage_state')
+                try:
+                    self.SetStageState = rospy.ServiceProxy('set_stage_state', SrvFrameState)
+                except rospy.ServiceException, e:
+                    print "Service call failed: %s"%e
             
 
             while self.arenastate is None:
@@ -249,11 +250,13 @@ class Action (smach.State):
 
         if self.paramsIn.robot.enabled:
             rv = 'aborted'
-            rospy.wait_for_service('set_stage_state')
-            try:
-                self.SetStageState = rospy.ServiceProxy('set_stage_state', SrvFrameState)
-            except rospy.ServiceException, e:
-                print "Service call failed: %s"%e
+            
+            if (self.SetStageState is None):
+                rospy.wait_for_service('set_stage_state')
+                try:
+                    self.SetStageState = rospy.ServiceProxy('set_stage_state', SrvFrameState)
+                except rospy.ServiceException, e:
+                    print "Service call failed: %s"%e
             
             self.timeStart = rospy.Time.now()
     

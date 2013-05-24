@@ -33,14 +33,16 @@ class TransformServerArenaCamera:
         self.pubCalibrationSet       = rospy.Publisher('camera/calibration_set',        CalibrationCamera, latch=True)
         self.selfPublishedCalibration = False
 
-        rospy.Service('camera_from_arena', arena_tf.srv.ArenaCameraConversion, self.CameraFromArena_callback)
-        rospy.Service('arena_from_camera', arena_tf.srv.ArenaCameraConversion, self.ArenaFromCamera_callback)
+
+        self.services = {}
+        self.services['camera_from_arena'] = rospy.Service('camera_from_arena', arena_tf.srv.ArenaCameraConversion, self.CameraFromArena_callback)
+        self.services['arena_from_camera'] = rospy.Service('arena_from_camera', arena_tf.srv.ArenaCameraConversion, self.ArenaFromCamera_callback)
         
-        rospy.Service('transformserverarenacamera/init',            ExperimentParams, self.Init_callback)
-        rospy.Service('transformserverarenacamera/trial_start',     ExperimentParams, self.TrialStart_callback)
-        rospy.Service('transformserverarenacamera/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        rospy.Service('transformserverarenacamera/trigger',         Trigger,          self.Trigger_callback)
-        rospy.Service('transformserverarenacamera/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services['transformserverarenacamera/init']            = rospy.Service('transformserverarenacamera/init',            ExperimentParams, self.Init_callback)
+        self.services['transformserverarenacamera/trial_start']     = rospy.Service('transformserverarenacamera/trial_start',     ExperimentParams, self.TrialStart_callback)
+        self.services['transformserverarenacamera/trial_end']       = rospy.Service('transformserverarenacamera/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        self.services['transformserverarenacamera/trigger']         = rospy.Service('transformserverarenacamera/trigger',         Trigger,          self.Trigger_callback)
+        self.services['transformserverarenacamera/wait_until_done'] = rospy.Service('transformserverarenacamera/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
         
         
         self.initConstructor = True
@@ -204,6 +206,11 @@ class TransformServerArenaCamera:
                 rate.sleep()
             except tf.Exception:
                 rospy.logwarn ('Exception in TransformServerArenaCamera()')
+                
+        # Shutdown all the services we offered.
+        for key in self.services:
+            self.services[key].shutdown()
+            
                 
 
 

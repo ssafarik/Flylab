@@ -26,7 +26,7 @@
     
     <!-- B:  Get input from a pre-recorded bag file. -->
 <!--
-    <node name="playbag" pkg="rosbag" type="play" args="-l /home/ssafarik/FlylabData/2013_04_30/test20130430171030.bag" />
+    <node name="playbag" pkg="rosbag" type="play" args="-l /home/sweta/FlylabData/2013_05_06/passivechase20130506113828.bag" />
     <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
 -->
 

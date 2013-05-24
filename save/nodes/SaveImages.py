@@ -65,11 +65,12 @@ class SaveImages:
         rospy.on_shutdown(self.OnShutdown_callback)
         
         # Offer some services.
-        rospy.Service('saveimages/init',            ExperimentParams, self.Init_callback)
-        rospy.Service('saveimages/trial_start',     ExperimentParams, self.TrialStart_callback)
-        rospy.Service('saveimages/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        rospy.Service('saveimages/trigger',         Trigger,          self.Trigger_callback)
-        rospy.Service('saveimages/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services = {}
+        self.services['saveimages/init']            = rospy.Service('saveimages/init',            ExperimentParams, self.Init_callback)
+        self.services['saveimages/trial_start']     = rospy.Service('saveimages/trial_start',     ExperimentParams, self.TrialStart_callback)
+        self.services['saveimages/trial_end']       = rospy.Service('saveimages/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        self.services['saveimages/trigger']         = rospy.Service('saveimages/trigger',         Trigger,          self.Trigger_callback)
+        self.services['saveimages/wait_until_done'] = rospy.Service('saveimages/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
         
         self.initialized = True
 
@@ -254,6 +255,11 @@ class SaveImages:
 
     def Main(self):
         rospy.spin()
+
+#        # Shutdown all the services we offered.
+#        for key in self.services:
+#            self.services[key].shutdown()
+
         
 
 if __name__ == '__main__':

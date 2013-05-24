@@ -27,11 +27,12 @@ class TransformServerStageArena:
         self.pubCalibrationSet       = rospy.Publisher('stage/calibration_set',        CalibrationStage, latch=True)
         self.selfPublishedCalibration = False
 
-        rospy.Service('transformserverarenastage/init',            ExperimentParams, self.Init_callback)
-        rospy.Service('transformserverarenastage/trial_start',     ExperimentParams, self.TrialStart_callback)
-        rospy.Service('transformserverarenastage/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        rospy.Service('transformserverarenastage/trigger',         Trigger,          self.Trigger_callback)
-        rospy.Service('transformserverarenastage/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services = {}
+        self.services['transformserverarenastage/init']            = rospy.Service('transformserverarenastage/init',            ExperimentParams, self.Init_callback)
+        self.services['transformserverarenastage/trial_start']     = rospy.Service('transformserverarenastage/trial_start',     ExperimentParams, self.TrialStart_callback)
+        self.services['transformserverarenastage/trial_end']       = rospy.Service('transformserverarenastage/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        self.services['transformserverarenastage/trigger']         = rospy.Service('transformserverarenastage/trigger',         Trigger,          self.Trigger_callback)
+        self.services['transformserverarenastage/wait_until_done'] = rospy.Service('transformserverarenastage/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
 
         self.initConstructor = True
 
@@ -116,15 +117,17 @@ class TransformServerStageArena:
         
     def Main(self):
         rate = rospy.Rate(100) # BUG: Reducing this causes erratic behavior w/ patterngen & fivebar. 
-        try:
-            while not rospy.is_shutdown():
-                try:
-                    self.SendTransforms()
-                    rate.sleep()
-                except tf.Exception:
-                    rospy.logwarn ('Exception in TransformServerStageArena()')
-        except:
-            print "Shutting down"
+        while not rospy.is_shutdown():
+            try:
+                self.SendTransforms()
+                rate.sleep()
+            except tf.Exception:
+                rospy.logwarn ('Exception in TransformServerStageArena()')
+
+        # Shutdown all the services we offered.
+        for key in self.services:
+            self.services[key].shutdown()
+            
 
 
 if __name__ == "__main__":

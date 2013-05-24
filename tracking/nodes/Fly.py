@@ -21,7 +21,7 @@ from flycore.msg import MsgFrameState
 from pythonmodules import filters, CircleFunctions
 
 
-globalNonessential = True   # Publish nonessential stuff?
+globalNonessential = False   # Publish nonessential stuff?
 globalLock = threading.Lock()
 
         
@@ -44,37 +44,37 @@ class Fly:
         
         # Nonessential stuff to publish.
         if globalNonessential:
-            self.pubImageRoiMean  = rospy.Publisher(self.name+"/image_mean", Image)
-            self.pubImageRoi      = rospy.Publisher(self.name+"/image", Image)
-            self.pubImageRoiReg   = rospy.Publisher(self.name+"/image_reg", Image)
-            self.pubImageRoiWings = rospy.Publisher(self.name+"/image_wings", Image)
-            self.pubImageMask     = rospy.Publisher(self.name+"/image_mask", Image)
-            self.pubImageMaskBody = rospy.Publisher(self.name+"/image_mask_body", Image)
-            self.pubImageSuper    = rospy.Publisher(self.name+'/image_super', Image)
-            self.pubLeftMetric    = rospy.Publisher(self.name+'/leftmetric', Float32)
-            self.pubLeftMetricMean= rospy.Publisher(self.name+'/leftmetricmean', Float32)
-            self.pubLeft          = rospy.Publisher(self.name+'/left', Float32)
-            self.pubRightMetric   = rospy.Publisher(self.name+'/rightmetric', Float32)
-            self.pubRight         = rospy.Publisher(self.name+'/right', Float32)
+            self.pubImageRoiMean    = rospy.Publisher(self.name+"/image_mean", Image)
+            self.pubImageRoi        = rospy.Publisher(self.name+"/image", Image)
+            self.pubImageRoiReg     = rospy.Publisher(self.name+"/image_reg", Image)
+            self.pubImageRoiWings   = rospy.Publisher(self.name+"/image_wings", Image)
+            self.pubImageMask       = rospy.Publisher(self.name+"/image_mask", Image)
+            self.pubImageMaskBody   = rospy.Publisher(self.name+"/image_mask_body", Image)
+            self.pubImageSuper      = rospy.Publisher(self.name+'/image_super', Image)
+            self.pubLeftMetric      = rospy.Publisher(self.name+'/leftmetric', Float32)
+            self.pubLeftMetricMean  = rospy.Publisher(self.name+'/leftmetricmean', Float32)
+            self.pubLeft            = rospy.Publisher(self.name+'/left', Float32)
+            self.pubRightMetric     = rospy.Publisher(self.name+'/rightmetric', Float32)
+            self.pubRight           = rospy.Publisher(self.name+'/right', Float32)
         
         global globalLock
         with globalLock:
-            rcFilterAngle           = rospy.get_param('tracking/rcFilterAngle', 0.1)
-            dtVelocity              = rospy.get_param('tracking/dtVelocity', 0.2)
-            dtForecast              = rospy.get_param('tracking/dtForecast',0.15)
-            rcFilterFlip            = rospy.get_param('tracking/rcFilterFlip', 3.0)
-            rcFilterSpeed           = rospy.get_param('tracking/rcFilterSpeed', 0.2)
-            speedThresholdForTravel = rospy.get_param('tracking/speedThresholdForTravel', 5.0)
-            rcFilterAngularVel      = rospy.get_param('tracking/rcFilterAngularVel', 0.05)
-            self.widthRoi           = rospy.get_param('tracking/roi/width', 15)
-            self.heightRoi          = rospy.get_param('tracking/roi/height', 15)
-            self.lengthBody         = rospy.get_param('tracking/lengthBody', 9)
-            self.widthBody          = rospy.get_param('tracking/widthBody', 5)
-            self.robot_width        = rospy.get_param('robot/width', 1.0)
-            self.robot_length       = rospy.get_param('robot/length', 1.0)
-            self.robot_height       = rospy.get_param('robot/height', 1.0)
-            self.rcForeground       = rospy.get_param('tracking/rcForeground', 1.0)
-            self.thresholdForeground= rospy.get_param('tracking/thresholdForeground', 25.0)
+            rcFilterAngle                = rospy.get_param('tracking/rcFilterAngle', 0.1)
+            dtVelocity                   = rospy.get_param('tracking/dtVelocity', 0.2)
+            self.dtForecast              = rospy.get_param('tracking/dtForecast',0.15)
+            rcFilterFlip                 = rospy.get_param('tracking/rcFilterFlip', 3.0)
+            rcFilterSpeed                = rospy.get_param('tracking/rcFilterSpeed', 0.2)
+            self.speedThresholdForTravel = rospy.get_param('tracking/speedThresholdForTravel', 5.0)
+            rcFilterAngularVel           = rospy.get_param('tracking/rcFilterAngularVel', 0.05)
+            self.widthRoi                = rospy.get_param('tracking/roi/width', 15)
+            self.heightRoi               = rospy.get_param('tracking/roi/height', 15)
+            self.lengthBody              = rospy.get_param('tracking/lengthBody', 9)
+            self.widthBody               = rospy.get_param('tracking/widthBody', 5)
+            self.robot_width             = rospy.get_param('robot/width', 1.0)
+            self.robot_length            = rospy.get_param('robot/length', 1.0)
+            self.robot_height            = rospy.get_param('robot/height', 1.0)
+            self.rcForeground            = rospy.get_param('tracking/rcForeground', 1.0)
+            self.thresholdForeground     = rospy.get_param('tracking/thresholdForeground', 25.0)
 
         self.kfState = filters.KalmanFilter()
         self.lpAngle = filters.LowPassCircleFilter(RC=rcFilterAngle)
@@ -85,7 +85,6 @@ class Fly:
         self.apAngleContour.SetValue(0.0)
         self.stampPrev = rospy.Time.now()
         self.dtVelocity = rospy.Duration(dtVelocity) # Interval over which to calculate velocity.
-        self.dtForecast = dtForecast
         self.stampPrev = rospy.Time.now()
         
         # Orientation detection stuff.
@@ -95,7 +94,6 @@ class Fly:
         self.lpSpeed.SetValue(0.0)
         self.angleOfTravelRecent = 0.0
         self.contourinfo = Contourinfo()
-        self.speedThresholdForTravel = speedThresholdForTravel # Speed that counts as "traveling".
         self.speed = 0.0
         self.angleContourUnwrapped = 0.0
 
@@ -752,7 +750,7 @@ class Fly:
             if 'Robot' in self.name:
                 markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
                                                     frame_id='Arena'),
-                                      ns='robot',
+                                      ns=self.name,
                                       id=1,
                                       type=Marker.CYLINDER,
                                       action=0,
