@@ -994,16 +994,16 @@ class Fivebar:
         if self.stateRef is not None:
             #rospy.logwarn('stateRef: %s' % self.stateRef)
             # PID Gains & Parameters.
-#            self.kP      = rospy.get_param('fivebar/kP', 1.0)
-#            self.kI      = rospy.get_param('fivebar/kI', 0.0)
-#            self.kD      = rospy.get_param('fivebar/kD', 0.0)
-#            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
-#            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
-#            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
-#            
-#            self.kP *= self.kAll
-#            self.kI *= self.kAll
-#            self.kD *= self.kAll
+            self.kP      = rospy.get_param('fivebar/kP', 1.0)
+            self.kI      = rospy.get_param('fivebar/kI', 0.0)
+            self.kD      = rospy.get_param('fivebar/kD', 0.0)
+            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
+            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
+            
+            self.kP *= self.kAll
+            self.kI *= self.kAll
+            self.kD *= self.kAll
             
             # The contour error.
             self.vecEeErrorPrev.x = self.vecEeError.x 
