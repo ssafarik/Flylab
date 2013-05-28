@@ -1168,14 +1168,27 @@ class Fivebar:
                 # Get the angular positions for each joint.
                 (angleCommand1,angleCommand2,angleCommand3,angleCommand4) = self.Get1234FromPt(self.ptEeCommand)
                 (angleSense1,  angleSense2,  angleSense3,  angleSense4)   = self.Get1234FromPt(self.ptEeSense)
+
                 
-                dA1 = angleCommand1-angleSense1
-                speedAngularMax1 = (self.speedLinearMax / self.L1)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
-                speedNext1 = N.sign(dA1) * min(N.abs(dA1) / self.T, speedAngularMax1)
+                # Compute velocities.
+                speed = min(self.speedLinearMax, self.T * N.linalg.norm([self.ptEeCommand.x-self.ptEeSense.x, self.ptEeCommand.y-self.ptEeSense.y]))
+                angleDelta = N.arctan2(self.ptEeCommand.y-self.ptEeSense.y, self.ptEeCommand.x-self.ptEeSense.x)
                 
-                dA2 = angleCommand2-angleSense2
-                speedAngularMax2 = (self.speedLinearMax / self.L2)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
-                speedNext2 = N.sign(dA2) * min(N.abs(dA2) / self.T, speedAngularMax2)
+                xDot = speed * N.cos(angleDelta)
+                yDot = speed * N.sin(angleDelta)
+                
+                jFwd = self.JacobianFwd(angleSense1, angleSense2)   # (dx,dy)   = jFwd * (dt1,dt2)
+                jInv = N.linalg.inv(jFwd)                           # (dt1,dt2) = jInv * (dx,dy)
+                (speedNext1, speedNext2) = jInv.dot(N.array([[xDot],[yDot]])) 
+                
+
+#                 dA1 = angleCommand1-angleSense1
+#                 speedAngularMax1 = (self.speedLinearMax / self.L1)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
+#                 speedNext1 = N.sign(dA1) * min(N.abs(dA1) / self.T, speedAngularMax1)
+#                 
+#                 dA2 = angleCommand2-angleSense2
+#                 speedAngularMax2 = (self.speedLinearMax / self.L2)  # Convert linear speed (mm/sec) to angular speed (rad/sec).
+#                 speedNext2 = N.sign(dA2) * min(N.abs(dA2) / self.T, speedAngularMax2)
             else:
                 angleCommand1 = 0.0
                 angleCommand2 = 0.0
