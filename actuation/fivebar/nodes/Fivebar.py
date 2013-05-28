@@ -68,6 +68,8 @@ class Fivebar:
         self.kD = rospy.get_param('fivebar/kD', 0.0)
         self.maxI = rospy.get_param('fivebar/maxI', 40.0)
         self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+        
+        self.bTune = rospy.get_param('/tune', False)
 
         self.rDragF = 0.0
 
@@ -1037,16 +1039,18 @@ class Fivebar:
         if self.stateRef is not None:
             #rospy.logwarn('stateRef: %s' % self.stateRef)
             # PID Gains & Parameters.
-            self.kP      = rospy.get_param('fivebar/kP', 1.0)
-            self.kI      = rospy.get_param('fivebar/kI', 0.0)
-            self.kD      = rospy.get_param('fivebar/kD', 0.0)
-            self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
-            self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
-            self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
-            
-            self.kP *= self.kAll
-            self.kI *= self.kAll
-            self.kD *= self.kAll
+            if (self.bTune):
+                self.kP      = rospy.get_param('fivebar/kP', 1.0)
+                self.kI      = rospy.get_param('fivebar/kI', 0.0)
+                self.kD      = rospy.get_param('fivebar/kD', 0.0)
+                self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
+                self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
+                self.kAll    = rospy.get_param('fivebar/kAll', 1.0)
+                self.speedLinearMax = rospy.get_param('fivebar/speed_max', 200.0)
+                
+                self.kP *= self.kAll
+                self.kI *= self.kAll
+                self.kD *= self.kAll
             
             # The contour error.
             self.vecEeErrorPrev.x = self.vecEeError.x 
@@ -1078,7 +1082,11 @@ class Fivebar:
     
     
                 # Get the command for the hardware, clipped to arena coords.
-                a = 0.9 #rospy.get_param('/a', 0.9)
+                if (self.bTune):
+                    a = rospy.get_param('/a', 0.9)
+                else:
+                    a = 0.9
+                    
                 ptEeCommandRaw = Point(x=(a*self.ptEeSense.x+(1-a)*self.stateVisual.pose.position.x) + vecPID.x,
                                        y=(a*self.ptEeSense.y+(1-a)*self.stateVisual.pose.position.y) + vecPID.y)
                 
@@ -1099,8 +1107,11 @@ class Fivebar:
 #                rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPID, N.linalg.norm([vecPIDclipped.x,vecPIDclipped.y])))
             
                 # Display a vector in rviz.
-                ptBase = self.ptEeSense
-                ptEnd = self.ptEeCommand
+                ptBase = self.stateVisual.pose.position #self.ptEeSense
+                ptEnd = Point(x=self.stateVisual.pose.position.x+vecPID.x,
+                              y=self.stateVisual.pose.position.y+vecPID.y,
+                              z=self.stateVisual.pose.position.z+vecPID.z
+                              ) #self.ptEeCommand
                 markerCommand = Marker(header=Header(stamp=self.time,
                                                     frame_id='Stage'),
                                       ns='command',
@@ -1152,7 +1163,9 @@ class Fivebar:
 #                self.pubMarker.publish(markerCommand)
 
             
-                # Get the desired positions for each joint.
+#                # Cheap and wrong way to convert mm/sec to radians/sec.  Should use Jacobian.
+
+                # Get the angular positions for each joint.
                 (angleCommand1,angleCommand2,angleCommand3,angleCommand4) = self.Get1234FromPt(self.ptEeCommand)
                 (angleSense1,  angleSense2,  angleSense3,  angleSense4)   = self.Get1234FromPt(self.ptEeSense)
                 
@@ -1171,30 +1184,9 @@ class Fivebar:
                 
     
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):
-#                # Cheap and wrong way to convert mm/sec to radians/sec.  Should use Jacobian.
-#                #speedNext = self.speedContourRef * 0.0120 
-#                speedNext = self.stateRef.speed * 0.0120 
-#
-#                # Distribute the velocity over the two joints.
-#                dAngle1 = N.abs(angleNext1-self.jointstate1.position) # Delta theta
-#                dAngle2 = N.abs(angleNext2-self.jointstate2.position)
-#                dist = N.linalg.norm([dAngle1,dAngle2])
-#                if dist != 0.0:
-#                    scale1 = dAngle1/dist
-#                    scale2 = dAngle2/dist
-#                else:
-#                    scale1 = 0.5
-#                    scale2 = 0.5
-#                    
-#                speedNext1 = scale1 * speedNext
-#                speedNext2 = scale2 * speedNext
-                
-                
                 with self.lock:
                     try:
                         #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.stateRef.pose.position.x,self.stateRef.pose.position.y))
-                        #self.SetPositionAtVel_joint1(Header(frame_id=self.names[0]), angleNext1, speedNext1)
-                        #self.SetPositionAtVel_joint2(Header(frame_id=self.names[1]), angleNext2, speedNext2)
                         self.SetVelocity_joint1(Header(frame_id=self.names[0]), angleCommand1, speedNext1)
                         self.SetVelocity_joint2(Header(frame_id=self.names[1]), angleCommand2, speedNext2)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
