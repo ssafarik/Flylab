@@ -62,7 +62,7 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
 
-        if (True):
+        if (False):
 # Four points step response.
             self.experimentparams.trial.robot.move.pattern.shape = 'square'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
             self.experimentparams.trial.robot.move.pattern.hzPattern = 1/16               # Patterns per second.
