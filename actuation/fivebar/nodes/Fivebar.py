@@ -741,6 +741,10 @@ class Fivebar:
     
         return N.array([[j11,j12],[j21,j22]])
 
+
+    def JacobianInv (self, angle1, angle2):
+        return N.linalg.inv(self.JacobianFwd (angle1, angle2))
+
         
     def GetXyFrom12 (self, angle1, angle2):
         (angle1, angle2, angle3, angle4, x, y) = self.Get1234xyFrom12(angle1, angle2)
@@ -853,7 +857,6 @@ class Fivebar:
         rospy.loginfo ('5B Calibrate_callback rvStageState=%s' % rvStageState)
         
         # Set zero velocity after calibration.
-#        (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', rvStageState)
         self.stateRef = rvStageState
 
         return rvStageState
@@ -1040,8 +1043,7 @@ class Fivebar:
             
             # The previous error.
             self.statePErrorPrev = copy.deepcopy(self.statePError)
-#            self.vecStatePrev = self.vecState
-            
+            #self.vecStatePrev = self.vecState
             
             if (self.stateRef is not None) and (self.stateVisual is not None):
                 # Error terms.
@@ -1096,7 +1098,7 @@ class Fivebar:
                 self.stateIError.pose.position.y -= self.kWindup * ptExcessI.y
                 self.stateIError.pose.position.z -= self.kWindup * ptExcessI.z
 
-                
+            
                 # PID control of the contour velocity error.
                 self.statePID.velocity.linear = Point(x=self.kPv*self.statePError.velocity.linear.x + self.kIv*self.stateIError.velocity.linear.x + self.kDv*self.stateDError.velocity.linear.x,
                                                       y=self.kPv*self.statePError.velocity.linear.y + self.kIv*self.stateIError.velocity.linear.y + self.kDv*self.stateDError.velocity.linear.y,
@@ -1215,25 +1217,15 @@ class Fivebar:
                 
                 # Compute velocities.
                 speed = min(self.speedLinearMax, N.linalg.norm([self.stateCommand.pose.position.x-self.ptEeMech.x, self.stateCommand.pose.position.y-self.ptEeMech.y])/self.T)
-                #angleToTarget = N.arctan2((self.stateCommand.pose.position.y-self.ptEeMech.y), (self.stateCommand.pose.position.x-self.ptEeMech.x))
                 angleToTarget = N.arctan2((self.stateRef.pose.position.y-self.stateVisual.pose.position.y), (self.stateRef.pose.position.x-self.stateVisual.pose.position.x))
                 
-                #xDot = speed * N.cos(angleToTarget)
-                #yDot = speed * N.sin(angleToTarget)
                 xDot = self.stateCommand.velocity.linear.x + speed * N.cos(angleToTarget)
                 yDot = self.stateCommand.velocity.linear.y + speed * N.sin(angleToTarget)
             
-                jFwd = self.JacobianFwd(angle1Mech, 
-                                        angle2Mech)   # (dx,dy)   = jFwd * (dt1,dt2)
-                jInv = N.linalg.inv(jFwd)                           # (dt1,dt2) = jInv * (dx,dy)
+                jInv = self.JacobianInv(angle1Mech, angle2Mech)
                 (theta1Dot, theta2Dot) = jInv.dot(N.array([[xDot],[yDot]])) 
                 
                 # Display the velocity vector in rviz.
-#                ptBase = self.ptEeMech
-#                ptEnd = Point(x=self.ptEeMech.x+xDot,
-#                              y=self.ptEeMech.y+yDot,
-#                              z=self.ptEeMech.z+0
-#                              ) 
                 ptBase = self.stateVisual.pose.position
                 ptEnd = Point(x=self.stateVisual.pose.position.x+xDot,
                               y=self.stateVisual.pose.position.y+yDot,
