@@ -2,6 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('fivebar')
 import rospy
+import copy
 import numpy as N
 import serial
 import tf
@@ -161,17 +162,11 @@ class Fivebar:
         self.ptEeMech = Point(0, 0, 0)
         self.stateCommand = MsgFrameState()  # Where to command the end-effector.
 
-#         self.vecEePError = Point(0, 0, 0)
-#         self.vecEePErrorPrev = Point(0, 0, 0)
-#         self.vecEeDError = Point(0, 0, 0)
-#         self.vecEeIError = Point(0, 0, 0)
-#         self.ptEeIErrorClipped = Point(0, 0, 0)
-        
         self.statePError = MsgFrameState()
         self.stateIError = MsgFrameState()
         self.stateDError = MsgFrameState()
-        self.vecState     = N.array([0,0,0,0,0,0]) #  [x,y,z,vx,vy,vz]
-        self.vecStatePrev = N.array([0,0,0,0,0,0]) #  [x,y,z,vx,vy,vz]
+#        self.vecState     = N.array([0,0,0,0,0,0]) #  [x,y,z,vx,vy,vz]
+#        self.vecStatePrev = N.array([0,0,0,0,0,0]) #  [x,y,z,vx,vy,vz]
         
         self.statePID = MsgFrameState()
 
@@ -776,20 +771,9 @@ class Fivebar:
             rospy.sleep(0.5)
             
         (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', reqStageState.state)
-#         ptsContourRefExternal = PointStamped(header=reqStageState.state.header,
-#                                                   point=reqStageState.state.pose.position)
-#         
-#         (ptsContourRefExternal, isInArena) = self.ClipPtsToArena(ptsContourRefExternal)
-#         self.ptsContourRef = self.TransformPointToFrame('Stage', ptsContourRefExternal)
-
-
-        #rospy.logwarn('5B ptsContourRef=[%0.2f, %0.2f], ext=[%0.2f, %0.2f]' % (self.ptsContourRef.point.x,self.ptsContourRef.point.y,ptsContourRefExternal.point.x,ptsContourRefExternal.point.y))
 
         rvStageState = SrvFrameStateResponse()
         rvStageState.state = reqStageState.state
-        #rvStageState.state.pose.position.x = reqStageState.state.pose.position.x
-        #rvStageState.state.pose.position.y = reqStageState.state.pose.position.y
-        #rvStageState.state.pose.position.z = reqStageState.state.pose.position.z
 
         return rvStageState
     
@@ -802,16 +786,6 @@ class Fivebar:
         
         (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', srvSignalReq.state)
         rv.success = isInArena
-#         # Position
-#         ptsContourRefExternal = PointStamped(header=srvSignalReq.state.header,
-#                                              point=srvSignalReq.state.pose.position) 
-#         
-#         
-#         (ptsContourRefExternal, isInArena) = self.ClipPtsToArena(ptsContourRefExternal)
-#         self.ptsContourRef = self.TransformPointToFrame('Stage', ptsContourRefExternal)
-#         rv.success = isInArena
-#         
-            
         
         return rv
 
@@ -828,13 +802,6 @@ class Fivebar:
     
 
     def VisualState_callback(self, state):
-        # Transform to Stage frame.
-#         try:
-#             posesContour.header.stamp = self.tfrx.getLatestCommonTime('Stage', posesContour.header.frame_id)
-#             self.posesContourSense = self.tfrx.transformPose('Stage', posesContour)
-#         except tf.Exception:
-#             rospy.logwarn ('5B Exception transforming to Stage frame in VisualState_callback()')
-        #rospy.logwarn('VisualState_callback: %s' % state)
         (self.stateVisual, isInArena) = self.TransformStateToFrame('Stage', state, doClipToArena=False)
         
         
@@ -1058,7 +1025,7 @@ class Fivebar:
                 self.maxI    = rospy.get_param('fivebar/maxI', 40.0)
                 self.kWindup = rospy.get_param('fivebar/kWindup', 0.0)
 
-                self.kPv      = rospy.get_param('fivebar/kPv', 1.0)
+                self.kPv      = rospy.get_param('fivebar/kPv', 0.0)
                 self.kIv      = rospy.get_param('fivebar/kIv', 0.0)
                 self.kDv      = rospy.get_param('fivebar/kDv', 0.0)
                 self.maxIv    = rospy.get_param('fivebar/maxIv', 40.0)
@@ -1072,8 +1039,8 @@ class Fivebar:
                 self.kD *= self.kAll
             
             # The previous error.
-            self.statePErrorPrev = self.statePError
-            self.vecStatePrev = self.vecState
+            self.statePErrorPrev = copy.deepcopy(self.statePError)
+#            self.vecStatePrev = self.vecState
             
             
             if (self.stateRef is not None) and (self.stateVisual is not None):
@@ -1100,19 +1067,19 @@ class Fivebar:
                 self.stateDError.velocity.linear.z = self.statePError.velocity.linear.z - self.statePErrorPrev.velocity.linear.z
                 
                 
-                self.vecRef = N.array([self.stateRef.pose.position.x, 
-                                       self.stateRef.pose.position.y, 
-                                       self.stateRef.pose.position.z,
-                                       self.stateRef.velocity.linear.x, 
-                                       self.stateRef.velocity.linear.y, 
-                                       self.stateRef.velocity.linear.z])
-                
-                self.vecVisual = N.array([self.stateVisual.pose.position.x, 
-                                          self.stateVisual.pose.position.y, 
-                                          self.stateVisual.pose.position.z,
-                                          self.stateVisual.velocity.linear.x, 
-                                          self.stateVisual.velocity.linear.y, 
-                                          self.stateVisual.velocity.linear.z])
+#                self.vecRef = N.array([self.stateRef.pose.position.x, 
+#                                       self.stateRef.pose.position.y, 
+#                                       self.stateRef.pose.position.z,
+#                                       self.stateRef.velocity.linear.x, 
+#                                       self.stateRef.velocity.linear.y, 
+#                                       self.stateRef.velocity.linear.z])
+#                
+#                self.vecVisual = N.array([self.stateVisual.pose.position.x, 
+#                                          self.stateVisual.pose.position.y, 
+#                                          self.stateVisual.pose.position.z,
+#                                          self.stateVisual.velocity.linear.x, 
+#                                          self.stateVisual.velocity.linear.y, 
+#                                          self.stateVisual.velocity.linear.z])
                 
                 
                 # PID control of the contour position error.
@@ -1160,11 +1127,11 @@ class Fivebar:
                                                            z=(a*self.ptEeMech.z+(1-a)*self.stateVisual.pose.position.z) + self.statePID.pose.position.z))
                 #(ptsEeCommandArena, isInArena) = self.ClipPtsToArena(ptsEeCommandRaw)
                 (ptsEeCommandReachable, isInReachable) = self.ClipPtsToReachable(ptsEeCommandRaw)
-                self.stateCommand.pose.position = ptsEeCommandReachable.point #ptsEeCommandClipped.point
+                self.stateCommand.pose.position = ptsEeCommandReachable.point
 
-                self.stateCommand.velocity.linear.x = self.stateRef.velocity.linear + statePID.velocity.linear
-                self.stateCommand.velocity.linear.y = self.stateRef.velocity.linear + statePID.velocity.linear
-                self.stateCommand.velocity.linear.z = self.stateRef.velocity.linear + statePID.velocity.linear
+                self.stateCommand.velocity.linear.x = self.stateRef.velocity.linear.x + self.statePID.velocity.linear.x
+                self.stateCommand.velocity.linear.y = self.stateRef.velocity.linear.y + self.statePID.velocity.linear.y
+                self.stateCommand.velocity.linear.z = self.stateRef.velocity.linear.z + self.statePID.velocity.linear.z
             
             
                 # Display the command vector in rviz.
@@ -1226,12 +1193,19 @@ class Fivebar:
                                           lifetime=rospy.Duration(1.0), points=[ptBase, ptEnd])
                     self.pubMarker.publish(markerCommand)
 
+
                     # Print the PID component values.
-                    magP = N.linalg.norm([self.statePError.pose.position.x, self.statePError.pose.position.y])
-                    magI = N.linalg.norm([self.stateIError.pose.position.x, self.stateIError.pose.position.y])
-                    magD = N.linalg.norm([self.stateDError.pose.position.x, self.stateDError.pose.position.y])
+                    magP = self.kP * N.linalg.norm([self.statePError.pose.position.x, self.statePError.pose.position.y])
+                    magI = self.kI * N.linalg.norm([self.stateIError.pose.position.x, self.stateIError.pose.position.y])
+                    magD = self.kD * N.linalg.norm([self.stateDError.pose.position.x, self.stateDError.pose.position.y])
                     magPID = N.linalg.norm([self.statePID.pose.position.x, self.statePID.pose.position.y])
-                    rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f' % (magP,magI,magD, magPID))
+                    
+                    magPv = self.kPv * N.linalg.norm([self.statePError.velocity.linear.x, self.statePError.velocity.linear.y])
+                    magIv = self.kIv * N.linalg.norm([self.stateIError.velocity.linear.x, self.stateIError.velocity.linear.y])
+                    magDv = self.kDv * N.linalg.norm([self.stateDError.velocity.linear.x, self.stateDError.velocity.linear.y])
+                    magPIDv = N.linalg.norm([self.statePID.velocity.linear.x, self.statePID.velocity.linear.y])
+                    
+                    rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], [% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPv,magIv,magDv, magPID, magPIDv))
 
             
                 # Get the angular positions for each joint.
@@ -1240,13 +1214,14 @@ class Fivebar:
 
                 
                 # Compute velocities.
-#                 speed = min(self.speedLinearMax, N.linalg.norm([self.stateCommand.pose.position.x-self.ptEeMech.x, self.stateCommand.pose.position.y-self.ptEeMech.y])/self.T)
-#                 angleToTarget = N.arctan2((self.stateCommand.pose.position.y-self.ptEeMech.y), (self.stateCommand.pose.position.x-self.ptEeMech.x))
-#                 #speed = min(self.speedLinearMax, self.T * N.linalg.norm([self.vecEePError.x, self.vecEePError.y]))
-#                 #angleToTarget = N.arctan2(self.vecEePError.y, self.vecEePError.x)
+                speed = min(self.speedLinearMax, N.linalg.norm([self.stateCommand.pose.position.x-self.ptEeMech.x, self.stateCommand.pose.position.y-self.ptEeMech.y])/self.T)
+                #angleToTarget = N.arctan2((self.stateCommand.pose.position.y-self.ptEeMech.y), (self.stateCommand.pose.position.x-self.ptEeMech.x))
+                angleToTarget = N.arctan2((self.stateRef.pose.position.y-self.stateVisual.pose.position.y), (self.stateRef.pose.position.x-self.stateVisual.pose.position.x))
                 
-                xDot = self.stateCommand.velocity.linear.x#speed * N.cos(angleToTarget)
-                yDot = self.stateCommand.velocity.linear.y#speed * N.sin(angleToTarget)
+                #xDot = speed * N.cos(angleToTarget)
+                #yDot = speed * N.sin(angleToTarget)
+                xDot = self.stateCommand.velocity.linear.x + speed * N.cos(angleToTarget)
+                yDot = self.stateCommand.velocity.linear.y + speed * N.sin(angleToTarget)
             
                 jFwd = self.JacobianFwd(angle1Mech, 
                                         angle2Mech)   # (dx,dy)   = jFwd * (dt1,dt2)
@@ -1254,10 +1229,15 @@ class Fivebar:
                 (theta1Dot, theta2Dot) = jInv.dot(N.array([[xDot],[yDot]])) 
                 
                 # Display the velocity vector in rviz.
-                ptBase = self.ptEeMech
-                ptEnd = Point(x=self.ptEeMech.x+xDot,
-                              y=self.ptEeMech.y+yDot,
-                              z=self.ptEeMech.z+0
+#                ptBase = self.ptEeMech
+#                ptEnd = Point(x=self.ptEeMech.x+xDot,
+#                              y=self.ptEeMech.y+yDot,
+#                              z=self.ptEeMech.z+0
+#                              ) 
+                ptBase = self.stateVisual.pose.position
+                ptEnd = Point(x=self.stateVisual.pose.position.x+xDot,
+                              y=self.stateVisual.pose.position.y+yDot,
+                              z=self.stateVisual.pose.position.z+0
                               ) 
                 markerVelocity = Marker(header=Header(stamp=self.time,
                                                     frame_id='Stage'),
