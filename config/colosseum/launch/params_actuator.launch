@@ -44,21 +44,21 @@
 
 	<!-- Good PID gains for ramp response. -->
 	<!--
-	-->
-	<param name="fivebar/kP"      type="double" value="0.03"/>
-	<param name="fivebar/kI"      type="double" value="0.001"/>
+	<param name="fivebar/kP"      type="double" value="1.0"/>
+	<param name="fivebar/kI"      type="double" value="0.02"/>
 	<param name="fivebar/kD"      type="double" value="0.0"/>
 	<param name="fivebar/maxI"    type="double" value="80"/>  
 	<param name="fivebar/kWindup" type="double" value="0.1"/>  
+	-->
 
 	<!-- Good PID gains for both step AND ramp response (e.g. experiments w/ a live fly). -->
 	<!--
-	<param name="fivebar/kP"      type="double" value="0.2"/>
-	<param name="fivebar/kI"      type="double" value="0.008"/>
-	<param name="fivebar/kD"      type="double" value="0.4"/>
-	<param name="fivebar/maxI"    type="double" value="100"/>  
-	<param name="fivebar/kWindup" type="double" value="0.95"/>  
 	-->
+	<param name="fivebar/kP"      type="double" value="2.0"/>
+	<param name="fivebar/kI"      type="double" value="0.02"/>
+	<param name="fivebar/kD"      type="double" value="0.0"/>
+	<param name="fivebar/maxI"    type="double" value="80"/>  
+	<param name="fivebar/kWindup" type="double" value="0.1"/>  
 
 	
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A'"/>

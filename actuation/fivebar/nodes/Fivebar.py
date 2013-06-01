@@ -1216,12 +1216,12 @@ class Fivebar:
 
                 
                 # Compute velocities.
-                speed = min(self.speedLinearMax, N.linalg.norm([self.stateCommand.pose.position.x-self.ptEeMech.x, self.stateCommand.pose.position.y-self.ptEeMech.y])/self.T)
-                angleToTarget = N.arctan2((self.stateRef.pose.position.y-self.stateVisual.pose.position.y), (self.stateRef.pose.position.x-self.stateVisual.pose.position.x))
+                xDot = self.stateCommand.velocity.linear.x + self.statePID.pose.position.x
+                yDot = self.stateCommand.velocity.linear.y + self.statePID.pose.position.y
+                pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
+                xDot = pt.x
+                yDot = pt.y
                 
-                xDot = self.stateCommand.velocity.linear.x + speed * N.cos(angleToTarget)
-                yDot = self.stateCommand.velocity.linear.y + speed * N.sin(angleToTarget)
-            
                 jInv = self.JacobianInv(angle1Mech, angle2Mech)
                 (theta1Dot, theta2Dot) = jInv.dot(N.array([[xDot],[yDot]])) 
                 
