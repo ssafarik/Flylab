@@ -548,8 +548,9 @@ class ContourIdentifier:
         # Create a list of computed object positions, if any.        
         ptComputed = [None for k in self.iAll_list] #[None for k in range(self.nRobots+len(self.objects))]
         for iRobot in self.iRobot_list:
-            ptComputed[iRobot] = Point(x=self.stateEndEffector.pose.position.x, 
-                                       y=self.stateEndEffector.pose.position.y)
+            if (self.stateEndEffector is not None):
+                ptComputed[iRobot] = Point(x=self.stateEndEffector.pose.position.x, 
+                                           y=self.stateEndEffector.pose.position.y)
 
         # Augment the contourinfo_list list, if necessary, so there are as many contourinfo_list as objects.
         contourinfo_listAug = copy.copy(self.contourinfo_list)
