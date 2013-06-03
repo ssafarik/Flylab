@@ -412,6 +412,27 @@ class ContourIdentifier:
         return map
     
 
+    def PublishMarker (self, pt, id, name):
+        marker = Marker(header=Header(stamp=rospy.Time.now(),
+                                      frame_id='Stage'),
+                          ns=name,
+                          id=id,
+                          type=Marker.SPHERE,
+                          action=0,
+                          pose=Pose(position=Point(x=pt.x,
+                                                   y=pt.y,
+                                                   z=pt.z)),
+                          scale=Vector3(x=2.0,
+                                        y=2.0,
+                                        z=2.0),
+                          color=ColorRGBA(a=0.5,
+                                          r=0.1,
+                                          g=0.1,
+                                          b=1.0),
+                          lifetime=rospy.Duration(1.0))
+        self.pubMarker.publish(marker)
+
+
     # MapContoursFromObjects()
     #   Uses self.contourinfo_list & self.objects,
     #   Returns a list of indices such that self.objects[k] = contour[map[k]], and self.objects[0]=therobot
@@ -431,20 +452,30 @@ class ContourIdentifier:
 
         # Robots.
         for iRobot in self.iRobot_list:
-            if (self.stateEndEffector is not None):
-                xyRobotComputed = [self.stateEndEffector.pose.position.x,
-                                   self.stateEndEffector.pose.position.y]
+#            if (self.stateEndEffector is not None):
+#                xyRobot = [self.stateEndEffector.pose.position.x,
+#                                 self.stateEndEffector.pose.position.y]
+#                #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
+#                #                                          self.objects[0].state.pose.position.y]))
+#            elif (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible):
+#                xyRobot = [self.objects[iRobot].state.pose.position.x,
+#                                 self.objects[iRobot].state.pose.position.y]
+#            else:
+#                xyRobot = [0.0, 0.0]
+            if (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible):
+                xyRobot = [self.objects[iRobot].state.pose.position.x,
+                                 self.objects[iRobot].state.pose.position.y]
+            elif (self.stateEndEffector is not None):
+                xyRobot = [self.stateEndEffector.pose.position.x,
+                           self.stateEndEffector.pose.position.y]
                 #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
                 #                                          self.objects[0].state.pose.position.y]))
-            elif (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible):
-                xyRobotComputed = [self.objects[iRobot].state.pose.position.x,
-                                   self.objects[iRobot].state.pose.position.y]
             else:
-                xyRobotComputed = [0.0, 0.0]
+                xyRobot = [0.0, 0.0]
 
 
-            xyObjects.append(xyRobotComputed)
-            self.tfbx.sendTransform((xyRobotComputed[0], xyRobotComputed[1], 0.0),
+            xyObjects.append(xyRobot)
+            self.tfbx.sendTransform((xyRobot[0], xyRobot[1], 0.0),
                                     tf.transformations.quaternion_about_axis(0, (0,0,1)),
                                     stamp,
                                     "RobotComputed",
@@ -459,7 +490,7 @@ class ContourIdentifier:
                 #rospy.loginfo ('CI Object %s at x,y=%s' % (iFly,[self.objects[iFly].state.pose.position.x,
                 #                                                 self.objects[iFly].state.pose.position.y]))
             
-        # Make a list of contourinfo positions.
+        # Make a list of contour positions.
         xyContours = []
         for iContour in range(len(self.contourinfo_list)):
             if self.contourinfo_list[iContour].x is not None:
@@ -517,7 +548,8 @@ class ContourIdentifier:
         # Create a list of computed object positions, if any.        
         ptComputed = [None for k in self.iAll_list] #[None for k in range(self.nRobots+len(self.objects))]
         for iRobot in self.iRobot_list:
-            ptComputed[iRobot] = Point(x=xyRobotComputed[0], y=xyRobotComputed[1])
+            ptComputed[iRobot] = Point(x=self.stateEndEffector.pose.position.x, 
+                                       y=self.stateEndEffector.pose.position.y)
 
         # Augment the contourinfo_list list, if necessary, so there are as many contourinfo_list as objects.
         contourinfo_listAug = copy.copy(self.contourinfo_list)
@@ -584,7 +616,7 @@ class ContourIdentifier:
             
 #        rospy.logwarn ('----------------------------------')
 #        if (self.nRobots==1):
-#            rospy.logwarn ('CI xyRobotComputed=%s' % xyRobotComputed)
+#            rospy.logwarn ('CI xyRobot=%s' % xyRobot)
 
 #        rospy.logwarn ('CI xyObjects=%s' % xyObjects)
 #        rospy.logwarn ('CI xyContours=%s' % xyContours)
@@ -599,6 +631,39 @@ class ContourIdentifier:
         return mapContoursFromObjects
     
     
+    def PublishArenaStateFromObjects(self):                    
+        # Construct the ArenaState message.
+        arenastate = ArenaState()
+        #if self.objects[0].state.pose.position.x is not None:
+        for iRobot in self.iRobot_list:
+            if (iRobot < len(self.objects)):
+                arenastate.robot.header.stamp    = self.objects[iRobot].state.header.stamp
+                arenastate.robot.header.frame_id = self.objects[iRobot].state.header.frame_id
+                arenastate.robot.name            = self.objects[iRobot].name
+                arenastate.robot.pose            = self.objects[iRobot].state.pose
+                arenastate.robot.velocity        = self.objects[iRobot].state.velocity
+                arenastate.robot.wings           = self.objects[iRobot].state.wings
+                arenastate.robot.speed           = self.objects[iRobot].speed
+                #rospy.logwarn ('CI robot.position=%s, ptOffset=%s' % ([self.objects[iRobot].state.pose.position.x,
+                #                                                            self.objects[iRobot].state.pose.position.y],
+                #                                                           [self.objects[iRobot].ptOffset.x,
+                #                                                            self.objects[iRobot].ptOffset.y]))
+        
+        #rospy.logwarn('iFly_list=%s, len(mapContourinfoFromObject)=%d' % (self.iFly_list,len(self.mapContourinfoFromObject)))
+        for iFly in self.iFly_list:
+            if (iFly < len(self.objects)):
+                arenastate.flies.append(MsgFrameState(header   = self.objects[iFly].state.header, 
+                                                      name     = self.objects[iFly].name,
+                                                      pose     = self.objects[iFly].state.pose,
+                                                      velocity = self.objects[iFly].state.velocity,
+                                                      wings    = self.objects[iFly].state.wings,
+                                                      speed    = min(50.0, self.objects[iFly].speed)))
+
+        
+        # Publish the ArenaState.
+        self.pubArenaState.publish(arenastate)
+        
+
     def ContourinfoLists_callback(self, contourinfolistsPixels):
         #rospy.logwarn('ContourinfoLists_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
 #        self.timePrev = rospy.Time.now().to_sec()
@@ -732,44 +797,13 @@ class ContourIdentifier:
                     #                                 self.objects[1].state.pose.position.y)
                     #    self.fidFly.write(data)
                 
+
     
-    
-                # Construct the ArenaState message.
-                arenastate = ArenaState()
-                #if self.objects[0].state.pose.position.x is not None:
-                for iRobot in self.iRobot_list:
-                    if (iRobot < len(self.objects)):
-                        arenastate.robot.header.stamp    = self.objects[iRobot].state.header.stamp
-                        arenastate.robot.header.frame_id = self.objects[iRobot].state.header.frame_id
-                        arenastate.robot.name            = self.objects[iRobot].name
-                        arenastate.robot.pose            = self.objects[iRobot].state.pose
-                        arenastate.robot.velocity        = self.objects[iRobot].state.velocity
-                        arenastate.robot.wings           = self.objects[iRobot].state.wings
-                        arenastate.robot.speed           = self.objects[iRobot].speed
-                        #rospy.logwarn ('CI robot.position=%s, ptOffset=%s' % ([self.objects[iRobot].state.pose.position.x,
-                        #                                                            self.objects[iRobot].state.pose.position.y],
-                        #                                                           [self.objects[iRobot].ptOffset.x,
-                        #                                                            self.objects[iRobot].ptOffset.y]))
-                
-                #rospy.logwarn('iFly_list=%s, len(mapContourinfoFromObject)=%d' % (self.iFly_list,len(self.mapContourinfoFromObject)))
-                for iFly in self.iFly_list:
-                    if (iFly < len(self.objects)):
-                        arenastate.flies.append(MsgFrameState(header   = self.objects[iFly].state.header, 
-                                                              name     = self.objects[iFly].name,
-                                                              pose     = self.objects[iFly].state.pose,
-                                                              velocity = self.objects[iFly].state.velocity,
-                                                              wings    = self.objects[iFly].state.wings,
-                                                              speed    = min(50.0, self.objects[iFly].speed)))
+                self.PublishArenaStateFromObjects()
 
                 
-                # Publish the ArenaState.
-                self.pubArenaState.publish(arenastate)
-                
-                
-                # Publish the EndEffectorOffset.
+                # Publish the VisualState.
                 if (0 in self.iRobot_list) and (0 < len(self.objects)):
-#                     self.pubVisualPosition.publish(PoseStamped(header=self.objects[0].state.header,
-#                                                                pose=self.objects[0].state.pose))
                     self.pubVisualState.publish(self.objects[0].state)
                 
                 
@@ -778,6 +812,7 @@ class ContourIdentifier:
                 self.markerArenaInner.header.stamp = contourinfolists.header.stamp
                 self.pubMarker.publish(self.markerArenaOuter)
                 self.pubMarker.publish(self.markerArenaInner)
+
                 
                 # Publish markers for all the exclusionzones.
                 if self.enabledExclusionzone:
