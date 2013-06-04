@@ -74,7 +74,7 @@ class ExperimentChase():
             self.experimentparams.trial.robot.move.pattern.hzPoint = 50                   # Points per second in the pattern.
 
         self.experimentparams.trial.robot.move.pattern.count = -1
-        self.experimentparams.trial.robot.move.pattern.size.x = 30
+        self.experimentparams.trial.robot.move.pattern.size.x = 32
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.pattern.param = 0
         self.experimentparams.trial.robot.move.pattern.direction = 1
@@ -82,7 +82,7 @@ class ExperimentChase():
         self.experimentparams.trial.robot.home.x = 0.0
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.tolerance = 2
+        self.experimentparams.trial.robot.home.tolerance = 35
 
         self.experimentparams.trial.lasergalvos.enabled = False
         self.experimentparams.trial.ledpanels.enabled = False

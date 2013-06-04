@@ -1051,6 +1051,7 @@ class Fivebar:
             self.statePErrorPrev = copy.deepcopy(self.statePError)
             #self.vecStatePrev = self.vecState
             
+
             if (self.stateRef is not None) and (self.stateVisual is not None):
                 # Error terms.
                 self.statePError.pose.position.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
@@ -1105,6 +1106,7 @@ class Fivebar:
                 self.stateIError.pose.position.z -= self.kWindup * ptExcessI.z
 
             
+
                 # PID control of the visual velocity error.
                 self.statePID.velocity.linear = Point(x=self.kPv*self.statePError.velocity.linear.x + self.kIv*self.stateIError.velocity.linear.x + self.kDv*self.stateDError.velocity.linear.x,
                                                       y=self.kPv*self.statePError.velocity.linear.y + self.kIv*self.stateIError.velocity.linear.y + self.kDv*self.stateDError.velocity.linear.y,
