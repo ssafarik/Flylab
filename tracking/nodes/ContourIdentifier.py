@@ -305,46 +305,91 @@ class ContourIdentifier:
         #rospy.loginfo('CI DM d=%s' % d)
         return d
     
-    
-    def GetDistanceMatrixFromContours(self, xyObjects, contourinfo_list, contourinfoMin_list, contourinfoMax_list, contourinfoMean_list, ptComputed):
-        d = N.array([[N.inf for n in range(len(contourinfo_list))] for m in range(len(xyObjects))])
-        for m in range(len(xyObjects)):
-            for n in range(len(contourinfo_list)):
-                try:
-                    d[m,n] = N.linalg.norm([xyObjects[m][0]-contourinfo_list[n].x,
-                                             xyObjects[m][1]-contourinfo_list[n].y])
+    def GetDistanceMatrixFromContours(self, xyObjects, xyContours):
+#    def GetDistanceMatrixFromContours(self, xyObjects, contourinfo_list, contourinfoMin_list, contourinfoMax_list, contourinfoMean_list, ptComputed):
+#         d = N.array([[N.inf for n in range(len(contourinfo_list))] for m in range(len(xyObjects))])
+#         for m in range(len(xyObjects)):
+#             for n in range(len(contourinfo_list)):
+#                 try:
+#                     d[m,n] = N.linalg.norm([xyObjects[m][0]-contourinfo_list[n].x,
+#                                              xyObjects[m][1]-contourinfo_list[n].y])
+# 
+#                     # Penalize deviations from any known computed positions.
+#                     if (ptComputed[m] is not None):
+#                         dComputed = N.linalg.norm([ptComputed[m].x-contourinfo_list[n].x,
+#                                                    ptComputed[m].y-contourinfo_list[n].y])
+#                     else: # Use object position as the computed position.
+#                         dComputed = 0 #d[m,n]
+#                         
+#                     d[m,n] += dComputed #* dComputed
+#                     
+#                     # Penalize deviations from ideal visual characteristics.
+#                     gainEcc = 10.0
+#                     eccmetric = gainEcc * N.abs(contourinfo_list[n].ecc - contourinfoMean_list[m].ecc) / N.max([contourinfo_list[n].ecc, contourinfoMean_list[m].ecc]) # Ranges 0 to 1.
+#                     d[m,n] += 0#eccmetric
+#                     
+#                     gainArea = 0.1 
+#                     areametric = gainArea * N.abs(contourinfo_list[n].area - contourinfoMean_list[m].area)
+#                     d[m,n] += 0#areametric
+#                     #if m<2:
+#                     #    rospy.logwarn('Object %s, eccmetric=%0.2f, areametric=%0.2f' % (m, eccmetric, areametric))
+#                     
+#                     
+#                 except TypeError:
+#                     d[m,n] = None
 
-                    # Penalize deviations from any known computed positions.
-                    #if (ptComputed[m] is None) and (ptComputed[0] is not None):
-                    if (ptComputed[m] is not None):
-                        dComputed = N.linalg.norm([ptComputed[m].x-contourinfo_list[n].x,
-                                                   ptComputed[m].y-contourinfo_list[n].y])
-                        #dComputed = N.linalg.norm([ptComputed[m].x-xyObjects[m][0],
-                        #                         ptComputed[m].y-xyObjects[m][1]])
-                    else: # Use object position as the computed position.
-                        dComputed = 0 #d[m,n]
-                        
-                    d[m,n] += dComputed #* dComputed
-                    
-                    # Penalize deviations from ideal visual characteristics.
-                    #if (contourinfo_list[n].ecc <= contourinfoMin_list[m].ecc) or (contourinfoMax_list[m].ecc <= contourinfo_list[n].ecc): 
-                    #    d[m,n] += 1000 
-                    #if (contourinfo_list[n].area <= contourinfoMin_list[m].area) or (contourinfoMax_list[m].area <= contourinfo_list[n].area): 
-                    #    d[m,n] += 0
+        X = 0
+        Y = 1
+        AMIN = 2
+        EMIN = 3
+        AMEAN = 4
+        EMEAN = 5
+        AMAX = 6
+        EMAX = 7
+        XCOMPUTED = 8
+        YCOMPUTED = 9
+        
+        AREA = 2
+        ECC = 3
+        
+        # The basic distance matrix.
+        d0 = N.subtract.outer(xyObjects[:,X], xyContours[:,X])
+        d1 = N.subtract.outer(xyObjects[:,Y], xyContours[:,Y])
+        dXY = N.hypot(d0, d1)
+
+
+        # Additional distance penalties.
+
+        # Penalty for distance from computed position
+        for m in range(len(xyObjects)):
+            if (xyObjects[:,XCOMPUTED] is None):
+                xyObjects[:,XCOMPUTED] = xyContours[m,X]
+                xyObjects[:,YCOMPUTED] = xyContours[m,Y]
+
+        d0 = N.subtract.outer(xyObjects[:,XCOMPUTED], xyContours[:,X])
+        d1 = N.subtract.outer(xyObjects[:,YCOMPUTED], xyContours[:,Y])
+        dPenalty1 = N.hypot(d0, d1)
+
+        d = dXY + dPenalty1
+        
+        # Penalty for deviation from visual characteristics.
+        for m in range(len(xyObjects)):
+            for n in range(len(xyContours)):
+                try:
                     gainEcc = 10.0
-                    eccmetric = gainEcc * N.abs(contourinfo_list[n].ecc - contourinfoMean_list[m].ecc) / N.max([contourinfo_list[n].ecc, contourinfoMean_list[m].ecc]) # Ranges 0 to 1.
+                    eccmetric = gainEcc * N.abs(xyContours[n,ECC] - xyObjects[m,EMEAN]) / N.max([xyContours[n,ECC], xyObjects[m,EMEAN]]) # Ranges 0 to 1.
                     d[m,n] += 0#eccmetric
-                    
+                     
                     gainArea = 0.1 
-                    areametric = gainArea * N.abs(contourinfo_list[n].area - contourinfoMean_list[m].area)
+                    areametric = gainArea * N.abs(xyContours[n,AREA] - xyObjects[m,AMEAN])
                     d[m,n] += 0#areametric
                     #if m<2:
                     #    rospy.logwarn('Object %s, eccmetric=%0.2f, areametric=%0.2f' % (m, eccmetric, areametric))
-                    
-                    
+                     
+                     
                 except TypeError:
                     d[m,n] = None
-
+                    
         return d
     
     
@@ -464,15 +509,23 @@ class ContourIdentifier:
 #            else:
 #                xyRobot = [0.0, 0.0]
 
-            if (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible):
+            if (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible) and (self.stateEndEffector is not None):
                 xyRobot = N.array([self.objects[iRobot].state.pose.position.x,
-                                   self.objects[iRobot].state.pose.position.y])
+                                   self.objects[iRobot].state.pose.position.y,
+                                   self.objects[iRobot].areaMin,                                  self.objects[iRobot].eccMin,
+                                   self.objects[iRobot].areaSum / self.objects[iRobot].areaCount, self.objects[iRobot].eccSum / self.objects[iRobot].eccCount,
+                                   self.objects[iRobot].areaMax,                                  self.objects[iRobot].eccMax,
+                                   self.stateEndEffector.pose.position.x,                         self.stateEndEffector.pose.position.y])
             else:
                 xyRobot = None
                 
             if (self.stateEndEffector is not None):
                 xyEndEffector = N.array([self.stateEndEffector.pose.position.x,
-                                         self.stateEndEffector.pose.position.y])
+                                         self.stateEndEffector.pose.position.y,
+                                         0.0, 1.0,
+                                         1.0, 1.0,
+                                         N.inf, 1.0,
+                                         None, None])
                 #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
                 #                                          self.objects[0].state.pose.position.y]))
             else:
@@ -507,7 +560,11 @@ class ContourIdentifier:
         for iFly in self.iFly_list:
             #if self.objects[iFly].isVisible:
                 xyObjects.append(N.array([self.objects[iFly].state.pose.position.x,
-                                          self.objects[iFly].state.pose.position.y]))
+                                          self.objects[iFly].state.pose.position.y,
+                                          self.objects[iFly].areaMin,                                self.objects[iFly].eccMin,
+                                          self.objects[iFly].areaSum / self.objects[iFly].areaCount, self.objects[iFly].eccSum / self.objects[iFly].eccCount,
+                                          self.objects[iFly].areaMax,                                self.objects[iFly].eccMax,
+                                          None, None])) # Computed positions.
                 #rospy.loginfo ('CI Object %s at x,y=%s' % (iFly,[self.objects[iFly].state.pose.position.x,
                 #                                                 self.objects[iFly].state.pose.position.y]))
             
@@ -516,47 +573,49 @@ class ContourIdentifier:
         for iContour in range(len(self.contourinfo_list)):
             if self.contourinfo_list[iContour].x is not None:
                 xyContours.append(N.array([self.contourinfo_list[iContour].x,
-                                           self.contourinfo_list[iContour].y]))
+                                           self.contourinfo_list[iContour].y,
+                                           self.contourinfo_list[iContour].area,  self.contourinfo_list[iContour].ecc]))
                 #rospy.loginfo ('CI contourinfo %s at x,y=%s' % (iContour,[self.contourinfo_list[iContour].x,
                 #                                               self.contourinfo_list[iContour].y]))
         
                 
         #rospy.loginfo ('CI flies[0,1].isVisible=%s' % [self.objects[0].isVisible, self.objects[1].isVisible])
 
-        # Construct two lists of contourinfo stats, to describe the range of good robot/fly properties.
-        contourinfoMin_list = []
-        contourinfoMax_list = []
-        contourinfoMean_list = []
-        
-        # Append the robot contourinfo stats.
-        contourinfo = Contourinfo()
-        for iRobot in self.iRobot_list:
-            contourinfo.area   = self.objects[iRobot].areaMin #self.areaMinRobot
-            contourinfo.ecc    = self.objects[iRobot].eccMin #self.eccMinRobot
-            contourinfoMin_list.append(contourinfo)
-            
-            contourinfo.area   = self.objects[iRobot].areaMax #self.areaMaxRobot
-            contourinfo.ecc    = self.objects[iRobot].eccMax #self.eccMaxRobot
-            contourinfoMax_list.append(contourinfo)
-            
-            contourinfo.area   = self.objects[iRobot].areaSum / self.objects[iRobot].areaCount 
-            contourinfo.ecc    = self.objects[iRobot].eccSum / self.objects[iRobot].eccCount
-            contourinfoMean_list.append(contourinfo)
-        
-        
-        # Append the fly contourinfo stats.
-        for iFly in self.iFly_list:
-            contourinfo.area   = self.objects[iFly].areaMin #self.areaMinFly
-            contourinfo.ecc    = self.objects[iFly].eccMin #self.eccMinFly
-            contourinfoMin_list.append(contourinfo)
-            
-            contourinfo.area   = self.objects[iFly].areaMax #self.areaMaxFly
-            contourinfo.ecc    = self.objects[iFly].eccMax #self.eccMaxFly
-            contourinfoMax_list.append(contourinfo)
-            
-            contourinfo.area   = self.objects[iFly].areaSum / self.objects[iFly].areaCount 
-            contourinfo.ecc    = self.objects[iFly].eccSum / self.objects[iFly].eccCount
-            contourinfoMean_list.append(contourinfo)
+
+#         # Construct two lists of contourinfo stats, to describe the range of good robot/fly properties.
+#         contourinfoMin_list = []
+#         contourinfoMax_list = []
+#         contourinfoMean_list = []
+#         
+#         # Append the robot contourinfo stats.
+#         contourinfo = Contourinfo()
+#         for iRobot in self.iRobot_list:
+#             contourinfo.area   = self.objects[iRobot].areaMin #self.areaMinRobot
+#             contourinfo.ecc    = self.objects[iRobot].eccMin #self.eccMinRobot
+#             contourinfoMin_list.append(contourinfo)
+#             
+#             contourinfo.area   = self.objects[iRobot].areaMax #self.areaMaxRobot
+#             contourinfo.ecc    = self.objects[iRobot].eccMax #self.eccMaxRobot
+#             contourinfoMax_list.append(contourinfo)
+#             
+#             contourinfo.area   = self.objects[iRobot].areaSum / self.objects[iRobot].areaCount 
+#             contourinfo.ecc    = self.objects[iRobot].eccSum / self.objects[iRobot].eccCount
+#             contourinfoMean_list.append(contourinfo)
+#         
+#         
+#         # Append the fly contourinfo stats.
+#         for iFly in self.iFly_list:
+#             contourinfo.area   = self.objects[iFly].areaMin #self.areaMinFly
+#             contourinfo.ecc    = self.objects[iFly].eccMin #self.eccMinFly
+#             contourinfoMin_list.append(contourinfo)
+#             
+#             contourinfo.area   = self.objects[iFly].areaMax #self.areaMaxFly
+#             contourinfo.ecc    = self.objects[iFly].eccMax #self.eccMaxFly
+#             contourinfoMax_list.append(contourinfo)
+#             
+#             contourinfo.area   = self.objects[iFly].areaSum / self.objects[iFly].areaCount 
+#             contourinfo.ecc    = self.objects[iFly].eccSum / self.objects[iFly].eccCount
+#             contourinfoMean_list.append(contourinfo)
 
 
         # Print ecc/area stats.
@@ -567,38 +626,24 @@ class ContourIdentifier:
         
         
         # Create a list of computed object positions, if any.        
-        ptComputed = [None for k in self.iAll_list] #[None for k in range(self.nRobots+len(self.objects))]
-        for iRobot in self.iRobot_list:
-            if (self.stateEndEffector is not None):
-                ptComputed[iRobot] = Point(x=self.stateEndEffector.pose.position.x, 
-                                           y=self.stateEndEffector.pose.position.y)
+#         ptComputed = [None for k in self.iAll_list] #[None for k in range(self.nRobots+len(self.objects))]
+#         for iRobot in self.iRobot_list:
+#             if (self.stateEndEffector is not None):
+#                 ptComputed[iRobot] = Point(x=self.stateEndEffector.pose.position.x, 
+#                                            y=self.stateEndEffector.pose.position.y)
 
         # Augment the contourinfo_list list, if necessary, so there are as many contourinfo_list as objects.
-        contourinfo_listAug = copy.copy(self.contourinfo_list)
-        while len(contourinfo_listAug)<len(xyObjects):
-            contourinfo_listAug.append(ContourinfoLists(x=55555, y=55555, ecc=1.0, area=1.0)) # norm(x,y) must be less than 999999!
-            #rospy.logwarn ('len(contourinfo_listAug),len(xyObjects)=%s' % [len(contourinfo_listAug),len(xyObjects)])
+#         contourinfo_listAug = copy.copy(self.contourinfo_list)
+#         while len(contourinfo_listAug)<len(xyObjects):
+#             contourinfo_listAug.append(ContourinfoLists(x=55555, y=55555, ecc=1.0, area=1.0)) # norm(x,y) must be less than 999999!
+        while len(xyContours)<len(xyObjects):
+            xyContours.append(N.array([55555.0, 55555.0, 1.0, 1.0])) # norm(x,y) must be less than 999999!
             
-# Do we really need these?  They take time to send.
-#        for m in range(len(xyObjects)):
-#            if (xyObjects[m][0] is not None) and (xyObjects[m][1] is not None):
-#                self.tfbx.sendTransform((xyObjects[m][0], xyObjects[m][1], 0.0),
-#                                        (0,0,0,1),
-#                                        stamp,
-#                                        "xyObjects"+str(m),
-#                                        "Arena")
-#            
-#        for n in range(len(contourinfo_listAug)):
-#            self.tfbx.sendTransform((contourinfo_listAug[n].x, contourinfo_listAug[n].y, 0.0),
-#                                    (0,0,0,1),
-#                                    stamp,
-#                                    "contours"+str(n),
-#                                    "Arena")
-        
 
         # Match objects with contourinfo_list.
         #rospy.logwarn ('GetDistanceMatrixFromContours()')
-        d = self.GetDistanceMatrixFromContours(xyObjects, contourinfo_listAug, contourinfoMin_list, contourinfoMax_list, contourinfoMean_list, ptComputed)
+#        d = self.GetDistanceMatrixFromContours(xyObjects, contourinfo_listAug, contourinfoMin_list, contourinfoMax_list, contourinfoMean_list, ptComputed)
+        d = self.GetDistanceMatrixFromContours(xyObjects, xyContours)
         if d is not []:
             # Choose the algorithm.
             #alg = 'galeshapely'
