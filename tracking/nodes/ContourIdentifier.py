@@ -81,6 +81,7 @@ class ContourIdentifier:
         self.radiusMask = rospy.get_param("camera/mask/radius", 25) # Pixels
         self.radiusArenaInner = rospy.get_param("arena/radius_inner", 25) # Millimeters
         self.radiusArenaOuter = rospy.get_param("arena/radius_outer", 30) # Millimeters
+        self.offsetEndEffectorMax = rospy.get_param('tracking/offsetEndEffectorMax', 10.0)
         
         self.enabledExclusionzone = False
         self.pointExclusionzone_list = [Point(x=0.0, y=0.0)]
@@ -462,31 +463,51 @@ class ContourIdentifier:
 #                                 self.objects[iRobot].state.pose.position.y]
 #            else:
 #                xyRobot = [0.0, 0.0]
+
             if (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible):
-                xyRobot = [self.objects[iRobot].state.pose.position.x,
-                                 self.objects[iRobot].state.pose.position.y]
-            elif (self.stateEndEffector is not None):
-                xyRobot = [self.stateEndEffector.pose.position.x,
-                           self.stateEndEffector.pose.position.y]
+                xyRobot = N.array([self.objects[iRobot].state.pose.position.x,
+                                   self.objects[iRobot].state.pose.position.y])
+            else:
+                xyRobot = None
+                
+            if (self.stateEndEffector is not None):
+                xyEndEffector = N.array([self.stateEndEffector.pose.position.x,
+                                         self.stateEndEffector.pose.position.y])
                 #rospy.logwarn ('CI Robot image at %s' % ([self.objects[0].state.pose.position.x,
                 #                                          self.objects[0].state.pose.position.y]))
             else:
-                xyRobot = [0.0, 0.0]
+                xyEndEffector = None
 
 
-            xyObjects.append(xyRobot)
-            self.tfbx.sendTransform((xyRobot[0], xyRobot[1], 0.0),
-                                    tf.transformations.quaternion_about_axis(0, (0,0,1)),
-                                    stamp,
-                                    "RobotComputed",
-                                    "Arena")
+            # Decide which position to use for robot matching (e.g. don't let the fly walk away with the robot).
+            if (xyRobot is not None) and (xyEndEffector is not None):
+                if (N.linalg.norm(xyRobot-xyEndEffector) < self.offsetEndEffectorMax):
+                    xy = xyRobot
+                else:
+                    xy = xyEndEffector
+            else:
+                if (xyRobot is not None):
+                    xy = xyRobot
+                elif (xyEndEffector is not None):
+                    xy = xyEndEffector
+                else:
+                    xy = None
+                    
+                    
+            if (xy is not None):
+                xyObjects.append(xy)
+                self.tfbx.sendTransform((xy[0], xy[1], 0.0),
+                                        tf.transformations.quaternion_about_axis(0, (0,0,1)),
+                                        stamp,
+                                        "RobotComputed",
+                                        "Arena")
 
 
         # Flies.    
         for iFly in self.iFly_list:
             #if self.objects[iFly].isVisible:
-                xyObjects.append([self.objects[iFly].state.pose.position.x,
-                                  self.objects[iFly].state.pose.position.y])
+                xyObjects.append(N.array([self.objects[iFly].state.pose.position.x,
+                                          self.objects[iFly].state.pose.position.y]))
                 #rospy.loginfo ('CI Object %s at x,y=%s' % (iFly,[self.objects[iFly].state.pose.position.x,
                 #                                                 self.objects[iFly].state.pose.position.y]))
             
@@ -494,8 +515,8 @@ class ContourIdentifier:
         xyContours = []
         for iContour in range(len(self.contourinfo_list)):
             if self.contourinfo_list[iContour].x is not None:
-                xyContours.append([self.contourinfo_list[iContour].x,
-                                   self.contourinfo_list[iContour].y])
+                xyContours.append(N.array([self.contourinfo_list[iContour].x,
+                                           self.contourinfo_list[iContour].y]))
                 #rospy.loginfo ('CI contourinfo %s at x,y=%s' % (iContour,[self.contourinfo_list[iContour].x,
                 #                                               self.contourinfo_list[iContour].y]))
         
