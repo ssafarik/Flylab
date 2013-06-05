@@ -56,7 +56,7 @@
 	-->
 	<param name="fivebar/kP"      type="double" value="1.0"/>
 	<param name="fivebar/kI"      type="double" value="0.1"/>
-	<param name="fivebar/kD"      type="double" value="40.0"/>
+	<param name="fivebar/kD"      type="double" value="80.0"/>
 	<param name="fivebar/maxI"    type="double" value="80"/>  
 	<param name="fivebar/kWindup" type="double" value="0.1"/>  
 

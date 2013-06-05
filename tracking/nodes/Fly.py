@@ -128,14 +128,16 @@ class Fly:
         self.state.wings.right.angle  = 0.0
 
         self.eccMin = 999.9
+        self.eccMean = None
         self.eccMax = 0.0
-        self.eccSum = 1.0
-        self.eccCount = 1
+        #self.eccSum = 1.0
+        #self.eccCount = 1
         
         self.areaMin = 999.9
+        self.areaMean = None
         self.areaMax = 0.0
-        self.areaSum = 0.0
-        self.areaCount = 1
+        #self.areaSum = 0.0
+        #self.areaCount = 1
         
         # Wing angle stuff.
         self.npfRoiMean = None
@@ -617,10 +619,22 @@ class Fly:
                     self.areaMin = contourinfo.area
                 if self.areaMax < contourinfo.area:
                     self.areaMax = contourinfo.area
-                self.eccSum += contourinfo.ecc
-                self.eccCount += 1
-                self.areaSum += contourinfo.area
-                self.areaCount += 1
+                
+                a = self.dt.to_sec() / 60
+                if (self.areaMean is not None):
+                    self.areaMean = (1-a)*self.areaMean + a*contourinfo.area
+                elif (not N.isnan(contourinfo.area)):
+                    self.areaMean = contourinfo.area 
+
+                if (self.eccMean is not None):
+                    self.eccMean = (1-a)*self.eccMean + a*contourinfo.ecc
+                elif (not N.isnan(contourinfo.ecc)):
+                    self.eccMean = contourinfo.ecc 
+                    
+                #self.eccSum += contourinfo.ecc
+                #self.eccCount += 1
+                #self.areaSum += contourinfo.area
+                #self.areaCount += 1
                 
                 self.isVisible = True
                 (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contourinfo.x, self.contourinfo.y), contourinfo.header.stamp.to_sec())
