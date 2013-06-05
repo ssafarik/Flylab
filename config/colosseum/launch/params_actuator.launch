@@ -13,8 +13,8 @@
 	<param name="rosSimpleStep/velDefault" type="double" value="0.5" />
 	<param name="rosSimpleStep/limitHi"    type="double" value="6.283185" />
 	<param name="rosSimpleStep/limitLo"    type="double" value="-6.283185" />
-	<param name="fivebar/speed_max"        type="double" value="100.0"/>
-	<param name="fivebar/T"                type="double" value="0.02"/>
+	<param name="fivebar/speed_max"        type="double" value="30.0"/>
+	<param name="fivebar/T"                type="double" value="0.025"/>
 
 	<param name="fivebar/linkwidth" type="double" value="25.4"/>  <!-- Affects the smallest closing angle. -->
 	<param name="fivebar/L0" type="double" value="266.7"/>  <!-- Distance between motor shafts -->
@@ -24,40 +24,41 @@
 	<param name="fivebar/L4" type="double" value="266.7"/>
 
 
-	<!-- Simple Proportional Control Gains
+	<!-- Simple Proportional Control Gains -->
+	<!--
 	<param name="fivebar/kP"      type="double" value="1.0"/>
 	<param name="fivebar/kI"      type="double" value="0.0"/>
 	<param name="fivebar/kD"      type="double" value="0.0"/>
 	<param name="fivebar/maxI"    type="double" value="0.0"/>  
 	<param name="fivebar/kWindup" type="double" value="0.0"/>  
-	 -->
+	-->
 
 	<!-- Good PID gains for step response. -->
 	<!--
-	<param name="fivebar/kP"      type="double" value="0.4"/>
+	<param name="fivebar/kP"      type="double" value="2.0"/>
 	<param name="fivebar/kI"      type="double" value="0.001"/>
-	<param name="fivebar/kD"      type="double" value="0.4"/>
+	<param name="fivebar/kD"      type="double" value="0.0"/>
 	<param name="fivebar/maxI"    type="double" value="50.0"/>  
 	<param name="fivebar/kWindup" type="double" value="1.0"/>  
 	-->
 
 	<!-- Good PID gains for ramp response. -->
 	<!--
-	<param name="fivebar/kP"      type="double" value="0.2"/>
-	<param name="fivebar/kI"      type="double" value="0.004"/>
-	<param name="fivebar/kD"      type="double" value="0.0"/>
-	<param name="fivebar/maxI"    type="double" value="50"/>  
-	<param name="fivebar/kWindup" type="double" value="0.0"/>  
+	<param name="fivebar/kP"      type="double" value="1.0"/>
+	<param name="fivebar/kI"      type="double" value="0.05"/>
+	<param name="fivebar/kD"      type="double" value="40.0"/>
+	<param name="fivebar/maxI"    type="double" value="80"/>  
+	<param name="fivebar/kWindup" type="double" value="0.1"/>  
 	-->
 
 	<!-- Good PID gains for both step AND ramp response (e.g. experiments w/ a live fly). -->
 	<!--
 	-->
-	<param name="fivebar/kP"      type="double" value="0.2"/>
-	<param name="fivebar/kI"      type="double" value="0.008"/>
-	<param name="fivebar/kD"      type="double" value="0.4"/>
-	<param name="fivebar/maxI"    type="double" value="100"/>  
-	<param name="fivebar/kWindup" type="double" value="0.95"/>  
+	<param name="fivebar/kP"      type="double" value="1.0"/>
+	<param name="fivebar/kI"      type="double" value="0.1"/>
+	<param name="fivebar/kD"      type="double" value="80.0"/>
+	<param name="fivebar/maxI"    type="double" value="80"/>  
+	<param name="fivebar/kWindup" type="double" value="0.1"/>  
 
 	
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.A'"/>
