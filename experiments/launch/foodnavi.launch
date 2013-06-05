@@ -1,12 +1,12 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the ZAP-A-FLY experiment.                 -->
+	<!-- Configuration of the FOODNAVI experiment.                 -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- experiment.                                                -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments zapafly.launch                       -->
+    <!-- roslaunch experiments foodnavi.launch                       -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 
@@ -16,7 +16,7 @@
 	<!-- ***  Hardware, Flies, and Robot  *** -->
 	<include file="$(find config)/launch/hardware.launch" />
 	<include file="$(find robots)/launch/robots_0.launch" />
-	<include file="$(find flies)/launch/flies_4.launch" />
+	<include file="$(find flies)/launch/flies_0.launch" />
 	<include file="$(find flies)/launch/flytype_unspecified.launch" />
 	<include file="$(find flies)/launch/flygender_unspecified.launch" />
 
