@@ -314,6 +314,7 @@ class Fivebar:
             stamp = self.tfrx.getLatestCommonTime(frame_id, state.header.frame_id)
         except tf.Exception, e:
             rospy.logwarn ('5B Exception1 transforming in TransformStateToFrame(): %s' % e)
+            rospy.logwarn('state=%s' % state)
         else:
             stateOut.name = state.name
             
@@ -333,6 +334,7 @@ class Fivebar:
                 posesOut = self.tfrx.transformPose(frame_id, poses)
             except tf.Exception, e:
                 rospy.logwarn ('5B Exception2 transforming in TransformStateToFrame(): %s' % e)
+                rospy.logwarn('poses=%s' % poses)
                 posesOut = poses
             stateOut.header = posesOut.header
             stateOut.pose = posesOut.pose
@@ -346,6 +348,7 @@ class Fivebar:
                 v3sOut = self.tfrx.transformVector3(frame_id, v3s)
             except tf.Exception, e:
                 rospy.logwarn ('5B Exception3 transforming in TransformStateToFrame(): %s' % e)
+                rospy.logwarn('v3s=%s' % v3s)
                 v3sOut = v3s
             stateOut.velocity.linear = v3sOut.vector
                     
@@ -358,6 +361,7 @@ class Fivebar:
                 v3sOut = self.tfrx.transformVector3(frame_id, v3s)
             except tf.Exception, e:
                 rospy.logwarn ('5B Exception4 transforming in TransformStateToFrame(): %s' % e)
+                rospy.logwarn('v3s=%s' % v3s)
                 v3sOut = v3s
             stateOut.velocity.angular = v3sOut.vector
                     

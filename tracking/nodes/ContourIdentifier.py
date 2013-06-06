@@ -311,6 +311,14 @@ class ContourIdentifier:
         d = N.hypot(d0, d1)
         
         # Additional distance penalties.
+        
+        # Make sure the robot gets first choice of the contours.
+        dPenalty = N.ones(d.shape)
+        dPenalty *= 1000.0
+        for iRobot in range(self.nRobots):
+            dPenalty[iRobot,:] = 0
+            
+        d += dPenalty
 
         # Penalty for distance from computed position
 #        for m in range(len(xyObjects)):
@@ -320,14 +328,14 @@ class ContourIdentifier:
 #
 #        d0 = N.subtract.outer(xyObjects[:,INDEX_XCOMPUTED], xyContours[:,INDEX_X])
 #        d1 = N.subtract.outer(xyObjects[:,INDEX_YCOMPUTED], xyContours[:,INDEX_Y])
-#        dPenalty1 = N.hypot(d0, d1)
+#        dPenalty = N.hypot(d0, d1)
 #
-#        d += dPenalty1
+#        d += dPenalty
         
         #rospy.logwarn('area=%s,%s' % (xyContours[:,INDEX_AREA], xyObjects[:,INDEX_AMEAN]))#, xyContours[:,INDEX_ECC], xyObjects[:,INDEX_EMEAN]))
         
         # Penalty for deviation from visual characteristics.
-        bMatchVisual = True
+        bMatchVisual = False    # True only seems to make it worse.
         if (bMatchVisual):    
             for m in range(len(xyObjects)):
                 for n in range(len(xyContours)):
@@ -513,6 +521,7 @@ class ContourIdentifier:
                     xy = xyRobot
                 else:
                     xy = xyEndEffector
+                    #rospy.logwarn('Too far away: % 0.1f' % N.linalg.norm(xyRobot[0:2]-xyEndEffector[0:2]))
             else:
                 if (xyRobot is not None):
                     xy = xyRobot
