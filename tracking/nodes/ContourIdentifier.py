@@ -95,7 +95,7 @@ class ContourIdentifier:
         self.radiusMask = rospy.get_param("camera/mask/radius", 25) # Pixels
         self.radiusArenaInner = rospy.get_param("arena/radius_inner", 25) # Millimeters
         self.radiusArenaOuter = rospy.get_param("arena/radius_outer", 30) # Millimeters
-        self.offsetEndEffectorMax = rospy.get_param('tracking/offsetEndEffectorMax', 10.0)
+        self.offsetEndEffectorMax = rospy.get_param('tracking/offsetEndEffectorMax', 15.0)
         
         self.enabledExclusionzone = False
         self.pointExclusionzone_list = [Point(x=0.0, y=0.0)]
