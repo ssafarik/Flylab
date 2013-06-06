@@ -512,11 +512,11 @@ class ContourIdentifier:
                     
             if (xy is not None):                    
                 xyObjects[iRobot,:] = xy
-                self.tfbx.sendTransform((xy[0], xy[1], 0.0),
-                                        tf.transformations.quaternion_about_axis(0, (0,0,1)),
-                                        stamp,
-                                        "RobotComputed",
-                                        "Arena")
+#                 self.tfbx.sendTransform((xy[0], xy[1], 0.0),
+#                                         tf.transformations.quaternion_about_axis(0, (0,0,1)),
+#                                         stamp,
+#                                         "RobotComputed",
+#                                         "Arena")
 
 
         # Flies into the objects list.    

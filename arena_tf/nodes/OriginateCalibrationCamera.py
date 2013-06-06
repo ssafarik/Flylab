@@ -15,6 +15,8 @@ from arena_tf.msg import CalibrationCamera
 # to be able to change whether we use the params on disk, or the params 
 # in a .bag file.
 #
+# Don't run this node when replaying a .bag file.  The data will come from the .bag file instead.
+#
 class OriginateCalibrationCamera:
 
     def __init__(self):
