@@ -313,24 +313,32 @@ class ContourIdentifier:
         # Additional distance penalties.
         
         # Make sure the robot gets first choice of the contours.
-        dPenalty = N.ones(d.shape)
-        dPenalty *= 1000.0
         for iRobot in range(self.nRobots):
-            dPenalty[iRobot,:] = 0
-            
-        d += dPenalty
+            k = d[iRobot,:].argmin()
+            d[iRobot,k] = 0.0
+        
+        # Add penalty to non-robot distances.
+#         dPenalty = N.ones(d.shape)
+#         dPenalty *= 1000.0
+#         for iRobot in range(self.nRobots):
+#             dPenalty[iRobot,:] = 0
+#             
+#         d += dPenalty
+
 
         # Penalty for distance from computed position
-#        for m in range(len(xyObjects)):
-#            if (N.isnan(xyObjects[m,INDEX_XCOMPUTED])):
-#                xyObjects[m,INDEX_XCOMPUTED] = xyContours[m,X]
-#                xyObjects[m,INDEX_YCOMPUTED] = xyContours[m,Y]
-#
-#        d0 = N.subtract.outer(xyObjects[:,INDEX_XCOMPUTED], xyContours[:,INDEX_X])
-#        d1 = N.subtract.outer(xyObjects[:,INDEX_YCOMPUTED], xyContours[:,INDEX_Y])
-#        dPenalty = N.hypot(d0, d1)
-#
-#        d += dPenalty
+        bPenalizeComputed = False
+        if (bPenalizeComputed):
+            for m in range(len(xyObjects)):
+                if (N.isnan(xyObjects[m,INDEX_XCOMPUTED])):
+                    xyObjects[m,INDEX_XCOMPUTED] = xyContours[m,X]
+                    xyObjects[m,INDEX_YCOMPUTED] = xyContours[m,Y]
+    
+            d0 = N.subtract.outer(xyObjects[:,INDEX_XCOMPUTED], xyContours[:,INDEX_X])
+            d1 = N.subtract.outer(xyObjects[:,INDEX_YCOMPUTED], xyContours[:,INDEX_Y])
+            dPenalty = N.hypot(d0, d1)
+    
+            d += dPenalty
         
         #rospy.logwarn('area=%s,%s' % (xyContours[:,INDEX_AREA], xyObjects[:,INDEX_AMEAN]))#, xyContours[:,INDEX_ECC], xyObjects[:,INDEX_EMEAN]))
         
