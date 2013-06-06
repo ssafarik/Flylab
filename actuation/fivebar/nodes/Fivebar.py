@@ -151,22 +151,18 @@ class Fivebar:
 
         self.subVisualState = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
         self.pubJointState = rospy.Publisher('joint_states', JointState)
-        # self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         self.pubMarker = rospy.Publisher('visualization_marker', Marker)
         
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
 
         self.stateRef = MsgFrameState()
-        self.stateVisual = None #MsgFrameState(header=Header(stamp=rospy.Time.now(), frame_id='Stage'), name='Robot')  # Visual position of the tool.
+        self.stateVisual = None
         self.ptEeMech = Point(0, 0, 0)
-#        self.stateCommand = MsgFrameState()  # Where to command the end-effector.
 
         self.statePError = MsgFrameState()
         self.stateIError = MsgFrameState()
         self.stateDError = MsgFrameState()
-#        self.vecState     = N.array([0,0,0,0,0,0]) #  [x,y,z,vx,vy,vz]
-#        self.vecStatePrev = N.array([0,0,0,0,0,0]) #  [x,y,z,vx,vy,vz]
         
         self.statePID = MsgFrameState()
 
@@ -521,10 +517,6 @@ class Fivebar:
         x = jEx - self.xCenter
         y = jEy - self.yCenter
 
-        #rospy.loginfo ('angle1=%s, angle2=%s' % (angle1,angle2))
-        #rospy.loginfo ('Lc=%s, Ld=%s, tc=%s, td=%s, te=%s, tf=%s, tg=%s, th=%s' % (Lc, Ld, tc, td, te, tf, tg, th))
-        #rospy.loginfo ('angle1=%s, angle2=%s, angle3=%s, angle4=%s' % (angle1, angle2, angle3, angle4))
-        #rospy.loginfo ('j3x=%s, j3y=%s, j4x=%s, j4y=%s, jEx=%s, jEy=%s, jFx=%s, jFy=%s' % (j3x, j3y, j4x, j4y, jEx, jEy, jFx, jFy))
         
         # Put angles into the proper range for their limits.
         if self.q1MinE<0.0:
@@ -635,14 +627,6 @@ class Fivebar:
                           R) \
               ]
 
-        #rospy.logwarn ('5B q1=%s' % q1)
-        #rospy.logwarn ('5B q2=%s' % q2)
-        #rospy.logwarn ('5B q3=%s' % q3)
-        #rospy.logwarn ('5B q4=%s' % q4)
-                
-        
-        #(angle1,angle2) = (q1[1]-self.q1CenterE,q2[0]-self.q2CenterE)
-        
         # Put angles into the proper 2pi range for their limits.
         if self.q1MinE<0.0:
             lo = -N.pi
@@ -866,27 +850,6 @@ class Fivebar:
         return rvStageState
     
 
-    def PublishMarker (self, pt, id, name):
-        marker = Marker(header=Header(stamp=rospy.Time.now(),
-                                      frame_id='Stage'),
-                          ns=name,
-                          id=id,
-                          type=Marker.SPHERE,
-                          action=0,
-                          pose=Pose(position=Point(x=pt.x,
-                                                   y=pt.y,
-                                                   z=pt.z)),
-                          scale=Vector3(x=2.0,
-                                        y=2.0,
-                                        z=2.0),
-                          color=ColorRGBA(a=0.5,
-                                          r=0.1,
-                                          g=0.1,
-                                          b=1.0),
-                          lifetime=rospy.Duration(1.0))
-        self.pubMarker.publish(marker)
-
-
     def SendTransforms(self):  
         if self.initialized:
             with self.lock:
@@ -920,7 +883,6 @@ class Fivebar:
                 state.pose.orientation.y = qEE[1]
                 state.pose.orientation.z = qEE[2]
                 state.pose.orientation.w = qEE[3]
-#                self.pubEndEffector.publish (state)
 
         
                 # Publish the link transforms.
@@ -1023,7 +985,6 @@ class Fivebar:
     #
     def UpdateMotorCommandFromTarget(self):
         if self.stateRef is not None:
-            #rospy.logwarn('stateRef: %s' % self.stateRef)
             # PID Gains & Parameters.
             if (self.bTune):
                 self.kP      = rospy.get_param('fivebar/kP', 1.0)
@@ -1046,14 +1007,11 @@ class Fivebar:
                 self.kD *= self.kAll
 
                 a = rospy.get_param('/a', 0.05) # This is the filter constant for the derivative term.
-                #b = rospy.get_param('/b', 0.0) # This helps pull the mechanical position under the visual position when at rest.
             else:
                 a = 0.05
-                #b = 0.0
             
             # The previous error.
             self.statePErrorPrev = copy.deepcopy(self.statePError)
-            #self.vecStatePrev = self.vecState
             
 
             if (self.stateRef is not None) and (self.stateVisual is not None):
@@ -1126,30 +1084,30 @@ class Fivebar:
                 self.stateIError.velocity.linear.z -= self.kWindup * ptExcessI.z
                 
             
-                # Display the command vector in rviz.
-                ptBase = self.stateVisual.pose.position
-                ptEnd = Point(x = ptBase.x + self.statePID.pose.position.x,
-                              y = ptBase.y + self.statePID.pose.position.y,
-                              z = ptBase.z + self.statePID.pose.position.z
-                              ) 
-                markerCommand = Marker(header=Header(stamp=self.time,
-                                                    frame_id='Stage'),
-                                      ns='pidPosition',
-                                      id=2,
-                                      type=Marker.ARROW,
-                                      action=0,
-                                      scale=Vector3(x=0.1,  # Shaft diameter
-                                                    y=0.2,  # Head diameter
-                                                    z=0.0),
-                                      color=ColorRGBA(a=0.8,
-                                                      r=1.0,
-                                                      g=1.0,
-                                                      b=1.0),
-                                      lifetime=rospy.Duration(1.0),
-                                      points=[ptBase, ptEnd])
-                self.pubMarker.publish(markerCommand)
-            
                 if (self.bTune):
+                    # Display the command vector in rviz.
+                    ptBase = self.stateVisual.pose.position
+                    ptEnd = Point(x = ptBase.x + self.statePID.pose.position.x,
+                                  y = ptBase.y + self.statePID.pose.position.y,
+                                  z = ptBase.z + self.statePID.pose.position.z
+                                  ) 
+                    markerCommand = Marker(header=Header(stamp=self.time,
+                                                        frame_id='Stage'),
+                                          ns='pidPosition',
+                                          id=2,
+                                          type=Marker.ARROW,
+                                          action=0,
+                                          scale=Vector3(x=0.1,  # Shaft diameter
+                                                        y=0.2,  # Head diameter
+                                                        z=0.0),
+                                          color=ColorRGBA(a=0.8,
+                                                          r=1.0,
+                                                          g=1.0,
+                                                          b=1.0),
+                                          lifetime=rospy.Duration(1.0),
+                                          points=[ptBase, ptEnd])
+                    self.pubMarker.publish(markerCommand)
+            
                     # Display P,I,D vectors in rviz.
                     ptBase = self.stateVisual.pose.position #self.ptEeMech
                     ptEnd = Point(x = ptBase.x + self.kP*self.statePError.pose.position.x,

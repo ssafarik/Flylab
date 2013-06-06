@@ -130,14 +130,10 @@ class Fly:
         self.eccMin = 999.9
         self.eccMean = None
         self.eccMax = 0.0
-        #self.eccSum = 1.0
-        #self.eccCount = 1
         
         self.areaMin = 999.9
         self.areaMean = None
         self.areaMax = 0.0
-        #self.areaSum = 0.0
-        #self.areaCount = 1
         
         # Wing angle stuff.
         self.npfRoiMean = None
@@ -270,18 +266,6 @@ class Fly:
 
         flipvaluePost = self.lpFlip.Update(flipvalueNew, self.contourinfo.header.stamp.to_sec())
 
-#        if 'Fly1' in self.name:
-#            rospy.logwarn('pre,post:  % 3.2f, % 3.2f' % (flipvaluePre, flipvaluePost))
-
-#        if N.sign(flipvaluePre) != N.sign(flipvaluePost):
-#            rospy.logwarn('flipped *******************************')
-            
-#            # Contour angle only ranges on [-pi,-0].  If it wraps, then change the lpFlip sign.
-#            d = N.abs(CircleFunctions.DistanceCircle(self.lpAngleContour.GetValue(), self.lpAngleContour.GetValuePrev()))
-#            if (d > (N.pi/2.0)):
-#                self.lpFlip.SetValue(-self.lpFlip.GetValue())
-#                rospy.logwarn('WRAP*****************************************')
-
             
                 
     def ResolveAngle(self, angle):
@@ -290,8 +274,6 @@ class Fly:
                 angleResolved = (angle + N.pi) % (2.0*N.pi)
             else:
                 angleResolved = copy.copy(angle)
-#                if 'Fly2' in self.name:
-#                    rospy.logwarn('=======================')
         else:
             angleResolved = None
 
@@ -631,11 +613,6 @@ class Fly:
                 elif (not N.isnan(contourinfo.ecc)):
                     self.eccMean = contourinfo.ecc 
                     
-                #self.eccSum += contourinfo.ecc
-                #self.eccCount += 1
-                #self.areaSum += contourinfo.area
-                #self.areaCount += 1
-                
                 self.isVisible = True
                 (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contourinfo.x, self.contourinfo.y), contourinfo.header.stamp.to_sec())
                 (zKalman, vzKalman) = (0.0, 0.0)
