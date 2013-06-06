@@ -33,23 +33,40 @@ if (len(sys.argv)>=2):
     
         
     for (topic, msg, t) in bag.read_messages(topicToSave):
-#        if topic.endswith(topicToSave):
-        if msg.encoding=='mono8':
-            filename = '%06d.png' % iImage
-
-#            image = Image.fromstring('L',(msg.width, msg.height), msg.data)
-#            image.save(filename)
-
-            # Way faster to use opencv for saving...
-            matImage = cv.GetImage(cvbridge.imgmsg_to_cv(msg, 'passthrough'))
-            cv.SaveImage(filename, matImage)
-
+        
+        # Handle compressed images.
+        if ('compressed' in topic):
+            if ('png' in msg.format):
+                ext = 'png'
+            elif ('jpeg' in msg.format):
+                ext = 'jpg'
+            else:
+                ext = 'xxx'
                 
-            rospy.logwarn ('Wrote %s' % filename)
+            filename = '%06d.%s' % (iImage,ext)
+            file = open(filename,'w')
+            file.write(msg.data)
+            file.close()
             iImage += 1
-        else:
-            rospy.logwarn ('Only image encoding==mono8 is supported.  This one has %s' % msg.encoding)
                 
+        else:
+            # Handle uncompressed images. 
+            if msg.encoding=='mono8':
+                filename = '%06d.png' % iImage
+    
+    #            image = Image.fromstring('L',(msg.width, msg.height), msg.data)
+    #            image.save(filename)
+    
+                # Way faster to use opencv for saving...
+                matImage = cv.GetImage(cvbridge.imgmsg_to_cv(msg, 'passthrough'))
+                cv.SaveImage(filename, matImage)
+    
+                    
+                rospy.logwarn ('Wrote %s' % filename)
+                iImage += 1
+            else:
+                rospy.logwarn ('Only image encoding==mono8 is supported.  This one has %s' % msg.encoding)
+                    
     if (iImage==0):
         rospy.logwarn('Please specify an image topic:  bag2png filename.bag imagetopic')
         rospy.logwarn('Topics in %s are:' % sys.argv[1])
