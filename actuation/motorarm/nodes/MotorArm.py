@@ -423,7 +423,7 @@ class MotorArm:
         rv = SrvSignalResponse()
         
         (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', srvSignalReq.state)
-        rv.success = isInArena
+        rv.success = True #isInArena
         
         return rv
 
@@ -732,6 +732,62 @@ class MotorArm:
                                       points=[ptBase, ptEnd])
                 self.pubMarker.publish(markerCommand)
             
+                # Get the angular positions for each joint.
+                angle1Mech = self.Get1FromPt(self.ptEeMech)
+            
+                # Compute the velocity command.
+                xDot = (self.stateRef.velocity.linear.x + self.statePID.velocity.linear.x) + self.statePID.pose.position.x
+                yDot = (self.stateRef.velocity.linear.y + self.statePID.velocity.linear.y) + self.statePID.pose.position.y
+
+
+                # Pull the mechanical position back under the visual position.
+                xDot += (self.stateVisual.pose.position.x - self.ptEeMech.x)
+                yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
+
+                # Clip to max speed.
+                pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
+                xDot = pt.x
+                yDot = pt.y
+                
+                
+                # Clip to stay in workspace.
+                pts = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
+                                                 frame_id='Stage'),
+                                   point=Point(x = xDot + self.ptEeMech.x,
+                                               y = yDot + self.ptEeMech.y))
+                (ptsArena, isInArena)         = (pts,True)#self.ClipPtsToArena(pts)
+                xDot = ptsArena.point.x - self.ptEeMech.x
+                yDot = ptsArena.point.y - self.ptEeMech.y
+                
+                
+                # Convert to motor coordinates.
+                jInv = self.JacobianInv(angle1Mech)
+                theta1Dot = jInv.dot(N.array([[xDot],[yDot]])) 
+                
+                # Display the velocity vector in rviz.
+                ptBase = self.ptEeMech #self.stateVisual.pose.position
+                ptEnd = Point(x = ptBase.x + xDot,
+                              y = ptBase.y + yDot,
+                              z = ptBase.z + 0
+                              ) 
+                markerVelocity = Marker(header=Header(stamp=self.time,
+                                                    frame_id='Stage'),
+                                      ns='velocityCommand',
+                                      id=3,
+                                      type=Marker.ARROW,
+                                      action=0,
+                                      scale=Vector3(x=0.1,  # Shaft diameter
+                                                    y=0.2,  # Head diameter
+                                                    z=0.0),
+                                      color=ColorRGBA(a=0.9,
+                                                      r=0.5,
+                                                      g=0.5,
+                                                      b=1.0),
+                                      lifetime=rospy.Duration(1.0),
+                                      points=[ptBase, ptEnd])
+                self.pubMarker.publish(markerVelocity)
+
+
                 if (self.bTune):
                     # Display P,I,D vectors in rviz.
                     ptBase = self.stateVisual.pose.position #self.ptEeMech
@@ -776,64 +832,9 @@ class MotorArm:
                     magDv = self.kDv * N.linalg.norm([self.stateDError.velocity.linear.x, self.stateDError.velocity.linear.y])
                     magPIDv = N.linalg.norm([self.statePID.velocity.linear.x, self.statePID.velocity.linear.y])
                     
-                    rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], [% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPv,magIv,magDv, magPID, magPIDv))
+                    rospy.logwarn('[P,I,D]=[% 5.2f,% 5.2f,% 5.2f]=% 5.2f, [% 5.2f,% 5.2f,% 5.2f]=% 5.2f, v=% 5.2f' % (magP,magI,magD, magPID, magPv,magIv,magDv, magPIDv, theta1Dot))
 
             
-                # Get the angular positions for each joint.
-                angle1Mech = self.Get1FromPt(self.ptEeMech)
-            
-                # Compute the velocity command.
-                xDot = (self.stateRef.velocity.linear.x + self.statePID.velocity.linear.x) + self.statePID.pose.position.x
-                yDot = (self.stateRef.velocity.linear.y + self.statePID.velocity.linear.y) + self.statePID.pose.position.y
-
-
-                # Pull the mechanical position back under the visual position.
-                xDot += (self.stateVisual.pose.position.x - self.ptEeMech.x)
-                yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
-
-                # Clip to max speed.
-                pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
-                xDot = pt.x
-                yDot = pt.y
-                
-                
-                # Clip to stay in workspace.
-                pts = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
-                                                 frame_id='Stage'),
-                                   point=Point(x = xDot + self.ptEeMech.x,
-                                               y = yDot + self.ptEeMech.y))
-                (ptsArena, isInArena)         = self.ClipPtsToArena(pts)
-                xDot = ptsArena.point.x - self.ptEeMech.x
-                yDot = ptsArena.point.y - self.ptEeMech.y
-                
-                
-                # Convert to motor coordinates.
-                jInv = self.JacobianInv(angle1Mech)
-                theta1Dot = jInv.dot(N.array([[xDot],[yDot]])) 
-                
-                # Display the velocity vector in rviz.
-                ptBase = self.ptEeMech #self.stateVisual.pose.position
-                ptEnd = Point(x = ptBase.x + xDot,
-                              y = ptBase.y + yDot,
-                              z = ptBase.z + 0
-                              ) 
-                markerVelocity = Marker(header=Header(stamp=self.time,
-                                                    frame_id='Stage'),
-                                      ns='velocityCommand',
-                                      id=3,
-                                      type=Marker.ARROW,
-                                      action=0,
-                                      scale=Vector3(x=0.1,  # Shaft diameter
-                                                    y=0.2,  # Head diameter
-                                                    z=0.0),
-                                      color=ColorRGBA(a=0.9,
-                                                      r=0.5,
-                                                      g=0.5,
-                                                      b=1.0),
-                                      lifetime=rospy.Duration(1.0),
-                                      points=[ptBase, ptEnd])
-                self.pubMarker.publish(markerVelocity)
-
             else:
                 theta1Dot = 0.0
                 theta2Dot = 0.0
