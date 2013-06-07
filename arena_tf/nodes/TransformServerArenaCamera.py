@@ -120,7 +120,7 @@ class TransformServerArenaCamera:
 #            rospy.logwarn(self.H)
             self.initialized = True
             
-        if (self.camerainfo is not None):
+        if (camerainfo is not None):
             self.camerainfo = camerainfo
             
 
@@ -169,7 +169,7 @@ class TransformServerArenaCamera:
         
 
     def SendTransforms(self):      
-        if (self.initialized):
+        if (self.initialized) and (self.camerainfo is not None):
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
                                     self.camerainfo.header.stamp, 

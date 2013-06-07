@@ -14,7 +14,7 @@ class TransformServerStageArena:
         self.initialized = False
         self.initConstructor = False
 
-        self.calibration =None 
+        self.calibration = None
 
         rospy.init_node('TransformServerStageArena')
 
@@ -48,6 +48,7 @@ class TransformServerStageArena:
         
             
         self.calibration = calibration
+        self.initialized = True
         
         
     def Init_callback(self, experimentparams):
@@ -79,13 +80,13 @@ class TransformServerStageArena:
         
     def SendTransforms(self):
         if (self.initialized):
-            self.tfbx.sendTransform((calibration.arena_x, 
-                                     calibration.arena_y,
-                                     calibration.arena_z), 
-                                    (calibration.arena_qx,
-                                     calibration.arena_qy,
-                                     calibration.arena_qz,
-                                     calibration.arena_qw),
+            self.tfbx.sendTransform((self.calibration.arena_x,
+                                     self.calibration.arena_y,
+                                     self.calibration.arena_z),
+                                    (self.calibration.arena_qx,
+                                     self.calibration.arena_qy,
+                                     self.calibration.arena_qz,
+                                     self.calibration.arena_qw),
                                     rospy.Time.now(),
                                     "Stage",     # child
                                     "Arena"      # parent
