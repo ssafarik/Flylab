@@ -25,7 +25,7 @@ class Experiment():
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "chase"
+        self.experimentparams.save.filenamebase = "chase20_"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False

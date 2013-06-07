@@ -156,7 +156,7 @@ class Fivebar:
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
 
-        self.stateRef = MsgFrameState()
+        self.stateRef = None
         self.stateVisual = None
         self.ptEeMech = Point(0, 0, 0)
 
@@ -302,68 +302,72 @@ class Fivebar:
         
     # Transform a MsgFrameState to the given frame.
     def TransformStateToFrame(self, frame_id, state, doClipToArena=True):
-        stateOut = MsgFrameState()
-        isInArena = True
-
-        # Get the time.        
-        try:
-            stamp = self.tfrx.getLatestCommonTime(frame_id, state.header.frame_id)
-        except tf.Exception, e:
-            rospy.logwarn ('5B Exception1 transforming in TransformStateToFrame(): %s' % e)
-            rospy.logwarn('state=%s' % state)
-        else:
-            stateOut.name = state.name
-            
-            # Transform the pose
-            poses = PoseStamped(header=state.header,
-                                pose=state.pose) 
-            poses.header.stamp = stamp
-            if (doClipToArena):
-                pts = PointStamped(header=poses.header, point=state.pose.position)
-                (pts, isInArena) = self.ClipPtsToArena(pts)
-                poses.pose.position = pts.point
+        if (state.header.frame_id != ''):
+            stateOut = MsgFrameState()
+            isInArena = True
+    
+            # Get the time.        
+            try:
+                stamp = self.tfrx.getLatestCommonTime(frame_id, state.header.frame_id)
+            except tf.Exception, e:
+                rospy.logwarn ('5B Exception1 transforming in TransformStateToFrame(): %s' % e)
+                rospy.logwarn('state=%s' % state)
             else:
-                isInArena = True
+                stateOut.name = state.name
                 
-            poses.header.stamp = stamp
-            try:
-                posesOut = self.tfrx.transformPose(frame_id, poses)
-            except tf.Exception, e:
-                rospy.logwarn ('5B Exception2 transforming in TransformStateToFrame(): %s' % e)
-                rospy.logwarn('poses=%s' % poses)
-                posesOut = poses
-            stateOut.header = posesOut.header
-            stateOut.pose = posesOut.pose
-            
-            
-            # Transform the linear velocity
-            v3s = Vector3Stamped(header=state.header,
-                                 vector=state.velocity.linear) 
-            v3s.header.stamp = stamp
-            try:
-                v3sOut = self.tfrx.transformVector3(frame_id, v3s)
-            except tf.Exception, e:
-                rospy.logwarn ('5B Exception3 transforming in TransformStateToFrame(): %s' % e)
-                rospy.logwarn('v3s=%s' % v3s)
-                v3sOut = v3s
-            stateOut.velocity.linear = v3sOut.vector
+                # Transform the pose
+                poses = PoseStamped(header=state.header,
+                                    pose=state.pose) 
+                poses.header.stamp = stamp
+                if (doClipToArena):
+                    pts = PointStamped(header=poses.header, point=state.pose.position)
+                    (pts, isInArena) = self.ClipPtsToArena(pts)
+                    poses.pose.position = pts.point
+                else:
+                    isInArena = True
                     
-                    
-            # Transform the angular velocity
-            v3s = Vector3Stamped(header=state.header,
-                                 vector=state.velocity.angular) 
-            v3s.header.stamp = stamp
-            try:
-                v3sOut = self.tfrx.transformVector3(frame_id, v3s)
-            except tf.Exception, e:
-                rospy.logwarn ('5B Exception4 transforming in TransformStateToFrame(): %s' % e)
-                rospy.logwarn('v3s=%s' % v3s)
-                v3sOut = v3s
-            stateOut.velocity.angular = v3sOut.vector
-                    
-                    
-            # Transform the speed.
-            stateOut.speed = state.speed
+                poses.header.stamp = stamp
+                try:
+                    posesOut = self.tfrx.transformPose(frame_id, poses)
+                except tf.Exception, e:
+                    rospy.logwarn ('5B Exception2 transforming in TransformStateToFrame(): %s' % e)
+                    rospy.logwarn('poses=%s' % poses)
+                    posesOut = poses
+                stateOut.header = posesOut.header
+                stateOut.pose = posesOut.pose
+                
+                
+                # Transform the linear velocity
+                v3s = Vector3Stamped(header=state.header,
+                                     vector=state.velocity.linear) 
+                v3s.header.stamp = stamp
+                try:
+                    v3sOut = self.tfrx.transformVector3(frame_id, v3s)
+                except tf.Exception, e:
+                    rospy.logwarn ('5B Exception3 transforming in TransformStateToFrame(): %s' % e)
+                    rospy.logwarn('v3s=%s' % v3s)
+                    v3sOut = v3s
+                stateOut.velocity.linear = v3sOut.vector
+                        
+                        
+                # Transform the angular velocity
+                v3s = Vector3Stamped(header=state.header,
+                                     vector=state.velocity.angular) 
+                v3s.header.stamp = stamp
+                try:
+                    v3sOut = self.tfrx.transformVector3(frame_id, v3s)
+                except tf.Exception, e:
+                    rospy.logwarn ('5B Exception4 transforming in TransformStateToFrame(): %s' % e)
+                    rospy.logwarn('v3s=%s' % v3s)
+                    v3sOut = v3s
+                stateOut.velocity.angular = v3sOut.vector
+                        
+                        
+                # Transform the speed.
+                stateOut.speed = state.speed
+        else:
+            (stateOut, isInArena) = (None, False)
+
             
             
         return (stateOut, isInArena)
