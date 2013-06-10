@@ -4,10 +4,8 @@ import roslib; roslib.load_manifest('fivebar')
 import rospy
 import copy
 import numpy as N
-import serial
 import tf
 import threading
-import PyKDL
 from geometry_msgs.msg import Point, PointStamped, Pose, PoseStamped, Vector3, Vector3Stamped
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header, ColorRGBA, String
@@ -61,7 +59,7 @@ class Fivebar:
         self.L3 = rospy.get_param('fivebar/L3', 1.0) # Link 3
         self.L4 = rospy.get_param('fivebar/L4', 1.0) # Link 4
 
-        self.T = rospy.get_param('fivebar/T', 1 / 50)  # Nominal motor update period, i.e. sample rate.
+        self.T = rospy.get_param('fivebar/T', 1/50)  # Nominal motor update period, i.e. sample rate.
 
         # PID Gains & Parameters.
         self.kP = rospy.get_param('fivebar/kP', 0.1)
@@ -79,12 +77,10 @@ class Fivebar:
         
         self.bTune = rospy.get_param('/tune', False)
 
-        self.rDragF = 0.0
-
         # Parking spot (millimeters)
         self.xPark = 0.0
         self.yPark = 0.0
-        
+        threading
         FUDGEX = 0.0
         FUDGEY = -20.0  # Fudge factor to center things better in the reachable workspace.
         FUDGEQ1 = -0.15052268 # These are the angles that move down 20mm at center.
@@ -102,13 +98,11 @@ class Fivebar:
         self.q2MaxE    = (N.pi - N.arccos((self.L0/2.0)/(self.L3+self.L1))) % (2.0*N.pi)
         self.q2CenterE = (self.q2MaxE+self.q2MinE)/2.0 + FUDGEQ2
         
-        # Joint angles from furthest reachable point to center of workspace (i.e. "index" coordinates)
+        # Joint angles from farthest reachable point to center of workspace (i.e. "index" coordinates)
         self.q1CenterI   = self.q1CenterE - self.q1MinE
         self.q2CenterI   = self.q2CenterE - self.q2MaxE
         
         # Joint angles at center of workspace (i.e. "zero" coordinates)
-        self.q1CenterZ   = 0.0
-        self.q2CenterZ   = 0.0
         q1MaxZ      = self.q1MaxE - self.q1CenterE
         q1MinZ      = self.q1MinE - self.q1CenterE
         q2MaxZ      = self.q2MaxE - self.q2CenterE
@@ -204,7 +198,7 @@ class Fivebar:
         try:
             self.Calibrate_joint1 = rospy.ServiceProxy(stSrv, SrvCalibrate)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
 
         stSrv = 'srvGetState_' + self.names[0]
@@ -212,35 +206,35 @@ class Fivebar:
         try:
             self.GetState_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvSetPositionAtVel_' + self.names[0]
         rospy.wait_for_service(stSrv)
         try:
             self.SetPositionAtVel_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvSetVelocity_' + self.names[0]
         rospy.wait_for_service(stSrv)
         try:
             self.SetVelocity_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ('5B FAILED %s: %s' % (stSrv, e))
+            rospy.logwarn ('5B FAILED %s: %s' % (stSrv, e))
 
         stSrv = 'srvSetPosition_'+self.names[0]
         rospy.wait_for_service(stSrv)
         try:
             self.SetPosition_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvPark_' + self.names[0]
         rospy.wait_for_service(stSrv)
         try:
             self.Park_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         # Wait for joint 2 to launch.
         stSrv = 'srvCalibrate_'+self.names[1]
@@ -248,42 +242,42 @@ class Fivebar:
         try:
             self.Calibrate_joint2 = rospy.ServiceProxy(stSrv, SrvCalibrate)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvGetState_'+self.names[1]
         rospy.wait_for_service(stSrv)
         try:
             self.GetState_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvSetPositionAtVel_'+self.names[1]
         rospy.wait_for_service(stSrv)
         try:
             self.SetPositionAtVel_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvSetVelocity_' + self.names[1]
         rospy.wait_for_service(stSrv)
         try:
             self.SetVelocity_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ('5B FAILED %s: %s' % (stSrv, e))
+            rospy.logwarn ('5B FAILED %s: %s' % (stSrv, e))
 
         stSrv = 'srvSetPosition_'+self.names[1]
         rospy.wait_for_service(stSrv)
         try:
             self.SetPosition_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvPark_'+self.names[1]
         rospy.wait_for_service(stSrv)
         try:
             self.Park_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ("5B FAILED %s: %s"%(stSrv,e))
+            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         self.initializedServices = True
         
@@ -374,16 +368,6 @@ class Fivebar:
         
 
             
-    def ScalePtMag (self, pt, mag):
-        magPt = N.linalg.norm([pt.x, pt.y, pt.z])
-        if magPt != 0:
-            r = mag / magPt
-        else:
-            r = mag
-            
-        return Point(r*pt.x, r*pt.y, r*pt.z)
-            
-        
     def ClipPtMag (self, pt, magMax):
         magPt = N.linalg.norm([pt.x, pt.y, pt.z])
         if magPt > magMax:
@@ -689,6 +673,10 @@ class Fivebar:
         return (angle1,angle2,angle3,angle4)
 
 
+    # JacobianFwd()
+    # The forward jacobian matrix, i.e. transform from joint anglular velocities to cartesian velocities.
+    # Note that the equations below assume a 3/1 ratio in L3/L1, and in L4/L2, and that L0=L3=L4.
+    #
     def JacobianFwd (self, angle1, angle2):
         t1 = angle1 + self.q1CenterE
         t2 = angle2 + self.q2CenterE
@@ -1042,19 +1030,19 @@ class Fivebar:
                 self.stateDError.velocity.linear.z = self.statePError.velocity.linear.z - self.statePErrorPrev.velocity.linear.z
                 
                 
-#                self.vecRef = N.array([self.stateRef.pose.position.x, 
-#                                       self.stateRef.pose.position.y, 
-#                                       self.stateRef.pose.position.z,
-#                                       self.stateRef.velocity.linear.x, 
-#                                       self.stateRef.velocity.linear.y, 
-#                                       self.stateRef.velocity.linear.z])
-#                
-#                self.vecVisual = N.array([self.stateVisual.pose.position.x, 
-#                                          self.stateVisual.pose.position.y, 
-#                                          self.stateVisual.pose.position.z,
-#                                          self.stateVisual.velocity.linear.x, 
-#                                          self.stateVisual.velocity.linear.y, 
-#                                          self.stateVisual.velocity.linear.z])
+#                 xRef = N.array([self.stateRef.pose.position.x, 
+#                                 self.stateRef.pose.position.y, 
+#                                 self.stateRef.pose.position.z,
+#                                 self.stateRef.velocity.linear.x, 
+#                                 self.stateRef.velocity.linear.y, 
+#                                 self.stateRef.velocity.linear.z])
+#                 
+#                 xVis = N.array([self.stateVisual.pose.position.x, 
+#                                 self.stateVisual.pose.position.y, 
+#                                 self.stateVisual.pose.position.z,
+#                                 self.stateVisual.velocity.linear.x, 
+#                                 self.stateVisual.velocity.linear.y, 
+#                                 self.stateVisual.velocity.linear.z])
                 
                 
                 # PID control of the visual position error.
@@ -1079,7 +1067,7 @@ class Fivebar:
                                                       z=self.kPv*self.statePError.velocity.linear.z + self.kIv*self.stateIError.velocity.linear.z + self.kDv*self.stateDError.velocity.linear.z)
                                     
                 # Anti-windup
-                ptEeIErrorClipped = self.ClipPtMag (self.stateIError.velocity.linear, self.maxI)
+                ptEeIErrorClipped = self.ClipPtMag (self.stateIError.velocity.linear, self.maxIv)
                 ptExcessI = Point(self.stateIError.velocity.linear.x - ptEeIErrorClipped.x,
                                   self.stateIError.velocity.linear.y - ptEeIErrorClipped.y,
                                   self.stateIError.velocity.linear.z - ptEeIErrorClipped.z)
@@ -1088,6 +1076,64 @@ class Fivebar:
                 self.stateIError.velocity.linear.z -= self.kWindup * ptExcessI.z
                 
             
+                # Get the angular positions for each joint.
+                (angle1Mech,   angle2Mech,   angle3Mech,   angle4Mech)    = self.Get1234FromPt(self.ptEeMech)
+
+                
+                # Compute the velocity command.
+                xDot = (self.stateRef.velocity.linear.x + self.statePID.velocity.linear.x) + self.statePID.pose.position.x
+                yDot = (self.stateRef.velocity.linear.y + self.statePID.velocity.linear.y) + self.statePID.pose.position.y
+
+
+                # Pull the mechanical position back under the visual position.
+                xDot += (self.stateVisual.pose.position.x - self.ptEeMech.x)
+                yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
+
+                # Clip to max speed.
+                pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
+                xDot = pt.x
+                yDot = pt.y
+                
+                
+                # Clip to stay in workspace.
+                pts = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
+                                                 frame_id='Stage'),
+                                   point=Point(x = xDot + self.ptEeMech.x,
+                                               y = yDot + self.ptEeMech.y))
+                (ptsArena, isInArena)         = self.ClipPtsToArena(pts)
+                xDot = ptsArena.point.x - self.ptEeMech.x
+                yDot = ptsArena.point.y - self.ptEeMech.y
+                
+                
+                # Convert to motor coordinates.
+                jInv = self.JacobianInv(angle1Mech, angle2Mech)
+                (theta1Dot, theta2Dot) = jInv.dot(N.array([[xDot],[yDot]])) 
+                
+                
+                # Display the velocity vector in rviz.
+                ptBase = self.ptEeMech #self.stateVisual.pose.position
+                ptEnd = Point(x = ptBase.x + xDot,
+                              y = ptBase.y + yDot,
+                              z = ptBase.z + 0
+                              ) 
+                markerVelocity = Marker(header=Header(stamp=self.time,
+                                                    frame_id='Stage'),
+                                      ns='velocityCommand',
+                                      id=3,
+                                      type=Marker.ARROW,
+                                      action=0,
+                                      scale=Vector3(x=0.1,  # Shaft diameter
+                                                    y=0.2,  # Head diameter
+                                                    z=0.0),
+                                      color=ColorRGBA(a=0.9,
+                                                      r=0.5,
+                                                      g=0.5,
+                                                      b=1.0),
+                                      lifetime=rospy.Duration(1.0),
+                                      points=[ptBase, ptEnd])
+                self.pubMarker.publish(markerVelocity)
+
+
                 if (self.bTune):
                     # Display the command vector in rviz.
                     ptBase = self.stateVisual.pose.position
@@ -1155,66 +1201,9 @@ class Fivebar:
                     magDv = self.kDv * N.linalg.norm([self.stateDError.velocity.linear.x, self.stateDError.velocity.linear.y])
                     magPIDv = N.linalg.norm([self.statePID.velocity.linear.x, self.statePID.velocity.linear.y])
                     
-                    rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], [% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPv,magIv,magDv, magPID, magPIDv))
+                    rospy.logwarn('[P,I,D]=[% 5.2f,% 5.2f,% 5.2f]=% 5.2f, [% 5.2f,% 5.2f,% 5.2f]=% 5.2f, v=% 5.2f, % 5.2f' % (magP,magI,magD, magPID, magPv,magIv,magDv, magPIDv, theta1Dot, theta2Dot))
 
             
-                # Get the angular positions for each joint.
-                (angle1Mech,   angle2Mech,   angle3Mech,   angle4Mech)    = self.Get1234FromPt(self.ptEeMech)
-
-                
-                # Compute the velocity command.
-                xDot = (self.stateRef.velocity.linear.x + self.statePID.velocity.linear.x) + self.statePID.pose.position.x
-                yDot = (self.stateRef.velocity.linear.y + self.statePID.velocity.linear.y) + self.statePID.pose.position.y
-
-
-                # Pull the mechanical position back under the visual position.
-                xDot += (self.stateVisual.pose.position.x - self.ptEeMech.x)
-                yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
-
-                # Clip to max speed.
-                pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
-                xDot = pt.x
-                yDot = pt.y
-                
-                
-                # Clip to stay in workspace.
-                pts = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
-                                                 frame_id='Stage'),
-                                   point=Point(x = xDot + self.ptEeMech.x,
-                                               y = yDot + self.ptEeMech.y))
-                (ptsArena, isInArena)         = self.ClipPtsToArena(pts)
-                xDot = ptsArena.point.x - self.ptEeMech.x
-                yDot = ptsArena.point.y - self.ptEeMech.y
-                
-                
-                # Convert to motor coordinates.
-                jInv = self.JacobianInv(angle1Mech, angle2Mech)
-                (theta1Dot, theta2Dot) = jInv.dot(N.array([[xDot],[yDot]])) 
-                
-                
-                # Display the velocity vector in rviz.
-                ptBase = self.ptEeMech #self.stateVisual.pose.position
-                ptEnd = Point(x = ptBase.x + xDot,
-                              y = ptBase.y + yDot,
-                              z = ptBase.z + 0
-                              ) 
-                markerVelocity = Marker(header=Header(stamp=self.time,
-                                                    frame_id='Stage'),
-                                      ns='velocityCommand',
-                                      id=3,
-                                      type=Marker.ARROW,
-                                      action=0,
-                                      scale=Vector3(x=0.1,  # Shaft diameter
-                                                    y=0.2,  # Head diameter
-                                                    z=0.0),
-                                      color=ColorRGBA(a=0.9,
-                                                      r=0.5,
-                                                      g=0.5,
-                                                      b=1.0),
-                                      lifetime=rospy.Duration(1.0),
-                                      points=[ptBase, ptEnd])
-                self.pubMarker.publish(markerVelocity)
-
             else:
                 theta1Dot = 0.0
                 theta2Dot = 0.0
@@ -1223,7 +1212,6 @@ class Fivebar:
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):
                 with self.lock:
                     try:
-                        #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.stateRef.pose.position.x,self.stateRef.pose.position.y))
                         self.SetVelocity_joint1(Header(frame_id=self.names[0]), None, theta1Dot)
                         self.SetVelocity_joint2(Header(frame_id=self.names[1]), None, theta2Dot)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
@@ -1241,8 +1229,8 @@ class Fivebar:
         self.initialized = True
 
 #        rospy.loginfo ('5B QMIN,QMAX: %s, %s, %s, %s' % (self.q1MinE, self.q1MaxE, self.q2MinE, self.q2MaxE))
-#        rospy.loginfo ('5B self.q1CenterEiz: %s, %s, %s' % (self.q1CenterE, self.q1CenterI, self.q1CenterZ))
-#        rospy.loginfo ('5B self.q2CenterEiz: %s, %s, %s' % (self.q2CenterE, self.q2CenterI, self.q2CenterZ))
+#        rospy.loginfo ('5B self.q1CenterEiz: %s, %s' % (self.q1CenterE, self.q1CenterI))
+#        rospy.loginfo ('5B self.q2CenterEiz: %s, %s' % (self.q2CenterE, self.q2CenterI))
         # Process messages forever.
         rosrate = rospy.Rate(1 / self.T)
 
