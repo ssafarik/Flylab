@@ -9,7 +9,7 @@ import patterngen.msg
 import experiment_msgs.msg
 
 class RobotSettings(genpy.Message):
-  _md5sum = "ea7f66c567a847a6dbbf3745fb94dba9"
+  _md5sum = "d2bb283f2fe0a80960b571c384a49399"
   _type = "experiment_msgs/RobotSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool            enabled
@@ -31,6 +31,8 @@ string 		frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
 float64 	distance
 float64 	angle
 string 		angleType # 'random' or 'constant'
+float64     angleOscMag
+float64     angleOscFreq
 float64 	speed
 string 		speedType # 'random' or 'constant'
 float64 	tolerance
@@ -142,7 +144,8 @@ float64       tolerance
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.move.relative.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.move.relative.angleOscMag, _x.move.relative.angleOscFreq, _x.move.relative.speed))
       _x = self.move.relative.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -239,9 +242,10 @@ float64       tolerance
         self.move.relative.angleType = str[start:end].decode('utf-8')
       else:
         self.move.relative.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.move.relative.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.move.relative.angleOscMag, _x.move.relative.angleOscFreq, _x.move.relative.speed,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -343,7 +347,8 @@ float64       tolerance
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.move.relative.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.move.relative.angleOscMag, _x.move.relative.angleOscFreq, _x.move.relative.speed))
       _x = self.move.relative.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -441,9 +446,10 @@ float64       tolerance
         self.move.relative.angleType = str[start:end].decode('utf-8')
       else:
         self.move.relative.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.move.relative.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.move.relative.angleOscMag, _x.move.relative.angleOscFreq, _x.move.relative.speed,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])

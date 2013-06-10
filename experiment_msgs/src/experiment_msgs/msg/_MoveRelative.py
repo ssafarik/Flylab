@@ -6,7 +6,7 @@ import struct
 
 
 class MoveRelative(genpy.Message):
-  _md5sum = "0b694dc2c4bde1073987904345c07b8b"
+  _md5sum = "45f378f1a9cd498e790728cb1d180f07"
   _type = "experiment_msgs/MoveRelative"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool 		tracking
@@ -15,14 +15,16 @@ string 		frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
 float64 	distance
 float64 	angle
 string 		angleType # 'random' or 'constant'
+float64     angleOscMag
+float64     angleOscFreq
 float64 	speed
 string 		speedType # 'random' or 'constant'
 float64 	tolerance
 
 
 """
-  __slots__ = ['tracking','frameidOriginPosition','frameidOriginAngle','distance','angle','angleType','speed','speedType','tolerance']
-  _slot_types = ['bool','string','string','float64','float64','string','float64','string','float64']
+  __slots__ = ['tracking','frameidOriginPosition','frameidOriginAngle','distance','angle','angleType','angleOscMag','angleOscFreq','speed','speedType','tolerance']
+  _slot_types = ['bool','string','string','float64','float64','string','float64','float64','float64','string','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -32,7 +34,7 @@ float64 	tolerance
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       tracking,frameidOriginPosition,frameidOriginAngle,distance,angle,angleType,speed,speedType,tolerance
+       tracking,frameidOriginPosition,frameidOriginAngle,distance,angle,angleType,angleOscMag,angleOscFreq,speed,speedType,tolerance
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -53,6 +55,10 @@ float64 	tolerance
         self.angle = 0.
       if self.angleType is None:
         self.angleType = ''
+      if self.angleOscMag is None:
+        self.angleOscMag = 0.
+      if self.angleOscFreq is None:
+        self.angleOscFreq = 0.
       if self.speed is None:
         self.speed = 0.
       if self.speedType is None:
@@ -66,6 +72,8 @@ float64 	tolerance
       self.distance = 0.
       self.angle = 0.
       self.angleType = ''
+      self.angleOscMag = 0.
+      self.angleOscFreq = 0.
       self.speed = 0.
       self.speedType = ''
       self.tolerance = 0.
@@ -103,7 +111,8 @@ float64 	tolerance
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.angleOscMag, _x.angleOscFreq, _x.speed))
       _x = self.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -156,9 +165,10 @@ float64 	tolerance
         self.angleType = str[start:end].decode('utf-8')
       else:
         self.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.angleOscMag, _x.angleOscFreq, _x.speed,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -204,7 +214,8 @@ float64 	tolerance
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.angleOscMag, _x.angleOscFreq, _x.speed))
       _x = self.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -258,9 +269,10 @@ float64 	tolerance
         self.angleType = str[start:end].decode('utf-8')
       else:
         self.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.angleOscMag, _x.angleOscFreq, _x.speed,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -281,3 +293,4 @@ _struct_I = genpy.struct_I
 _struct_2d = struct.Struct("<2d")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
+_struct_3d = struct.Struct("<3d")

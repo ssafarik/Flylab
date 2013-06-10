@@ -4,6 +4,8 @@ string 		frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
 float64 	distance
 float64 	angle
 string 		angleType # 'random' or 'constant'
+float64     angleOscMag
+float64     angleOscFreq
 float64 	speed
 string 		speedType # 'random' or 'constant'
 float64 	tolerance

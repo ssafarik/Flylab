@@ -10,7 +10,7 @@ import patterngen.msg
 import experiment_msgs.msg
 
 class ExperimentParamsRequest(genpy.Message):
-  _md5sum = "ac3366e329653e1404b8bcba5c1d5aba"
+  _md5sum = "baf99b010aa2600a5241f304662857fe"
   _type = "experiment_srvs/ExperimentParamsRequest"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """experiment_msgs/ExperimentSettings  experiment
@@ -115,6 +115,8 @@ string 		frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
 float64 	distance
 float64 	angle
 string 		angleType # 'random' or 'constant'
+float64     angleOscMag
+float64     angleOscFreq
 float64 	speed
 string 		speedType # 'random' or 'constant'
 float64 	tolerance
@@ -341,7 +343,8 @@ float64 			       wait
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.pre.robot.move.relative.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.pre.robot.move.relative.angleOscMag, _x.pre.robot.move.relative.angleOscFreq, _x.pre.robot.move.relative.speed))
       _x = self.pre.robot.move.relative.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -494,7 +497,8 @@ float64 			       wait
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.trial.robot.move.relative.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.trial.robot.move.relative.angleOscMag, _x.trial.robot.move.relative.angleOscFreq, _x.trial.robot.move.relative.speed))
       _x = self.trial.robot.move.relative.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -847,9 +851,10 @@ float64 			       wait
         self.pre.robot.move.relative.angleType = str[start:end].decode('utf-8')
       else:
         self.pre.robot.move.relative.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.pre.robot.move.relative.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.pre.robot.move.relative.angleOscMag, _x.pre.robot.move.relative.angleOscFreq, _x.pre.robot.move.relative.speed,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -1118,9 +1123,10 @@ float64 			       wait
         self.trial.robot.move.relative.angleType = str[start:end].decode('utf-8')
       else:
         self.trial.robot.move.relative.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.trial.robot.move.relative.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.trial.robot.move.relative.angleOscMag, _x.trial.robot.move.relative.angleOscFreq, _x.trial.robot.move.relative.speed,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -1497,7 +1503,8 @@ float64 			       wait
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.pre.robot.move.relative.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.pre.robot.move.relative.angleOscMag, _x.pre.robot.move.relative.angleOscFreq, _x.pre.robot.move.relative.speed))
       _x = self.pre.robot.move.relative.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -1650,7 +1657,8 @@ float64 			       wait
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.trial.robot.move.relative.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.trial.robot.move.relative.angleOscMag, _x.trial.robot.move.relative.angleOscFreq, _x.trial.robot.move.relative.speed))
       _x = self.trial.robot.move.relative.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -2004,9 +2012,10 @@ float64 			       wait
         self.pre.robot.move.relative.angleType = str[start:end].decode('utf-8')
       else:
         self.pre.robot.move.relative.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.pre.robot.move.relative.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.pre.robot.move.relative.angleOscMag, _x.pre.robot.move.relative.angleOscFreq, _x.pre.robot.move.relative.speed,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -2275,9 +2284,10 @@ float64 			       wait
         self.trial.robot.move.relative.angleType = str[start:end].decode('utf-8')
       else:
         self.trial.robot.move.relative.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.trial.robot.move.relative.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.trial.robot.move.relative.angleOscMag, _x.trial.robot.move.relative.angleOscFreq, _x.trial.robot.move.relative.speed,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -2661,6 +2671,6 @@ _struct_I = genpy.struct_I
 _struct_B = struct.Struct("<B")
 class ExperimentParams(object):
   _type          = 'experiment_srvs/ExperimentParams'
-  _md5sum = '16be195079183c63e94a0f20ec68e573'
+  _md5sum = 'fe306f533de6e8808524373925f80de7'
   _request_class  = ExperimentParamsRequest
   _response_class = ExperimentParamsResponse
