@@ -70,8 +70,10 @@ class ExperimentMoveAbsolute():
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Arena"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Arena"
         self.experimentparams.trial.robot.move.relative.distance = 30.0
-        self.experimentparams.trial.robot.move.relative.angle = 0.0
         self.experimentparams.trial.robot.move.relative.angleType = 'constant'
+        self.experimentparams.trial.robot.move.relative.angleOffset = 0.0
+        self.experimentparams.trial.robot.move.relative.angleOscMag = 0 # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0   # Hz
         self.experimentparams.trial.robot.move.relative.speed = 200
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = 2

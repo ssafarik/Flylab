@@ -70,8 +70,10 @@ class ExperimentRegressiveMotion():
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Robot"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1"
         self.experimentparams.trial.robot.move.relative.distance = 60
-        self.experimentparams.trial.robot.move.relative.angle = 0
         self.experimentparams.trial.robot.move.relative.angleType = 'constant'
+        self.experimentparams.trial.robot.move.relative.angleOffset = 0
+        self.experimentparams.trial.robot.move.relative.angleOscMag = 0 # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0   # Hz
         self.experimentparams.trial.robot.move.relative.speed = 30
         self.experimentparams.trial.robot.move.relative.speedType = 'random'
         self.experimentparams.trial.robot.move.relative.tolerance = 2

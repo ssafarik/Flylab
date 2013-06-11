@@ -54,8 +54,10 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Robot"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.distance = 20
-        self.experimentparams.trial.robot.move.relative.angle = 0.0 * N.pi / 180.0
         self.experimentparams.trial.robot.move.relative.angleType = 'constant'
+        self.experimentparams.trial.robot.move.relative.angleOffset = 0
+        self.experimentparams.trial.robot.move.relative.angleOscMag = 0 # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0   # Hz
         self.experimentparams.trial.robot.move.relative.speed = 20
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
