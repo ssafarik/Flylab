@@ -14,7 +14,7 @@ class TransformServerStageArena:
         self.initialized = False
         self.initConstructor = False
 
-        self.calibration =None 
+        self.calibration = None
 
         rospy.init_node('TransformServerStageArena')
 
@@ -22,10 +22,9 @@ class TransformServerStageArena:
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
 
-        self.subCalibrationOriginate = rospy.Subscriber('stage/calibration_originate', CalibrationStage, self.Calibration_callback)
-        self.subCalibrationSet       = rospy.Subscriber('stage/calibration_set',       CalibrationStage, self.Calibration_callback)
-        self.pubCalibrationSet       = rospy.Publisher('stage/calibration_set',        CalibrationStage, latch=True)
-        self.selfPublishedCalibration = False
+        self.subCalibrationOriginate = rospy.Subscriber('stage/calibration_originate', CalibrationStage, self.Calibration_callback) # This topic brings in data, but it doesn't get recorded.
+        self.subCalibrationSet       = rospy.Subscriber('stage/calibration_set',       CalibrationStage, self.Calibration_callback) # This topic brings in data, and gets recorded into the .bag file if being saved.
+        self.pubCalibrationSet       = rospy.Publisher('stage/calibration_set',        CalibrationStage, latch=True)                # We republish the data at each trial.
 
         self.services = {}
         self.services['transformserverarenastage/init']            = rospy.Service('transformserverarenastage/init',            ExperimentParams, self.Init_callback)
@@ -39,7 +38,7 @@ class TransformServerStageArena:
 
     # Receive calibration values (wherever they came from), and republish them (for the bag file).
     # Either:
-    # -- file -> params -> calibration_originator.py -> here and bagfile.
+    # -- file -> params -> OriginateCalibrationStage.py -> here.
     # or
     # -- bagfile -> here.
     def Calibration_callback (self, calibration):
@@ -48,32 +47,8 @@ class TransformServerStageArena:
             rospy.sleep(0.1)
         
             
-        if (not self.selfPublishedCalibration):
-            self.calibration = calibration
-            
-            ptStageArena = Point()
-            qStageArena = Quaternion()
-            
-            ptStageArena.x = calibration.arena_x #rospy.get_param('stage/arena_x', 0.0)
-            ptStageArena.y = calibration.arena_y #rospy.get_param('stage/arena_y', 0.0)
-            ptStageArena.z = calibration.arena_z #rospy.get_param('stage/arena_z', 0.0)
-                 
-            qStageArena.x = calibration.arena_qx #rospy.get_param('stage/arena_qx', 0.0)
-            qStageArena.y = calibration.arena_qy #rospy.get_param('stage/arena_qy', 0.0)
-            qStageArena.z = calibration.arena_qz #rospy.get_param('stage/arena_qz', 0.0)
-            qStageArena.w = calibration.arena_qw #rospy.get_param('stage/arena_qw', 1.0)
-
-            self.transStageArena = (ptStageArena.x, 
-                                    ptStageArena.y,
-                                    ptStageArena.z)
-            self.rotStageArena   = (qStageArena.x,
-                                    qStageArena.y,
-                                    qStageArena.z,
-                                    qStageArena.w)
-            
-            self.initialized = True
-        else:
-            self.selfPublishedCalibration = False
+        self.calibration = calibration
+        self.initialized = True
         
         
     def Init_callback(self, experimentparams):
@@ -83,12 +58,10 @@ class TransformServerStageArena:
     # Publishes the calibration.
     #
     def TrialStart_callback(self, experimentparams):
-        while (not self.initialized):
+        while (self.calibration is None):
             rospy.sleep(0.5)
 
-        if (self.calibration is not None):
-            self.selfPublishedCalibration = True
-            self.pubCalibrationSet.publish(self.calibration)
+        self.pubCalibrationSet.publish(self.calibration)
             
         return True
                 
@@ -106,9 +79,14 @@ class TransformServerStageArena:
         
         
     def SendTransforms(self):
-        if self.initialized:
-            self.tfbx.sendTransform(self.transStageArena, 
-                                    self.rotStageArena,
+        if (self.initialized):
+            self.tfbx.sendTransform((self.calibration.arena_x,
+                                     self.calibration.arena_y,
+                                     self.calibration.arena_z),
+                                    (self.calibration.arena_qx,
+                                     self.calibration.arena_qy,
+                                     self.calibration.arena_qz,
+                                     self.calibration.arena_qw),
                                     rospy.Time.now(),
                                     "Stage",     # child
                                     "Arena"      # parent

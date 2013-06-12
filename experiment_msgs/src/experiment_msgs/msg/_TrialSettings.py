@@ -9,7 +9,7 @@ import patterngen.msg
 import experiment_msgs.msg
 
 class TrialSettings(genpy.Message):
-  _md5sum = "b35f9859353b5050f40fac02e468b7f1"
+  _md5sum = "6975cc5ef5c7fc5ed3e84270eb6f4cf3"
   _type = "experiment_msgs/TrialSettings"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """# All run concurrently:  (robot) and (lasergalvos) and (ledpanels).  Any terminate -> all terminate.
@@ -36,13 +36,15 @@ patterngen/MsgPattern     pattern
 MSG: experiment_msgs/MoveRelative
 bool 		tracking
 string 		frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'
-string 		frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
-float64 	distance
-float64 	angle
-string 		angleType # 'random' or 'constant'
-float64 	speed
-string 		speedType # 'random' or 'constant'
-float64 	tolerance
+string 		frameidOriginAngle    # 'Plate' or 'Robot' or 'Fly'
+float64 	distance              # mm
+string 		angleType             # 'random' or 'constant'
+float64 	angleOffset           # Radians from origin to target.
+float64     angleOscMag           # Radian magnitude of the added oscillation.
+float64     angleOscFreq          # Hz of the added oscillation.
+string 		speedType             # 'random' or 'constant'
+float64 	speed                 # mm/sec
+float64 	tolerance             # mm
 
 
 ================================================================================
@@ -164,22 +166,23 @@ string                  statefilterCriteria	    # "inclusive" or "exclusive"
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2d.pack(_x.robot.move.relative.distance, _x.robot.move.relative.angle))
+      buff.write(_struct_d.pack(self.robot.move.relative.distance))
       _x = self.robot.move.relative.angleType
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.robot.move.relative.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.robot.move.relative.angleOffset, _x.robot.move.relative.angleOscMag, _x.robot.move.relative.angleOscFreq))
       _x = self.robot.move.relative.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.robot.move.relative.tolerance))
+      _x = self
+      buff.write(_struct_2d.pack(_x.robot.move.relative.speed, _x.robot.move.relative.tolerance))
       _x = self.robot.move.pattern.frameidPosition
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -348,10 +351,9 @@ string                  statefilterCriteria	    # "inclusive" or "exclusive"
         self.robot.move.relative.frameidOriginAngle = str[start:end].decode('utf-8')
       else:
         self.robot.move.relative.frameidOriginAngle = str[start:end]
-      _x = self
       start = end
-      end += 16
-      (_x.robot.move.relative.distance, _x.robot.move.relative.angle,) = _struct_2d.unpack(str[start:end])
+      end += 8
+      (self.robot.move.relative.distance,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -361,9 +363,10 @@ string                  statefilterCriteria	    # "inclusive" or "exclusive"
         self.robot.move.relative.angleType = str[start:end].decode('utf-8')
       else:
         self.robot.move.relative.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.robot.move.relative.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.robot.move.relative.angleOffset, _x.robot.move.relative.angleOscMag, _x.robot.move.relative.angleOscFreq,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -373,9 +376,10 @@ string                  statefilterCriteria	    # "inclusive" or "exclusive"
         self.robot.move.relative.speedType = str[start:end].decode('utf-8')
       else:
         self.robot.move.relative.speedType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.robot.move.relative.tolerance,) = _struct_d.unpack(str[start:end])
+      end += 16
+      (_x.robot.move.relative.speed, _x.robot.move.relative.tolerance,) = _struct_2d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -616,22 +620,23 @@ string                  statefilterCriteria	    # "inclusive" or "exclusive"
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2d.pack(_x.robot.move.relative.distance, _x.robot.move.relative.angle))
+      buff.write(_struct_d.pack(self.robot.move.relative.distance))
       _x = self.robot.move.relative.angleType
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.robot.move.relative.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.robot.move.relative.angleOffset, _x.robot.move.relative.angleOscMag, _x.robot.move.relative.angleOscFreq))
       _x = self.robot.move.relative.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.robot.move.relative.tolerance))
+      _x = self
+      buff.write(_struct_2d.pack(_x.robot.move.relative.speed, _x.robot.move.relative.tolerance))
       _x = self.robot.move.pattern.frameidPosition
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -801,10 +806,9 @@ string                  statefilterCriteria	    # "inclusive" or "exclusive"
         self.robot.move.relative.frameidOriginAngle = str[start:end].decode('utf-8')
       else:
         self.robot.move.relative.frameidOriginAngle = str[start:end]
-      _x = self
       start = end
-      end += 16
-      (_x.robot.move.relative.distance, _x.robot.move.relative.angle,) = _struct_2d.unpack(str[start:end])
+      end += 8
+      (self.robot.move.relative.distance,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -814,9 +818,10 @@ string                  statefilterCriteria	    # "inclusive" or "exclusive"
         self.robot.move.relative.angleType = str[start:end].decode('utf-8')
       else:
         self.robot.move.relative.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.robot.move.relative.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.robot.move.relative.angleOffset, _x.robot.move.relative.angleOscMag, _x.robot.move.relative.angleOscFreq,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -826,9 +831,10 @@ string                  statefilterCriteria	    # "inclusive" or "exclusive"
         self.robot.move.relative.speedType = str[start:end].decode('utf-8')
       else:
         self.robot.move.relative.speedType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.robot.move.relative.tolerance,) = _struct_d.unpack(str[start:end])
+      end += 16
+      (_x.robot.move.relative.speed, _x.robot.move.relative.tolerance,) = _struct_2d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])

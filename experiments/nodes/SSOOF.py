@@ -70,8 +70,10 @@ class ExperimentSSOOF():
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1"
         self.experimentparams.trial.robot.move.relative.distance = 1
-        self.experimentparams.trial.robot.move.relative.angle = 0
         self.experimentparams.trial.robot.move.relative.angleType = 'constant'
+        self.experimentparams.trial.robot.move.relative.angleOffset = 0
+        self.experimentparams.trial.robot.move.relative.angleOscMag = 0 # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0   # Hz
         self.experimentparams.trial.robot.move.relative.speed = 20
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = 2

@@ -69,7 +69,7 @@ class SaveArenastate:
 
         
         #################################################################################
-        self.versionFile = '2.81'    # Increment this when the file format changes.
+        self.versionFile = '2.82'    # Increment this when the file format changes.
         #################################################################################
 
         
@@ -129,8 +129,10 @@ class SaveArenastate:
                                     'preRobotMoveRelOriginPosition, '\
                                     'preRobotMoveRelOriginAngle, '\
                                     'preRobotMoveRelDistance, '\
-                                    'preRobotMoveRelAngle, '\
+                                    'preRobotMoveRelAngleOffset, '\
                                     'preRobotMoveRelAngleType, '\
+                                    'preRobotMoveRelAngleOscMag, '\
+                                    'preRobotMoveRelAngleOscFreq, '\
                                     'preRobotMoveRelSpeed, '\
                                     'preRobotMoveRelSpeedType, '\
                                     'preRobotMoveRelTolerance\n'
@@ -149,8 +151,10 @@ class SaveArenastate:
                                     '{preRobotMoveRelOriginPosition:s}, '\
                                     '{preRobotMoveRelOriginAngle:s}, '\
                                     '{preRobotMoveRelDistance:s}, '\
-                                    '{preRobotMoveRelAngle:s}, '\
+                                    '{preRobotMoveRelAngleOffset:s}, '\
                                     '{preRobotMoveRelAngleType:s}, '\
+                                    '{preRobotMoveRelAngleOscMag:s}, '\
+                                    '{preRobotMoveRelAngleOscFreq:s}, '\
                                     '{preRobotMoveRelSpeed:s}, '\
                                     '{preRobotMoveRelSpeedType:s}, '\
                                     '{preRobotMoveRelTolerance:s}\n'
@@ -257,8 +261,10 @@ class SaveArenastate:
                                     'trialRobotMoveRelOriginPosition, '\
                                     'trialRobotMoveRelOriginAngle, '\
                                     'trialRobotMoveRelDistance, '\
-                                    'trialRobotMoveRelAngle, '\
+                                    'trialRobotMoveRelAngleOffset, '\
                                     'trialRobotMoveRelAngleType, '\
+                                    'trialRobotMoveRelAngleOscMag, '\
+                                    'trialRobotMoveRelAngleOscFreq, '\
                                     'trialRobotMoveRelSpeed, '\
                                     'trialRobotMoveRelSpeedType, '\
                                     'trialRobotMoveRelTolerance\n'
@@ -277,8 +283,10 @@ class SaveArenastate:
                                     '{trialRobotMoveRelOriginPosition:s}, '\
                                     '{trialRobotMoveRelOriginAngle:s}, '\
                                     '{trialRobotMoveRelDistance:s}, '\
-                                    '{trialRobotMoveRelAngle:s}, '\
+                                    '{trialRobotMoveRelAngleOffset:s}, '\
                                     '{trialRobotMoveRelAngleType:s}, '\
+                                    '{trialRobotMoveRelAngleOscMag:s}, '\
+                                    '{trialRobotMoveRelAngleOscFreq:s}, '\
                                     '{trialRobotMoveRelSpeed:s}, '\
                                     '{trialRobotMoveRelSpeedType:s}, '\
                                     '{trialRobotMoveRelTolerance:s}\n'
@@ -547,8 +555,10 @@ class SaveArenastate:
                                                 preRobotMoveRelOriginPosition = str(experimentparamsReq.pre.robot.move.relative.frameidOriginPosition),
                                                 preRobotMoveRelOriginAngle    = str(experimentparamsReq.pre.robot.move.relative.frameidOriginAngle),
                                                 preRobotMoveRelDistance       = str(experimentparamsReq.pre.robot.move.relative.distance),
-                                                preRobotMoveRelAngle          = str(experimentparamsReq.pre.robot.move.relative.angle),
+                                                preRobotMoveRelAngleOffset    = str(experimentparamsReq.pre.robot.move.relative.angleOffset),
                                                 preRobotMoveRelAngleType      = str(experimentparamsReq.pre.robot.move.relative.angleType),
+                                                preRobotMoveRelAngleOscMag    = str(experimentparamsReq.pre.robot.move.relative.angleOscMag),
+                                                preRobotMoveRelAngleOscFreq   = str(experimentparamsReq.pre.robot.move.relative.angleOscFreq),
                                                 preRobotMoveRelSpeed          = str(experimentparamsReq.pre.robot.move.relative.speed),
                                                 preRobotMoveRelSpeedType      = str(experimentparamsReq.pre.robot.move.relative.speedType),
                                                 preRobotMoveRelTolerance      = str(experimentparamsReq.pre.robot.move.relative.tolerance),
@@ -661,8 +671,10 @@ class SaveArenastate:
                                                 trialRobotMoveRelOriginPosition = str(experimentparamsReq.trial.robot.move.relative.frameidOriginPosition),
                                                 trialRobotMoveRelOriginAngle    = str(experimentparamsReq.trial.robot.move.relative.frameidOriginAngle),
                                                 trialRobotMoveRelDistance       = str(experimentparamsReq.trial.robot.move.relative.distance),
-                                                trialRobotMoveRelAngle          = str(experimentparamsReq.trial.robot.move.relative.angle),
+                                                trialRobotMoveRelAngleOffset    = str(experimentparamsReq.trial.robot.move.relative.angleOffset),
                                                 trialRobotMoveRelAngleType      = str(experimentparamsReq.trial.robot.move.relative.angleType),
+                                                trialRobotMoveRelAngleOscMag    = str(experimentparamsReq.trial.robot.move.relative.angleOscMag),
+                                                trialRobotMoveRelAngleOscFreq   = str(experimentparamsReq.trial.robot.move.relative.angleOscFreq),
                                                 trialRobotMoveRelSpeed          = str(experimentparamsReq.trial.robot.move.relative.speed),
                                                 trialRobotMoveRelSpeedType      = str(experimentparamsReq.trial.robot.move.relative.speedType),
                                                 trialRobotMoveRelTolerance      = str(experimentparamsReq.trial.robot.move.relative.tolerance),

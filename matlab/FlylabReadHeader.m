@@ -18,7 +18,7 @@ function header = FlylabReadHeader (filename)
                 end
                 structVersion = struct(headings{1}{1},values{1});
 
-                if strcmp(values{1}{1},'2.81')
+                if strcmp(values{1}{1},'2.82')
                     bSuccess = true;
                 else
                     break;
@@ -71,7 +71,7 @@ function header = FlylabReadHeader (filename)
                                    headings{4}{1},values{4});
                 
             case 'preRobotEnabled'
-                values = textscan(fid,'%q%q%q%q%f%f%d%f%f%f%d%q%q%q%f%f%q%f%q%f',1,'Delimiter',',');
+                values = textscan(fid,'%q%q%q%q%f%f%d%f%f%f%d%q%q%q%f%f%q%f%f%f%q%f',1,'Delimiter',',');
                 for i=1:length(values)
                     if strcmpi(values{i},'True'); values{i}=true; end;
                     if strcmpi(values{i},'False'); values{i}=false; end;
@@ -95,7 +95,9 @@ function header = FlylabReadHeader (filename)
                                    headings{17}{1},values{17}, ...
                                    headings{18}{1},values{18}, ...
                                    headings{19}{1},values{19}, ...
-                                   headings{20}{1},values{20});
+                                   headings{20}{1},values{20}, ...
+                                   headings{21}{1},values{21}, ...
+                                   headings{22}{1},values{22});
 
             case 'preLaserEnabled'
                 values = textscan(fid,'%q%q%q%q%f%f%d%f%f%f%d%q%q%q',1,'Delimiter',',');
@@ -173,7 +175,7 @@ function header = FlylabReadHeader (filename)
                 structPreWait2 = struct(headings{1}{1},values{1});
                 
             case 'trialRobotEnabled'
-                values = textscan(fid,'%q%q%q%q%f%f%d%f%f%f%d%q%q%q%f%f%q%f%q%f',1,'Delimiter',',');
+                values = textscan(fid,'%q%q%q%q%f%f%d%f%f%f%d%q%q%q%f%f%q%f%f%f%q%f',1,'Delimiter',',');
                 for i=1:length(values)
                     if strcmpi(values{i},'True'); values{i}=true; end;
                     if strcmpi(values{i},'False'); values{i}=false; end;
@@ -197,7 +199,9 @@ function header = FlylabReadHeader (filename)
                                    headings{17}{1},values{17}, ...
                                    headings{18}{1},values{18}, ...
                                    headings{19}{1},values{19}, ...
-                                   headings{20}{1},values{20});
+                                   headings{20}{1},values{20}, ...
+                                   headings{21}{1},values{21}, ...
+                                   headings{22}{1},values{22});
                 
             case 'trialLaserEnabled'
                 values = textscan(fid,'%q%q%q%q%f%f%d%f%f%f%d%q%q%q',1,'Delimiter',',');
@@ -295,7 +299,7 @@ function header = FlylabReadHeader (filename)
         header.postTrigger           = structPostTrigger;
         header.postWait              = structPostWait;
     else
-        fprintf('WARNING: This code only reads Flylab .csv version 2.81\n');
+        fprintf('WARNING: This code only reads Flylab .csv version 2.82\n');
         try
             fprintf('%s is a version %s file.\n', filename, values{1}{1});
         catch

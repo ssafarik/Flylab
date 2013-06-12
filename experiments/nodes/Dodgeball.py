@@ -43,8 +43,10 @@ class Experiment():
         self.experimentparams.pre.robot.move.relative.frameidOriginPosition = "Fly1"
         self.experimentparams.pre.robot.move.relative.frameidOriginAngle = "Fly1"
         self.experimentparams.pre.robot.move.relative.distance = 35                 # Distance to the target point from the origin frame's position.
-        self.experimentparams.pre.robot.move.relative.angle = 0                     # Angle to the target point from the origin frame's x-axis.
         self.experimentparams.pre.robot.move.relative.angleType = 'random'          # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
+        self.experimentparams.pre.robot.move.relative.angleOffset = 0                     # Angle to the target point from the origin frame's x-axis.
+        self.experimentparams.pre.robot.move.relative.angleOscMag = 0 # Radians
+        self.experimentparams.pre.robot.move.relative.angleOscFreq = 0   # Hz
         self.experimentparams.pre.robot.move.relative.speed = 20                    # Speed at which to move the robot toward the target point. 
         self.experimentparams.pre.robot.move.relative.speedType = 'constant'        # 'constant' or 'random'.  Use the given value, or a random frpre of it. 
         self.experimentparams.pre.robot.move.relative.tolerance = 2                 # When robot-to-target distance is within this tolerance, then the move is over.
@@ -101,8 +103,10 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.distance = 6                    # Distance to the target point from the origin frame's position.
-        self.experimentparams.trial.robot.move.relative.angle = 0                       # Angle to the target point from the origin frame's x-axis.
         self.experimentparams.trial.robot.move.relative.angleType = 'random'            # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
+        self.experimentparams.trial.robot.move.relative.angleOffset = 0                       # Angle to the target point from the origin frame's x-axis.
+        self.experimentparams.trial.robot.move.relative.angleOscMag = 0 # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0   # Hz
         self.experimentparams.trial.robot.move.relative.speed = 20                      # Speed at which to move the robot toward the target point. 
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random frtrial of it. 
         self.experimentparams.trial.robot.move.relative.tolerance = 2                   # When robot-to-target distance is within this tolerance, then the move is over.

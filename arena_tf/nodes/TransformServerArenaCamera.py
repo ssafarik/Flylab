@@ -16,7 +16,6 @@ class TransformServerArenaCamera:
     def __init__(self):
         self.initialized = False
         self.initConstructor = False
-        self.initCalibration = False
         
         self.camerainfo = None
         self.calibration = None
@@ -31,7 +30,6 @@ class TransformServerArenaCamera:
         self.subCalibrationOriginate = rospy.Subscriber('camera/calibration_originate', CalibrationCamera, self.Calibration_callback)
         self.subCalibrationSet       = rospy.Subscriber('camera/calibration_set',       CalibrationCamera, self.Calibration_callback)
         self.pubCalibrationSet       = rospy.Publisher('camera/calibration_set',        CalibrationCamera, latch=True)
-        self.selfPublishedCalibration = False
 
 
         self.services = {}
@@ -50,7 +48,7 @@ class TransformServerArenaCamera:
 
     # Receive calibration values (wherever they came from), and republish them (for the bag file).
     # Either:
-    # -- file -> params -> calibration_originator.py -> here and bagfile.
+    # -- file -> params -> OriginateCalibrationArena.py -> here.
     # or
     # -- bagfile -> here.
     def Calibration_callback (self, calibration):
@@ -59,11 +57,7 @@ class TransformServerArenaCamera:
             rospy.sleep(0.1)
         
             
-        if (not self.selfPublishedCalibration):
-            self.calibration = calibration
-            self.initCalibration = True
-        else:
-            self.selfPublishedCalibration = False
+        self.calibration = calibration
 
 
     def Init_callback(self, experimentparams):
@@ -73,12 +67,10 @@ class TransformServerArenaCamera:
     # Publishes the calibration.
     #
     def TrialStart_callback(self, experimentparams):
-        while (not self.initialized):
+        while (self.calibration is None):
             rospy.sleep(0.5)
 
-        if (self.calibration is not None):
-            self.selfPublishedCalibration = True
-            self.pubCalibrationSet.publish(self.calibration)
+        self.pubCalibrationSet.publish(self.calibration)
             
         return True
                 
@@ -96,7 +88,7 @@ class TransformServerArenaCamera:
         
         
     def CameraInfo_callback (self, camerainfo):
-        if (self.initCalibration) and (self.camerainfo is None):
+        if (self.calibration is not None) and (self.camerainfo is None):
             P = N.reshape(N.array(camerainfo.P),[3,4])
             #K = N.reshape(N.array(camerainfo.K),[3,3])
             K = P[0:3,0:3] # P is the matrix that applies to image_rect.
@@ -129,11 +121,12 @@ class TransformServerArenaCamera:
 #            rospy.logwarn(self.H)
             self.initialized = True
             
-        self.camerainfo = camerainfo
+        if (camerainfo is not None):
+            self.camerainfo = camerainfo
             
 
     def CameraFromArena_callback(self, req):
-        if (self.initialized) and (self.camerainfo is not None):
+        if (self.initialized):
             point_count = min(len(req.xSrc), len(req.ySrc))
             xSrc = list(req.xSrc)
             ySrc = list(req.ySrc)
@@ -155,7 +148,7 @@ class TransformServerArenaCamera:
                 'yDst': yDst}
 
     def ArenaFromCamera_callback(self, req):
-        if (self.initialized) and (self.camerainfo is not None):
+        if (self.initialized):
             point_count = min(len(req.xSrc), len(req.ySrc))
             xSrc = list(req.xSrc)
             ySrc = list(req.ySrc)
@@ -178,24 +171,23 @@ class TransformServerArenaCamera:
 
     def SendTransforms(self):      
         if (self.initialized) and (self.camerainfo is not None):
-            stamp = self.camerainfo.header.stamp 
             self.tfbx.sendTransform((0, 0, 0), 
                                     (0,0,0,1), 
-                                    stamp, 
+                                    self.camerainfo.header.stamp, 
                                     "Camera", "Camera0")
             self.tfbx.sendTransform((0,0,0), 
                                     (0,0,0,1), 
-                                    stamp, 
+                                    self.camerainfo.header.stamp, 
                                     "ImageRaw", "Camera")
             self.tfbx.sendTransform((0,0,0), 
                                     (0,0,0,1), 
-                                    stamp, 
+                                    self.camerainfo.header.stamp, 
                                     "ImageRect", "ImageRaw")
             self.tfbx.sendTransform((self.calibration.xMask,
                                      self.calibration.yMask,
                                      0.0),
                                     (0,0,0,1), 
-                                    stamp, 
+                                    self.camerainfo.header.stamp, 
                                     "Arena", "ImageRect")
       
         
@@ -212,7 +204,6 @@ class TransformServerArenaCamera:
         for key in self.services:
             self.services[key].shutdown()
             
-                
 
 
 if __name__ == "__main__":

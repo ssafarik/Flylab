@@ -4,10 +4,8 @@ import roslib; roslib.load_manifest('motorarm')
 import rospy
 import copy
 import numpy as N
-import serial
 import tf
 import threading
-import PyKDL
 from geometry_msgs.msg import Point, PointStamped, Pose, PoseStamped, Vector3, Vector3Stamped
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header, ColorRGBA, String
@@ -77,7 +75,6 @@ class MotorArm:
 
         self.subVisualState = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
         self.pubJointState = rospy.Publisher('joint_states', JointState)
-        # self.pubEndEffector       = rospy.Publisher('EndEffector', MsgFrameState)
         self.pubMarker = rospy.Publisher('visualization_marker', Marker)
         
         self.tfrx = tf.TransformListener()
@@ -86,7 +83,6 @@ class MotorArm:
         self.stateRef = MsgFrameState()
         self.stateVisual = None
         self.ptEeMech = Point(0, 0, 0)
-#        self.stateCommand = MsgFrameState()  # Where to command the end-effector.
 
         self.statePError = MsgFrameState()
         self.stateIError = MsgFrameState()
@@ -103,17 +99,6 @@ class MotorArm:
         
         self.timePrev = rospy.Time.now()
         self.time = rospy.Time.now()
-        
-        self.anglePrev = 0.0
-        self.angleNext = 0.0
-        self.speedNextFiltered = None
-        self.dAFiltered = 0.0
-        self.dA2Filtered = 0.0
-        self.dASum = 0.0
-        self.xMin = 99999
-        self.xMax = 0
-        self.yMin = 99999
-        self.yMax = 0
         
         self.request = SrvFrameStateRequest()
         self.request.state.header.frame_id = 'Stage'
@@ -135,35 +120,35 @@ class MotorArm:
         try:
             self.Calibrate_joint1 = rospy.ServiceProxy(stSrv, SrvCalibrate)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ('MA FAILED %s: %s' % (stSrv, e))
+            rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
 
         stSrv = 'srvGetState_' + self.names[0]
         rospy.wait_for_service(stSrv)
         try:
             self.GetState_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ('MA FAILED %s: %s' % (stSrv, e))
+            rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
 
         stSrv = 'srvSetPositionAtVel_' + self.names[0]
         rospy.wait_for_service(stSrv)
         try:
             self.SetPositionAtVel_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ('MA FAILED %s: %s' % (stSrv, e))
+            rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
 
         stSrv = 'srvSetVelocity_' + self.names[0]
         rospy.wait_for_service(stSrv)
         try:
             self.SetVelocity_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ('MA FAILED %s: %s' % (stSrv, e))
+            rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
 
         stSrv = 'srvPark_' + self.names[0]
         rospy.wait_for_service(stSrv)
         try:
             self.Park_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
-            rospy.loginfo ('MA FAILED %s: %s' % (stSrv, e))
+            rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
 
 
         self.initializedServices = True
@@ -329,9 +314,8 @@ class MotorArm:
 
     # Forward kinematics:  Get x,y from angle 1
     def Get1xyFrom1 (self, angle):
-        # Rotate the frames from centered to east-pointing. 
-        x = self.L1 * N.cos(angle)  # +N.pi)
-        y = self.L1 * N.sin(angle)  # +N.pi)
+        x = self.L1 * N.cos(angle)
+        y = self.L1 * N.sin(angle)
 
         return (angle, x, y)
     
@@ -343,6 +327,7 @@ class MotorArm:
         
         return angle
         
+        
     # Get1FromXy()
     # Inverse Kinematics: Get Angle 1 from the (x,y) end-effector position,
     # where (x,y) is in the  frame of the workspace center.
@@ -350,7 +335,6 @@ class MotorArm:
     def Get1FromXy (self, x, y):
         
         angle = (N.arctan2(y, x) % (2.0 * N.pi)) + self.unwind
-#        angle -= N.pi
         
         if (angle - self.angleInvKinPrev) > N.pi:  # Clockwise across zero.
             angle -= 2.0 * N.pi
@@ -376,7 +360,7 @@ class MotorArm:
 
     def JacobianInv (self, angle1):
         t1 = angle1 % N.pi
-        if (N.pi/4.0 < t1 < 3.0*N.pi/4.0):
+        if (N.pi/4.0 < t1 < 3.0*N.pi/4.0):  # Decide whether to use dx or dy for the calculation.
             j11 = -1.0 / (self.L1 * N.sin(angle1))
             j21 = 0
         else:
@@ -423,7 +407,7 @@ class MotorArm:
         rv = SrvSignalResponse()
         
         (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', srvSignalReq.state)
-        rv.success = isInArena
+        rv.success = True #isInArena
         
         return rv
 
@@ -512,7 +496,6 @@ class MotorArm:
                 except (rospy.ServiceException, IOError), e:
                     rospy.logwarn ('MA FAILED %s' % e)
                     self.jointstate1 = None
-                # rospy.logwarn('MA joint1=% 3.1f' % self.jointstate1.position)
             
             if (self.jointstate1 is not None):                 
                 (angle1, self.ptEeMech.x, self.ptEeMech.y) = self.Get1xyFrom1(self.jointstate1.position)
@@ -534,7 +517,6 @@ class MotorArm:
                 state.pose.orientation.y = qEE[1]
                 state.pose.orientation.z = qEE[2]
                 state.pose.orientation.w = qEE[3]
-#                self.pubEndEffector.publish (state)
 
 
                 
@@ -633,10 +615,8 @@ class MotorArm:
                 self.kD *= self.kAll
 
                 a = rospy.get_param('/a', 0.05) # This is the filter constant for the derivative term.
-                #b = rospy.get_param('/b', 0.0) # This helps pull the mechanical position under the visual position when at rest.
             else:
                 a = 0.05
-                #b = 0.0
             
             # The previous error.
             self.statePErrorPrev = copy.deepcopy(self.statePError)
@@ -700,7 +680,7 @@ class MotorArm:
                                                       z=self.kPv*self.statePError.velocity.linear.z + self.kIv*self.stateIError.velocity.linear.z + self.kDv*self.stateDError.velocity.linear.z)
                                     
                 # Anti-windup
-                ptEeIErrorClipped = self.ClipPtMag (self.stateIError.velocity.linear, self.maxI)
+                ptEeIErrorClipped = self.ClipPtMag (self.stateIError.velocity.linear, self.maxIv)
                 ptExcessI = Point(self.stateIError.velocity.linear.x - ptEeIErrorClipped.x,
                                   self.stateIError.velocity.linear.y - ptEeIErrorClipped.y,
                                   self.stateIError.velocity.linear.z - ptEeIErrorClipped.z)
@@ -709,30 +689,86 @@ class MotorArm:
                 self.stateIError.velocity.linear.z -= self.kWindup * ptExcessI.z
                 
             
-                # Display the command vector in rviz.
-                ptBase = self.stateVisual.pose.position
-                ptEnd = Point(x = ptBase.x + self.statePID.pose.position.x,
-                              y = ptBase.y + self.statePID.pose.position.y,
-                              z = ptBase.z + self.statePID.pose.position.z
+                # Get the angular positions for each joint.
+                angle1Mech = self.Get1FromPt(self.ptEeMech)
+            
+                # Compute the velocity command.
+                xDot = (self.stateRef.velocity.linear.x + self.statePID.velocity.linear.x) + self.statePID.pose.position.x
+                yDot = (self.stateRef.velocity.linear.y + self.statePID.velocity.linear.y) + self.statePID.pose.position.y
+
+
+                # Pull the mechanical position back under the visual position.
+                xDot += (self.stateVisual.pose.position.x - self.ptEeMech.x)
+                yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
+
+                # Clip to max speed.
+                pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
+                xDot = pt.x
+                yDot = pt.y
+                
+                
+                # Clip to stay in workspace.
+                pts = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
+                                                 frame_id='Stage'),
+                                   point=Point(x = xDot + self.ptEeMech.x,
+                                               y = yDot + self.ptEeMech.y))
+                (ptsArena, isInArena)         = (pts,True)#self.ClipPtsToArena(pts) causes position error surges at certain points around the circle.
+                xDot = ptsArena.point.x - self.ptEeMech.x
+                yDot = ptsArena.point.y - self.ptEeMech.y
+                
+                
+                # Convert to motor coordinates.
+                jInv = self.JacobianInv(angle1Mech)
+                theta1Dot = jInv.dot(N.array([[xDot],[yDot]])) 
+                
+                # Display the velocity vector in rviz.
+                ptBase = self.ptEeMech #self.stateVisual.pose.position
+                ptEnd = Point(x = ptBase.x + xDot,
+                              y = ptBase.y + yDot,
+                              z = ptBase.z + 0
                               ) 
-                markerCommand = Marker(header=Header(stamp=self.time,
+                markerVelocity = Marker(header=Header(stamp=self.time,
                                                     frame_id='Stage'),
-                                      ns='pidPosition',
-                                      id=2,
+                                      ns='velocityCommand',
+                                      id=3,
                                       type=Marker.ARROW,
                                       action=0,
                                       scale=Vector3(x=0.1,  # Shaft diameter
                                                     y=0.2,  # Head diameter
                                                     z=0.0),
-                                      color=ColorRGBA(a=0.8,
-                                                      r=1.0,
-                                                      g=1.0,
+                                      color=ColorRGBA(a=0.9,
+                                                      r=0.5,
+                                                      g=0.5,
                                                       b=1.0),
                                       lifetime=rospy.Duration(1.0),
                                       points=[ptBase, ptEnd])
-                self.pubMarker.publish(markerCommand)
-            
+                self.pubMarker.publish(markerVelocity)
+
+
                 if (self.bTune):
+                    # Display the command vector in rviz.
+                    ptBase = self.stateVisual.pose.position
+                    ptEnd = Point(x = ptBase.x + self.statePID.pose.position.x,
+                                  y = ptBase.y + self.statePID.pose.position.y,
+                                  z = ptBase.z + self.statePID.pose.position.z
+                                  ) 
+                    markerCommand = Marker(header=Header(stamp=self.time,
+                                                        frame_id='Stage'),
+                                          ns='pidPosition',
+                                          id=2,
+                                          type=Marker.ARROW,
+                                          action=0,
+                                          scale=Vector3(x=0.1,  # Shaft diameter
+                                                        y=0.2,  # Head diameter
+                                                        z=0.0),
+                                          color=ColorRGBA(a=0.8,
+                                                          r=1.0,
+                                                          g=1.0,
+                                                          b=1.0),
+                                          lifetime=rospy.Duration(1.0),
+                                          points=[ptBase, ptEnd])
+                    self.pubMarker.publish(markerCommand)
+            
                     # Display P,I,D vectors in rviz.
                     ptBase = self.stateVisual.pose.position #self.ptEeMech
                     ptEnd = Point(x = ptBase.x + self.kP*self.statePError.pose.position.x,
@@ -776,64 +812,9 @@ class MotorArm:
                     magDv = self.kDv * N.linalg.norm([self.stateDError.velocity.linear.x, self.stateDError.velocity.linear.y])
                     magPIDv = N.linalg.norm([self.statePID.velocity.linear.x, self.statePID.velocity.linear.y])
                     
-                    rospy.logwarn('[P,I,D]=[% 6.2f,% 6.2f,% 6.2f], [% 6.2f,% 6.2f,% 6.2f], PID=% 7.2f, % 7.2f' % (magP,magI,magD, magPv,magIv,magDv, magPID, magPIDv))
+                    rospy.logwarn('[P,I,D]=[% 5.2f,% 5.2f,% 5.2f]=% 5.2f, [% 5.2f,% 5.2f,% 5.2f]=% 5.2f, v=% 5.2f' % (magP,magI,magD, magPID, magPv,magIv,magDv, magPIDv, theta1Dot))
 
             
-                # Get the angular positions for each joint.
-                angle1Mech = self.Get1FromPt(self.ptEeMech)
-            
-                # Compute the velocity command.
-                xDot = (self.stateRef.velocity.linear.x + self.statePID.velocity.linear.x) + self.statePID.pose.position.x
-                yDot = (self.stateRef.velocity.linear.y + self.statePID.velocity.linear.y) + self.statePID.pose.position.y
-
-
-                # Pull the mechanical position back under the visual position.
-                xDot += (self.stateVisual.pose.position.x - self.ptEeMech.x)
-                yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
-
-                # Clip to max speed.
-                pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
-                xDot = pt.x
-                yDot = pt.y
-                
-                
-                # Clip to stay in workspace.
-                pts = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
-                                                 frame_id='Stage'),
-                                   point=Point(x = xDot + self.ptEeMech.x,
-                                               y = yDot + self.ptEeMech.y))
-                (ptsArena, isInArena)         = self.ClipPtsToArena(pts)
-                xDot = ptsArena.point.x - self.ptEeMech.x
-                yDot = ptsArena.point.y - self.ptEeMech.y
-                
-                
-                # Convert to motor coordinates.
-                jInv = self.JacobianInv(angle1Mech)
-                theta1Dot = jInv.dot(N.array([[xDot],[yDot]])) 
-                
-                # Display the velocity vector in rviz.
-                ptBase = self.ptEeMech #self.stateVisual.pose.position
-                ptEnd = Point(x = ptBase.x + xDot,
-                              y = ptBase.y + yDot,
-                              z = ptBase.z + 0
-                              ) 
-                markerVelocity = Marker(header=Header(stamp=self.time,
-                                                    frame_id='Stage'),
-                                      ns='velocityCommand',
-                                      id=3,
-                                      type=Marker.ARROW,
-                                      action=0,
-                                      scale=Vector3(x=0.1,  # Shaft diameter
-                                                    y=0.2,  # Head diameter
-                                                    z=0.0),
-                                      color=ColorRGBA(a=0.9,
-                                                      r=0.5,
-                                                      g=0.5,
-                                                      b=1.0),
-                                      lifetime=rospy.Duration(1.0),
-                                      points=[ptBase, ptEnd])
-                self.pubMarker.publish(markerVelocity)
-
             else:
                 theta1Dot = 0.0
                 theta2Dot = 0.0
@@ -842,7 +823,6 @@ class MotorArm:
             if (self.jointstate1 is not None):
                 with self.lock:
                     try:
-                        #rospy.logwarn('%0.4f: dt=%0.4f, x,y=[%0.2f,%0.2f]' % (time.to_sec(),self.dt.to_sec(),self.stateRef.pose.position.x,self.stateRef.pose.position.y))
                         self.SetVelocity_joint1(Header(frame_id=self.names[0]), None, theta1Dot)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
                         rospy.logwarn ("MA Exception:  %s" % e)

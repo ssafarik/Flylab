@@ -42,8 +42,10 @@ class Experiment():
         self.experimentparams.pre.robot.move.relative.frameidOriginPosition = "Fly1"
         self.experimentparams.pre.robot.move.relative.frameidOriginAngle = "Fly1"
         self.experimentparams.pre.robot.move.relative.distance = 35                 # Distance to the target point from the origin frame's position.
-        self.experimentparams.pre.robot.move.relative.angle = 0                     # Angle to the target point from the origin frame's x-axis.
         self.experimentparams.pre.robot.move.relative.angleType = 'random'          # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
+        self.experimentparams.pre.robot.move.relative.angleOffset = 0                     # Angle to the target point from the origin frame's x-axis.
+        self.experimentparams.pre.robot.move.relative.angleOscMag = 0 # Radians
+        self.experimentparams.pre.robot.move.relative.angleOscFreq = 0   # Hz
         self.experimentparams.pre.robot.move.relative.speed = 20                    # Speed at which to move the robot toward the target point. 
         self.experimentparams.pre.robot.move.relative.speedType = 'constant'        # 'constant' or 'random'.  Use the given value, or a random frpre of it. 
         self.experimentparams.pre.robot.move.relative.tolerance = 2                 # When robot-to-target distance is within this tolerance, then the move is over.
@@ -99,8 +101,10 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.distance = 8
-        self.experimentparams.trial.robot.move.relative.angle = 180.0 * N.pi / 180.0
         self.experimentparams.trial.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
+        self.experimentparams.trial.robot.move.relative.angleOffset = N.pi
+        self.experimentparams.trial.robot.move.relative.angleOscMag = 0 # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0   # Hz
         self.experimentparams.trial.robot.move.relative.speed = 5.2
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
