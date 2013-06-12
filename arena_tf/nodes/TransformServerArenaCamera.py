@@ -97,8 +97,9 @@ class TransformServerArenaCamera:
         
     def CameraInfo_callback (self, camerainfo):
         if (self.initCalibration) and (self.camerainfo is None):
-            K = N.reshape(N.array(camerainfo.K),[3,3])
             P = N.reshape(N.array(camerainfo.P),[3,4])
+            #K = N.reshape(N.array(camerainfo.K),[3,3])
+            K = P[0:3,0:3] # P is the matrix that applies to image_rect.
             
     
             rvec = N.array([self.calibration.arena_rvec_0, self.calibration.arena_rvec_1, self.calibration.arena_rvec_2], dtype=N.float32)
