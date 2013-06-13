@@ -1,112 +1,119 @@
 ###############################################################################################################
 ###############################################################################################################
 ##  Calibration Overview:  
-##  The steps below result in several files specific to your camera, camera position, actuator hardware, etc:
-##  	<your device name>.launch                          The main launch file to make your device available in ROS.
-##  	camera.launch                                      The launch file for the camera mounted to your experimental device.
-##  	/cameras/<your device name>_calibration.yaml       Contains distortion & other camera parameters.
-##  	/cameras/background.png                            Background image of an empty arena.
+##  The steps below update files describing the camera distortion, camera position, actuator hardware, etc:
+##  	<your hardware>.launch                             The main launch file to make your device available in ROS.
+##      params_calibration.launch                          Camera and stage position calibration.
+##      params_camera_tracking.launch                      Camera exposure, etc.
+##  	~/.ros/camera_info/<camera guid>.yaml              Contains distortion & other camera parameters.
+##  	~/background.png                                   Background image of an empty arena.
 ###############################################################################################################
 ###############################################################################################################
 
 
-1 ############################### Point to your hardware:
-# Determine the name of your experimental hardware, i.e. <your device name>
-<ctrl> + <alt> + T        # To open a new terminal window.
-roscd config/launch
-gedit hardware.launch
-# Edit hardware.launch to point to your .launch file, e.g. racetrack.launch
+############################### Point to your hardware:
+1. # Determine the name of your experimental hardware, i.e. <your device name>
+2. $ <ctrl> + <alt> + T        # To open a new terminal window.
+3. $ roscd config/launch
+4. $ gedit hardware.launch
+5. # Edit hardware.launch to point to your .launch file.
 
 
 
-2 ############################### Adjust Camera Exposure:
-# Start the camera node.
-<ctrl> + <shift> + T        # To open a new terminal window tab.
-roslaunch <your device name> camera.launch
+############################### Adjust Camera Exposure:
+1.  # Start the camera node.
+2.  $ <ctrl> + <shift> + T        # To open a new terminal window tab.
+3.  $ roslaunch <your device name> camera.launch 
+    # For example:  roslaunch racetrack camera.launch
 
-
-# Start the camera viewer.
-<ctrl> + <shift> + T        # To open a new terminal window tab.
-rosrun image_view image_view image:=camera/image_raw   
-
+# Open a camera image window.
+5.  $ <ctrl> + <shift> + T        # To open a new terminal window tab.
+6.  $ rosrun image_view image_view image:=camera/image_raw   
 
 # Open the camera properties window.
-<ctrl> + <shift> + T        # To open a new terminal window tab.
-rosrun dynamic_reconfigure reconfigure_gui camera
-
+7.  $ <ctrl> + <shift> + T        # To open a new terminal window tab.
+8.  $ rosrun dynamic_reconfigure reconfigure_gui camera
 
 # Adjust mode, brightness, exposure, gain, shutter, etc.
-# Edit "params_camera.yaml" with the new settings, for example:
-#     ~/git/Flylab/ros/racetrack/launch/params_camera.yaml
-# Close the Dynamic Reconfigure window.
+9.  # Edit "Flylab/config/<your hardware>/launch/params_camera_tracking.yaml" with the new settings.
+    # For example:  $ gedit ~/src.git/Flylab/config/racetrack/launch/params_camera_tracking.launch
+10. # Close the Dynamic Reconfigure window.
+11. $ <ctrl>+C (to kill the camera node).
 
 
-# Kill the camera node.
-<ctrl>+C in the terminal window tab where you launched the camera,
 
-
-3 ############################### Camera Intrinsic Parameters (i.e. Lens distortion):
+############################### Camera Intrinsic Parameters (i.e. Lens distortion):
 # Launch the camera node with adjusted settings.
-roslaunch <your device name> camera.launch
+1.  $ roslaunch <your device name> camera.launch
+    # For example:  roslaunch racetrack camera.launch
 
 # Calibrate for distortion.
-# Print out ~/git/Flylab/ros/calibration/patterns/camera_calibration_pattern_30mm.pdf in 1:1 scale
-# Measure each checker to make sure it is 30mm, then tape pattern to something flat
-# Unmount camera from rig if necessary to give calibration pattern plenty of room to move
-<ctrl> + <shift> + T        # To open a new terminal window tab.
-rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_raw camera:=/camera
-
-# Wave 30mm checkerboard pattern in front of camera until all bars turn green and calibrate button activates
-# Click <calibrate>  (will take several minutes)
-# Click <commit>  (writes data to ~/.ros/camera_info/<guid>.yaml)
+2.  # Print ~/git/Flylab/calibration/patterns/camera_calibration_pattern_30mm.pdf (or other appropriate size).
+3.  # Measure each checker to make sure it is 30mm, then tape or spray-mount the pattern to something flat.
+4.  # If necessary, which it probably isn't, unmount camera from rig to give calibration pattern plenty of room to move.
+5.  $ <ctrl> + <shift> + T        # To open a new terminal window tab.
+6.  $ rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_raw camera:=/camera
+7.  # Wave checkerboard pattern in front of camera until all bars turn green and calibrate button activates
+8.  # Click <calibrate>  (will take several minutes)
+9.  # Click <commit>  (writes data to ~/.ros/camera_info/<guid>.yaml)
 
 # Kill the camera and camera_calibrator.
-<ctrl>+C in the terminal window tab where you launched the camera,
-<ctrl>+C in the terminal window tab where you launched the camera_calibration,
+10. $ <ctrl>+C in the terminal window tab where you launched the camera,
+11. $ <ctrl>+C in the terminal window tab where you launched the cameracalibrator.py,
+
+# Edit the P transform to make square pixels.
+12. # Open the file ~/.ros/camera_info/<guid>.yaml
+13. # Note that P is a 3x4 matrix, but is given as a list.
+14. # Let fx and fy be the first two diagonal entries of the P matrix, (i.e. zero-based entries 0 and 5).
+15. # Compute the geometric mean of fx and fy:  fm = sqrt(fx*fy)
+16. # Change the fx and fy values in P to fm.
+    #  For example:
+    #  P_old:  [1508.83337402344, 0, 351.78430686128, 0, 0, 1514.90673828125, 239.021498430047, 0, 0, 0, 1, 0]
+    #  P_new:  [1511.86700647000, 0, 351.78430686128, 0, 0, 1511.86700647000, 239.021498430047, 0, 0, 0, 1, 0]
 
 
-4 ############################### Camera Extrinsic Parameters (i.e. Relationship of Camera to Arena):
-# Print ~/git/Flylab/ros/calibration/patterns/camera_arena_calibration_pattern.pdf in a scale appropriate for your rig.
-# Measure the checker square size, and enter that number (in millimeters) in params_calibration.launch  
 
-# Mount camera on flylab rig, positioned so that the arena is roughly centered in image.
-roscd config/launch
-gedit hardware.launch
-# Make sure it points to <your device name>.launch, save & exit.
-roslaunch calibration CameraArena.launch
+############################### Camera Extrinsic Parameters (i.e. Relationship of Camera to Arena):
+1.  # Print ~/git/Flylab/calibration/patterns/camera_arena_calibration_pattern.pdf in a scale appropriate for your rig.
+2.  # Measure the checker square size, and enter that number (in millimeters) in Flylab/config/<your hardware>/launch/params_calibration.launch  
 
-# Use the following command to move the center and radius of the circle to correspond to the arena.
-rostopic pub -1 Joystick/Commands geometry_msgs/Point -- dx dy dr            #(where dx,dy,dr are replaced with numbers)
-
-# Place circular paper containing the checkerboard pattern on arena
-
-roscd <your device name>/launch
-# Edit params_calibration.launch with mask/x, mask/y, mask/radius, etc. 
-# Edit calibration.launch with average rvec and tvec values (after they stabilize).
-# <ctrl>+C to shutdown CameraArena.launch
-
-
-5 ############################### Acquire a New Background Image:
-# Remove all objects from arena, then:
-rm /cameras/background.png
-roslaunch experiments <any experiment>.launch
-# After the background.png file is written, place the magnet in the arena.
-
-# Adjust the diff_threshold so that contours look good.
-rosparam set tracking/diff_threshold <value>
-# Once you have figured out the correct value, save it in the file "params_tracking.yaml" 
-# <ctrl>+C to kill the experiment.
+# Move the center and radius of the circle to correspond to the arena.
+3.  $ roslaunch calibration CameraArena.launch
+4.  $ rostopic pub -1 Joystick/Commands geometry_msgs/Point -- dx dy dr            #(where dx,dy,dr are replaced with numbers)
+5.  $ roscd <your device name>/launch
+6.  # Enter values for mask/x, mask/y, mask/radius in the file Flylab/config/<your hardware>/launch/params_calibration.launch. 
+7.  $ <ctrl>+C (to shutdown CameraArena.launch)
+ 
+# Get the rvec and tvec values.
+8.  # Position the checkerboard pattern on the arena, mounted *very flat* and roughly centered in image.
+9.  $ roslaunch calibration CameraArena.launch
+10. # Wait for rvec and tvec average values to stabilize.
+11. $ roscd <your device name>/launch
+12. # Edit Flylab/config/<your hardware>/launch/params_calibration.launch with average rvec and tvec values. 
+13. $ <ctrl>+C (to shutdown CameraArena.launch)
 
 
-6 ############################### Stage Extrinsic Parameters (i.e. Relationship of Stage to Arena):
-roscd config/launch
-gedit hardware.launch
-# Make sure it points to <your device name>.launch, save & exit.
 
-roslaunch calibration StageArena.launch
+############################### Acquire a New Background Image:
+1. # Remove all objects from arena.
+2. $ roslaunch experiments <any experiment>.launch
+3. # <Acquire New Background> in the FlylabGUI.
+4. # <Save New Background> in the FlylabGUI.
 
-# The magnet will drive in a spiral pattern to cover the arena.  After a number of cycles, the calibration values should converge.
-# Edit calibration.launch with translation vector and quaternion values.
-# <ctrl>+C to shutdown StageArena.launch
+
+
+############################### Adjust the diff_threshold so that contours look good.
+1. # Place magnet and/or flies in the arena.
+2. $ rosparam set tracking/diff_threshold <value>
+3. # Once you have figured out the correct value, save it in the file "Flylab/config/<your hardware/launch/params_tracking.yaml" 
+4. # <Exit Now> in the FlylabGUI to kill the software.
+
+
+
+############################### Stage Extrinsic Parameters (i.e. Relationship of Stage to Arena):
+1. $ roslaunch calibration StageArena.launch
+2. # Wait while the magnet drives in a pattern to cover the arena.  After a number of cycles, the calibration values should converge.
+3. # Edit Flylab/config/<your hardware/launch/params_calibration.launch with translation vector and quaternion values.
+4. # <ctrl>+C to shutdown StageArena.launch
 
 

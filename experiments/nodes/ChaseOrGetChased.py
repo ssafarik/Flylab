@@ -25,7 +25,7 @@ class Experiment():
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "chase20_"
+        self.experimentparams.save.filenamebase = "chase10_"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
@@ -68,9 +68,11 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.distance = 8
-        self.experimentparams.trial.robot.move.relative.angle = 180.0 * N.pi / 180.0
         self.experimentparams.trial.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
-        self.experimentparams.trial.robot.move.relative.speed = 20 #5.2
+        self.experimentparams.trial.robot.move.relative.angleOffset = N.pi    # Radians from origin to target.
+        self.experimentparams.trial.robot.move.relative.angleOscMag = N.pi/2  # Radian magnitude of the added oscillation.
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = 1.0    # Hz of the added oscillation.
+        self.experimentparams.trial.robot.move.relative.speed = 10 #5.2
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
         self.experimentparams.trial.robot.home.enabled = False

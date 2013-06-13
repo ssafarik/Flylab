@@ -245,7 +245,7 @@ class Action (smach.State):
 
         rospy.loginfo("EL State MoveRobot(%s)" % [self.paramsIn.robot.move.mode,
                                                   self.paramsIn.robot.move.relative.distance, 
-                                                  self.paramsIn.robot.move.relative.angle, 
+                                                  self.paramsIn.robot.move.relative.angleOffset, 
                                                   self.paramsIn.robot.move.relative.speed])
 
         if self.paramsIn.robot.enabled:
@@ -317,8 +317,7 @@ class Action (smach.State):
             elif (self.paramsIn.robot.move.relative.angleType=='constant'):
                 if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
                     angleBase = self.GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
-                    angleRel = self.paramsIn.robot.move.relative.angle
-                # else we already computed the angle.
+                    angleRel = self.paramsIn.robot.move.relative.angleOffset
 
             elif (self.paramsIn.robot.move.relative.angleType=='current'):
                 if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
@@ -326,14 +325,17 @@ class Action (smach.State):
                     angleRel = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOriginAngle, 'Robot')
                     if (angleRel is None):
                         angleRel = 0.0
-                # else we already computed the angle.
-                
+                    
             else:
                 rospy.logwarn ('EL, unknown robot.move.relative.angleType: %s' % self.paramsIn.robot.move.relative.angleType)
                 angleBase = 0.0
                 angleRel = 0.0    
+
+            # Oscillate the angle:  angleOsc = A * sin(2*pi * f * t) = A * sin(w * t)
+            angleOsc = self.paramsIn.robot.move.relative.angleOscMag * N.sin(2.0 * N.pi * self.paramsIn.robot.move.relative.angleOscFreq * rospy.Time.now().to_sec())
+                    
                 
-            angle = (angleBase + angleRel + angleSpeed) % (2.0*N.pi)
+            angle = (angleBase + angleRel + angleSpeed + angleOsc) % (2.0*N.pi)
 
                                                    
             # Move a distance relative to whose position?

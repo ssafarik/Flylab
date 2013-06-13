@@ -79,6 +79,8 @@ class CalibrateCameraArena:
     
     def CameraInfo_callback (self, msgCameraInfo):
         self.camerainfo = msgCameraInfo
+        self.K = N.reshape(self.camerainfo.P,[3,4])[0:3,0:3] # camerainfo.K and camerainfo.D apply to image_raw; P w/ D=0 applies to image_rect.
+        self.D = N.array([0.0, 0.0, 0.0, 0.0, 0.0])
       
 
     def Point_callback(self, point):
@@ -122,8 +124,8 @@ class CalibrateCameraArena:
             (self.pointsAxesProjected,jacobian) = cv2.projectPoints(self.pointsAxes,
                                                                     rvec,
                                                                     tvec,
-                                                                    N.reshape(self.camerainfo.K, [3,3]),
-                                                                    N.reshape(self.camerainfo.D, [5,1])
+                                                                    self.K,
+                                                                    self.D
                                                                     )
                 
             # origin point
@@ -152,8 +154,8 @@ class CalibrateCameraArena:
                 self.PrepareImageCorners(cornersImage.squeeze())
                 (rv, self.rvec, self.tvec) = cv2.solvePnP(self.pointsArena, 
                                                           self.pointsImage, 
-                                                          N.reshape(self.camerainfo.K,[3,3]), 
-                                                          N.reshape(self.camerainfo.D,[5,1]))
+                                                          self.K, 
+                                                          self.D)
                 self.rvec = self.rvec.squeeze()
                 self.tvec = self.tvec.squeeze()
                 
@@ -164,12 +166,9 @@ class CalibrateCameraArena:
                 RT[:-1,:-1] = R[:-1,:-1]
                 RT[:,-1] = T[:-1,-1]
                 
-                K = N.reshape(self.camerainfo.K,[3,3])
-                P = N.reshape(N.array(self.camerainfo.P),[3,4])
-                
                 
                 # H is/mightbe the transform from camera point to arena point.
-                Hinv = N.dot(K, RT)
+                Hinv = N.dot(self.K, RT)
                 Hinv = Hinv / Hinv[-1,-1]
                 H = N.linalg.inv(Hinv)
                 self.Hinv = Hinv

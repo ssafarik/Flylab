@@ -6,23 +6,25 @@ import struct
 
 
 class MoveRelative(genpy.Message):
-  _md5sum = "0b694dc2c4bde1073987904345c07b8b"
+  _md5sum = "fd8929d3983869290dceba82b067cd0d"
   _type = "experiment_msgs/MoveRelative"
   _has_header = False #flag to mark the presence of a Header object
   _full_text = """bool 		tracking
 string 		frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'
-string 		frameidOriginAngle # 'Plate' or 'Robot' or 'Fly'
-float64 	distance
-float64 	angle
-string 		angleType # 'random' or 'constant'
-float64 	speed
-string 		speedType # 'random' or 'constant'
-float64 	tolerance
+string 		frameidOriginAngle    # 'Plate' or 'Robot' or 'Fly'
+float64 	distance              # mm
+string 		angleType             # 'random' or 'constant'
+float64 	angleOffset           # Radians from origin to target.
+float64     angleOscMag           # Radian magnitude of the added oscillation.
+float64     angleOscFreq          # Hz of the added oscillation.
+string 		speedType             # 'random' or 'constant'
+float64 	speed                 # mm/sec
+float64 	tolerance             # mm
 
 
 """
-  __slots__ = ['tracking','frameidOriginPosition','frameidOriginAngle','distance','angle','angleType','speed','speedType','tolerance']
-  _slot_types = ['bool','string','string','float64','float64','string','float64','string','float64']
+  __slots__ = ['tracking','frameidOriginPosition','frameidOriginAngle','distance','angleType','angleOffset','angleOscMag','angleOscFreq','speedType','speed','tolerance']
+  _slot_types = ['bool','string','string','float64','string','float64','float64','float64','string','float64','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -32,7 +34,7 @@ float64 	tolerance
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       tracking,frameidOriginPosition,frameidOriginAngle,distance,angle,angleType,speed,speedType,tolerance
+       tracking,frameidOriginPosition,frameidOriginAngle,distance,angleType,angleOffset,angleOscMag,angleOscFreq,speedType,speed,tolerance
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -49,14 +51,18 @@ float64 	tolerance
         self.frameidOriginAngle = ''
       if self.distance is None:
         self.distance = 0.
-      if self.angle is None:
-        self.angle = 0.
       if self.angleType is None:
         self.angleType = ''
-      if self.speed is None:
-        self.speed = 0.
+      if self.angleOffset is None:
+        self.angleOffset = 0.
+      if self.angleOscMag is None:
+        self.angleOscMag = 0.
+      if self.angleOscFreq is None:
+        self.angleOscFreq = 0.
       if self.speedType is None:
         self.speedType = ''
+      if self.speed is None:
+        self.speed = 0.
       if self.tolerance is None:
         self.tolerance = 0.
     else:
@@ -64,10 +70,12 @@ float64 	tolerance
       self.frameidOriginPosition = ''
       self.frameidOriginAngle = ''
       self.distance = 0.
-      self.angle = 0.
       self.angleType = ''
-      self.speed = 0.
+      self.angleOffset = 0.
+      self.angleOscMag = 0.
+      self.angleOscFreq = 0.
       self.speedType = ''
+      self.speed = 0.
       self.tolerance = 0.
 
   def _get_types(self):
@@ -95,22 +103,23 @@ float64 	tolerance
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2d.pack(_x.distance, _x.angle))
+      buff.write(_struct_d.pack(self.distance))
       _x = self.angleType
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.angleOffset, _x.angleOscMag, _x.angleOscFreq))
       _x = self.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.tolerance))
+      _x = self
+      buff.write(_struct_2d.pack(_x.speed, _x.tolerance))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -143,10 +152,9 @@ float64 	tolerance
         self.frameidOriginAngle = str[start:end].decode('utf-8')
       else:
         self.frameidOriginAngle = str[start:end]
-      _x = self
       start = end
-      end += 16
-      (_x.distance, _x.angle,) = _struct_2d.unpack(str[start:end])
+      end += 8
+      (self.distance,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -156,9 +164,10 @@ float64 	tolerance
         self.angleType = str[start:end].decode('utf-8')
       else:
         self.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.angleOffset, _x.angleOscMag, _x.angleOscFreq,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -168,9 +177,10 @@ float64 	tolerance
         self.speedType = str[start:end].decode('utf-8')
       else:
         self.speedType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.tolerance,) = _struct_d.unpack(str[start:end])
+      end += 16
+      (_x.speed, _x.tolerance,) = _struct_2d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -196,22 +206,23 @@ float64 	tolerance
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      _x = self
-      buff.write(_struct_2d.pack(_x.distance, _x.angle))
+      buff.write(_struct_d.pack(self.distance))
       _x = self.angleType
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.speed))
+      _x = self
+      buff.write(_struct_3d.pack(_x.angleOffset, _x.angleOscMag, _x.angleOscFreq))
       _x = self.speedType
       length = len(_x)
       if python3 or type(_x) == unicode:
         _x = _x.encode('utf-8')
         length = len(_x)
       buff.write(struct.pack('<I%ss'%length, length, _x))
-      buff.write(_struct_d.pack(self.tolerance))
+      _x = self
+      buff.write(_struct_2d.pack(_x.speed, _x.tolerance))
     except struct.error as se: self._check_types(se)
     except TypeError as te: self._check_types(te)
 
@@ -245,10 +256,9 @@ float64 	tolerance
         self.frameidOriginAngle = str[start:end].decode('utf-8')
       else:
         self.frameidOriginAngle = str[start:end]
-      _x = self
       start = end
-      end += 16
-      (_x.distance, _x.angle,) = _struct_2d.unpack(str[start:end])
+      end += 8
+      (self.distance,) = _struct_d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -258,9 +268,10 @@ float64 	tolerance
         self.angleType = str[start:end].decode('utf-8')
       else:
         self.angleType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.speed,) = _struct_d.unpack(str[start:end])
+      end += 24
+      (_x.angleOffset, _x.angleOscMag, _x.angleOscFreq,) = _struct_3d.unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -270,9 +281,10 @@ float64 	tolerance
         self.speedType = str[start:end].decode('utf-8')
       else:
         self.speedType = str[start:end]
+      _x = self
       start = end
-      end += 8
-      (self.tolerance,) = _struct_d.unpack(str[start:end])
+      end += 16
+      (_x.speed, _x.tolerance,) = _struct_2d.unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e) #most likely buffer underfill
@@ -281,3 +293,4 @@ _struct_I = genpy.struct_I
 _struct_2d = struct.Struct("<2d")
 _struct_B = struct.Struct("<B")
 _struct_d = struct.Struct("<d")
+_struct_3d = struct.Struct("<3d")
