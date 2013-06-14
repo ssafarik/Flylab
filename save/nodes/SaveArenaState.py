@@ -24,9 +24,8 @@ class SaveArenastate:
         self.initialized = False
 
         # Create new directory each day
-        self.dirWorking_base = os.path.expanduser("~/FlylabData")
-        self.dirDay = time.strftime("%Y_%m_%d")
-        self.dirCsv = self.dirWorking_base + "/" + self.dirDay
+        self.dirBase = os.path.expanduser("~/FlylabData")
+        self.dirCsv = self.dirBase + "/" + time.strftime("%Y_%m_%d")
 
         # Make sure dir exists.
         try:
@@ -469,6 +468,15 @@ class SaveArenastate:
         self.bSaveOnlyWhileTriggered = experimentparamsReq.save.onlyWhileTriggered
 
         if (self.bSaveArenastate):
+            # Get the directory:  dirBag = 'FlylabData/YYYY_MM_DD'
+            self.dirCsv = self.dirBase + '/' + time.strftime('%Y_%m_%d')
+
+            # Make sure path exists.
+            try:
+                os.makedirs(self.dirCsv)
+            except OSError:
+                pass
+            
             # Determine if we should be saving.
             if (self.bSaveOnlyWhileTriggered):
                 self.bSavingArenastate = False

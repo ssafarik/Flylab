@@ -30,11 +30,11 @@ class SaveImages:
 
         # Create new directory each day
         self.dirBase = os.path.expanduser('~/FlylabData')
-        self.dirWorking = self.dirBase + '/' + time.strftime('%Y_%m_%d')
+        self.dirImages = self.dirBase + '/' + time.strftime('%Y_%m_%d')
 
         # Make sure dir exists.
         try:
-            os.makedirs(self.dirWorking)
+            os.makedirs(self.dirImages)
         except OSError:
             pass
         
@@ -113,12 +113,12 @@ class SaveImages:
         self.bSaveOnlyWhileTriggered = self.paramsSave.onlyWhileTriggered
         
         if (self.paramsSave.mov):                
-            # Get the directory:  dirWorking = '~/FlylabData/YYYY_MM_DD'
-            self.dirWorking = self.dirBase + '/' + time.strftime('%Y_%m_%d')
+            # Get the directory:  dirImages = '~/FlylabData/YYYY_MM_DD'
+            self.dirImages = self.dirBase + '/' + time.strftime('%Y_%m_%d')
             
             # Make sure dir exists.
             try:
-                os.makedirs(self.dirWorking)
+                os.makedirs(self.dirImages)
             except OSError:
                 pass
 
@@ -126,7 +126,7 @@ class SaveImages:
             # Initialize vars for each imagetopic.
             # Make a subdir and video filename for each timestamped imagetopic:  dirFrames['camera/image_raw'] = '/home/user/FlylabData/YYYY_MM_DD/test20130418131415_camera_image_raw'
             for (imagetopic,value) in self.subImage_dict.iteritems():
-                self.dirFrames[imagetopic] = self.dirWorking + '/' + self.paramsSave.filenamebase + self.paramsSave.timestamp + '_' + imagetopic.replace('/','_')
+                self.dirFrames[imagetopic] = self.dirImages + '/' + self.paramsSave.filenamebase + self.paramsSave.timestamp + '_' + imagetopic.replace('/','_')
                 self.fullpathVideo_dict[imagetopic] = '%s.mov' % (self.dirFrames[imagetopic]) 
                 self.iFrame[imagetopic] = 0
     
