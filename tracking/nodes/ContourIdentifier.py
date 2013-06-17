@@ -623,12 +623,13 @@ class ContourIdentifier:
                 # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
                 try:
                     stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
-                    transformEE = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
+                    (translationEE,rotationEE) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
                 except tf.Exception, e:
                     pass    # No transform - probably because we're replaying a bag file.
                     #rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
                 else:
-                    self.pubTransformEE.publish(transformEE)
+                    self.pubTransformEE.publish(Transform(translation=Vector3(translationEE[0],translationEE[1],translationEE[2]), 
+                                                          rotation=Quaternion(rotationEE[0],rotationEE[1],rotationEE[2],rotationEE[3])))
 
 
                 #if self.stateEndEffector is None:

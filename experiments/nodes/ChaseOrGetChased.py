@@ -22,10 +22,10 @@ class Experiment():
         self.experimentparams = ExperimentParamsRequest()
         
         self.experimentparams.experiment.description = "Chase or get chased"
-        self.experimentparams.experiment.maxTrials = -1
+        self.experimentparams.experiment.maxTrials = 1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "chase10_"
+        self.experimentparams.save.filenamebase = "chase_"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
@@ -70,7 +70,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.distance = 8
         self.experimentparams.trial.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
         self.experimentparams.trial.robot.move.relative.angleOffset = N.pi    # Radians from origin to target.
-        self.experimentparams.trial.robot.move.relative.angleOscMag = N.pi/2  # Radian magnitude of the added oscillation.
+        self.experimentparams.trial.robot.move.relative.angleOscMag = 0#N.pi/2  # Radian magnitude of the added oscillation.
         self.experimentparams.trial.robot.move.relative.angleOscFreq = 1.0    # Hz of the added oscillation.
         self.experimentparams.trial.robot.move.relative.speed = 10 #5.2
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
@@ -110,7 +110,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 600    # 10 minutes
+        self.experimentparams.post.trigger.timeout = 60
 
         self.experimentparams.post.wait = 0.0
         
