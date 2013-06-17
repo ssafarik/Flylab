@@ -574,12 +574,18 @@ class Fly:
             
             # Use the computed end-effector orientation.
             if posesComputedExternal is not None:
-                posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
-                q = posesComputed.pose.orientation
-                rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                angleSensed = rpy[2]
+                try: 
+                    posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
+                    q = posesComputed.pose.orientation
+                    rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
+                except tf.Exception, e:
+                    rospy.logwarn('FLY Exception in Update(): %s' % e)
+                    angleSensed = contourinfo.angle
+                else:
+                    angleSensed = rpy[2]
             else:
                 angleSensed = contourinfo.angle
+
                 
             
 

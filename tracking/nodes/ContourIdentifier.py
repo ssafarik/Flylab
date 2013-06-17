@@ -9,7 +9,7 @@ import numpy as N
 import threading
 from tracking.msg import ArenaState, Contourinfo, ContourinfoLists
 from arena_tf.srv import ArenaCameraConversion
-from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Vector3
+from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped, Quaternion, Transform, Vector3
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
 from flycore.msg import MsgFrameState, TrackingCommand
@@ -77,6 +77,10 @@ class ContourIdentifier:
         self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists', ContourinfoLists, self.ContourinfoLists_callback, queue_size=queue_size_contours)
         self.pubArenaState          = rospy.Publisher('ArenaState', ArenaState)
         self.pubVisualState         = rospy.Publisher('VisualState', MsgFrameState)
+        self.subTransformEE         = rospy.Subscriber('end_effector', Transform, self.EndEffector_callback)
+        self.pubTransformEE         = rospy.Publisher('end_effector', Transform)
+        
+        self.transformEE = None
         
         # Poses
         self.poseRobot = Pose()
@@ -607,30 +611,41 @@ class ContourIdentifier:
         # Publish the ArenaState.
         self.pubArenaState.publish(arenastate)
         
+    def EndEffector_callback(self, transformEE):
+        self.transformEE = transformEE
+        
 
     def ContourinfoLists_callback(self, contourinfolistsPixels):
         if self.initialized:
-            # Get state of the EndEffector.
+            
             if self.nRobots>0:
+                
+                # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
                 try:
                     stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
-                    (transEndEffector, quatEndEffector) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
+                    transformEE = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
                 except tf.Exception, e:
-                    rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
+                    pass    # No transform - probably because we're replaying a bag file.
+                    #rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
                 else:
-                    if self.stateEndEffector is None:
-                        self.ResetFlyObjects() # When first data, need to reset all the fly objects due to tracking of robot contour as a fly, hence having an extra object.
-                        self.stateEndEffector = MsgFrameState()
-                        
+                    self.pubTransformEE.publish(transformEE)
+
+
+                #if self.stateEndEffector is None:
+                #    self.ResetFlyObjects() # When first data, need to reset all the fly objects due to tracking of robot contour as a fly, hence having an extra object.
+
+                # 
+                if (self.transformEE is not None):                    
+                    self.stateEndEffector = MsgFrameState()
                     self.stateEndEffector.header.stamp = stamp
                     self.stateEndEffector.header.frame_id = 'Arena'
-                    self.stateEndEffector.pose.position.x = transEndEffector[0]
-                    self.stateEndEffector.pose.position.y = transEndEffector[1]
-                    self.stateEndEffector.pose.position.z = transEndEffector[2]
-                    self.stateEndEffector.pose.orientation.x = quatEndEffector[0]
-                    self.stateEndEffector.pose.orientation.y = quatEndEffector[1]
-                    self.stateEndEffector.pose.orientation.z = quatEndEffector[2]
-                    self.stateEndEffector.pose.orientation.w = quatEndEffector[3]
+                    self.stateEndEffector.pose.position.x = self.transformEE.translation.x
+                    self.stateEndEffector.pose.position.y = self.transformEE.translation.y
+                    self.stateEndEffector.pose.position.z = self.transformEE.translation.z
+                    self.stateEndEffector.pose.orientation.x = self.transformEE.rotation.x
+                    self.stateEndEffector.pose.orientation.y = self.transformEE.rotation.y
+                    self.stateEndEffector.pose.orientation.z = self.transformEE.rotation.z
+                    self.stateEndEffector.pose.orientation.w = self.transformEE.rotation.w
 
             contourinfolistsPixels = self.FilterContourinfoWithinMask(contourinfolistsPixels)
             contourinfolists = self.TransformContourinfoArenaFromCamera(contourinfolistsPixels)
