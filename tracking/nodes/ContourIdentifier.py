@@ -77,8 +77,8 @@ class ContourIdentifier:
         self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists', ContourinfoLists, self.ContourinfoLists_callback, queue_size=queue_size_contours)
         self.pubArenaState          = rospy.Publisher('ArenaState', ArenaState)
         self.pubVisualState         = rospy.Publisher('VisualState', MsgFrameState)
-        self.subTransformEE         = rospy.Subscriber('end_effector', Transform, self.EndEffector_callback)
-        self.pubTransformEE         = rospy.Publisher('end_effector', Transform)
+        self.subStateEE             = rospy.Subscriber('end_effector', MsgFrameState, self.EndEffector_callback)
+        self.pubStateEE             = rospy.Publisher('end_effector', MsgFrameState)
         
         self.transformEE = None
         
@@ -611,10 +611,13 @@ class ContourIdentifier:
         # Publish the ArenaState.
         self.pubArenaState.publish(arenastate)
         
-    def EndEffector_callback(self, transformEE):
-        self.transformEE = transformEE
+
+    # Bring in the end effector state via messages.        
+    def EndEffector_callback(self, stateEndEffector):
+        self.stateEndEffector = stateEndEffector
         
 
+    # ContourinfoLists_callback() is the main message handler for this node.
     def ContourinfoLists_callback(self, contourinfolistsPixels):
         if self.initialized:
             
@@ -628,25 +631,13 @@ class ContourIdentifier:
                     pass    # No transform - probably because we're replaying a bag file.
                     #rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
                 else:
-                    self.pubTransformEE.publish(Transform(translation=Vector3(translationEE[0],translationEE[1],translationEE[2]), 
-                                                          rotation=Quaternion(rotationEE[0],rotationEE[1],rotationEE[2],rotationEE[3])))
+                    self.pubStateEE.publish(MsgFrameState(header=Header(stamp=contourinfolistsPixels.header.stamp,
+                                                                            frame_id='Arena'),
+                                                              pose=Pose(position=Point(translationEE[0],translationEE[1],translationEE[2]),
+                                                                        orientation=Quaternion(rotationEE[0],rotationEE[1],rotationEE[2],rotationEE[3]))
+                                                              )
+                                                )
 
-
-                #if self.stateEndEffector is None:
-                #    self.ResetFlyObjects() # When first data, need to reset all the fly objects due to tracking of robot contour as a fly, hence having an extra object.
-
-                # 
-                if (self.transformEE is not None):                    
-                    self.stateEndEffector = MsgFrameState()
-                    self.stateEndEffector.header.stamp = contourinfolistsPixels.header.stamp
-                    self.stateEndEffector.header.frame_id = 'Arena'
-                    self.stateEndEffector.pose.position.x = self.transformEE.translation.x
-                    self.stateEndEffector.pose.position.y = self.transformEE.translation.y
-                    self.stateEndEffector.pose.position.z = self.transformEE.translation.z
-                    self.stateEndEffector.pose.orientation.x = self.transformEE.rotation.x
-                    self.stateEndEffector.pose.orientation.y = self.transformEE.rotation.y
-                    self.stateEndEffector.pose.orientation.z = self.transformEE.rotation.z
-                    self.stateEndEffector.pose.orientation.w = self.transformEE.rotation.w
 
             contourinfolistsPixels = self.FilterContourinfoWithinMask(contourinfolistsPixels)
             contourinfolists = self.TransformContourinfoArenaFromCamera(contourinfolistsPixels)
