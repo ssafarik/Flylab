@@ -34,7 +34,7 @@
     <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" />
 
     <include file="$(find flappy)/launch/input_bag.launch" >
-        <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/chase20_20130606172046.bag" />
+        <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/chase_20130617163016.bag" />
     </include> 
         
     

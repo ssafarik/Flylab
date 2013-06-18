@@ -638,7 +638,7 @@ class ContourIdentifier:
                 # 
                 if (self.transformEE is not None):                    
                     self.stateEndEffector = MsgFrameState()
-                    self.stateEndEffector.header.stamp = stamp
+                    self.stateEndEffector.header.stamp = contourinfolistsPixels.header.stamp
                     self.stateEndEffector.header.frame_id = 'Arena'
                     self.stateEndEffector.pose.position.x = self.transformEE.translation.x
                     self.stateEndEffector.pose.position.y = self.transformEE.translation.y
