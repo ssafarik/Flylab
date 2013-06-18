@@ -25,16 +25,16 @@
     
   
 
-    <include file="$(find flappy)/launch/params_tracking.launch" />
-    <include file="$(find flappy)/launch/params_calibration.launch" />
+    <include file="$(find colosseum)/launch/params_tracking.launch" />
+    <include file="$(find colosseum)/launch/params_calibration.launch" />
 
-	<!-- <include file="$(find flybowls)/launch/heatbowl_85mm.launch" />  -->
+	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" />
 
 	
     <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" />
 
     <include file="$(find flappy)/launch/input_bag.launch" >
-        <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/chase_20130617163016.bag" />
+        <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/chase_20130617171758.bag" />
     </include> 
         
     

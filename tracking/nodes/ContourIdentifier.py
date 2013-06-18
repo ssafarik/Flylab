@@ -441,17 +441,17 @@ class ContourIdentifier:
 
 
     # MapContoursFromObjects()
-    #   Uses self.contourinfo_list & self.objects,
+    #   Uses self.contourinfo_list, self.stateEndEffector, & self.objects,
     #   Returns a list of indices such that self.objects[k] = contour[map[k]], and self.objects[0]=therobot
     #
     def MapContoursFromObjects(self):
         # Time.
-        if (self.stateEndEffector is not None):
-            stamp = self.stateEndEffector.header.stamp
-        elif (len(self.objects)>0) and (self.objects[0].isVisible):
-            stamp = self.objects[0].state.header.stamp
-        else:
-            stamp = rospy.Time.now()
+#         if (self.stateEndEffector is not None):
+#             stamp = self.stateEndEffector.header.stamp
+#         elif (len(self.objects)>0) and (self.objects[0].isVisible):
+#             stamp = self.objects[0].state.header.stamp
+#         else:
+#             stamp = rospy.Time.now()
 
 
         # Make the list of objects (i.e. robots & flies).
@@ -475,25 +475,37 @@ class ContourIdentifier:
                 eccMax = N.inf
                 
                 
-            if (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible) and (self.stateEndEffector is not None):
+            # Get the computed position.
+            if (self.stateEndEffector is not None):
+                xComputed = self.stateEndEffector.pose.position.x
+                yComputed = self.stateEndEffector.pose.position.y
+            else:
+                xComputed = N.nan
+                yComputed = N.nan
+                
+                
+            # Get the robot xy.
+            if (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible):
                 xyRobot = N.array([self.objects[iRobot].state.pose.position.x,
                                    self.objects[iRobot].state.pose.position.y,
                                    areaMin,  eccMin,
                                    areaMean, eccMean,
                                    areaMax,  eccMax,
-                                   self.stateEndEffector.pose.position.x,                         
-                                   self.stateEndEffector.pose.position.y])
+                                   xComputed,                         
+                                   yComputed])
             else:
                 xyRobot = None
                 
+                
+            # Get the end-effector xy.
             if (self.stateEndEffector is not None):
                 xyEndEffector = N.array([self.stateEndEffector.pose.position.x,
                                          self.stateEndEffector.pose.position.y,
                                          areaMin,  eccMin,
                                          areaMean, eccMean,
                                          areaMax,  eccMax,
-                                         self.stateEndEffector.pose.position.x, 
-                                         self.stateEndEffector.pose.position.y])
+                                         xComputed, 
+                                         yComputed])
             else:
                 xyEndEffector = None
 
@@ -516,11 +528,6 @@ class ContourIdentifier:
                     
             if (xy is not None):                    
                 xyObjects[iRobot,:] = xy
-#                 self.tfbx.sendTransform((xy[0], xy[1], 0.0),
-#                                         tf.transformations.quaternion_about_axis(0, (0,0,1)),
-#                                         stamp,
-#                                         "RobotComputed",
-#                                         "Arena")
 
 
         # Flies into the objects list.    
@@ -628,15 +635,15 @@ class ContourIdentifier:
                     stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
                     (translationEE,rotationEE) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
                 except tf.Exception, e:
-                    pass    # No transform - probably because we're replaying a bag file.
+                    pass    # No transform - Either the EE is still initializing, or because we're replaying a bag file.
                     #rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
                 else:
                     self.pubStateEE.publish(MsgFrameState(header=Header(stamp=contourinfolistsPixels.header.stamp,
-                                                                            frame_id='Arena'),
-                                                              pose=Pose(position=Point(translationEE[0],translationEE[1],translationEE[2]),
-                                                                        orientation=Quaternion(rotationEE[0],rotationEE[1],rotationEE[2],rotationEE[3]))
-                                                              )
-                                                )
+                                                                        frame_id='Arena'),
+                                                          pose=Pose(position=Point(translationEE[0],translationEE[1],translationEE[2]),
+                                                                    orientation=Quaternion(rotationEE[0],rotationEE[1],rotationEE[2],rotationEE[3]))
+                                                          )
+                                            )
 
 
             contourinfolistsPixels = self.FilterContourinfoWithinMask(contourinfolistsPixels)
@@ -690,31 +697,35 @@ class ContourIdentifier:
                 
                 # Update the robot state w/ the contourinfo and end-effector positions.
                 for iRobot in self.iRobot_list:
-                    if (self.stateEndEffector is not None):
-                        if self.mapContourinfoFromObject[iRobot] is not None:
-                            # For the robot, use the end-effector angle instead of the contourinfo angle.
-                            if self.stateEndEffector is not None:
-                                q = self.stateEndEffector.pose.orientation
-                                rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                                self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].angle = rpy[2]
+                    if self.mapContourinfoFromObject[iRobot] is not None:
+                        # For the robot, use the end-effector angle instead of the contourinfo angle.
+                        if self.stateEndEffector is not None:
+                            q = self.stateEndEffector.pose.orientation
+                            rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
+                            self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].angle = rpy[2]
 
-                            contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iRobot]]
-                        else:
-                            contourinfo = contourinfoNone
-                             
-                        if (iRobot < len(self.objects)):
-                            self.objects[iRobot].Update(contourinfo, 
-                                                        PoseStamped(header=self.stateEndEffector.header, 
-                                                                    pose=self.stateEndEffector.pose))
+                        contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iRobot]]
+                    else:
+                        contourinfo = contourinfoNone
+                         
+                    # Use the computed pose if one exists.
+                    if self.stateEndEffector is not None:
+                        poses = PoseStamped(header=self.stateEndEffector.header, pose=self.stateEndEffector.pose)
+                    else:
+                        poses = None
+                        
+                    # Update the object.
+                    if (iRobot < len(self.objects)):
+                        self.objects[iRobot].Update(contourinfo, poses)
 
-                        # Write a file (for getting Kalman covariances, etc).
-                        #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateEndEffector.pose.position.x,
-                        #                                     self.stateEndEffector.pose.position.y,
-                        #                                     self.objects[iRobot].state.pose.position.x, 
-                        #                                     self.objects[iRobot].state.pose.position.y,
-                        #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].x,
-                        #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].y)
-                        #self.fidRobot.write(data)
+                    # Write a file (for getting Kalman covariances, etc).
+                    #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateEndEffector.pose.position.x,
+                    #                                     self.stateEndEffector.pose.position.y,
+                    #                                     self.objects[iRobot].state.pose.position.x, 
+                    #                                     self.objects[iRobot].state.pose.position.y,
+                    #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].x,
+                    #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].y)
+                    #self.fidRobot.write(data)
                         
                 
                 # Update the flies' states.

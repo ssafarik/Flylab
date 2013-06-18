@@ -572,7 +572,7 @@ class Fly:
             self.dt = self.contourinfo.header.stamp - self.stampPrev
             self.stampPrev = self.contourinfo.header.stamp
             
-            # Use the computed end-effector orientation.
+            # The computed orientation overrides the visual orientation.
             if posesComputedExternal is not None:
                 try: 
                     posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)

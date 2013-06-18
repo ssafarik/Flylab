@@ -5,7 +5,7 @@
     
 <!-- 
 -->
-    <node name="playbag" pkg="rosbag" type="play" args="$(arg bagfiles)" /> 
+    <node name="playbag" pkg="rosbag" type="play" args="-r 0.25 $(arg bagfiles)" /> 
     <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
 </launch>
    
