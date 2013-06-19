@@ -60,8 +60,11 @@ class FlylabGUI:
     def BtnExitNow_clicked_cb(self, widget):
         if not rospy.is_shutdown():
             command = String(data='exit_now')
-            self.pubBroadcastCommand.publish(command)
-            rospy.sleep(1)
+            try:
+                self.pubBroadcastCommand.publish(command)
+                rospy.sleep(1)
+            except rospy.exceptions.ROSInterruptException:
+                pass # ROS shutting down.
             sys.exit(0)
     
     def BtnExitAfterTrial_clicked_cb(self, widget):
@@ -93,6 +96,10 @@ if __name__ == "__main__":
         if (rospy.is_shutdown()):
             sys.exit(0)
             
-        rospy.sleep(-1)  # Returns immediately.  Equivalent to rospy.spinOnce(), if it existed.
+        try:
+            rospy.sleep(-1)  # Returns immediately.  Equivalent to rospy.spinOnce(), if it existed.
+        except rospy.exceptions.ROSInterruptException, e:
+            pass # ROS shutting down.
+        
     
     

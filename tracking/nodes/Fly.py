@@ -21,7 +21,8 @@ from flycore.msg import MsgFrameState
 from pythonmodules import filters, CircleFunctions
 
 
-globalNonessential = False   # Publish nonessential stuff?
+globalNonessentialWings = False   # Publish nonessential stuff?
+globalNonessentialSuperRes = False   # Publish nonessential stuff?
 globalLock = threading.Lock()
 
         
@@ -43,7 +44,7 @@ class Fly:
         self.pubMarker       = rospy.Publisher('visualization_marker', Marker)
         
         # Nonessential stuff to publish.
-        if globalNonessential:
+        if globalNonessentialWings:
             self.pubImageRoiMean    = rospy.Publisher(self.name+"/image_mean", Image)
             self.pubImageRoi        = rospy.Publisher(self.name+"/image", Image)
             self.pubImageRoiReg     = rospy.Publisher(self.name+"/image_reg", Image)
@@ -56,6 +57,8 @@ class Fly:
             self.pubLeft            = rospy.Publisher(self.name+'/left', Float32)
             self.pubRightMetric     = rospy.Publisher(self.name+'/rightmetric', Float32)
             self.pubRight           = rospy.Publisher(self.name+'/right', Float32)
+        if globalNonessentialSuperRes:
+            self.pubImageSuper      = rospy.Publisher(self.name+'/image_super', Image)
         
         global globalLock
         with globalLock:
@@ -346,7 +349,7 @@ class Fly:
         
     
             # Publish non-essential stuff.
-            if globalNonessential:
+            if globalNonessentialWings:
                 npMaskWings1 = copy.copy(self.npMaskWings)
                 npMaskWings1.resize(npMaskWings1.size)
                 imgMaskWings  = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npMaskWings), 'passthrough')
@@ -372,7 +375,7 @@ class Fly:
 
         
     def UpdateFlySuperresolution(self, npRoi, moments):
-        if globalNonessential:
+        if globalNonessentialSuperRes:
             if (moments['m00'] != 0.0):
                 xCOM  = moments['m10']/moments['m00']
                 yCOM  = moments['m01']/moments['m00']
@@ -517,7 +520,7 @@ class Fly:
         else:
             angleRight = N.arctan2(yRight, xRight)+N.pi
             
-            if globalNonessential:
+            if globalNonessentialWings:
                 npToUse = npWingRight
                 if (momentsLeft['m00'] != 0):
                     npRoiReg[momentsLeft['m01']/momentsLeft['m00'],   
@@ -533,7 +536,7 @@ class Fly:
 
 
         # Nonessential stuff to publish.
-        if globalNonessential:
+        if globalNonessentialWings:
             self.imgRoiReg  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npRoiReg), 'passthrough') 
             self.imgRoiMean = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8(self.npfRoiMean)), 'passthrough')
 

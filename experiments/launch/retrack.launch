@@ -7,6 +7,8 @@
     <!--                                                            -->
     <!-- ========================================================== -->
 
+    <param name="use_sim_time"                 type="bool" value="true"/>
+    
     <!-- ***  Core stuff  *** -->
     <include file="$(find flycore)/launch/flycore.launch" />
     
@@ -14,8 +16,8 @@
     <!-- ***  Hardware, Flies, and Robot  *** -->
     <!-- No hardware. -->
     <include file="$(find robots)/launch/robot_0625h_0625w.launch" />
-    <include file="$(find robots)/launch/robots_1.launch" />
-    <include file="$(find flies)/launch/flies_1.launch" />
+    <include file="$(find robots)/launch/robots_0.launch" />
+    <include file="$(find flies)/launch/flies_2.launch" />
     <include file="$(find flies)/launch/flytype_unspecified.launch" />
     <include file="$(find flies)/launch/flygender_M.launch" />
 
@@ -28,13 +30,13 @@
     <include file="$(find colosseum)/launch/params_tracking.launch" />
     <include file="$(find colosseum)/launch/params_calibration.launch" />
 
-	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" />
+	<include file="$(find flybowls)/launch/heatbowl_50mm.launch" />
 
 	
     <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" />
 
     <include file="$(find flappy)/launch/input_bag.launch" >
-        <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/chase_20130617171758.bag" />
+        <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130618125239.bag" />
     </include> 
         
     
