@@ -212,46 +212,45 @@ class ContourIdentifier:
         
 
     def ResetFlyObjects (self):
-        with self.lock:
-            # Save status.
-            initializedSav = self.initialized
-            self.initialized = False
-            
-            for iObject in range(len(self.objects)):
-                del self.objects[0]
-            self.objects = []
-    
-            
-            self.iRobot_list = range(self.nRobots)
-            self.iFly_list = range(self.nRobots, self.nRobots+self.nFlies)
-            self.iAll_list = range(self.nRobots+self.nFlies)
-    
-            iName = 0 # Counter for the object names.
-            
-            # Add the robot(s), if any.
-            for iRobot in self.iRobot_list:
-                try:
-                    self.objects.append(Fly.Fly(tfrx=self.tfrx, name="Robot"))
-                except rospy.ServiceException, e:
-                    rospy.logwarn ('Exception adding Fly() object: %s' % e)
-                    
-            iName += 1
+        # Save status.
+        initializedSav = self.initialized
+        self.initialized = False
+        
+        for iObject in range(len(self.objects)):
+            del self.objects[0]
+        self.objects = []
+
+        
+        self.iRobot_list = range(self.nRobots)
+        self.iFly_list = range(self.nRobots, self.nRobots+self.nFlies)
+        self.iAll_list = range(self.nRobots+self.nFlies)
+
+        iName = 0 # Counter for the object names.
+        
+        # Add the robot(s), if any.
+        for iRobot in self.iRobot_list:
+            try:
+                self.objects.append(Fly.Fly(tfrx=self.tfrx, name="Robot", lock=self.lock))
+            except rospy.ServiceException, e:
+                rospy.logwarn ('Exception adding Fly() object: %s' % e)
                 
-    
-            # Add the flies, if any.
-            for iFly in self.iFly_list:
-                try:
-                    self.objects.append(Fly.Fly(tfrx=self.tfrx, name=("Fly%s" % iName)))
-                except rospy.ServiceException:
-                    rospy.logwarn ('Exception adding Fly() object: %s' % e)
-                iName += 1
+        iName += 1
             
+
+        # Add the flies, if any.
+        for iFly in self.iFly_list:
+            try:
+                self.objects.append(Fly.Fly(tfrx=self.tfrx, name=("Fly%s" % iName)))
+            except rospy.ServiceException:
+                rospy.logwarn ('Exception adding Fly() object: %s' % e)
+            iName += 1
+        
+
+        # Restore status.
+        self.initialized = initializedSav
     
-            # Restore status.
-            self.initialized = initializedSav
-        
-        
-        
+    
+    
     # FilterContourinfoWithinRadius()
     # Filter the contours by radius.  Return a contourinfolists containing only those within radius.
     #  

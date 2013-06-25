@@ -21,7 +21,7 @@ from flycore.msg import MsgFrameState
 from pythonmodules import filters, CircleFunctions
 
 
-globalLock = threading.Lock()
+globalLock2 = threading.Lock()
 
         
 ###############################################################################
@@ -32,14 +32,20 @@ globalLock = threading.Lock()
 # Updates its state based on an image "contour" from a single camera.
 #
 class Fly:
-    def __init__(self, name=None, tfrx=None):
-        global globalLock
+    def __init__(self, name=None, tfrx=None, lock=None):
+        global globalLock2
+        if (lock is not None):
+            self.lock = lock
+        else:
+            self.lock = globalLock2
+            
 
         self.initialized = False
         self.name = name
 
-        self.bNonessentialPublish = rospy.get_param('tracking/nonessentialPublish', False)   # Publish nonessential stuff?
-        self.bNonessentialCalcSuper = rospy.get_param('tracking/nonessentialCalcSuper', False)   # Calculate the super-resolution image.
+        with self.lock:
+            self.bNonessentialPublish = rospy.get_param('tracking/nonessentialPublish', False)   # Publish nonessential stuff?
+            self.bNonessentialCalcSuper = rospy.get_param('tracking/nonessentialCalcSuper', False)   # Calculate the super-resolution image.
         
         self.cvbridge = CvBridge()
         self.tfrx = tfrx
@@ -62,7 +68,7 @@ class Fly:
             self.pubRight           = rospy.Publisher(self.name+'/right', Float32)
             self.pubImageSuper      = rospy.Publisher(self.name+'/image_super', Image)
         
-        with globalLock:
+        with self.lock:
             rcFilterAngle                = rospy.get_param('tracking/rcFilterAngle', 0.1)
             dtVelocity                   = rospy.get_param('tracking/dtVelocity', 0.2)
             self.dtForecast              = rospy.get_param('tracking/dtForecast',0.15)
@@ -353,7 +359,7 @@ class Fly:
                 
             if (npfRoiMean is not None):
                 # Mean Fly Body Mask.
-                #with globalLock:
+                #with self.lock:
                 #    self.thresholdWings = rospy.get_param('tracking/thresholdWings', 25.0)
                 (threshOut, npMaskBody) = cv2.threshold(npfRoiMean.astype(N.uint8), self.thresholdWings, 255, cv2.THRESH_BINARY_INV)
                 self.npMaskWings = cv2.bitwise_and(self.npMaskWings, npMaskBody)
@@ -385,8 +391,8 @@ class Fly:
     
         
     def UpdateFlyMean(self, npRoiReg):
-        #global globalLock
-        #with globalLock:
+        #global self.lock
+        #with self.lock:
         #    self.rcForeground = rospy.get_param('tracking/rcForeground', 0.01)
         alphaForeground = 1 - N.exp(-self.dt.to_sec() / self.rcForeground)
 
@@ -503,10 +509,10 @@ class Fly:
     # Compute the left & right wing angles from the given contourinfo angle and image.
     #
     def GetWingAngles(self, contourinfo):
-        global globalLock
 
-        self.metricWingThreshold = rospy.get_param('tracking/wingmetric_threshold', 3.0)
-        self.scalarFlyMean = rospy.get_param('tracking/scalarFlyMean', 1.0)
+        with self.lock:
+            self.metricWingThreshold = rospy.get_param('tracking/wingmetric_threshold', 3.0)
+            self.scalarFlyMean = rospy.get_param('tracking/scalarFlyMean', 1.0)
 
         npRoiIn = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, "passthrough")))
         npRoi = cv2.bitwise_and(npRoiIn, self.npMaskCircle)
@@ -813,7 +819,7 @@ class Fly:
 
             # Send the Forecast transform.
             if self.state.pose.position.x is not None:
-                #with globalLock:
+                #with self.lock:
                 #    self.dtForecast = rospy.get_param('tracking/dtForecast',0.25)
                 poseForecast = Pose()#copy.copy(self.state.pose)
                 poseForecast.position.x = self.state.pose.position.x + self.state.velocity.linear.x * self.dtForecast
