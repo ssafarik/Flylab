@@ -89,6 +89,7 @@ class ContourGenerator:
         self.area_list = []
         self.ecc_list = []
         self.imgRoi_list = []
+        self.contour_list = []
         self.nContours = 0
         self.nContoursMax = rospy.get_param('tracking/nContoursMax', 20)
         self.areaContourMin = rospy.get_param('tracking/areaContourMin', 0.0)
@@ -98,6 +99,8 @@ class ContourGenerator:
         if (1 < self.nContoursMax):
             self.nContoursMax -= 1
         
+        self.kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3)) #N.ones([3,3], dtype=N.uint8)
+
         
         # OpenCV
         self.max_8U = 255
@@ -142,6 +145,7 @@ class ContourGenerator:
             self.matMask              = N.zeros([self.height, self.width], dtype=N.uint8)
             self.matForeground        = N.zeros([self.height, self.width], dtype=N.uint8)
             self.matThreshold         = N.zeros([self.height, self.width], dtype=N.uint8)
+            self.matMaskOthers        = N.zeros([self.height, self.width], dtype=N.uint8)
             
             
             if self.bUseTransforms:
@@ -337,7 +341,9 @@ class ContourGenerator:
         return angle, ecc
         
 
-    def ContourinfoFromMoments(self, moments):
+    def ContourinfoFromContour(self, contour):
+        moments = cv2.moments(contour)  # Sometimes the contour contains just one pixel, resulting in moments=(0,0,0,0,0,0)
+
         #rospy.logwarn('moments=%s' % repr(moments))
         m00 = moments['m00']
         m10 = moments['m10']
@@ -367,9 +373,9 @@ class ContourGenerator:
     # AppendContourinfoListsFromContour()
     # Converts contour to a contourinfo, transforms it to the output frame, and appends the contourinfo members to their respective lists.
     #
-    def AppendContourinfoListsFromContour(self, contour, matForeground):
-        moments = cv2.moments(contour)  # Sometimes the contour contains just one pixel, resulting in moments=(0,0,0,0,0,0)
-        (x, y, area, angle, ecc) = self.ContourinfoFromMoments(moments)
+    def AppendContourinfoListsFromContour(self, contours, iContour, matForeground):
+        contour = contours[iContour]
+        (x, y, area, angle, ecc) = self.ContourinfoFromContour(contour)
         if (x is None) or (y is None):
             (x,y) = contour[0][0]
             area = 0.0001 # one pixel's worth.
@@ -383,9 +389,7 @@ class ContourGenerator:
         ptsContour.point.x = x
         ptsContour.point.y = y
             
-        if x is not None:
-            imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(cv2.getRectSubPix(matForeground, (self.widthRoi, self.heightRoi), (x,y))), 'passthrough')
-            #self.pubImageRoi.publish(imgRoi)
+        if (x is not None):
             try:
                 if self.bUseTransforms:
                     self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptsContour)
@@ -397,7 +401,8 @@ class ContourGenerator:
                 self.angle_list.append(angle)
                 self.area_list.append(area)
                 self.ecc_list.append(ecc)
-                self.imgRoi_list.append(imgRoi)
+                self.imgRoi_list.append(None)
+                self.contour_list.append(iContour)
                 self.nContours += 1
 
             except tf.Exception, e:
@@ -406,8 +411,7 @@ class ContourGenerator:
             except TypeError, e:
                 rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptsContour.header.frame_id, e))
                 
-        
-
+                
 
     def ContourinfoListsFromImage(self, matThreshold, matForeground):
         self.x_list = []
@@ -416,6 +420,7 @@ class ContourGenerator:
         self.area_list = []
         self.ecc_list = []
         self.imgRoi_list = []
+        self.contour_list = []
         
         # Find contours
         sumImage = cv2.sumElems(matThreshold)
@@ -427,13 +432,13 @@ class ContourGenerator:
 
         # Put the top-level contours into the contourinfolists
         self.nContours = 0
-        if contours is not None:
+        if (contours is not None):
             (NEXT,PREV,CHILD,PARENT)=(0,1,2,3)
             iContour = 0
-            while (0<=iContour) and (iContour<len(contours)): 
-                contour = contours[iContour]
-                self.AppendContourinfoListsFromContour(contour, matForeground) # self.nContours++ gets incremented inside function.
+            while (0 <= iContour < len(contours)): 
+                self.AppendContourinfoListsFromContour(contours, iContour, matForeground) # self.nContours++ gets incremented inside function.
                 iContour = hierarchy[0][iContour][NEXT]
+                
                     
         
         # Put lists into contourinfolists.
@@ -454,16 +459,17 @@ class ContourGenerator:
             
         # Remove duplicates and too-small contours.
         if self.nContours > 0:
-            # Repackage the data as a list of lists, i.e. [[x,y,a,a,e],[x,y,a,a,e],...], skipping too-small contours.
+            # Repackage the data as a list of lists, i.e. [[x,y,a,a,e,i],[x,y,a,a,e,i],...], skipping too-small contours.
             contourinfolists_list = []
             for iContour in range(self.nContours):
                 if (self.areaContourMin <= contourinfolists.area[iContour]):
                     contourinfolists_list.append([contourinfolists.x[iContour], 
-                                                 contourinfolists.y[iContour], 
-                                                 contourinfolists.angle[iContour], 
-                                                 contourinfolists.area[iContour], 
-                                                 contourinfolists.ecc[iContour], 
-                                                 contourinfolists.imgRoi[iContour]])
+                                                  contourinfolists.y[iContour], 
+                                                  contourinfolists.angle[iContour], 
+                                                  contourinfolists.area[iContour], 
+                                                  contourinfolists.ecc[iContour], 
+                                                  contourinfolists.imgRoi[iContour],
+                                                  self.contour_list[iContour]])
 
             # Remove the dups.
             contourinfolists_list = sorted(tuple(contourinfolists_list))
@@ -477,6 +483,7 @@ class ContourGenerator:
             contourinfolists.area = []
             contourinfolists.ecc = []
             contourinfolists.imgRoi = []
+            self.contour_list = []
             for iContour in range(self.nContours):
                 contourinfolists.x.append(contourinfolists_list[iContour][0])
                 contourinfolists.y.append(contourinfolists_list[iContour][1])
@@ -484,6 +491,35 @@ class ContourGenerator:
                 contourinfolists.area.append(contourinfolists_list[iContour][3])
                 contourinfolists.ecc.append(contourinfolists_list[iContour][4])
                 contourinfolists.imgRoi.append(contourinfolists_list[iContour][5])
+                self.contour_list.append(contourinfolists_list[iContour][6])
+
+
+            # Get the ROI pixels for each contour, minus the pixels for the other contours.
+            for iContour in range(self.nContours):
+                x = contourinfolists.x[iContour]
+                y = contourinfolists.y[iContour]
+
+                self.matMaskOthers.fill(0)
+                
+                # Go through all the other contours.
+                for kContour in range(self.nContours):
+                    if (kContour != iContour):
+                        xk = contourinfolists.x[kContour]
+                        yk = contourinfolists.y[kContour]
+                        
+                        # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
+                        if (N.linalg.norm([x-xk,y-yk])<N.linalg.norm([self.widthRoi,self.heightRoi])):
+                            jContour = self.contour_list[kContour]
+                            cv2.drawContours(self.matMaskOthers, contours, jContour, 255, cv.CV_FILLED, 4, hierarchy, 0)
+                        
+                self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
+                matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
+                matRoi = cv2.getRectSubPix(matForeground - matOthers, 
+                                           (self.widthRoi, self.heightRoi), 
+                                           (x,y))
+                imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
+                contourinfolists.imgRoi[iContour] = imgRoi
+                
 
             
         return contourinfolists, contours    
@@ -529,7 +565,7 @@ class ContourGenerator:
                 radiusMask = int(rospy.get_param('camera/mask/radius', 9999)) 
                 if radiusMask != self.radiusMask:
                     self.radiusMask = radiusMask 
-                    self.matMask = N.zeros([self.height, self.width], dtype=N.uint8)
+                    self.matMask.fill(0)
                     cv2.circle(self.matMask,
                               (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
                               int(self.radiusMask), 
@@ -553,6 +589,7 @@ class ContourGenerator:
                 cv2.accumulateWeighted(N.float32(self.matImageRect), self.matfBackground, alphaBackground)
                 self.matBackground = N.uint8(self.matfBackground)
     
+    
                 # Create the foreground.
                 if self.bEqualizeHist:
                     matBackgroundEq = cv2.equalizeHist(self.matBackground)
@@ -571,7 +608,7 @@ class ContourGenerator:
                                                  cv2.THRESH_TOZERO)
     
                 
-                # Mask the threshold image.
+                # Apply the arena mask to the threshold image.
                 self.matThreshold = cv2.bitwise_and(self.matThreshold, self.matMask)
                 
                 # Get the ContourinfoLists.
@@ -580,7 +617,7 @@ class ContourGenerator:
                 
                 # Convert to color for display image
                 if self.pubImageProcessed.get_num_connections() > 0:
-                    # Mask the camera image, and convert it to color.
+                    # Apply the arena mask to the camera image, and convert it to color.
                     self.matImageRect = cv2.bitwise_and(self.matImageRect, self.matMask)
                     self.matProcessed = cv2.cvtColor(self.matImageRect, cv.CV_GRAY2RGB)
                     
