@@ -383,10 +383,10 @@ class Fly:
             self.npMaskWings = 255*N.ones([self.heightRoi, self.widthRoi], dtype=N.uint8)
             
         elif (q==3):    # Only use the left pixels.
-            w1 = 6*self.widthRoi/10     # Width of left side.
-            w2 = self.widthRoi - w1     # Width of right side.
+            w1 = int(6*self.widthRoi/10)     # Width of left side.
+            w2 = int(self.widthRoi) - w1     # Width of right side.
             self.npMaskWings = 255*N.hstack([N.ones([self.heightRoi, w1], dtype=N.uint8),
-                                             N.zeros([self.heightRoi, w2], dtype=N.uint8)]) 
+                                             N.zeros([self.heightRoi, w2], dtype=N.uint8)])
             
     
         
