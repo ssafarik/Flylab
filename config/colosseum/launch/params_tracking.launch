@@ -5,8 +5,8 @@
   <param name="tracking/dtForecast"                 type="double" value="0.10"/>                   <!-- Time to forecast future fly states. -->
   <param name="tracking/rcBackground"               type="double" value="20000"/>                  <!-- Moving average for dynamic background. -->
   <param name="tracking/rcForeground"               type="double" value="20"/>                     <!-- Moving average for foreground objects (e.g. Fly1/image_mean). -->
-  <param name="tracking/scalarFlyMean"              type="double" value="2.0"/>                    <!-- Subtract this multiple of the fly mean image for wing detection. -->
-  <param name="tracking/wingmetric_threshold"       type="double" value="2.0"/>                    <!-- Threshold for number of means wing pixels must sum to to count as a wing-extension. -->
+  <param name="tracking/scalarFlyMean"              type="double" value="1.2"/>                    <!-- Subtract this multiple of the fly mean image for wing detection. -->
+  <param name="tracking/wingmetric_threshold"       type="double" value="1.5"/>                    <!-- Number of std devs the sum of wing pixels must differ from mean to count as a wing-extension. -->
   <param name="tracking/filenameBackground"         type="string" value="~/background.png"/>       <!-- Location of the initial background image. -->
   <param name="tracking/speedThresholdForTravel"    type="double" value="5.0"/>
   <param name="tracking/areaContourMin"             type="double" value="4"/>

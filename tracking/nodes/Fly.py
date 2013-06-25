@@ -149,9 +149,14 @@ class Fly:
                   int(self.heightRoi/2), 
                   255, 
                   cv.CV_FILLED)
-        self.metricMeanLeft  = None
-        self.metricMeanRight = None
+        self.meanLeft  = None
+        self.meanRight = None
         
+        self.sumSqDevLeft = 0.0
+        self.stdDevLeft  = 0.0 
+        self.sumSqDevRight = 0.0
+        self.stdDevRight  = 0.0 
+        self.countSqDev = 0
         
         
         # Super-resolution image.
@@ -513,17 +518,17 @@ class Fly:
         # Moving-Average fly image.
         self.UpdateFlyMean(npRoiReg)
 
-        # Mask the input ROI.
-        npRoiReg = cv2.bitwise_and(npRoiReg, self.npMaskWings)
-        
         
         # Background Fly Subtraction.
         diff = npRoiReg.astype(N.float32) - self.npfRoiMean*self.scalarFlyMean # Magnify the mean.
         npWings = N.clip(diff, 0, N.iinfo(N.uint8).max).astype(N.uint8)
         #npWings = npRoiReg 
         
+        # Mask the input ROI.
+        #npRoiReg = cv2.bitwise_and(npRoiReg, self.npMaskWings)
+        
         # Mask the wings.
-#        npWings = cv2.bitwise_and(npWings, self.npMaskWings)
+        npWings = cv2.bitwise_and(npWings, self.npMaskWings)
                         
         # Create images with only pixels of left wing (i.e. image top) or right wing (i.e. image bottom).
         npWingLeft   = N.vstack((npWings[:self.heightRoi/2, :],
@@ -538,54 +543,62 @@ class Fly:
 
         # Coordinates of body, and wings relative to wing hinge.
         try:
-            xBody  = momentsRoi['m10']/momentsRoi['m00']
-            yBody  = momentsRoi['m01']/momentsRoi['m00']
+            xBody  = N.round(momentsRoi['m10']/momentsRoi['m00'])
+            yBody  = N.round(momentsRoi['m01']/momentsRoi['m00'])
         except ZeroDivisionError:
-            xBody = self.widthRoi/2
-            yBody = self.heightRoi/2
+            xBody = N.round(self.widthRoi/2)
+            yBody = N.round(self.heightRoi/2)
             
         try:
-            xLeftAbs  = momentsLeft['m10']/momentsLeft['m00']   # Absolute pixel location.
-            yLeftAbs  = momentsLeft['m01']/momentsLeft['m00']
+            xLeftAbs  = N.round(momentsLeft['m10']/momentsLeft['m00'])   # Absolute pixel location.
+            yLeftAbs  = N.round(momentsLeft['m01']/momentsLeft['m00'])
         except ZeroDivisionError:
-            xLeftAbs = (xBody + self.lengthBody/4)
+            xLeftAbs = N.round(xBody + self.lengthBody/4)
             yLeftAbs = yBody
             
-        xLeft = xLeftAbs - (xBody + self.lengthBody/4)      # Hinge-relative location.
+        xLeft = xLeftAbs - N.round(xBody + self.lengthBody/4)      # Hinge-relative location.
         yLeft = yLeftAbs - yBody
         
             
         try:
-            xRightAbs = momentsRight['m10']/momentsRight['m00']   # Absolute pixel location.
-            yRightAbs = momentsRight['m01']/momentsRight['m00']
+            xRightAbs = N.round(momentsRight['m10']/momentsRight['m00'])   # Absolute pixel location.
+            yRightAbs = N.round(momentsRight['m01']/momentsRight['m00'])
         except ZeroDivisionError:
-            xRightAbs = (xBody + self.lengthBody/4)
+            xRightAbs = N.round(xBody + self.lengthBody/4)
             yRightAbs = yBody
             
-        xRight = xRightAbs - (xBody + self.lengthBody/4)      # Hinge-relative location.
+        xRight = xRightAbs - N.round(xBody + self.lengthBody/4)      # Hinge-relative location.
         yRight = yRightAbs - yBody
         
-        xBodyBg = xBody
-        yBodyBg = yBody
-
 
         # Metrics to distinguish wing extension from noise.
-        metricLeft = momentsLeft['m00']
-        metricRight = momentsRight['m00']
+        sumLeft = momentsLeft['m00']
+        sumRight = momentsRight['m00']
 
-        # Metric mean, for thresholding.
-        if (self.metricMeanLeft is not None):
+        # Wing statistics.
+        
+        # Wing intensity mean
+        if (self.meanLeft is not None):
             a = 0.0001
-            self.metricMeanLeft  = (1-a)*self.metricMeanLeft  + a*metricLeft 
-            self.metricMeanRight = (1-a)*self.metricMeanRight + a*metricRight 
+            self.meanLeft  = (1-a)*self.meanLeft  + a*sumLeft 
+            self.meanRight = (1-a)*self.meanRight + a*sumRight 
         else:
-            self.metricMeanLeft  = metricLeft 
-            self.metricMeanRight = metricRight 
+            self.meanLeft  = sumLeft 
+            self.meanRight = sumRight 
+        
+        # Wing intensity std dev.
+        devLeft = (sumLeft-self.meanLeft)
+        devRight = (sumRight-self.meanRight)
+        self.sumSqDevLeft  += devLeft**2 
+        self.sumSqDevRight += devRight**2
+        self.countSqDev += 1
+        self.stdDevLeft  = N.sqrt(self.sumSqDevLeft/self.countSqDev) 
+        self.stdDevRight = N.sqrt(self.sumSqDevRight/self.countSqDev) 
             
         
         npToUse = npWings #npWingRight
 
-        if (metricLeft < self.metricWingThreshold*self.metricMeanLeft):
+        if (N.abs(devLeft) < self.metricWingThreshold*self.stdDevLeft):
             angleLeft = N.pi
         else:
             angleLeft  = N.arctan2(yLeft, xLeft)+N.pi
@@ -598,7 +611,7 @@ class Fly:
                             xLeftAbs] = 255.0      # Set pixel at wing center.
 
             
-        if (metricRight < self.metricWingThreshold*self.metricMeanRight):
+        if (N.abs(devRight) < self.metricWingThreshold*self.stdDevRight):
             angleRight = N.pi
         else:
             angleRight = N.arctan2(yRight, xRight)+N.pi
@@ -611,6 +624,8 @@ class Fly:
                     npToUse[yRightAbs+0.99, 
                             xRightAbs] = 255.0
             
+        #npToUse[yBody, xBody] = 255.0      # Set pixel at body center.
+        #npRoiReg[yBody, xBody] = 255.0      # Set pixel at bosy center.
 
 
         # Nonessential stuff to publish.
@@ -625,10 +640,10 @@ class Fly:
             self.pubImageRoiReg.publish(self.imgRoiReg)
             self.pubImageRoiMean.publish(self.imgRoiMean)
             self.pubImageRoiWings.publish(imgWings)
-            self.pubLeftMetric.publish(metricLeft)
-            self.pubLeftMetricMean.publish(self.metricWingThreshold*self.metricMeanLeft)
-            self.pubRightMetric.publish(-metricRight)
-            self.pubRightMetricMean.publish(-self.metricWingThreshold*self.metricMeanRight)
+            self.pubLeftMetric.publish(N.abs(devLeft))
+            self.pubLeftMetricMean.publish(self.metricWingThreshold*self.stdDevLeft)
+            self.pubRightMetric.publish(-N.abs(devRight))
+            self.pubRightMetricMean.publish(-self.metricWingThreshold*self.stdDevRight)
             self.pubLeft.publish(angleLeft)
             self.pubRight.publish(angleRight)
 
