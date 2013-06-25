@@ -66,12 +66,12 @@ class CalibrateStageArena():
         self.rvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
         self.tvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
 
-        self.rvec[0] = rospy.get_param('/camera_arena_rvec_0')
-        self.rvec[1] = rospy.get_param('/camera_arena_rvec_1')
-        self.rvec[2] = rospy.get_param('/camera_arena_rvec_2')
-        self.tvec[0] = rospy.get_param('/camera_arena_tvec_0')
-        self.tvec[1] = rospy.get_param('/camera_arena_tvec_1')
-        self.tvec[2] = rospy.get_param('/camera_arena_tvec_2')
+        self.rvec[0] = rospy.get_param('/camera/arena_rvec_0')
+        self.rvec[1] = rospy.get_param('/camera/arena_rvec_1')
+        self.rvec[2] = rospy.get_param('/camera/arena_rvec_2')
+        self.tvec[0] = rospy.get_param('/camera/arena_tvec_0')
+        self.tvec[1] = rospy.get_param('/camera/arena_tvec_1')
+        self.tvec[2] = rospy.get_param('/camera/arena_tvec_2')
         
         #self.tvec[0] = 0.0
         #self.tvec[1] = 0.0
@@ -79,35 +79,35 @@ class CalibrateStageArena():
         #rospy.logwarn(self.tvec)
       
 
-        rospy.logwarn ('Waiting for ImageRect transform...')
+        rospy.loginfo ('Waiting for ImageRect transform...')
         while True:
             try:
                 stamp = self.tfrx.getLatestCommonTime('/ImageRect', '/Camera')
                 (self.transCameraRect, rot) = self.tfrx.lookupTransform('/ImageRect', '/Camera', stamp)
                 break
-            except tf.Exception:
-                pass
-        rospy.logwarn ('Found ImageRect transform.')
+            except tf.Exception, e:
+                rospy.logwarn('Exception1 in StageArena: %s' % e)
+        rospy.loginfo ('Found ImageRect transform.')
         
 
-        rospy.logwarn ('Waiting for service: arena_from_camera...')
+        rospy.loginfo ('Waiting for service: arena_from_camera...')
         rospy.wait_for_service('arena_from_camera')
         try:
             self.ArenaFromCamera = rospy.ServiceProxy('arena_from_camera', ArenaCameraConversion)
         except rospy.ServiceException, e:
-            rospy.logwarn('Exception in StageArena: %s' % e)
-        rospy.logwarn ('Found service: arena_from_camera.')
+            rospy.logwarn('Exception2 in StageArena: %s' % e)
+        rospy.loginfo ('Found service: arena_from_camera.')
 
-        rospy.logwarn ('Waiting for service: camera_from_arena...')
+        rospy.loginfo ('Waiting for service: camera_from_arena...')
         rospy.wait_for_service('camera_from_arena')
         try:
             self.CameraFromArena = rospy.ServiceProxy('camera_from_arena', ArenaCameraConversion)
         except rospy.ServiceException, e:
-            rospy.logwarn('Exception in StageArena: %s' % e)
-        rospy.logwarn ('Found service: camera_from_arena.')
+            rospy.logwarn('Exception3 in StageArena: %s' % e)
+        rospy.loginfo ('Found service: camera_from_arena.')
 
             
-        self.nRobots = rospy.get_param('nRobots', 0)
+        self.nRobots = rospy.get_param('nRobots', 1)
             
         rospy.on_shutdown(self.OnShutdown_callback)
 
@@ -136,6 +136,8 @@ class CalibrateStageArena():
     
     def CameraInfo_callback (self, msgCameraInfo):
         self.camerainfo = msgCameraInfo
+        self.K = N.reshape(self.camerainfo.P,[3,4])[0:3,0:3] # camerainfo.K and camerainfo.D apply to image_raw; P w/ D=0 applies to image_rect.
+        self.D = N.array([0.0, 0.0, 0.0, 0.0, 0.0])
 
       
 
@@ -162,11 +164,11 @@ class CalibrateStageArena():
             widthAxisLine = 3
 
             (pointsAxesProjected,jacobian) = cv2.projectPoints(pointsAxes,
-                                                                    rvec,
-                                                                    tvec,
-                                                                    N.reshape(self.camerainfo.K, [3,3]),
-                                                                    N.array([0,0,0,0,0],dtype='float32')#self.camerainfo.D, [5,1])
-                                                                    )
+                                                               rvec,
+                                                               tvec,
+                                                               self.K,
+                                                               self.D
+                                                               )
             
             # origin point
             pt1 = tuple(pointsAxesProjected[0][0])
@@ -212,23 +214,23 @@ class CalibrateStageArena():
             (hStartProjected,jacobian) = cv2.projectPoints(hStart.transpose(),
                                               rvec,
                                               tvec,
-                                              N.reshape(self.camerainfo.K,[3,3]),
-                                              N.array([0,0,0,0,0],dtype='float32'))#N.reshape(self.camerainfo.D,[5,1]))
+                                              self.K,
+                                              self.D)
             (hEndProjected,jacobian) = cv2.projectPoints(hEnd.transpose(),
                                               rvec,
                                               tvec,
-                                              N.reshape(self.camerainfo.K,[3,3]),
-                                              N.array([0,0,0,0,0],dtype='float32'))#N.reshape(self.camerainfo.D,[5,1]))
+                                              self.K,
+                                              self.D)
             (vStartProjected,jacobian) = cv2.projectPoints(vStart.transpose(),
                                               rvec,
                                               tvec,
-                                              N.reshape(self.camerainfo.K,[3,3]),
-                                              N.array([0,0,0,0,0],dtype='float32'))#N.reshape(self.camerainfo.D,[5,1]))
+                                              self.K,
+                                              self.D)
             (vEndProjected,jacobian) = cv2.projectPoints(vEnd.transpose(),
                                               rvec,
                                               tvec,
-                                              N.reshape(self.camerainfo.K,[3,3]),
-                                              N.array([0,0,0,0,0],dtype='float32'))#N.reshape(self.camerainfo.D,[5,1]))
+                                              self.K,
+                                              self.D)
 
             for iLine in range(self.nRows):
                 cv2.line(img, tuple(hStartProjected[iLine,:][0].astype('int32')), tuple(hEndProjected[iLine,:][0].astype('int32')), cv.CV_RGB(self.colorMax,0,0), widthGridline)
@@ -291,20 +293,25 @@ class CalibrateStageArena():
                     
     
                     for iPoint in range(self.pointRobot_array.shape[1]):
+                        # Draw blue dots on prior robot locations.
                         pointImage = self.PointImageFromArena(Point(x=self.pointRobot_array[0,iPoint], y=self.pointRobot_array[1,iPoint]))                        
                         cv2.circle(self.npDisplay, 
                                    (int(pointImage.x), int(pointImage.y)), 
                                    5, cv.CV_RGB(0,0,self.colorMax/2), cv.CV_FILLED)
                         
+                        # Draw green dots on prior end-effector locations.
                         pointImage = self.PointImageFromArena(Point(x=self.pointEndEffector_array[0,iPoint], y=self.pointEndEffector_array[1,iPoint]))                        
                         cv2.circle(self.npDisplay, 
                                    (int(pointImage.x), int(pointImage.y)), 
                                    5, cv.CV_RGB(0,self.colorMax/2,0), cv.CV_FILLED)
                     
+                    # Draw bright blue dots on robot location.
                     pointImage = self.PointImageFromArena(self.poseRobot.pose.position)                        
                     cv2.circle(self.npDisplay, 
                                (int(pointImage.x), int(pointImage.y)), 
                                3, cv.CV_RGB(0,0,self.colorMax), cv.CV_FILLED)
+                    
+                    # Draw bright green dots on end-effector location.
                     pointImage = self.PointImageFromArena(Point(x=xEndEffector, y=yEndEffector))                        
                     cv2.circle(self.npDisplay, 
                                (int(pointImage.x), int(pointImage.y)), 
@@ -407,7 +414,7 @@ class CalibrateStageArena():
             cv2.imshow('Stage/Arena Calibration', self.npDisplay)
             cv2.waitKey(3)
         t1 = rospy.Time.now().to_sec()
-        rospy.logwarn('time=%f' % (t1-t0))
+        #rospy.logwarn('time=%f' % (t1-t0))
 
    
     def ContourinfoLists_callback(self, contourinfolists):
@@ -488,15 +495,16 @@ class CalibrateStageArena():
         msgPattern.frameidPosition = 'Stage'
         msgPattern.frameidAngle = 'Stage'
         msgPattern.shape = rospy.get_param('calibration/shape', 'spiral')
-        msgPattern.count = -1
-        msgPattern.size = Point(x=rospy.get_param('arena/radius_inner', 25.4), y=0)
-        msgPattern.points = []
-        msgPattern.preempt = True
-        msgPattern.param = 0.0
         if msgPattern.shape=='spiral':
             msgPattern.hzPattern = 0.008
         else:
             msgPattern.hzPattern = 0.1
+        msgPattern.count = -1
+        msgPattern.points = []
+        msgPattern.size = Point(x=0.9*rospy.get_param('arena/radius_inner', 25.4), y=0)
+        msgPattern.preempt = True
+        msgPattern.param = 0.0
+        msgPattern.direction = 1
         self.pubSetPattern.publish (msgPattern)
 
         rospy.spin()

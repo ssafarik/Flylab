@@ -191,90 +191,61 @@ class Fivebar:
             
 
     def LoadServices(self):
-        # Load joint1 services.
-        # Wait for joint 1 to launch.
+        # Joint1 services.
         stSrv = 'srvCalibrate_' + self.names[0]
-        rospy.wait_for_service(stSrv)
         try:
+            rospy.wait_for_service(stSrv)
             self.Calibrate_joint1 = rospy.ServiceProxy(stSrv, SrvCalibrate)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
 
         stSrv = 'srvGetState_' + self.names[0]
-        rospy.wait_for_service(stSrv)
         try:
-            self.GetState_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
-        except (rospy.ServiceException, IOError), e:
-            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
-
-        stSrv = 'srvSetPositionAtVel_' + self.names[0]
-        rospy.wait_for_service(stSrv)
-        try:
-            self.SetPositionAtVel_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
+            rospy.wait_for_service(stSrv)
+            self.GetState_joint1 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvSetVelocity_' + self.names[0]
-        rospy.wait_for_service(stSrv)
         try:
-            self.SetVelocity_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
+            rospy.wait_for_service(stSrv)
+            self.SetVelocity_joint1 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ('5B FAILED %s: %s' % (stSrv, e))
 
-        stSrv = 'srvSetPosition_'+self.names[0]
-        rospy.wait_for_service(stSrv)
-        try:
-            self.SetPosition_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
-        except (rospy.ServiceException, IOError), e:
-            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
-
         stSrv = 'srvPark_' + self.names[0]
-        rospy.wait_for_service(stSrv)
         try:
+            rospy.wait_for_service(stSrv)
             self.Park_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
-        # Wait for joint 2 to launch.
+        # Joint2 services.
         stSrv = 'srvCalibrate_'+self.names[1]
-        rospy.wait_for_service(stSrv)
         try:
+            rospy.wait_for_service(stSrv)
             self.Calibrate_joint2 = rospy.ServiceProxy(stSrv, SrvCalibrate)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvGetState_'+self.names[1]
-        rospy.wait_for_service(stSrv)
         try:
-            self.GetState_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
-        except (rospy.ServiceException, IOError), e:
-            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
-
-        stSrv = 'srvSetPositionAtVel_'+self.names[1]
-        rospy.wait_for_service(stSrv)
-        try:
-            self.SetPositionAtVel_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
+            rospy.wait_for_service(stSrv)
+            self.GetState_joint2 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
 
         stSrv = 'srvSetVelocity_' + self.names[1]
-        rospy.wait_for_service(stSrv)
         try:
-            self.SetVelocity_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
+            rospy.wait_for_service(stSrv)
+            self.SetVelocity_joint2 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ('5B FAILED %s: %s' % (stSrv, e))
 
-        stSrv = 'srvSetPosition_'+self.names[1]
-        rospy.wait_for_service(stSrv)
-        try:
-            self.SetPosition_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
-        except (rospy.ServiceException, IOError), e:
-            rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
-
         stSrv = 'srvPark_'+self.names[1]
-        rospy.wait_for_service(stSrv)
         try:
+            rospy.wait_for_service(stSrv)
             self.Park_joint2 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ("5B FAILED %s: %s"%(stSrv,e))
@@ -847,12 +818,23 @@ class Fivebar:
             with self.lock:
                 try:
                     self.jointstate1 = self.GetState_joint1()
+                except rospy.ServiceException, e:
+                    stSrv = 'srvGetState_' + self.names[0]
+                    try:
+                        rospy.wait_for_service(stSrv, timeout=5)
+                        self.GetState_joint1 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
+                    except rospy.ServiceException, e:
+                        rospy.logwarn ('5B FAILED to reconnect service %s(): %s' % (stSrv, e))
+                    
+                try:
                     self.jointstate2 = self.GetState_joint2()
-                except (rospy.ServiceException, IOError), e:
-                    rospy.logwarn ("5B FAILED %s"%e)
-                    self.jointstate1 = None
-                    self.jointstate2 = None
-                #rospy.logwarn('5B [j1,j2]=%s' % [self.jointstate1.position,self.jointstate2.position])
+                except rospy.ServiceException, e:
+                    stSrv = 'srvGetState_' + self.names[1]
+                    try:
+                        rospy.wait_for_service(stSrv, timeout=5)
+                        self.GetState_joint2 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
+                    except rospy.ServiceException, e:
+                        rospy.logwarn ('5B FAILED to reconnect service %s(): %s' % (stSrv, e))
                     
 
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
@@ -1213,12 +1195,32 @@ class Fivebar:
                 with self.lock:
                     try:
                         self.SetVelocity_joint1(Header(frame_id=self.names[0]), None, theta1Dot)
+                    except rospy.ServiceException, e:
+                        stSrv = 'srvSetVelocity_' + self.names[0]
+                        try:
+                            rospy.wait_for_service(stSrv, timeout=5)
+                            self.SetVelocity_joint1 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
+                        except rospy.ServiceException, e:
+                            rospy.logwarn ('5B FAILED to reconnect service %s(): %s' % (stSrv, e))
+
+                    try:
                         self.SetVelocity_joint2(Header(frame_id=self.names[1]), None, theta2Dot)
-                    except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
-                        rospy.logwarn ("5B Exception:  %s" % e)
+                    except rospy.ServiceException, e:
+                        stSrv = 'srvSetVelocity_' + self.names[1]
+                        try:
+                            rospy.wait_for_service(stSrv, timeout=5)
+                            self.SetVelocity_joint2 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
+                        except rospy.ServiceException, e:
+                            rospy.logwarn ('5B FAILED to reconnect service %s(): %s' % (stSrv, e))
 
         
     def OnShutdown_callback(self):
+        self.GetState_joint1.close()
+        self.SetVelocity_joint1.close()
+
+        self.GetState_joint2.close()
+        self.SetVelocity_joint2.close()
+        
         rospy.loginfo("5B Closed Fivebar device.")
 
 

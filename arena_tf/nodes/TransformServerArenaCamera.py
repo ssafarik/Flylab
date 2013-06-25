@@ -197,8 +197,8 @@ class TransformServerArenaCamera:
             try:
                 self.SendTransforms()
                 rate.sleep()
-            except tf.Exception:
-                rospy.logwarn ('Exception in TransformServerArenaCamera()')
+            except (tf.Exception, rospy.exceptions.ROSInterruptException), e:
+                pass # ROS shutting down.
                 
         # Shutdown all the services we offered.
         for key in self.services:

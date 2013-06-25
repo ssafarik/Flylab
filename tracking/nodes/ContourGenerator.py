@@ -44,7 +44,7 @@ class ContourGenerator:
         self.bUseTransforms             = rospy.get_param('tracking/usetransforms', True)               # Set False to stay in camera coordinates.
         self.bEqualizeHist = False
         self.header = None
-        self.matCamera = None
+        self.matImageRect = None
         self.matBackground = None
         
         self.command = None # Valid values:  None, or 'establish_background'
@@ -56,8 +56,8 @@ class ContourGenerator:
         
         #self.subCameraInfo          = rospy.Subscriber('camera/camera_info', CameraInfo, self.CameraInfo_callback)
         self.subImageRect           = rospy.Subscriber('camera/image_rect', Image, self.Image_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
-        self.subImageBackgroundOriginate = rospy.Subscriber('camera/image_background_originate', Image, self.ImageBackgroundSet_callback, queue_size=1, buff_size=262144, tcp_nodelay=True) # The image from disk needs to come in on a different topic so it doesn't go directly into the bag file.
-        self.subImageBackgroundSet  = rospy.Subscriber('camera/image_background_set', Image, self.ImageBackgroundSet_callback, queue_size=1, buff_size=262144, tcp_nodelay=True)
+        self.subImageBackgroundOriginate = rospy.Subscriber('camera/image_background_originate', Image, self.ImageBackgroundSet_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True) # The image from disk needs to come in on a different topic so it doesn't go directly into the bag file.
+        self.subImageBackgroundSet  = rospy.Subscriber('camera/image_background_set', Image, self.ImageBackgroundSet_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
         
         self.pubTrackingCommand     = rospy.Publisher('tracking/command', TrackingCommand)
@@ -89,6 +89,7 @@ class ContourGenerator:
         self.area_list = []
         self.ecc_list = []
         self.imgRoi_list = []
+        self.contour_list = []
         self.nContours = 0
         self.nContoursMax = rospy.get_param('tracking/nContoursMax', 20)
         self.areaContourMin = rospy.get_param('tracking/areaContourMin', 0.0)
@@ -98,6 +99,8 @@ class ContourGenerator:
         if (1 < self.nContoursMax):
             self.nContoursMax -= 1
         
+        self.kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3)) #N.ones([3,3], dtype=N.uint8)
+
         
         # OpenCV
         self.max_8U = 255
@@ -121,7 +124,7 @@ class ContourGenerator:
         # Mask Info
         self.radiusMask = int(rospy.get_param('camera/mask/radius', 9999))
 
-        self.stampPrev = rospy.Time.now()
+        self.stampPrev = None#rospy.Time.now()
         
         self.services = {}
         self.services['tracking/init'] = rospy.Service('tracking/init',            ExperimentParams, self.Init_callback)
@@ -134,7 +137,7 @@ class ContourGenerator:
         
 
     def InitializeImages(self):
-        if (self.header is not None) and (self.matCamera is not None):
+        if (self.header is not None) and (self.matImageRect is not None):
 
             # Initialize the images.
             self.matProcessed         = N.zeros([self.height, self.width, 3], dtype=N.uint8)
@@ -142,6 +145,7 @@ class ContourGenerator:
             self.matMask              = N.zeros([self.height, self.width], dtype=N.uint8)
             self.matForeground        = N.zeros([self.height, self.width], dtype=N.uint8)
             self.matThreshold         = N.zeros([self.height, self.width], dtype=N.uint8)
+            self.matMaskOthers        = N.zeros([self.height, self.width], dtype=N.uint8)
             
             
             if self.bUseTransforms:
@@ -172,7 +176,7 @@ class ContourGenerator:
                       cv.CV_FILLED)
             
                 
-            self.initialized = True
+            self.initImages = True
 
 
     def Init_callback(self, experimentparams):
@@ -273,25 +277,6 @@ class ContourGenerator:
         return (response.xDst, response.yDst)
         
         
-    def PixelsFromMm (self, xIn):
-        if self.bUseTransforms:
-            ptsIn = PointStamped()
-            ptsIn.header.frame_id = 'Arena'
-            ptsIn.point.x = 0.0
-            ptsIn.point.y = 0.0
-            ptsOrigin = self.tfrx.transformPoint('ImageRect', ptsIn)        
-            
-            ptsIn.point.x = xIn
-            ptsIn.point.y = xIn
-            ptsOut = self.tfrx.transformPoint('ImageRect', ptsIn)
-            xOut = (ptsOut.point.x - ptsOrigin.point.x)
-            
-        else:
-            xOut = xIn 
-                
-        return xOut
-        
-        
     def DrawAngleLine(self, matImage, x0, y0, angle, ecc, length):
         if (not N.isnan(angle)) and (self.minEccForDisplay < ecc):
             height, width = matImage.size
@@ -356,7 +341,9 @@ class ContourGenerator:
         return angle, ecc
         
 
-    def ContourinfoFromMoments(self, moments):
+    def ContourinfoFromContour(self, contour):
+        moments = cv2.moments(contour)  # Sometimes the contour contains just one pixel, resulting in moments=(0,0,0,0,0,0)
+
         #rospy.logwarn('moments=%s' % repr(moments))
         m00 = moments['m00']
         m10 = moments['m10']
@@ -386,9 +373,9 @@ class ContourGenerator:
     # AppendContourinfoListsFromContour()
     # Converts contour to a contourinfo, transforms it to the output frame, and appends the contourinfo members to their respective lists.
     #
-    def AppendContourinfoListsFromContour(self, contour, matForeground):
-        moments = cv2.moments(contour)  # Sometimes the contour contains just one pixel, resulting in moments=(0,0,0,0,0,0)
-        (x, y, area, angle, ecc) = self.ContourinfoFromMoments(moments)
+    def AppendContourinfoListsFromContour(self, contours, iContour, matForeground):
+        contour = contours[iContour]
+        (x, y, area, angle, ecc) = self.ContourinfoFromContour(contour)
         if (x is None) or (y is None):
             (x,y) = contour[0][0]
             area = 0.0001 # one pixel's worth.
@@ -402,9 +389,7 @@ class ContourGenerator:
         ptsContour.point.x = x
         ptsContour.point.y = y
             
-        if x is not None:
-            imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(cv2.getRectSubPix(matForeground, (self.widthRoi, self.heightRoi), (x,y))), 'passthrough')
-            #self.pubImageRoi.publish(imgRoi)
+        if (x is not None):
             try:
                 if self.bUseTransforms:
                     self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptsContour)
@@ -416,7 +401,8 @@ class ContourGenerator:
                 self.angle_list.append(angle)
                 self.area_list.append(area)
                 self.ecc_list.append(ecc)
-                self.imgRoi_list.append(imgRoi)
+                self.imgRoi_list.append(None)
+                self.contour_list.append(iContour)
                 self.nContours += 1
 
             except tf.Exception, e:
@@ -425,8 +411,7 @@ class ContourGenerator:
             except TypeError, e:
                 rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptsContour.header.frame_id, e))
                 
-        
-
+                
 
     def ContourinfoListsFromImage(self, matThreshold, matForeground):
         self.x_list = []
@@ -435,6 +420,7 @@ class ContourGenerator:
         self.area_list = []
         self.ecc_list = []
         self.imgRoi_list = []
+        self.contour_list = []
         
         # Find contours
         sumImage = cv2.sumElems(matThreshold)
@@ -446,13 +432,13 @@ class ContourGenerator:
 
         # Put the top-level contours into the contourinfolists
         self.nContours = 0
-        if contours is not None:
+        if (contours is not None):
             (NEXT,PREV,CHILD,PARENT)=(0,1,2,3)
             iContour = 0
-            while (0<=iContour) and (iContour<len(contours)): 
-                contour = contours[iContour]
-                self.AppendContourinfoListsFromContour(contour, matForeground) # self.nContours++ gets incremented inside function.
+            while (0 <= iContour < len(contours)): 
+                self.AppendContourinfoListsFromContour(contours, iContour, matForeground) # self.nContours++ gets incremented inside function.
                 iContour = hierarchy[0][iContour][NEXT]
+                
                     
         
         # Put lists into contourinfolists.
@@ -473,16 +459,17 @@ class ContourGenerator:
             
         # Remove duplicates and too-small contours.
         if self.nContours > 0:
-            # Repackage the data as a list of lists, i.e. [[x,y,a,a,e],[x,y,a,a,e],...], skipping too-small contours.
+            # Repackage the data as a list of lists, i.e. [[x,y,a,a,e,i],[x,y,a,a,e,i],...], skipping too-small contours.
             contourinfolists_list = []
             for iContour in range(self.nContours):
                 if (self.areaContourMin <= contourinfolists.area[iContour]):
                     contourinfolists_list.append([contourinfolists.x[iContour], 
-                                                 contourinfolists.y[iContour], 
-                                                 contourinfolists.angle[iContour], 
-                                                 contourinfolists.area[iContour], 
-                                                 contourinfolists.ecc[iContour], 
-                                                 contourinfolists.imgRoi[iContour]])
+                                                  contourinfolists.y[iContour], 
+                                                  contourinfolists.angle[iContour], 
+                                                  contourinfolists.area[iContour], 
+                                                  contourinfolists.ecc[iContour], 
+                                                  contourinfolists.imgRoi[iContour],
+                                                  self.contour_list[iContour]])
 
             # Remove the dups.
             contourinfolists_list = sorted(tuple(contourinfolists_list))
@@ -496,6 +483,7 @@ class ContourGenerator:
             contourinfolists.area = []
             contourinfolists.ecc = []
             contourinfolists.imgRoi = []
+            self.contour_list = []
             for iContour in range(self.nContours):
                 contourinfolists.x.append(contourinfolists_list[iContour][0])
                 contourinfolists.y.append(contourinfolists_list[iContour][1])
@@ -503,198 +491,234 @@ class ContourGenerator:
                 contourinfolists.area.append(contourinfolists_list[iContour][3])
                 contourinfolists.ecc.append(contourinfolists_list[iContour][4])
                 contourinfolists.imgRoi.append(contourinfolists_list[iContour][5])
+                self.contour_list.append(contourinfolists_list[iContour][6])
+
+
+            # Get the ROI pixels for each contour, minus the pixels for the other contours.
+            for iContour in range(self.nContours):
+                x = contourinfolists.x[iContour]
+                y = contourinfolists.y[iContour]
+
+                self.matMaskOthers.fill(0)
+                
+                # Go through all the other contours.
+                for kContour in range(self.nContours):
+                    if (kContour != iContour):
+                        xk = contourinfolists.x[kContour]
+                        yk = contourinfolists.y[kContour]
+                        
+                        # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
+                        if (N.linalg.norm([x-xk,y-yk])<N.linalg.norm([self.widthRoi,self.heightRoi])):
+                            jContour = self.contour_list[kContour]
+                            cv2.drawContours(self.matMaskOthers, contours, jContour, 255, cv.CV_FILLED, 4, hierarchy, 0)
+                        
+                self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
+                matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
+                matRoi = cv2.getRectSubPix(matForeground - matOthers, 
+                                           (self.widthRoi, self.heightRoi), 
+                                           (x,y))
+                imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
+                contourinfolists.imgRoi[iContour] = imgRoi
+                
 
             
         return contourinfolists, contours    
         
 
     def Image_callback(self, image):
-        #rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
-        #self.timePrev = rospy.Time.now().to_sec()
-        
-        self.dt = image.header.stamp - self.stampPrev
-        self.stampPrev = image.header.stamp
-        
-
-        if not self.initConstructor:
-            return
-
-        self.header = image.header
-        self.height = image.height
-        self.width = image.width
-        # Convert ROS image to OpenCV image.
         try:
-            self.matCamera = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
-        except CvBridgeError, e:
-            rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
-        
-        if not self.initImages:
-            self.InitializeImages()
+            #rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
+            #self.timePrev = rospy.Time.now().to_sec()
             
-        if (self.initImages and self.initBackground):
-            self.initialized = True
-            
-
-        if self.initialized:        
-            # Check for new diff_threshold value
-            self.diff_threshold = rospy.get_param('tracking/diff_threshold', 50)
-            
-            # Create the mask.
-            radiusMask = int(rospy.get_param('camera/mask/radius', 9999)) 
-            if radiusMask != self.radiusMask:
-                self.radiusMask = radiusMask 
-                self.matMask = N.zeros([self.height, self.width], dtype=N.uint8)
-                cv2.circle(self.matMask,
-                          (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
-                          int(self.radiusMask), 
-                          self.color_max, 
-                          cv.CV_FILLED)
-            
-            # Normalize the histogram.
-            if self.bEqualizeHist:
-                self.matCamera = cv2.equalizeHist(self.matCamera)
-            
-            
-            # Update the background.
-            #rospy.logwarn('types: %s' % [type(N.float32(self.matCamera)), type(self.matfBackground), type(self.rcBackground)])
-            if (self.bEstablishBackground):
-                rcBackground = self.rcBackgroundEstablish
+            if (self.stampPrev is not None):
+                self.dt = image.header.stamp - self.stampPrev
             else:
-                rcBackground = rospy.get_param('tracking/rcBackground', 2500) # Time constant for moving average background.
-            
-            alphaBackground = 1 - N.exp(-self.dt.to_sec() / rcBackground)
-            
-            cv2.accumulateWeighted(N.float32(self.matCamera), self.matfBackground, alphaBackground)
-            self.matBackground = N.uint8(self.matfBackground)
-
-            # Create the foreground.
-            if self.bEqualizeHist:
-                matBackgroundEq = cv2.equalizeHist(self.matBackground)
-
-
-            if (self.bUseBackgroundSubtraction) and (self.matBackground is not None):
-                self.matForeground = cv2.absdiff(self.matCamera, self.matBackground)
-            else:
-                self.matForeground = self.matCamera
-
-            
-            # Threshold
-            (threshold,self.matThreshold) = cv2.threshold(self.matForeground, 
-                                             self.diff_threshold, 
-                                             self.max_8U, 
-                                             cv2.THRESH_TOZERO)
-
-            
-            # Mask the threshold image.
-            self.matThreshold = cv2.bitwise_and(self.matThreshold, self.matMask)
-            
-            # Get the ContourinfoLists.
-            (self.contourinfolists, self.contours) = self.ContourinfoListsFromImage(self.matThreshold, self.matForeground)    # Modifies self.matThreshold
-            self.pubContourinfoLists.publish(self.contourinfolists)
-            
-            # Convert to color for display image
-            if self.pubImageProcessed.get_num_connections() > 0:
-                # Mask the camera image, and convert it to color.
-                self.matCamera = cv2.bitwise_and(self.matCamera, self.matMask)
-                self.matProcessed = cv2.cvtColor(self.matCamera, cv.CV_GRAY2RGB)
+                self.dt = rospy.Time(0)
                 
-                # Draw contours on Processed image.
-                if self.contours:
-                    cv2.drawContours(self.matProcessed, self.contours, -1, cv.CV_RGB(0,0,self.color_max), thickness=1, maxLevel=1)
-                
+            self.stampPrev = image.header.stamp
             
-            # Publish processed image
-            if self.pubImageProcessed.get_num_connections() > 0:
-                try:
-                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matProcessed), 'passthrough')
+    
+            if not self.initConstructor:
+                return
+    
+            self.header = image.header
+            self.height = image.height
+            self.width = image.width
+            # Convert ROS image to OpenCV image.
+            try:
+                self.matImageRect = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
+            except CvBridgeError, e:
+                rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
+            
+            if not self.initImages:
+                self.InitializeImages()
+                
+            if (self.initImages and self.initBackground):
+                self.initialized = True
+                
+    
+            if self.initialized:        
+                # Check for new diff_threshold value
+                self.diff_threshold = rospy.get_param('tracking/diff_threshold', 50)
+                
+                # Create the mask.
+                radiusMask = int(rospy.get_param('camera/mask/radius', 9999)) 
+                if radiusMask != self.radiusMask:
+                    self.radiusMask = radiusMask 
+                    self.matMask.fill(0)
+                    cv2.circle(self.matMask,
+                              (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
+                              int(self.radiusMask), 
+                              self.color_max, 
+                              cv.CV_FILLED)
+                
+                # Normalize the histogram.
+                if self.bEqualizeHist:
+                    self.matImageRect = cv2.equalizeHist(self.matImageRect)
+                
+                
+                # Update the background.
+                #rospy.logwarn('types: %s' % [type(N.float32(self.matImageRect)), type(self.matfBackground), type(self.rcBackground)])
+                if (self.bEstablishBackground):
+                    rcBackground = self.rcBackgroundEstablish
+                else:
+                    rcBackground = rospy.get_param('tracking/rcBackground', 2500) # Time constant for moving average background.
+                
+                alphaBackground = 1 - N.exp(-self.dt.to_sec() / rcBackground)
+                
+                cv2.accumulateWeighted(N.float32(self.matImageRect), self.matfBackground, alphaBackground)
+                self.matBackground = N.uint8(self.matfBackground)
+    
+    
+                # Create the foreground.
+                if self.bEqualizeHist:
+                    matBackgroundEq = cv2.equalizeHist(self.matBackground)
+    
+    
+                if (self.bUseBackgroundSubtraction) and (self.matBackground is not None):
+                    self.matForeground = cv2.absdiff(self.matImageRect, self.matBackground)
+                else:
+                    self.matForeground = self.matImageRect
+    
+                
+                # Threshold
+                (threshold,self.matThreshold) = cv2.threshold(self.matForeground, 
+                                                 self.diff_threshold, 
+                                                 self.max_8U, 
+                                                 cv2.THRESH_TOZERO)
+    
+                
+                # Apply the arena mask to the threshold image.
+                self.matThreshold = cv2.bitwise_and(self.matThreshold, self.matMask)
+                
+                # Get the ContourinfoLists.
+                (self.contourinfolists, self.contours) = self.ContourinfoListsFromImage(self.matThreshold, self.matForeground)    # Modifies self.matThreshold
+                self.pubContourinfoLists.publish(self.contourinfolists)
+                
+                # Convert to color for display image
+                if self.pubImageProcessed.get_num_connections() > 0:
+                    # Apply the arena mask to the camera image, and convert it to color.
+                    self.matImageRect = cv2.bitwise_and(self.matImageRect, self.matMask)
+                    self.matProcessed = cv2.cvtColor(self.matImageRect, cv.CV_GRAY2RGB)
+                    
+                    # Draw contours on Processed image.
+                    if self.contours:
+                        cv2.drawContours(self.matProcessed, self.contours, -1, cv.CV_RGB(0,0,self.color_max), thickness=1, maxLevel=1)
+                    
+                
+                # Publish processed image
+                if self.pubImageProcessed.get_num_connections() > 0:
+                    try:
+                        image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matProcessed), 'passthrough')
+                        image2.header = image.header
+                        image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
+                        #rospy.logwarn(image2.encoding)
+                        self.pubImageProcessed.publish(image2)
+                    except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
+                        rospy.logwarn ('Exception %s' % e)
+                
+                # Publish background image
+                if (self.pubImageBackground.get_num_connections() > 0) and (self.matBackground is not None):
+                    try:
+                        image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
+                        image2.header.stamp = image.header.stamp
+                        self.pubImageBackground.publish(image2)
+                    except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
+                        rospy.logwarn ('Exception %s' % e)
+    
+                
+                # Publish thresholded image
+                if self.pubImageThreshold.get_num_connections() > 0:
+                    try:
+                        self.matImageRect = cv2.add(self.matThreshold, self.matForeground)
+                        image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
+                        image2.header.stamp = image.header.stamp
+                        self.pubImageThreshold.publish(image2)
+                    except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
+                        rospy.logwarn ('Exception %s' % e)
+    
+                  
+                # Publish foreground image
+                if self.pubImageForeground.get_num_connections() > 0:
+                    try:
+                        image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matForeground), 'passthrough')
+                        image2.header.stamp = image.header.stamp
+                        self.pubImageForeground.publish(image2)
+                    except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
+                        rospy.logwarn ('Exception %s' % e)
+    
+                  
+                # Publish a special image for use in rviz.
+                if self.pubImageRviz.get_num_connections() > 0:
+                    self.matProcessedFlip = cv2.flip(self.matProcessed, 0)
+                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matProcessedFlip), 'passthrough')
                     image2.header = image.header
+                    image2.header.frame_id = 'Arena'
                     image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
-                    #rospy.logwarn(image2.encoding)
-                    self.pubImageProcessed.publish(image2)
-                except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
-                    rospy.logwarn ('Exception %s' % e)
-            
-            # Publish background image
-            if (self.pubImageBackground.get_num_connections() > 0) and (self.matBackground is not None):
-                try:
-                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
-                    image2.header.stamp = image.header.stamp
-                    self.pubImageBackground.publish(image2)
-                except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
-                    rospy.logwarn ('Exception %s' % e)
-
-            
-            # Publish thresholded image
-            if self.pubImageThreshold.get_num_connections() > 0:
-                try:
-                    self.matCamera = cv2.add(self.matThreshold, self.matForeground)
-                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matCamera), 'passthrough')
-                    image2.header.stamp = image.header.stamp
-                    self.pubImageThreshold.publish(image2)
-                except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
-                    rospy.logwarn ('Exception %s' % e)
-
-              
-            # Publish foreground image
-            if self.pubImageForeground.get_num_connections() > 0:
-                try:
-                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matForeground), 'passthrough')
-                    image2.header.stamp = image.header.stamp
-                    self.pubImageForeground.publish(image2)
-                except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
-                    rospy.logwarn ('Exception %s' % e)
-
-              
-            # Publish a special image for use in rviz.
-            if self.pubImageRviz.get_num_connections() > 0:
-                self.matProcessedFlip = cv2.flip(self.matProcessed, 0)
-                image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matProcessedFlip), 'passthrough')
-                image2.header = image.header
-                image2.header.frame_id = 'Arena'
-                image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
-                
-                camerainfo2 = CameraInfo()#copy.copy(self.camerainfo)
-                camerainfo2.header = self.header
-                camerainfo2.header.frame_id = 'Arena'
-                camerainfo2.height = self.height
-                camerainfo2.width = self.width
-                k11 = rospy.get_param('/k11', 1.0)
-                k13 = rospy.get_param('/k13', 0.0)
-                k22 = rospy.get_param('/k22', 1.0)
-                k23 = rospy.get_param('/k23', 0.0)
-                k33 = rospy.get_param('/k33', 1.0)
-                p11 = rospy.get_param('/p11', -0.023)
-                p13 = rospy.get_param('/p13', 0.0)
-                p22 = rospy.get_param('/p22', +0.023)
-                p23 = rospy.get_param('/p23', 0.0)
-                p33 = rospy.get_param('/p33', 1.0)
-                camerainfo2.D = (0.0, 0.0, 0.0, 0.0, 0.0)
-                camerainfo2.K = (k11, 0.0, k13, \
-                                 0.0, k22, k23, \
-                                 0.0, 0.0, k33)
-                camerainfo2.R = (1.0, 0.0, 0.0, \
-                                 0.0, 1.0, 0.0, \
-                                 0.0, 0.0, 1.0)
-                camerainfo2.P = (p11, 0.0,                    self.ptsOriginMask.point.x, 0.0, \
-                                 0.0, p22, camerainfo2.height-self.ptsOriginMask.point.y, 0.0, \
-                                 0.0, 0.0,                                           1.0, 0.0)
-                self.pubCamerainfoRviz.publish(camerainfo2)
-                self.pubImageRviz.publish(image2)
-                
-
-            # When automatically establishing a new background, determine if the background has stabilized.                
-            if (self.bEstablishBackground) and (self.nContours==self.nContoursEstablish):
-                self.nContoursEstablished += 1
-            else:
-                self.nContoursEstablished = 0
-              
-            # Stabilized when more than six time-constants worth of background.  
-            if (self.nContoursEstablished > 2*(rcBackground/self.dt.to_sec())):
-                #self.pubTrackingCommand.publish(TrackingCommand(command='save_background')) # Let the user manually save it when they're happy with it.
-                rospy.logwarn('establish_background Finished.  Click <Save Background Image> if it\'s acceptable.')
-                self.bEstablishBackground = False
-                self.nContoursEstablished = 0
-
+                    
+                    camerainfo2 = CameraInfo()#copy.copy(self.camerainfo)
+                    camerainfo2.header = self.header
+                    camerainfo2.header.frame_id = 'Arena'
+                    camerainfo2.height = self.height
+                    camerainfo2.width = self.width
+                    k11 = rospy.get_param('/k11', 1.0)
+                    k13 = rospy.get_param('/k13', 0.0)
+                    k22 = rospy.get_param('/k22', 1.0)
+                    k23 = rospy.get_param('/k23', 0.0)
+                    k33 = rospy.get_param('/k33', 1.0)
+                    p11 = rospy.get_param('/p11', -0.023)
+                    p13 = rospy.get_param('/p13', 0.0)
+                    p22 = rospy.get_param('/p22', +0.023)
+                    p23 = rospy.get_param('/p23', 0.0)
+                    p33 = rospy.get_param('/p33', 1.0)
+                    camerainfo2.D = (0.0, 0.0, 0.0, 0.0, 0.0)
+                    camerainfo2.K = (k11, 0.0, k13, \
+                                     0.0, k22, k23, \
+                                     0.0, 0.0, k33)
+                    camerainfo2.R = (1.0, 0.0, 0.0, \
+                                     0.0, 1.0, 0.0, \
+                                     0.0, 0.0, 1.0)
+                    camerainfo2.P = (p11, 0.0,                    self.ptsOriginMask.point.x, 0.0, \
+                                     0.0, p22, camerainfo2.height-self.ptsOriginMask.point.y, 0.0, \
+                                     0.0, 0.0,                                           1.0, 0.0)
+                    self.pubCamerainfoRviz.publish(camerainfo2)
+                    self.pubImageRviz.publish(image2)
+                    
+    
+                # When automatically establishing a new background, determine if the background has stabilized.                
+                if (self.bEstablishBackground) and (self.nContours==self.nContoursEstablish):
+                    self.nImagesContoursEstablished += 1
+                else:
+                    self.nImagesContoursEstablished = 0
+                  
+                # Stabilized when more than two time-constants worth of background.  
+                if (self.bEstablishBackground) and (self.nImagesContoursEstablished > 2*(rcBackground/self.dt.to_sec())):
+                    #self.pubTrackingCommand.publish(TrackingCommand(command='save_background')) # Let the user manually save it when they're happy with it.
+                    rospy.logwarn('establish_background Finished.  Click <Save Background Image> if it\'s acceptable.')
+                    self.bEstablishBackground = False
+                    self.nImagesContoursEstablished = 0
+        except rospy.exceptions.ROSException, e:
+            rospy.loginfo('CG ROSException: %s' % e)
 
 
     def Main(self):
