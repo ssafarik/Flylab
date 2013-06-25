@@ -21,8 +21,6 @@ from flycore.msg import MsgFrameState
 from pythonmodules import filters, CircleFunctions
 
 
-globalNonessentialWings = False   # Publish nonessential stuff?
-globalNonessentialSuperRes = False   # Publish nonessential stuff?
 globalLock = threading.Lock()
 
         
@@ -35,32 +33,35 @@ globalLock = threading.Lock()
 #
 class Fly:
     def __init__(self, name=None, tfrx=None):
+        global globalLock
+
         self.initialized = False
         self.name = name
 
+        self.bNonessentialPublish = rospy.get_param('tracking/nonessentialPublish', False)   # Publish nonessential stuff?
+        self.bNonessentialCalcSuper = rospy.get_param('tracking/nonessentialCalcSuper', False)   # Calculate the super-resolution image.
+        
         self.cvbridge = CvBridge()
         self.tfrx = tfrx
         self.tfbx = tf.TransformBroadcaster()
         self.pubMarker       = rospy.Publisher('visualization_marker', Marker)
         
         # Nonessential stuff to publish.
-        if globalNonessentialWings:
+        if self.bNonessentialPublish:
             self.pubImageRoiMean    = rospy.Publisher(self.name+"/image_mean", Image)
             self.pubImageRoi        = rospy.Publisher(self.name+"/image", Image)
             self.pubImageRoiReg     = rospy.Publisher(self.name+"/image_reg", Image)
             self.pubImageRoiWings   = rospy.Publisher(self.name+"/image_wings", Image)
             self.pubImageMask       = rospy.Publisher(self.name+"/image_mask", Image)
             self.pubImageMaskBody   = rospy.Publisher(self.name+"/image_mask_body", Image)
-            self.pubImageSuper      = rospy.Publisher(self.name+'/image_super', Image)
             self.pubLeftMetric      = rospy.Publisher(self.name+'/leftmetric', Float32)
             self.pubLeftMetricMean  = rospy.Publisher(self.name+'/leftmetricmean', Float32)
             self.pubLeft            = rospy.Publisher(self.name+'/left', Float32)
             self.pubRightMetric     = rospy.Publisher(self.name+'/rightmetric', Float32)
+            self.pubRightMetricMean  = rospy.Publisher(self.name+'/rightmetricmean', Float32)
             self.pubRight           = rospy.Publisher(self.name+'/right', Float32)
-        if globalNonessentialSuperRes:
             self.pubImageSuper      = rospy.Publisher(self.name+'/image_super', Image)
         
-        global globalLock
         with globalLock:
             rcFilterAngle                = rospy.get_param('tracking/rcFilterAngle', 0.1)
             dtVelocity                   = rospy.get_param('tracking/dtVelocity', 0.2)
@@ -77,8 +78,10 @@ class Fly:
             self.robot_length            = rospy.get_param('robot/length', 1.0)
             self.robot_height            = rospy.get_param('robot/height', 1.0)
             self.rcForeground            = rospy.get_param('tracking/rcForeground', 1.0)
-            self.thresholdForeground     = rospy.get_param('tracking/thresholdForeground', 25.0)
-
+            self.thresholdWings     = rospy.get_param('tracking/thresholdWings', 25.0)
+            self.scalarFlyMean           = rospy.get_param('tracking/scalarFlyMean', 1.0)
+            self.metricWingThreshold     = rospy.get_param('tracking/wingmetric_threshold', 3.0)
+            
         self.kfState = filters.KalmanFilter()
         self.lpAngle = filters.LowPassCircleFilter(RC=rcFilterAngle)
         self.lpAngle.SetValue(0.0)
@@ -98,7 +101,6 @@ class Fly:
         self.angleOfTravelRecent = 0.0
         self.contourinfo = Contourinfo()
         self.speed = 0.0
-        self.angleContourUnwrapped = 0.0
 
         
         self.lpWx = filters.LowPassFilter(RC=rcFilterAngularVel)
@@ -153,9 +155,12 @@ class Fly:
         
         
         # Super-resolution image.
-        self.heightSuper = 100*self.heightRoi
-        self.widthSuper = 100*self.widthRoi
-        self.npfSuper = N.zeros([self.heightSuper, self.widthSuper]) 
+        if self.bNonessentialCalcSuper:
+            self.heightSuper = 16*self.heightRoi # The resolution increase for super-res.
+            self.widthSuper = 16*self.widthRoi
+            self.npfSuper      = N.zeros([self.heightSuper, self.widthSuper]) 
+            self.npfSuperSum   = N.zeros([self.heightSuper, self.widthSuper]) 
+            self.npfSuperCount = N.zeros([self.heightSuper, self.widthSuper]) 
         
         
         
@@ -302,65 +307,76 @@ class Fly:
     # FUTURE: should make the body/wing dimensions automatically calculated from the fly mean image, npfRoiMean.
     #
     def UpdateWingMask(self, npfRoiMean):
-        #global globalLock
+        q = 3
         
-        self.npMaskWings = N.zeros([self.heightRoi, self.widthRoi], dtype=N.uint8)
-
-
-        # Coordinates of the body ellipse.
-        centerBody = (self.widthRoi/2, 
-                      self.heightRoi/2)
-        sizeBody = (self.lengthBody, 
-                    self.widthBody)
-        angleBody = 0.0
-        
-        # Left wing ellipse.
-        sizeLeft = (self.lengthBody*10/10, 
-                    self.lengthBody*7/10)
-        centerLeft = (centerBody[0] - sizeLeft[0]/2 + self.lengthBody*1/10,
-                      centerBody[1] - sizeLeft[1]/2 - 1)
-        angleLeft = 0.0
-
-        # Right wing ellipse.
-        sizeRight = (self.lengthBody*10/10, 
-                     self.lengthBody*7/10)
-        centerRight = (centerBody[0] - sizeRight[0]/2 + self.lengthBody*1/10,
-                       centerBody[1] + sizeRight[1]/2)
-        angleRight = 0.0
-
-
-        # Draw ellipses on the mask.
-        #cv2.ellipse(self.npMaskWings,
-        #            (centerBody, sizeBody, angleBody),
-        #            255, cv.CV_FILLED)
-        cv2.ellipse(self.npMaskWings,
-                    (centerLeft, sizeLeft, angleLeft*180.0/N.pi),
-                    255, cv.CV_FILLED)
-        cv2.ellipse(self.npMaskWings,
-                    (centerRight, sizeRight, angleRight*180.0/N.pi),
-                    255, cv.CV_FILLED)
-            
-        if (npfRoiMean is not None):
-            # Mean Fly Body Mask.
-            #with globalLock:
-            #    self.thresholdForeground = rospy.get_param('tracking/thresholdForeground', 25.0)
-            (threshOut, npMaskBody) = cv2.threshold(npfRoiMean.astype(N.uint8), self.thresholdForeground, 255, cv2.THRESH_BINARY_INV)
-            self.npMaskWings = cv2.bitwise_and(self.npMaskWings, npMaskBody)
-        
+        if (q==1):  # Use a carefully constructed wing-area mask.
+            self.npMaskWings = N.zeros([self.heightRoi, self.widthRoi], dtype=N.uint8)
     
-            # Publish non-essential stuff.
-            if globalNonessentialWings:
-                npMaskWings1 = copy.copy(self.npMaskWings)
-                npMaskWings1.resize(npMaskWings1.size)
-                imgMaskWings  = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npMaskWings), 'passthrough')
-                imgMaskWings.data = list(npMaskWings1)
-                self.pubImageMask.publish(imgMaskWings)
+    
+            # Coordinates of the body ellipse.
+            centerBody = (self.widthRoi/2, 
+                          self.heightRoi/2)
+            sizeBody = (self.lengthBody, 
+                        self.widthBody)
+            angleBody = 0.0
+            
+            # Left wing ellipse.
+            sizeLeft = (self.lengthBody*10/10, 
+                        self.lengthBody*7/10)
+            centerLeft = (centerBody[0] - sizeLeft[0]/2 + self.lengthBody*1/10,
+                          centerBody[1] - sizeLeft[1]/2 - 1)
+            angleLeft = 0.0
+    
+            # Right wing ellipse.
+            sizeRight = (self.lengthBody*10/10, 
+                         self.lengthBody*7/10)
+            centerRight = (centerBody[0] - sizeRight[0]/2 + self.lengthBody*1/10,
+                           centerBody[1] + sizeRight[1]/2)
+            angleRight = 0.0
+    
+    
+            # Draw ellipses on the mask.
+            #cv2.ellipse(self.npMaskWings,
+            #            (centerBody, sizeBody, angleBody),
+            #            255, cv.CV_FILLED)
+            cv2.ellipse(self.npMaskWings,
+                        (centerLeft, sizeLeft, angleLeft*180.0/N.pi),
+                        255, cv.CV_FILLED)
+            cv2.ellipse(self.npMaskWings,
+                        (centerRight, sizeRight, angleRight*180.0/N.pi),
+                        255, cv.CV_FILLED)
+                
+            if (npfRoiMean is not None):
+                # Mean Fly Body Mask.
+                #with globalLock:
+                #    self.thresholdWings = rospy.get_param('tracking/thresholdWings', 25.0)
+                (threshOut, npMaskBody) = cv2.threshold(npfRoiMean.astype(N.uint8), self.thresholdWings, 255, cv2.THRESH_BINARY_INV)
+                self.npMaskWings = cv2.bitwise_and(self.npMaskWings, npMaskBody)
+            
         
-                npMaskBody1 = copy.copy(npMaskBody)
-                npMaskBody1.resize(npMaskBody1.size)
-                imgMaskBody  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npMaskBody), 'passthrough')
-                imgMaskBody.data = list(npMaskBody1)
-                self.pubImageMaskBody.publish(imgMaskBody)
+                # Publish non-essential stuff.
+                if self.bNonessentialPublish:
+                    npMaskWings1 = copy.copy(self.npMaskWings)
+                    npMaskWings1.resize(npMaskWings1.size)
+                    imgMaskWings  = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npMaskWings), 'passthrough')
+                    imgMaskWings.data = list(npMaskWings1)
+                    self.pubImageMask.publish(imgMaskWings)
+            
+                    npMaskBody1 = copy.copy(npMaskBody)
+                    npMaskBody1.resize(npMaskBody1.size)
+                    imgMaskBody  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npMaskBody), 'passthrough')
+                    imgMaskBody.data = list(npMaskBody1)
+                    self.pubImageMaskBody.publish(imgMaskBody)
+                    
+        elif (q==2):    # Use all pixels.
+            self.npMaskWings = 255*N.ones([self.heightRoi, self.widthRoi], dtype=N.uint8)
+            
+        elif (q==3):    # Only use the left pixels.
+            w1 = 6*self.widthRoi/10     # Width of left side.
+            w2 = self.widthRoi - w1     # Width of right side.
+            self.npMaskWings = 255*N.hstack([N.ones([self.heightRoi, w1], dtype=N.uint8),
+                                             N.zeros([self.heightRoi, w2], dtype=N.uint8)]) 
+            
     
         
     def UpdateFlyMean(self, npRoiReg):
@@ -369,63 +385,111 @@ class Fly:
         #    self.rcForeground = rospy.get_param('tracking/rcForeground', 0.01)
         alphaForeground = 1 - N.exp(-self.dt.to_sec() / self.rcForeground)
 
+        # Use npRoiReg with no thresholding.
         if (self.npfRoiMean is None):
             self.npfRoiMean = N.float32(npRoiReg)
         cv2.accumulateWeighted(N.float32(npRoiReg), self.npfRoiMean, alphaForeground)
 
+        # Use npRoiReg with thresholding to try to get body only.
+#         self.thresholdBody = rospy.get_param('tracking/thresholdBody', 25.0)
+#         (threshOut, npMaskWings) = cv2.threshold(npRoiReg, self.thresholdBody, 255, cv2.THRESH_BINARY)
+#         npMasked = cv2.bitwise_and(npRoiReg, npMaskWings)
+# 
+#         if (self.npfRoiMean is None):
+#             self.npfRoiMean = N.float32(npMasked)
+#         cv2.accumulateWeighted(N.float32(npMasked), self.npfRoiMean, alphaForeground)
+
         
     def UpdateFlySuperresolution(self, npRoi, moments):
-        if globalNonessentialSuperRes:
+        if self.bNonessentialCalcSuper:
             if (moments['m00'] != 0.0):
                 xCOM  = moments['m10']/moments['m00']
                 yCOM  = moments['m01']/moments['m00']
+
                 
-#                 rospy.logwarn('-------------------------------------------------------')
                 # Rotate the fly image to 0-degrees, and the size of the super image.
-                angleR = self.GetResolvedAngleRaw()
+                angleR = self.GetResolvedAngleFiltered()
                 scale = self.widthSuper/npRoi.shape[1]
-                xCenter = self.widthSuper/2+xCOM
-                yCenter = self.heightSuper/2+yCOM
-                #T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, scale)
-                #T = N.array([[scale*N.cos(angleR), -scale*N.sin(angleR), xCenter], [scale*N.sin(angleR), scale*N.cos(angleR), yCenter]])
-                T = cv2.getRotationMatrix2D((xCOM,yCOM), 0, self.widthSuper/npRoi.shape[1])
+                x2Center = self.widthSuper/2
+                y2Center = self.heightSuper/2
+                
+                # The transform for ROI rotation & scale.
+                T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, scale)
                 L = T.tolist()
                 L.append([0.0, 0.0, 1.0])
-                T2 = N.array(L)
+                T1 = N.array(L)
+                
+                # The transform to the center of the super image.
+                Ttrans = N.array([[1, 0, x2Center-self.widthRoi/2.0],
+                                  [0, 1, y2Center-self.heightRoi/2.0],
+                                  [0, 0, 1],
+                                  ], dtype=N.float)
+                
+                # The complete transform.
+                T2 = N.dot(Ttrans,T1)
+                
+                
+                # Update the Super image from the ROI pixels.
+                method='sample_perpixelaveraging'
+                
+                if (method=='sample_perpixelaveraging'):
+                    # This method only updates those few pixels in the ROI, and averages the super pixels on a per pixel basis.
+                    npfSuperNow = N.zeros([self.heightSuper, self.widthSuper]) 
+                    for x in range(npRoi.shape[1]):
+                        for y in range(npRoi.shape[0]):
+                            (x2,y2,z2) = N.dot(T2, N.array([x, y, 1],dtype=float))
+                            if (0<=x2<self.widthSuper) and (0<=y2<self.heightSuper): 
+                                self.npfSuperCount[int(y2),int(x2)] += 1
+                                self.npfSuperSum[int(y2),int(x2)] += npRoi[y,x]
+                                
+                    self.npfSuper = self.npfSuperSum / self.npfSuperCount
 
-#                 self.npfSuper = cv2.warpAffine(npRoi, T, (self.widthSuper,self.heightSuper))
-                for x in range(npRoi.shape[1]):
-                    for y in range(npRoi.shape[0]):
-                        (x2,y2,z2) = N.dot(T2, N.array([x,y,1]))
-#                        (x2,y2) = N.dot(T, N.array([x,y,1]))
-                        x2 += xCenter
-                        y2 += yCenter
-                        if (0<=x2<self.widthSuper) and (0<=y2<self.heightSuper): 
-                            self.npfSuper[int(x2),int(y2)] = npRoi[x,y]
-                            #rospy.logwarn('(xCOM,yCOM)=(%d,%d), angle=%3.2f, (%d,%d) -> (%d,%d): %d' % (xCOM,yCOM,angleR,x,y,int(x2),int(y2), npRoi[x,y]))
-    
-                imgSuper  = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8(self.npfSuper)), 'passthrough')
-                self.pubImageSuper.publish(imgSuper)
+                                
+                elif (method=='sample_wholeimageaveraging'):
+                    # This method only updates those few pixels in the ROI, and does a moving average of the whole super image.
+                    npfSuperNow = N.zeros([self.heightSuper, self.widthSuper]) 
+                    for x in range(npRoi.shape[1]):
+                        for y in range(npRoi.shape[0]):
+                            (x2,y2,z2) = N.dot(T2, N.array([x, y, 1],dtype=float))
+                            if (0<=x2<self.widthSuper) and (0<=y2<self.heightSuper): 
+                                npfSuperNow[int(y2),int(x2)] = npRoi[y,x]
+                                
+                    a = 1 - N.exp(-self.dt.to_sec() / self.rcForeground)
+                    #self.npfSuper = (1-a)*self.npfSuper + a*npfSuperNow
+                    self.npfSuper = N.clip((1-a)*self.npfSuper + 0.5*npfSuperNow, 0.0, 255.0)
+                    
+                                
+                elif (method=='interpolate'): 
+                    # This method uses a moving average of an interpolated resized image.
+                    npfSuperNow = cv2.warpAffine(npRoi, T2[:-1,:], (self.widthSuper,self.heightSuper), flags=cv2.INTER_LANCZOS4)
+                    
+                    a = 1 - N.exp(-self.dt.to_sec() / self.rcForeground)
+                    self.npfSuper = (1-a)*self.npfSuper + a*npfSuperNow
+
+
+                if self.bNonessentialPublish:
+                    imgSuper  = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8(self.npfSuper)), 'passthrough')
+                    self.pubImageSuper.publish(imgSuper)
 
         
         
     # Rotate the image to 0 degrees.                    
     def RegisterImageRoi(self, npRoi):
         npRoiReg = npRoi
-        if (self.angleContourUnwrapped is not None):
-            # Center of mass.
-            moments = cv2.moments(npRoi)
-            if (moments['m00'] != 0.0):
-                xCOM  = moments['m10']/moments['m00']
-                yCOM  = moments['m01']/moments['m00']
-                
-                # Rotate the fly image to 0-degrees.
-                angleR = self.GetResolvedAngleRaw()
-                T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, 1.0)
-                npRoiReg = cv2.warpAffine(npRoi, T, (0,0))#(self.widthRoi, self.heightRoi))
-                
-                # Super-resolution fly image.
-                self.UpdateFlySuperresolution(npRoiReg, moments)
+
+        # Center of mass.
+        moments = cv2.moments(npRoi)
+        if (moments['m00'] != 0.0):
+            xCOM  = moments['m10']/moments['m00']
+            yCOM  = moments['m01']/moments['m00']
+            
+            # Rotate the fly image to 0-degrees.
+            angleR = self.GetResolvedAngleFiltered()
+            T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, 1.0)
+            npRoiReg = cv2.warpAffine(npRoi, T, (0,0))
+        
+            # Super-resolution fly image.
+            self.UpdateFlySuperresolution(npRoi, moments)
             
         return npRoiReg
         
@@ -435,6 +499,9 @@ class Fly:
     #
     def GetWingAngles(self, contourinfo):
         global globalLock
+
+        self.metricWingThreshold = rospy.get_param('tracking/wingmetric_threshold', 3.0)
+        self.scalarFlyMean = rospy.get_param('tracking/scalarFlyMean', 1.0)
 
         npRoiIn = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, "passthrough")))
         npRoi = cv2.bitwise_and(npRoiIn, self.npMaskCircle)
@@ -451,7 +518,7 @@ class Fly:
         
         
         # Background Fly Subtraction.
-        diff = npRoiReg.astype(N.float32) - self.npfRoiMean*1.0 # Only partially subtract the mean.
+        diff = npRoiReg.astype(N.float32) - self.npfRoiMean*self.scalarFlyMean # Magnify the mean.
         npWings = N.clip(diff, 0, N.iinfo(N.uint8).max).astype(N.uint8)
         #npWings = npRoiReg 
         
@@ -469,28 +536,35 @@ class Fly:
         momentsLeft  = cv2.moments(npWingLeft)
         momentsRight = cv2.moments(npWingRight)
 
-        # Pixel locations of body & wings.
+        # Coordinates of body, and wings relative to wing hinge.
         try:
             xBody  = momentsRoi['m10']/momentsRoi['m00']
             yBody  = momentsRoi['m01']/momentsRoi['m00']
         except ZeroDivisionError:
-            xBody = 0.0
-            yBody = 0.0
+            xBody = self.widthRoi/2
+            yBody = self.heightRoi/2
             
         try:
-            xLeft  = momentsLeft['m10']/momentsLeft['m00'] - (xBody + self.lengthBody/4)
-            yLeft  = momentsLeft['m01']/momentsLeft['m00'] - yBody
+            xLeftAbs  = momentsLeft['m10']/momentsLeft['m00']   # Absolute pixel location.
+            yLeftAbs  = momentsLeft['m01']/momentsLeft['m00']
         except ZeroDivisionError:
-            xLeft = 0.0
-            yLeft = 0.0
+            xLeftAbs = (xBody + self.lengthBody/4)
+            yLeftAbs = yBody
+            
+        xLeft = xLeftAbs - (xBody + self.lengthBody/4)      # Hinge-relative location.
+        yLeft = yLeftAbs - yBody
+        
             
         try:
-            xRight = momentsRight['m10']/momentsRight['m00'] - (xBody + self.lengthBody/4)
-            yRight = momentsRight['m01']/momentsRight['m00'] - yBody + 1
+            xRightAbs = momentsRight['m10']/momentsRight['m00']   # Absolute pixel location.
+            yRightAbs = momentsRight['m01']/momentsRight['m00']
         except ZeroDivisionError:
-            xRight = 0.0
-            yRight = 0.0
-
+            xRightAbs = (xBody + self.lengthBody/4)
+            yRightAbs = yBody
+            
+        xRight = xRightAbs - (xBody + self.lengthBody/4)      # Hinge-relative location.
+        yRight = yRightAbs - yBody
+        
         xBodyBg = xBody
         yBodyBg = yBody
 
@@ -501,7 +575,7 @@ class Fly:
 
         # Metric mean, for thresholding.
         if (self.metricMeanLeft is not None):
-            a = 0.001
+            a = 0.0001
             self.metricMeanLeft  = (1-a)*self.metricMeanLeft  + a*metricLeft 
             self.metricMeanRight = (1-a)*self.metricMeanRight + a*metricRight 
         else:
@@ -509,47 +583,41 @@ class Fly:
             self.metricMeanRight = metricRight 
             
         
-        
-        if (metricLeft < 3*self.metricMeanLeft):
+        npToUse = npWings #npWingRight
+
+        if (metricLeft < self.metricWingThreshold*self.metricMeanLeft):
             angleLeft = N.pi
         else:
             angleLeft  = N.arctan2(yLeft, xLeft)+N.pi
+
+            if self.bNonessentialPublish:
+                if (momentsLeft['m00'] != 0):
+                    npRoiReg[yLeftAbs,   
+                             xLeftAbs] = 255.0      # Set pixel at wing center.
+                    npToUse[yLeftAbs,   
+                            xLeftAbs] = 255.0      # Set pixel at wing center.
+
             
-        if (metricRight < 3*self.metricMeanRight):
+        if (metricRight < self.metricWingThreshold*self.metricMeanRight):
             angleRight = N.pi
         else:
             angleRight = N.arctan2(yRight, xRight)+N.pi
             
-            if globalNonessentialWings:
-                npToUse = npWingRight
-                if (momentsLeft['m00'] != 0):
-                    npRoiReg[momentsLeft['m01']/momentsLeft['m00'],   
-                             momentsLeft['m10']/momentsLeft['m00']] = 255.0      # Set pixel at wing center.
-                    npToUse[momentsLeft['m01']/momentsLeft['m00'],   
-                            momentsLeft['m10']/momentsLeft['m00']] = 255.0      # Set pixel at wing center.
+            if self.bNonessentialPublish:
                 if (momentsRight['m00'] != 0):
-                    npRoiReg[momentsRight['m01']/momentsRight['m00']+1, 
-                             momentsRight['m10']/momentsRight['m00']] = 255.0
-                    npToUse[momentsRight['m01']/momentsRight['m00']+1, 
-                            momentsRight['m10']/momentsRight['m00']] = 255.0
+                    #rospy.logwarn('% 0.2f, % 0.2f' % (yRightAbs+0,xRightAbs))
+                    npRoiReg[yRightAbs+0.99, 
+                             xRightAbs] = 255.0
+                    npToUse[yRightAbs+0.99, 
+                            xRightAbs] = 255.0
             
 
 
         # Nonessential stuff to publish.
-        if globalNonessentialWings:
+        if self.bNonessentialPublish:
             self.imgRoiReg  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npRoiReg), 'passthrough') 
-            self.imgRoiMean = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8(self.npfRoiMean)), 'passthrough')
+            self.imgRoiMean = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.clip(self.npfRoiMean*self.scalarFlyMean, 0, N.iinfo(N.uint8).max).astype(N.uint8)), 'passthrough')
 
-#            npRoiReg[momentsLeft['m01']/momentsLeft['m00'],   
-#                     momentsLeft['m10']/momentsLeft['m00']] = 255.0      # Set pixel at wing center.
-#            npRoiReg[momentsRight['m01']/momentsRight['m00']+1, 
-#                     momentsRight['m10']/momentsRight['m00']] = 255.0
-            
-            npToUse = npWingRight
-#            npToUse[momentsLeft['m01']/momentsLeft['m00'],   
-#                    momentsLeft['m10']/momentsLeft['m00']] = 255.0      # Set pixel at wing center.
-#            npToUse[momentsRight['m01']/momentsRight['m00']+1, 
-#                    momentsRight['m10']/momentsRight['m00']] = 255.0
             imgWings = copy.copy(self.imgRoiReg)
             npWings1 = npToUse.astype(N.uint8).reshape(npToUse.size)
             imgWings.data = list(npWings1)
@@ -558,8 +626,9 @@ class Fly:
             self.pubImageRoiMean.publish(self.imgRoiMean)
             self.pubImageRoiWings.publish(imgWings)
             self.pubLeftMetric.publish(metricLeft)
-            self.pubLeftMetricMean.publish(3*self.metricMeanLeft)
-            self.pubRightMetric.publish(metricRight)
+            self.pubLeftMetricMean.publish(self.metricWingThreshold*self.metricMeanLeft)
+            self.pubRightMetric.publish(-metricRight)
+            self.pubRightMetricMean.publish(-self.metricWingThreshold*self.metricMeanRight)
             self.pubLeft.publish(angleLeft)
             self.pubRight.publish(angleRight)
 
@@ -678,7 +747,6 @@ class Fly:
             else:
                 angle = angleSensed
             (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = tf.transformations.quaternion_about_axis(angle, (0,0,1))
-
 
             # Get the angular velocities.
             if self.isVisible:
