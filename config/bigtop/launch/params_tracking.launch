@@ -1,16 +1,18 @@
 <launch>
-  <param name="tracking/diff_threshold"             type="double" value="20"/>                  <!-- Adjust this based on light brightness, etc, to get good contours. -->
-  <param name="tracking/dtForecast"                 type="double" value="0.20"/>                <!-- Time to forecast future fly states. -->
-  <param name="tracking/rcBackground"               type="double" value="2500"/>                <!-- Moving average for dynamic background. -->
-  <param name="tracking/rcForeground"               type="double" value="2"/>                   <!-- Moving average for foreground objects (e.g. Fly1/image_mean). -->
-  <param name="tracking/thresholdForeground"        type="double" value="25.0"/>                <!-- Threshold for foreground objects detection. -->
-  <param name="tracking/filenameBackground"         type="string" value="~/background.png"/>    <!-- Location of the initial background image. -->
+  <param name="tracking/diff_threshold"             type="double" value="20"/>                     <!-- Adjust this based on light brightness, etc, to get good contours. -->
+  <param name="tracking/thresholdWings"             type="double" value="20"/>                     <!-- Threshold for foreground objects detection. -->
+  <param name="tracking/thresholdBody"              type="double" value="30"/>                     <!-- Threshold for fly body detection. -->
+  <param name="tracking/dtForecast"                 type="double" value="0.20"/>                   <!-- Time to forecast future fly states. -->
+  <param name="tracking/rcBackground"               type="double" value="2500"/>                   <!-- Moving average for dynamic background. -->
+  <param name="tracking/rcForeground"               type="double" value="2"/>                      <!-- Moving average for foreground objects (e.g. Fly1/image_mean). -->
+  <param name="tracking/scalarFlyMean"              type="double" value="1.2"/>                    <!-- Subtract this multiple of the fly mean image for wing detection. -->
+  <param name="tracking/wingmetric_threshold"       type="double" value="1.5"/>                    <!-- Number of std devs the sum of wing pixels must differ from mean to count as a wing-extension. -->
+  <param name="tracking/filenameBackground"         type="string" value="~/background.png"/>       <!-- Location of the initial background image. -->
   <param name="tracking/speedThresholdForTravel"    type="double" value="5.0"/>
   <param name="tracking/areaContourMin"             type="double" value="3"/>
-  <param name="tracking/roi/height"                 type="int" value="21"/>                     <!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
-  <param name="tracking/roi/width"                  type="int" value="21"/>                     <!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
-  <param name="tracking/wingmetric_threshold"       type="double" value="300"/>                 <!-- Threshold for the wing-extension metric. -->
-  <param name="tracking/lengthBody"                 type="int" value="7"/>                      <!-- Fly body length in pixels. -->
-  <param name="tracking/widthBody"                  type="int" value="3"/>                      <!-- Fly body width in pixels. -->
+  <param name="tracking/roi/height"                 type="int" value="21"/>                        <!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
+  <param name="tracking/roi/width"                  type="int" value="21"/>                        <!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
+  <param name="tracking/lengthBody"                 type="int" value="7"/>                         <!-- Fly body length in pixels. -->
+  <param name="tracking/widthBody"                  type="int" value="3"/>                         <!-- Fly body width in pixels. -->
 
 </launch>
