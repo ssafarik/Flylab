@@ -549,31 +549,31 @@ class Fly:
 
         # Coordinates of body, and wings relative to wing hinge.
         try:
-            xBody  = N.round(momentsRoi['m10']/momentsRoi['m00'])
-            yBody  = N.round(momentsRoi['m01']/momentsRoi['m00'])
+            xBody  = (momentsRoi['m10']/momentsRoi['m00'])
+            yBody  = (momentsRoi['m01']/momentsRoi['m00'])
         except ZeroDivisionError:
-            xBody = N.round(self.widthRoi/2)
-            yBody = N.round(self.heightRoi/2)
+            xBody = (self.widthRoi/2.0)
+            yBody = (self.heightRoi/2.0)
             
         try:
-            xLeftAbs  = N.round(momentsLeft['m10']/momentsLeft['m00'])   # Absolute pixel location.
-            yLeftAbs  = N.round(momentsLeft['m01']/momentsLeft['m00'])
+            xLeftAbs  = (momentsLeft['m10']/momentsLeft['m00'])   # Absolute pixel location.
+            yLeftAbs  = (momentsLeft['m01']/momentsLeft['m00'])
         except ZeroDivisionError:
-            xLeftAbs = N.round(xBody + self.lengthBody/4)
+            xLeftAbs = (xBody + self.lengthBody/4.0)
             yLeftAbs = yBody
             
-        xLeft = xLeftAbs - N.round(xBody + self.lengthBody/4)      # Hinge-relative location.
+        xLeft = xLeftAbs - (xBody + self.lengthBody/4.0)      # Hinge-relative location.
         yLeft = yLeftAbs - yBody
         
             
         try:
-            xRightAbs = N.round(momentsRight['m10']/momentsRight['m00'])   # Absolute pixel location.
-            yRightAbs = N.round(momentsRight['m01']/momentsRight['m00'])
+            xRightAbs = (momentsRight['m10']/momentsRight['m00'])   # Absolute pixel location.
+            yRightAbs = (momentsRight['m01']/momentsRight['m00'])
         except ZeroDivisionError:
-            xRightAbs = N.round(xBody + self.lengthBody/4)
+            xRightAbs = (xBody + self.lengthBody/4)
             yRightAbs = yBody
             
-        xRight = xRightAbs - N.round(xBody + self.lengthBody/4)      # Hinge-relative location.
+        xRight = xRightAbs - (xBody + self.lengthBody/4.0)      # Hinge-relative location.
         yRight = yRightAbs - yBody
         
 
@@ -611,10 +611,10 @@ class Fly:
 
             if self.bNonessentialPublish:
                 if (momentsLeft['m00'] != 0):
-                    npRoiReg[yLeftAbs,   
-                             xLeftAbs] = 255.0      # Set pixel at wing center.
-                    npToUse[yLeftAbs,   
-                            xLeftAbs] = 255.0      # Set pixel at wing center.
+                    x = N.round(xLeftAbs).astype(N.uint8)
+                    y = N.round(yLeftAbs).astype(N.uint8)
+                    npRoiReg[y, x] = 255.0
+                    npToUse[y,x] = 255.0
 
             
         if (N.abs(devRight) < self.metricWingThreshold*self.stdDevRight):
@@ -625,13 +625,13 @@ class Fly:
             if self.bNonessentialPublish:
                 if (momentsRight['m00'] != 0):
                     #rospy.logwarn('% 0.2f, % 0.2f' % (yRightAbs+0,xRightAbs))
-                    npRoiReg[yRightAbs+0.99, 
-                             xRightAbs] = 255.0
-                    npToUse[yRightAbs+0.99, 
-                            xRightAbs] = 255.0
+                    x = N.round(xRightAbs).astype(N.uint8)
+                    y = N.round(yRightAbs).astype(N.uint8)
+                    npRoiReg[y, x] = 255.0
+                    npToUse[y,x] = 255.0
             
-        #npToUse[yBody, xBody] = 255.0      # Set pixel at body center.
-        #npRoiReg[yBody, xBody] = 255.0      # Set pixel at bosy center.
+        #npToUse[N.round(yBody).astype(N.uint8), N.round(xBody).astype(N.uint8)] = 255.0      # Set pixel at body center.
+        #npRoiReg[N.round(yBody).astype(N.uint8), N.round(xBody).astype(N.uint8)] = 255.0      # Set pixel at bosy center.
 
 
         # Nonessential stuff to publish.
