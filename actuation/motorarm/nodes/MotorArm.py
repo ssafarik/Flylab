@@ -699,6 +699,11 @@ class MotorArm:
                 yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
 
                 # Clip to max speed.
+                if (self.stateRef.speed != 0.0):  # If speed is unspecified, then this field is set to 0.0
+                    speedMax = min(self.stateRef.speed, self.speedLinearMax)
+                else:
+                    speedMax = self.speedLinearMax
+                    
                 pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
                 xDot = pt.x
                 yDot = pt.y
