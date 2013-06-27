@@ -1071,8 +1071,13 @@ class Fivebar:
                 xDot += (self.stateVisual.pose.position.x - self.ptEeMech.x)
                 yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
 
-                # Clip to max speed.
-                pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
+                # Clip to max allowed speed.
+                if (self.stateRef.speed != 0.0):  # If speed is unspecified, then this field is set to 0.0
+                    speedMax = min(self.stateRef.speed, self.speedLinearMax)
+                else:
+                    speedMax = self.speedLinearMax
+                    
+                pt = self.ClipPtMag(Point(x=xDot,y=yDot), speedMax)
                 xDot = pt.x
                 yDot = pt.y
                 

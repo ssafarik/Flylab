@@ -91,8 +91,8 @@ class Reset (smach.State):
             self.target.pose.position.y = userdata.experimentparamsIn.trial.robot.home.y
             try:
                 self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
-                                                                            pose=self.target.pose),
-                                                        speed = userdata.experimentparamsIn.trial.robot.home.speed))
+                                                                            pose=self.target.pose,
+                                                                            speed = userdata.experimentparamsIn.trial.robot.home.speed)))
             except rospy.ServiceException, e:
                 stSrv = 'set_stage_state'
                 try:
@@ -383,8 +383,11 @@ class Action (smach.State):
                     if (doMove):
                         try:
                             self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
-                                                                                        pose=self.target.pose),
-                                                                    speed = speedTarget))
+                                                                                        pose=self.target.pose,
+                                                                                        speed = speedTarget # Max allowed speed.
+                                                                                        )
+                                                                    )
+                                               )
                         except rospy.ServiceException, e:
                             stSrv = 'set_stage_state'
                             try:
