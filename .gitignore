@@ -5,6 +5,7 @@ srv_gen/
 *.pyc
 *.metadata
 *.project
+*.pydevproject
 *.cproject
 *.make
 *.cmake
