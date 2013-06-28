@@ -19,10 +19,6 @@ from experiment_srvs.srv import Trigger, ExperimentParams
 
 
 ###############################################################################
-# Save() is a ROS node.  It saves Image messages from a list of topics to image files (.png, .bmp, etc).
-#
-#  At the end of each trial, a video is made.  
-# There should be one video frame per line in the .csv
 #
 class SaveBag:
     def __init__(self):
@@ -191,8 +187,8 @@ class SaveBag:
             topic4 = 'camera/camera_info'
             topic5 = 'camera/image_rect/compressed'
             topic6 = 'tracking/command'
-            topic7 = 'tf'
-            cmdline = ['rosbag','record','-O',self.dirBag+'/'+self.filenameBag, topic1, topic2, topic3, topic4, topic5, topic6, topic7]
+            topic7 = 'end_effector'
+            cmdline = ['rosbag', 'record','-O', self.dirBag+'/'+self.filenameBag, topic1, topic2, topic3, topic4, topic5, topic6, topic7]
             self.processRosbag = subprocess.Popen(cmdline)
 
     

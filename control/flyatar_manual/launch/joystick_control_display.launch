@@ -1,9 +1,0 @@
-<launch>
-  <param name="robot_visible" type="boolean" value="true"/>
-  <param name="robot_velocity_max" type="double" value="60"/>
-  <include file="$(find joystick_commands)/launch/joystick_commands.launch" />
-  <include file="$(find stage_message_interface)/launch/stage_message_interface.launch" />
-  <node pkg="flyatar_manual" type="JoystickControl.py" name="JoystickControl" />
-  <include file="$(find image_gui)/launch/DisplayDraw.launch" />
-  <node pkg="save_data" type="SaveBags.py" name="SaveBags" />
-</launch>

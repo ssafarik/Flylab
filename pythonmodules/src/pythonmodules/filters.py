@@ -50,19 +50,13 @@ class LowPassHalfCircleFilter:
         self.RC = RC
         self.t = None
         self.zf = None
-        self.zfPrev = None
 
         
-    def GetValuePrev(self):
-        return self.zfPrev
-
-
     def GetValue(self):
         return self.zf
 
 
     def SetValue(self, z):
-        self.zfPrev = self.zf
         self.zf = z
 
 
@@ -73,21 +67,19 @@ class LowPassHalfCircleFilter:
         if (self.zf is not None) and (self.t is not None): 
             if (z is not None) and (t is not None):
                 zUnwrapped = CircleFunctions.UnwrapHalfCircle(z, self.zf)
-                    
+                
                 dt = t - self.t
                 alpha = dt/(self.RC + dt)
-                zf = alpha*zUnwrapped + (1 - alpha)*self.zf
+                self.zf = (1.0 - alpha)*self.zf + alpha*zUnwrapped
             else: # Initialized, but no measurement.
-                zf = self.zf
+                pass
         else: # Not initialized, but have a measurement.
-            zf = z
+            self.zf = z
 
 
-        self.zfPrev = self.zf
         self.t = t
-        self.zf = zf
 
-        return zf
+        return self.zf
 
 
 # Filter an angle, with unwrapping by 2*pi.
@@ -121,17 +113,16 @@ class LowPassCircleFilter:
                     
                 dt = t - self.t
                 alpha = dt/(self.RC + dt)
-                zf = alpha*z + (1 - alpha)*self.zf
+                self.zf = (1 - alpha)*self.zf + alpha*z
             else: # Initialized, but no measurement.
-                zf = self.zf
+                pass
         else: # Not initialized, but have a measurement.
-            zf = z
+            self.zf = z
 
 
         self.t = t
-        self.zf = zf
 
-        return zf
+        return self.zf
 
 
 class LowPassFilter:

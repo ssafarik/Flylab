@@ -606,8 +606,7 @@ class PatternGenXY:
                 #rospy.logwarn('iPoint=%d/%d, speed=% 4.1f, x=% 4.1f' % (self.iPoint, len(self.pattern1.points), speed, pts.point.x))
                 state=MsgFrameState(header=pts.header,
                                     pose=Pose(position=pts.point),
-                                    velocity=velocity,
-                                    speed=speed)
+                                    velocity=velocity)#
                 resp = self.SignalOutput (state)
                 bSuccess = resp.success
                 if (not bSuccess):

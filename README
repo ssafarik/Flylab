@@ -2,75 +2,46 @@ Flylab Software
 -------------------------------------
 
 This software is the central framework for many experiments & hardware 
-platforms in the Dickinson Lab at the UW.  
+platforms in the Dickinson Lab.  
 
-It provides a platform for virtual reality environments that consist of some 
-combination of realtime multifly tracking, mechanical actuators to simulate 
-robot/fly interactions, laser-galvo steering, realtime multifly tracking & 
-visual servoing, an experiment library & examples thereof, data-logging of 
-fly & robot states, and other related pieces.
+Flylab provides a platform for experiments involving Drosophila walking in
+virtual environments that consist of some combination of realtime multifly 
+tracking, closed-loop (visual servoing) interaction with mechanical fly-sized 
+robots, closed-loop laser-galvo steering to stimulate flies dynamically and
+remotely, closed-loop interaction with LED display panels (q.v. M. Reiser), 
+a fairly versatile architecture to conduct a wide range of experiments with 
+minimal programming on the part of the researcher, data-logging of fly & robot 
+states, and a number of other related pieces.
 
-A focus has been to enable easy operation across multiple machines and multiple 
-experimental hardware platforms, and as such each piece of experimental hardware 
-has a directory in the "config" package.  There you will find all the relevant
-parameters, etc, needed for the software to operate on a given piece of hardware.  
-To have the software use a given piece of hardware, simply point 
-config/config/launch/hardware.launch to the name of your hardware.  Calibration 
-and setup instructions are in the file calibration.txt.
+An effort has been to enable easy operation across multiple machines and multiple 
+experimental hardware platforms, and as such each experimental "rig" has a 
+directory in the "config" package to describe that hardware.  There you will 
+find the relevant parameters needed for Flylab to operate on the given rig.  
+To have Flylab use a given rig, simply point config/config/launch/hardware.launch 
+to the appropriate name.  A given experiment can run on any rig (up to the 
+rig's capabilities), and a given rig can run any experiment.
 
-In the "experiments" package there is a set of experiments, and an experiment library.  
-An experiment runs as a "state machine", and the specific parameters are 
-specified by filling out a data structure in the appropriate <experimentname>.py 
-file, and then roslaunch'ing the appropriate .launch file.  The experiments 
-library has been written with the intention that a wide variety of experiments 
-are possible via this data structure.  During operation, you may view the state
-machine graph of the experiment with the following command:
-rosrun smach_viewer smach_viewer.py
+Calibration and setup instructions are in the file calibration.txt.
+
+In the "experiments" package there is a set of experiments with an experiments 
+library.  An experiment is started via the <experimentname>.launch file, and it
+starts all of the other needed Flylab components.  Internally an experiment 
+runs as a state machine, and each specific experiment is distinguished by a set of 
+parameters in the appropriate <experimentname>.py file.  The available parameters
+allow one to conduct a wide variety of experiments.  
+
+During operation, you may view the state machine graph of the experiment with 
+the following command:  rosrun smach_viewer smach_viewer.py
+
 
 
 Some useful commands:
 -----------------------
-roslaunch experiments <experimentname>.launch					           # Run an experiment.
-rostopic pub -1 experiment/command std_msgs/String pause                   # Pause the experiment at the start of the next trial.
-rostopic pub -1 experiment/command std_msgs/String continue                # Continue a paused experiment.
-rostopic pub -1 experiment/command std_msgs/String exit                    # Terminate the experiment at the start of the next trial.
-rostopic pub -1 experiment/command std_msgs/String stage/calibrate         # Rerun the motor calibration routine at the start of the next trial.
+roslaunch experiments <experimentname>.launch                   # Run an experiment.
 
-rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand all_on 0 0 0 0
-rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand all_off 0 0 0 0
-rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand set_pattern_id 1 0 0 0    # Set pattern #1 on the panels.  Assumes they're already programmed, etc.
-rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand set_gain_offset 1 2 3 4   # Set the xgain, xoffset, ygain, yoffset.
-# (panel commands take 0 to 4 parameters, but the rostopic command needs to see all four, hence the above have all four numbers, e.g. "0 0 0 0", even if they take fewer params).
-# All the various commands are supported.  See LEDPanels/nodes/panels.py for a list.
-
-
-
-roslaunch <your device name> camera.launch						# Run the camera; publish image_raw.
-ROS_NAMESPACE=camera rosrun image_proc image_proc				# Run the image processor; publish image_rect.
-roslaunch tracking tracking.launch								# Run the image tracking system; publish image_processed.
-
-rosrun image_view image_view image:=camera/image_raw			# Open a window for image_raw.
-rosrun image_view image_view image:=camera/image_rect			# Open a window for image_rect.
-rosrun image_view image_view image:=camera/image_processed		# Open a window for image_processed.
-rosrun dynamic_reconfigure reconfigure_gui camera				# Open a window to change camera settings.
-
-roslaunch config hardware.launch								# Load the currently configured hardware.
-
-roslaunch patterngen PatternGenXY.py							# Run the 2D pattern generator.
-rostopic pub -1 PatternGen patterngen/MsgPattern -- \           # Send a command to the pattern generator:
-													   mode \      # <byshape | bypoints > 
-													   shape \     # <constant | ramp | circle | square | flylogo | spiral> 
-													   frame \     # the reference frame for the pattern. 
-													   hzPattern \ # patterns per second.
-													   hzPoint \   # points per second of the pattern.
-													   count \     # total number of patterns to output, -1 means forever.
-													   pointlist \ # [...] a list of points.
-													   radius      # max distance from origin.
-													   preempt     # whether or not to interrupt the current pattern, <True|False>
-rostopic pub -1 PatternGen patterngen/MsgPattern "byshape" "circle" "Stage" 0.25 50 1 [] 40 True  # For example.
-
-rxgraph															# Show the graph of ROS nodes.
-rxconsole														# Show ROS messages, logs, etc.
+rosrun image_view image_view image:=camera/image_rect &         # Open a window for image_rect.
+rosrun dynamic_reconfigure reconfigure_gui &                    # Open a window to change camera settings.
 rosrun smach_viewer smach_viewer.py								# Show the state machine graph.
+rxconsole														# Show ROS messages, logs, etc.
 
 

@@ -116,36 +116,29 @@ class MotorArm:
         # Load joint1 services.
         # Wait for joint 1 to launch.
         stSrv = 'srvCalibrate_' + self.names[0]
-        rospy.wait_for_service(stSrv)
         try:
+            rospy.wait_for_service(stSrv)
             self.Calibrate_joint1 = rospy.ServiceProxy(stSrv, SrvCalibrate)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
 
         stSrv = 'srvGetState_' + self.names[0]
-        rospy.wait_for_service(stSrv)
         try:
-            self.GetState_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
-        except (rospy.ServiceException, IOError), e:
-            rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
-
-        stSrv = 'srvSetPositionAtVel_' + self.names[0]
-        rospy.wait_for_service(stSrv)
-        try:
-            self.SetPositionAtVel_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
+            rospy.wait_for_service(stSrv)
+            self.GetState_joint1 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
 
         stSrv = 'srvSetVelocity_' + self.names[0]
-        rospy.wait_for_service(stSrv)
         try:
-            self.SetVelocity_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
+            rospy.wait_for_service(stSrv)
+            self.SetVelocity_joint1 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
 
         stSrv = 'srvPark_' + self.names[0]
-        rospy.wait_for_service(stSrv)
         try:
+            rospy.wait_for_service(stSrv)
             self.Park_joint1 = rospy.ServiceProxy(stSrv, SrvJointState)
         except (rospy.ServiceException, IOError), e:
             rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
@@ -493,9 +486,13 @@ class MotorArm:
             with self.lock:
                 try:
                     self.jointstate1 = self.GetState_joint1()
-                except (rospy.ServiceException, IOError), e:
-                    rospy.logwarn ('MA FAILED %s' % e)
-                    self.jointstate1 = None
+                except rospy.ServiceException, e:
+                    stSrv = 'srvGetState_' + self.names[0]
+                    try:
+                        rospy.wait_for_service(stSrv, timeout=5)
+                        self.GetState_joint1 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
+                    except rospy.ServiceException, e:
+                        rospy.logwarn ('MA FAILED to reconnect service %s(): %s' % (stSrv, e))
             
             if (self.jointstate1 is not None):                 
                 (angle1, self.ptEeMech.x, self.ptEeMech.y) = self.Get1xyFrom1(self.jointstate1.position)
@@ -702,6 +699,11 @@ class MotorArm:
                 yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
 
                 # Clip to max speed.
+                if (self.stateRef.speed != 0.0):  # If speed is unspecified, then this field is set to 0.0
+                    speedMax = min(self.stateRef.speed, self.speedLinearMax)
+                else:
+                    speedMax = self.speedLinearMax
+                    
                 pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
                 xDot = pt.x
                 yDot = pt.y
@@ -824,8 +826,13 @@ class MotorArm:
                 with self.lock:
                     try:
                         self.SetVelocity_joint1(Header(frame_id=self.names[0]), None, theta1Dot)
-                    except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
-                        rospy.logwarn ("MA Exception:  %s" % e)
+                    except rospy.ServiceException, e:
+                        stSrv = 'srvSetVelocity_' + self.names[0]
+                        try:
+                            rospy.wait_for_service(stSrv, timeout=5)
+                            self.SetVelocity_joint1 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
+                        except rospy.ServiceException, e:
+                            rospy.logwarn ('MA FAILED to reconnect service %s(): %s' % (stSrv, e))
 
         
     def OnShutdown_callback(self):

@@ -32,9 +32,9 @@ def DistanceCircle(angle2, angle1):
 # meaning that the arrow can be pointing either way.  Cannot be further than pi/2 apart.
 #
 def DistanceHalfCircle(angle2, angle1):
-    angle1b = angle1 % (2.0*N.pi)   # The angle1 is good on 2pi.
-    angle2b = angle2 % (N.pi)       # The angle2 might be off by pi.
-    angle2c = angle2b + N.pi
+    angle1b = angle1 % (2.0*N.pi)   # angle1 is good on 2pi.
+    angle2b = angle2 % (N.pi)       # angle2b on range [0,pi)
+    angle2c = angle2b + N.pi        # angle2c on range [pi,2pi)
     
     distb = angle2b - angle1b
     distc = angle2c - angle1b
@@ -78,7 +78,7 @@ def DistanceHalfCircle(angle2, angle1):
 def UnwrapCircle(angle, anglePrev):
     if (angle is not None):
         if (anglePrev is not None):
-            delta = DistanceCircle(anglePrev,angle)
+            delta = DistanceCircle(angle, anglePrev)
             angleUnwrapped = anglePrev + delta
         else:
             angleUnwrapped = angle
