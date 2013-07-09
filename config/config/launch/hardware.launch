@@ -7,6 +7,6 @@
     <!-- .launch file from here.                                    -->
     <!-- ========================================================== -->
     
-    <include file="$(find colosseum)/launch/main.launch" />
+    <include file="$(find racetrack)/launch/main.launch" />
      
 </launch>
