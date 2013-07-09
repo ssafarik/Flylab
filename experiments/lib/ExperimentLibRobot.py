@@ -324,7 +324,6 @@ class Action (smach.State):
                 if (self.ptTarget is None):                                 # Get a random angle once per move.
                     angleBase = 2.0*N.pi * N.random.random()
                     angleRel = 0.0
-                    angle = (angleBase + angleRel + angleSpeed) % (2.0*N.pi)
                 # else we already computed the angle.
                     
             elif (self.paramsIn.robot.move.relative.angleType=='constant'):
