@@ -19,7 +19,7 @@
   <param name="camera/mask/y" type="double" value="247"/>
   <param name="camera/mask/radius" type="double" value="243"/>  <!-- pixels -->
 
-  <param name="calibration/checker_size" type="double" value="15.0" />
+  <param name="calibration/checker_size" type="double" value="14.0" />
 
 
 

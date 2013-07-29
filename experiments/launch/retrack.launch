@@ -36,7 +36,16 @@
     <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" />
 
     <include file="$(find flappy)/launch/input_bag.launch" >
-        <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130619123409.bag" />
+        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130618125239.bag" /> -->
+        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130618133754.bag" /> -->
+        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130619123409.bag" /> -->
+        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130619130356.bag" /> -->
+        
+         <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130712105024.bag" /> 
+        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130712115025.bag" /> --> 
+        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130712125027.bag" /> --> 
+        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130712135028.bag" /> -->
+
     </include> 
         
     
