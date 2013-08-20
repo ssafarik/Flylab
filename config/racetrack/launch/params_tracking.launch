@@ -1,5 +1,5 @@
 <launch>
-  <param name="tracking/diff_threshold"             type="double" value="25"/>                     <!-- Adjust this based on light brightness, etc, to get good contours. -->
+  <param name="tracking/diff_threshold"             type="double" value="33"/>                     <!-- Adjust this based on light brightness, etc, to get good contours. -->
   <param name="tracking/dtForecast"                 type="double" value="0.20"/>                   <!-- Time to forecast future fly states. -->
   <param name="tracking/rcBackground"               type="double" value="2500"/>                   <!-- Moving average for dynamic background. -->
   <param name="tracking/rcForeground"               type="double" value="2"/>                      <!-- Moving average for foreground objects (e.g. Fly1/image_mean). -->
