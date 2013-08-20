@@ -67,6 +67,8 @@ class Fly:
             self.pubRightMetricMean  = rospy.Publisher(self.name+'/rightmetricmean', Float32)
             self.pubRight           = rospy.Publisher(self.name+'/right', Float32)
             self.pubImageSuper      = rospy.Publisher(self.name+'/image_super', Image)
+            self.pubImageSuperCount = rospy.Publisher(self.name+'/image_supercount', Image)
+            self.pubImageSuperGrad = rospy.Publisher(self.name+'/image_supergrad', Image)
         
         with self.lock:
             rcFilterAngle                = rospy.get_param('tracking/rcFilterAngle', 0.1)
@@ -169,9 +171,9 @@ class Fly:
         if self.bNonessentialCalcSuper:
             self.heightSuper = 16*self.heightRoi # The resolution increase for super-res.
             self.widthSuper = 16*self.widthRoi
-            self.npfSuper      = N.zeros([self.heightSuper, self.widthSuper]) 
-            self.npfSuperSum   = N.zeros([self.heightSuper, self.widthSuper]) 
-            self.npfSuperCount = N.zeros([self.heightSuper, self.widthSuper]) 
+            self.npfSuper      = N.zeros([self.heightSuper, self.widthSuper], dtype=N.float) 
+            self.npfSuperSum   = N.zeros([self.heightSuper, self.widthSuper], dtype=N.float) 
+            self.npfSuperCount = N.zeros([self.heightSuper, self.widthSuper], dtype=N.float) 
         
         
         
@@ -383,7 +385,7 @@ class Fly:
             self.npMaskWings = 255*N.ones([self.heightRoi, self.widthRoi], dtype=N.uint8)
             
         elif (q==3):    # Only use the left pixels.
-            w1 = int(6*self.widthRoi/10)     # Width of left side.
+            w1 = int(6.0*float(self.widthRoi)/10.0)     # Width of left side.
             w2 = int(self.widthRoi) - w1     # Width of right side.
             self.npMaskWings = 255*N.hstack([N.ones([self.heightRoi, w1], dtype=N.uint8),
                                              N.zeros([self.heightRoi, w2], dtype=N.uint8)])
@@ -420,9 +422,9 @@ class Fly:
                 
                 # Rotate the fly image to 0-degrees, and the size of the super image.
                 angleR = self.GetResolvedAngleFiltered()
-                scale = self.widthSuper/npRoi.shape[1]
-                x2Center = self.widthSuper/2
-                y2Center = self.heightSuper/2
+                scale = float(self.widthSuper)/float(npRoi.shape[1])
+                x2Center = float(self.widthSuper)/2.0
+                y2Center = float(self.heightSuper)/2.0
                 
                 # The transform for ROI rotation & scale.
                 T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, scale)
@@ -431,8 +433,8 @@ class Fly:
                 T1 = N.array(L)
                 
                 # The transform to the center of the super image.
-                Ttrans = N.array([[1, 0, x2Center-self.widthRoi/2.0],
-                                  [0, 1, y2Center-self.heightRoi/2.0],
+                Ttrans = N.array([[1, 0, x2Center-float(self.widthRoi)/2.0],
+                                  [0, 1, y2Center-float(self.heightRoi)/2.0],
                                   [0, 0, 1],
                                   ], dtype=N.float)
                 
@@ -445,12 +447,12 @@ class Fly:
                 
                 if (method=='sample_perpixelaveraging'):
                     # This method only updates those few pixels in the ROI, and averages the super pixels on a per pixel basis.
-                    npfSuperNow = N.zeros([self.heightSuper, self.widthSuper]) 
+                    npfSuperNow = N.zeros([self.heightSuper, self.widthSuper], dtype=N.float) 
                     for x in range(npRoi.shape[1]):
                         for y in range(npRoi.shape[0]):
                             (x2,y2,z2) = N.dot(T2, N.array([x, y, 1],dtype=float))
-                            if (0<=x2<self.widthSuper) and (0<=y2<self.heightSuper): 
-                                self.npfSuperCount[int(y2),int(x2)] += 1
+                            if (0.0<=x2<float(self.widthSuper)) and (0.0<=y2<float(self.heightSuper)): 
+                                self.npfSuperCount[int(y2),int(x2)] += 1.0
                                 self.npfSuperSum[int(y2),int(x2)] += npRoi[y,x]
                                 
                     self.npfSuper = self.npfSuperSum / self.npfSuperCount
@@ -458,7 +460,7 @@ class Fly:
                                 
                 elif (method=='sample_wholeimageaveraging'):
                     # This method only updates those few pixels in the ROI, and does a moving average of the whole super image.
-                    npfSuperNow = N.zeros([self.heightSuper, self.widthSuper]) 
+                    npfSuperNow = N.zeros([self.heightSuper, self.widthSuper], dtype=N.float) 
                     for x in range(npRoi.shape[1]):
                         for y in range(npRoi.shape[0]):
                             (x2,y2,z2) = N.dot(T2, N.array([x, y, 1],dtype=float))
@@ -481,15 +483,20 @@ class Fly:
                 if self.bNonessentialPublish:
                     imgSuper  = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8(self.npfSuper)), 'passthrough')
                     self.pubImageSuper.publish(imgSuper)
+                    
+                    imgSuperCount  = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8((self.npfSuperCount/N.max(self.npfSuperCount))*255.0)), 'passthrough')
+                    self.pubImageSuperCount.publish(imgSuperCount)
 
+#                     (mask, npfGradient) = cv2.calcMotionGradient(self.npfSuper, 0.1, 255.0)
+#                     imgSuperGrad  = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.uint8(npfGradient/360.0*255.0)), 'passthrough')
+#                     self.pubImageSuperGrad.publish(imgSuperGrad)
         
         
     # Rotate the image to 0 degrees.                    
-    def RegisterImageRoi(self, npRoi):
+    def RegisterImageRoi(self, npRoi, moments):
         npRoiReg = npRoi
 
         # Center of mass.
-        moments = cv2.moments(npRoi)
         if (moments['m00'] != 0.0):
             xCOM  = moments['m10']/moments['m00']
             yCOM  = moments['m01']/moments['m00']
@@ -499,8 +506,18 @@ class Fly:
             T = cv2.getRotationMatrix2D((xCOM,yCOM), -angleR*180.0/N.pi, 1.0)
             npRoiReg = cv2.warpAffine(npRoi, T, (0,0))
         
-            # Super-resolution fly image.
-            self.UpdateFlySuperresolution(npRoi, moments)
+        
+        # Correct for centering error after the transformation.
+        momentsRoiReg = cv2.moments(npRoiReg)
+        if (momentsRoiReg['m00'] != 0.0):
+            xCOM  = momentsRoiReg['m10']/momentsRoiReg['m00']
+            yCOM  = momentsRoiReg['m01']/momentsRoiReg['m00']
+            
+            # Rotate the fly image to 0-degrees.
+            T = N.array([[1, 0, float(self.widthRoi)/2.0-xCOM],
+                         [0, 1, float(self.heightRoi)/2.0-yCOM]], dtype=float)
+            npRoiReg = cv2.warpAffine(npRoiReg, T, (0,0))
+
             
         return npRoiReg
         
@@ -516,12 +533,15 @@ class Fly:
 
         npRoiIn = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, "passthrough")))
         npRoi = cv2.bitwise_and(npRoiIn, self.npMaskCircle)
-        npRoiReg = self.RegisterImageRoi(npRoi)
+        
+        moments = cv2.moments(npRoi)
 
-        # Update the wing mask.
+        npRoiReg = self.RegisterImageRoi(npRoi, moments)
+        
+
+        # Update various images.
+        self.UpdateFlySuperresolution(npRoi, moments)
         self.UpdateWingMask(self.npfRoiMean)
-
-        # Moving-Average fly image.
         self.UpdateFlyMean(npRoiReg)
 
         
@@ -537,23 +557,23 @@ class Fly:
         npWings = cv2.bitwise_and(npWings, self.npMaskWings)
                         
         # Create images with only pixels of left wing (i.e. image top) or right wing (i.e. image bottom).
-        npWingLeft   = N.vstack((npWings[:self.heightRoi/2, :],
-                                 N.zeros([self.heightRoi/2+1, self.widthRoi])))
-        npWingRight  = N.vstack((N.zeros([self.heightRoi/2+1, self.widthRoi]), 
-                                 npWings[(self.heightRoi/2+1):, :]))
+        npWingLeft   = N.vstack((npWings[:float(self.heightRoi)/2.0, :],
+                                 N.zeros([float(self.heightRoi)/2.0+1.0, self.widthRoi],dtype=N.uint8)))
+        npWingRight  = N.vstack((N.zeros([float(self.heightRoi)/2.0+1.0, self.widthRoi],dtype=N.uint8), 
+                                 npWings[(float(self.heightRoi)/2.0+1.0):, :]))
         
         # Wing moments.
-        momentsRoi = cv2.moments(npRoiReg)
+        momentsRoiReg = cv2.moments(npRoiReg)
         momentsLeft  = cv2.moments(npWingLeft)
         momentsRight = cv2.moments(npWingRight)
 
         # Coordinates of body, and wings relative to wing hinge.
         try:
-            xBody  = (momentsRoi['m10']/momentsRoi['m00'])
-            yBody  = (momentsRoi['m01']/momentsRoi['m00'])
+            xBody  = (momentsRoiReg['m10']/momentsRoiReg['m00'])
+            yBody  = (momentsRoiReg['m01']/momentsRoiReg['m00'])
         except ZeroDivisionError:
-            xBody = (self.widthRoi/2.0)
-            yBody = (self.heightRoi/2.0)
+            xBody = float(self.widthRoi)/2.0
+            yBody = float(self.heightRoi)/2.0
             
         try:
             xLeftAbs  = (momentsLeft['m10']/momentsLeft['m00'])   # Absolute pixel location.
@@ -633,7 +653,6 @@ class Fly:
         #npToUse[N.round(yBody).astype(N.uint8), N.round(xBody).astype(N.uint8)] = 255.0      # Set pixel at body center.
         #npRoiReg[N.round(yBody).astype(N.uint8), N.round(xBody).astype(N.uint8)] = 255.0      # Set pixel at bosy center.
 
-
         # Nonessential stuff to publish.
         if self.bNonessentialPublish:
             self.imgRoiReg  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npRoiReg), 'passthrough') 
@@ -657,7 +676,7 @@ class Fly:
     
     
     # Update()
-    # Update the current state using the visual position and the computed position (if applicable)
+    # Update the fly:  current state using the visual position and the computed position (if applicable), mean fly, superres, etc.
     def Update(self, contourinfo, posesComputedExternal):
         if self.initialized:
             self.contourinfo = contourinfo

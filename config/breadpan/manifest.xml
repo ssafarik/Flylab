@@ -1,0 +1,14 @@
+<package>
+  <description brief="breadpan">
+
+     breadpan
+
+  </description>
+  <author>IK</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/breadpan</url>
+
+</package>
+
+
