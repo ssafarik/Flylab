@@ -55,7 +55,7 @@ class Experiment():
         self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
         self.experimentparams.pre.trigger.angleTestBilateral = True
-        self.experimentparams.pre.trigger.timeHold = 0.0
+        self.experimentparams.pre.trigger.timeHold = 0.02
         self.experimentparams.pre.trigger.timeout = -1
         self.experimentparams.pre.wait2 = 0.0
         
@@ -72,7 +72,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.angleOffset = N.pi    # Radians from origin to target.
         self.experimentparams.trial.robot.move.relative.angleOscMag = 0#N.pi/2  # Radian magnitude of the added oscillation.
         self.experimentparams.trial.robot.move.relative.angleOscFreq = 1.0    # Hz of the added oscillation.
-        self.experimentparams.trial.robot.move.relative.speed = 10 #5.2
+        self.experimentparams.trial.robot.move.relative.speed = 100 #5.2
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
         self.experimentparams.trial.robot.home.enabled = False
@@ -110,7 +110,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 120
+        self.experimentparams.post.trigger.timeout = 600
 
         self.experimentparams.post.wait = 0.0
         

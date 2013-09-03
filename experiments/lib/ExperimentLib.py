@@ -888,7 +888,7 @@ class ExperimentLib():
     # Gets called after all 'reset' states are terminated.
     # If any states aborted, then abort.
     def AllResetTerm_callback(self, outcome_map):
-        #rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
+        rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
         rv = 'success'
         for (name,classHardware) in self.actions_dict.iteritems():
             if (name in outcome_map):
