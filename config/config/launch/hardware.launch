@@ -7,6 +7,10 @@
     <!-- .launch file from here.                                    -->
     <!-- ========================================================== -->
     
+<<<<<<< HEAD
     <include file="$(find colosseum)/launch/main.launch" />
+=======
+    <include file="$(find cookiecutter)/launch/main.launch" />
+>>>>>>> 970cd82d24322e1a84d743ab5b0996bd8b6ab267
      
 </launch>

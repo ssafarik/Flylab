@@ -1,16 +1,16 @@
 <launch>
 
 	<!-- ========================================================== -->
-	<!-- Configuration of the camera attached to the racetrack.     -->
+	<!-- Configuration of the camera attached to the BREADPAN.      -->
     <!-- Don't launch this file directly.                           -->
-    <!-- Launch the racetrack.launch file, and point here          -->
+    <!-- Launch the cookiecutter.launch file, and point here        -->
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
     <param name="camera/image_rect/compressed/format" type="string" value="png" />
-	<include file="$(find racetrack)/launch/params_camera.launch" ns="camera" />
-	
-	<node name="camera"     pkg="camera_aravis" type="camnode"    />
+	<include file="$(find breadpan)/launch/params_camera_tracking.launch" ns="camera" />
+
+	<node name="camera"     pkg="camera_aravis" type="camnode" />
 	<node name="image_proc" pkg="image_proc"    type="image_proc" ns="camera" />
   
 </launch>

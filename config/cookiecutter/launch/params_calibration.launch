@@ -1,0 +1,36 @@
+<launch>
+  <!-- =================================================================== -->
+  <!-- Calibration for the COOKIECUTTER.                                   -->
+  <!-- =================================================================== -->
+
+  <!-- =================================================================== -->
+  <!-- Arena-Camera transform.                                             -->
+  <!--                                                                     -->
+  <!-- "roslaunch calibration CameraArena.launch"                          -->
+  <!--                                                                     -->
+  <!-- Use the following command to move the center and radius of the      -->
+  <!-- circle to correspond to the arena:                                  -->
+  <!-- rostopic pub -1 Joystick/Commands geometry_msgs/Point @@ dx dy dr   -->
+  <!-- (where dx,dy,dr are replaced with numbers, and the @'s are hyphens) -->
+  <!-- =================================================================== -->
+  
+  <!-- The mask circle in camera coordinates (i.e. pixels).    -->
+  <param name="camera/mask/x" type="double" value="318"/>
+  <param name="camera/mask/y" type="double" value="251"/>
+  <param name="camera/mask/radius" type="double" value="240"/>  <!-- pixels -->
+
+  <param name="calibration/checker_size" type="double" value="14.0" />
+
+
+
+  <!-- These values come from CameraArena.launch, with a checkerboard on the arena. They might need fiddling with after use. -->
+  <param name="camera/arena_rvec_0" type="double" value="-3.140"/>
+  <param name="camera/arena_rvec_1" type="double" value="-0.000"/>
+  <param name="camera/arena_rvec_2" type="double" value="0.021"/>
+  <param name="camera/arena_tvec_0" type="double" value="4.116"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera/arena_tvec_1" type="double" value="1.024"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera/arena_tvec_2" type="double" value="326.940"/>
+  
+
+</launch>
+
