@@ -530,6 +530,9 @@ class ContourGenerator:
             #rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
             #self.timePrev = rospy.Time.now().to_sec()
             
+            if not self.initConstructor:
+                return
+    
             if (self.stampPrev is not None):
                 self.dt = image.header.stamp - self.stampPrev
             else:
@@ -537,9 +540,6 @@ class ContourGenerator:
                 
             self.stampPrev = image.header.stamp
             
-    
-            if not self.initConstructor:
-                return
     
             self.header = image.header
             self.height = image.height
