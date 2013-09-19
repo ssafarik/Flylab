@@ -23,7 +23,7 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Laser tracks all flies for 30min"
+        self.experimentparams.experiment.description = "See how long the fly lives with Laser (200mW)"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
@@ -33,6 +33,14 @@ class Experiment():
         self.experimentparams.save.mov = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
+        
+        self.experimentparams.robotspec.nRobots = 0
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
@@ -69,13 +77,13 @@ class Experiment():
         self.experimentparams.trial.robot.enabled = False
         
         
-        mode='fixedpointlist'    # Laser to specific locations.
+        #mode='fixedpointlist'    # Laser to specific locations.
         #mode='fixedcircle'
         #mode='fixedgrid' 
-        #mode='trackgrid'        # Small grid tracks flies.
+        mode='trackgrid'        # Small grid tracks flies.
         #mode='tracknumber'      # Draw a numeral on flies.
         #mode='trackflylogo'
-        flies_list = range(1,1+rospy.get_param('nFlies', 0))
+        flies_list = range(1,1+self.experimentparams.flyspec.nFlies)
         
         
         self.experimentparams.trial.lasergalvos.enabled = True
@@ -146,8 +154,8 @@ class Experiment():
                                                                                 size       = Point(x=2,
                                                                                                    y=2),
                                                                                 preempt    = False,
-                                                                                param      = 3,
-                                                                                direction  = 1), # Peano curve level.
+                                                                                param      = 3, # Peano curve level.
+                                                                                direction  = 1),
                                                                      )
         if mode=='tracknumber':
             for iFly in flies_list:

@@ -32,6 +32,14 @@ class ExperimentOpenTrigger():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
+        self.experimentparams.robotspec.nRobots = 0
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]

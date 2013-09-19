@@ -34,6 +34,14 @@ class Experiment():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False # Saves always.
         
+        self.experimentparams.robotspec.nRobots = 0
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
@@ -73,7 +81,7 @@ class Experiment():
         self.experimentparams.trial.lasergalvos.statefilterLo_list = []
         self.experimentparams.trial.lasergalvos.statefilterHi_list = []
         self.experimentparams.trial.lasergalvos.statefilterCriteria_list = []
-        for iFly in range(2):#rospy.get_param('nFlies', 0)):
+        for iFly in range(2):#self.experimentparams.flyspec.nFlies):
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                             frameidPosition   = 'Fly%dForecast' % (iFly+1),
                                                                             frameidAngle   = 'Fly%dForecast' % (iFly+1),

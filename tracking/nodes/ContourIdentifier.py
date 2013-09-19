@@ -55,8 +55,8 @@ class ContourIdentifier:
     def __init__(self):
         self.initialized = False
         self.stateEndEffector = None  # If no robot exists, this will remain as None.  Set in ContourinfoLists_callback.
-        self.nFlies = rospy.get_param('nFlies', 0)
-        self.nRobots = rospy.get_param('nRobots', 0)
+        self.nRobots = 0
+        self.nFlies = 0
         
         self.contourinfo_list = []
         self.mapContourinfoFromObject = []      # A mapping from the (kalman) object number to the contourinfo number.
@@ -179,7 +179,7 @@ class ContourIdentifier:
     #
     def TrackingCommand_callback(self, trackingcommand):
         with self.lock:
-            if trackingcommand.command=='setexclusionzones':
+            if trackingcommand.command=='initialize':
                 self.enabledExclusionzone = trackingcommand.exclusionzones.enabled
                 self.pointExclusionzone_list = trackingcommand.exclusionzones.point_list
                 self.radiusExclusionzone_list = trackingcommand.exclusionzones.radius_list
@@ -209,6 +209,8 @@ class ContourIdentifier:
                                                                                     b=1.0),
                                                                     lifetime=rospy.Duration(1.0))
                                                              )
+                self.nRobots = trackingcommand.nRobots
+                self.nFlies = trackingcommand.nFlies
                 self.ResetFlyObjects()
             
 

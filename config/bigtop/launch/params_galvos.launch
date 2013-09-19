@@ -16,7 +16,7 @@
 
     
 
-    <!--  May be improved with a spherical adjustment like:  yv = my * ym .* sin(ym*(pi/180)/33.33) + by - ym/20.4 + 0.1 -->  
+    <!-- Least Squares for y = a3*x**3 + a2*x**2 + a1*x + a0.  Millimeters to Volts: -->
     <param name="galvodirector/a3" type="double" value="-1.26487e-07" />
     <param name="galvodirector/a2" type="double" value="1.42924e-06" />
     <param name="galvodirector/a1" type="double" value="0.0528306" />
@@ -25,6 +25,8 @@
     <param name="galvodirector/b2" type="double" value="-8.91973e-06" />
     <param name="galvodirector/b1" type="double" value="-0.0529175" />
     <param name="galvodirector/b0" type="double" value="3.60264" />
+    
+    <!-- Least Squares for y = a3i*x**3 + a2i*x**2 + a1i*x + a0i.  Volts to Millimeters: -->
     <param name="galvodirector/a3i" type="double" value="0.0144464" />
     <param name="galvodirector/a2i" type="double" value="0.00490769" />
     <param name="galvodirector/a1i" type="double" value="18.9315" />

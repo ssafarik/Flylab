@@ -34,6 +34,14 @@ class Experiment():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         
+        self.experimentparams.robotspec.nRobots = 0
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0]
@@ -75,7 +83,7 @@ class Experiment():
         #mode='trackgrid'        # Small grid tracks flies.
         mode='tracknumber'      # Draw a numeral on flies.
         #mode='trackflylogo'
-        flies_list = range(1,1+rospy.get_param('nFlies', 0))
+        flies_list = range(1,1+self.experimentparams.flyspec.nFlies)
         
         
         self.experimentparams.trial.lasergalvos.enabled = False

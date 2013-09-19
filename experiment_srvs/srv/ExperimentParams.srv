@@ -1,5 +1,7 @@
 experiment_msgs/ExperimentSettings  experiment
 experiment_msgs/SaveSettings        save
+experiment_msgs/RobotSpec           robotspec
+experiment_msgs/FlySpec             flyspec
 flycore/TrackingCommand             tracking
 experiment_msgs/PreSettings         pre
 experiment_msgs/TrialSettings       trial

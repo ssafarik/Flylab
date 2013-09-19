@@ -107,7 +107,7 @@ class CalibrateStageArena():
         rospy.loginfo ('Found service: camera_from_arena.')
 
             
-        self.nRobots = rospy.get_param('nRobots', 1)
+        self.nRobots = 1
             
         rospy.on_shutdown(self.OnShutdown_callback)
 

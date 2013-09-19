@@ -34,6 +34,14 @@ class ExperimentZapafly():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
+        self.experimentparams.robotspec.nRobots = 0
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
@@ -116,7 +124,7 @@ class ExperimentZapafly():
                                                                             direction  = 1), # Peano curve level.
                                                                  )
         if mode=='trackgrid':
-            for iFly in range(rospy.get_param('nFlies', 0)):
+            for iFly in range(self.experimentparams.flyspec.nFlies):
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                                 frameidPosition   = 'Fly%dForecast' % (iFly+1),
                                                                                 frameidAngle   = 'Fly%dForecast' % (iFly+1),
@@ -131,7 +139,7 @@ class ExperimentZapafly():
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
         if mode=='tracknumber':
-            for iFly in range(rospy.get_param('nFlies', 0)):
+            for iFly in range(self.experimentparams.flyspec.nFlies):
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                                 frameidPosition   = 'Fly%dForecast' % (iFly+1),
                                                                                 frameidAngle   = 'Fly%dForecast' % (iFly+1),
@@ -146,7 +154,7 @@ class ExperimentZapafly():
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
         if mode=='trackflylogo':
-            for iFly in range(rospy.get_param('nFlies', 0)):
+            for iFly in range(self.experimentparams.flyspec.nFlies):
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
                                                                                 frameidPosition   = 'Fly%dForecast' % (iFly+1),
                                                                                 frameidAngle   = 'Fly%dForecast' % (iFly+1),

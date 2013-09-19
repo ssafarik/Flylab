@@ -15,13 +15,8 @@
 	<!-- ***  Core stuff  *** -->
 	<include file="$(find flycore)/launch/flycore.launch" />
 	
-	<!-- ***  Hardware, Flies, and Robot  *** -->
-	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find robots)/launch/robot_3180h_1590w.launch" />
-	<include file="$(find robots)/launch/robots_1.launch" />
-	<include file="$(find flies)/launch/flies_1.launch" />
-	<include file="$(find flies)/launch/flytype_unspecified.launch" />
-	<include file="$(find flies)/launch/flygender_unspecified.launch" />
+    <!-- ***  Hardware  *** -->
+    <include file="$(find config)/launch/hardware.launch" />
 
 	<!-- ***  The Experiment  *** -->
 	<node pkg="experiments" type="PassiveChase.py" name="Experiment" required="true" />

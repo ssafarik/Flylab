@@ -23,7 +23,7 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Laser is on the fly except in a specified region."
+        self.experimentparams.experiment.description = "Laser (50mW) is on the fly except in 40mm square."
         self.experimentparams.experiment.maxTrials = 1
         self.experimentparams.experiment.trial = 1
         
@@ -34,6 +34,14 @@ class Experiment():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False # Saves always.
 
+        self.experimentparams.robotspec.nRobots = 0
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = 'TrpA1- Aristae Intact'
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=48.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [8.0]
@@ -67,17 +75,19 @@ class Experiment():
         # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = False
+
         
+        flies_list = range(1,1+self.experimentparams.flyspec.nFlies)
         
         self.experimentparams.trial.lasergalvos.enabled = True
         self.experimentparams.trial.lasergalvos.pattern_list = []
         self.experimentparams.trial.lasergalvos.statefilterHi_list = []
         self.experimentparams.trial.lasergalvos.statefilterLo_list = []
         self.experimentparams.trial.lasergalvos.statefilterCriteria_list = []
-        for iFly in range(rospy.get_param('nFlies', 0)):#range(3):#
+        for iFly in flies_list:
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Fly%dForecast' % (iFly+1),
-                                                                            frameidAngle   = 'Fly%dForecast' % (iFly+1),
+                                                                            frameidPosition   = 'Fly%dForecast' % iFly,
+                                                                            frameidAngle   = 'Fly%dForecast' % iFly,
                                                                             shape      = 'grid',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -122,7 +132,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = False
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 3600
+        self.experimentparams.post.trigger.timeout = 1800
 
         self.experimentparams.post.wait = 0.0
         

@@ -35,8 +35,9 @@
 # 13. roslaunch galvodirector calibrator.launch
 # 14.   Wait until at least several hundred "I/O Point Pairs" have been collected, and/or the
 #       numbers stabilize to at least four decimal places.  May take an hour or more.
-# 16. Terminate the calibrator.py program (ctrl+c in the terminal window)
-# 15. Transfer the calculated numbers to params_galvos.launch
+# 15. Terminate the calibrator.py program (ctrl+c in the terminal window)
+# 16. Transfer the calculated numbers to params_galvos.launch
+# 17. Replace optical filters.
 #
 # You're done!
 #
