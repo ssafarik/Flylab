@@ -2,6 +2,10 @@ function FlylabPlotHistogramPosition(varargin)
 % FlylabPlotPositionHistogram(filedata, iFrameParent, iFrameChild, radius, nBins [, iStart, iStop])
 % Plot a heatmap of where the fly has been.
 %
+% iFrameParent: Frame number of the parent object (1=Robot, 2=Fly1, etc)
+% iFrameChild:  Frame number of the child object (1=Robot, 2=Fly1, etc)
+% iStart:       Only consider states beginning here.
+% iStop:        Only consider states ending here.
 %
 
     if nargin==5
@@ -60,7 +64,7 @@ function FlylabPlotHistogramPosition(varargin)
     hold off;
     cla;
     image(imgIdent); 
-    hold on; [m n]=size(imgIdent); scatterPose(n/2,m/2,pi/2,10,[1,1,1],'triangle');
+    hold on; [m,n]=size(imgIdent); scatterPose(n/2,m/2,pi/2,2,[1,1,1],'triangle');
     colormap(hot);
     axis equal
     axis([0 nBins 0 nBins]);
@@ -70,7 +74,7 @@ function FlylabPlotHistogramPosition(varargin)
     subplot(1,2,2);
     hold off;
     image(imgBlur); 
-    hold on; [m n]=size(imgBlur); scatterPose(n/2,m/2,pi/2,10,[1,1,1],'triangle');
+    hold on; [m,n]=size(imgBlur); scatterPose(n/2,m/2,pi/2,2,[1,1,1],'triangle');
     colormap(hot);
     axis equal
     axis([0 nBins 0 nBins]);

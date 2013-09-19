@@ -23,11 +23,11 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Laser tracks all flies for 30min"
+        self.experimentparams.experiment.description = "Test the galvos"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zap"
+        self.experimentparams.save.filenamebase = "test"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
@@ -69,9 +69,9 @@ class Experiment():
         self.experimentparams.trial.robot.enabled = False
         
         
-        mode='fixedpointlist'    # Laser to specific locations.
+        #mode='fixedpointlist'    # Laser to specific locations.
         #mode='fixedcircle'
-        #mode='fixedgrid' 
+        mode='fixedpeano' 
         #mode='trackgrid'        # Small grid tracks flies.
         #mode='tracknumber'      # Draw a numeral on flies.
         #mode='trackflylogo'
@@ -92,8 +92,7 @@ class Experiment():
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
                                                                             count      = 1,
-                                                                            points     = [#Point(x=0  ,y=0)],
-                                                                                          Point(x=34  ,y=34),
+                                                                            points     = [Point(x=34  ,y=34),
                                                                                           Point(x=34  ,y=34+6),
                                                                                           Point(x=34  ,y=34-6),
                                                                                           Point(x=34+6,y=34),
@@ -105,35 +104,21 @@ class Experiment():
                                                                             direction  = 1),
                                                                  )
         if mode=='fixedcircle':
-            # Draw a point.
+            # Draw a circle.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
-                                                                            shape      = 'circle',
-                                                                            hzPattern  = 40.0,
-                                                                            hzPoint    = 1000.0,
-                                                                            count      = 1,
-                                                                            size       = Point(x=80,
-                                                                                               y= 0),
-                                                                            preempt    = False,
-                                                                            param      = 3,
-                                                                            direction  = 1), # Peano curve level.
-                                                                 )
-        if mode=='fixedgrid':
-            # Draw a maze.
-            self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
-                                                                            shape      = 'grid',
-                                                                            hzPattern  = 40.0,
-                                                                            hzPoint    = 1000.0,
-                                                                            count      = 1,
-                                                                            size       = Point(x=0,
-                                                                                               y=0),
-                                                                            preempt    = False,
-                                                                            param      = 3, # Peano curve level.
-                                                                            direction  = 1),
-                                                                 )
+                                                                                frameidPosition   = 'Arena',
+                                                                                frameidAngle   = 'Arena',
+                                                                                shape      = 'circle',
+                                                                                hzPattern  = 40.0,
+                                                                                hzPoint    = 1000.0,
+                                                                                count      = 1,
+                                                                                size       = Point(x=80,
+                                                                                                   y= 0),
+                                                                                preempt    = False,
+                                                                                param      = 3,  # Peano curve level.
+                                                                                direction  = 1
+                                                                                ),
+                                                                        )
         if mode=='trackgrid':
             for iFly in flies_list:
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
@@ -162,7 +147,7 @@ class Experiment():
                                                                                                    y=8),
                                                                                 preempt    = False,
                                                                                 param      = 0,
-                                                                                direction  = 1), # Peano curve level.
+                                                                                direction  = 1),
                                                                      )
         if mode=='trackflylogo':
             for iFly in flies_list:
@@ -177,8 +162,23 @@ class Experiment():
                                                                                                    y=6),
                                                                                 preempt    = False,
                                                                                 param      = 0,
-                                                                                direction  = 1), # Peano curve level.
+                                                                                direction  = 1),
                                                                      )
+        if mode=='fixedpeano':
+            # Draw a peano.
+            self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
+                                                                            frameidPosition   = 'Arena',
+                                                                            frameidAngle   = 'Arena',
+                                                                            shape      = 'peano',
+                                                                            hzPattern  = 40.0,
+                                                                            hzPoint    = 1000.0,
+                                                                            count      = 1,
+                                                                            size       = Point(x=100,
+                                                                                               y=100),
+                                                                            preempt    = False,
+                                                                            param      = 3, # Peano curve level.
+                                                                            direction  = 1),
+                                                                 )
         
         
         self.experimentparams.trial.ledpanels.enabled = False

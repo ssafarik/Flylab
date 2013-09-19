@@ -3,6 +3,11 @@ function FlylabPlotPosition(varargin)
 % Plot positions of the specified object (robot=1, fly1=2, fly2=3, etc), in the given frame of reference.
 % Draws a circle on the sample given by iTrigger.
 %
+% iFrameParent: Frame number of the parent object (1=Robot, 2=Fly1, etc)
+% iFrameChild:  Frame number of the child object (1=Robot, 2=Fly1, etc)
+% iStart:       Only consider states beginning here.
+% iStop:        Only consider states ending here.
+%
 
     if nargin==5
         filedata        = varargin{1};

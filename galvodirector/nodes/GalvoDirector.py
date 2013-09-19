@@ -23,7 +23,7 @@ class NullClass:
 ###############################################################################
 ###############################################################################
 ###############################################################################
-# The class GalvoDirector subscribes to ArenaState, and draws the commanded
+# The class GalvoDirector subscribes to GalvoDirector/command, and draws the commanded
 # pattern into the commanded frame, e.g. draw a grid at the origin of the 
 # "Fly1" frame, or draw a circle at the origin of the "Arena" frame.
 #
@@ -46,9 +46,9 @@ class GalvoDirector:
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
-        self.subGalvoCommand = rospy.Subscriber('GalvoDirector/command', MsgGalvoCommand, self.GalvoCommand_callback, queue_size=2)
-        self.pubGalvoPointCloud = rospy.Publisher('GalvoDriver/pointcloud', PointCloud, latch=True)
-        self.pubGalvoPointCloudMm = rospy.Publisher('GalvoDriver/pointcloudmm', PointCloud, latch=True)
+        self.subGalvodirectorCommand = rospy.Subscriber('GalvoDirector/command', MsgGalvoCommand, self.GalvodirectorCommand_callback, queue_size=2)
+        self.pubGalvodriverPointcloud = rospy.Publisher('GalvoDriver/pointcloud', PointCloud, latch=True)
+        self.pubGalvodriverPointcloudMm = rospy.Publisher('GalvoDriver/pointcloudmm', PointCloud, latch=True)
 
         # Attach to services.
         try:
@@ -62,10 +62,25 @@ class GalvoDirector:
         rospy.on_shutdown(self.OnShutdown_callback)
         
         # Calibration data (median values) to convert millimeters to volts, from "roslaunch galvodirector calibrator.launch".
-        self.mx = rospy.get_param('galvodirector/mx', 0.0) #0.05111587
-        self.bx = rospy.get_param('galvodirector/bx', 0.0) #-0.90610801
-        self.my = rospy.get_param('galvodirector/my', 0.0) #-0.05003545
-        self.by = rospy.get_param('galvodirector/by', 0.0) #3.15307329
+        self.a3 = rospy.get_param('galvodirector/a3', 0.0)
+        self.a2 = rospy.get_param('galvodirector/a2', 0.0)
+        self.a1 = rospy.get_param('galvodirector/a1', 0.0)
+        self.a0 = rospy.get_param('galvodirector/a0', 0.0)
+        
+        self.b3 = rospy.get_param('galvodirector/b3', 0.0)
+        self.b2 = rospy.get_param('galvodirector/b2', 0.0)
+        self.b1 = rospy.get_param('galvodirector/b1', 0.0)
+        self.b0 = rospy.get_param('galvodirector/b0', 0.0)
+
+        self.a3i = rospy.get_param('galvodirector/a3i', 0.0)
+        self.a2i = rospy.get_param('galvodirector/a2i', 0.0)
+        self.a1i = rospy.get_param('galvodirector/a1i', 0.0)
+        self.a0i = rospy.get_param('galvodirector/a0i', 0.0)
+        
+        self.b3i = rospy.get_param('galvodirector/b3i', 0.0)
+        self.b2i = rospy.get_param('galvodirector/b2i', 0.0)
+        self.b1i = rospy.get_param('galvodirector/b1i', 0.0)
+        self.b0i = rospy.get_param('galvodirector/b0i', 0.0)
         
         self.xBeamsink = rospy.get_param('galvodirector/xBeamsink', 0.0) # volts
         self.yBeamsink = rospy.get_param('galvodirector/yBeamsink', 0.0) # volts
@@ -119,10 +134,10 @@ class GalvoDirector:
         pass
 
 
-    # GalvoCommand_callback()
+    # GalvodirectorCommand_callback()
     # Receive the list of patterns, and store their pointcloud templates (centered at origin).
     #
-    def GalvoCommand_callback(self, command):
+    def GalvodirectorCommand_callback(self, command):
         if (self.initialized):
             with self.lock:
                 self.enable_laser = command.enable_laser
@@ -140,11 +155,12 @@ class GalvoDirector:
                         
                         # Compute pattern points, if necessary.
                         if len(command.pattern_list[iPattern].points)==0:
+                            command.pattern_list[iPattern].isDirty = True
                             gpp = self.GetPatternPoints(SrvGetPatternPointsRequest(pattern=command.pattern_list[iPattern]))
                             pattern = gpp.pattern
                         else:
                             pattern = command.pattern_list[iPattern]
-                        
+
                         # Store the pointcloud templates.
                         self.pointcloudtemplate_list.append(self.PointCloudFromPoints(pattern.frameidPosition, pattern.points))
                     
@@ -207,16 +223,16 @@ class GalvoDirector:
                     # Publish a pointcloud in volts and mm.
                     pointcloudmm = self.GetUnifiedPointcloud(self.pointcloud_list)
                     pointcloudv = self.VoltsFromUnitsPointcloud(copy.deepcopy(pointcloudmm))
-                    self.pubGalvoPointCloud.publish(pointcloudv)
-                    self.pubGalvoPointCloudMm.publish(pointcloudmm)
+                    self.pubGalvodriverPointcloud.publish(pointcloudv)
+                    self.pubGalvodriverPointcloudMm.publish(pointcloudmm)
             
             else: # not self.enable_laser
                 
                 # Point laser at the beam sink.
                 self.pointcloudBeamsink.header.stamp=rospy.Time.now()
-                self.pubGalvoPointCloud.publish(self.pointcloudBeamsink)
+                self.pubGalvodriverPointcloud.publish(self.pointcloudBeamsink)
                 self.pointcloudBeamsinkMm.header.stamp=rospy.Time.now()
-                self.pubGalvoPointCloudMm.publish(self.pointcloudBeamsinkMm)
+                self.pubGalvodriverPointcloudMm.publish(self.pointcloudBeamsinkMm)
         
 
     # GetUnifiedPointcloud()
@@ -255,11 +271,11 @@ class GalvoDirector:
     def VoltsFromUnitsPointcloud(self, pointcloud):
         if self.units == 'millimeters':
             for point in pointcloud.points:
-                point.x *= self.mx
-                point.x += self.bx
+                x = point.x
+                point.x = self.a3*x**3 + self.a2*x**2 + self.a1*x + self.a0
+                y = point.y
+                point.y = self.b3*y**3 + self.b2*y**2 + self.b1*y + self.b0
 
-                point.y *= self.my
-                point.y += self.by
                 
                 # Clip to 10
                 point.x = min(point.x,+10.0)
@@ -275,16 +291,15 @@ class GalvoDirector:
     
 
     # UnitsFromVoltsPointcloud()
-    # Inplace convert the pointcloud units to volts.
+    # Inplace convert the pointcloud volts to units.
     #
     def UnitsFromVoltsPointcloud(self, pointcloud):
         if self.units == 'millimeters':
             for point in pointcloud.points:
-                point.x -= self.bx
-                point.x /= self.mx
-
-                point.y -= self.by
-                point.y /= self.my
+                x = point.x
+                point.x = self.a3i*x**3 + self.a2i*x**2 + self.a1i*x + self.a0i
+                y = point.y
+                point.y = self.b3i*y**3 + self.b2i*y**2 + self.b1i*y + self.b0i
                 
         elif self.units=='volts':
             pass

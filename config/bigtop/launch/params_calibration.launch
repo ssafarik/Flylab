@@ -15,41 +15,21 @@
   <!-- =================================================================== -->
   
   <!-- The mask circle in camera coordinates (i.e. pixels).    -->
-  <param name="camera/mask/x" type="double" value="364"/>
-  <param name="camera/mask/y" type="double" value="250"/>
-  <param name="camera/mask/radius" type="double" value="241"/>  <!-- pixels -->
+  <param name="camera/mask/x" type="double" value="324"/>
+  <param name="camera/mask/y" type="double" value="244"/>
+  <param name="camera/mask/radius" type="double" value="224"/>  <!-- pixels -->
 
   <param name="calibration/checker_size" type="double" value="14.0" />
 
 
 
   <!-- These values come from CameraArena.launch, with a checkerboard on the arena. They might need fiddling with after use. -->
-  <param name="camera/arena_rvec_0" type="double" value="-3.114"/>
+  <param name="camera/arena_rvec_0" type="double" value="-3.122"/>
   <param name="camera/arena_rvec_1" type="double" value="-0.000"/>
-  <param name="camera/arena_rvec_2" type="double" value="-0.004"/>
-  <param name="camera/arena_tvec_0" type="double" value="-3.765"/> <!-- Adjust for arena alignment here. -->
-  <param name="camera/arena_tvec_1" type="double" value="-4.177"/> <!-- Adjust for arena alignment here. -->
-  <param name="camera/arena_tvec_2" type="double" value="377.585"/>
+  <param name="camera/arena_rvec_2" type="double" value="-0.036"/>
+  <param name="camera/arena_tvec_0" type="double" value="-10.703"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera/arena_tvec_1" type="double" value="-6.474"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera/arena_tvec_2" type="double" value="357.201"/>
   
-
-  <!-- ================================================================== -->
-  <!-- Arena-to-Galvo transform                                           -->
-  <!-- where you align the computed laser position with the visual        -->
-  <!-- laser position.                                                    -->
-  <!--                                                                    -->
-  <!-- "roslaunch calibration GalvoArena.launch"                          -->
-  <!-- Then let it run until the "Translation Vector" and "Quaternion"    -->
-  <!-- stabilize.  Then copy the translation & quaternion values to       -->
-  <!-- the "args" below, e.g.  as:  tx,ty,tz,qx,qy,qz,qw                  -->
-  <!--                                                                    -->
-  <!-- ================================================================== -->
-  
-  <param name="arena_galvo_x" type="double" value="0"/>  <!-- Adjust for laser alignment here. -->
-  <param name="arena_galvo_y" type="double" value="0"/>  <!-- Adjust for laser alignment here. -->
-  <param name="arena_galvo_z" type="double" value="0"/>
-  <param name="arena_galvo_qx" type="double" value="0"/>
-  <param name="arena_galvo_qy" type="double" value="0"/>
-  <param name="arena_galvo_qz" type="double" value="0"/>
-  <param name="arena_galvo_qw" type="double" value="1"/>
 
 </launch>

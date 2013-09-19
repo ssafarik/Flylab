@@ -404,15 +404,16 @@ class PatternGenXY:
             return self.points
 
 
-    def GetPointsGridPeano(self, pattern):
+    def GetPointsPeano(self, pattern):
         peano = self.PeanoCurve()
         level = int(pattern.param)
             
+        
         return peano.GetPoints(level, pattern.size.x, pattern.size.y)
     
 
     def GetPointsGrid(self, pattern):
-        points = self.GetPointsGridPeano(pattern)
+        points = self.GetPointsPeano(pattern)
         return self.InterpolatePoints(points, 0.2)
 
 
@@ -494,6 +495,8 @@ class PatternGenXY:
         if (pattern.isDirty):  
             if pattern.shape == 'constant':
                 pattern.points = self.GetPointsConstant(pattern)
+            elif pattern.shape == 'point':
+                pattern.points = self.GetPointsConstant(pattern)
             elif pattern.shape == 'circle':
                 pattern.points = self.GetPointsCircle(pattern)
             elif pattern.shape == 'square':
@@ -504,12 +507,12 @@ class PatternGenXY:
                 pattern.points = self.GetPointsSpiral(pattern)
             elif pattern.shape == 'ramp':
                 pattern.points = self.GetPointsRamp(pattern)
+            elif pattern.shape == 'peano':
+                pattern.points = self.GetPointsPeano(pattern)
             elif pattern.shape == 'grid':
                 pattern.points = self.GetPointsGrid(pattern)
             elif pattern.shape == 'raster':
                 pattern.points = self.GetPointsGridRaster(pattern)
-            elif pattern.shape == 'peano':
-                pattern.points = self.GetPointsGridPeano(pattern)
             elif (len(pattern.shape)==1) and (pattern.shape.isalnum()):
                 pattern.points = self.GetPointsCharacter(pattern)
             elif pattern.shape == 'bypoints':

@@ -2,6 +2,8 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
+from geometry_msgs.msg import Point, Pose, Vector3
+from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
 
 
