@@ -27,7 +27,7 @@ class Experiment():
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zap"
+        self.experimentparams.save.filenamebase = "HCS_trytokill_"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
@@ -40,7 +40,7 @@ class Experiment():
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = "HCS normal"
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
@@ -52,7 +52,7 @@ class Experiment():
         self.experimentparams.pre.wait1 = 0.0
         
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = 'Arena'
+        self.experimentparams.pre.trigger.frameidParent = '/Arena'
         self.experimentparams.pre.trigger.frameidChild = 'Fly1'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
@@ -94,8 +94,8 @@ class Experiment():
         if mode=='fixedpointlist':
             # Draw a point.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
+                                                                            frameidPosition   = '/Arena',
+                                                                            frameidAngle   = '/Arena',
                                                                             shape      = 'bypoints',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -115,8 +115,8 @@ class Experiment():
         if mode=='fixedcircle':
             # Draw a point.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
+                                                                            frameidPosition   = '/Arena',
+                                                                            frameidAngle   = '/Arena',
                                                                             shape      = 'circle',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -130,8 +130,8 @@ class Experiment():
         if mode=='fixedgrid':
             # Draw a maze.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
+                                                                            frameidPosition   = '/Arena',
+                                                                            frameidAngle   = '/Arena',
                                                                             shape      = 'grid',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -211,7 +211,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = -1
+        self.experimentparams.post.trigger.timeout = 1800
 
         self.experimentparams.post.wait = 0.0
         

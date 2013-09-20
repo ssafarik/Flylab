@@ -8,12 +8,12 @@ function histAll = FlylabPlotHistogramPositionFiles(dirspec, filespec, iFramePar
 %
 
     nFilesMax=999;          % Set this to limit the number of files to look at.
-    radius = 20;
+    radius = 85;
     nBins = 256;
     nClipped = 150;
 
     filenames = GetFilenames(dirspec, filespec);
-    [m, nFiles] = size(filenames);
+    [~, nFiles] = size(filenames);
     iFiles = 1:min(nFiles,nFilesMax);
 
     fprintf ('Found %d files.\n', nFiles)
@@ -54,9 +54,9 @@ function histAll = FlylabPlotHistogramPositionFiles(dirspec, filespec, iFramePar
                 .00 .00  .00  .05  .00 .00 .00];
     kernBlur = kernBlur / sum(sum(kernBlur));
 
-    % Make color values match with the colormap, and rotate 90 twice.
-    imgIdent = rot90(conv2(img,kernIdentity)*length(hot),2);
-    imgBlur = rot90(conv2(img,kernBlur)*length(hot),2);
+    % Make color values match with the colormap, and rotate 90 once.
+    imgIdent = rot90(conv2(img,kernIdentity)*length(hot),1);
+    imgBlur = rot90(conv2(img,kernBlur)*length(hot),1);
     
 %     figure(99);
      hold off;

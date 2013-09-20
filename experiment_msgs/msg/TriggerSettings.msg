@@ -1,5 +1,5 @@
 bool 		enabled
-string 		frameidParent 	# 'Plate', 'Robot', 'Fly1', 'Fly2' etc
+string 		frameidParent 	# 'Arena', 'Robot', 'Fly1', 'Fly2' etc
 string 		frameidChild 	
 float64 	speedAbsParentMin  # Absolute speed of parent frame.
 float64 	speedAbsParentMax

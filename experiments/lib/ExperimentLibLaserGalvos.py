@@ -193,15 +193,15 @@ class Action (smach.State):
                         stamp=None
                         if (pose is None) or (velocity is None):
                             try:
-                                stamp = self.tfrx.getLatestCommonTime('Arena', pattern.frameidPosition)
+                                stamp = self.tfrx.getLatestCommonTime('/Arena', pattern.frameidPosition)
                             except tf.Exception:
                                 pass
 
                             
                         # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                        if (pose is None) and (stamp is not None) and self.tfrx.canTransform('Arena', pattern.frameidPosition, stamp):
+                        if (pose is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', pattern.frameidPosition, stamp):
                             try:
-                                poseStamped = self.tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
+                                poseStamped = self.tfrx.transformPose('/Arena', PoseStamped(header=Header(stamp=stamp,
                                                                                                       frame_id=pattern.frameidPosition),
                                                                                         pose=Pose(position=Point(0,0,0),
                                                                                                   orientation=Quaternion(0,0,0,1)
@@ -214,9 +214,9 @@ class Action (smach.State):
 
                                 
                         # If we still need the velocity, then get it from ROS.
-                        if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('Arena', pattern.frameidPosition, stamp):
+                        if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', pattern.frameidPosition, stamp):
                             try:
-                                velocity_tuple = self.tfrx.lookupTwist('Arena', pattern.frameidPosition, stamp, self.dtVelocity)
+                                velocity_tuple = self.tfrx.lookupTwist('/Arena', pattern.frameidPosition, stamp, self.dtVelocity)
                             except tf.Exception:
                                 velocity = None
                             else:

@@ -192,7 +192,7 @@ class ContourIdentifier:
                     self.markerExclusionzone_list = []
                     for i in range(len(self.pointExclusionzone_list)):
                         self.markerExclusionzone_list.append(Marker(header=Header(stamp = rospy.Time.now(),
-                                                                                  frame_id='Arena'),
+                                                                                  frame_id='/Arena'),
                                                                     ns='exclusionzone_%d' % i,
                                                                     id=100+i,
                                                                     type=Marker.CYLINDER,
@@ -301,12 +301,12 @@ class ContourIdentifier:
 
             
             contourinfolistsOut = copy.copy(contourinfolistsIn)
-            contourinfolistsOut.header.frame_id = 'Arena'
+            contourinfolistsOut.header.frame_id = '/Arena'
             contourinfolistsOut.x = response.xDst
             contourinfolistsOut.y = response.yDst
         else:
             contourinfolistsOut = copy.copy(contourinfolistsIn)
-            contourinfolistsOut.header.frame_id = 'Arena'
+            contourinfolistsOut.header.frame_id = '/Arena'
             contourinfolistsOut.x = []
             contourinfolistsOut.y = []
             
@@ -641,14 +641,14 @@ class ContourIdentifier:
                         
                         # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
                         try:
-                            stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
-                            (translationEE,rotationEE) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
+                            stamp = self.tfrx.getLatestCommonTime('/Arena', 'EndEffector')
+                            (translationEE,rotationEE) = self.tfrx.lookupTransform('/Arena', 'EndEffector', stamp)
                         except tf.Exception, e:
                             pass    # No transform - Either the EE is still initializing, or because we're replaying a bag file.
                             #rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
                         else:
                             self.pubStateEE.publish(MsgFrameState(header=Header(stamp=contourinfolistsPixels.header.stamp,
-                                                                                frame_id='Arena'),
+                                                                                frame_id='/Arena'),
                                                                   pose=Pose(position=Point(translationEE[0],translationEE[1],translationEE[2]),
                                                                             orientation=Quaternion(rotationEE[0],rotationEE[1],rotationEE[2],rotationEE[3]))
                                                                   )

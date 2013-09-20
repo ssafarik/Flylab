@@ -23,11 +23,11 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Laser (50mW) is on the fly except in 40mm square."
+        self.experimentparams.experiment.description = "Laser (180mW) is on the fly except in 40mm square."
         self.experimentparams.experiment.maxTrials = 1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "zapcoolzone"
+        self.experimentparams.save.filenamebase = 'TrpA1neg_AristaeIntact_180mW_' # 'HCS_normal_' #
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
@@ -40,7 +40,7 @@ class Experiment():
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = 'TrpA1- Aristae Intact'
+        self.experimentparams.flyspec.description = 'TrpA1- Aristae Intact' #'HCS normal' #
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=48.0)]
@@ -52,7 +52,7 @@ class Experiment():
         self.experimentparams.pre.wait1 = 0.0
         
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = 'Arena'
+        self.experimentparams.pre.trigger.frameidParent = '/Arena'
         self.experimentparams.pre.trigger.frameidChild = 'Fly1'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
@@ -117,7 +117,7 @@ class Experiment():
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.frameidParent = 'Arena'
+        self.experimentparams.post.trigger.frameidParent = '/Arena'
         self.experimentparams.post.trigger.frameidChild = 'Fly1'
         self.experimentparams.post.trigger.speedAbsParentMin =   0.0
         self.experimentparams.post.trigger.speedAbsParentMax = 999.0

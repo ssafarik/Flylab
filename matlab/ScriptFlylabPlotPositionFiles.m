@@ -3,8 +3,8 @@
 % Subplots are fly frame trajectory, and heatmap.
 
 %dirspec='C:\\Flyranch\Flylabdata*';
-dirspec = '~/FlylabData/2013_03_05*';
-filespec='zap20130305180539.csv'; %'*.csv';
+dirspec = '~/FlylabData/2013_09_19*';
+filespec='*.csv';
 
 filenames = GetFilenames(dirspec, filespec);
 nSubsample = 5;
@@ -22,8 +22,8 @@ for i=1:length(filenames)
     [m,n] = size(filedata.states);
     iStop = min(iTriggerEnd+nPosttrigger, m);
 
-    iFrameRobots = 1:0+filedata.header.robots.nRobots;
-    iFrameFlies  = 2:1+filedata.header.flies.nFlies;
+    iFrameRobots = 1:0+filedata.header.robotspec.nRobots;
+    iFrameFlies  = 2:1+filedata.header.flyspec.nFlies;
     
     figure(1); 
     clf; 
@@ -33,7 +33,7 @@ for i=1:length(filenames)
     title(sprintf('Arena-centered View\nFile %d: %s', i, filenames{i})); 
     
     subplot(3,2,5); 
-    if filedata.header.flies.nFlies>0
+    if filedata.header.flyspec.nFlies>0
         FlylabPlotPosition(filedata, iFrameFlies(1), [iFrameRobots,iFrameFlies], iTriggerStart, nSubsample, iStart, iStop); 
     else
         cla;

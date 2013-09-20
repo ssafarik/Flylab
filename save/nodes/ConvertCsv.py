@@ -485,40 +485,40 @@ class ConvertCsv:
        
        
         #######################################################################
-        self.headerVersionFileTxt_V27 = self.headerVersionFileTxt_V26
-        self.templateVersionFile_V27 = self.templateVersionFile_V26
-        self.headerExperimentTxt_V27 =  self.headerExperimentTxt_V26
-        self.templateExperiment_V27 =  self.templateExperiment_V26
-        self.headerRobotSpecTxt_V27 =       self.headerRobotSpecTxt_V26
-        self.templateRobotSpec_V27 =      self.templateRobotSpec_V26
-        self.headerFlySpecTxt_V27 =       self.headerFlySpecTxt_V26
+        self.headerVersionFileTxt_V27 =  self.headerVersionFileTxt_V26
+        self.templateVersionFile_V27 =   self.templateVersionFile_V26
+        self.headerExperimentTxt_V27 =   self.headerExperimentTxt_V26
+        self.templateExperiment_V27 =    self.templateExperiment_V26
+        self.headerRobotSpecTxt_V27 =    self.headerRobotSpecTxt_V26
+        self.templateRobotSpec_V27 =     self.templateRobotSpec_V26
+        self.headerFlySpecTxt_V27 =      self.headerFlySpecTxt_V26
         self.templateFlySpec_V27 =       self.templateFlySpec_V26
-        self.headerTrackingTxtA_V27 =   self.headerTrackingTxtA_V26
-        self.headerTrackingTxtB_V27 =   self.headerTrackingTxtB_V26
-        self.templateTrackingA_V27 =   self.templateTrackingA_V26
-        self.templateTrackingB_V27 =   self.templateTrackingB_V26
-        self.headerPreRobotTxt_V27 =    self.headerPreRobotTxt_V26
-        self.templatePreRobot_V27 =    self.templatePreRobot_V26
-        self.headerPreLaserTxt_V27 =    self.headerPreLaserTxt_V26
-        self.templatePreLaser_V27 =    self.templatePreLaser_V26
-        self.headerPreLEDPanelsTxt_V27 =self.headerPreLEDPanelsTxt_V26
-        self.templatePreLEDPanels_V27 =self.templatePreLEDPanels_V26
-        self.headerPreWait1Txt_V27 =    self.headerPreWait1Txt_V26
-        self.templatePreWait1_V27 =    self.templatePreWait1_V26
-        self.headerPreTriggerTxt_V27 =  self.headerPreTriggerTxt_V26
-        self.templatePreTrigger_V27 =  self.templatePreTrigger_V26
-        self.headerPreWait2Txt_V27 =    self.headerPreWait2Txt_V26
-        self.templatePreWait2_V27 =    self.templatePreWait2_V26
-        self.headerTrialRobotTxt_V27 =  self.headerTrialRobotTxt_V26
-        self.templateTrialRobot_V27 =  self.templateTrialRobot_V26
-        self.headerTrialLaserTxt_V27 =  self.headerTrialLaserTxt_V26
-        self.templateTrialLaser_V27 =  self.templateTrialLaser_V26
+        self.headerTrackingTxtA_V27 =    self.headerTrackingTxtA_V26
+        self.headerTrackingTxtB_V27 =    self.headerTrackingTxtB_V26
+        self.templateTrackingA_V27 =     self.templateTrackingA_V26
+        self.templateTrackingB_V27 =     self.templateTrackingB_V26
+        self.headerPreRobotTxt_V27 =     self.headerPreRobotTxt_V26
+        self.templatePreRobot_V27 =      self.templatePreRobot_V26
+        self.headerPreLaserTxt_V27 =     self.headerPreLaserTxt_V26
+        self.templatePreLaser_V27 =      self.templatePreLaser_V26
+        self.headerPreLEDPanelsTxt_V27 = self.headerPreLEDPanelsTxt_V26
+        self.templatePreLEDPanels_V27 =  self.templatePreLEDPanels_V26
+        self.headerPreWait1Txt_V27 =     self.headerPreWait1Txt_V26
+        self.templatePreWait1_V27 =      self.templatePreWait1_V26
+        self.headerPreTriggerTxt_V27 =   self.headerPreTriggerTxt_V26
+        self.templatePreTrigger_V27 =    self.templatePreTrigger_V26
+        self.headerPreWait2Txt_V27 =     self.headerPreWait2Txt_V26
+        self.templatePreWait2_V27 =      self.templatePreWait2_V26
+        self.headerTrialRobotTxt_V27 =   self.headerTrialRobotTxt_V26
+        self.templateTrialRobot_V27 =    self.templateTrialRobot_V26
+        self.headerTrialLaserTxt_V27 =   self.headerTrialLaserTxt_V26
+        self.templateTrialLaser_V27 =    self.templateTrialLaser_V26
         self.headerTrialLEDPanelsTxt_V27 = self.headerTrialLEDPanelsTxt_V26
         self.templateTrialLEDPanels_V27 = self.templateTrialLEDPanels_V26
-        self.headerPostTriggerTxt_V27 = self.headerPostTriggerTxt_V26
-        self.templatePostTrigger_V27 = self.templatePostTrigger_V26
-        self.headerPostWaitTxt_V27 =    self.headerPostWaitTxt_V26
-        self.templatePostWait_V27 =    self.templatePostWait_V26
+        self.headerPostTriggerTxt_V27 =  self.headerPostTriggerTxt_V26
+        self.templatePostTrigger_V27 =   self.templatePostTrigger_V26
+        self.headerPostWaitTxt_V27 =     self.headerPostWaitTxt_V26
+        self.templatePostWait_V27 =      self.templatePostWait_V26
 
         
         # The state lines.
@@ -617,15 +617,15 @@ class ConvertCsv:
                                         '\"{preLaserStatefilterHi:s}\", '\
                                         '{preLaserStatefilterCriteria:s}, '\
                                         '{preLaserTimeout:s}\n'
-        self.headerPreLEDPanelsTxt_V28 =self.headerPreLEDPanelsTxt_V27
-        self.templatePreLEDPanels_V28 =self.templatePreLEDPanels_V27
-        self.headerPreWait1Txt_V28 =    self.headerPreWait1Txt_V27
-        self.templatePreWait1_V28 =    self.templatePreWait1_V27
-        self.headerPreTriggerTxt_V28 =  self.headerPreTriggerTxt_V27
-        self.templatePreTrigger_V28 =  self.templatePreTrigger_V27
-        self.headerPreWait2Txt_V28 =    self.headerPreWait2Txt_V27
-        self.templatePreWait2_V28 =    self.templatePreWait2_V27
-        self.headerTrialRobotTxt_V28 =  'trialRobotEnabled, '\
+        self.headerPreLEDPanelsTxt_V28 = self.headerPreLEDPanelsTxt_V27
+        self.templatePreLEDPanels_V28  = self.templatePreLEDPanels_V27
+        self.headerPreWait1Txt_V28     = self.headerPreWait1Txt_V27
+        self.templatePreWait1_V28      = self.templatePreWait1_V27
+        self.headerPreTriggerTxt_V28   = self.headerPreTriggerTxt_V27
+        self.templatePreTrigger_V28    = self.templatePreTrigger_V27
+        self.headerPreWait2Txt_V28     = self.headerPreWait2Txt_V27
+        self.templatePreWait2_V28      = self.templatePreWait2_V27
+        self.headerTrialRobotTxt_V28   = 'trialRobotEnabled, '\
                                         'trialRobotMovePatternFramePosition, '\
                                         'trialRobotMovePatternFrameAngle, '\
                                         'trialRobotMovePatternShape, '\
@@ -699,11 +699,11 @@ class ConvertCsv:
                                         '{trialLaserStatefilterCriteria:s}, '\
                                         '{trialLaserTimeout:s}\n'
         self.headerTrialLEDPanelsTxt_V28 = self.headerTrialLEDPanelsTxt_V27
-        self.templateTrialLEDPanels_V28 = self.templateTrialLEDPanels_V27
-        self.headerPostTriggerTxt_V28 = self.headerPostTriggerTxt_V27
-        self.templatePostTrigger_V28 = self.templatePostTrigger_V27
-        self.headerPostWaitTxt_V28 =    self.headerPostWaitTxt_V27
-        self.templatePostWait_V28 =    self.templatePostWait_V27
+        self.templateTrialLEDPanels_V28  = self.templateTrialLEDPanels_V27
+        self.headerPostTriggerTxt_V28    = self.headerPostTriggerTxt_V27
+        self.templatePostTrigger_V28     = self.templatePostTrigger_V27
+        self.headerPostWaitTxt_V28       = self.headerPostWaitTxt_V27
+        self.templatePostWait_V28        = self.templatePostWait_V27
 
         
         # The state lines.
@@ -717,19 +717,19 @@ class ConvertCsv:
         
         #######################################################################
         # version 2.81 removes the timeout fields.
-        self.headerVersionFileTxt_V281 =self.headerVersionFileTxt_V28
-        self.templateVersionFile_V281 = self.templateVersionFile_V28
-        self.headerExperimentTxt_V281 = self.headerExperimentTxt_V28
-        self.templateExperiment_V281 =  self.templateExperiment_V28
-        self.headerRobotSpecTxt_V281 =      self.headerRobotSpecTxt_V28
-        self.templateRobotSpec_V281 =      self.templateRobotSpec_V28
-        self.headerFlySpecTxt_V281 =      self.headerFlySpecTxt_V28
-        self.templateFlySpec_V281 =       self.templateFlySpec_V28
-        self.headerTrackingTxtA_V281 =  self.headerTrackingTxtA_V28
-        self.headerTrackingTxtB_V281 =  self.headerTrackingTxtB_V28
-        self.templateTrackingA_V281 =   self.templateTrackingA_V28
-        self.templateTrackingB_V281 =   self.templateTrackingB_V28
-        self.headerPreRobotTxt_V281 =   'preRobotEnabled, '\
+        self.headerVersionFileTxt_V281 = self.headerVersionFileTxt_V28
+        self.templateVersionFile_V281  = self.templateVersionFile_V28
+        self.headerExperimentTxt_V281  = self.headerExperimentTxt_V28
+        self.templateExperiment_V281   = self.templateExperiment_V28
+        self.headerRobotSpecTxt_V281   = self.headerRobotSpecTxt_V28
+        self.templateRobotSpec_V281    = self.templateRobotSpec_V28
+        self.headerFlySpecTxt_V281     = self.headerFlySpecTxt_V28
+        self.templateFlySpec_V281      = self.templateFlySpec_V28
+        self.headerTrackingTxtA_V281   = self.headerTrackingTxtA_V28
+        self.headerTrackingTxtB_V281   = self.headerTrackingTxtB_V28
+        self.templateTrackingA_V281    = self.templateTrackingA_V28
+        self.templateTrackingB_V281    = self.templateTrackingB_V28
+        self.headerPreRobotTxt_V281    = 'preRobotEnabled, '\
                                         'preRobotMovePatternFramePosition, '\
                                         'preRobotMovePatternFrameAngle, '\
                                         'preRobotMovePatternShape, '\
@@ -975,17 +975,17 @@ class ConvertCsv:
                                         '{preRobotMoveRelSpeedType:s}, '\
                                         '{preRobotMoveRelTolerance:s}\n'
                                     
-        self.headerPreLaserTxt_V282 =   self.headerPreLaserTxt_V281
-        self.templatePreLaser_V282 =    self.templatePreLaser_V281
+        self.headerPreLaserTxt_V282     = self.headerPreLaserTxt_V281
+        self.templatePreLaser_V282      = self.templatePreLaser_V281
         self.headerPreLEDPanelsTxt_V282 = self.headerPreLEDPanelsTxt_V281
-        self.templatePreLEDPanels_V282 = self.templatePreLEDPanels_V281
-        self.headerPreWait1Txt_V282 =   self.headerPreWait1Txt_V281
-        self.templatePreWait1_V282 =    self.templatePreWait1_V281
-        self.headerPreTriggerTxt_V282 = self.headerPreTriggerTxt_V281
-        self.templatePreTrigger_V282 =  self.templatePreTrigger_V281
-        self.headerPreWait2Txt_V282 =   self.headerPreWait2Txt_V281
-        self.templatePreWait2_V282 =    self.templatePreWait2_V281
-        self.headerTrialRobotTxt_V282 = 'trialRobotEnabled, '\
+        self.templatePreLEDPanels_V282  = self.templatePreLEDPanels_V281
+        self.headerPreWait1Txt_V282     = self.headerPreWait1Txt_V281
+        self.templatePreWait1_V282      = self.templatePreWait1_V281
+        self.headerPreTriggerTxt_V282   = self.headerPreTriggerTxt_V281
+        self.templatePreTrigger_V282    = self.templatePreTrigger_V281
+        self.headerPreWait2Txt_V282     = self.headerPreWait2Txt_V281
+        self.templatePreWait2_V282      = self.templatePreWait2_V281
+        self.headerTrialRobotTxt_V282   = 'trialRobotEnabled, '\
                                         'trialRobotMovePatternFramePosition, '\
                                         'trialRobotMovePatternFrameAngle, '\
                                         'trialRobotMovePatternShape, '\
@@ -1030,14 +1030,14 @@ class ConvertCsv:
                                         '{trialRobotMoveRelSpeedType:s}, '\
                                         '{trialRobotMoveRelTolerance:s}\n'
                                     
-        self.headerTrialLaserTxt_V282 =  self.headerTrialLaserTxt_V281
-        self.templateTrialLaser_V282 =   self.templateTrialLaser_V281
+        self.headerTrialLaserTxt_V282     = self.headerTrialLaserTxt_V281
+        self.templateTrialLaser_V282      = self.templateTrialLaser_V281
         self.headerTrialLEDPanelsTxt_V282 = self.headerTrialLEDPanelsTxt_V281
-        self.templateTrialLEDPanels_V282 = self.templateTrialLEDPanels_V281
-        self.headerPostTriggerTxt_V282 = self.headerPostTriggerTxt_V281
-        self.templatePostTrigger_V282 = self.templatePostTrigger_V281
-        self.headerPostWaitTxt_V282 =    self.headerPostWaitTxt_V281
-        self.templatePostWait_V282 =    self.templatePostWait_V281
+        self.templateTrialLEDPanels_V282  = self.templateTrialLEDPanels_V281
+        self.headerPostTriggerTxt_V282    = self.headerPostTriggerTxt_V281
+        self.templatePostTrigger_V282     = self.templatePostTrigger_V281
+        self.headerPostWaitTxt_V282       = self.headerPostWaitTxt_V281
+        self.templatePostWait_V282        = self.templatePostWait_V281
 
         
         # The state lines.

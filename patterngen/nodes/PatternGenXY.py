@@ -27,8 +27,8 @@ class PatternGenXY:
         self.pattern1.hzPoint = 50
         self.pattern1.count = 0
         self.pattern1.points = []
-        self.pattern1.frameidPosition = 'Arena'
-        self.pattern1.frameidAngle = 'Arena'
+        self.pattern1.frameidPosition = '/Arena'
+        self.pattern1.frameidAngle = '/Arena'
         self.pattern1.size = Point(25.4, 25.4, 0.0)
         self.pattern1.preempt = True
         self.pattern1.param = 0.0
@@ -625,12 +625,12 @@ class PatternGenXY:
         pts = PointStamped()
                       
         try:  
-            pts.header.stamp = self.tfrx.getLatestCommonTime('Arena', self.pattern1.frameidPosition)
-            (pos,q) = self.tfrx.lookupTransform('Arena', self.pattern1.frameidPosition, pts.header.stamp)
+            pts.header.stamp = self.tfrx.getLatestCommonTime('/Arena', self.pattern1.frameidPosition)
+            (pos,q) = self.tfrx.lookupTransform('/Arena', self.pattern1.frameidPosition, pts.header.stamp)
         except tf.Exception, e:
             rospy.logwarn('Exception transforming %s->Arena in TransformPatternPoint():  %s' % (self.pattern1.frameidPosition,e))
         else:
-            pts.header.frame_id = 'Arena'
+            pts.header.frame_id = '/Arena'
             pts.point = copy.copy(self.pattern1.points[self.iPoint])
             pts.point.x += pos[0]
             pts.point.y += pos[1]

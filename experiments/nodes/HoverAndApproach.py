@@ -47,8 +47,8 @@ class Experiment():
         
         self.experimentparams.pre.robot.enabled = True
         self.experimentparams.pre.robot.move.mode = 'pattern'                       # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
-        self.experimentparams.pre.robot.move.pattern.frameidPosition = 'Arena'
-        self.experimentparams.pre.robot.move.pattern.frameidAngle = 'Arena'
+        self.experimentparams.pre.robot.move.pattern.frameidPosition = '/Arena'
+        self.experimentparams.pre.robot.move.pattern.frameidAngle = '/Arena'
         self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
         self.experimentparams.pre.robot.move.pattern.hzPattern = 1/20                # Patterns per second.0
         self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.

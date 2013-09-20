@@ -15,7 +15,7 @@ function FlylabPlotHistogramPosition(varargin)
         radius       = varargin{4};
         nBins        = varargin{5};
         iStart       = 1;
-        [iStop,n]    = size(filedata.states);
+        [iStop,~]    = size(filedata.states);
     elseif nargin==7
         filedata     = varargin{1};
         iFrameParent = varargin{2};

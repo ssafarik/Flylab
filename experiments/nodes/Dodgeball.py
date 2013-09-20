@@ -58,8 +58,8 @@ class Experiment():
         self.experimentparams.pre.robot.move.relative.speed = 20                    # Speed at which to move the robot toward the target point. 
         self.experimentparams.pre.robot.move.relative.speedType = 'constant'        # 'constant' or 'random'.  Use the given value, or a random frpre of it. 
         self.experimentparams.pre.robot.move.relative.tolerance = 2                 # When robot-to-target distance is within this tolerance, then the move is over.
-        self.experimentparams.pre.robot.move.pattern.frameidPosition = 'Arena'               # 
-        self.experimentparams.pre.robot.move.pattern.frameidAngle = 'Arena'               # 
+        self.experimentparams.pre.robot.move.pattern.frameidPosition = '/Arena'               # 
+        self.experimentparams.pre.robot.move.pattern.frameidAngle = '/Arena'               # 
         self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
         self.experimentparams.pre.robot.move.pattern.hzPattern = 1/6                # Patterns per second.
         self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.

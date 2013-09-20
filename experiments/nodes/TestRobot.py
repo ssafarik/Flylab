@@ -69,8 +69,8 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.relative.speed = 20
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
-        self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
+        self.experimentparams.trial.robot.move.pattern.frameidPosition = '/Arena'               # 
+        self.experimentparams.trial.robot.move.pattern.frameidAngle = '/Arena'               # 
 
         if (False):
 # Four points step response.
