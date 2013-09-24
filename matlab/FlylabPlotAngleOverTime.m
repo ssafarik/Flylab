@@ -26,13 +26,14 @@ function FlylabPlotAngleOverTime(dirspec, filespec)
     for i = iFiles
         fprintf('File %d: %s ... ', i, filenames{i})
         filedata = FlylabReadFile(filenames{i});
-
-        stateFly{i} = FlylabGetObjectState(filedata, 2);
-        timeFly{i} = filedata.states(:,1);
-        angleFly{i} = stateFly{i}(:,3);
-        lenMin = min(lenMin,length(angleFly{i}));
-        lenMax = max(lenMax,length(angleFly{i}));
-        fprintf ('done.\n')
+        if (FlylabIsValidFiledata(filedata))
+            stateFly{i} = FlylabGetObjectState(filedata, 2);
+            timeFly{i} = filedata.states(:,1);
+            angleFly{i} = stateFly{i}(:,3);
+            lenMin = min(lenMin,length(angleFly{i}));
+            lenMax = max(lenMax,length(angleFly{i}));
+            fprintf ('done.\n')
+        end
     end
 
     % Compute the mean time array.

@@ -23,13 +23,15 @@ function histAll = FlylabPlotHistogramPositionFiles(dirspec, filespec, iFramePar
     for i = iFiles;
         fprintf('File %d: %s ... ', i, filenames{i})
         filedata = FlylabReadFile(filenames{i});
-        histFile(:,:,i) = FlylabGetHistogramPosition(filedata, iFrameParent, iFrameChild, radius, nBins);
-        %histFile(:,:,i) = FlylabClipByCount(histFile(:,:,i), nClipped);
-        
-        % Make the histogram into an image, i.e. normalize to 1.
-        imgFile{i} = histFile(:,:,i)./max(max(histFile(:,:,i)));  
+        if (FlylabIsValidFiledata(filedata))
+            histFile(:,:,i) = FlylabGetHistogramPosition(filedata, iFrameParent, iFrameChild, radius, nBins);
+            %histFile(:,:,i) = FlylabClipByCount(histFile(:,:,i), nClipped);
 
-        fprintf ('done.\n')
+            % Make the histogram into an image, i.e. normalize to 1.
+            imgFile{i} = histFile(:,:,i)./max(max(histFile(:,:,i)));  
+
+            fprintf ('done.\n')
+        end
     end
 
     % Get counts for all files, and make an image.

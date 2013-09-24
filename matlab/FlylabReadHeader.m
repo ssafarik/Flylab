@@ -7,7 +7,7 @@ function header = FlylabReadHeader (filename)
     bSuccess = false;
     fid = fopen(filename);
 
-    while (1)
+    while (fid ~= -1)
         headings = textscan(fid,'%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q',1,'Delimiter',',');
         switch headings{1}{1}
             case 'versionFile'
@@ -308,5 +308,7 @@ function header = FlylabReadHeader (filename)
         % header lines.
     end
     
-    fclose(fid);
+    if (fid ~= -1)
+        fclose(fid);
+    end
                 
