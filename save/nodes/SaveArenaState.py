@@ -35,7 +35,7 @@ class SaveArenastate:
 
 
         self.bTriggered = False
-        self.bSaveOnlyWhileTriggered = False # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
+        self.bSaveOnlyWhileTriggered = True # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
 
 
         
