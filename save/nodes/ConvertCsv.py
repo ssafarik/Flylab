@@ -10,10 +10,15 @@ import numpy as N
 ###############################################################################
 ## How to use this utility:
 ##
-##   1. Scroll to the bottom of this file.
-##   2. Edit the lines for your input and output directories.  
-##   3. Edit the version number you want to write.
-##   4. python ConvertCsv.py
+##   Step 1. Edit the following lines for your input and output directories, and version:  
+versionToWrite = 'latest'  # '2.2' or '2.6' or '2.7' or '2.8' or '2.81' or '2.82' or '2.83' or 'latest'
+dirIn   = '/home/ssafarik/FlylabData_oldversions'
+dirOut  = '/home/ssafarik/FlylabData_converted'
+
+#whatToCopy = 'everything'           # Choose one of these two options.
+whatToCopy = 'csvonly'              # Choose one of these two options.
+    
+##   Step 2. rosrun save ConvertCsv.py
 ##
 ##   You're done!  The directory tree will be duplicated, except that all
 ##   the .csv files will be converted to the specified version.
@@ -4271,21 +4276,7 @@ class ConvertCsv:
 if __name__ == '__main__':
     convert = ConvertCsv()
     
-    
-    ###############################################################################################
-    ###############################################################################################
-    convert.versionToWrite = 'latest'  # '2.2' or '2.6' or '2.7' or '2.8' or '2.81' or '2.82' or '2.83' or 'latest'
-    dirIn   = '/home/ssafarik/FlylabData_oldversions'
-    dirOut  = '/home/ssafarik/FlylabData_converted'
-    
-    
-    #whatToCopy = 'everything'           # Choose one of these two options.
-    whatToCopy = 'csvonly'              # Choose one of these two options.
-    
-    ###############################################################################################
-    ###############################################################################################
-
-    
+    convert.versionToWrite = versionToWrite 
     convert.ConvertTree(dirIn, dirOut, whatToCopy)
     
     
