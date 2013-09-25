@@ -185,7 +185,7 @@ class Action (smach.State):
                         
                     elif ('Fly' in self.paramsIn.ledpanels.frame_id):
                         for iFly in range(len(self.arenastate.flies)):
-                            if self.paramsIn.ledpanels.frame_id == self.arenastate.flies[iFly].name:
+                            if (self.arenastate.flies[iFly].name in self.paramsIn.ledpanels.frame_id):
                                 #pose = self.arenastate.flies[iFly].pose  # For consistency w/ galvodirector, we'll get pose via transform.
                                 velocity = self.arenastate.flies[iFly].velocity
                                 speed = self.arenastate.flies[iFly].speed

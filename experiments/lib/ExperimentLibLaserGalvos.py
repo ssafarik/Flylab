@@ -183,7 +183,7 @@ class Action (smach.State):
                                 
                             elif ('Fly' in pattern.frameidPosition):
                                 for iFly in range(len(self.arenastate.flies)):
-                                    if pattern.frameidPosition == self.arenastate.flies[iFly].name:
+                                    if (self.arenastate.flies[iFly].name in pattern.frameidPosition):
                                         #pose = self.arenastate.flies[iFly].pose  # For consistency w/ galvodirector, we'll get pose via transform.
                                         velocity = self.arenastate.flies[iFly].velocity
                                         speed = self.arenastate.flies[iFly].speed
