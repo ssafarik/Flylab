@@ -49,8 +49,10 @@ for i=1:length(filenames)
         %drawnow; 
     end
     
-    fprintf ('Press a key for next file %d...\n', i+1);
-    pause; 
-    fprintf ('working...\n');
+    if i<length(filenames)
+        fprintf ('Press a key for next file %d...\n', i+1);
+        pause; 
+        fprintf ('working...\n');
+    end
 end
 fprintf ('Done.\n');
