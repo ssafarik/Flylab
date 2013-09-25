@@ -27,36 +27,38 @@ function FlylabPlotHistogramInteractions(interactions, radius, nBins)
             filedata = FlylabReadFile(filename);
         end
         
-        % Add the histogram from this interaction to the sum.
-        iFrames = [2 3];
-        iFrameLeader = FlylabGetLeader(filedata, iFrames(1), iFrames(2), radius, iStart, iStop);
-        iFrameFollower = iFrames(find(iFrames~=iFrameLeader));
-        histogramLeader   = histogramLeader   + FlylabGetHistogramPosition(filedata, iFrameLeader, iFrameFollower, radius, nBins, iStart, iStop);
-        histogramFollower = histogramFollower + FlylabGetHistogramPosition(filedata, iFrameFollower, iFrameLeader, radius, nBins, iStart, iStop);
+        if (FlylabIsValidFiledata(filedata))
+            % Add the histogram from this interaction to the sum.
+            iFrames = [2 3];
+            iFrameLeader = FlylabGetLeader(filedata, iFrames(1), iFrames(2), radius, iStart, iStop);
+            iFrameFollower = iFrames(find(iFrames~=iFrameLeader));
+            histogramLeader   = histogramLeader   + FlylabGetHistogramPosition(filedata, iFrameLeader, iFrameFollower, radius, nBins, iStart, iStop);
+            histogramFollower = histogramFollower + FlylabGetHistogramPosition(filedata, iFrameFollower, iFrameLeader, radius, nBins, iStart, iStop);
+
+            subplot(1,2,1);
+            img = (histogramLeader ./ max(max(histogramLeader))) * length(hot);         
+            image(img); 
+            hold on; 
+            [m n]=size(img); scatterPose(n/2, m/2, pi/2, 10, [1 1 1], 'triangle');
+            colormap(hot);
+            axis equal
+            axis([0 nBins 0 nBins]);
+            axis xy;
+            drawnow;
+
+            subplot(1,2,2);
+            img = (histogramFollower ./ max(max(histogramFollower))) * length(hot);         
+            image(img); 
+            hold on; 
+            [m n]=size(img); scatterPose(n/2, m/2, pi/2, 10, [1 1 1], 'triangle');
+            colormap(hot);
+            axis equal
+            axis([0 nBins 0 nBins]);
+            axis xy;
+
+            drawnow;
+        end
         
-        subplot(1,2,1);
-        img = (histogramLeader ./ max(max(histogramLeader))) * length(hot);         
-        image(img); 
-        hold on; 
-        [m n]=size(img); scatterPose(n/2, m/2, pi/2, 10, [1 1 1], 'triangle');
-        colormap(hot);
-        axis equal
-        axis([0 nBins 0 nBins]);
-        axis xy;
-        drawnow;
-
-        subplot(1,2,2);
-        img = (histogramFollower ./ max(max(histogramFollower))) * length(hot);         
-        image(img); 
-        hold on; 
-        [m n]=size(img); scatterPose(n/2, m/2, pi/2, 10, [1 1 1], 'triangle');
-        colormap(hot);
-        axis equal
-        axis([0 nBins 0 nBins]);
-        axis xy;
-
-        drawnow;
-
         filenamePrev = filename;
     end
     subplot(1,2,1);

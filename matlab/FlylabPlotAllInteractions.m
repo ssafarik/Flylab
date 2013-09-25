@@ -17,20 +17,24 @@ function FlylabPlotAllInteractions(interactions, nPre, nPost, nSubsample)
             filedata = FlylabReadFile(filename); 
         end
         
-        iPlot = iPlot+1;
-        subplot(4,5,iPlot); 
-        iTrigger = iStart;
-        FlylabPlotPosition(filedata, 0, [2 3], iTrigger, nSubsample, iStart-nPre, iStop+nPost); 
-        axis on; 
-        [pth,fn,c] = fileparts(filename);
-        title (sprintf('%s:%d-%d', fn, iStart, iStop)); 
-        drawnow; 
+        if (FlylabIsValidFiledata(filedata))
+            iPlot = iPlot+1;
+            subplot(4,5,iPlot); 
+            iTrigger = iStart;
+            FlylabPlotPosition(filedata, 0, [2 3], iTrigger, nSubsample, iStart-nPre, iStop+nPost); 
+            axis on; 
+            [pth,fn,c] = fileparts(filename);
+            txtTitle = fn;
+            txtTitle(strfind(txtTitle,'_'))=' '; % Convert underscores to spaces.
+            title (sprintf('%s:%d-%d', txtTitle, iStart, iStop)); 
+            drawnow; 
 
-        % If the subplots are full, then open another figure window.
-        if mod(iPlot,nMaxInteractions)==0
-            iPlot=0;
-            figure(gcf+1);
-            clf;
+            % If the subplots are full, then open another figure window.
+            if mod(iPlot,nMaxInteractions)==0
+                iPlot=0;
+                figure(gcf+1);
+                clf;
+            end
         end
         
         filenamePrev = filename;

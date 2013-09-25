@@ -32,15 +32,23 @@ class Experiment():
         self.experimentparams.save.mov = True
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
+        
+        self.experimentparams.robotspec.nRobots = 1
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
 
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
         self.experimentparams.pre.robot.enabled = True
         self.experimentparams.pre.robot.move.mode = 'pattern'                       # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
-        self.experimentparams.pre.robot.move.pattern.frameidPosition = 'Arena'
-        self.experimentparams.pre.robot.move.pattern.frameidAngle = 'Arena'
+        self.experimentparams.pre.robot.move.pattern.frameidPosition = '/Arena'
+        self.experimentparams.pre.robot.move.pattern.frameidAngle = '/Arena'
         self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
         self.experimentparams.pre.robot.move.pattern.hzPattern = 1/10                # Patterns per second.0
         self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
@@ -56,7 +64,7 @@ class Experiment():
         self.experimentparams.pre.ledpanels.idPattern = 1 
         self.experimentparams.pre.ledpanels.origin.x = 0 
         self.experimentparams.pre.ledpanels.origin.y = 0 
-        self.experimentparams.pre.ledpanels.frame_id = 'Fly1'
+        self.experimentparams.pre.ledpanels.frame_id = 'Fly01'
         self.experimentparams.pre.ledpanels.statefilterHi = ''
         self.experimentparams.pre.ledpanels.statefilterLo = ''
         self.experimentparams.pre.ledpanels.statefilterCriteria = ''
@@ -64,7 +72,7 @@ class Experiment():
 
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = True
-        self.experimentparams.pre.trigger.frameidParent = 'Fly1'
+        self.experimentparams.pre.trigger.frameidParent = 'Fly01'
         self.experimentparams.pre.trigger.frameidChild = 'Robot'
         self.experimentparams.pre.trigger.speedAbsParentMin =   3.0        # Absolute speed of the parent in fixed frame.
         self.experimentparams.pre.trigger.speedAbsParentMax =  60.0
@@ -88,8 +96,8 @@ class Experiment():
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'relative'                        # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
         self.experimentparams.trial.robot.move.relative.tracking = True                 # True=update the target point continually.  False=the target point is set at the trigger time. 
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly01Forecast"
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly01Forecast"
         self.experimentparams.trial.robot.move.relative.distance = 4                    # Distance to the target point from the origin frame's position.
         self.experimentparams.trial.robot.move.relative.angleType = 'current'           # 'constant' or 'random' or 'current'.  Use given angle always, or choose random angle once per move.
         self.experimentparams.trial.robot.move.relative.angleOffset = 0                 # Angle to the target point from the origin frame's x-axis.
@@ -112,13 +120,13 @@ class Experiment():
         self.experimentparams.trial.ledpanels.idPattern = 1
         self.experimentparams.trial.ledpanels.origin.x = 0 
         self.experimentparams.trial.ledpanels.origin.y = 0 
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.frameidParent = 'Fly1'
+        self.experimentparams.post.trigger.frameidParent = 'Fly01'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.speedAbsParentMin = 999.0
         self.experimentparams.post.trigger.speedAbsParentMax = 111.0     # i.e. NEVER

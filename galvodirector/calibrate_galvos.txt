@@ -1,0 +1,45 @@
+# The class GalvoCalibrator commands the galvos to a set of input points,
+# and reads the output points from the tracking system. 
+#
+# It then computes a linear relationship between the two, and displays it to the screen.
+#
+#
+# Instructions:
+# ---------------
+#
+#  Note: You should have an Ubuntu machine to run roscore and most of Flylab, and a Windows machine (called galvobox) to run just the galvodriver.
+#
+#  Make sure that the ROS networking is set properly between the main computer and the galvo computer.
+#  1. Get the ip of the machine running roscore (usually a Ubuntu machine, for example a.b.c.d)
+#  2. Get the ip of the galvobox (for example e.f.g.h).
+#  3. On the roscore machine, edit the environment vars such that:
+#     ROS_MASTER_URI=http://localhost:11311
+#     ROS_IP=a.b.c.d
+#  4. On the galvobox, edit the environment vars such that:
+#     ROS_MASTER_URI=http://a.b.c.d:11311
+#     ROS_IP=e.f.g.h
+#
+#  Perform the calibration:
+#  1. Run roscore
+#  2. Remove any optical filters so the camera can see the laser.
+#  3. Turn off all illumination.
+#  4. Turn on the laser.
+#  5. Run galvodriver (on the Windows galvobox machine) w/ roscore already running
+#  6. roslaunch galvodirector calibrator.launch   
+#  7.   Adjust the laser power so that each spot (in camera) is approx the size of a fly.
+#  8.   Turn off the laser.
+#  9.   In the Flylab GUI, click on <Establish New Background>.
+# 10.   In the Flylab GUI, click <Save Background Image>.
+# 11. Terminate the calibrator.py program (ctrl+c in the terminal window)
+# 12. Turn on the laser.
+# 13. roslaunch galvodirector calibrator.launch
+# 14.   Wait until at least several hundred "I/O Point Pairs" have been collected, and/or the
+#       numbers stabilize to at least four decimal places.  May take an hour or more.
+# 15. Terminate the calibrator.py program (ctrl+c in the terminal window)
+# 16. Transfer the calculated numbers to params_galvos.launch
+# 17. Replace optical filters.
+#
+# You're done!
+#
+
+

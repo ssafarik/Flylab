@@ -34,6 +34,14 @@ class Experiment():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         
+        self.experimentparams.robotspec.nRobots = 0
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0]
@@ -44,8 +52,8 @@ class Experiment():
         self.experimentparams.pre.wait1 = 0.0
         
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = 'Arena'
-        self.experimentparams.pre.trigger.frameidChild = 'Fly1'
+        self.experimentparams.pre.trigger.frameidParent = '/Arena'
+        self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin =   0.0
@@ -75,7 +83,7 @@ class Experiment():
         #mode='trackgrid'        # Small grid tracks flies.
         mode='tracknumber'      # Draw a numeral on flies.
         #mode='trackflylogo'
-        flies_list = range(1,1+rospy.get_param('nFlies', 0))
+        flies_list = range(1,1+self.experimentparams.flyspec.nFlies)
         
         
         self.experimentparams.trial.lasergalvos.enabled = False
@@ -86,8 +94,8 @@ class Experiment():
         if mode=='fixedpointlist':
             # Draw a point.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
+                                                                            frameidPosition   = '/Arena',
+                                                                            frameidAngle   = '/Arena',
                                                                             shape      = 'bypoints',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -106,8 +114,8 @@ class Experiment():
         if mode=='fixedcircle':
             # Draw a point.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
+                                                                            frameidPosition   = '/Arena',
+                                                                            frameidAngle   = '/Arena',
                                                                             shape      = 'circle',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -121,8 +129,8 @@ class Experiment():
         if mode=='trackgrid':
             for iFly in flies_list:
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%dForecast' % iFly,
-                                                                                frameidAngle   = 'Fly%dForecast' % iFly,
+                                                                                frameidPosition   = 'Fly%02dForecast' % iFly,
+                                                                                frameidAngle   = 'Fly%02dForecast' % iFly,
                                                                                 shape      = 'grid',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -136,8 +144,8 @@ class Experiment():
         if mode=='tracknumber':
             for iFly in flies_list:
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%dForecast' % iFly,
-                                                                                frameidAngle   = 'Fly%dForecast' % iFly,
+                                                                                frameidPosition   = 'Fly%02dForecast' % iFly,
+                                                                                frameidAngle   = 'Fly%02dForecast' % iFly,
                                                                                 shape      = '%s' % iFly,
                                                                                 hzPattern  = 10.0,
                                                                                 hzPoint    = 1000.0,
@@ -151,8 +159,8 @@ class Experiment():
         if mode=='trackflylogo':
             for iFly in flies_list:
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%dForecast' % iFly,
-                                                                                frameidAngle   = 'Fly%dForecast' % iFly,
+                                                                                frameidPosition   = 'Fly%02dForecast' % iFly,
+                                                                                frameidAngle   = 'Fly%02dForecast' % iFly,
                                                                                 shape      = 'flylogo',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -166,8 +174,8 @@ class Experiment():
         if mode=='fixedmaze':
             # Draw a maze.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
+                                                                            frameidPosition   = '/Arena',
+                                                                            frameidAngle   = '/Arena',
                                                                             shape      = 'grid',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -183,7 +191,7 @@ class Experiment():
         self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''

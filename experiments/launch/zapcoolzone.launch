@@ -1,0 +1,22 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- This experiment hits everywhere with the laser, except     -->
+	<!-- for a specified region.                                    -->
+    <!--                                                            -->
+    <!-- Launch this file to run the experiment, as in:             -->
+    <!-- roslaunch experiments zapcoolzone.launch                   -->
+    <!--                                                            -->
+	<!-- ========================================================== -->
+
+	<!-- ***  Core stuff  *** -->
+	<include file="$(find flycore)/launch/flycore.launch" />
+	
+    <!-- ***  Hardware  *** -->
+    <include file="$(find config)/launch/hardware.launch" />
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="experiments" type="ZapCoolZone.py" name="Experiment" required="true" />
+
+	
+  
+</launch>

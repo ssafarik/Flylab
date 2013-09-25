@@ -85,6 +85,7 @@ class StartExperiment (smach.State):
                              input_keys=['experimentparamsIn'],
                              output_keys=['experimentparamsOut'])
 
+        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
 
         services_dict = {}
         for name in g_notify_list:
@@ -110,6 +111,15 @@ class StartExperiment (smach.State):
         userdata.experimentparamsOut = experimentparams
         
         self.ExperimentStartServices.notify(experimentparams)
+
+        # Set up the tracking.    
+        userdata.experimentparamsOut = experimentparams
+        msgTrackingCommand = TrackingCommand()
+        msgTrackingCommand.command = 'initialize'
+        msgTrackingCommand.exclusionzones = experimentparams.tracking.exclusionzones
+        msgTrackingCommand.nRobots = experimentparams.robotspec.nRobots
+        msgTrackingCommand.nFlies = experimentparams.flyspec.nFlies
+        self.pubTrackingCommand.publish(msgTrackingCommand)
         
         # Wait for the Arenastate to get published.
         while self.arenastate is None:
@@ -210,11 +220,14 @@ class StartTrial (smach.State):
         rospy.loginfo ('EL State StartTrial(%s)' % experimentparams.experiment.trial)
 
 
-        # Set up the tracking exclusion zones.    
+        # Set up the tracking.    
         userdata.experimentparamsOut = experimentparams
         msgTrackingCommand = TrackingCommand()
-        msgTrackingCommand.command = 'setexclusionzones'
+        msgTrackingCommand.command = 'initialize'
         msgTrackingCommand.exclusionzones = experimentparams.tracking.exclusionzones
+        msgTrackingCommand.nRobots = experimentparams.robotspec.nRobots
+        msgTrackingCommand.nFlies = experimentparams.flyspec.nFlies
+        
         self.pubTrackingCommand.publish(msgTrackingCommand)
         
 
@@ -345,7 +358,6 @@ class TriggerOnStates (smach.State):
         self.TriggerServices = NotifyServices(services_dict=services_dict, type=Trigger) #TriggerServices()
         self.TriggerServices.attach()
     
-        self.nRobots = rospy.get_param('nRobots', 0)
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
     
         # Command messages.
@@ -385,7 +397,7 @@ class TriggerOnStates (smach.State):
         speed = None
         
         # If absolute speed (i.e. in the Arena frame), then try to use ArenaState speed.
-        if (frameidParent=='Arena') and (self.arenastate is not None):
+        if (frameidParent=='/Arena') and (self.arenastate is not None):
 
             # Check the robot.
             if (self.nRobots>0) and (frameidChild==self.arenastate.robot.name):
@@ -430,6 +442,9 @@ class TriggerOnStates (smach.State):
     def execute(self, userdata):
         rospy.loginfo('EL State TriggerOnStates(%s)' % (self.mode))
 
+
+        self.nRobots = userdata.experimentparamsIn.robotspec.nRobots
+        
         if self.mode == 'pre':
             trigger = userdata.experimentparamsIn.pre.trigger
         else:
@@ -500,7 +515,7 @@ class TriggerOnStates (smach.State):
                 isSpeedAbsParentInRange = True
                 if (trigger.speedAbsParentMin is not None) and (trigger.speedAbsParentMax is not None):
                     isSpeedAbsParentInRange = False
-                    speedAbsParent = self.GetSpeedFrameToFrame('Arena', trigger.frameidParent)# Absolute speed of the parent frame.
+                    speedAbsParent = self.GetSpeedFrameToFrame('/Arena', trigger.frameidParent)# Absolute speed of the parent frame.
                     #rospy.loginfo ('EL parent speed=%s' % speedAbsParent)
                     if speedAbsParent is not None:
                         if (trigger.speedAbsParentMin <= speedAbsParent <= trigger.speedAbsParentMax):
@@ -510,7 +525,7 @@ class TriggerOnStates (smach.State):
                 isSpeedAbsChildInRange = True
                 if (trigger.speedAbsChildMin is not None) and (trigger.speedAbsChildMax is not None):
                     isSpeedAbsChildInRange = False
-                    speedAbsChild = self.GetSpeedFrameToFrame('Arena', trigger.frameidChild)# Absolute speed of the child frame.
+                    speedAbsChild = self.GetSpeedFrameToFrame('/Arena', trigger.frameidChild)# Absolute speed of the child frame.
                     #rospy.loginfo ('EL child speed=%s' % speedAbsChild)
                     if speedAbsChild is not None:
                         if (trigger.speedAbsChildMin <= speedAbsChild <= trigger.speedAbsChildMax):
@@ -888,7 +903,7 @@ class ExperimentLib():
     # Gets called after all 'reset' states are terminated.
     # If any states aborted, then abort.
     def AllResetTerm_callback(self, outcome_map):
-        rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
+        #rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
         rv = 'success'
         for (name,classHardware) in self.actions_dict.iteritems():
             if (name in outcome_map):

@@ -26,13 +26,14 @@ function FlylabPlotAngleOverTime(dirspec, filespec)
     for i = iFiles
         fprintf('File %d: %s ... ', i, filenames{i})
         filedata = FlylabReadFile(filenames{i});
-
-        stateFly{i} = FlylabGetObjectState(filedata, 2);
-        timeFly{i} = filedata.states(:,1);
-        angleFly{i} = stateFly{i}(:,3);
-        lenMin = min(lenMin,length(angleFly{i}));
-        lenMax = max(lenMax,length(angleFly{i}));
-        fprintf ('done.\n')
+        if (FlylabIsValidFiledata(filedata))
+            stateFly{i} = FlylabGetObjectState(filedata, 2);
+            timeFly{i} = filedata.states(:,1);
+            angleFly{i} = stateFly{i}(:,3);
+            lenMin = min(lenMin,length(angleFly{i}));
+            lenMax = max(lenMax,length(angleFly{i}));
+            fprintf ('done.\n')
+        end
     end
 
     % Compute the mean time array.
@@ -88,8 +89,10 @@ function FlylabPlotAngleOverTime(dirspec, filespec)
     errorbar(timeMean(indices), angleMean(indices), ciAll(1,:), ciAll(2,:)); %angleStd(indices));
     hold on
     plot(timeMean, linMean, '-.r');
+    txtTitle = filedata.header.flyspec.description;
+    txtTitle(strfind(txtTitle,'_'))=' '; % Convert underscores to spaces.
     title(sprintf('flytype=%s,\nMean Angle Over Time When Laser On Clockwise Fly Rotation,\ntotal trial time=%0.1f hours, 95%% Confidence Interval', ...
-        filedata.header.flies.typeFlies, ...
+        txtTitle, ...
         timeMean(n)*nFiles/60));
     ylabel('radians');
     xlabel('minutes');

@@ -291,7 +291,7 @@ class MotorArm:
         isInArena = True
         
         # Transform to Arena frame.
-        ptsArena = self.TransformPointToFrame('Arena', ptsIn)
+        ptsArena = self.TransformPointToFrame('/Arena', ptsIn)
 
         # Clip to arena radius.
         (ptClipped, bClipped) = self.ClipPtToRadius(ptsArena.point, self.radiusArena)
