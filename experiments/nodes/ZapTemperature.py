@@ -53,7 +53,7 @@ class ExperimentZapafly():
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = False
         self.experimentparams.pre.trigger.frameidParent = '/Arena'
-        self.experimentparams.pre.trigger.frameidChild = 'Fly1'
+        self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
@@ -111,8 +111,8 @@ class ExperimentZapafly():
                                                                  )
         if mode=='trackgrid1':
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Fly1',
-                                                                            frameidAngle   = 'Fly1',
+                                                                            frameidPosition   = 'Fly01',
+                                                                            frameidAngle   = 'Fly01',
                                                                             shape      = 'grid',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -126,8 +126,8 @@ class ExperimentZapafly():
         if mode=='trackgrid':
             for iFly in range(self.experimentparams.flyspec.nFlies):
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%dForecast' % (iFly+1),
-                                                                                frameidAngle   = 'Fly%dForecast' % (iFly+1),
+                                                                                frameidPosition   = 'Fly%02dForecast' % (iFly+1),
+                                                                                frameidAngle   = 'Fly%02dForecast' % (iFly+1),
                                                                                 shape      = 'grid',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -141,8 +141,8 @@ class ExperimentZapafly():
         if mode=='tracknumber':
             for iFly in range(self.experimentparams.flyspec.nFlies):
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%dForecast' % (iFly+1),
-                                                                                frameidAngle   = 'Fly%dForecast' % (iFly+1),
+                                                                                frameidPosition   = 'Fly%02dForecast' % (iFly+1),
+                                                                                frameidAngle   = 'Fly%02dForecast' % (iFly+1),
                                                                                 shape      = '%s' % (iFly+1),
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -156,8 +156,8 @@ class ExperimentZapafly():
         if mode=='trackflylogo':
             for iFly in range(self.experimentparams.flyspec.nFlies):
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%dForecast' % (iFly+1),
-                                                                                frameidAngle   = 'Fly%dForecast' % (iFly+1),
+                                                                                frameidPosition   = 'Fly%02dForecast' % (iFly+1),
+                                                                                frameidAngle   = 'Fly%02dForecast' % (iFly+1),
                                                                                 shape      = 'flylogo',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -203,7 +203,7 @@ class ExperimentZapafly():
         self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''

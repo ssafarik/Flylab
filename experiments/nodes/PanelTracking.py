@@ -55,7 +55,7 @@ class Experiment():
         self.experimentparams.pre.wait1 = 0.5
         self.experimentparams.pre.trigger.enabled = False
         self.experimentparams.pre.trigger.frameidParent = '/Arena'
-        self.experimentparams.pre.trigger.frameidChild = 'Fly1'
+        self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
@@ -85,7 +85,7 @@ class Experiment():
         self.experimentparams.trial.ledpanels.idPattern = 1
         self.experimentparams.trial.ledpanels.origin.x = 10
         self.experimentparams.trial.ledpanels.origin.y = 0
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
@@ -93,7 +93,7 @@ class Experiment():
         
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = '/Arena'
-        self.experimentparams.post.trigger.frameidChild = 'Fly1'
+        self.experimentparams.post.trigger.frameidChild = 'Fly01'
         self.experimentparams.post.trigger.speedAbsParentMin =   0.0
         self.experimentparams.post.trigger.speedAbsParentMax = 999.0
         self.experimentparams.post.trigger.speedAbsChildMin  =   0.0

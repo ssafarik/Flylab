@@ -60,7 +60,7 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.mode = 'pattern'        
         self.experimentparams.trial.robot.move.relative.tracking = False
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Robot"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly01Forecast"
         self.experimentparams.trial.robot.move.relative.distance = 20
         self.experimentparams.trial.robot.move.relative.angleType = 'constant'
         self.experimentparams.trial.robot.move.relative.angleOffset = 0
@@ -99,7 +99,7 @@ class ExperimentChase():
 
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.frameidParent = 'Fly1'
+        self.experimentparams.post.trigger.frameidParent = 'Fly01'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.speedAbsParentMin = 999.0
         self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. Never.

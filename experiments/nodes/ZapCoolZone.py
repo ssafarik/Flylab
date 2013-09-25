@@ -23,11 +23,14 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Laser (180mW) is on the fly except in 40mm square."
-        self.experimentparams.experiment.maxTrials = 1
+        self.experimentparams.experiment.description = "Laser is on the fly except in southeast quarter."
+        self.experimentparams.experiment.maxTrials = 2
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = 'TrpA1neg_AristaeIntact_180mW_' # 'HCS_normal_' #
+        #self.experimentparams.save.filenamebase = 'HCS_normal_150mW_' 
+        #self.experimentparams.save.filenamebase = 'TrpA1neg_AristaeIntact_150mW_' # 
+        #self.experimentparams.save.filenamebase = 'UAS_TrpA1_parentalcontrol_180mW_' 
+        self.experimentparams.save.filenamebase = 'UAS_TrpA1_geosmin_120mW_' 
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
@@ -40,7 +43,10 @@ class Experiment():
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = 'TrpA1- Aristae Intact' #'HCS normal' #
+        #self.experimentparams.flyspec.description = 'HCS normal'
+        #self.experimentparams.flyspec.description = 'TrpA1 neg Aristae Intact' #
+        #self.experimentparams.flyspec.description = 'UAS_TrpA1_parentalcontrol_180mW'
+        self.experimentparams.flyspec.description = 'UAS_TrpA1_geosmin_120mW' 
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=48.0)]
@@ -53,7 +59,7 @@ class Experiment():
         
         self.experimentparams.pre.trigger.enabled = False
         self.experimentparams.pre.trigger.frameidParent = '/Arena'
-        self.experimentparams.pre.trigger.frameidChild = 'Fly1'
+        self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
@@ -86,8 +92,8 @@ class Experiment():
         self.experimentparams.trial.lasergalvos.statefilterCriteria_list = []
         for iFly in flies_list:
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Fly%dForecast' % iFly,
-                                                                            frameidAngle   = 'Fly%dForecast' % iFly,
+                                                                            frameidPosition   = 'Fly%02dForecast' % iFly,
+                                                                            frameidAngle   = 'Fly%02dForecast' % iFly,
                                                                             shape      = 'grid',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -104,21 +110,21 @@ class Experiment():
             #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
             #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
             #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
-            self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'pose':{'position':{'x':40, 'y':40}}}")
-            self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'pose':{'position':{'x':0, 'y':0}}}")
+            self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'pose':{'position':{'x':100, 'y':0}}}")
+            self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'pose':{'position':{'x':0, 'y':-100}}}")
             self.experimentparams.trial.lasergalvos.statefilterCriteria_list.append("exclusive")
         
         self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 3
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = '/Arena'
-        self.experimentparams.post.trigger.frameidChild = 'Fly1'
+        self.experimentparams.post.trigger.frameidChild = 'Fly01'
         self.experimentparams.post.trigger.speedAbsParentMin =   0.0
         self.experimentparams.post.trigger.speedAbsParentMax = 999.0
         self.experimentparams.post.trigger.speedAbsChildMin  =   0.0

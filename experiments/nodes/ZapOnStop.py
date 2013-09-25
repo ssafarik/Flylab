@@ -53,7 +53,7 @@ class Experiment():
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = False
         self.experimentparams.pre.trigger.frameidParent = '/Arena'
-        self.experimentparams.pre.trigger.frameidChild = 'Fly1'
+        self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin =   0.0
@@ -83,8 +83,8 @@ class Experiment():
         self.experimentparams.trial.lasergalvos.statefilterCriteria_list = []
         for iFly in range(2):#self.experimentparams.flyspec.nFlies):
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Fly%dForecast' % (iFly+1),
-                                                                            frameidAngle   = 'Fly%dForecast' % (iFly+1),
+                                                                            frameidPosition   = 'Fly%02dForecast' % (iFly+1),
+                                                                            frameidAngle   = 'Fly%02dForecast' % (iFly+1),
                                                                             shape      = 'grid',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -108,14 +108,14 @@ class Experiment():
         self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = '/Arena'
-        self.experimentparams.post.trigger.frameidChild = 'Fly1'
+        self.experimentparams.post.trigger.frameidChild = 'Fly01'
         self.experimentparams.post.trigger.speedAbsParentMin =   0.0
         self.experimentparams.post.trigger.speedAbsParentMax = 999.0
         self.experimentparams.post.trigger.speedAbsChildMin =   0.0

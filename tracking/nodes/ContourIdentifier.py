@@ -243,7 +243,7 @@ class ContourIdentifier:
         # Add the flies, if any.
         for iFly in self.iFly_list:
             try:
-                self.objects.append(Fly.Fly(tfrx=self.tfrx, name=("Fly%s" % iName)))
+                self.objects.append(Fly.Fly(tfrx=self.tfrx, name=("Fly%02d" % iName)))
             except rospy.ServiceException:
                 rospy.logwarn ('Exception adding Fly() object: %s' % e)
             iName += 1
