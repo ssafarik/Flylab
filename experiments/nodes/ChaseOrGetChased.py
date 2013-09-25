@@ -67,7 +67,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.tracking = True
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
         self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.distance = 8
+        self.experimentparams.trial.robot.move.relative.distance = 4
         self.experimentparams.trial.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
         self.experimentparams.trial.robot.move.relative.angleOffset = N.pi    # Radians from origin to target.
         self.experimentparams.trial.robot.move.relative.angleOscMag = 0#N.pi/2  # Radian magnitude of the added oscillation.
