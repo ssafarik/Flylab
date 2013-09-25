@@ -89,8 +89,10 @@ function FlylabPlotAngleOverTime(dirspec, filespec)
     errorbar(timeMean(indices), angleMean(indices), ciAll(1,:), ciAll(2,:)); %angleStd(indices));
     hold on
     plot(timeMean, linMean, '-.r');
+    txtTitle = filedata.header.flyspec.description;
+    txtTitle(strfind(txtTitle,'_'))=' '; % Convert underscores to spaces.
     title(sprintf('flytype=%s,\nMean Angle Over Time When Laser On Clockwise Fly Rotation,\ntotal trial time=%0.1f hours, 95%% Confidence Interval', ...
-        filedata.header.flyspec.description, ...
+        txtTitle, ...
         timeMean(n)*nFiles/60));
     ylabel('radians');
     xlabel('minutes');

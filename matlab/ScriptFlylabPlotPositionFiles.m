@@ -3,8 +3,8 @@
 % Subplots are fly frame trajectory, and heatmap.
 
 %dirspec='C:\\Flyranch\Flylabdata*';
-dirspec = '~/FlylabData/2013_09_24*';
-filespec='UAS_TrpA1_parentalcontrol_180mW_*.csv';
+dirspec = '~/FlylabData/2013_09_25*';
+filespec='vel_UAS_TrpA1_geosmin_120mW_*.csv';
 
 filenames = GetFilenames(dirspec, filespec);
 nSubsample = 5;
@@ -30,7 +30,9 @@ for i=1:length(filenames)
 
         subplot(3,2,[1 2 3 4]); 
         FlylabPlotPosition(filedata, iArena, [iFrameRobots,iFrameFlies], iTriggerStart, nSubsample, iStart, iStop); 
-        title(sprintf('Arena-centered View\nFile %d: %s', i, filenames{i})); 
+        txtTitle = filenames{i};
+        txtTitle(strfind(txtTitle,'_'))=' '; % Convert underscores to spaces.
+        title(sprintf('Arena-centered View\nFile %d: %s', i, txtTitle)); 
 
         subplot(3,2,5); 
         if filedata.header.flyspec.nFlies>0

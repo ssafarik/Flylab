@@ -24,7 +24,9 @@ function FlylabPlotAllInteractions(interactions, nPre, nPost, nSubsample)
             FlylabPlotPosition(filedata, 0, [2 3], iTrigger, nSubsample, iStart-nPre, iStop+nPost); 
             axis on; 
             [pth,fn,c] = fileparts(filename);
-            title (sprintf('%s:%d-%d', fn, iStart, iStop)); 
+            txtTitle = fn;
+            txtTitle(strfind(txtTitle,'_'))=' '; % Convert underscores to spaces.
+            title (sprintf('%s:%d-%d', txtTitle, iStart, iStop)); 
             drawnow; 
 
             % If the subplots are full, then open another figure window.
