@@ -31,7 +31,7 @@ class Experiment():
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = True
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
-        self.experimentparams.save.onlyWhileTriggered = True
+        self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.robotspec.nRobots = 1
         self.experimentparams.robotspec.width = 1.5875
@@ -50,7 +50,7 @@ class Experiment():
         self.experimentparams.pre.robot.move.pattern.frameidPosition = '/Arena'
         self.experimentparams.pre.robot.move.pattern.frameidAngle = '/Arena'
         self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/20                # Patterns per second.0
+        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/10                # Patterns per second.0
         self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
         self.experimentparams.pre.robot.move.pattern.count = -1
         self.experimentparams.pre.robot.move.pattern.size.x = 30
@@ -80,8 +80,8 @@ class Experiment():
         self.experimentparams.pre.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.pre.trigger.speedRelMin       =   0.0        # Relative speed of child to parent.
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
-        self.experimentparams.pre.trigger.distanceMin = 15.0               # Distance between child and parent frames.
-        self.experimentparams.pre.trigger.distanceMax = 30.0
+        self.experimentparams.pre.trigger.distanceMin = 25.0               # Distance between child and parent frames.
+        self.experimentparams.pre.trigger.distanceMax = 35.0
         self.experimentparams.pre.trigger.angleMin = 00.0 * N.pi / 180.0   # Angle of the child frame from the perspective of the parent frame.
         self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'          # 'inclusive' or 'exclusive' of the given angle range.
