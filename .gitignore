@@ -2,6 +2,7 @@ bin/
 build/
 msg_gen/
 srv_gen/
+.metadata
 *.pyc
 *.metadata
 *.project
@@ -12,4 +13,4 @@ srv_gen/
 *.internal
 *.lisp
 *.asv
-
+_*
