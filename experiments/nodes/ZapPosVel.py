@@ -23,14 +23,14 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Laser is on the fly when fly moving west."
-        self.experimentparams.experiment.maxTrials = -1
+        self.experimentparams.experiment.description = "Laser is on the fly when fly not moving east on left half arena."
+        self.experimentparams.experiment.maxTrials = 2
         self.experimentparams.experiment.trial = 1
         
         #self.experimentparams.save.filenamebase = 'HCS_normal_150mW_' 
         #self.experimentparams.save.filenamebase = 'TrpA1neg_AristaeIntact_150mW_' # 
         #self.experimentparams.save.filenamebase = 'UAS_TrpA1_parentalcontrol_180mW_' 
-        self.experimentparams.save.filenamebase = 'vel_TrpA1_CO2_120mW_' 
+        self.experimentparams.save.filenamebase = 'posvel_TrpA1_geosmin_120mW_' 
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
@@ -40,13 +40,11 @@ class Experiment():
         self.experimentparams.robotspec.nRobots = 0
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
-        self.experimentparams.robotspec.description = "Black oxide magnet"
+        self.experimentparams.robotspec.description = "none"
 
         self.experimentparams.flyspec.nFlies = 1
-        #self.experimentparams.flyspec.description = 'HCS normal'
-        #self.experimentparams.flyspec.description = 'TrpA1 neg Aristae Intact' #
-        #self.experimentparams.flyspec.description = 'UAS_TrpA1_parentalcontrol_180mW'
-        self.experimentparams.flyspec.description = 'TrpA1_CO2_120mW' 
+        #self.experimentparams.flyspec.description = 'TrpA1_parentalcontrol_120mW'
+        self.experimentparams.flyspec.description = 'TrpA1_geosmin_120mW' 
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=48.0)]
@@ -106,8 +104,10 @@ class Experiment():
                                                                  )
             #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'speed':5.0}")
             #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'speed':0.0}")
-            self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'velocity':{'linear':{'x':1,'y':9999}}}")
-            self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'linear':{'x':-9999,'y':-9999}}}")
+            #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'velocity':{'linear':{'x':1,'y':9999}}}")
+            #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'linear':{'x':-9999,'y':-9999}}}")
+            self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'velocity':{'linear':{'x':1,'y':9999}},'pose':{'position':{'x':0, 'y':100}}}")
+            self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'linear':{'x':-9999,'y':-9999}},'pose':{'position':{'x':-100, 'y':-100}}}")
             #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
             #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
             #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'pose':{'position':{'x':0, 'y':100}}}")
