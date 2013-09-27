@@ -2,7 +2,6 @@ bin/
 build/
 msg_gen/
 srv_gen/
-.metadata/
 *.pyc
 *.metadata
 *.project
