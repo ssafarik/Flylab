@@ -92,9 +92,10 @@ function FlylabPlotPosition(varargin)
         if iFrameParent~=0
             axis([-rMax rMax -rMax rMax]);
         end
+        axis ([-85 85 -85 85]);
     end
     
-    axis off
-    axis equal
+    %axis off
+    %axis equal
 
     

@@ -1,7 +1,7 @@
 function bValid = FlylabIsValidFiledata (filedata)
     if (size(fieldnames(filedata.header))>0)
-        bValid = True;
+        bValid = true;
     else
-        bValid = False;
+        bValid = false;
     end
     
