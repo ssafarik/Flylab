@@ -145,6 +145,10 @@ class Action (smach.State):
                 isStatefiltered = True
             else:
                 isStatefiltered = False
+                
+            if (len(self.paramsIn.lasergalvos.statefilterLo_list) != len(self.paramsIn.lasergalvos.statefilterHi_list)):
+                rospy.logwarn('Check your experiment params structure:  Number of statefilters does not match number of patterns.  Not filtering states.')
+                
 
             # Initialize statefilter vars.                
             bInStatefilterRangePrev = [False for i in range(nPatterns)]
@@ -157,7 +161,6 @@ class Action (smach.State):
     
             # Move galvos until preempt or timeout.        
             while not rospy.is_shutdown():
-                
                 # If state is used to determine when pattern is shown.
                 if isStatefiltered:
                     # Check if any filterstates have changed.
@@ -202,12 +205,12 @@ class Action (smach.State):
                         if (pose is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', pattern.frameidPosition, stamp):
                             try:
                                 poseStamped = self.tfrx.transformPose('/Arena', PoseStamped(header=Header(stamp=stamp,
-                                                                                                      frame_id=pattern.frameidPosition),
-                                                                                        pose=Pose(position=Point(0,0,0),
-                                                                                                  orientation=Quaternion(0,0,0,1)
-                                                                                                  )
-                                                                                        )
-                                                                   )
+                                                                                                          frame_id=pattern.frameidPosition),
+                                                                                            pose=Pose(position=Point(0,0,0),
+                                                                                                      orientation=Quaternion(0,0,0,1)
+                                                                                                      )
+                                                                                            )
+                                                                      )
                                 pose = poseStamped.pose
                             except tf.Exception:
                                 pose = None
@@ -237,7 +240,6 @@ class Action (smach.State):
                             state = MsgFrameState(pose = pose, 
                                                   velocity = velocity,
                                                   speed = speed)
-    
                             bInStatefilterRangePrev[iPattern] = bInStatefilterRange[iPattern]
                             bInStatefilterRange[iPattern] = self.Statefilter.InRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
                             self.Statefilter.PublishMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)

@@ -761,7 +761,7 @@ class Fly:
                 vy = vyKalman
                 vz = vzKalman
             else: # Use the unfiltered data for the case where the filters return None results.
-                rospy.logwarn('FLY Object %s not yet initialized at %s, %s' % (self.name, contourinfo.header.stamp.to_sec(), [self.contourinfo.x, self.contourinfo.y]))
+                rospy.logwarn('FLY Object %s not yet initialized, %s' % (self.name, [self.contourinfo.x, self.contourinfo.y]))
                 x = 0.0#self.contourinfo.x
                 y = 0.0#self.contourinfo.y
                 z = 0.0
