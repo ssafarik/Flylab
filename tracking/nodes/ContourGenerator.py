@@ -91,6 +91,11 @@ class ContourGenerator:
         self.imgRoi_list = []
         self.contour_list = []
         self.nContours = 0
+        self.nContoursPrev = 0
+        
+        self.nObjects = 2   # TODO: should be nRobots + nFlies
+        self.bMerged = False
+        
         self.nContoursMax = rospy.get_param('tracking/nContoursMax', 20)
         self.areaContourMin = rospy.get_param('tracking/areaContourMin', 0.0)
         self.minEccForDisplay = 1.75
@@ -475,8 +480,34 @@ class ContourGenerator:
             contourinfolists_list = sorted(tuple(contourinfolists_list))
             contourinfolists_list = [x for i, x in enumerate(contourinfolists_list) if (not i) or (N.linalg.norm(N.array(contourinfolists_list[i][0:2])-N.array(contourinfolists_list[i-1][0:2])) > self.distanceDuplicateContour)]
         
-            # Repackage the de-duped data.
+        
+            # Count the contours.
             self.nContours = len(contourinfolists_list)
+            
+
+            # Determine if two contours have merged, and need to be split.
+            #rospy.logwarn('nObjects=%d, nContoursPrev=%d, nContours=%d, bMerged=%s' % (self.nObjects, self.nContoursPrev, self.nContours, self.bMerged))
+            if (max(self.nContours,self.nContoursPrev) <= self.nObjects):
+                if (self.nContours < self.nContoursPrev):
+                    self.bMerged = True # Just merged.
+                    
+                if ((self.nContours == self.nContoursPrev) and self.bMerged):
+                    self.bMerged = True # Stay merged.
+                
+                if ((self.nContours == self.nContoursPrev) and not self.bMerged):
+                    self.bMerged = False # Stay unmerged.
+
+                if (self.nContours > self.nContoursPrev):
+                    self.bMerged = False # Became unmerged.
+            else:
+                self.bMerged = False # Have enough contours, don't split any.
+                
+                
+            #if self.bMerged:
+            #    rospy.logwarn('Contours Merged: %d' % self.nContours)
+                
+
+            # Repackage the de-duped data.
             contourinfolists.x = []
             contourinfolists.y = []
             contourinfolists.angle = []
@@ -521,7 +552,8 @@ class ContourGenerator:
                 contourinfolists.imgRoi[iContour] = imgRoi
                 
 
-            
+        self.nContoursPrev = self.nContours
+    
         return contourinfolists, contours    
         
 
