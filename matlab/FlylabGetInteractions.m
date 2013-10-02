@@ -5,6 +5,7 @@ function [start,stop] = FlylabGetInteractions(varargin)
 % iFrameParent: Frame number of the parent object (1=Robot, 2=Fly1, etc)
 % iFrameChild:  Frame number of the child object (1=Robot, 2=Fly1, etc)
 % nMinLen:      Minimum length of a valid interaction sequence.
+% criteria:     'chase' or 'proximity' or 'fight' or 'all'
 % iStart:       Only consider states beginning here.
 % iStop:        Only consider states ending here.
 %

@@ -122,7 +122,7 @@ class Fly:
         self.isDead = False # TO DO: dead fly detection.
 
         self.state = MsgFrameState()
-        self.state.header.frame_id = 'Arena'
+        self.state.header.frame_id = '/Arena'
         self.state.pose.position.x = 0.0
         self.state.pose.position.y = 0.0
         self.state.pose.position.z = 0.0
@@ -691,7 +691,7 @@ class Fly:
             # The computed orientation overrides the visual orientation.
             if posesComputedExternal is not None:
                 try: 
-                    posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
+                    posesComputed = self.tfrx.transformPose('/Arena', posesComputedExternal)
                     q = posesComputed.pose.orientation
                     rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
                 except tf.Exception, e:
@@ -765,7 +765,7 @@ class Fly:
                 vy = vyKalman
                 vz = vzKalman
             else: # Use the unfiltered data for the case where the filters return None results.
-                rospy.logwarn('FLY Object %s not yet initialized at %s, %s' % (self.name, contourinfo.header.stamp.to_sec(), [self.contourinfo.x, self.contourinfo.y]))
+                rospy.logwarn('FLY Object %s not yet initialized, %s' % (self.name, [self.contourinfo.x, self.contourinfo.y]))
                 x = 0.0#self.contourinfo.x
                 y = 0.0#self.contourinfo.y
                 z = 0.0
@@ -861,7 +861,7 @@ class Fly:
             # Publish a 3D model marker for the robot.
             if 'Robot' in self.name:
                 markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
-                                                    frame_id='Arena'),
+                                                    frame_id='/Arena'),
                                       ns=self.name,
                                       id=1,
                                       type=Marker.CYLINDER,

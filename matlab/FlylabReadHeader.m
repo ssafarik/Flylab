@@ -7,7 +7,7 @@ function header = FlylabReadHeader (filename)
     bSuccess = false;
     fid = fopen(filename);
 
-    while (1)
+    while (fid ~= -1)
         headings = textscan(fid,'%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q%q',1,'Delimiter',',');
         switch headings{1}{1}
             case 'versionFile'
@@ -18,7 +18,7 @@ function header = FlylabReadHeader (filename)
                 end
                 structVersion = struct(headings{1}{1},values{1});
 
-                if strcmp(values{1}{1},'2.82')
+                if strcmp(values{1}{1},'2.83')
                     bSuccess = true;
                 else
                     break;
@@ -37,27 +37,24 @@ function header = FlylabReadHeader (filename)
                                    headings{4}{1},values{4});
                 
             case 'nRobots'
-                values = textscan(fid,'%d%f%f%q%q%q',1,'Delimiter',',');
+                values = textscan(fid,'%d%f%f%q',1,'Delimiter',',');
                 for i=1:length(values)
                     if strcmpi(values{i},'True'); values{i}=true; end;
                     if strcmpi(values{i},'False'); values{i}=false; end;
                 end
-                structRobots = struct(headings{1}{1},values{1}, ...
+                structRobotSpec = struct(headings{1}{1},values{1}, ...
                                    headings{2}{1},values{2}, ...
                                    headings{3}{1},values{3}, ...
-                                   headings{4}{1},values{4}, ...
-                                   headings{5}{1},values{5}, ...
-                                   headings{6}{1},values{6});
+                                   headings{4}{1},values{4});
                 
             case 'nFlies'
-                values = textscan(fid,'%d%q%q',1,'Delimiter',',');
+                values = textscan(fid,'%d%q',1,'Delimiter',',');
                 for i=1:length(values)
                     if strcmpi(values{i},'True'); values{i}=true; end;
                     if strcmpi(values{i},'False'); values{i}=false; end;
                 end
-                structFlies = struct(headings{1}{1},values{1}, ...
-                                   headings{2}{1},values{2}, ...
-                                   headings{3}{1},values{3});
+                structFlySpec = struct(headings{1}{1},values{1}, ...
+                                   headings{2}{1},values{2});
                 
             case 'trackingExclusionzoneEnabled'
                 values = textscan(fid,'%q%f%f%f',1,'Delimiter',',');
@@ -284,8 +281,8 @@ function header = FlylabReadHeader (filename)
             header = setfield(header, topfields{i}, getfield(structTop,topfields{i}));
         end
         header.version               = structVersion;
-        header.robots                = structRobots;
-        header.flies                 = structFlies;
+        header.robotspec             = structRobotSpec;
+        header.flyspec               = structFlySpec;
         header.trackingExclusionzone = structTrackingExclusionzone;
         header.preRobot              = structPreRobot;
         header.preLaser              = structPreLaser;
@@ -299,7 +296,7 @@ function header = FlylabReadHeader (filename)
         header.postTrigger           = structPostTrigger;
         header.postWait              = structPostWait;
     else
-        fprintf('WARNING: This code only reads Flylab .csv version 2.82\n');
+        fprintf('WARNING: This code only reads Flylab .csv version 2.83\n');
         try
             fprintf('%s is a version %s file.\n', filename, values{1}{1});
         catch
@@ -311,5 +308,7 @@ function header = FlylabReadHeader (filename)
         % header lines.
     end
     
-    fclose(fid);
+    if (fid ~= -1)
+        fclose(fid);
+    end
                 

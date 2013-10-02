@@ -32,24 +32,4 @@
   <param name="camera/arena_tvec_2" type="double" value="388.357"/>
   
 
-  <!-- ================================================================== -->
-  <!-- Arena-to-Galvo transform                                           -->
-  <!-- where you align the computed laser position with the visual        -->
-  <!-- laser position.                                                    -->
-  <!--                                                                    -->
-  <!-- "roslaunch calibration GalvoArena.launch"                          -->
-  <!-- Then let it run until the "Translation Vector" and "Quaternion"    -->
-  <!-- stabilize.  Then copy the translation & quaternion values to       -->
-  <!-- the "args" below, e.g.  as:  tx,ty,tz,qx,qy,qz,qw                  -->
-  <!--                                                                    -->
-  <!-- ================================================================== -->
-  
-  <param name="arena_galvo_x" type="double" value="0"/>  <!-- Adjust for laser alignment here. -->
-  <param name="arena_galvo_y" type="double" value="0"/>  <!-- Adjust for laser alignment here. -->
-  <param name="arena_galvo_z" type="double" value="0"/>
-  <param name="arena_galvo_qx" type="double" value="0"/>
-  <param name="arena_galvo_qy" type="double" value="0"/>
-  <param name="arena_galvo_qz" type="double" value="0"/>
-  <param name="arena_galvo_qw" type="double" value="1"/>
-
 </launch>

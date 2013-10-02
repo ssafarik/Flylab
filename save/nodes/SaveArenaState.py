@@ -35,17 +35,7 @@ class SaveArenastate:
 
 
         self.bTriggered = False
-        self.bSaveOnlyWhileTriggered = False # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
-
-        self.nFlies         = rospy.get_param("nFlies", 0)
-        self.typeFlies      = rospy.get_param("fly/type", "unspecified")
-        self.genderFlies    = rospy.get_param("fly/gender", "unspecified")
-        self.nRobots        = rospy.get_param("nRobots", 0)
-        self.widthRobot     = rospy.get_param("robot/width", "3.175") # mm
-        self.heightRobot    = rospy.get_param("robot/height", "3.175") # mm
-        self.visibleRobot   = bool(rospy.get_param("robot/visible", "True"))
-        self.paintRobot     = str(rospy.get_param("robot/paint", "blackoxide"))
-        self.scentRobot     = str(rospy.get_param("robot/scent", "unscented"))
+        self.bSaveOnlyWhileTriggered = True # False: Save everything from one trial_start to the trial_end.  True:  Save everything from trigger=on to trigger=off.
 
 
         
@@ -68,7 +58,7 @@ class SaveArenastate:
 
         
         #################################################################################
-        self.versionFile = '2.82'    # Increment this when the file format changes.
+        self.versionFile = '2.83'    # Increment this when the file format changes.
         #################################################################################
 
         
@@ -84,25 +74,19 @@ class SaveArenastate:
                                     '{maxTrials:s}, '\
                                     '{trial:s}\n'
                                   
-        self.headerRobotTxt =       'nRobots, '\
+        self.headerRobotSpecTxt =   'nRobots, '\
                                     'widthRobot, '\
                                     'heightRobot, '\
-                                    'visibleRobot, '\
-                                    'paintRobot, '\
-                                    'scentRobot\n'
-        self.templateRobot =        '{nRobots:s}, '\
+                                    'descriptionRobot\n'
+        self.templateRobotSpec =    '{nRobots:s}, '\
                                     '{widthRobot:s}, '\
                                     '{heightRobot:s}, '\
-                                    '{visibleRobot:s}, '\
-                                    '{paintRobot:s}, '\
-                                    '{scentRobot:s}\n'
+                                    '{descriptionRobot:s}\n'
                                   
-        self.headerFliesTxt =       'nFlies, '\
-                                    'typeFlies, '\
-                                    'genderFlies\n'
-        self.templateFlies =        '{nFlies:s}, '\
-                                    '{typeFlies:s}, '\
-                                    '{genderFlies:s}\n'
+        self.headerFlySpecTxt =     'nFlies, '\
+                                    'descriptionFlies\n'
+        self.templateFlySpec =      '{nFlies:s}, '\
+                                    '{descriptionFlies:s}\n'
 
         self.headerTrackingTxtA =   'trackingExclusionzoneEnabled'
         self.headerTrackingTxtB =   ', trackingExclusionzoneX, '\
@@ -380,11 +364,6 @@ class SaveArenastate:
         self.templateStateRobot = ', {xRobot:{align}{sign}{width}.{precision}{type}}, {yRobot:{align}{sign}{width}.{precision}{type}}, {aRobot:{align}{sign}{width}.{precision}{type}}, {vxRobot:{align}{sign}{width}.{precision}{type}}, {vyRobot:{align}{sign}{width}.{precision}{type}}, {vaRobot:{align}{sign}{width}.{precision}{type}}, {aRobotWingLeft:{align}{sign}{width}.{precision}{type}}, {aRobotWingRight:{align}{sign}{width}.{precision}{type}}'
         self.templateStateFly   = ', {xFly:{align}{sign}{width}.{precision}{type}}, {yFly:{align}{sign}{width}.{precision}{type}}, {aFly:{align}{sign}{width}.{precision}{type}}, {vxFly:{align}{sign}{width}.{precision}{type}}, {vyFly:{align}{sign}{width}.{precision}{type}}, {vaFly:{align}{sign}{width}.{precision}{type}}, {aFlyWingLeft:{align}{sign}{width}.{precision}{type}}, {aFlyWingRight:{align}{sign}{width}.{precision}{type}}'
 
-        self.stateTxt = self.stateLeftTxt + self.stateRobotTxt
-        for i in range(self.nFlies):
-            self.stateTxt += self.stateFlyTxt
-        self.stateTxt += '\n'
-
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -520,18 +499,15 @@ class SaveArenastate:
                                                 maxTrials                  = str(experimentparamsReq.experiment.maxTrials),
                                                 trial                      = str(experimentparamsReq.experiment.trial),
                                                 )
-        headerRobot = self.templateRobot.format(
-                                                nRobots                    = str(self.nRobots),
-                                                widthRobot                 = str(self.widthRobot),
-                                                heightRobot                = str(self.heightRobot),
-                                                visibleRobot               = str(self.visibleRobot),
-                                                paintRobot                 = str(self.paintRobot),
-                                                scentRobot                 = str(self.scentRobot),
+        headerRobotSpec = self.templateRobotSpec.format(
+                                                nRobots                    = str(experimentparamsReq.robotspec.nRobots),
+                                                widthRobot                 = str(experimentparamsReq.robotspec.width),
+                                                heightRobot                = str(experimentparamsReq.robotspec.height),
+                                                descriptionRobot           = str(experimentparamsReq.robotspec.description),
                                                 )
-        headerFlies = self.templateFlies.format(
-                                                nFlies                     = str(self.nFlies),
-                                                typeFlies                  = str(self.typeFlies),
-                                                genderFlies                = str(self.genderFlies),
+        headerFlySpec = self.templateFlySpec.format(
+                                                nFlies                     = str(experimentparamsReq.flyspec.nFlies),
+                                                descriptionFlies           = str(experimentparamsReq.flyspec.description),
                                                 )
 
         self.headerTrackingTxt = self.headerTrackingTxtA
@@ -789,12 +765,12 @@ class SaveArenastate:
             self.fid.write(headerExperiment)
             self.fid.write('\n')
 
-            self.fid.write(self.headerRobotTxt)
-            self.fid.write(headerRobot)
+            self.fid.write(self.headerRobotSpecTxt)
+            self.fid.write(headerRobotSpec)
             self.fid.write('\n')
 
-            self.fid.write(self.headerFliesTxt)
-            self.fid.write(headerFlies)
+            self.fid.write(self.headerFlySpecTxt)
+            self.fid.write(headerFlySpec)
             self.fid.write('\n')
 
             self.fid.write(self.headerTrackingTxt)
@@ -846,6 +822,11 @@ class SaveArenastate:
             self.fid.write('\n')
             
             
+            self.stateTxt = self.stateLeftTxt + self.stateRobotTxt
+            for i in range(experimentparamsReq.flyspec.nFlies):
+                self.stateTxt += self.stateFlyTxt
+            self.stateTxt += '\n'
+
             self.fid.write(self.stateTxt)
 
     
@@ -856,7 +837,7 @@ class SaveArenastate:
 
             # Get latest time.
             stamp = max(0.0, arenastate.robot.header.stamp.to_sec())
-            for iFly in range(len(arenastate.flies)): #self.nFlies):
+            for iFly in range(len(arenastate.flies)):
                 stamp = max(stamp, arenastate.flies[iFly].header.stamp.to_sec())
             
             # Get the state of the robot.
@@ -895,7 +876,7 @@ class SaveArenastate:
 
 
             # Go through the flies.                
-            for iFly in range(self.nFlies):
+            for iFly in range(len(arenastate.flies)):
                 # Get the state of each fly.
                 if len(arenastate.flies)>iFly:
                     stateFly = arenastate.flies[iFly]

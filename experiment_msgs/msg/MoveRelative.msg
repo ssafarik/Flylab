@@ -1,6 +1,6 @@
 bool 		tracking
-string 		frameidOriginPosition # 'Plate' or 'Robot' or 'Fly'
-string 		frameidOriginAngle    # 'Plate' or 'Robot' or 'Fly'
+string 		frameidOriginPosition # 'Arena' or 'Robot' or 'Fly'
+string 		frameidOriginAngle    # 'Arena' or 'Robot' or 'Fly'
 float64 	distance              # mm
 string 		angleType             # 'random' or 'constant'
 float64 	angleOffset           # Radians from origin to target.

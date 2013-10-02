@@ -55,8 +55,8 @@ class ContourIdentifier:
     def __init__(self):
         self.initialized = False
         self.stateEndEffector = None  # If no robot exists, this will remain as None.  Set in ContourinfoLists_callback.
-        self.nFlies = rospy.get_param('nFlies', 0)
-        self.nRobots = rospy.get_param('nRobots', 0)
+        self.nRobots = 0
+        self.nFlies = 0
         
         self.contourinfo_list = []
         self.mapContourinfoFromObject = []      # A mapping from the (kalman) object number to the contourinfo number.
@@ -179,7 +179,7 @@ class ContourIdentifier:
     #
     def TrackingCommand_callback(self, trackingcommand):
         with self.lock:
-            if trackingcommand.command=='setexclusionzones':
+            if trackingcommand.command=='initialize':
                 self.enabledExclusionzone = trackingcommand.exclusionzones.enabled
                 self.pointExclusionzone_list = trackingcommand.exclusionzones.point_list
                 self.radiusExclusionzone_list = trackingcommand.exclusionzones.radius_list
@@ -192,7 +192,7 @@ class ContourIdentifier:
                     self.markerExclusionzone_list = []
                     for i in range(len(self.pointExclusionzone_list)):
                         self.markerExclusionzone_list.append(Marker(header=Header(stamp = rospy.Time.now(),
-                                                                                  frame_id='Arena'),
+                                                                                  frame_id='/Arena'),
                                                                     ns='exclusionzone_%d' % i,
                                                                     id=100+i,
                                                                     type=Marker.CYLINDER,
@@ -209,6 +209,9 @@ class ContourIdentifier:
                                                                                     b=1.0),
                                                                     lifetime=rospy.Duration(1.0))
                                                              )
+                self.nRobots = trackingcommand.nRobots
+                self.nFlies = trackingcommand.nFlies
+                rospy.logwarn('nRobots=%d, nFlies=%d' % (self.nRobots, self.nFlies))
                 self.ResetFlyObjects()
             
 
@@ -241,7 +244,7 @@ class ContourIdentifier:
         # Add the flies, if any.
         for iFly in self.iFly_list:
             try:
-                self.objects.append(Fly.Fly(tfrx=self.tfrx, name=("Fly%s" % iName)))
+                self.objects.append(Fly.Fly(tfrx=self.tfrx, name=("Fly%02d" % iName)))
             except rospy.ServiceException:
                 rospy.logwarn ('Exception adding Fly() object: %s' % e)
             iName += 1
@@ -299,12 +302,12 @@ class ContourIdentifier:
 
             
             contourinfolistsOut = copy.copy(contourinfolistsIn)
-            contourinfolistsOut.header.frame_id = 'Arena'
+            contourinfolistsOut.header.frame_id = '/Arena'
             contourinfolistsOut.x = response.xDst
             contourinfolistsOut.y = response.yDst
         else:
             contourinfolistsOut = copy.copy(contourinfolistsIn)
-            contourinfolistsOut.header.frame_id = 'Arena'
+            contourinfolistsOut.header.frame_id = '/Arena'
             contourinfolistsOut.x = []
             contourinfolistsOut.y = []
             
@@ -639,14 +642,14 @@ class ContourIdentifier:
                         
                         # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
                         try:
-                            stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
-                            (translationEE,rotationEE) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
+                            stamp = self.tfrx.getLatestCommonTime('/Arena', 'EndEffector')
+                            (translationEE,rotationEE) = self.tfrx.lookupTransform('/Arena', 'EndEffector', stamp)
                         except tf.Exception, e:
                             pass    # No transform - Either the EE is still initializing, or because we're replaying a bag file.
                             #rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
                         else:
                             self.pubStateEE.publish(MsgFrameState(header=Header(stamp=contourinfolistsPixels.header.stamp,
-                                                                                frame_id='Arena'),
+                                                                                frame_id='/Arena'),
                                                                   pose=Pose(position=Point(translationEE[0],translationEE[1],translationEE[2]),
                                                                             orientation=Quaternion(rotationEE[0],rotationEE[1],rotationEE[2],rotationEE[3]))
                                                                   )

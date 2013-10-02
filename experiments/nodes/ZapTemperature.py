@@ -34,6 +34,14 @@ class ExperimentZapafly():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
+        self.experimentparams.robotspec.nRobots = 0
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
@@ -44,8 +52,8 @@ class ExperimentZapafly():
 
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = 'Arena'
-        self.experimentparams.pre.trigger.frameidChild = 'Fly1'
+        self.experimentparams.pre.trigger.frameidParent = '/Arena'
+        self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
@@ -75,8 +83,8 @@ class ExperimentZapafly():
         if mode=='platepoint':
             # Draw a point.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
+                                                                            frameidPosition   = '/Arena',
+                                                                            frameidAngle   = '/Arena',
                                                                             shape      = 'constant',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -89,8 +97,8 @@ class ExperimentZapafly():
                                                                  )
         if mode=='plategrid':
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Arena',
-                                                                            frameidAngle   = 'Arena',
+                                                                            frameidPosition   = '/Arena',
+                                                                            frameidAngle   = '/Arena',
                                                                             shape      = 'grid',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -103,8 +111,8 @@ class ExperimentZapafly():
                                                                  )
         if mode=='trackgrid1':
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = 'Fly1',
-                                                                            frameidAngle   = 'Fly1',
+                                                                            frameidPosition   = 'Fly01',
+                                                                            frameidAngle   = 'Fly01',
                                                                             shape      = 'grid',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -116,10 +124,10 @@ class ExperimentZapafly():
                                                                             direction  = 1), # Peano curve level.
                                                                  )
         if mode=='trackgrid':
-            for iFly in range(rospy.get_param('nFlies', 0)):
+            for iFly in range(self.experimentparams.flyspec.nFlies):
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%dForecast' % (iFly+1),
-                                                                                frameidAngle   = 'Fly%dForecast' % (iFly+1),
+                                                                                frameidPosition   = 'Fly%02dForecast' % (iFly+1),
+                                                                                frameidAngle   = 'Fly%02dForecast' % (iFly+1),
                                                                                 shape      = 'grid',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -131,10 +139,10 @@ class ExperimentZapafly():
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
         if mode=='tracknumber':
-            for iFly in range(rospy.get_param('nFlies', 0)):
+            for iFly in range(self.experimentparams.flyspec.nFlies):
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%dForecast' % (iFly+1),
-                                                                                frameidAngle   = 'Fly%dForecast' % (iFly+1),
+                                                                                frameidPosition   = 'Fly%02dForecast' % (iFly+1),
+                                                                                frameidAngle   = 'Fly%02dForecast' % (iFly+1),
                                                                                 shape      = '%s' % (iFly+1),
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -146,10 +154,10 @@ class ExperimentZapafly():
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
         if mode=='trackflylogo':
-            for iFly in range(rospy.get_param('nFlies', 0)):
+            for iFly in range(self.experimentparams.flyspec.nFlies):
                 self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%dForecast' % (iFly+1),
-                                                                                frameidAngle   = 'Fly%dForecast' % (iFly+1),
+                                                                                frameidPosition   = 'Fly%02dForecast' % (iFly+1),
+                                                                                frameidAngle   = 'Fly%02dForecast' % (iFly+1),
                                                                                 shape      = 'flylogo',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -163,8 +171,8 @@ class ExperimentZapafly():
         if mode=='fixedmaze':
             # Draw a maze.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Arena',
-                                                                                frameidAngle   = 'Arena',
+                                                                                frameidPosition   = '/Arena',
+                                                                                frameidAngle   = '/Arena',
                                                                                 shape      = 'grid',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -178,8 +186,8 @@ class ExperimentZapafly():
         if mode=='fixedpoint':
             # Draw a point.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Arena',
-                                                                                frameidAngle   = 'Arena',
+                                                                                frameidPosition   = '/Arena',
+                                                                                frameidAngle   = '/Arena',
                                                                                 shape      = 'constant',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -195,7 +203,7 @@ class ExperimentZapafly():
         self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
