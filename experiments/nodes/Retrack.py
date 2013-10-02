@@ -32,7 +32,7 @@ class Experiment():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         
-        self.experimentparams.robotspec.nRobots = 0
+        self.experimentparams.robotspec.nRobots = 1
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
         self.experimentparams.robotspec.description = "Black oxide magnet"

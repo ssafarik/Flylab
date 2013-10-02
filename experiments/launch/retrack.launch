@@ -11,39 +11,27 @@
     
     <!-- ***  Core stuff  *** -->
     <include file="$(find flycore)/launch/flycore.launch" />
-    
-
-    <!-- ***  Hardware  *** -->
-    <!-- No hardware. -->
-
-
-    <!-- ***  The Experiment  *** -->
-    <node pkg="experiments" type="Retrack.py" name="Experiment" required="true" />
-
-    
-  
-
-    <include file="$(find colosseum)/launch/params_tracking.launch" />
-    <include file="$(find colosseum)/launch/params_calibration.launch" />
-
-	<include file="$(find flybowls)/launch/heatbowl_50mm.launch" />
-
-	
     <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" />
 
-    <include file="$(find flappy)/launch/input_bag.launch" >
-        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130618125239.bag" /> -->
-        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130618133754.bag" /> -->
-        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130619123409.bag" /> -->
-        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130619130356.bag" /> -->
-        
-         <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130712105024.bag" /> 
-        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130712115025.bag" /> --> 
-        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130712125027.bag" /> --> 
-        <!-- <arg name="bagfiles" value="/home/ssafarik/bags/colosseum/twoflies20130712135028.bag" /> -->
+    
 
+    <!-- STEP 1:  Edit Retrack.py for the number of robots & flies.  -->
+    <node pkg="experiments" type="Retrack.py" name="Experiment" required="true" />
+  
+
+    <!-- STEP 2:  Edit the following lines to show the hardware you recorded the .bag file upon. -->
+    <include file="$(find racetrack)/launch/params_tracking.launch" />
+    <include file="$(find racetrack)/launch/params_calibration.launch" />
+	<include file="$(find flybowls)/launch/heatbowl_50mm.launch" />
+
+
+    <!-- STEP 3:  Edit the following lines to play the appropriate .bag file. -->
+    <include file="$(find flappy)/launch/input_bag.launch" >
+        <arg name="bagfiles" value="/home/ssafarik/test.bag" /> 
     </include> 
+
         
+
     
      
 

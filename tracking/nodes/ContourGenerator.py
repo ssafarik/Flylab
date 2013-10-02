@@ -60,7 +60,6 @@ class ContourGenerator:
         self.subImageBackgroundSet  = rospy.Subscriber('camera/image_background_set', Image, self.ImageBackgroundSet_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
         
-        self.pubTrackingCommand     = rospy.Publisher('tracking/command', TrackingCommand)
         self.pubImageProcessed      = rospy.Publisher('camera/image_processed', Image)
         self.pubImageBackground     = rospy.Publisher('camera/image_background', Image)
         self.pubImageBackgroundSet  = rospy.Publisher('camera/image_background_set', Image, latch=True) # We publish the current background image (at trial_start & trigger) primarily so that rosbag can record it.
@@ -87,7 +86,7 @@ class ContourGenerator:
         self.nContours = 0
         self.nContoursPrev = 0
         
-        self.nObjects = 2   # TODO: should be nRobots + nFlies
+        self.nObjects = 0
         self.bMerged = False
         
         self.nContoursMax = rospy.get_param('tracking/nContoursMax', 20)
@@ -269,6 +268,12 @@ class ContourGenerator:
             self.bEstablishBackground = True
             self.nContoursEstablish = int(trackingcommand.param)
             rospy.logwarn('establish_background started...')
+
+        if (self.command=='initialize'):
+            self.nRobots = trackingcommand.nRobots
+            self.nFlies = trackingcommand.nFlies
+            self.nObjects = self.nRobots + self.nFlies
+        
         
     
     def MmFromPixels (self, xIn):
@@ -799,7 +804,6 @@ class ContourGenerator:
                   
                 # Stabilized when more than two time-constants worth of background.  
                 if (self.bEstablishBackground) and (self.nImagesContoursEstablished > 2*(rcBackground/self.dt.to_sec())):
-                    #self.pubTrackingCommand.publish(TrackingCommand(command='save_background')) # Let the user manually save it when they're happy with it.
                     rospy.logwarn('establish_background Finished.  Click <Save Background Image> if it\'s acceptable.')
                     self.bEstablishBackground = False
                     self.nImagesContoursEstablished = 0

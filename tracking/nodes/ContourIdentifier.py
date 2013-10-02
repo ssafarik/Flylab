@@ -211,6 +211,7 @@ class ContourIdentifier:
                                                              )
                 self.nRobots = trackingcommand.nRobots
                 self.nFlies = trackingcommand.nFlies
+                rospy.logwarn('nRobots=%d, nFlies=%d' % (self.nRobots, self.nFlies))
                 self.ResetFlyObjects()
             
 

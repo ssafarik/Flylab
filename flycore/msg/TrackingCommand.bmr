@@ -1,0 +1,62 @@
+class update_flycore_TrackingCommand_5e4e0a3428d2f6051010b4a1907b0b35(MessageUpdateRule):
+    old_type = "flycore/TrackingCommand"
+    old_full_text = """
+string                command          # 'setexclusionzones' or 'save_background'
+flycore/CircleZones   exclusionzones
+string                param            # An extra parameter if a command needs it (e.g. save_background specifies a number of foreground objects).
+
+
+================================================================================
+MSG: flycore/CircleZones
+bool                        enabled
+geometry_msgs/Point[]       point_list
+float64[]                   radius_list
+
+
+
+================================================================================
+MSG: geometry_msgs/Point
+# This contains the position of a point in free space
+float64 x
+float64 y
+float64 z
+"""
+
+    new_type = "flycore/TrackingCommand"
+    new_full_text = """
+string                command          # 'initialize' or 'save_background'
+flycore/CircleZones   exclusionzones
+int32                 nRobots
+int32                 nFlies
+string                param            # An extra parameter if a command needs it (e.g. save_background specifies a number of foreground objects).
+
+
+================================================================================
+MSG: flycore/CircleZones
+bool                        enabled
+geometry_msgs/Point[]       point_list
+float64[]                   radius_list
+
+
+
+================================================================================
+MSG: geometry_msgs/Point
+# This contains the position of a point in free space
+float64 x
+float64 y
+float64 z
+"""
+
+    order = 0
+    migrated_types = [("CircleZones","CircleZones"),]
+
+    valid = True
+    def update(self, old_msg, new_msg):
+        if (old_msg.command=='setexclusionzones'):
+            new_msg.command = 'initialize'
+        else:
+            new_msg.command = old_msg.command
+        self.migrate(old_msg.exclusionzones, new_msg.exclusionzones)
+        new_msg.nRobots = 0
+        new_msg.nFlies = 0
+        new_msg.param = old_msg.param
