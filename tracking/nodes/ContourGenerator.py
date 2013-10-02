@@ -83,14 +83,13 @@ class ContourGenerator:
         
         # Contour Info
         self.contourinfolists = ContourinfoLists()
-        self.x_list = []
-        self.y_list = []
-        self.angle_list = []
-        self.area_list = []
-        self.ecc_list = []
-        self.imgRoi_list = []
-        self.contour_list = []
+        self.contourinfolists_dict = {'x':[], 'y':[], 'angle':[], 'area':[], 'ecc':[], 'imgRoi':[], 'iContour':[]}
         self.nContours = 0
+        self.nContoursPrev = 0
+        
+        self.nObjects = 2   # TODO: should be nRobots + nFlies
+        self.bMerged = False
+        
         self.nContoursMax = rospy.get_param('tracking/nContoursMax', 20)
         self.areaContourMin = rospy.get_param('tracking/areaContourMin', 0.0)
         self.minEccForDisplay = 1.75
@@ -373,8 +372,8 @@ class ContourGenerator:
     # AppendContourinfoListsFromContour()
     # Converts contour to a contourinfo, transforms it to the output frame, and appends the contourinfo members to their respective lists.
     #
-    def AppendContourinfoListsFromContour(self, contours, iContour, matForeground):
-        contour = contours[iContour]
+    def AppendContourinfoListsFromContour(self, contour_list, iContour, matForeground):
+        contour = contour_list[iContour]
         (x, y, area, angle, ecc) = self.ContourinfoFromContour(contour)
         if (x is None) or (y is None):
             (x,y) = contour[0][0]
@@ -383,146 +382,233 @@ class ContourGenerator:
             ecc = 1.0
         
             
-        # Save contourinfolists
-        ptsContour = PointStamped()
-        ptsContour.header.frame_id = 'ImageRect'
-        ptsContour.point.x = x
-        ptsContour.point.y = y
-            
+        # Transform and Save contourinfo to the dict.
         if (x is not None):
+            ptsContour = PointStamped()
+            ptsContour.header.frame_id = 'ImageRect'
+            ptsContour.point.x = x
+            ptsContour.point.y = y
+            
             try:
                 if self.bUseTransforms:
                     self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptsContour)
                 else:
                     self.ptsOutput = ptsContour
                     
-                self.x_list.append(self.ptsOutput.point.x)
-                self.y_list.append(self.ptsOutput.point.y)
-                self.angle_list.append(angle)
-                self.area_list.append(area)
-                self.ecc_list.append(ecc)
-                self.imgRoi_list.append(None)
-                self.contour_list.append(iContour)
-                self.nContours += 1
-
             except tf.Exception, e:
                 rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptsContour.header.frame_id, e))
                 self.ptsOutput = PointStamped()
             except TypeError, e:
                 rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptsContour.header.frame_id, e))
-                
-                
 
-    def ContourinfoListsFromImage(self, matThreshold, matForeground):
-        self.x_list = []
-        self.y_list = []
-        self.angle_list = []
-        self.area_list = []
-        self.ecc_list = []
-        self.imgRoi_list = []
-        self.contour_list = []
+            else:
+                self.contourinfolists_dict['x'].append(self.ptsOutput.point.x)
+                self.contourinfolists_dict['y'].append(self.ptsOutput.point.y)
+                self.contourinfolists_dict['angle'].append(angle)
+                self.contourinfolists_dict['area'].append(area)
+                self.contourinfolists_dict['ecc'].append(ecc)
+                self.contourinfolists_dict['imgRoi'].append(None)
+                self.contourinfolists_dict['iContour'].append(iContour)
+
+
+            # Get the ROI pixels for each contour, minus the pixels of the other contours.
+            if (matForeground is not None):
+                nContours = len(self.contourinfolists_dict['x'])
+                for iContour in range(nContours):
+                    x = self.contourinfolists_dict['x'][iContour]
+                    y = self.contourinfolists_dict['y'][iContour]
         
-        # Find contours
-        sumImage = cv2.sumElems(matThreshold)
-        if self.minSumImage < sumImage[0]:
-            (contours,hierarchy) = cv2.findContours(matThreshold, mode=cv2.RETR_CCOMP, method=cv2.CHAIN_APPROX_SIMPLE) # Modifies matThreshold.
-        else:
-            (contours,hierarchy) = (None, None)
-            
-
-        # Put the top-level contours into the contourinfolists
-        self.nContours = 0
-        if (contours is not None):
-            (NEXT,PREV,CHILD,PARENT)=(0,1,2,3)
-            iContour = 0
-            while (0 <= iContour < len(contours)): 
-                self.AppendContourinfoListsFromContour(contours, iContour, matForeground) # self.nContours++ gets incremented inside function.
-                iContour = hierarchy[0][iContour][NEXT]
-                
+                    self.matMaskOthers.fill(0)
                     
+                    # Go through all the other contours.
+                    for kContour in range(nContours):
+                        if (kContour != iContour):
+                            xk = self.contourinfolists_dict['x'][kContour]
+                            yk = self.contourinfolists_dict['y'][kContour]
+                            
+                            # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
+                            if (N.linalg.norm([x-xk,y-yk])<N.linalg.norm([self.widthRoi,self.heightRoi])):
+                                jContour = self.contourinfolists_dict['iContour'][kContour]
+                                cv2.drawContours(self.matMaskOthers, contour_list, jContour, 255, cv.CV_FILLED, 4, self.hierarchy, 0)
+                            
+                    self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
+                    matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
+                    matRoi = cv2.getRectSubPix(matForeground - matOthers, 
+                                               (self.widthRoi, self.heightRoi), 
+                                               (x,y))
+                    imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
+                    self.contourinfolists_dict['imgRoi'][iContour] = imgRoi
+                
+
+                
+                
+
+    def RemoveDupsAndTooSmallContours(self, contoursIn_list):
+        contoursOut_list = []
+        iContourLargest = None
         
+        # Put the contours into the contourinfolists_dict.
+        self.contourinfolists_dict = {'x':[], 'y':[], 'angle':[], 'area':[], 'ecc':[], 'imgRoi':[], 'iContour':[]}
+        for iContour in range(len(contoursIn_list)):
+            self.AppendContourinfoListsFromContour(contoursIn_list, iContour, None)
+
         # Put lists into contourinfolists.
         contourinfolists = ContourinfoLists()
-        contourinfolists.header.seq = self.seq
-        contourinfolists.header.stamp = self.header.stamp
-        contourinfolists.header.frame_id = self.frameidOutput # i.e. Camera
-        self.seq += 1
-        
-        if self.nContours > 0:
-            contourinfolists.x = self.x_list
-            contourinfolists.y = self.y_list
-            contourinfolists.angle = self.angle_list
-            contourinfolists.area = self.area_list
-            contourinfolists.ecc = self.ecc_list
-            contourinfolists.imgRoi = self.imgRoi_list
         
             
-        # Remove duplicates and too-small contours.
-        if self.nContours > 0:
-            # Repackage the data as a list of lists, i.e. [[x,y,a,a,e,i],[x,y,a,a,e,i],...], skipping too-small contours.
+        if (len(contoursIn_list) > 0):
+            # Skip too-small contours, and repackage the data as a list of lists, i.e. [[x,y,a,a,e,i,i],[x,y,a,a,e,i,i],...]
             contourinfolists_list = []
-            for iContour in range(self.nContours):
-                if (self.areaContourMin <= contourinfolists.area[iContour]):
-                    contourinfolists_list.append([contourinfolists.x[iContour], 
-                                                  contourinfolists.y[iContour], 
-                                                  contourinfolists.angle[iContour], 
-                                                  contourinfolists.area[iContour], 
-                                                  contourinfolists.ecc[iContour], 
-                                                  contourinfolists.imgRoi[iContour],
-                                                  self.contour_list[iContour]])
+            for iContour in range(len(contoursIn_list)):
+                if (self.areaContourMin <= self.contourinfolists_dict['area'][iContour]):
+                    contourinfolists_list.append([self.contourinfolists_dict['x'][iContour],        # 0 
+                                                  self.contourinfolists_dict['y'][iContour],        # 1
+                                                  self.contourinfolists_dict['angle'][iContour],    # 2
+                                                  self.contourinfolists_dict['area'][iContour],     # 3
+                                                  self.contourinfolists_dict['ecc'][iContour],      # 4
+                                                  self.contourinfolists_dict['imgRoi'][iContour],   # 5
+                                                  self.contourinfolists_dict['iContour'][iContour]])# 6
 
             # Remove the dups.
             contourinfolists_list = sorted(tuple(contourinfolists_list))
             contourinfolists_list = [x for i, x in enumerate(contourinfolists_list) if (not i) or (N.linalg.norm(N.array(contourinfolists_list[i][0:2])-N.array(contourinfolists_list[i-1][0:2])) > self.distanceDuplicateContour)]
         
-            # Repackage the de-duped data.
+        
+            # Count the contours.
             self.nContours = len(contourinfolists_list)
-            contourinfolists.x = []
-            contourinfolists.y = []
-            contourinfolists.angle = []
-            contourinfolists.area = []
-            contourinfolists.ecc = []
-            contourinfolists.imgRoi = []
-            self.contour_list = []
+            
+
+            # Reconstruct the contour_list from the deduped data, also find the one with max area.
+            area = -1
             for iContour in range(self.nContours):
-                contourinfolists.x.append(contourinfolists_list[iContour][0])
-                contourinfolists.y.append(contourinfolists_list[iContour][1])
-                contourinfolists.angle.append(contourinfolists_list[iContour][2])
-                contourinfolists.area.append(contourinfolists_list[iContour][3])
-                contourinfolists.ecc.append(contourinfolists_list[iContour][4])
-                contourinfolists.imgRoi.append(contourinfolists_list[iContour][5])
-                self.contour_list.append(contourinfolists_list[iContour][6])
+                contoursOut_list.append(contoursIn_list[contourinfolists_list[iContour][6]]) # Append contours indexed from the original list.
+                if (area < contourinfolists_list[iContour][3]):
+                    iContourLargest = iContour
+                    area = contourinfolists_list[iContour][3]
 
+        
+        return (contoursOut_list, iContourLargest)
+    
+    
+    # Split a contour into two, dividing at the line connecting the two greatest defects.
+    def SplitContour(self, contour, defects):
+        contour1 = contour
+        contour2 = None
+        
+        if (defects is not None) and (len(defects)>=2):
+            iDefects = N.argsort(defects[:,0,3]) # Sorted indices of defect size.
+            
+            # Get the two largest defects, in index order.
+            j = min(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
+            k = max(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
+            
+            contour1 = contour[j:k+1]
+            contour2 = N.concatenate((contour[0:j+1],contour[k:len(contour)+1]))
+        
+        return (contour1,contour2)
+        
+        
+    
+    def ContourinfoListsFromImage(self, matThreshold, matForeground):
+        # Find contours
+        sumImage = cv2.sumElems(matThreshold)
+        if self.minSumImage < sumImage[0]:
+            (contours,hierarchy) = cv2.findContours(matThreshold, mode=cv2.RETR_CCOMP, method=cv2.CHAIN_APPROX_NONE )#cv2.CHAIN_APPROX_SIMPLE) # Modifies matThreshold.
+        else:
+            (contours,hierarchy) = (None, None)
+            
 
-            # Get the ROI pixels for each contour, minus the pixels for the other contours.
-            for iContour in range(self.nContours):
-                x = contourinfolists.x[iContour]
-                y = contourinfolists.y[iContour]
+        # Make a list of the top-level contours.
+        self.contour_list = []
+        if (contours is not None):
+            (NEXT,PREV,CHILD,PARENT)=(0,1,2,3)
+            iContour = 0
+            while (0 <= iContour < len(contours)): 
+                self.contour_list.append(contours[iContour])
+                iContour = hierarchy[0][iContour][NEXT]
 
-                self.matMaskOthers.fill(0)
+            
+        # Clean the contours.
+        (self.contour_list, iContourLargest) = self.RemoveDupsAndTooSmallContours(self.contour_list)
+        self.nContours = len(self.contour_list)
+
+            
+
+        if (self.nContours > 0):
+
+            # Determine if two contours have merged, and need to be split.
+            iContourMerged = iContourLargest
+            
+            if (max(self.nContours,self.nContoursPrev) <= self.nObjects) and (iContourMerged is not None):
+                if (self.nContours < self.nContoursPrev):
+                    self.bMerged = True # Just merged.
+                    
+                if ((self.nContours == self.nContoursPrev) and self.bMerged):
+                    self.bMerged = True # Stay merged.
                 
-                # Go through all the other contours.
-                for kContour in range(self.nContours):
-                    if (kContour != iContour):
-                        xk = contourinfolists.x[kContour]
-                        yk = contourinfolists.y[kContour]
-                        
-                        # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
-                        if (N.linalg.norm([x-xk,y-yk])<N.linalg.norm([self.widthRoi,self.heightRoi])):
-                            jContour = self.contour_list[kContour]
-                            cv2.drawContours(self.matMaskOthers, contours, jContour, 255, cv.CV_FILLED, 4, hierarchy, 0)
-                        
-                self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
-                matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
-                matRoi = cv2.getRectSubPix(matForeground - matOthers, 
-                                           (self.widthRoi, self.heightRoi), 
-                                           (x,y))
-                imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
-                contourinfolists.imgRoi[iContour] = imgRoi
+                if ((self.nContours == self.nContoursPrev) and not self.bMerged):
+                    self.bMerged = False # Stay unmerged.
+
+                if (self.nContours > self.nContoursPrev):
+                    self.bMerged = False # Become unmerged.
+            else:
+                self.bMerged = False # Have enough contours, don't split any.
                 
 
             
-        return contourinfolists, contours    
+            # Split the merged contour.
+            if self.bMerged:
+                contour = self.contour_list.pop(iContourMerged)
+                hull = cv2.convexHull(contour, returnPoints=False)
+                defects = cv2.convexityDefects(contour, hull) 
+                #rospy.logwarn('contour: %s' % contour)
+                #rospy.logwarn('hull: %s' % hull)
+                #rospy.logwarn('defects: %s' % convexityDefects)
+                #rospy.logwarn ('----------------')
+                (contour1,contour2) = self.SplitContour(contour, defects)
+                if (contour1 is not None):
+                    self.contour_list.append(contour1)
+                if (contour2 is not None):
+                    self.contour_list.append(contour2)
+                    
+                self.nContours = len(self.contour_list)
+                
+
+        # Make the hierarchy for self.contour_list.
+        self.hierarchy = [[]]
+        for iContour in range(len(self.contour_list)):
+            self.hierarchy[0].append([(iContour+1 if iContour+1<len(self.contour_list) else -1),   # NEXT 
+                                      (iContour-1 if iContour-1>=0 else -1),                       # PREV
+                                      -1,                                                          # CHILD
+                                      -1])                                                         # PARENT
+        self.hierarchy = N.array(self.hierarchy)
+                                         
+
+        # Put the contours into the contourinfolists_dict.
+        self.contourinfolists_dict = {'x':[], 'y':[], 'angle':[], 'area':[], 'ecc':[], 'imgRoi':[], 'iContour':[]}
+        for iContour in range(self.nContours):
+            self.AppendContourinfoListsFromContour(self.contour_list, iContour, matForeground)
+                
+                    
+        
+        # Put lists into a ContourinfoLists message.
+        contourinfolists = ContourinfoLists()
+        contourinfolists.header.seq = self.seq
+        contourinfolists.header.stamp = self.header.stamp
+        contourinfolists.header.frame_id = self.frameidOutput # i.e. Camera
+        self.seq += 1
+        if self.nContours > 0:
+            contourinfolists.x = self.contourinfolists_dict['x']
+            contourinfolists.y = self.contourinfolists_dict['y']
+            contourinfolists.angle = self.contourinfolists_dict['angle']
+            contourinfolists.area = self.contourinfolists_dict['area']
+            contourinfolists.ecc = self.contourinfolists_dict['ecc']
+            contourinfolists.imgRoi = self.contourinfolists_dict['imgRoi']
+        
+            
+        self.nContoursPrev = self.nContours
+    
+        return contourinfolists  
         
 
     def Image_callback(self, image):
@@ -612,7 +698,7 @@ class ContourGenerator:
                 self.matThreshold = cv2.bitwise_and(self.matThreshold, self.matMask)
                 
                 # Get the ContourinfoLists.
-                (self.contourinfolists, self.contours) = self.ContourinfoListsFromImage(self.matThreshold, self.matForeground)    # Modifies self.matThreshold
+                self.contourinfolists = self.ContourinfoListsFromImage(self.matThreshold, self.matForeground)    # Modifies self.matThreshold
                 self.pubContourinfoLists.publish(self.contourinfolists)
                 
                 # Convert to color for display image
@@ -622,8 +708,8 @@ class ContourGenerator:
                     self.matProcessed = cv2.cvtColor(self.matImageRect, cv.CV_GRAY2RGB)
                     
                     # Draw contours on Processed image.
-                    if self.contours:
-                        cv2.drawContours(self.matProcessed, self.contours, -1, cv.CV_RGB(0,0,self.color_max), thickness=1, maxLevel=1)
+                    if self.contour_list:
+                        cv2.drawContours(self.matProcessed, self.contour_list, -1, cv.CV_RGB(0,0,self.color_max), thickness=1, maxLevel=1)
                     
                 
                 # Publish processed image
