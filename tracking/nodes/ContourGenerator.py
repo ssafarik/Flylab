@@ -507,8 +507,13 @@ class ContourGenerator:
             j = min(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
             k = max(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
             
-            contour1 = contour[j:k+1]
-            contour2 = N.concatenate((contour[0:j+1],contour[k:len(contour)+1]))
+            # Keep the shared points.
+            #contour1 = contour[j:k+1]
+            #contour2 = N.concatenate((contour[0:j+1],contour[k:len(contour)+1]))
+            
+            # Don't keep the shared points.
+            contour1 = contour[j+1:k]
+            contour2 = N.concatenate((contour[0:j],contour[k+1:len(contour)+1]))
         
         return (contour1,contour2)
         
