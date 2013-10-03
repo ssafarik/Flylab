@@ -320,11 +320,13 @@ class Fly:
     # FUTURE: should make the body/wing dimensions automatically calculated from the fly mean image, npfRoiMean.
     #
     def UpdateWingMask(self, npfRoiMean):
-        q = 3
+        q = 2
         
         if (q==1):  # Use a carefully constructed wing-area mask.
             self.npMaskWings = N.zeros([self.heightRoi, self.widthRoi], dtype=N.uint8)
     
+            #self.lengthBody              = rospy.get_param('tracking/lengthBody', 9)
+            #self.widthBody               = rospy.get_param('tracking/widthBody', 5)
     
             # Coordinates of the body ellipse.
             centerBody = (self.widthRoi/2, 
@@ -366,21 +368,15 @@ class Fly:
                 (threshOut, npMaskBody) = cv2.threshold(npfRoiMean.astype(N.uint8), self.thresholdWings, 255, cv2.THRESH_BINARY_INV)
                 self.npMaskWings = cv2.bitwise_and(self.npMaskWings, npMaskBody)
             
-        
-                # Publish non-essential stuff.
+                # Publish the body mask.
                 if self.bNonessentialPublish:
-                    npMaskWings1 = copy.copy(self.npMaskWings)
-                    npMaskWings1.resize(npMaskWings1.size)
-                    imgMaskWings  = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npMaskWings), 'passthrough')
-                    imgMaskWings.data = list(npMaskWings1)
-                    self.pubImageMask.publish(imgMaskWings)
-            
                     npMaskBody1 = copy.copy(npMaskBody)
                     npMaskBody1.resize(npMaskBody1.size)
                     imgMaskBody  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npMaskBody), 'passthrough')
                     imgMaskBody.data = list(npMaskBody1)
                     self.pubImageMaskBody.publish(imgMaskBody)
                     
+        
         elif (q==2):    # Use all pixels.
             self.npMaskWings = 255*N.ones([self.heightRoi, self.widthRoi], dtype=N.uint8)
             
@@ -390,6 +386,14 @@ class Fly:
             self.npMaskWings = 255*N.hstack([N.ones([self.heightRoi, w1], dtype=N.uint8),
                                              N.zeros([self.heightRoi, w2], dtype=N.uint8)])
             
+        # Publish the wing mask.
+        if self.bNonessentialPublish:
+            npMaskWings1 = copy.copy(self.npMaskWings)
+            npMaskWings1.resize(npMaskWings1.size)
+            imgMaskWings  = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.npMaskWings), 'passthrough')
+            imgMaskWings.data = list(npMaskWings1)
+            self.pubImageMask.publish(imgMaskWings)
+    
     
         
     def UpdateFlyMean(self, npRoiReg):
