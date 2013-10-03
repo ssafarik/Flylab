@@ -1,0 +1,22 @@
+<launch>
+	<!-- ==========================================================   -->
+	<!-- This experiment hits the fly when fly performs a combination -->
+    <!-- of position and velocity.                                    -->
+    <!--                                                              -->
+    <!-- Launch this file to run the experiment, as in:               -->
+    <!-- roslaunch experiments zapposvel.launch                       -->
+    <!--                                                              -->
+	<!-- ==========================================================   -->
+
+	<!-- ***  Core stuff  *** -->
+	<include file="$(find flycore)/launch/flycore.launch" />
+	
+    <!-- ***  Hardware  *** -->
+    <include file="$(find config)/launch/hardware.launch" />
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="experiments" type="ZapPosVel.py" name="Experiment" required="true" />
+
+	
+  
+</launch>

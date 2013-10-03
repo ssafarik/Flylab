@@ -2,6 +2,8 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
+from geometry_msgs.msg import Point, Pose, Vector3
+from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
 
 
@@ -37,7 +39,7 @@ class Statefilter:
     
                 if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
                     markerTarget = Marker(header=Header(stamp = state.header.stamp,
-                                                        frame_id='Arena'),
+                                                        frame_id='/Arena'),
                                           ns='statefilter',
                                           id=1,
                                           type=Marker.CUBE,

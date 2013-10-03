@@ -11,7 +11,11 @@
   <depend package="rospy"/>
   <depend package="pythonmodules"/>
   <depend package="geometry_msgs"/>
-  
+  <depend package="rosbag"/>
+
+  <export>
+    <rosbag migration_rule_file="msg/TrackingCommand.bmr"/>
+  </export>  
 
 </package>
 

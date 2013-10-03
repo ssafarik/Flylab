@@ -33,6 +33,14 @@ class ExperimentChase():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
+        self.experimentparams.robotspec.nRobots = 1
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 0
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=50.0, y=68.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
@@ -52,7 +60,7 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.mode = 'pattern'        
         self.experimentparams.trial.robot.move.relative.tracking = False
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Robot"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly01Forecast"
         self.experimentparams.trial.robot.move.relative.distance = 20
         self.experimentparams.trial.robot.move.relative.angleType = 'constant'
         self.experimentparams.trial.robot.move.relative.angleOffset = 0
@@ -61,8 +69,8 @@ class ExperimentChase():
         self.experimentparams.trial.robot.move.relative.speed = 20
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
-        self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
+        self.experimentparams.trial.robot.move.pattern.frameidPosition = '/Arena'               # 
+        self.experimentparams.trial.robot.move.pattern.frameidAngle = '/Arena'               # 
 
         if (False):
 # Four points step response.
@@ -91,7 +99,7 @@ class ExperimentChase():
 
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.frameidParent = 'Fly1'
+        self.experimentparams.post.trigger.frameidParent = 'Fly01'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.speedAbsParentMin = 999.0
         self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. Never.

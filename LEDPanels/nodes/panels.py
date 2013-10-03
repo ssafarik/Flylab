@@ -167,6 +167,7 @@ class LEDPanels():
         self.services['get_adc_value'] = rospy.Service('get_adc_value', SrvGetADCValue, self.GetADCValue_callback)        
 
         self.serialport = self.DiscoverSerialPort() 
+        rospy.logwarn ('LEDPanels using %s' % self.serialport)
         if (self.serialport is not None):
             self.serial = serial.Serial(self.serialport, baudrate=921600, rtscts=False, dsrdtr=False) # 8N1
             self.initialized = True
@@ -182,15 +183,16 @@ class LEDPanels():
 
         if (serialport=='unspecified'):
             p1 = subprocess.Popen(["dmesg"], stdout=subprocess.PIPE)
-            p2 = subprocess.Popen(["grep", "FTDI USB Serial Device"], stdin=p1.stdout, stdout=subprocess.PIPE)
+            p2 = subprocess.Popen(["grep", "FTDI USB Serial Device converter now attached"], stdin=p1.stdout, stdout=subprocess.PIPE)
             output = p2.communicate()[0]    
             output = output.replace('\n', ' ')
             
+            # Go through all the ttyXXXXX tokens, and take the last one.
             serialport = None  
             for token in output.split(' '):
                 if 'tty' in token:
                     serialport = '/dev/' + token
-                    break
+                
             
         return serialport
               

@@ -195,8 +195,8 @@ class Action (smach.State):
         if len(arenastate.flies)>0:
             stamp = max(stamp,arenastate.flies[0].header.stamp)
     
-        if self.tfrx.canTransform('Arena', frameid, stamp):        
-            (trans,q) = self.tfrx.lookupTransform('Arena', frameid, stamp)
+        if self.tfrx.canTransform('/Arena', frameid, stamp):        
+            (trans,q) = self.tfrx.lookupTransform('/Arena', frameid, stamp)
             rpy = tf.transformations.euler_from_quaternion(q)
             angle = rpy[2] % (2.0 * N.pi)
         else:
@@ -227,8 +227,8 @@ class Action (smach.State):
         if len(arenastate.flies)>0:
             stamp = max(stamp,arenastate.robot.header.stamp)
             
-        if self.tfrx.canTransform('Arena', frameid, stamp):        
-            (trans,q) = self.tfrx.lookupTransform('Arena', frameid, stamp)
+        if self.tfrx.canTransform('/Arena', frameid, stamp):        
+            (trans,q) = self.tfrx.lookupTransform('/Arena', frameid, stamp)
             trans = N.array(trans)
         else:
             trans = None

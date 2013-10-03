@@ -7,19 +7,21 @@ function FlylabDeleteDeadFlyFiles (dirspec, filespec)
     
     for k = 1:length(filenames)
         filedata = FlylabReadFile(filenames{k});
-        fprintf ('-----------\n');
-        if FlylabHasDeadFly(filedata)
-            fprintf ('---Deleting %s\n', filenames{k});
-            delete(filenames{k});
-            
-            [a,b,c]=fileparts(filenames{k});
-            fprintf ('---Deleting %s\n', [a,b,'.mov']);
-            delete([a,b,'.mov']);
+        if (FlylabIsValidFiledata(filedata))
+            fprintf ('-----------\n');
+            if FlylabHasDeadFly(filedata)
+                fprintf ('---Deleting %s\n', filenames{k});
+                delete(filenames{k});
 
-            fprintf ('---rmdir %s\n', [a,b]);
-            rmdir([a,b],'s');
-        else
-            fprintf ('Keeping  %s\n', filenames{k}); 
+                [a,b,c]=fileparts(filenames{k});
+                fprintf ('---Deleting %s\n', [a,b,'.mov']);
+                delete([a,b,'.mov']);
+
+                fprintf ('---rmdir %s\n', [a,b]);
+                rmdir([a,b],'s');
+            else
+                fprintf ('Keeping  %s\n', filenames{k}); 
+            end
         end
     end
     
