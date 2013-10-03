@@ -1,0 +1,21 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the CHASEOSCILLATION experiment.          -->
+    <!--                                                            -->
+    <!-- Launch this file to run the experiment, as in:             -->
+    <!-- roslaunch experiments chaseoscillation.launch              -->
+    <!--                                                            -->
+	<!-- ========================================================== -->
+
+	<!-- ***  Core stuff  *** -->
+	<include file="$(find flycore)/launch/flycore.launch" />
+	
+	<!-- ***  Hardware, Flies, and Robot  *** -->
+	<include file="$(find config)/launch/hardware.launch" />
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="experiments" type="ChaseOscillation.py" name="Experiment" required="true" />
+
+	
+  
+</launch>
