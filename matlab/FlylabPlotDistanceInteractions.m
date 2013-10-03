@@ -29,12 +29,14 @@ function FlylabPlotDistanceInteractions(interactions, nPre, nPost)
         if ~strcmp(filename,filenamePrev)
             fprintf ('Reading %s.\n', filename);
             filedata = FlylabReadFile(filename); 
-            state2 = FlylabGetObjectState(filedata, 2);
-            state3 = FlylabGetObjectState(filedata, 3);
-            posRel = state2(:,1:2) - state3(:,1:2);
-            distRel = zeros(length(posRel),1);
-            for i=1:length(posRel)
-                distRel(i) = sqrt(posRel(i,:)*posRel(i,:)');
+            if (FlylabIsValidFiledata(filedata))
+                state2 = FlylabGetObjectState(filedata, 2);
+                state3 = FlylabGetObjectState(filedata, 3);
+                posRel = state2(:,1:2) - state3(:,1:2);
+                distRel = zeros(length(posRel),1);
+                for i=1:length(posRel)
+                    distRel(i) = sqrt(posRel(i,:)*posRel(i,:)');
+                end
             end
         end
         

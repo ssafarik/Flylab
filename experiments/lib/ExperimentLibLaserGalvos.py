@@ -145,6 +145,10 @@ class Action (smach.State):
                 isStatefiltered = True
             else:
                 isStatefiltered = False
+                
+            if (len(self.paramsIn.lasergalvos.statefilterLo_list) != len(self.paramsIn.lasergalvos.statefilterHi_list)):
+                rospy.logwarn('Check your experiment params structure:  Number of statefilters does not match number of patterns.  Not filtering states.')
+                
 
             # Initialize statefilter vars.                
             bInStatefilterRangePrev = [False for i in range(nPatterns)]
@@ -157,7 +161,6 @@ class Action (smach.State):
     
             # Move galvos until preempt or timeout.        
             while not rospy.is_shutdown():
-                
                 # If state is used to determine when pattern is shown.
                 if isStatefiltered:
                     # Check if any filterstates have changed.
@@ -183,7 +186,7 @@ class Action (smach.State):
                                 
                             elif ('Fly' in pattern.frameidPosition):
                                 for iFly in range(len(self.arenastate.flies)):
-                                    if pattern.frameidPosition == self.arenastate.flies[iFly].name:
+                                    if (self.arenastate.flies[iFly].name in pattern.frameidPosition):
                                         #pose = self.arenastate.flies[iFly].pose  # For consistency w/ galvodirector, we'll get pose via transform.
                                         velocity = self.arenastate.flies[iFly].velocity
                                         speed = self.arenastate.flies[iFly].speed
@@ -193,30 +196,30 @@ class Action (smach.State):
                         stamp=None
                         if (pose is None) or (velocity is None):
                             try:
-                                stamp = self.tfrx.getLatestCommonTime('Arena', pattern.frameidPosition)
+                                stamp = self.tfrx.getLatestCommonTime('/Arena', pattern.frameidPosition)
                             except tf.Exception:
                                 pass
 
                             
                         # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                        if (pose is None) and (stamp is not None) and self.tfrx.canTransform('Arena', pattern.frameidPosition, stamp):
+                        if (pose is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', pattern.frameidPosition, stamp):
                             try:
-                                poseStamped = self.tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
-                                                                                                      frame_id=pattern.frameidPosition),
-                                                                                        pose=Pose(position=Point(0,0,0),
-                                                                                                  orientation=Quaternion(0,0,0,1)
-                                                                                                  )
-                                                                                        )
-                                                                   )
+                                poseStamped = self.tfrx.transformPose('/Arena', PoseStamped(header=Header(stamp=stamp,
+                                                                                                          frame_id=pattern.frameidPosition),
+                                                                                            pose=Pose(position=Point(0,0,0),
+                                                                                                      orientation=Quaternion(0,0,0,1)
+                                                                                                      )
+                                                                                            )
+                                                                      )
                                 pose = poseStamped.pose
                             except tf.Exception:
                                 pose = None
 
                                 
                         # If we still need the velocity, then get it from ROS.
-                        if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('Arena', pattern.frameidPosition, stamp):
+                        if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', pattern.frameidPosition, stamp):
                             try:
-                                velocity_tuple = self.tfrx.lookupTwist('Arena', pattern.frameidPosition, stamp, self.dtVelocity)
+                                velocity_tuple = self.tfrx.lookupTwist('/Arena', pattern.frameidPosition, stamp, self.dtVelocity)
                             except tf.Exception:
                                 velocity = None
                             else:
@@ -237,7 +240,6 @@ class Action (smach.State):
                             state = MsgFrameState(pose = pose, 
                                                   velocity = velocity,
                                                   speed = speed)
-    
                             bInStatefilterRangePrev[iPattern] = bInStatefilterRange[iPattern]
                             bInStatefilterRange[iPattern] = self.Statefilter.InRange(state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)
                             self.Statefilter.PublishMarkers (state, statefilterLo_dict, statefilterHi_dict, statefilterCriteria)

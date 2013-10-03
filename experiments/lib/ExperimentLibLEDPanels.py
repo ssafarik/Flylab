@@ -185,7 +185,7 @@ class Action (smach.State):
                         
                     elif ('Fly' in self.paramsIn.ledpanels.frame_id):
                         for iFly in range(len(self.arenastate.flies)):
-                            if self.paramsIn.ledpanels.frame_id == self.arenastate.flies[iFly].name:
+                            if (self.arenastate.flies[iFly].name in self.paramsIn.ledpanels.frame_id):
                                 #pose = self.arenastate.flies[iFly].pose  # For consistency w/ galvodirector, we'll get pose via transform.
                                 velocity = self.arenastate.flies[iFly].velocity
                                 speed = self.arenastate.flies[iFly].speed
@@ -195,15 +195,15 @@ class Action (smach.State):
                 stamp=None
                 if (pose is None) or (velocity is None):
                     try:
-                        stamp = self.tfrx.getLatestCommonTime('Arena', self.paramsIn.ledpanels.frame_id)
+                        stamp = self.tfrx.getLatestCommonTime('/Arena', self.paramsIn.ledpanels.frame_id)
                     except tf.Exception:
                         pass
 
                     
                 # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                if (pose is None) and (stamp is not None) and self.tfrx.canTransform('Arena', self.paramsIn.ledpanels.frame_id, stamp):
+                if (pose is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', self.paramsIn.ledpanels.frame_id, stamp):
                     try:
-                        poseStamped = self.tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
+                        poseStamped = self.tfrx.transformPose('/Arena', PoseStamped(header=Header(stamp=stamp,
                                                                                               frame_id=self.paramsIn.ledpanels.frame_id),
                                                                                 pose=Pose(position=Point(0,0,0),
                                                                                           orientation=Quaternion(0,0,0,1)
@@ -216,9 +216,9 @@ class Action (smach.State):
 
                         
                 # If we still need the velocity, then get it from ROS.
-                if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('Arena', self.paramsIn.ledpanels.frame_id, stamp):
+                if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', self.paramsIn.ledpanels.frame_id, stamp):
                     try:
-                        velocity_tuple = self.tfrx.lookupTwist('Arena', self.paramsIn.ledpanels.frame_id, stamp, self.dtVelocity)
+                        velocity_tuple = self.tfrx.lookupTwist('/Arena', self.paramsIn.ledpanels.frame_id, stamp, self.dtVelocity)
                     except tf.Exception:
                         velocity = None
                     else:

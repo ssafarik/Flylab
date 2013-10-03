@@ -38,7 +38,7 @@
 	<param name="galvodriver/hzPoint" type="double" value="250000.0"/>
 	<param name="tracking/diff_threshold" type="double" value="100.0"/>
 	
-	<node pkg="galvodirector" type="Calibrator.py" name="GalvoCalibrator" />
+	<node pkg="galvodirector" type="Calibrator.py" name="GalvoCalibrator" required="true"/>
 
 	
   

@@ -32,6 +32,14 @@ class Experiment():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         
+        self.experimentparams.robotspec.nRobots = 1
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
@@ -41,7 +49,7 @@ class Experiment():
         self.experimentparams.pre.ledpanels.enabled = False
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = 'Fly1'
+        self.experimentparams.pre.trigger.frameidParent = 'Fly01'
         self.experimentparams.pre.trigger.frameidChild = 'Robot'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
@@ -55,7 +63,7 @@ class Experiment():
         self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
         self.experimentparams.pre.trigger.angleTestBilateral = True
-        self.experimentparams.pre.trigger.timeHold = 0.0
+        self.experimentparams.pre.trigger.timeHold = 0.02
         self.experimentparams.pre.trigger.timeout = -1
         self.experimentparams.pre.wait2 = 0.0
         
@@ -65,14 +73,14 @@ class Experiment():
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'relative'        
         self.experimentparams.trial.robot.move.relative.tracking = True
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.distance = 8
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly01Forecast"
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly01Forecast"
+        self.experimentparams.trial.robot.move.relative.distance = 4
         self.experimentparams.trial.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
         self.experimentparams.trial.robot.move.relative.angleOffset = N.pi    # Radians from origin to target.
         self.experimentparams.trial.robot.move.relative.angleOscMag = 0#N.pi/2  # Radian magnitude of the added oscillation.
         self.experimentparams.trial.robot.move.relative.angleOscFreq = 1.0    # Hz of the added oscillation.
-        self.experimentparams.trial.robot.move.relative.speed = 10 #5.2
+        self.experimentparams.trial.robot.move.relative.speed = 100 #5.2
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'
         self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
         self.experimentparams.trial.robot.home.enabled = False
@@ -89,13 +97,13 @@ class Experiment():
         self.experimentparams.trial.ledpanels.idPattern = 1
         self.experimentparams.trial.ledpanels.origin.x = 0 
         self.experimentparams.trial.ledpanels.origin.y = 0 
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.frameidParent = 'Fly1'
+        self.experimentparams.post.trigger.frameidParent = 'Fly01'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.speedAbsParentMin = 999.0
         self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. NEVER
@@ -110,7 +118,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 120
+        self.experimentparams.post.trigger.timeout = 600
 
         self.experimentparams.post.wait = 0.0
         

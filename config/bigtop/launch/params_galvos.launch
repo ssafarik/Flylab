@@ -14,22 +14,28 @@
     <param name="galvodirector/xBeamsink" type="double" value="0.0" />  <!-- volts -->
     <param name="galvodirector/yBeamsink" type="double" value="-10.0" />  <!-- volts -->
 
-<!--  The 785nm IR laser... needs an adjustment like:  yv = my * ym .* sin(ym*(pi/180)/33.33) + by - ym/20.4 + 0.1  
-    <param name="galvodirector/mx" type="double" value="0.0506807" />
-    <param name="galvodirector/bx" type="double" value="-0.6616871" />
-    <param name="galvodirector/my" type="double" value="-0.0496085" />
-    <param name="galvodirector/by" type="double" value="3.3768726" />
--->
     
 
-<!-- The red laser: visible light -->
-<!-- 
--->
-	<param name="galvodirector/mx" type="double" value="0.0514908" />
-	<param name="galvodirector/bx" type="double" value="-0.6019530" />
-	<param name="galvodirector/my" type="double" value="-0.0502735" />
-	<param name="galvodirector/by" type="double" value="3.2848424" />
-   
-
+    <!-- Least Squares for y = a3*x**3 + a2*x**2 + a1*x + a0.  Millimeters to Volts: -->
+    <param name="galvodirector/a3" type="double" value="-1.26487e-07" />
+    <param name="galvodirector/a2" type="double" value="1.42924e-06" />
+    <param name="galvodirector/a1" type="double" value="0.0528306" />
+    <param name="galvodirector/a0" type="double" value="-0.219368" />
+    <param name="galvodirector/b3" type="double" value="2.72008e-07" />
+    <param name="galvodirector/b2" type="double" value="-8.91973e-06" />
+    <param name="galvodirector/b1" type="double" value="-0.0529175" />
+    <param name="galvodirector/b0" type="double" value="3.60264" />
+    
+    <!-- Least Squares for y = a3i*x**3 + a2i*x**2 + a1i*x + a0i.  Volts to Millimeters: -->
+    <param name="galvodirector/a3i" type="double" value="0.0144464" />
+    <param name="galvodirector/a2i" type="double" value="0.00490769" />
+    <param name="galvodirector/a1i" type="double" value="18.9315" />
+    <param name="galvodirector/a0i" type="double" value="4.13669" />
+    <param name="galvodirector/b3i" type="double" value="-0.0232455" />
+    <param name="galvodirector/b2i" type="double" value="0.0742489" />
+    <param name="galvodirector/b1i" type="double" value="-18.5115" />
+    <param name="galvodirector/b0i" type="double" value="67.1802" />
+    
 </launch>
+
 	

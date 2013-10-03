@@ -32,6 +32,14 @@ class ExperimentRegressiveMotion():
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         
+        self.experimentparams.robotspec.nRobots = 1
+        self.experimentparams.robotspec.width = 1.5875
+        self.experimentparams.robotspec.height = 1.5875
+        self.experimentparams.robotspec.description = "Black oxide magnet"
+
+        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.description = "unspecified"
+        
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
@@ -42,7 +50,7 @@ class ExperimentRegressiveMotion():
         self.experimentparams.pre.wait1 = 0.0
         
         self.experimentparams.pre.trigger.enabled = True
-        self.experimentparams.pre.trigger.frameidParent = 'Fly1'
+        self.experimentparams.pre.trigger.frameidParent = 'Fly01'
         self.experimentparams.pre.trigger.frameidChild = 'Robot'
         self.experimentparams.pre.trigger.speedAbsParentMin =   4.0
         self.experimentparams.pre.trigger.speedAbsParentMax =  40.0
@@ -68,7 +76,7 @@ class ExperimentRegressiveMotion():
         self.experimentparams.trial.robot.move.mode = 'relative'        
         self.experimentparams.trial.robot.move.relative.tracking = False
         self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Robot"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1"
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly01"
         self.experimentparams.trial.robot.move.relative.distance = 60
         self.experimentparams.trial.robot.move.relative.angleType = 'constant'
         self.experimentparams.trial.robot.move.relative.angleOffset = 0
@@ -89,13 +97,13 @@ class ExperimentRegressiveMotion():
         self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
+        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
         self.experimentparams.trial.ledpanels.statefilterHi = ''
         self.experimentparams.trial.ledpanels.statefilterLo = ''
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = False
-        self.experimentparams.post.trigger.frameidParent = 'Fly1'
+        self.experimentparams.post.trigger.frameidParent = 'Fly01'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.distanceMin = 0.0
         self.experimentparams.post.trigger.distanceMax = 999.0
