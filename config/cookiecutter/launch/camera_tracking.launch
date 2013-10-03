@@ -7,7 +7,7 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-    <param name="camera/image_rect/compressed/format" type="string" value="png" />
+    <param name="camera/image_rect/compressed/format" type="string" value="jpeg" />
 	<include file="$(find cookiecutter)/launch/params_camera_tracking.launch" ns="camera" />
 
 	<node name="camera"     pkg="camera_aravis" type="camnode" />
