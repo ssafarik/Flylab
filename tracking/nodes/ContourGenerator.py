@@ -544,20 +544,10 @@ class ContourGenerator:
             # Determine if two contours have merged, and need to be split.
             iContourMerged = iContourLargest
             
-            if (max(self.nContours,self.nContoursPrev) <= self.nObjects) and (iContourMerged is not None):
-                if (self.nContours < self.nContoursPrev):
-                    self.bMerged = True # Just merged.
-                    
-                if ((self.nContours == self.nContoursPrev) and self.bMerged):
-                    self.bMerged = True # Stay merged.
-                
-                if ((self.nContours == self.nContoursPrev) and not self.bMerged):
-                    self.bMerged = False # Stay unmerged.
-
-                if (self.nContours > self.nContoursPrev):
-                    self.bMerged = False # Become unmerged.
+            if (self.nContours < self.nObjects) and (iContourMerged is not None):
+                self.bMerged = True
             else:
-                self.bMerged = False # Have enough contours, don't split any.
+                self.bMerged = False
                 
 
             
@@ -566,10 +556,7 @@ class ContourGenerator:
                 contour = self.contour_list.pop(iContourMerged)
                 hull = cv2.convexHull(contour, returnPoints=False)
                 defects = cv2.convexityDefects(contour, hull) 
-                #rospy.logwarn('contour: %s' % contour)
-                #rospy.logwarn('hull: %s' % hull)
-                #rospy.logwarn('defects: %s' % convexityDefects)
-                #rospy.logwarn ('----------------')
+
                 (contour1,contour2) = self.SplitContour(contour, defects)
                 if (contour1 is not None):
                     self.contour_list.append(contour1)
@@ -713,8 +700,17 @@ class ContourGenerator:
                     self.matProcessed = cv2.cvtColor(self.matImageRect, cv.CV_GRAY2RGB)
                     
                     # Draw contours on Processed image.
+                    colors = [cv.CV_RGB(0,              0,              self.color_max), # blue
+                              cv.CV_RGB(0,              self.color_max, 0             ), # green
+                              cv.CV_RGB(self.color_max, 0,              0             ), # red
+                              cv.CV_RGB(self.color_max, self.color_max, 0             ), # yellow
+                              cv.CV_RGB(self.color_max, 0,              self.color_max), # magenta
+                              cv.CV_RGB(0,              self.color_max, self.color_max)] # cyan
                     if self.contour_list:
-                        cv2.drawContours(self.matProcessed, self.contour_list, -1, cv.CV_RGB(0,0,self.color_max), thickness=1, maxLevel=1)
+                        for k in range(len(self.contour_list)):
+                            #color = cv.CV_RGB(0,0,self.color_max)
+                            color = colors[k % len(colors)]
+                            cv2.drawContours(self.matProcessed, self.contour_list, k, color, thickness=1, maxLevel=1)
                     
                 
                 # Publish processed image
