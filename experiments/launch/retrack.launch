@@ -7,18 +7,19 @@
     <!--                                                            -->
     <!-- ========================================================== -->
 
-    <param name="use_sim_time"                 type="bool" value="true"/>
     
     <!-- ***  Core stuff  *** -->
+    <param name="use_sim_time"                 type="bool" value="true"/>
     <include file="$(find flycore)/launch/main.launch" />
-
-    <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" />
+    <node pkg="experiments" type="Retrack.py" name="Experiment" required="true" />
 
     
 
-    <!-- STEP 1:  Edit Retrack.py for the number of robots & flies.  -->
-    <node pkg="experiments" type="Retrack.py" name="Experiment" required="true" />
-  
+    <!-- STEP 0:  "export RETRACK=1" at the command prompt.
+
+    
+    <!-- STEP 1:  Edit Retrack.py to set the number of robots & flies.  -->
+ 
 
     <!-- STEP 2:  Edit the following lines to show the hardware you recorded the .bag file upon. -->
     <include file="$(find racetrack)/launch/params_tracking.launch" />
@@ -27,12 +28,13 @@
 
 
     <!-- STEP 3:  Edit the following lines to play the appropriate .bag file. -->
-    <include file="$(find flappy)/launch/input_bag.launch" >
+    <include file="$(find config)/launch/playbag.launch" >
         <arg name="bagfiles" value="/home/ssafarik/test.bag" /> 
     </include> 
 
         
-
+    <!-- STEP 4:  Launch this file, e.g. "roslaunch experiments retrack.launch" -->
+    
     
      
 
