@@ -375,7 +375,10 @@ class ContourGenerator:
     
     
     # AppendContourinfoListsFromContour()
-    # Converts contour to a contourinfo, transforms it to the output frame, and appends the contourinfo members to their respective lists.
+    # Converts contour to a contourinfo...
+    # transforms it to the output frame...
+    # computes the contour image minus the other contour images...
+    # and appends the contourinfo members to their respective lists.
     #
     def AppendContourinfoListsFromContour(self, contour_list, iContour, matForeground):
         contour = contour_list[iContour]
@@ -419,30 +422,31 @@ class ContourGenerator:
             # Get the ROI pixels for each contour, minus the pixels of the other contours.
             if (matForeground is not None):
                 nContours = len(self.contourinfolists_dict['x'])
-                for iContour in range(nContours):
-                    x = self.contourinfolists_dict['x'][iContour]
-                    y = self.contourinfolists_dict['y'][iContour]
-        
-                    self.matMaskOthers.fill(0)
-                    
-                    # Go through all the other contours.
-                    for kContour in range(nContours):
-                        if (kContour != iContour):
-                            xk = self.contourinfolists_dict['x'][kContour]
-                            yk = self.contourinfolists_dict['y'][kContour]
-                            
-                            # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
-                            if (N.linalg.norm([x-xk,y-yk])<N.linalg.norm([self.widthRoi,self.heightRoi])):
-                                jContour = self.contourinfolists_dict['iContour'][kContour]
-                                cv2.drawContours(self.matMaskOthers, contour_list, jContour, 255, cv.CV_FILLED, 4, self.hierarchy, 0)
-                            
-                    self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
-                    matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
-                    matRoi = cv2.getRectSubPix(matForeground - matOthers, 
-                                               (self.widthRoi, self.heightRoi), 
-                                               (x,y))
-                    imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
-                    self.contourinfolists_dict['imgRoi'][iContour] = imgRoi
+                #for iContour in range(nContours):
+                x = self.contourinfolists_dict['x'][iContour]
+                y = self.contourinfolists_dict['y'][iContour]
+    
+                self.matMaskOthers.fill(0)
+                
+                # Go through all the other contours.
+                normRoi = N.linalg.norm([self.widthRoi,self.heightRoi])
+                for kContour in range(nContours):
+                    if (kContour != iContour):
+                        xk = self.contourinfolists_dict['x'][kContour]
+                        yk = self.contourinfolists_dict['y'][kContour]
+                        
+                        # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
+                        if (N.linalg.norm([x-xk,y-yk]) < normRoi):
+                            jContour = self.contourinfolists_dict['iContour'][kContour]
+                            cv2.drawContours(self.matMaskOthers, contour_list, jContour, 255, cv.CV_FILLED, 4, self.hierarchy, 0)
+                        
+                self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
+                matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
+                matRoi = cv2.getRectSubPix(matForeground - matOthers, 
+                                           (self.widthRoi, self.heightRoi), 
+                                           (x,y))
+                imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
+                self.contourinfolists_dict['imgRoi'][iContour] = imgRoi
                 
 
                 
