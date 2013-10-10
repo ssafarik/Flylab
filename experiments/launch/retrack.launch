@@ -14,9 +14,6 @@
     <node pkg="experiments" type="Retrack.py" name="Experiment" required="true" />
 
     
-
-    <!-- STEP 0:  "export RETRACK=1" at the command prompt.
-
     
     <!-- STEP 1:  Edit Retrack.py to set the number of robots & flies.  -->
  
@@ -33,7 +30,7 @@
     </include> 
 
         
-    <!-- STEP 4:  Launch this file, e.g. "roslaunch experiments retrack.launch" -->
+    <!-- STEP 4:  Launch this file, e.g. "RETRACK=1 roslaunch experiments retrack.launch" -->
     
     
      
