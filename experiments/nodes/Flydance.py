@@ -27,7 +27,7 @@ class Experiment():
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "foodnavi"
+        self.experimentparams.save.filenamebase = "flydance"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
@@ -210,7 +210,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 1800
+        self.experimentparams.post.trigger.timeout = 7200
         self.experimentparams.post.wait = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 

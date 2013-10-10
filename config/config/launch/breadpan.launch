@@ -1,21 +1,19 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the COOKIECUTTER hardware.                -->
+	<!-- Configuration of the BREADPAN hardware.                    -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- hardware.                                                  -->
     <!--                                                            -->
-    <!-- Don't launch this file directly.                           -->
-    <!-- Launch hardware.launch, and point here from there.         -->
 	<!-- ========================================================== -->
 
 	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" /> 
-	<include file="$(find cookiecutter)/launch/params_calibration.launch" />
-	<include file="$(find cookiecutter)/launch/params_tracking.launch" />
+	<include file="$(find breadpan)/launch/params_calibration.launch" />
+	<include file="$(find breadpan)/launch/params_tracking.launch" />
 
 
     <!-- Get input from the camera, and from the background image file. -->
-    <include file="$(find cookiecutter)/launch/camera_tracking.launch" />
+    <include file="$(find breadpan)/launch/camera_tracking.launch" />
     <node name="OriginateBackground"         pkg="tracking" type="OriginateBackground.py" />
     <node name="OriginateCalibrationCamera"  pkg="arena_tf" type="OriginateCalibrationCamera.py" />
     <node name="OriginateCalibrationStage"   pkg="arena_tf" type="OriginateCalibrationStage.py" />

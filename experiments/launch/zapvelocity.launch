@@ -9,10 +9,8 @@
 	<!-- ========================================================== -->
 
 	<!-- ***  Core stuff  *** -->
-	<include file="$(find flycore)/launch/flycore.launch" />
+	<include file="$(find flycore)/launch/main.launch" />
 	
-    <!-- ***  Hardware  *** -->
-    <include file="$(find config)/launch/hardware.launch" />
 
 	<!-- ***  The Experiment  *** -->
 	<node pkg="experiments" type="ZapVelocity.py" name="Experiment" required="true" />

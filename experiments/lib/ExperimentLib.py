@@ -367,6 +367,7 @@ class TriggerOnStates (smach.State):
 
 
     def CommandExperiment_callback(self, msgString):
+        #rospy.logwarn('TriggerOnStates received: %s' % msgString.data)
         self.commandExperiment = msgString.data
             
         
@@ -467,7 +468,6 @@ class TriggerOnStates (smach.State):
                 #    return 'preempt'
                 rospy.sleep(1.0)
     
-    
             rv = 'aborted'
             while not rospy.is_shutdown():
                 # Test for distance.
@@ -567,8 +567,8 @@ class TriggerOnStates (smach.State):
                         break
                     
                     #rospy.loginfo('EL duration=%s' % duration)
-                
                 if (self.commandExperiment=='exit_now'):
+                    #rospy.logwarn('TriggerOnStates: aborted.')
                     rv = 'aborted'
                     break
 
@@ -629,19 +629,31 @@ class TriggerOnTime (smach.State):
         
     def execute(self, userdata):
         if self.mode=='pre1':
-            duration = userdata.experimentparamsIn.pre.wait1
+            elapsedMax = userdata.experimentparamsIn.pre.wait1
         elif self.mode=='pre2':
-            duration = userdata.experimentparamsIn.pre.wait2
+            elapsedMax = userdata.experimentparamsIn.pre.wait2
+        elif self.mode=='post':
+            elapsedMax = userdata.experimentparamsIn.post.wait
         else:
-            duration = userdata.experimentparamsIn.post.wait
+            rospy.logwarn ('TriggerOnTime mode must be one of: pre1, pre2, post.')
+            
 
-        rospy.loginfo('EL State TriggerOnTime(%s, %s)' % (self.mode, duration))
+        rospy.loginfo('EL State TriggerOnTime(%s, %s)' % (self.mode, elapsedMax))
             
         rv = 'success'
-        rospy.sleep(duration)
+        self.timeTriggered = rospy.Time.now()
+        while not rospy.is_shutdown():
+            elapsed = rospy.Time.now().to_sec() - self.timeTriggered.to_sec()
 
-        if (self.commandExperiment=='exit_now'):
-            rv = 'aborted'
+            if elapsed >= elapsedMax:
+                rv = 'success'
+                break
+
+            if (self.commandExperiment=='exit_now'):
+                rv = 'aborted'
+                break
+
+            rospy.sleep(0.1)
 
         #try:
         #    if rv!='aborted' and ('pre' in self.mode):
@@ -743,6 +755,7 @@ class ExperimentLib():
         ################################################################################### RESET
         smachReset = smach.Concurrence(outcomes = ['success','disabled','aborted'],
                                          default_outcome = 'aborted',
+                                         child_termination_cb = self.AnyResetTerm_callback,
                                          outcome_cb = self.AllResetTerm_callback,
                                          input_keys = ['experimentparamsIn'])
         with smachReset:
@@ -835,24 +848,24 @@ class ExperimentLib():
 
 
 
-            ################################################################################### TRIAL -> POST
+            ################################################################################### TRIAL -> POSTWAIT
             smach.StateMachine.add('TRIAL', 
                                    smachTrial,
-                                   transitions={'success':'POST',
-                                                'disabled':'POST',
+                                   transitions={'success':'POSTWAIT',
+                                                'disabled':'POSTWAIT',
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
 
-            ################################################################################### POST -> (ENDTRIALCALLBACK or RESETHARDWARE)
+            ################################################################################### POSTWAIT -> (ENDTRIALCALLBACK or RESETHARDWARE)
             if endtrial_callback is not None:
-                stateAfterWaitPost = 'ENDTRIALCALLBACK'
+                stateAfterPostWait = 'ENDTRIALCALLBACK'
             else:
-                stateAfterWaitPost = 'RESETHARDWARE'
+                stateAfterPostWait = 'RESETHARDWARE'
 
-            smach.StateMachine.add('POST', 
+            smach.StateMachine.add('POSTWAIT', 
                                    TriggerOnTime(mode='post', tfrx=self.tfrx),
-                                   transitions={'success':stateAfterWaitPost,
+                                   transitions={'success':stateAfterPostWait,
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
@@ -900,10 +913,20 @@ class ExperimentLib():
         self.smachTop.request_preempt()
         
         
+    # Gets called upon ANY 'reset' state termination.
+    def AnyResetTerm_callback(self, outcome_map):
+        #rospy.logwarn('AnyResetTerm_callback(%s)' % repr(outcome_map))
+        rv = False
+        
+        return rv
+
+    
     # Gets called after all 'reset' states are terminated.
     # If any states aborted, then abort.
     def AllResetTerm_callback(self, outcome_map):
         #rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
+        #rospy.logwarn('actions_dict=%s' % repr(self.actions_dict))
+        
         rv = 'success'
         for (name,classHardware) in self.actions_dict.iteritems():
             if (name in outcome_map):
