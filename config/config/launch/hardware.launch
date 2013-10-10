@@ -1,12 +1,16 @@
 <launch>
 
     <!-- ========================================================== -->
-    <!-- This file points to the HARDWARE you are using.            -->
+    <!-- This file launches the hardware rig you are using,         -->
+    <!-- based on the environment variable "RIG".                   -->
     <!--                                                            -->
-    <!-- Only point to the single appropriate hardware-specific     -->
-    <!-- .launch file from here.                                    -->
+    <!-- Some examples:                                             -->
+    <!-- export RIG=bigtop                                          -->
+    <!-- export RIG=colosseum                                       -->
+    <!-- export RIG=racetrack                                       -->
+    <!-- export RIG=breadpan                                        -->
     <!-- ========================================================== -->
     
-    <include file="$(find racetrack)/launch/main.launch" />
+    <include file="$(find rigs)/launch/$(env RIG).launch" />
      
 </launch>
