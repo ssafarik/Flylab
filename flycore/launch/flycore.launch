@@ -11,6 +11,6 @@
 	<include file="$(find arena_tf)/launch/main.launch" />
 	<include file="$(find tracking)/launch/main.launch" />
 	<include file="$(find ui)/launch/main.launch" />
-	<node pkg="patterngen" type="PatternGenXY.py" name="PatternGen" />
+	<node pkg="patterngen" type="PatternGenXY.py" name="PatternGen" required="true" />
   
 </launch>
