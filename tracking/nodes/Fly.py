@@ -60,12 +60,21 @@ class Fly:
             self.pubImageRoiWings   = rospy.Publisher(self.name+"/image_wings", Image)
             self.pubImageMask       = rospy.Publisher(self.name+"/image_mask", Image)
             self.pubImageMaskBody   = rospy.Publisher(self.name+"/image_mask_body", Image)
-            self.pubLeftMetric      = rospy.Publisher(self.name+'/leftmetric', Float32)
-            self.pubLeftMetricMean  = rospy.Publisher(self.name+'/leftmetricmean', Float32)
+            
             self.pubLeft            = rospy.Publisher(self.name+'/left', Float32)
-            self.pubRightMetric     = rospy.Publisher(self.name+'/rightmetric', Float32)
-            self.pubRightMetricMean  = rospy.Publisher(self.name+'/rightmetricmean', Float32)
+            self.pubLeftSum         = rospy.Publisher(self.name+'/leftsum', Float32)
+            self.pubLeftMeanSum     = rospy.Publisher(self.name+'/leftmeansum', Float32)
+            self.pubLeftMeanPlusStdDevSum    = rospy.Publisher(self.name+'/leftplusstddevsum', Float32)
+            self.pubLeftMeanMinusStdDevSum   = rospy.Publisher(self.name+'/leftminusstddevsum', Float32)
+            self.pubLeftStdDevSum   = rospy.Publisher(self.name+'/leftstddevsum', Float32)
+
             self.pubRight           = rospy.Publisher(self.name+'/right', Float32)
+            self.pubRightSum        = rospy.Publisher(self.name+'/rightsum', Float32)
+            self.pubRightMeanSum    = rospy.Publisher(self.name+'/rightmeansum', Float32)
+            self.pubRightMeanPlusStdDevSum    = rospy.Publisher(self.name+'/rightplusstddevsum', Float32)
+            self.pubRightMeanMinusStdDevSum   = rospy.Publisher(self.name+'/rightminusstddevsum', Float32)
+            self.pubRightStdDevSum  = rospy.Publisher(self.name+'/rightstddevsum', Float32)
+            
             self.pubImageSuper      = rospy.Publisher(self.name+'/image_super', Image)
             self.pubImageSuperCount = rospy.Publisher(self.name+'/image_supercount', Image)
             self.pubImageSuperGrad = rospy.Publisher(self.name+'/image_supergrad', Image)
@@ -86,9 +95,9 @@ class Fly:
             self.robot_length            = rospy.get_param('robot/length', 1.0)
             self.robot_height            = rospy.get_param('robot/height', 1.0)
             self.rcForeground            = rospy.get_param('tracking/rcForeground', 1.0)
-            self.thresholdWings     = rospy.get_param('tracking/thresholdWings', 25.0)
+            self.thresholdWings          = rospy.get_param('tracking/thresholdWings', 25.0)
             self.scalarFlyMean           = rospy.get_param('tracking/scalarFlyMean', 1.0)
-            self.metricWingThreshold     = rospy.get_param('tracking/wingmetric_threshold', 3.0)
+            self.nStdDevWings            = rospy.get_param('tracking/wingmetric_threshold', 3.0)
             
         self.kfState = filters.KalmanFilter()
         self.lpAngle = filters.LowPassCircleFilter(RC=rcFilterAngle)
@@ -157,14 +166,16 @@ class Fly:
                   int(self.heightRoi/2), 
                   255, 
                   cv.CV_FILLED)
-        self.meanLeft  = None
-        self.meanRight = None
+        self.meanSumLeft  = None
+        self.meanSumRight = None
         
-        self.sumSqDevLeft = 0.0
-        self.stdDevLeft  = 0.0 
-        self.sumSqDevRight = 0.0
-        self.stdDevRight  = 0.0 
-        self.countSqDev = 0
+        self.sumSumLeft = 0.0
+        self.sumSumRight = 0.0
+        self.sumSqDevSumLeft = 0.0
+        self.stdDevSumLeft  = 0.0 
+        self.sumSqDevSumRight = 0.0
+        self.stdDevSumRight  = 0.0 
+        self.count = 0
         
         
         # Super-resolution image.
@@ -532,14 +543,17 @@ class Fly:
     def GetWingAngles(self, contourinfo):
 
         with self.lock:
-            self.metricWingThreshold = rospy.get_param('tracking/wingmetric_threshold', 3.0)
+            self.nStdDevWings = rospy.get_param('tracking/wingmetric_threshold', 3.0)
             self.scalarFlyMean = rospy.get_param('tracking/scalarFlyMean', 1.0)
 
+        # Convert ROS image to numpy.
         npRoiIn = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, "passthrough")))
+        
+        # Apply the fly-rotation mask.
         npRoi = cv2.bitwise_and(npRoiIn, self.npMaskCircle)
         
+        # Orient the fly to 0 degrees.
         moments = cv2.moments(npRoi)
-
         npRoiReg = self.RegisterImageRoi(npRoi, moments)
         
 
@@ -549,15 +563,15 @@ class Fly:
         self.UpdateFlyMean(npRoiReg)
 
         
-        # Background Fly Subtraction.
-        diff = npRoiReg.astype(N.float32) - self.npfRoiMean*self.scalarFlyMean # Magnify the mean.
-        npWings = N.clip(diff, 0, N.iinfo(N.uint8).max).astype(N.uint8)
+        # Create a "wing foreground", i.e. Background Fly Subtraction.
+        diff = N.abs(npRoiReg.astype(N.float32) - self.npfRoiMean*self.scalarFlyMean) # Subtract a multiple of the average fly.
+        npWings = N.clip(diff, 0, N.iinfo(N.uint8).max).astype(N.uint8) # Convert to a uint8.
         #npWings = npRoiReg 
         
         # Mask the input ROI.
         #npRoiReg = cv2.bitwise_and(npRoiReg, self.npMaskWings)
         
-        # Mask the wings.
+        # Mask the wing foreground.
         npWings = cv2.bitwise_and(npWings, self.npMaskWings)
                         
         # Create images with only pixels of left wing (i.e. image top) or right wing (i.e. image bottom).
@@ -601,39 +615,56 @@ class Fly:
         yRight = yRightAbs - yBody
         
 
+#        if self.bNonessentialPublish:
+#            # Mark a pixel for the body.
+#            x = N.round(xBody).astype(N.uint8)
+#            y = N.round(yBody).astype(N.uint8)
+#            npRoiReg[y, x] = 255.0
+
+        
         # Metrics to distinguish wing extension from noise.
         sumLeft = momentsLeft['m00']
         sumRight = momentsRight['m00']
 
         # Wing statistics.
+        self.count += 1
+        self.sumSumLeft += sumLeft
+        self.sumSumRight += sumRight
         
         # Wing intensity mean
-        if (self.meanLeft is not None):
-            a = 0.0001
-            self.meanLeft  = (1-a)*self.meanLeft  + a*sumLeft 
-            self.meanRight = (1-a)*self.meanRight + a*sumRight 
+        if (self.count > 100):
+            # Exponentially weighted mean.
+            a = 0.001
+            self.meanSumLeft  = (1-a)*self.meanSumLeft  + a*sumLeft 
+            self.meanSumRight = (1-a)*self.meanSumRight + a*sumRight 
         else:
-            self.meanLeft  = sumLeft 
-            self.meanRight = sumRight 
+            # Use straight mean for first N values.
+            self.meanSumLeft  = self.sumSumLeft / self.count 
+            self.meanSumRight = self.sumSumRight / self.count 
         
         # Wing intensity std dev.
-        devLeft = (sumLeft-self.meanLeft)
-        devRight = (sumRight-self.meanRight)
-        self.sumSqDevLeft  += devLeft**2 
-        self.sumSqDevRight += devRight**2
-        self.countSqDev += 1
-        self.stdDevLeft  = N.sqrt(self.sumSqDevLeft/self.countSqDev) 
-        self.stdDevRight = N.sqrt(self.sumSqDevRight/self.countSqDev) 
+        #self.meanSumLeft = self.sumSumLeft / self.count
+        devSumLeft = (sumLeft-self.meanSumLeft)
+        self.sumSqDevSumLeft  += devSumLeft**2 
+        self.stdDevSumLeft  = N.sqrt(self.sumSqDevSumLeft/self.count) 
+
+        #self.meanSumRight = self.sumSumRight / self.count
+        devSumRight = (sumRight-self.meanSumRight)
+        self.sumSqDevSumRight += devSumRight**2
+        self.stdDevSumRight = N.sqrt(self.sumSqDevSumRight/self.count) 
             
         
         npToUse = npWings #npWingRight
 
-        if (N.abs(devLeft) < self.metricWingThreshold*self.stdDevLeft):
+        #if (N.abs(devSumLeft) < self.nStdDevWings*self.stdDevSumLeft):
+        if (       devSumLeft  < self.nStdDevWings*self.stdDevSumLeft):
             angleLeft = N.pi
         else:
             angleLeft  = N.arctan2(yLeft, xLeft)+N.pi
 
             if self.bNonessentialPublish:
+                
+                # Mark a pixel for the left wing.
                 if (momentsLeft['m00'] != 0):
                     x = N.round(xLeftAbs).astype(N.uint8)
                     y = N.round(yLeftAbs).astype(N.uint8)
@@ -641,14 +672,16 @@ class Fly:
                     npToUse[y,x] = 255.0
 
             
-        if (N.abs(devRight) < self.metricWingThreshold*self.stdDevRight):
+        #if (N.abs(devSumRight) < self.nStdDevWings*self.stdDevSumRight):
+        if (       devSumRight  < self.nStdDevWings*self.stdDevSumRight):
             angleRight = N.pi
         else:
             angleRight = N.arctan2(yRight, xRight)+N.pi
             
             if self.bNonessentialPublish:
                 if (momentsRight['m00'] != 0):
-                    #rospy.logwarn('% 0.2f, % 0.2f' % (yRightAbs+0,xRightAbs))
+                
+                # Mark a pixel for the right wing.
                     x = N.round(xRightAbs).astype(N.uint8)
                     y = N.round(yRightAbs).astype(N.uint8)
                     npRoiReg[y, x] = 255.0
@@ -669,12 +702,22 @@ class Fly:
             self.pubImageRoiReg.publish(self.imgRoiReg)
             self.pubImageRoiMean.publish(self.imgRoiMean)
             self.pubImageRoiWings.publish(imgWings)
-            self.pubLeftMetric.publish(N.abs(devLeft))
-            self.pubLeftMetricMean.publish(self.metricWingThreshold*self.stdDevLeft)
-            self.pubRightMetric.publish(-N.abs(devRight))
-            self.pubRightMetricMean.publish(-self.metricWingThreshold*self.stdDevRight)
+            
             self.pubLeft.publish(angleLeft)
+            self.pubLeftSum.publish(sumLeft)
+            self.pubLeftMeanSum.publish(self.meanSumLeft)
+            self.pubLeftMeanPlusStdDevSum.publish(self.meanSumLeft + self.nStdDevWings*self.stdDevSumLeft)
+            self.pubLeftMeanMinusStdDevSum.publish(self.meanSumLeft - self.nStdDevWings*self.stdDevSumLeft)
+            self.pubLeftStdDevSum.publish(N.abs(devSumLeft))
+            
             self.pubRight.publish(angleRight)
+            self.pubRightSum.publish(sumRight)
+            self.pubRightMeanSum.publish(self.meanSumRight)
+            self.pubRightMeanPlusStdDevSum.publish(self.meanSumRight + self.nStdDevWings*self.stdDevSumRight)
+            self.pubRightMeanMinusStdDevSum.publish(self.meanSumRight - self.nStdDevWings*self.stdDevSumRight)
+            self.pubRightStdDevSum.publish(N.abs(devSumRight))
+
+            
 
         return (angleLeft, angleRight)
     

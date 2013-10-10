@@ -375,7 +375,10 @@ class ContourGenerator:
     
     
     # AppendContourinfoListsFromContour()
-    # Converts contour to a contourinfo, transforms it to the output frame, and appends the contourinfo members to their respective lists.
+    # Converts contour to a contourinfo...
+    # transforms it to the output frame...
+    # computes the contour image minus the other contour images...
+    # and appends the contourinfo members to their respective lists.
     #
     def AppendContourinfoListsFromContour(self, contour_list, iContour, matForeground):
         contour = contour_list[iContour]
@@ -419,30 +422,31 @@ class ContourGenerator:
             # Get the ROI pixels for each contour, minus the pixels of the other contours.
             if (matForeground is not None):
                 nContours = len(self.contourinfolists_dict['x'])
-                for iContour in range(nContours):
-                    x = self.contourinfolists_dict['x'][iContour]
-                    y = self.contourinfolists_dict['y'][iContour]
-        
-                    self.matMaskOthers.fill(0)
-                    
-                    # Go through all the other contours.
-                    for kContour in range(nContours):
-                        if (kContour != iContour):
-                            xk = self.contourinfolists_dict['x'][kContour]
-                            yk = self.contourinfolists_dict['y'][kContour]
-                            
-                            # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
-                            if (N.linalg.norm([x-xk,y-yk])<N.linalg.norm([self.widthRoi,self.heightRoi])):
-                                jContour = self.contourinfolists_dict['iContour'][kContour]
-                                cv2.drawContours(self.matMaskOthers, contour_list, jContour, 255, cv.CV_FILLED, 4, self.hierarchy, 0)
-                            
-                    self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
-                    matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
-                    matRoi = cv2.getRectSubPix(matForeground - matOthers, 
-                                               (self.widthRoi, self.heightRoi), 
-                                               (x,y))
-                    imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
-                    self.contourinfolists_dict['imgRoi'][iContour] = imgRoi
+                #for iContour in range(nContours):
+                x = self.contourinfolists_dict['x'][iContour]
+                y = self.contourinfolists_dict['y'][iContour]
+    
+                self.matMaskOthers.fill(0)
+                
+                # Go through all the other contours.
+                normRoi = N.linalg.norm([self.widthRoi,self.heightRoi])
+                for kContour in range(nContours):
+                    if (kContour != iContour):
+                        xk = self.contourinfolists_dict['x'][kContour]
+                        yk = self.contourinfolists_dict['y'][kContour]
+                        
+                        # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
+                        if (N.linalg.norm([x-xk,y-yk]) < normRoi):
+                            jContour = self.contourinfolists_dict['iContour'][kContour]
+                            cv2.drawContours(self.matMaskOthers, contour_list, jContour, 255, cv.CV_FILLED, 4, self.hierarchy, 0)
+                        
+                self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
+                matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
+                matRoi = cv2.getRectSubPix(matForeground - matOthers, 
+                                           (self.widthRoi, self.heightRoi), 
+                                           (x,y))
+                imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
+                self.contourinfolists_dict['imgRoi'][iContour] = imgRoi
                 
 
                 
@@ -507,8 +511,13 @@ class ContourGenerator:
             j = min(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
             k = max(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
             
-            contour1 = contour[j:k+1]
-            contour2 = N.concatenate((contour[0:j+1],contour[k:len(contour)+1]))
+            # Keep the shared points.
+            #contour1 = contour[j:k+1]
+            #contour2 = N.concatenate((contour[0:j+1],contour[k:len(contour)+1]))
+            
+            # Don't keep the shared points.
+            contour1 = contour[j+1:k]
+            contour2 = N.concatenate((contour[0:j],contour[k+1:len(contour)+1]))
         
         return (contour1,contour2)
         
@@ -544,20 +553,10 @@ class ContourGenerator:
             # Determine if two contours have merged, and need to be split.
             iContourMerged = iContourLargest
             
-            if (max(self.nContours,self.nContoursPrev) <= self.nObjects) and (iContourMerged is not None):
-                if (self.nContours < self.nContoursPrev):
-                    self.bMerged = True # Just merged.
-                    
-                if ((self.nContours == self.nContoursPrev) and self.bMerged):
-                    self.bMerged = True # Stay merged.
-                
-                if ((self.nContours == self.nContoursPrev) and not self.bMerged):
-                    self.bMerged = False # Stay unmerged.
-
-                if (self.nContours > self.nContoursPrev):
-                    self.bMerged = False # Become unmerged.
+            if (self.nContours < self.nObjects) and (iContourMerged is not None):
+                self.bMerged = True
             else:
-                self.bMerged = False # Have enough contours, don't split any.
+                self.bMerged = False
                 
 
             
@@ -566,10 +565,7 @@ class ContourGenerator:
                 contour = self.contour_list.pop(iContourMerged)
                 hull = cv2.convexHull(contour, returnPoints=False)
                 defects = cv2.convexityDefects(contour, hull) 
-                #rospy.logwarn('contour: %s' % contour)
-                #rospy.logwarn('hull: %s' % hull)
-                #rospy.logwarn('defects: %s' % convexityDefects)
-                #rospy.logwarn ('----------------')
+
                 (contour1,contour2) = self.SplitContour(contour, defects)
                 if (contour1 is not None):
                     self.contour_list.append(contour1)
@@ -713,8 +709,17 @@ class ContourGenerator:
                     self.matProcessed = cv2.cvtColor(self.matImageRect, cv.CV_GRAY2RGB)
                     
                     # Draw contours on Processed image.
+                    colors = [cv.CV_RGB(0,              0,              self.color_max), # blue
+                              cv.CV_RGB(0,              self.color_max, 0             ), # green
+                              cv.CV_RGB(self.color_max, 0,              0             ), # red
+                              cv.CV_RGB(self.color_max, self.color_max, 0             ), # yellow
+                              cv.CV_RGB(self.color_max, 0,              self.color_max), # magenta
+                              cv.CV_RGB(0,              self.color_max, self.color_max)] # cyan
                     if self.contour_list:
-                        cv2.drawContours(self.matProcessed, self.contour_list, -1, cv.CV_RGB(0,0,self.color_max), thickness=1, maxLevel=1)
+                        for k in range(len(self.contour_list)):
+                            #color = cv.CV_RGB(0,0,self.color_max)
+                            color = colors[k % len(colors)]
+                            cv2.drawContours(self.matProcessed, self.contour_list, k, color, thickness=1, maxLevel=1)
                     
                 
                 # Publish processed image

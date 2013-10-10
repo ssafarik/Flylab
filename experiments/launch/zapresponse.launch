@@ -11,13 +11,11 @@
 	<!-- ========================================================== -->
 
 	<!-- ***  Core stuff  *** -->
-	<include file="$(find flycore)/launch/flycore.launch" />
-	
-    <!-- ***  Hardware  *** -->
-    <include file="$(find config)/launch/hardware.launch" />
+    <include file="$(find flycore)/launch/main.launch" />
+
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="Zapresponse.py" name="Experiment" required="true" />
+	<node pkg="experiments" type="ZapResponse.py" name="Experiment" required="true" />
 
 	
   

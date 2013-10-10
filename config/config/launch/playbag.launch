@@ -1,0 +1,16 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Plays a bag file for retracking, as specified in the       -->
+	<!-- argument "bagfiles".                                       -->
+    <!--                                                            -->
+	<!-- ========================================================== -->
+
+    <arg name="bagfiles" />
+    
+    <node name="playbag" pkg="rosbag" type="play" args="--clock -r 1 $(arg bagfiles)" required="true" /> 
+    <node name="republisher" pkg="image_transport" type="republish" args="compressed raw in:=camera/image_rect out:=camera/image_rect" />
+    
+	
+</launch>
+	
+	

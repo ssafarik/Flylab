@@ -11,10 +11,8 @@
 	<!-- ========================================================== -->
 
 	<!-- ***  Core stuff  *** -->
-	<include file="$(find flycore)/launch/flycore.launch" />
-	
-    <!-- ***  Hardware  *** -->
-    <include file="$(find config)/launch/hardware.launch" />
+    <include file="$(find flycore)/launch/main.launch" />
+
 
 	<!-- ***  The Experiment  *** -->
 	<node pkg="experiments" type="Dodgeball.py" name="Experiment" required="true" />

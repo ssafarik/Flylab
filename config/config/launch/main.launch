@@ -1,0 +1,20 @@
+<launch>
+
+    <!-- ========================================================== -->
+    <!-- This file launches the hardware rig you are using,         -->
+    <!-- based on the environment variable "RIG".                   -->
+    <!--                                                            -->
+    <!-- If environment var RETRACK is set to 1,                    -->
+    <!-- (i.e. "export RETRACK=1", then don't include the hardware. -->
+    <!--                                                            -->
+    <!-- Some examples:                                             -->
+    <!-- export RIG=bigtop                                          -->
+    <!-- export RIG=colosseum                                       -->
+    <!-- export RIG=racetrack                                       -->
+    <!-- export RIG=breadpan                                        -->
+    <!--                                                            -->
+    <!-- ========================================================== -->
+    
+    <include file="$(find config)/launch/$(env RIG).launch" unless="$(optenv RETRACK 0)" />
+     
+</launch>

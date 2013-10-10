@@ -5,8 +5,6 @@
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- hardware.                                                  -->
     <!--                                                            -->
-    <!-- Don't launch this file directly.                           -->
-    <!-- Launch hardware.launch, and point here from there.         -->
 	<!-- ========================================================== -->
 	
 	<include file="$(find LEDPanels)/launch/main.launch" />
