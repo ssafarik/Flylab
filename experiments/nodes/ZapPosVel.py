@@ -31,7 +31,8 @@ class Experiment():
         #self.experimentparams.save.filenamebase = 'TrpA1neg_AristaeIntact_150mW_' # 
         #self.experimentparams.save.filenamebase = 'UAS_TrpA1_parentalcontrol_180mW_' 
         #self.experimentparams.save.filenamebase = 'posvel_TrpA1_geosmin_fed_120mW_' 
-        self.experimentparams.save.filenamebase = 'posvel_TrpA1_CVA_260mW_'
+        #self.experimentparams.save.filenamebase = 'posvel_TrpA1_CVA_260mW_'
+        self.experimentparams.save.filenamebase = 'posvel_TrpA1_sugar_120mW_'
          
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
@@ -47,7 +48,8 @@ class Experiment():
         self.experimentparams.flyspec.nFlies = 1
         #self.experimentparams.flyspec.description = 'TrpA1_parentalcontrol_120mW'
         #self.experimentparams.flyspec.description = 'TrpA1_geosmin_fed_120mW' 
-        self.experimentparams.flyspec.description = 'TrpA1_CVA_260mW' 
+        #self.experimentparams.flyspec.description = 'TrpA1_CVA_260mW' 
+        self.experimentparams.flyspec.description = 'TrpA1_sugar_120mW' 
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=48.0)]

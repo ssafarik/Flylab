@@ -17,7 +17,7 @@
     <include file="$(find config)/launch/hardware.launch" />
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="Zapresponse.py" name="Experiment" required="true" />
+	<node pkg="experiments" type="ZapResponse.py" name="Experiment" required="true" />
 
 	
   
