@@ -30,6 +30,7 @@ class Reset (smach.State):
         self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.pubGalvoCommand    = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
         rospy.on_shutdown(self.OnShutdown_callback)
@@ -39,6 +40,12 @@ class Reset (smach.State):
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+
+        
+        # Create the tracking command for the galvo director.
+        self.commandGalvoBeamsink = MsgGalvoCommand()
+        self.commandGalvoBeamsink.enable_laser = False # False will send it to the beamsink.
+
 
 
     def CommandExperiment_callback(self, msgString):
@@ -58,7 +65,7 @@ class Reset (smach.State):
         rospy.loginfo("EL State ResetGalvos()")
 
         if (userdata.experimentparamsIn.trial.lasergalvos.enabled):
-            # Reset the various hardware.
+            self.pubGalvoCommand.publish(self.commandGalvoBeamsink)
             rv = 'success'
         else:
             rv = 'disabled'
@@ -122,8 +129,10 @@ class Action (smach.State):
     def execute(self, userdata):
         if self.mode == 'pre':
             self.paramsIn = userdata.experimentparamsIn.pre
-        if self.mode == 'trial':
+        elif self.mode == 'trial':
             self.paramsIn = userdata.experimentparamsIn.trial
+        else:
+            rospy.logwarn('EL Galvos mode must be pre or trial.')
 
         for pattern in self.paramsIn.lasergalvos.pattern_list:
             rospy.loginfo("EL State Lasergalvos(%s)" % pattern)
