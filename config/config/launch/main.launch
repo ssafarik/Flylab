@@ -11,6 +11,6 @@
     <!-- export RIG=breadpan                                        -->
     <!-- ========================================================== -->
     
-    <include file="$(find rigs)/launch/$(env RIG).launch" />
+    <include file="$(find config)/launch/$(env RIG).launch" />
      
 </launch>

@@ -10,7 +10,8 @@
     <param name="use_sim_time"                 type="bool" value="true"/>
     
     <!-- ***  Core stuff  *** -->
-    <include file="$(find flycore)/launch/flycore.launch" />
+    <include file="$(find flycore)/launch/main.launch" />
+
     <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" />
 
     
