@@ -15,6 +15,6 @@
     <!--                                                            -->
     <!-- ========================================================== -->
     
-    <include file="$(find config)/launch/$(env RIG).launch" if=$(optenv RETRACK 0) />
+    <include file="$(find config)/launch/$(env RIG).launch" unless="$(optenv RETRACK 0)" />
      
 </launch>
