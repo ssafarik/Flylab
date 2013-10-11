@@ -504,20 +504,42 @@ class ContourGenerator:
         contour1 = contour
         contour2 = None
         
-        if (defects is not None) and (len(defects)>=2):
-            iDefects = N.argsort(defects[:,0,3]) # Sorted indices of defect size.
+        if (defects is not None):
+            nDefects = len(defects)
             
-            # Get the two largest defects, in index order.
-            j = min(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
-            k = max(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
+            if (nDefects==0):
+                rospy.logwarn('SplitContour: 0 defects.')
+#                 (xyCenter, whAxes, degMajor) = cv2.minAreaRect(cnt)
+#                 #(xyCenter, whAxes, degMajor) = cv2.fitEllipse(cnt)
+# 
+#                 # Split along the minor axis.
+#                 #j = one side
+#                 #k = other side
+#                 
+#                 #contour1 = contour[j+1:k]
+#                 #contour2 = N.concatenate((contour[0:j],contour[k+1:len(contour)+1]))
+
             
-            # Keep the shared points.
-            #contour1 = contour[j:k+1]
-            #contour2 = N.concatenate((contour[0:j+1],contour[k:len(contour)+1]))
+            if (nDefects==1):
+                rospy.logwarn('SplitContour: 1 defect.')
             
-            # Don't keep the shared points.
-            contour1 = contour[j+1:k]
-            contour2 = N.concatenate((contour[0:j],contour[k+1:len(contour)+1]))
+            if (nDefects>=2):
+                iDefects = N.argsort(defects[:,0,3]) # Sorted indices of defect size.
+                
+                # Get the two largest defects, in index order.
+                j = min(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
+                k = max(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
+                
+                # Keep the shared points.
+                #contour1 = contour[j:k+1]
+                #contour2 = N.concatenate((contour[0:j+1],contour[k:len(contour)+1]))
+                
+                # Don't keep the shared points.
+                contour1 = contour[j+1:k]
+                contour2 = N.concatenate((contour[0:j],contour[k+1:len(contour)+1]))
+                
+        else:
+            rospy.logwarn('SplitContour: defects==None.')
         
         return (contour1,contour2)
         
