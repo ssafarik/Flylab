@@ -42,10 +42,6 @@ class Reset (smach.State):
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
 
         
-        # Create the tracking command for the galvo director.
-        self.commandGalvoBeamsink = MsgGalvoCommand()
-        self.commandGalvoBeamsink.enable_laser = False # False will send it to the beamsink.
-
 
 
     def CommandExperiment_callback(self, msgString):
@@ -65,8 +61,11 @@ class Reset (smach.State):
         rospy.loginfo("EL State ResetGalvos()")
 
         if (userdata.experimentparamsIn.trial.lasergalvos.enabled):
-            self.pubGalvoCommand.publish(self.commandGalvoBeamsink)
+            commandGalvoBeamsink = MsgGalvoCommand()
+            commandGalvoBeamsink.enable_laser = False # False will send it to the beamsink.
+            self.pubGalvoCommand.publish(commandGalvoBeamsink)
             rv = 'success'
+        
         else:
             rv = 'disabled'
             
@@ -142,10 +141,10 @@ class Action (smach.State):
             self.timeStart = rospy.Time.now()
     
             # Create the tracking command for the galvo director.
-            command = MsgGalvoCommand()
-            command.enable_laser = True
-            command.units = 'millimeters' # 'millimeters' or 'volts'
-            command.pattern_list = self.paramsIn.lasergalvos.pattern_list
+            commandGalvo = MsgGalvoCommand()
+            commandGalvo.enable_laser = True
+            commandGalvo.units = 'millimeters' # 'millimeters' or 'volts'
+            commandGalvo.pattern_list = self.paramsIn.lasergalvos.pattern_list
 
             # Determine if we're showing patterns only for certain states.            
             nPatterns = len(self.paramsIn.lasergalvos.pattern_list)
@@ -166,7 +165,7 @@ class Action (smach.State):
                              
             # If unfiltered, publish the command.
             if not isStatefiltered:
-                self.pubGalvoCommand.publish(command)
+                self.pubGalvoCommand.publish(commandGalvo)
     
             # Move galvos until preempt or timeout.        
             while not rospy.is_shutdown():
@@ -260,20 +259,20 @@ class Action (smach.State):
                     
                     # If filter state has changed, then publish the new command                    
                     if bFilterStateChanged:
-                        command.pattern_list = []
+                        commandGalvo.pattern_list = []
                         for iPattern in range(nPatterns):
                             if bInStatefilterRange[iPattern]:
                                 pattern = self.paramsIn.lasergalvos.pattern_list[iPattern]
-                                command.pattern_list.append(pattern)
+                                commandGalvo.pattern_list.append(pattern)
                     
-                        if len(command.pattern_list)>0:
-                            command.enable_laser = True
+                        if len(commandGalvo.pattern_list)>0:
+                            commandGalvo.enable_laser = True
                         else:
-                            command.enable_laser = False
+                            commandGalvo.enable_laser = False
                             
-                        self.pubGalvoCommand.publish(command)
+                        self.pubGalvoCommand.publish(commandGalvo)
 
-                # else command.pattern_list contains all patterns, and has already been published.
+                # else commandGalvo.pattern_list contains all patterns, and has already been published.
                 
                 
                 if self.preempt_requested():
@@ -311,9 +310,9 @@ class Action (smach.State):
 
                 
         # Turn off the laser.
-        command = MsgGalvoCommand()
-        command.enable_laser = False
-        self.pubGalvoCommand.publish(command)
+        commandGalvo = MsgGalvoCommand()
+        commandGalvo.enable_laser = False
+        self.pubGalvoCommand.publish(commandGalvo)
         
                 
         return rv

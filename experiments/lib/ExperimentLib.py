@@ -676,9 +676,6 @@ class ExperimentLib():
         
         self.actions_dict = g_actions_dict
         
-        self.xHome = 0
-        self.yHome = 0
-
         services_dict = {}
         for name in g_notify_list:
             services_dict[name+'/trigger'] = None
@@ -736,7 +733,7 @@ class ExperimentLib():
                                       classHardware.Action (mode='pre', tfrx=self.tfrx))
 
         
-        # Create the main 'Trials' concurrency state.
+        # Create the main 'Trial' concurrency state.
         ################################################################################### TRIAL
         smachTrial = smach.Concurrence(outcomes = ['success','disabled','aborted'],
                                          default_outcome = 'aborted',
@@ -753,7 +750,7 @@ class ExperimentLib():
 
         # Create the 'RESET' concurrency state.
         ################################################################################### RESET
-        smachReset = smach.Concurrence(outcomes = ['success','disabled','aborted'],
+        smachReset = smach.Concurrence(outcomes = ['success','aborted'],
                                          default_outcome = 'aborted',
                                          child_termination_cb = self.AnyResetTerm_callback,
                                          outcome_cb = self.AllResetTerm_callback,
@@ -805,7 +802,6 @@ class ExperimentLib():
             smach.StateMachine.add('RESETHARDWARE',                         
                                    smachReset,
                                    transitions={'success':stateAfterResetHardware,
-                                                'disabled':stateAfterResetHardware, 
                                                 'aborted':'aborted'},
                                    remapping={'experimentparamsIn':'experimentparams'})
 
@@ -918,6 +914,8 @@ class ExperimentLib():
         #rospy.logwarn('AnyResetTerm_callback(%s)' % repr(outcome_map))
         rv = False
         
+        # rv==True:  preempt all remaining states.
+        # rv==False: keep running.
         return rv
 
     
