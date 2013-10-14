@@ -798,6 +798,8 @@ class Fly:
                 (zKalman, vzKalman) = (0.0, 0.0)
                 (angleLeft, angleRight) = (N.pi, N.pi)
 
+            if (angleSensed is None):
+                angleSensed = 0.0
                 
             # If good data, then use it.
             if (xKalman is not None) and (yKalman is not None):
