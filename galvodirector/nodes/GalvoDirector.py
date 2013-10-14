@@ -211,7 +211,7 @@ class GalvoDirector:
                             else:
                                 self.pointcloud_list.append(pointcloud)
                         else:
-                            rospy.logwarn ('Cannot transform from frame %s at %s' % (pointcloud_template.header.frame_id, pointcloud_template.header.stamp))
+                            rospy.logwarn ('Cannot transform frame to %s from %s' % ('/Arena', pointcloud_template.header.frame_id))
         
                         #t3 = rospy.Time.now().to_sec()
                         #rospy.logwarn('GalvoDirector, stamp=%s, wait dt=%0.5f, transform dt=%0.5f' % (pointcloud_template.header.stamp,(t2-t1),(t3-t2))) # BUG: Occasional 0.1 sec times.

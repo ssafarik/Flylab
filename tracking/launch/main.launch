@@ -25,7 +25,7 @@
     <param name="tracking/rcFilterFlip"            		type="double" value="3.0"/>
 
 
-    <node name="ContourGenerator"  pkg="tracking" type="ContourGenerator.py" />
-    <node name="ContourIdentifier" pkg="tracking" type="ContourIdentifier.py" />
+    <node name="ContourGenerator"  pkg="tracking" type="ContourGenerator.py" required="true" />
+    <node name="ContourIdentifier" pkg="tracking" type="ContourIdentifier.py" required="true" />
 	
 </launch>

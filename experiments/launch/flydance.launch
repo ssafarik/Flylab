@@ -1,12 +1,12 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the ZAP-ON-STOP learning experiment.      -->
+	<!-- Configuration of the FLYDANCE experiment.                 -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- experiment.                                                -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments chase.launch                         -->
+    <!-- roslaunch experiments flydance.launch                       -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 
@@ -15,7 +15,7 @@
 
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="ZapOnTurn.py" name="Experiment" required="true" />
+	<node pkg="experiments" type="Flydance.py" name="Experiment" required="true" />
 
 	
   
