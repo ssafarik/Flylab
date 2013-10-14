@@ -27,7 +27,7 @@
 
     <!-- STEP 3:  Edit the following lines to play the appropriate .bag file. -->
     <include file="$(find flappy)/launch/input_bag.launch" >
-        <arg name="bagfiles" value="/home/ssafarik/test.bag" /> 
+        <arg name="bagfiles" value="$(env BAGFILE)" /> 
     </include> 
 
         
