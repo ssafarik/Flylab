@@ -7,17 +7,20 @@
     <!--                                                            -->
     <!-- ========================================================== -->
 
-    <param name="use_sim_time"                 type="bool" value="true"/>
     
     <!-- ***  Core stuff  *** -->
-    <include file="$(find flycore)/launch/flycore.launch" />
-    <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" />
+    <param name="use_sim_time"                 type="bool" value="true"/>
+    <include file="$(find flycore)/launch/main.launch" />
+    <node pkg="experiments" type="Retrack.py" name="Experiment" required="true" />
+    <include file="$(find config)/launch/playbag.launch" >
+        <arg name="bagfiles" value="$(env BAGFILE)" /> 
+    </include> 
+
 
     
-
-    <!-- STEP 1:  Edit Retrack.py for the number of robots & flies.  -->
-    <node pkg="experiments" type="Retrack.py" name="Experiment" required="true" />
-  
+    
+    <!-- STEP 1:  Edit Retrack.py to set the number of robots & flies.  -->
+ 
 
     <!-- STEP 2:  Edit the following lines to show the hardware you recorded the .bag file upon. -->
     <include file="$(find racetrack)/launch/params_tracking.launch" />
@@ -25,15 +28,18 @@
 	<include file="$(find flybowls)/launch/heatbowl_50mm.launch" />
 
 
-    <!-- STEP 3:  Edit the following lines to play the appropriate .bag file. -->
-    <include file="$(find flappy)/launch/input_bag.launch" >
-        <arg name="bagfiles" value="$(env BAGFILE)" /> 
-    </include> 
+    <!-- 
+        STEP 3:  Set the bag filespec of the file(s) you want to retrack:    
+                export BAGFILESPEC=/asdf/filename*.bag
+    -->
 
-        
 
+    <!-- 
+        STEP 4:  Run the retracker (in the same terminal window as step 3):    
+                  retracker
+    -->
     
-     
+    
 
 	
 </launch>

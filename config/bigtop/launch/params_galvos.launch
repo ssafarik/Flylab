@@ -10,7 +10,7 @@
 	<!-- ========================================================== -->
 
 	<param name="galvodriver/hzPoint" type="double" value="250000.0"/>
-	<param name="galvodriver/hzUSB" type="double" value="45.0"/>  <!-- The fastest that the DAQ can be updated over USB.  Galvodriver makes sure to stay slower than this rate. -->
+	<param name="galvodriver/hzUSB" type="double" value="30.0"/>  <!-- The fastest that the DAQ can be updated over USB.  Galvodriver makes sure to stay slower than this rate. -->
     <param name="galvodirector/xBeamsink" type="double" value="0.0" />  <!-- volts -->
     <param name="galvodirector/yBeamsink" type="double" value="-10.0" />  <!-- volts -->
 

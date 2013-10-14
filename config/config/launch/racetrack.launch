@@ -1,26 +1,27 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the BREADPAN hardware.                    -->
+	<!-- Configuration of the racetrack hardware.                   -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- hardware.                                                  -->
     <!--                                                            -->
-    <!-- Don't launch this file directly.                           -->
-    <!-- Launch hardware.launch, and point here from there.         -->
 	<!-- ========================================================== -->
 
-	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" /> 
-	<include file="$(find breadpan)/launch/params_calibration.launch" />
-	<include file="$(find breadpan)/launch/params_tracking.launch" />
+	<include file="$(find racetrack)/launch/params_calibration.launch" />
+	<include file="$(find racetrack)/launch/params_tracking.launch" />
+	<include file="$(find flybowls)/launch/flybowl_50mm.launch" /> 
 
+	<include file="$(find motorarm)/launch/motorarm.launch" />
+	<include file="$(find racetrack)/launch/params_actuator.launch" />
 
+	
     <!-- Get input from the camera, and from the background image file. -->
-    <include file="$(find breadpan)/launch/camera_tracking.launch" />
+    <include file="$(find racetrack)/launch/camera_tracking.launch" />
     <node name="OriginateBackground"         pkg="tracking" type="OriginateBackground.py" />
     <node name="OriginateCalibrationCamera"  pkg="arena_tf" type="OriginateCalibrationCamera.py" />
     <node name="OriginateCalibrationStage"   pkg="arena_tf" type="OriginateCalibrationStage.py" />
     
-	
+
 </launch>
 	
 	
