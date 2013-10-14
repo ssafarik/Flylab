@@ -8,6 +8,7 @@ import cv2
 import copy
 import tf
 import numpy as N
+from scipy.cluster.vq import kmeans,vq
 import threading
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Point, PointStamped
@@ -499,49 +500,83 @@ class ContourGenerator:
         return (contoursOut_list, iContourLargest)
     
     
-    # Split a contour into two, dividing at the line connecting the two greatest defects.
-    def SplitContour(self, contour, defects):
-        contour1 = contour
-        contour2 = None
+    # Split a contour into two (or multiple possible subcontours).
+    def SplitContour(self, contourIn, defects):
+        contoursOut = []
         
         if (defects is not None):
             nDefects = len(defects)
             
-            if (nDefects==0):
-                rospy.logwarn('SplitContour: 0 defects.')
-#                 (xyCenter, whAxes, degMajor) = cv2.minAreaRect(cnt)
-#                 #(xyCenter, whAxes, degMajor) = cv2.fitEllipse(cnt)
-# 
-#                 # Split along the minor axis.
-#                 #j = one side
-#                 #k = other side
-#                 
-#                 #contour1 = contour[j+1:k]
-#                 #contour2 = N.concatenate((contour[0:j],contour[k+1:len(contour)+1]))
+            # Divide into two, based on kmeans clustering.
+            if (nDefects<2):
+                contourInB = contourIn.squeeze()
+                centroids,_ = kmeans(contourInB, 2)    # Make two clusters.
+                iAssignment,_ = vq(contourInB, centroids)          # Assign points to clusters.
+                
+                contoursOut.append(contourIn[iAssignment==0])
+                contoursOut.append(contourIn[iAssignment==1])
 
             
-            if (nDefects==1):
-                rospy.logwarn('SplitContour: 1 defect.')
-            
-            if (nDefects>=2):
-                iDefects = N.argsort(defects[:,0,3]) # Sorted indices of defect size.
+            # Divide into two, at the line connecting the two greatest defects.
+            if (nDefects==2):
+                iBySize = N.argsort(defects[:,0,3]) # Sorted indices of defect size.
                 
                 # Get the two largest defects, in index order.
-                j = min(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
-                k = max(defects[iDefects[-1],0,2], defects[iDefects[-2],0,2])
+                j = min(defects[iBySize[-1],0,2], defects[iBySize[-2],0,2])
+                k = max(defects[iBySize[-1],0,2], defects[iBySize[-2],0,2])
                 
                 # Keep the shared points.
-                #contour1 = contour[j:k+1]
-                #contour2 = N.concatenate((contour[0:j+1],contour[k:len(contour)+1]))
+                #contour1 = contourIn[j:k+1]
+                #contour2 = N.concatenate((contourIn[0:j+1],contourIn[k:len(contourIn)+1]))
                 
                 # Don't keep the shared points.
-                contour1 = contour[j+1:k]
-                contour2 = N.concatenate((contour[0:j],contour[k+1:len(contour)+1]))
+                contoursOut.append(contourIn[j+1:k])
+                contoursOut.append(N.concatenate((contourIn[0:j],contourIn[k+1:len(contourIn)+1])))
+                #contour1 = contourIn[j+1:k]
+                #contour2 = N.concatenate((contourIn[0:j],contourIn[k+1:len(contourIn)+1]))
+
+                
+            # Divide into three candidate contour pairs, and let the ContourIdentifier figure it out.
+            if (nDefects>2):
+                iBySize = N.argsort(defects[:,0,3]) # Indices sorted by defect size.
+                
+                # Indices of three largest defects, sorted by point location.
+                iByLocation = N.array([defects[iBySize[-3],0,2], defects[iBySize[-2],0,2], defects[iBySize[-1],0,2]])
+                iByLocation.sort()
+
+                # Indices of three largest defects, in location order.
+                j = iByLocation[0]
+                k = iByLocation[1]
+                m = iByLocation[2]
+
+                # Three contours.
+                #contoursOut.append(contourIn[j+1:k])
+                #contoursOut.append(contourIn[k+1:m])
+                #contoursOut.append(N.concatenate((contourIn[0:j],contourIn[m+1:len(contourIn)+1])))
+
+                # Three pairs of contours.
+                (p1, p2) = (j, k)
+                contoursOut.append(contourIn[p1+1:p2])
+                contoursOut.append(N.concatenate((contourIn[0:p1],contourIn[p2+1:len(contourIn)+1])))
+
+                (p1, p2) = (k, m)
+                contoursOut.append(contourIn[p1+1:p2])
+                contoursOut.append(N.concatenate((contourIn[0:p1],contourIn[p2+1:len(contourIn)+1])))
+                
+                (p1, p2) = (j, m)
+                contoursOut.append(contourIn[p1+1:p2])
+                contoursOut.append(N.concatenate((contourIn[0:p1],contourIn[p2+1:len(contourIn)+1])))
+                
                 
         else:
-            rospy.logwarn('SplitContour: defects==None.')
-        
-        return (contour1,contour2)
+            contourInB = contourIn.squeeze()
+            centroids,_ = kmeans(contourInB, 2)    # Make two clusters.
+            iAssignment,_ = vq(contourInB, centroids)          # Assign points to clusters.
+            
+            contoursOut.append(contourIn[iAssignment==0])
+            contoursOut.append(contourIn[iAssignment==1])
+
+        return contoursOut #(contour1,contour2)
         
         
     
@@ -581,19 +616,13 @@ class ContourGenerator:
                 self.bMerged = False
                 
 
-            
             # Split the merged contour.
             if self.bMerged:
                 contour = self.contour_list.pop(iContourMerged)
                 hull = cv2.convexHull(contour, returnPoints=False)
                 defects = cv2.convexityDefects(contour, hull) 
 
-                (contour1,contour2) = self.SplitContour(contour, defects)
-                if (contour1 is not None):
-                    self.contour_list.append(contour1)
-                if (contour2 is not None):
-                    self.contour_list.append(contour2)
-                    
+                self.contour_list.extend(self.SplitContour(contour, defects))
                 self.nContours = len(self.contour_list)
                 
 
