@@ -247,7 +247,7 @@ class Fly:
 
         
 
-        if self.contourinfo.ecc is not None:
+        if (self.contourinfo.ecc is not None) and (self.contourinfo.ecc != 0.0):
             eccmetric = (self.contourinfo.ecc + 1/self.contourinfo.ecc) - 1 #self.contourinfo.ecc#
         else:
             eccmetric = 1.0

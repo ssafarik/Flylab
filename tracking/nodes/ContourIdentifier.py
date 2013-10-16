@@ -320,14 +320,14 @@ class ContourIdentifier:
     #
     def GetDistanceMatrix(self, xyObjects, xyContours):
         # The basic distance matrix.
-        d0 = N.subtract.outer(xyObjects[:,INDEX_X], xyContours[:,INDEX_X])
-        d1 = N.subtract.outer(xyObjects[:,INDEX_Y], xyContours[:,INDEX_Y])
-        d = N.hypot(d0, d1)
-        
+        d0 = N.subtract.outer(xyObjects[:,INDEX_X], xyContours[:,INDEX_X]) # nObjects-by-nContours matrix of x-distances between objects and contours.
+        d1 = N.subtract.outer(xyObjects[:,INDEX_Y], xyContours[:,INDEX_Y]) # nObjects-by-nContours matrix of y-distances between objects and contours.
+        d = N.hypot(d0, d1)                                                # nObjects-by-nContours matrix of 2-norm distances between objects and contours.
         
         # Additional distance penalties.
         
         # Make sure the robot gets first choice of the contours.
+        # Set to 0 the robot's nearest contour.
         for iRobot in range(self.nRobots):
             k = d[iRobot,:].argmin()
             d[iRobot,k] = 0.0
@@ -557,7 +557,7 @@ class ContourIdentifier:
                                                   self.contourinfo_list[iContour].y,
                                                   self.contourinfo_list[iContour].area,  self.contourinfo_list[iContour].ecc])
         
-        
+
         # Match objects with contourinfo_list.
         d = self.GetDistanceMatrix(xyObjects, xyContours)
         if d is not []:
@@ -577,9 +577,12 @@ class ContourIdentifier:
                 if (mapContoursFromObjects[m])>=len(self.contourinfo_list):
                     mapContoursFromObjects[m] = None
 
+            #for i in range(len(d)):
+            #    rospy.logwarn(d[i])
             #rospy.logwarn ('CI mapObjectsGaleShapely =%s' % mapObjectsGaleShapely)
             #rospy.logwarn ('CI mapObjectsMunkres     =%s' % mapObjectsMunkres)
             #rospy.logwarn ('CI mapContoursFromObjects=%s' % mapContoursFromObjects)
+            #rospy.logwarn('-----')
                 
             # Append a None for missing flies.
             while len(mapContoursFromObjects) < self.nRobots+self.nFlies:
