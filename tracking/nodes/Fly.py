@@ -247,14 +247,8 @@ class Fly:
 
         
 
-        if (self.contourinfo.ecc is not None) and (self.contourinfo.ecc != 0.0):
-            eccmetric = (self.contourinfo.ecc + 1/self.contourinfo.ecc) - 1 #self.contourinfo.ecc#
-        else:
-            eccmetric = 1.0
-        #rospy.logwarn('%s: eccmetric=%0.2f' % (self.name, eccmetric))
-
         if (self.speed > self.speedThresholdForTravel):
-            if (eccmetric > 1.5):
+            if (self.contourinfo.ecc > 0.6):
                 magFlipvalueNew = 1.0
 
                 # Choose the better orientation.
