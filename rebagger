@@ -2,8 +2,12 @@
 
 # This script converts bag files to the latest version, and writes the
 # converted filename.bag as filename_cnv.bag
+# 
+# To specify the files to convert, do the following before running:
+# export BAGFILESPEC=/asdf/filename*.bag
+#
 
-for fn in `ls /home/sweta/Flylab_data/2013_08_29/*.bag | cut -d. -f 1`; do 
+for fn in `ls $BAGFILESPEC | cut -d. -f 1`; do 
     echo $fn.bag
     rosbag fix $fn.bag $fn\_cnv.bag
 done
