@@ -43,7 +43,8 @@ int32					g_nPointsBufferDaqRegistered = -1;
 int32					g_nPointsPointcloudEx=0;
 int32					g_nPointsPointcloudExMax=0;
 int32					g_nPointsPointcloudExRegistered=0;
-int32					g_nDuplicates = 0;
+int32					g_nDupsPointcloudDup = 0;
+int32					g_nDupsPoint = 0;
 float64 			   *g_pPointcloudExPoints=NULL;
 int32 				   *g_pPointcloudExIntensity=NULL;
 
@@ -53,10 +54,14 @@ sensor_msgs::PointCloud g_pointcloud;
 
 int						g_bStarted=FALSE;
 
-double					g_hzPoint = 10.0; // The point rate effects the lag in the pointcloud update = onboardbufsize/g_hzPoint, e.g. 4095/16384 = 0.25 seconds.
+double					g_hzDaqClock = 1000.0; // The point rate effects the lag in the pointcloud update = onboardbufsize/g_hzDaqClock, e.g. 4095/16384 = 0.25 seconds.
+double					g_hzGalvoRate = 10.0; // The rate the galvos can move from point to point, with reasonable quality.
+
 double					g_hzPointcloud = 0.0;
 double					g_hzPointcloudEx = 0.0;
 double					g_hzUSB = 40.0;
+double					g_xBeamsink = 0.0;
+double					g_yBeamsink = 0.0;
 
 double					g_timeHeartbeat=0.0;	// This time should get updated at regular intervals.  Checked in main().
 
@@ -98,7 +103,7 @@ void HandleDAQError(int32 e)
 //
 void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointcloud)
 {
-	double	hzPoint = 0.0;
+	double	hzDaqClock = 0.0;
 	
 
 	// Copy the given pointcloud, if it contains points.
@@ -108,12 +113,12 @@ void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointclou
 
 	//g_lockPointcloud.unlock();
 
-	ros::param::get("galvodriver/hzPoint", hzPoint);
-	if (g_hzPoint != hzPoint)
-	{
-		g_hzPoint = hzPoint;
-		g_bNeedToReset = TRUE;
-	}
+//	ros::param::get("galvodriver/hzDaqClock", hzDaqClock);
+//	if (g_hzDaqClock != hzDaqClock)
+//	{
+//		g_hzDaqClock = hzDaqClock;
+//		g_bNeedToReset = TRUE;
+//	}
 	//cout << g_nPointsBufferDaq << " ";
 
 } // GalvoPointCloud_callback()
@@ -163,8 +168,9 @@ void UpdatePointsFromPointcloud(void)
 {
 	int			i=0;
 	int			iPoint=0;
-	int			iPointcloud=0;
-	int			iDuplicate=0;
+	int			iDupPointcloud=0;
+	int			iDupPoint=0;
+	double		hzPointcloudDup = 0.0;
 	
 
 	//g_lockPointcloud.lock();
@@ -172,21 +178,28 @@ void UpdatePointsFromPointcloud(void)
 	// If a multi-point cloud, then duplicate its points to bring it to down the USB rate, etc.
 	if (g_pointcloud.points.size()>1 || g_nPointsPerCloud == 0)
 	{
-		g_nPointsPerCloud = MAX(1,g_pointcloud.points.size());
-		g_hzPointcloud = g_hzPoint / (double)g_nPointsPerCloud;						// Output rate of the given pointcloud.
-		g_nDuplicates = (int32)MAX(1.0, ceil(g_hzPointcloud/g_hzUSB));          	// Number of point (or pointcloud) copies needed to stay below the USB update rate.
-		g_hzPointcloudEx = g_hzPointcloud / (double)g_nDuplicates;					// Output rate of the expanded pointcloud.
-		g_nPointsPointcloudEx = g_nPointsPerCloud * g_nDuplicates;					// Number of points in the "expanded" pointcloud.
-		g_nPointsBufferDaq = NCOPIES_POINTCLOUDEX * g_nPointsPointcloudEx; 			// Number of points in the PC buffer -- multiple pointcloudex's.
+		g_nPointsPerCloud = MAX(1,g_pointcloud.points.size());								// The number of points in the given cloud.
+		g_hzPointcloud = g_hzDaqClock / (double)g_nPointsPerCloud;							// Output rate of the given pointcloud, if we just blasted it out.
+
+		g_nDupsPoint = (int32)MAX(1.0, ceil(g_hzDaqClock / g_hzGalvoRate));					// Number of point copies needed to stay below the max galvo rate.
+		hzPointcloudDup =  g_hzPointcloud / (double)g_nDupsPoint;							// Rate of a pointcloud with duplicated points.
+		g_nDupsPointcloudDup = (int32)MAX(1.0, ceil(hzPointcloudDup / g_hzUSB));			// Number of pointcloudDup copies needed to stay below the USB update rate.
+
+		g_hzPointcloudEx = g_hzPointcloud / (double)(g_nDupsPointcloudDup * g_nDupsPoint);	// Output rate of the expanded pointcloud.
+		g_nPointsPointcloudEx = g_nPointsPerCloud * (g_nDupsPointcloudDup * g_nDupsPoint);	// Number of points in the "expanded" pointcloud.
+		g_nPointsBufferDaq = NCOPIES_POINTCLOUDEX * g_nPointsPointcloudEx; 					// Number of points in the PC buffer -- multiple pointcloudex's.
 	}
 	else // if a single-point cloud, make it the same size as the prior multi-point cloud so we don't have to reregister the DAQ buffer, etc.
 	{
-		g_nDuplicates = g_nPointsPointcloudEx;										// Make same size as prior cloud, but by way of using duplicates instead of unique points.
 		g_nPointsPerCloud = 1;
-		g_hzPointcloud = g_hzPoint / (double)g_nPointsPerCloud;						// Output rate of the given pointcloud.
-		g_hzPointcloudEx = g_hzPointcloud / (double)g_nDuplicates;					// Output rate of the expanded pointcloud.
-		g_nPointsPointcloudEx = g_nPointsPerCloud * g_nDuplicates;					// Number of points in the "expanded" pointcloud.
-		g_nPointsBufferDaq = NCOPIES_POINTCLOUDEX * g_nPointsPointcloudEx; 			// Number of points in the PC buffer -- multiple pointcloudex's.
+		g_hzPointcloud = g_hzDaqClock / (double)g_nPointsPerCloud;							// Output rate of the given pointcloud.
+
+		g_nDupsPoint = g_nPointsPointcloudEx;												// Make same size as prior cloud, but by way of using duplicates instead of unique points.
+		g_nDupsPointcloudDup = 1;															// Make same size as prior cloud, but by way of using duplicates instead of unique points.
+
+		g_hzPointcloudEx = g_hzPointcloud / (double)(g_nDupsPointcloudDup * g_nDupsPoint);	// Output rate of the expanded pointcloud.
+		g_nPointsPointcloudEx = g_nPointsPerCloud * (g_nDupsPointcloudDup * g_nDupsPoint);	// Number of points in the "expanded" pointcloud.
+		g_nPointsBufferDaq = NCOPIES_POINTCLOUDEX * g_nPointsPointcloudEx; 				// Number of points in the PC buffer -- multiple pointcloudex's.
 	}
 
 	// Realloc memory if size grew.  This is one buffer containing multiple copies of pointcloud, i.e. one pointcloudEx.  The DAQ will use this buffer NCOPIES_POINTCLOUDEX times.
@@ -209,36 +222,42 @@ void UpdatePointsFromPointcloud(void)
 	if (g_pointcloud.points.size()>0)
 	{
 		//ROS_WARN("Nonempty pointcloud.");
-		for (i=0; i<g_nPointsPerCloud; i++)
+		for (iDupPointcloud=0; iDupPointcloud<g_nDupsPointcloudDup; iDupPointcloud++)
 		{
-			for (iDuplicate=0; iDuplicate<g_nDuplicates; iDuplicate++)
+			for (i=0; i<g_nPointsPerCloud; i++)
 			{
-				// Copy the (x,y) values.
-				g_pPointcloudExPoints[iPoint*2]   = (float64)g_pointcloud.points[i].x;
-				g_pPointcloudExPoints[iPoint*2+1] = (float64)g_pointcloud.points[i].y;
+				for (iDupPoint=0; iDupPoint<g_nDupsPoint; iDupPoint++)
+				{
+					// Copy the (x,y) values.
+					g_pPointcloudExPoints[iPoint*2]   = (float64)g_pointcloud.points[i].x;
+					g_pPointcloudExPoints[iPoint*2+1] = (float64)g_pointcloud.points[i].y;
+
+					// Copy the z-blanking value.
+					g_pPointcloudExIntensity[iPoint] = (g_pointcloud.points[i].z != 0.0) ? LASERON : LASEROFF;
 			
-				// Copy the z-blanking value.
-				g_pPointcloudExIntensity[iPoint] = (g_pointcloud.points[i].z != 0.0) ? LASERON : LASEROFF;
-		
-				iPoint++;
+					iPoint++;
+				}
 			}
 		}
 	}
-	else // Empty pointcloud -- use beamsink point (0,-10)
+	else // Empty pointcloud -- use beamsink point.
 	{
 		//ROS_WARN("Empty pointcloud.");
-		for (i=0; i<g_nPointsPerCloud; i++)
+		for (iDupPointcloud=0; iDupPointcloud<g_nDupsPointcloudDup; iDupPointcloud++)
 		{
-			for (iDuplicate=0; iDuplicate<g_nDuplicates; iDuplicate++)
+			for (i=0; i<g_nPointsPerCloud; i++)
 			{
-				// Copy the beamsink values.
-				g_pPointcloudExPoints[iPoint*2]   =   0.0;
-				g_pPointcloudExPoints[iPoint*2+1] = -10.0;
+				for (iDupPoint=0; iDupPoint<g_nDupsPoint; iDupPoint++)
+				{
+					// Copy the beamsink values.
+					g_pPointcloudExPoints[iPoint*2]   = g_xBeamsink;
+					g_pPointcloudExPoints[iPoint*2+1] = g_yBeamsink;
+
+					// Copy the z-blanking value.
+					g_pPointcloudExIntensity[iPoint] = LASERON;
 			
-				// Copy the z-blanking value.
-				g_pPointcloudExIntensity[iPoint] = LASERON;
-		
-				iPoint++;
+					iPoint++;
+				}
 			}
 		}
 	}
@@ -320,12 +339,13 @@ int RegisterCallbackDAQBuffer (TaskHandle hTask)
 		}
 
 		//g_lockPointcloud.lock();
-		ROS_WARN("hzPre=%9.2f, hzPost=%6.2f, offbdBufsz=%6lu, nPtsPerCloud=%6lu, nDups=%6lu", 
+		ROS_WARN("hzPre=%9.2f, hzPost=%6.2f, offbdBufsz=%6lu, nPtsPerCloud=%6lu, nDupsPointcloud=%6lu, nDupsPoint=%6lu",
 				g_hzPointcloud, 
 				g_hzPointcloudEx, 
 				g_nPointsPointcloudEx,
 				MAX(1,g_pointcloud.points.size()),
-				g_nDuplicates);
+				g_nDupsPointcloudDup,
+				g_nDupsPoint);
 		//g_lockPointcloud.lock();
 
 		rv = TRUE;
@@ -396,7 +416,7 @@ void ResetDAQ(void)
 			//ROS_WARN("CreateAOVoltageChan");
 			HandleDAQError(e);
 			
-			e = DAQmxCfgSampClkTiming (g_hTask, "OnboardClock", (float64)g_hzPoint, DAQmx_Val_Rising, DAQmx_Val_ContSamps, g_nPointsPointcloudEx);
+			e = DAQmxCfgSampClkTiming (g_hTask, "OnboardClock", (float64)g_hzDaqClock, DAQmx_Val_Rising, DAQmx_Val_ContSamps, g_nPointsPointcloudEx);
 			//ROS_WARN("CfgSampClkTiming");
 			HandleDAQError(e);
 			
@@ -472,15 +492,19 @@ int main(int argc, char **argv)
 	
 	g_pszError = new char[LENERR];
 	
-	node.getParam("galvodriver/hzPoint", g_hzPoint);
+	node.getParam("galvodriver/hzDaqClock", g_hzDaqClock);
+	node.getParam("galvodriver/hzGalvoRate", g_hzGalvoRate);
 	node.getParam("galvodriver/hzUSB", g_hzUSB);
+	node.getParam("galvodirector/xBeamsink", g_xBeamsink);
+	node.getParam("galvodirector/yBeamsink", g_yBeamsink);
+
 	
 	hzSpin = 2.0 * g_hzUSB;
 	ros::Rate           rosRate(hzSpin);
 	
 	ros::Subscriber subGalvoPoints = node.subscribe("GalvoDriver/pointcloud", 2, GalvoPointCloud_callback);
-	ROS_WARN ("Listening on GalvoDriver/pointcloud, hzPoint=%0.2f", g_hzPoint);
-	ros::Publisher	pubHeartbeat = node.advertise<std_msgs::Time>("heartbeat", 10);
+	ROS_WARN ("Listening on GalvoDriver/pointcloud, hzDaqClock=%0.2f", g_hzDaqClock);
+	ros::Publisher	pubHeartbeat = node.advertise<std_msgs::Time>("galvodriver/heartbeat", 10);
 
 	ResetDAQ();
 
