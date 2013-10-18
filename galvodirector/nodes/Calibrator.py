@@ -42,7 +42,7 @@ class GalvoCalibrator:
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback)
         self.subCommand    = rospy.Subscriber('broadcast/command', String, self.Command_callback)
 
-        self.pubGalvodirectorCommand = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand)
+        self.pubGalvodirectorCommand = rospy.Publisher('galvodirector/command', MsgGalvoCommand)
 
 
         self.pointsInput = [

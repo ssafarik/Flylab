@@ -30,7 +30,7 @@ class Reset (smach.State):
         self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
-        self.pubGalvoCommand    = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
+        self.pubGalvoCommand    = rospy.Publisher('galvodirector/command', MsgGalvoCommand, latch=True)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
         rospy.on_shutdown(self.OnShutdown_callback)
@@ -98,7 +98,7 @@ class Action (smach.State):
         self.arenastate = None
         self.dtVelocity = rospy.Duration(rospy.get_param('tracking/dtVelocity', 0.2)) # Interval over which to calculate velocity.
 
-        self.pubGalvoCommand    = rospy.Publisher('GalvoDirector/command', MsgGalvoCommand, latch=True)
+        self.pubGalvoCommand    = rospy.Publisher('galvodirector/command', MsgGalvoCommand, latch=True)
         queue_size_arenastate   = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState      = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 

@@ -480,7 +480,7 @@ void ResetDAQ(void)
 //*********************************************
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "GalvoDriver");
+	ros::init(argc, argv, "galvodriver");
 	
 	ros::NodeHandle 	node;
 	uInt32 				udata;
@@ -502,8 +502,8 @@ int main(int argc, char **argv)
 	hzSpin = 2.0 * g_hzUSB;
 	ros::Rate           rosRate(hzSpin);
 	
-	ros::Subscriber subGalvoPoints = node.subscribe("GalvoDriver/pointcloud", 2, GalvoPointCloud_callback);
-	ROS_WARN ("Listening on GalvoDriver/pointcloud, hzDaqClock=%0.2f", g_hzDaqClock);
+	ros::Subscriber subGalvoPoints = node.subscribe("galvodriver/pointcloud", 2, GalvoPointCloud_callback);
+	ROS_WARN ("Listening on galvodriver/pointcloud, hzDaqClock=%0.2f", g_hzDaqClock);
 	ros::Publisher	pubHeartbeat = node.advertise<std_msgs::Time>("galvodriver/heartbeat", 10);
 
 	ResetDAQ();

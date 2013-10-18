@@ -10,7 +10,7 @@
 	<node pkg="rviz" type="rviz" args="-d $(find ui)/Multifly.vcg" name="rviz" /> 
 
 	<!-- Run the GUI Command window. -->
-	<node pkg="ui" type="FlylabGUI.py" name="FlylabGUI" /> 
+	<node pkg="ui" type="FlylabGUI.py" name="FlylabGUI" required="true" /> 
 	
 	
 	<!-- Show zero or more camera windows. -->

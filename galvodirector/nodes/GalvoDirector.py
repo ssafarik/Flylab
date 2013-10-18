@@ -11,7 +11,7 @@ from galvodirector.msg import MsgGalvoCommand
 from tracking.msg import ArenaState
 from geometry_msgs.msg import Point, Transform
 from sensor_msgs.msg import PointCloud, ChannelFloat32
-from std_msgs.msg import Header
+from std_msgs.msg import Header, Time
 from patterngen.msg import MsgPattern
 from patterngen.srv import *
 
@@ -23,12 +23,12 @@ class NullClass:
 ###############################################################################
 ###############################################################################
 ###############################################################################
-# The class GalvoDirector subscribes to GalvoDirector/command, and draws the commanded
+# The class GalvoDirector subscribes to galvodirector/command, and draws the commanded
 # pattern into the commanded frame, e.g. draw a grid at the origin of the 
 # "Fly1" frame, or draw a circle at the origin of the "Arena" frame.
 #
 # Uses the PatternGen service to compute the various point locations. 
-# Publishes GalvoDriver/pointcloud for the galvos to scan.
+# Publishes galvodriver/pointcloud for the galvos to scan.
 #
 ###############################################################################
 ###############################################################################
@@ -46,9 +46,10 @@ class GalvoDirector:
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
-        self.subGalvodirectorCommand = rospy.Subscriber('GalvoDirector/command', MsgGalvoCommand, self.GalvodirectorCommand_callback, queue_size=2)
-        self.pubGalvodriverPointcloud = rospy.Publisher('GalvoDriver/pointcloud', PointCloud, latch=True)
-        self.pubGalvodriverPointcloudMm = rospy.Publisher('GalvoDriver/pointcloudmm', PointCloud, latch=True)
+        self.subGalvodirectorCommand = rospy.Subscriber('galvodirector/command', MsgGalvoCommand, self.GalvodirectorCommand_callback, queue_size=2)
+        self.pubGalvodriverPointcloud = rospy.Publisher('galvodriver/pointcloud', PointCloud, latch=True)
+        self.pubGalvodriverPointcloudMm = rospy.Publisher('galvodriver/pointcloudmm', PointCloud, latch=True)
+        self.subGalvodriverHeartbeat = rospy.Subscriber('galvodriver/heartbeat', Time, self.GalvodriverHeartbeat_callback, queue_size=2)
 
         # Attach to services.
         try:
@@ -92,6 +93,8 @@ class GalvoDirector:
         self.frameidPosition_list = []
         self.units = 'millimeters'
         
+        self.timeHeartbeat = None
+        
         self.pointcloudBeamsink = PointCloud(header=Header(frame_id='/Arena', 
                                                            stamp=rospy.Time.now()),
                                              points=[Point(x=self.xBeamsink, 
@@ -134,6 +137,20 @@ class GalvoDirector:
         pass
 
 
+    def GalvodriverHeartbeat_callback(self, time):
+        if (self.initialized):
+            # Convert to ROS time format.
+            rosTime = rospy.Time(time.data.secs, time.data.nsecs)
+            
+            # Calc the offset in computer clocks (driver & director clocks).
+            if (self.timeHeartbeat is None):
+                self.durHeartbeatClockOffset = rospy.Time.now() - rosTime  
+    
+            self.timeHeartbeat = rosTime
+        
+        
+        
+        
     # GalvodirectorCommand_callback()
     # Receive the list of patterns, and store their pointcloud templates (centered at origin).
     #
@@ -332,12 +349,23 @@ class GalvoDirector:
             
 
     def Main(self):
-        rospy.spin()
+        rosRate = rospy.Rate(1)     # Check for a heartbeat at this rate.
+        tMaxAgeOfHeartbeat = 10.0   # If we don't get a heartbeat in this number of seconds, we quit.
+        
+        bKeepRunning = True
+        while (not rospy.is_shutdown() and bKeepRunning):
+            if (self.timeHeartbeat is not None):
+                duration = (rospy.Time.now() - self.timeHeartbeat) - self.durHeartbeatClockOffset
+                if (duration.to_sec() > tMaxAgeOfHeartbeat):
+                    rospy.logwarn ("Galvos Heartbeat hasn't been seen in %0.2f seconds.  Quitting." % duration.to_sec())
+                    bKeepRunning = False
+                    
+            rosRate.sleep()
             
 
 
 if __name__ == '__main__':
-    rospy.init_node('GalvoDirector')
+    rospy.init_node('galvodirector')
     gd = GalvoDirector()
     gd.Main()
     
