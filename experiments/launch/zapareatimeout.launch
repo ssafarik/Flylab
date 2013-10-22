@@ -1,0 +1,20 @@
+<launch>
+	<!-- ==========================================================   -->
+	<!-- This experiment lasers the fly when fly is in an area, up    -->
+    <!-- to a timeout period.                                         -->
+    <!--                                                              -->
+    <!-- Launch this file to run the experiment, as in:               -->
+    <!-- roslaunch experiments zapposvel.launch                       -->
+    <!--                                                              -->
+	<!-- ==========================================================   -->
+
+	<!-- ***  Core stuff  *** -->
+    <include file="$(find flycore)/launch/main.launch" />
+
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="experiments" type="ZapAreaTimeout.py" name="Experiment" required="true" />
+
+	
+  
+</launch>
