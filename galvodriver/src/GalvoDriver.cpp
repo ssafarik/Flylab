@@ -531,7 +531,7 @@ int main(int argc, char **argv)
 	ROS_WARN("USB transfer request count=%u", udata);
 	
 	//ros::spin();
-	double 			timeAllowed = ros::Duration(2.0).toSec();
+	double 			timeAllowed = ros::Duration(4.0).toSec();
 	double 			timeTaken;
 	std_msgs::Time	heartbeat;
 	int				iCount=0;
