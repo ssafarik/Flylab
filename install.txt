@@ -11,45 +11,52 @@
 # Install ROS Hydro on Ubuntu.
 sudo apt-get install ros-hydro-desktop-full
 sudo apt-get install ros-hydro-cmake-modules
+sudo rosdep init
+rosdep update
 
 
 # Add the following lines to your ~/.bashrc
 source /opt/ros/hydro/setup.bash
 export ROS_PACKAGE_PATH=~/src.git:~/src.hg:$ROS_PACKAGE_PATH    # (Assuming your ROS projects are in these two directories).
 export ROS_IP=123.456.789.012                                   # (i.e. your ip)
-export ROS_MASTER_URI=http://$ROS_IP:11311
+export ROS_MASTER_URI=http://localhost:11311
 export PYTHONPATH=~/src.git/Flylab/arena_tf/src:~/src.git/Flylab/flycore/src:$PYTHONPATH
 export RIG=bigtop                                               # (change this to the name of your Flylab rig)
+
+
+# Get a few additional pieces.
+sudo easy_install munkres
+sudo apt-get install python-setuptools
+sudo apt-get install python-numpy
+sudo apt-get install python-scipy
+sudo apt-get install libdc1394-22-dev
+sudo apt-get install intltool
+sudo apt-get install gobject-introspection
 
 
 # Get the Flylab software.
 cd ~/src.git
 git clone https://github.com/ssafarik/Flylab.git
+sudo copy ~/src.git/Flylab/udevrules/99-simple_step.rules /etc/udev/rules.d 
 
 
 # Get simple_step.
 cd ~/src.hg
 hg clone https://bitbucket.org/willdickson/simple_step
-python ~/src.hg/api/python/setup.py install
+sudo python ~/src.hg/simple_step/api/python/setup.py develop
 cd ~/src.git
 git clone https://github.com/ssafarik/rosSimpleStep.git
+git clone https://github.com/strawlab/pylibusb.git
+sudo python ~/src.git/pylibusb/setup.py install
 
-
-# Get a few additional pieces.
-easy_install munkres
-sudo apt-get install python-numpy
-sudo apt-get install python-scipy
-sudo apt-get install libdc1394-22
-sudo apt-get install libdc1394-22-dev
-sudo apt-get install intltool
-sudo apt-get install gobject-introspection
 
 
 # Get Aravis camera library.
 cd ~/src.git
 git clone http://git.gnome.org/cgit/aravis
 cd ~/src.git/aravis
-./autogen.sh             # Might be necessary to comment out the line in configure.ac:  GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
+# Edit configure.ac, and comment out the line:  GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
+./autogen.sh             
 make
 sudo make install
 
