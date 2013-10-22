@@ -8,16 +8,18 @@
 #
 ###
 
+# Install ROS Hydro on Ubuntu.
+sudo apt-get install ros-hydro-desktop-full
+sudo apt-get install ros-hydro-cmake-modules
 
-# Install ROS Fuerte on Ubuntu.
 
-
-# Edit your ~/.bashrc
-source /opt/ros/fuerte/setup.bash
-export ROS_PACKAGE_PATH=~/src.git:~/src.hg:$ROS_PACKAGE_PATH
-export ROS_IP=123.456.789.012   # (i.e. your ip)
+# Add the following lines to your ~/.bashrc
+source /opt/ros/hydro/setup.bash
+export ROS_PACKAGE_PATH=~/src.git:~/src.hg:$ROS_PACKAGE_PATH    # (Assuming your ROS projects are in these two directories).
+export ROS_IP=123.456.789.012                                   # (i.e. your ip)
 export ROS_MASTER_URI=http://$ROS_IP:11311
-export RIG=bigtop               # (change this to the name of your Flylab rig)
+export PYTHONPATH=~/src.git/Flylab/arena_tf/src:~/src.git/Flylab/flycore/src:$PYTHONPATH
+export RIG=bigtop                                               # (change this to the name of your Flylab rig)
 
 
 # Get the Flylab software.
@@ -33,7 +35,7 @@ cd ~/src.git
 git clone https://github.com/ssafarik/rosSimpleStep.git
 
 
-# Get a few additonal pieces.
+# Get a few additional pieces.
 easy_install munkres
 sudo apt-get install python-numpy
 sudo apt-get install python-scipy
@@ -71,5 +73,8 @@ rosmake flylaball
 # Assuming that flylaball finished without errors, and that you have functioning Flylab hardware, then you 
 # should be able to run an experiment, for example:
 roslaunch experiments testtracking.launch  
+
+
+
 
 

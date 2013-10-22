@@ -7,7 +7,6 @@
 
 
 	<!-- Run rviz. -->
-    <!-- <node pkg="rviz" type="rviz" args="-d $(find ui)/Multifly.vcg" name="rviz" /> --> 
     <node pkg="rviz" type="rviz" args="-d $(find ui)/arena.rviz" name="rviz" /> 
 
 	<!-- Run the GUI Command window. -->
