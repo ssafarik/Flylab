@@ -9,6 +9,6 @@
 
 	<include file="$(find bigtop)/launch/params_camera_aux.launch" ns="camera_aux" />
 	<node name="camera_aux"  pkg="camera_aravis" type="camnode" />
-	<node name="view_aux"    pkg="image_view"    type="image_view" args="image:=camera_aux/image_raw" />  
+<!-- <node name="view_aux"    pkg="image_view"    type="image_view" args="image:=camera_aux/image_raw" /> -->  
 	
 </launch>
