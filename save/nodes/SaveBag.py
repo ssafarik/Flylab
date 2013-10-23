@@ -189,15 +189,16 @@ class SaveBag:
             topic6 = 'tracking/command'
             topic7 = 'end_effector'
             cmdline = ['rosbag', 'record','-O', self.dirBag+'/'+self.filenameBag, topic1, topic2, topic3, topic4, topic5, topic6, topic7]
-            self.processRosbag = subprocess.Popen(cmdline)
+            self.processRosbag = subprocess.Popen(cmdline, preexec_fn=subprocess.os.setpgrp)
 
     
     def StopRecordingBag(self):
         if (self.processRosbag is not None):
-            self.processRosbag.send_signal(subprocess.signal.SIGINT)
+            #self.processRosbag.send_signal(subprocess.signal.SIGINT)
+            subprocess.os.killpg(self.processRosbag.pid, subprocess.signal.SIGINT)
             self.processRosbag.wait()
-            self.processRosbag = None
             rospy.logwarn('Closed bag file.')
+            self.processRosbag = None
                 
 
     def Main(self):
