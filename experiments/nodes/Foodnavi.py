@@ -22,11 +22,12 @@ class Experiment():
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
-        
-        self.experimentparams.experiment.description = "Navigation between two food spots"
+
+        self.experimentparams.experiment.description = "Navigation with food ysa"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
+        # self.experimentparams.save.filenamebase = "foodnavi_%s_%s_%s_" % (flyspec, foodspec, gender)       
         self.experimentparams.save.filenamebase = "foodnavi"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
@@ -40,7 +41,7 @@ class Experiment():
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = "HCS male"
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
