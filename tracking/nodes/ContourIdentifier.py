@@ -687,7 +687,7 @@ class ContourIdentifier:
                             contourinfo.header = contourinfolists.header
                             contourinfo.x      = contourinfolists.x[i]
                             contourinfo.y      = contourinfolists.y[i]
-                            if (contourinfolists.angle[i] != 99.9) and (not N.isnan(contourinfolists.angle[i])):
+                            if (not N.isnan(contourinfolists.angle[i])):
                                 contourinfo.angle = contourinfolists.angle[i]
                             else:
                                 contourinfo.angle = self.contouranglePrev

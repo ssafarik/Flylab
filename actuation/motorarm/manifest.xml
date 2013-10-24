@@ -17,7 +17,6 @@
   <depend package="roslib"/>
   <depend package="urdf"/>
   <depend package="kdl_parser"/>
-  <depend package="python_orocos_kdl"/>
   <depend package="tf"/>
   
   <depend package="rosSimpleStep"/>

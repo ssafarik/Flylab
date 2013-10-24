@@ -1,102 +1,87 @@
 ###
-# NOTE: These instructions are outdated.
+# Installation Instructions for Flylab.
+#
+# The bulk of the software runs on Ubuntu, but if you want to run the galvodriver using 
+# a National Instruments DAQ, then you'll also need a Windows machine with winros (so far 
+# I've tested it w/ winros hydro) to run just the galvodriver node.  If you have a
+# different DAQ, then you'll need to write a galvodriver for it.
+#
 ###
 
+# Install ROS Hydro on Ubuntu.
+sudo apt-get install ros-hydro-desktop-full
+sudo apt-get install ros-hydro-cmake-modules
+sudo rosdep init
+rosdep update
 
-# Install Ubuntu:
-# http://www.ubuntu.com/
 
-# Install Ubuntu packages
-sudo apt-get install build-essential python-yaml cmake subversion wget git-core git-gui git-doc
+# Add the following lines to your ~/.bashrc
+source /opt/ros/hydro/setup.bash
+export ROS_PACKAGE_PATH=~/src.git:~/src.hg:$ROS_PACKAGE_PATH    # (Assuming your ROS projects are in these two directories).
+export ROS_IP=123.456.789.012                                   # (i.e. your ip)
+export ROS_MASTER_URI=http://localhost:11311
+export PYTHONPATH=~/src.git/Flylab/arena_tf/src:~/src.git/Flylab/flycore/src:$PYTHONPATH
+export RIG=bigtop                                               # (change this to the name of your Flylab rig)
 
-# ROS Installation:
-sudo sh -c 'echo "deb http://code.ros.org/packages/ros/ubuntu lucid main" > /etc/apt/sources.list.d/ros-latest.list'
-wget http://code.ros.org/packages/ros.key -O - | sudo apt-key add -
-sudo apt-get update
-echo "hddtemp hddtemp/daemon boolean false" | sudo debconf-set-selections
-sudo apt-get install ros-cturtle-pr2all
 
-# Make new user flylab-user
-sudo adduser flylab-user
+# Get a few additional pieces.
+sudo easy_install munkres
+sudo apt-get install python-setuptools
+sudo apt-get install python-numpy
+sudo apt-get install python-scipy
+sudo apt-get install libdc1394-22-dev
+sudo apt-get install intltool
+sudo apt-get install gobject-introspection
 
-# Login as flylab-user and setup local bin directory
-mkdir ~/bin
-export PATH=~/bin:$PATH
 
-# Create Local Flylab Git Repository:
-git clone git://github.com/peterpolidoro/Flylab.git ~/git/Flylab
-cp ~/git/Flylab/ros/rosinstall ~/bin/
-source /opt/ros/cturtle/setup.sh
-echo "source ~/ros/Flylab/setup.sh" >> ~/.bashrc
-. ~/.bashrc
+# Get the Flylab software.
+cd ~/src.git
+git clone https://github.com/ssafarik/Flylab.git
+sudo copy ~/src.git/Flylab/udevrules/99-simple_step.rules /etc/udev/rules.d 
 
-# Setting Groups and Permissions:
-sudo adduser $USER video
-sudo groupadd usb
-sudo adduser $USER usb
-sudo cp ~/git/Flylab/ros/udevrules/99*.rules /etc/udev/rules.d/
-# restart computer
 
-# Compiling:
-rosmake experiments
-
-# Running the Pattern Experiment:
-roslaunch experiments pattern.launch
-
-# Updating Flylab Code to get the latest git repository on github:
-cd ~/git/Flylab
-git pull
+# Get simple_step.
+cd ~/src.hg
+hg clone https://bitbucket.org/willdickson/simple_step
+sudo python ~/src.hg/simple_step/api/python/setup.py develop
+cd ~/src.git
+git clone https://github.com/ssafarik/rosSimpleStep.git
+git clone https://github.com/strawlab/pylibusb.git
+sudo python ~/src.git/pylibusb/setup.py install
 
 
 
-# Example Local Repository Code Modification:
-# Change in-bounds radius from 60mm to 90mm for wait experiment
-cd ~/git/Flylab/ros/experiments/launch
-# Open wait_experiment.launch in your favorite editor
-# Change this line: <param name="in_bounds_radius" type="double" value="60"/>
-# To this: <param name="in_bounds_radius" type="double" value="90"/>
-# Change this line: <param name="move_distance" type="double" value="65"/>
-# To this: <param name="move_distance" type="double" value="95"/>
-# Save wait_experiment.launch
-git commit -a -m "Modified in-bounds radius from 60mm to 90mm"
-
-# Converting bag files to directories of images and videos:
-# Create ~/FlylabData/bag_file_play_list
-# Each line of the file bag_file_play list should contain the name of a single bag file
-# The bag files should be in the directory ~/FlylabData/*_Bags/
-# Example bag_file_play_list:
-# 2010_12_14_14_46_07.bag
-# 2010_12_14_14_46_17.bag
-# 2010_12_14_14_46_23.bag
-# 
-# These bag files should be located in ~/FlylabData/2010_12_14_Bags/
-# Then run roslaunch file to save images and videos to ~/Videos/
-rosmake save_data
-roslaunch save_data play_bags_save_video_nocat.launch
-
-
-# Compiling Stage USB Device Firmware:
-# Todo: Upgrade to new libusb-1.0, PyUSB, and newest LUFA release, implement acceleration variable, fix homing bug
-mkdir ~/LUFA
-cd ~/LUFA
-wget http://lufa-lib.googlecode.com/files/LUFA-090605.zip
-unzip LUFA-090605.zip
-mv LUFA\ 090605/ LUFA090605
-echo "export LUFA090605=~/LUFA/LUFA090605" >> ~/.bashrc
-. ~/.bashrc
-sudo apt-get install gcc-avr avr-libc
-mkdir ~/TEENSY
-cd ~/TEENSY
-wget http://www.pjrc.com/teensy/teensy.gz
-gzip -d teensy.gz
-chmod 755 teensy
-sudo cp ~/git/Flylab/ros/udevrules/49-teensy.rules /etc/udev/rules.d/
-cd ~/ros/Flylab/ros/actuation/stage/usb_device/
-make clean
+# Get Aravis camera library.
+cd ~/src.git
+git clone http://git.gnome.org/cgit/aravis
+cd ~/src.git/aravis
+# Edit configure.ac, and comment out the line:  GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
+./autogen.sh             
 make
-~/TEENSY/teensy &
-# Press button on teensy board
-# Select hex file in ~/ros/Flylab/ros/actuation/stage/usb_device/
-# Press 'Program' button on Teensy GUI 
-# Press 'Reboot' button on Teensy GUI 
+sudo make install
+
+
+# Get camera_aravis ROS driver for aravis.
+cd ~/src.git
+git clone http://github.com/ssafarik/camera_aravis.git
+
+
+# Make the Flylab software.
+rosmake flylaball
+
+
+# Verify that you have proper hardware:  i.e. a Flylab rig (the "RIG=___" line in your .bashrc) that consists 
+# of, at minimum, a tracking camera (preferably ethernet) and an arena for flies to walk around.  It might also 
+# have a robotic mechanism, a laser/galvo system, LED panels, lighting, etc. 
+# 
+
+
+# You're done!
+# Assuming that flylaball finished without errors, and that you have functioning Flylab hardware, then you 
+# should be able to run an experiment, for example:
+roslaunch experiments testtracking.launch  
+
+
+
+
 

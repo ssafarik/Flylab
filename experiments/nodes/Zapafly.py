@@ -198,14 +198,16 @@ class Experiment():
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.distanceMin = 999.0
-        self.experimentparams.post.trigger.distanceMax = 888.0 # i.e. never
+        self.experimentparams.post.trigger.frameidParent = '/Arena'
+        self.experimentparams.post.trigger.frameidChild = 'Fly01'
         self.experimentparams.post.trigger.speedAbsParentMin =   0.0
         self.experimentparams.post.trigger.speedAbsParentMax = 999.0
         self.experimentparams.post.trigger.speedAbsChildMin =   0.0
         self.experimentparams.post.trigger.speedAbsChildMax = 999.0
         self.experimentparams.post.trigger.speedRelMin =   0.0
         self.experimentparams.post.trigger.speedRelMax = 999.0
+        self.experimentparams.post.trigger.distanceMin = 999.0
+        self.experimentparams.post.trigger.distanceMax = 888.0 # i.e. never
         self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'

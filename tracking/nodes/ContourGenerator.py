@@ -353,16 +353,16 @@ class ContourGenerator:
         area = cv2.contourArea(contour)
 
         if (len(contour)>=5):
-            ((x,y), axes, degMajor) = cv2.fitEllipse(contour)
+            ((x,y), axes, degMinor) = cv2.fitEllipse(contour)
             
-            degMajor = 90.0 - degMajor
+            degMajor = 90.0 - degMinor
             angle = (((degMajor % 180.0)-180.0) * N.pi / 180.0) # Put on range -180 to 0, and convert to radians.
 
             lenMajor = max(axes)
             lenMinor = min(axes)
             ecc = N.sqrt(1.0-(lenMinor/lenMajor)**2.0)
         else:
-            moments = cv2.moments(contour)  # Sometimes the contour contains just one pixel, resulting in moments=(0,0,0,0,0,0)
+            moments = cv2.moments(contour)
       
             #rospy.logwarn('moments=%s' % repr(moments))
             m00 = moments['m00']
@@ -375,10 +375,10 @@ class ContourGenerator:
             else: # There was just one pixel in the contour.
                 (x,y) = contour[0][0]
 
-            angle = float('NaN')
+            angle = float('NaN') # Must use NaN instead of None, so that it can go through the ROS message.
             ecc = 0.0
         
-#         if (ecc>0.8):
+#         if (ecc>0.6):
 #             rospy.logwarn('areas: %3.2f, %3.2f' % (area, area2))
 #             rospy.logwarn('angles: %+3.2f, %+3.2f' % (angle*180/N.pi, angle2*180/N.pi))
 #             rospy.logwarn('ecc: %+3.2f, %+3.2f' % (ecc, ecc2))

@@ -8,7 +8,7 @@
 	<!-- ========================================================== -->
     
 	
-	<node name="GalvoDirector" pkg="galvodirector" type="GalvoDirector.py" />
+	<node name="GalvoDirector" pkg="galvodirector" type="GalvoDirector.py" required="true" />
 
 
 </launch>
