@@ -41,7 +41,9 @@ class Fly:
             
 
         self.initialized = False
+        self.updated = False
         self.name = name
+        
 
         with self.lock:
             self.bNonessentialPublish = rospy.get_param('tracking/nonessentialPublish', False)   # Publish nonessential stuff?
@@ -150,11 +152,11 @@ class Fly:
         self.state.wings.right.angle  = 0.0
 
         self.eccMin = 999.9
-        self.eccMean = None
+        self.eccMean = 0.0
         self.eccMax = 0.0
         
         self.areaMin = 999.9
-        self.areaMean = None
+        self.areaMean = 1.0
         self.areaMax = 0.0
         
         # Wing angle stuff.
@@ -762,15 +764,16 @@ class Fly:
                     self.areaMax = contourinfo.area
                 
                 a = self.dt.to_sec() / 60
-                if (self.areaMean is not None):
+                if (self.updated):
                     self.areaMean = (1-a)*self.areaMean + a*contourinfo.area
-                elif (not N.isnan(contourinfo.area)):
+                    self.eccMean = (1-a)*self.eccMean + a*contourinfo.ecc
+                else:
+                    #if (not N.isnan(contourinfo.area)):
                     self.areaMean = contourinfo.area 
 
-                if (self.eccMean is not None):
-                    self.eccMean = (1-a)*self.eccMean + a*contourinfo.ecc
-                elif (not N.isnan(contourinfo.ecc)):
+                    #if (not N.isnan(contourinfo.ecc)):
                     self.eccMean = contourinfo.ecc 
+                    
                     
                 self.isVisible = True
                 (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contourinfo.x, self.contourinfo.y), contourinfo.header.stamp.to_sec())
@@ -918,7 +921,8 @@ class Fly:
                                                       b=0.5),
                                       lifetime=rospy.Duration(0.5))
                 self.pubMarker.publish(markerRobot)
-
+                
+            self.updated = True
         
     
 

@@ -75,6 +75,7 @@ class ContourGenerator:
         
         if self.bUseTransforms:
             self.tfrx = tf.TransformListener()
+            rospy.sleep(1)
         
         self.rcBackgroundEstablish = rospy.get_param('tracking/rcBackgroundEstablish', 1.0) # Time constant to use when establishing a new background automatically. 
 
@@ -700,7 +701,6 @@ class ContourGenerator:
         try:
             #rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
             #self.timePrev = rospy.Time.now().to_sec()
-            
             if not self.initConstructor:
                 return
     
@@ -781,7 +781,7 @@ class ContourGenerator:
                 
                 # Apply the arena mask to the threshold image.
                 self.matThreshold = cv2.bitwise_and(self.matThreshold, self.matMask)
-                
+
                 # Get the ContourinfoLists.
                 self.contourinfolists = self.ContourinfoListsFromImage(self.matThreshold, self.matForeground)    # Modifies self.matThreshold
                 self.pubContourinfoLists.publish(self.contourinfolists)

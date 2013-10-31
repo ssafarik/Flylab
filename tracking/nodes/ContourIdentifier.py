@@ -67,6 +67,7 @@ class ContourIdentifier:
         
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
+        rospy.sleep(1)
         
         self.ResetFlyObjects()
         
@@ -346,27 +347,30 @@ class ContourIdentifier:
             dPenalty = N.hypot(d0, d1)
     
             d += dPenalty
+            
         
-        
-        # Penalty for deviation of visual characteristics.
-        bMatchVisual = False    # True only seems to make it worse.
-        if (bMatchVisual):    
-            for m in range(len(xyObjects)):
-                for n in range(len(xyContours)):
-                    try:
-                        if (not N.isnan(xyObjects[m,INDEX_AMEAN])):
-                            gainArea = 0.1 
-                            areametric = gainArea * N.abs(xyContours[n,INDEX_AREA] - xyObjects[m,INDEX_AMEAN])
-                            d[m,n] += areametric
-                         
-                        if (not N.isnan(xyObjects[m,INDEX_EMEAN])):
-                            gainEcc = 10.0
-                            eccmetric = gainEcc * N.abs(xyContours[n,INDEX_ECC] - xyObjects[m,INDEX_EMEAN]) / N.max([xyContours[n,INDEX_ECC], xyObjects[m,INDEX_EMEAN]]) # Ranges 0 to 1.
-                            d[m,n] += eccmetric
-                         
-                         
-                    except TypeError:
-                        d[m,n] = None
+        # Penalty for deviation of visual characteristics: area and ecc.
+        gainArea = 0.1 
+        aPenalty = 0#gainArea * N.abs(N.subtract.outer(xyObjects[:,INDEX_AMEAN], xyContours[:,INDEX_AREA]))
+
+        gainEcc = 10.0
+        ePenalty = gainEcc * N.abs(N.subtract.outer(xyObjects[:,INDEX_EMEAN], xyContours[:,INDEX_ECC]))
+        d += (aPenalty + ePenalty)
+            
+#             for m in range(len(xyObjects)):
+#                 for n in range(len(xyContours)):
+#                     try:
+#                         if (bMatchArea and not N.isnan(xyObjects[m,INDEX_AMEAN])):
+#                             areametric = gainArea * N.abs(xyContours[n,INDEX_AREA] - xyObjects[m,INDEX_AMEAN])
+#                             d[m,n] += areametric
+#                          
+#                         if (bMatchEcc and not N.isnan(xyObjects[m,INDEX_EMEAN])):
+#                             eccmetric = gainEcc * N.abs(xyContours[n,INDEX_ECC] - xyObjects[m,INDEX_EMEAN])# / N.max([xyContours[n,INDEX_ECC], xyObjects[m,INDEX_EMEAN]]) # Ranges 0 to 1.
+#                             d[m,n] += eccmetric
+#                          
+#                          
+#                     except TypeError:
+#                         d[m,n] = None
                     
         return d
     
@@ -428,11 +432,9 @@ class ContourIdentifier:
                    
     def GetMatchMunkres(self, d):
         map = [None for i in range(len(d))]
-
         indexes = self.munkres.compute(d)
         for k in range(len(map)):
             map[k] = indexes[k][1]
-        
         return map
     
 
@@ -537,7 +539,7 @@ class ContourIdentifier:
             if (xy is not None):                    
                 xyObjects[iRobot,:] = xy
 
-
+        
         # Flies into the objects list.    
         for iFly in self.iFly_list:
             xyObjects[iFly,:] = N.array([self.objects[iFly].state.pose.position.x,
@@ -555,9 +557,10 @@ class ContourIdentifier:
             if (not N.isnan(self.contourinfo_list[iContour].x)):
                 xyContours[iContour,:] = N.array([self.contourinfo_list[iContour].x,
                                                   self.contourinfo_list[iContour].y,
-                                                  self.contourinfo_list[iContour].area,  self.contourinfo_list[iContour].ecc])
+                                                  self.contourinfo_list[iContour].area,  
+                                                  self.contourinfo_list[iContour].ecc])
         
-
+        
         # Match objects with contourinfo_list.
         d = self.GetDistanceMatrix(xyObjects, xyContours)
         if d is not []:
@@ -571,12 +574,12 @@ class ContourIdentifier:
             if alg=='munkres':
                 mapObjectsMunkres = self.GetMatchMunkres(d)
                 mapContoursFromObjects = mapObjectsMunkres
-                
+            
             # Set the augmented entries to None.
             for m in range(len(mapContoursFromObjects)):
                 if (mapContoursFromObjects[m])>=len(self.contourinfo_list):
                     mapContoursFromObjects[m] = None
-
+            
             #for i in range(len(d)):
             #    rospy.logwarn(d[i])
             #rospy.logwarn ('CI mapObjectsGaleShapely =%s' % mapObjectsGaleShapely)
@@ -640,7 +643,6 @@ class ContourIdentifier:
         with self.lock:
             try:
                 if self.initialized:
-                    
                     if self.nRobots>0:
                         
                         # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
@@ -658,10 +660,10 @@ class ContourIdentifier:
                                                                   )
                                                     )
         
-        
+                    
                     contourinfolistsPixels = self.FilterContourinfolistsWithinMask(contourinfolistsPixels)
                     contourinfolists = self.TransformContourinfolistsArenaFromCamera(contourinfolistsPixels)
-        
+                    
                     # Create a null contourinfo.
                     contourinfoNone = Contourinfo()
                     contourinfoNone.header = contourinfolists.header
@@ -698,7 +700,7 @@ class ContourIdentifier:
                             contourinfo.imgRoi = contourinfolists.imgRoi[i]
                             self.contourinfo_list.append(contourinfo)
             
-        
+                    
                     # Figure out who is who in the camera image.
                     try:
                         self.mapContourinfoFromObject = self.MapContoursFromObjects()
@@ -707,7 +709,6 @@ class ContourIdentifier:
         
                         
                     if self.mapContourinfoFromObject is not None:
-                        
                         # Update the robot state w/ the contourinfo and end-effector positions.
                         for iRobot in self.iRobot_list:
                             if self.mapContourinfoFromObject[iRobot] is not None:
@@ -740,7 +741,6 @@ class ContourIdentifier:
                             #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].y)
                             #self.fidRobot.write(data)
                                 
-                        
                         # Update the flies' states.
                         for iFly in self.iFly_list:
                             if self.mapContourinfoFromObject[iFly] is not None:
@@ -761,10 +761,8 @@ class ContourIdentifier:
                             #    self.fidFly.write(data)
                         
         
-            
                         self.PublishArenaStateFromObjects()
         
-                        
                         # Publish the VisualState.
                         if (0 in self.iRobot_list) and (0 < len(self.objects)):
                             self.pubVisualState.publish(self.objects[0].state)
@@ -776,7 +774,6 @@ class ContourIdentifier:
                         self.pubMarker.publish(self.markerArenaOuter)
                         self.pubMarker.publish(self.markerArenaInner)
         
-                        
                         # Publish markers for all the exclusionzones.
                         if self.enabledExclusionzone:
                             for marker in self.markerExclusionzone_list:
@@ -785,7 +782,8 @@ class ContourIdentifier:
         
             except rospy.exceptions.ROSException, e:
                 rospy.loginfo('CI ROSException: %s' % e)
-                            
+                      
+
 
     
 if __name__ == '__main__':
