@@ -22,11 +22,12 @@ class Experiment():
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
-        
-        self.experimentparams.experiment.description = "Navigation between two food spots"
+
+        self.experimentparams.experiment.description = "Navigation with food ysa"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
+        # self.experimentparams.save.filenamebase = "foodnavi_%s_%s_%s_" % (flyspec, foodspec, gender)       
         self.experimentparams.save.filenamebase = "foodnavi"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
@@ -40,7 +41,7 @@ class Experiment():
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = "HCS male"
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
@@ -76,117 +77,7 @@ class Experiment():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = False
         
-        
-        #mode='fixedpointlist'    # Laser to specific locations.
-        #mode='fixedcircle'
-        #mode='fixedmaze' 
-        #mode='trackgrid'        # Small grid tracks flies.
-        mode='tracknumber'      # Draw a numeral on flies.
-        #mode='trackflylogo'
-        flies_list = range(1,1+self.experimentparams.flyspec.nFlies)
-        
-        
         self.experimentparams.trial.lasergalvos.enabled = False
-        self.experimentparams.trial.lasergalvos.pattern_list = []
-        self.experimentparams.trial.lasergalvos.statefilterLo_list = []
-        self.experimentparams.trial.lasergalvos.statefilterHi_list = []
-        self.experimentparams.trial.lasergalvos.statefilterCriteria_list = []
-        if mode=='fixedpointlist':
-            # Draw a point.
-            self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = '/Arena',
-                                                                            frameidAngle   = '/Arena',
-                                                                            shape      = 'bypoints',
-                                                                            hzPattern  = 40.0,
-                                                                            hzPoint    = 1000.0,
-                                                                            count      = 1,
-                                                                            points     = [Point(x=34  ,y=34),
-                                                                                          Point(x=34  ,y=34+6),
-                                                                                          Point(x=34  ,y=34-6),
-                                                                                          Point(x=34+6,y=34),
-                                                                                          Point(x=34-6,y=34)],
-                                                                            size       = Point(x=0,
-                                                                                               y=0),
-                                                                            preempt    = False,
-                                                                            param      = 3,
-                                                                            direction  = 1), # Peano curve level.
-                                                                 )
-        if mode=='fixedcircle':
-            # Draw a point.
-            self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = '/Arena',
-                                                                            frameidAngle   = '/Arena',
-                                                                            shape      = 'circle',
-                                                                            hzPattern  = 40.0,
-                                                                            hzPoint    = 1000.0,
-                                                                            count      = 1,
-                                                                            size       = Point(x=80,
-                                                                                               y= 0),
-                                                                            preempt    = False,
-                                                                            param      = 3,
-                                                                            direction  = 1), # Peano curve level.
-                                                                 )
-        if mode=='trackgrid':
-            for iFly in flies_list:
-                self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%02dForecast' % iFly,
-                                                                                frameidAngle   = 'Fly%02dForecast' % iFly,
-                                                                                shape      = 'grid',
-                                                                                hzPattern  = 40.0,
-                                                                                hzPoint    = 1000.0,
-                                                                                count      = 1,
-                                                                                size       = Point(x=2,
-                                                                                                   y=2),
-                                                                                preempt    = False,
-                                                                                param      = 3,
-                                                                                direction  = 1), # Peano curve level.
-                                                                     )
-        if mode=='tracknumber':
-            for iFly in flies_list:
-                self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%02dForecast' % iFly,
-                                                                                frameidAngle   = 'Fly%02dForecast' % iFly,
-                                                                                shape      = '%s' % iFly,
-                                                                                hzPattern  = 10.0,
-                                                                                hzPoint    = 1000.0,
-                                                                                count      = 1,
-                                                                                size       = Point(x=8,
-                                                                                                   y=8),
-                                                                                preempt    = False,
-                                                                                param      = 0,
-                                                                                direction  = 1), # Peano curve level.
-                                                                     )
-        if mode=='trackflylogo':
-            for iFly in flies_list:
-                self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = 'Fly%02dForecast' % iFly,
-                                                                                frameidAngle   = 'Fly%02dForecast' % iFly,
-                                                                                shape      = 'flylogo',
-                                                                                hzPattern  = 40.0,
-                                                                                hzPoint    = 1000.0,
-                                                                                count      = 1,
-                                                                                size       = Point(x=6,
-                                                                                                   y=6),
-                                                                                preempt    = False,
-                                                                                param      = 0,
-                                                                                direction  = 1), # Peano curve level.
-                                                                     )
-        if mode=='fixedmaze':
-            # Draw a maze.
-            self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = '/Arena',
-                                                                            frameidAngle   = '/Arena',
-                                                                            shape      = 'grid',
-                                                                            hzPattern  = 40.0,
-                                                                            hzPoint    = 1000.0,
-                                                                            count      = 1,
-                                                                            size       = Point(x=140,
-                                                                                               y=140),
-                                                                            preempt    = False,
-                                                                            param      = 2,
-                                                                            direction  = 1), # Peano curve level.
-                                                                 )
-        
         
         self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
@@ -197,14 +88,16 @@ class Experiment():
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.distanceMin = 999.0
-        self.experimentparams.post.trigger.distanceMax = 888.0 # i.e. never
+        self.experimentparams.post.trigger.frameidParent = 'Arena'
+        self.experimentparams.post.trigger.frameidChild = 'Fly1'
         self.experimentparams.post.trigger.speedAbsParentMin =   0.0
         self.experimentparams.post.trigger.speedAbsParentMax = 999.0
         self.experimentparams.post.trigger.speedAbsChildMin =   0.0
         self.experimentparams.post.trigger.speedAbsChildMax = 999.0
         self.experimentparams.post.trigger.speedRelMin =   0.0
         self.experimentparams.post.trigger.speedRelMax = 999.0
+        self.experimentparams.post.trigger.distanceMin = 999.0
+        self.experimentparams.post.trigger.distanceMax = 888.0 # i.e. never
         self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
