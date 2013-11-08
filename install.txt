@@ -15,15 +15,6 @@ sudo rosdep init
 rosdep update
 
 
-# Add the following lines to your ~/.bashrc
-source /opt/ros/hydro/setup.bash
-export ROS_PACKAGE_PATH=~/src.git:~/src.hg:$ROS_PACKAGE_PATH    # (Assuming your ROS projects are in these two directories).
-export ROS_IP=123.456.789.012                                   # (i.e. your ip)
-export ROS_MASTER_URI=http://localhost:11311
-export PYTHONPATH=~/src.git/Flylab/arena_tf/src:~/src.git/Flylab/flycore/src:$PYTHONPATH
-export RIG=bigtop                                               # (change this to the name of your Flylab rig)
-
-
 # Get a few additional pieces.
 sudo easy_install munkres
 sudo apt-get install python-setuptools
@@ -52,18 +43,33 @@ sudo python ~/src.git/pylibusb/setup.py install
 
 
 # Get Aravis camera library.
-cd ~/src.git
-git clone http://git.gnome.org/cgit/aravis
-cd ~/src.git/aravis
-# Edit configure.ac, and comment out the line:  GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
-./autogen.sh             
-make
-sudo make install
+Download the latest release from https://wiki.gnome.org/Aravis, 
+for example:  http://ftp.acc.umu.se/pub/GNOME/sources/aravis/0.3/aravis-0.3.0.tar.xz 
+tar -xzf aravis-0.3.0.tar.xz   # To extract the files.
+cd aravix-0.3.0
+./configure
+make && sudo make install
 
 
-# Get camera_aravis ROS driver for aravis.
-cd ~/src.git
+# Set up a catkin workspace.
+mkdir -p ~/catkin/src
+
+
+# Get camera_aravis.
+cd ~/catkin/src
 git clone http://github.com/ssafarik/camera_aravis.git
+cd ~/catkin && catkin_make
+
+
+# Run the following commands (adjust them first if necessary).
+echo "source /opt/ros/hydro/setup.bash" >> ~/.bashrc
+echo "export ROS_IP=123.456.789.012" >> ~/.bashrc                                   # (i.e. your ip)
+echo "export ROS_MASTER_URI=http://localhost:11311" >> ~/.bashrc
+echo "export PYTHONPATH=~/src.git/Flylab/arena_tf/src:~/src.git/Flylab/flycore/src:$PYTHONPATH" >> ~/.bashrc
+echo "source ~/catkin/devel/setup.bash" >> ~/.bashrc
+echo "export ROS_PACKAGE_PATH=~/src.git:~/src.hg:$ROS_PACKAGE_PATH" >> ~/.bashrc    # (Assuming your ROS projects are in these two directories).
+echo "export RIG=bigtop" >> ~/.bashrc                                               # (change this to the name of your Flylab rig)
+
 
 
 # Make the Flylab software.
