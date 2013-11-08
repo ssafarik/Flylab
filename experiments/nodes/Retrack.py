@@ -17,6 +17,7 @@ from patterngen.msg import MsgPattern
 class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
+        rospy.sleep(1)
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()

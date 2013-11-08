@@ -20,6 +20,7 @@ class TransformServerArenaCamera:
         self.camerainfo = None
         self.calibration = None
         rospy.init_node('TransformServerArenaCamera')
+        rospy.sleep(1)
         
         self.tfbx = tf.TransformBroadcaster()
 

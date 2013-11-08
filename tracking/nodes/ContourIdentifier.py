@@ -788,6 +788,7 @@ class ContourIdentifier:
     
 if __name__ == '__main__':
     rospy.init_node('ContourIdentifier')
+    rospy.sleep(1)
     ci = ContourIdentifier()
     rospy.spin()
     

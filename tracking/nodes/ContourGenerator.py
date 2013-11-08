@@ -57,7 +57,10 @@ class ContourGenerator:
         
         #self.subCameraInfo          = rospy.Subscriber('camera/camera_info', CameraInfo, self.CameraInfo_callback)
         self.subImageRect           = rospy.Subscriber('camera/image_rect', Image, self.Image_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
-        self.subImageBackgroundOriginate = rospy.Subscriber('camera/image_background_originate', Image, self.ImageBackgroundSet_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True) # The image from disk needs to come in on a different topic so it doesn't go directly into the bag file.
+        
+        # The background image from disk needs to come in on a different topic than the background image from a replayed bag file, i.e. "camera/image_background_originate" so it
+        # doesn't go directly into the bag file that's being recorded.
+        self.subImageBackgroundOriginate = rospy.Subscriber('camera/image_background_originate', Image, self.ImageBackgroundSet_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True) 
         self.subImageBackgroundSet  = rospy.Subscriber('camera/image_background_set', Image, self.ImageBackgroundSet_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
         
@@ -727,7 +730,7 @@ class ContourGenerator:
             if (self.initImages and self.initBackground):
                 self.initialized = True
                 
-    
+            #rospy.logwarn('%s', (self.initConstructor, self.initImages, self.initBackground, self.initialized))
             if self.initialized:        
                 # Check for new diff_threshold value
                 self.diff_threshold = rospy.get_param('tracking/diff_threshold', 50)
@@ -911,6 +914,7 @@ class ContourGenerator:
 
 def main(args):
     rospy.init_node('ContourGenerator') #, anonymous=True)
+    rospy.sleep(1)
     try:
         cg = ContourGenerator()
         cg.Main()

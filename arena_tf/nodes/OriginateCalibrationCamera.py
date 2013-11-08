@@ -47,6 +47,7 @@ class OriginateCalibrationCamera:
 
 if __name__ == '__main__':
     rospy.init_node('OriginateCalibrationCamera')
+    rospy.sleep(1)
     try:
         cal = OriginateCalibrationCamera()
         cal.Main()

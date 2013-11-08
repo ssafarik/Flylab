@@ -1146,5 +1146,7 @@ class ExperimentLib():
         
         rospy.logwarn ('Experiment finished with outcome=%s' % outcome)
         self.sis.stop()
+
+
 # End class ExperimentLib()
     

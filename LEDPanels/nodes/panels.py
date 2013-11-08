@@ -27,6 +27,7 @@ class LEDPanels():
         self.initialized = False
         
         rospy.init_node('LEDPanels')
+        rospy.sleep(1)
         
         self.subPanelsCommand = rospy.Subscriber('LEDPanels/command', MsgPanelsCommand, self.PanelsCommand_callback)
         rospy.on_shutdown(self.OnShutdown_callback)
