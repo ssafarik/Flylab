@@ -79,73 +79,73 @@ Visualization Manager:
       Queue Size: 100
       Value: true
     - Class: rviz/Axes
-      Enabled: true
-      Length: 5
+      Enabled: false
+      Length: 3
       Name: Robot
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Robot
-      Value: true
+      Value: false
     - Class: rviz/Axes
       Enabled: true
-      Length: 5
+      Length: 3
       Name: Fly01
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Fly01
       Value: true
     - Class: rviz/Axes
       Enabled: false
-      Length: 5
+      Length: 3
       Name: Fly02
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Fly02
       Value: false
     - Class: rviz/Axes
       Enabled: false
-      Length: 5
+      Length: 3
       Name: Fly03
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Fly03
       Value: false
     - Class: rviz/Axes
       Enabled: false
-      Length: 5
+      Length: 3
       Name: Fly04
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Fly04
       Value: false
     - Class: rviz/Axes
       Enabled: false
-      Length: 5
+      Length: 3
       Name: Fly05
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Fly05
       Value: false
     - Class: rviz/Axes
       Enabled: false
-      Length: 5
+      Length: 3
       Name: Fly06
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Fly06
       Value: false
     - Class: rviz/Axes
       Enabled: false
-      Length: 5
+      Length: 3
       Name: Fly07
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Fly07
       Value: false
     - Class: rviz/Axes
       Enabled: false
-      Length: 5
+      Length: 3
       Name: Fly08
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Fly08
       Value: false
     - Class: rviz/Axes
       Enabled: false
-      Length: 5
+      Length: 3
       Name: Fly09
-      Radius: 1
+      Radius: 0.5
       Reference Frame: Fly09
       Value: false
     - Alpha: 1
