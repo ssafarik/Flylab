@@ -24,12 +24,13 @@ class ExperimentZapresponse():
         self.experimentparams = ExperimentParamsRequest()
         
         #flies = 'HCS'
-        flies = 'TrpA1_paralysis'
+        flies = 'TrpA1_sugar'
+        #flies = 'TrpA1_paralysis'
         #flies = 'TrpA1_wingextender'
-        t0 = 30     # off 
+        t0 = 120     # off 
         t1 = 3      # on
         t2 = 117    # off
-        laserpower = '120mW'
+        laserpower = '260mW'
         
         
         self.experimentparams.experiment.description = 'Laser is off for %d secs, on for %d secs, and off for %d secs' % (t0, t1, t2)

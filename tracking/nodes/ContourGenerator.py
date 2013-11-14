@@ -19,6 +19,7 @@ from arena_tf.srv import ArenaCameraConversion
 from flycore.msg import TrackingCommand
 from experiment_srvs.srv import Trigger, ExperimentParams
 from tracking.msg import ContourinfoLists
+from pythonmodules import SetDict
 
 
 
@@ -41,8 +42,6 @@ class ContourGenerator:
         
         self.lock = threading.Lock()
         
-        self.bUseBackgroundSubtraction  = rospy.get_param('tracking/usebackgroundsubtraction', True)    # Set False to turn off bg subtraction.        
-        self.bUseTransforms             = rospy.get_param('tracking/usetransforms', True)               # Set False to stay in camera coordinates.
         self.bEqualizeHist = False
         self.header = None
         self.matImageRect = None
@@ -51,17 +50,38 @@ class ContourGenerator:
         self.command = None # Valid values:  None, or 'establish_background'
         self.bEstablishBackground = False # Gets set to true when user requests to establish a new background automatically.
         
+
+        # Read all the params.
+        self.params = rospy.get_param('/', {})
+        defaults = {'camera':{'mask':{'x':0, 
+                                      'y':0,
+                                      'radius':9999}},
+                    'tracking':{'diff_threshold':20,
+                                'usebackgroundsubtraction': True,
+                                'usetransforms': True,
+                                'queue_size_images':1,
+                                'rcBackgroundEstablish':1.0,
+                                'rcBackground':2500.0,
+                                'roi':{'width':15,
+                                       'height':15},
+                                'nContoursMax':20,
+                                'distanceDuplicateContour':0.1,
+                                'distanceMergedContours':40.0,
+                                'frameid_contours':'ImageRect'}
+                    }
+        SetDict.SetWithPreserve(self.params, defaults)
+        
+
         # Messages
         self.camerainfo = None
-        queue_size_images = rospy.get_param('tracking/queue_size_images', 1)
         
         #self.subCameraInfo          = rospy.Subscriber('camera/camera_info', CameraInfo, self.CameraInfo_callback)
-        self.subImageRect           = rospy.Subscriber('camera/image_rect', Image, self.Image_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
+        self.subImageRect           = rospy.Subscriber('camera/image_rect', Image, self.Image_callback, queue_size=self.params['tracking']['queue_size_images'], buff_size=262144, tcp_nodelay=True)
         
         # The background image from disk needs to come in on a different topic than the background image from a replayed bag file, i.e. "camera/image_background_originate" so it
         # doesn't go directly into the bag file that's being recorded.
-        self.subImageBackgroundOriginate = rospy.Subscriber('camera/image_background_originate', Image, self.ImageBackgroundSet_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True) 
-        self.subImageBackgroundSet  = rospy.Subscriber('camera/image_background_set', Image, self.ImageBackgroundSet_callback, queue_size=queue_size_images, buff_size=262144, tcp_nodelay=True)
+        self.subImageBackgroundOriginate = rospy.Subscriber('camera/image_background_originate', Image, self.ImageBackgroundSet_callback, queue_size=self.params['tracking']['queue_size_images'], buff_size=262144, tcp_nodelay=True) 
+        self.subImageBackgroundSet  = rospy.Subscriber('camera/image_background_set', Image, self.ImageBackgroundSet_callback, queue_size=self.params['tracking']['queue_size_images'], buff_size=262144, tcp_nodelay=True)
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
         
         self.pubImageProcessed      = rospy.Publisher('camera/image_processed', Image)
@@ -76,14 +96,11 @@ class ContourGenerator:
         self.seq = 0
         self.selfPublishedBackground = False
         
-        if self.bUseTransforms:
+        if self.params['tracking']['usetransforms']:
             self.tfrx = tf.TransformListener()
             rospy.sleep(1)
         
-        self.rcBackgroundEstablish = rospy.get_param('tracking/rcBackgroundEstablish', 1.0) # Time constant to use when establishing a new background automatically. 
 
-        self.widthRoi  = rospy.get_param ('tracking/roi/width', 15)
-        self.heightRoi = rospy.get_param ('tracking/roi/height', 15)
         
         # Contour Info
         self.contourinfolists = ContourinfoLists()
@@ -92,15 +109,11 @@ class ContourGenerator:
         
         self.nObjects = 0
         
-        self.nContoursMax = rospy.get_param('tracking/nContoursMax', 20)
-        self.areaContourMin = rospy.get_param('tracking/areaContourMin', 0.0)
         self.minEccForDisplay = 1.75
         self.minSumImage = 100
-        self.distanceDuplicateContour = rospy.get_param('tracking/distanceDuplicateContour', 0.1)        
-        if (1 < self.nContoursMax):
-            self.nContoursMax -= 1
+        if (1 < self.params['tracking']['nContoursMax']):
+            self.params['tracking']['nContoursMax'] -= 1
         
-        self.rMergedContourLimit = rospy.get_param('tracking/distanceMergedContours', 40.0) # Distance (pixels) at which a pair of contours must have been within to be considered as merged.
         self.rClosestPrev = 55555
         self.rClosest = 55555
         self.bMerged = False
@@ -114,7 +127,6 @@ class ContourGenerator:
         self.cvbridge = CvBridge()
         
         # Coordinate Systems
-        self.frameidOutput = rospy.get_param('frameid_contours', 'ImageRect')
         
         self.ptsOriginImage = PointStamped()
         self.ptsOriginImage.header.frame_id = 'ImageRect'
@@ -126,9 +138,6 @@ class ContourGenerator:
         self.ptsOriginArena.point.x = 0
         self.ptsOriginArena.point.y = 0
         
-
-        # Mask Info
-        self.radiusMask = int(rospy.get_param('camera/mask/radius', 9999))
 
         self.stampPrev = None#rospy.Time.now()
         
@@ -153,8 +162,7 @@ class ContourGenerator:
             self.matThreshold         = N.zeros([self.height, self.width], dtype=N.uint8)
             self.matMaskOthers        = N.zeros([self.height, self.width], dtype=N.uint8)
             
-            
-            if self.bUseTransforms:
+            if self.params['tracking']['usetransforms']:
                 b = False
                 while not b:
                     try:
@@ -177,7 +185,7 @@ class ContourGenerator:
                         
             cv2.circle(self.matMask,
                       (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
-                      int(self.radiusMask), 
+                      int(self.params['camera']['mask']['radius']), 
                       self.color_max, 
                       cv.CV_FILLED)
             
@@ -239,7 +247,7 @@ class ContourGenerator:
     def ImageBackgroundSet_callback (self, image):
         while (not self.initConstructor):
             rospy.loginfo('Waiting for initConstructor.')
-            rospy.sleep(0.1)
+            rospy.sleep(0.5)
         
             
         if (not self.selfPublishedBackground):
@@ -256,15 +264,14 @@ class ContourGenerator:
         
         
     def CameraInfo_callback (self, msgCameraInfo):
-        #with self.lock:
-            if self.initConstructor:
-                self.camerainfo = msgCameraInfo
-                
-                if not self.initialized:
-                    self.InitializeImages()
+        if self.initConstructor:
+            self.camerainfo = msgCameraInfo
             
-                if (self.initImages and self.initBackground):
-                    self.initialized = True
+            if not self.initialized:
+                self.InitializeImages()
+        
+            if (self.initImages and self.initBackground):
+                self.initialized = True
             
     # TrackingCommand_callback()
     # Receives commands to change the tracking behavior.
@@ -412,16 +419,16 @@ class ContourGenerator:
             ptsContour.point.y = y
             
             try:
-                if self.bUseTransforms:
-                    self.ptsOutput = self.tfrx.transformPoint(self.frameidOutput, ptsContour)
+                if self.params['tracking']['usetransforms']:
+                    self.ptsOutput = self.tfrx.transformPoint(self.params['tracking']['frameid_contours'], ptsContour)
                 else:
                     self.ptsOutput = ptsContour
                     
             except tf.Exception, e:
-                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptsContour.header.frame_id, e))
+                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.params['tracking']['frameid_contours'], ptsContour.header.frame_id, e))
                 self.ptsOutput = PointStamped()
             except TypeError, e:
-                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.frameidOutput, ptsContour.header.frame_id, e))
+                rospy.logwarn ('Exception transforming point to frame=%s from frame=%s: %s' % (self.params['tracking']['frameid_contours'], ptsContour.header.frame_id, e))
     
             else:
                 contourinfolists_dict['x'].append(self.ptsOutput.point.x)
@@ -444,7 +451,7 @@ class ContourGenerator:
                 self.matMaskOthers.fill(0)
                 
                 # Go through all the other contours.
-                normRoi = N.linalg.norm([self.widthRoi,self.heightRoi])
+                normRoi = N.linalg.norm([self.params['tracking']['roi']['width'],self.params['tracking']['roi']['height']])
                 for kContour in range(nContours):
                     if (kContour != iContour):
                         xk = contourinfolists_dict['x'][kContour]
@@ -458,7 +465,7 @@ class ContourGenerator:
                 self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
                 matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
                 matRoi = cv2.getRectSubPix(matForeground - matOthers, 
-                                           (self.widthRoi, self.heightRoi), 
+                                           (self.params['tracking']['roi']['width'], self.params['tracking']['roi']['height']), 
                                            (x,y))
                 imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
                 contourinfolists_dict['imgRoi'][iContour] = imgRoi
@@ -482,7 +489,7 @@ class ContourGenerator:
             # Skip too-small contours, and repackage the data as a list of lists, i.e. [[x,y,a,a,e,i,i],[x,y,a,a,e,i,i],...]
             contourinfolists_list = []
             for iContour in range(len(contoursIn_list)):
-                if (self.areaContourMin <= contourinfolists_dict['area'][iContour]):
+                if (self.params['tracking']['areaContourMin'] <= contourinfolists_dict['area'][iContour]):
                     contourinfolists_list.append([contourinfolists_dict['x'][iContour],        # 0 
                                                   contourinfolists_dict['y'][iContour],        # 1
                                                   contourinfolists_dict['angle'][iContour],    # 2
@@ -493,7 +500,7 @@ class ContourGenerator:
 
             # Remove the dups.
             contourinfolists_list = sorted(tuple(contourinfolists_list))
-            contourinfolists_list = [x for i, x in enumerate(contourinfolists_list) if (not i) or (N.linalg.norm(N.array(contourinfolists_list[i][0:2])-N.array(contourinfolists_list[i-1][0:2])) > self.distanceDuplicateContour)]
+            contourinfolists_list = [x for i, x in enumerate(contourinfolists_list) if (not i) or (N.linalg.norm(N.array(contourinfolists_list[i][0:2])-N.array(contourinfolists_list[i-1][0:2])) > self.params['tracking']['distanceDuplicateContour'])]
         
         
             # Count the contours.
@@ -532,7 +539,7 @@ class ContourGenerator:
          
                  
         # Determine if there's a merged contour.
-        if (self.nContours < self.nObjects) and (self.rClosestPrev < self.rMergedContourLimit):
+        if (self.nContours < self.nObjects) and (self.rClosestPrev < self.params['tracking']['distanceMergedContours']):
             self.bMerged = True
         else:
             self.bMerged = False
@@ -684,7 +691,7 @@ class ContourGenerator:
         contourinfolists = ContourinfoLists()
         contourinfolists.header.seq = self.seq
         contourinfolists.header.stamp = self.header.stamp
-        contourinfolists.header.frame_id = self.frameidOutput # i.e. Camera
+        contourinfolists.header.frame_id = self.params['tracking']['frameid_contours'] # i.e. Camera
         self.seq += 1
         if self.nContours > 0:
             contourinfolists.x = contourinfolists_dict['x']
@@ -706,12 +713,11 @@ class ContourGenerator:
             #self.timePrev = rospy.Time.now().to_sec()
             if not self.initConstructor:
                 return
-    
+
             if (self.stampPrev is not None):
                 self.dt = image.header.stamp - self.stampPrev
             else:
                 self.dt = rospy.Time(0)
-                
             self.stampPrev = image.header.stamp
             
     
@@ -723,26 +729,23 @@ class ContourGenerator:
                 self.matImageRect = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
             except CvBridgeError, e:
                 rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
-            
             if not self.initImages:
                 self.InitializeImages()
-                
             if (self.initImages and self.initBackground):
                 self.initialized = True
                 
             #rospy.logwarn('%s', (self.initConstructor, self.initImages, self.initBackground, self.initialized))
             if self.initialized:        
-                # Check for new diff_threshold value
-                self.diff_threshold = rospy.get_param('tracking/diff_threshold', 50)
+                # Check for new params.
+                self.paramsPrev = copy.deepcopy(self.params) 
+                SetDict.SetWithOverwrite(self.params, rospy.get_param('/',{}))
                 
                 # Create the mask.
-                radiusMask = int(rospy.get_param('camera/mask/radius', 9999)) 
-                if radiusMask != self.radiusMask:
-                    self.radiusMask = radiusMask 
+                if self.paramsPrev['camera']['mask']['radius'] != self.params['camera']['mask']['radius']:
                     self.matMask.fill(0)
                     cv2.circle(self.matMask,
                               (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
-                              int(self.radiusMask), 
+                              int(self.params['camera']['mask']['radius']), 
                               self.color_max, 
                               cv.CV_FILLED)
                 
@@ -754,9 +757,9 @@ class ContourGenerator:
                 # Update the background.
                 #rospy.logwarn('types: %s' % [type(N.float32(self.matImageRect)), type(self.matfBackground), type(self.rcBackground)])
                 if (self.bEstablishBackground):
-                    rcBackground = self.rcBackgroundEstablish
+                    rcBackground = self.params['tracking']['rcBackgroundEstablish']
                 else:
-                    rcBackground = rospy.get_param('tracking/rcBackground', 2500) # Time constant for moving average background.
+                    rcBackground = self.params['tracking']['rcBackground'] # Time constant for moving average background.
                 
                 alphaBackground = 1 - N.exp(-self.dt.to_sec() / rcBackground)
                 
@@ -768,8 +771,7 @@ class ContourGenerator:
                 if self.bEqualizeHist:
                     matBackgroundEq = cv2.equalizeHist(self.matBackground)
     
-    
-                if (self.bUseBackgroundSubtraction) and (self.matBackground is not None):
+                if (self.params['tracking']['usebackgroundsubtraction']) and (self.matBackground is not None):
                     self.matForeground = cv2.absdiff(self.matImageRect, self.matBackground)
                 else:
                     self.matForeground = self.matImageRect
@@ -777,7 +779,7 @@ class ContourGenerator:
                 
                 # Threshold
                 (threshold,self.matThreshold) = cv2.threshold(self.matForeground, 
-                                                 self.diff_threshold, 
+                                                 self.params['tracking']['diff_threshold'], 
                                                  self.max_8U, 
                                                  cv2.THRESH_TOZERO)
     
@@ -914,7 +916,7 @@ class ContourGenerator:
 
 def main(args):
     rospy.init_node('ContourGenerator') #, anonymous=True)
-    rospy.sleep(1)
+        
     try:
         cg = ContourGenerator()
         cg.Main()

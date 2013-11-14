@@ -123,7 +123,7 @@ class StartExperiment (smach.State):
         
         # Wait for the Arenastate to get published.
         while self.arenastate is None:
-            rospy.logwarn('Waiting for camera tracking to deliver an Arenastate.')
+            rospy.logwarn('Waiting for tracking to deliver an Arenastate.')
             rospy.sleep(0.5)
             
         #rospy.loginfo ('EL Exiting StartExperiment()')

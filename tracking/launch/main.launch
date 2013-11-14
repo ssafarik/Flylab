@@ -8,7 +8,7 @@
     rosrun image_view image_view image:=camera/image_processed
     -->
 	  
-    <param name="frameid_contours" type="string" value="ImageRect"/>
+    <param name="tracking/frameid_contours" type="string" value="ImageRect"/>
     <param name="tracking/queue_size_images" type="int" value="2"/>
     <param name="tracking/queue_size_arenastate" type="int" value="200"/>
     <param name="tracking/queue_size_contours" type="int" value="2"/>
