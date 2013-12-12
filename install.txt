@@ -55,21 +55,21 @@ make && sudo make install
 mkdir -p ~/catkin/src
 
 
-# Get camera_aravis.
-cd ~/catkin/src
-git clone http://github.com/ssafarik/camera_aravis.git
-cd ~/catkin && catkin_make
-
-
 # Run the following commands (adjust them first if necessary).
 echo "source /opt/ros/hydro/setup.bash" >> ~/.bashrc
 echo "export ROS_IP=123.456.789.012" >> ~/.bashrc                                   # (i.e. your ip)
 echo "export ROS_MASTER_URI=http://localhost:11311" >> ~/.bashrc
 echo "export PYTHONPATH=~/src.git/Flylab/arena_tf/src:~/src.git/Flylab/flycore/src:$PYTHONPATH" >> ~/.bashrc
 echo "source ~/catkin/devel/setup.bash" >> ~/.bashrc
-echo "export ROS_PACKAGE_PATH=~/src.git:~/src.hg:$ROS_PACKAGE_PATH" >> ~/.bashrc    # (Assuming your ROS projects are in these two directories).
+echo "export ROS_PACKAGE_PATH=~/src.git:~/src.hg:~/catkin:$ROS_PACKAGE_PATH" >> ~/.bashrc    # (Assuming your ROS projects are in these two directories).
 echo "export RIG=bigtop" >> ~/.bashrc                                               # (change this to the name of your Flylab rig)
+source ~/.bashrc
 
+
+# Get camera_aravis.
+cd ~/catkin/src
+git clone http://github.com/ssafarik/camera_aravis.git
+cd ~/catkin && catkin_make
 
 
 # Make the Flylab software.
