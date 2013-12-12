@@ -54,7 +54,9 @@ function FlylabPlotPosition(varargin)
     
     for iFrameChild = iFrameChildren
         % Get object pose.
-        [pos, ang] = FlylabGetTransformedStates(filedata, iFrameParent, iFrameChild);
+        statesTransformed = FlylabGetTransformedStates(filedata, iFrameParent, iFrameChild);
+        pos = statesTransformed(:,1:2);
+        ang = statesTransformed(:,3);
 
         % Rotate if necessary so fly points north.
         if iFrameParent~=0
@@ -74,7 +76,7 @@ function FlylabPlotPosition(varargin)
 
             % Remove points outside a boundary.
             if iFrameParent~=0
-                rMax = 30;
+                rMax = 40;
             else
                 rMax = 100000;
             end
