@@ -30,7 +30,7 @@
   <depend package="flycore" />
   <depend package="galvodirector" />
   <depend package="image_gui" />
-  <depend package="LEDPanels" />
+  <depend package="ledpanels" />
   <depend package="patterngen" />
   <depend package="pythonmodules" />
   <depend package="save" />

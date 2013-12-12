@@ -1,35 +1,35 @@
 #!/usr/bin/env python
 from __future__ import division
-import roslib; roslib.load_manifest('LEDPanels')
+import roslib; roslib.load_manifest('ledpanels')
 import rospy
 import serial
 import numpy as N
 
-from LEDPanels.msg import MsgPanelsCommand
-from LEDPanels.srv import *
+from ledpanels.msg import MsgPanelsCommand
+from ledpanels.srv import *
 import subprocess
 
 
 #######################################################################################################
-# LEDPanels node receives message commands on the topic 'LEDPanels/command', and communicates with
+# ledpanels node receives message commands on the topic 'ledpanels/command', and communicates with
 # the panel hardware.
 #
 # For example:
-# rosrun LEDPanels panels.py
+# rosrun ledpanels ledpanels.py
 #
 # and then:
-# rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand all_on 0 0 0 0 0 0
-# rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand set_pattern_id 1 0 0 0 0 0
+# rostopic pub -1 ledpanels/command ledpanels/MsgPanelsCommand all_on 0 0 0 0 0 0
+# rostopic pub -1 ledpanels/command ledpanels/MsgPanelsCommand set_pattern_id 1 0 0 0 0 0
 # (panel commands take 0 to 6 parameters, but the rostopic command needs to see all six, hence the "all_on 0 0 0 0 0 0", etc).
 # 
 class LEDPanels():
     def __init__(self):
         self.initialized = False
         
-        rospy.init_node('LEDPanels')
+        rospy.init_node('ledpanels')
         rospy.sleep(1)
         
-        self.subPanelsCommand = rospy.Subscriber('LEDPanels/command', MsgPanelsCommand, self.PanelsCommand_callback)
+        self.subPanelsCommand = rospy.Subscriber('ledpanels/command', MsgPanelsCommand, self.PanelsCommand_callback)
         rospy.on_shutdown(self.OnShutdown_callback)
         
         self.commands = {
@@ -141,7 +141,7 @@ class LEDPanels():
                          'set_voltage_range_adc':{'id': 0x62, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 7, 'unsigned': True}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 3, 'unsigned': True}], 
-                                                'help': 'set_voltage_range_adc(channel, range), Set input voltage range on an ADC.  range = 0:[0,+10], 1:[-5,+5], 2:[-2.5,+2.5], 3:[-10,+10]'},
+                                                'help': 'set_voltage_range_adc(channel, range), Set input voltage range on an ADC.  range = 0:[-10,+10], 1:[-5,+5], 2:[-2.5,+2.5], 3:[0,+10]'},
 
 
                          # *************************************************************************
@@ -175,7 +175,7 @@ class LEDPanels():
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}], 
-                                                'help': 'set_mode_pos_custom_x(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for x positions.  xpos = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127].'},
+                                                'help': 'set_mode_pos_custom_x(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for x positions.  xpos = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127], and 10 corresponds to 1.0.'},
                          'set_mode_pos_custom_y':{'id': 0x64, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
@@ -183,7 +183,7 @@ class LEDPanels():
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}], 
-                                                'help': 'set_mode_pos_custom_y(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for x positions.  ypos = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127].'},
+                                                'help': 'set_mode_pos_custom_y(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for x positions.  ypos = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127], and 10 corresponds to 1.0.'},
                          'set_mode_vel_custom_x': {'id': 0x65, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
@@ -191,7 +191,7 @@ class LEDPanels():
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}], 
-                                                'help': 'set_mode_vel_custom_x(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for x velocity.  xrate = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127].'},
+                                                'help': 'set_mode_vel_custom_x(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for x velocity.  xrate = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127], and 10 corresponds to 1.0.'},
                          'set_mode_vel_custom_y': {'id': 0x66, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
@@ -199,7 +199,7 @@ class LEDPanels():
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}], 
-                                                'help': 'set_mode_vel_custom_y(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for y velocity.  yrate = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127].'},
+                                                'help': 'set_mode_vel_custom_y(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for y velocity.  yrate = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127], and 10 corresponds to 1.0.'},
 
                          
                          # *************************************************************************
@@ -229,12 +229,12 @@ class LEDPanels():
         self.services['get_adc_value'] = rospy.Service('get_adc_value', SrvGetADCValue, self.GetADCValue_callback)        
 
         self.serialport = self.DiscoverSerialPort() 
-        rospy.logwarn ('LEDPanels using %s' % self.serialport)
+        rospy.logwarn ('ledpanels using %s' % self.serialport)
         if (self.serialport is not None):
             self.serial = serial.Serial(self.serialport, baudrate=921600, rtscts=False, dsrdtr=False, timeout=1) # 8N1
             self.initialized = True
         else:
-            rospy.logerr('LEDPanels serial port was not specified as a ROS parameter, nor was it found automatically.')
+            rospy.logerr('ledpanels serial port was not specified as a ROS parameter, nor was it found automatically.')
             
 
     # Figure out which serial port the panels controller is attached to.
@@ -262,12 +262,12 @@ class LEDPanels():
     def MakeSurePortIsOpen(self):
         while not self.serial.isOpen():
             try:
-                rospy.logwarn ('LEDPanels: Trying to open serial port %s ...' % self.serialport)
+                rospy.logwarn ('ledpanels: Trying to open serial port %s ...' % self.serialport)
                 self.serial.open()
             except serial.SerialException:
                 rospy.sleep(1)
             else:
-                rospy.logwarn ('LEDPanels: Opened serial port %s' % self.serialport)
+                rospy.logwarn ('ledpanels: Opened serial port %s' % self.serialport)
     
         
     # Sends the get_version command to the LED controller, and returns the response.
@@ -344,11 +344,11 @@ class LEDPanels():
                                 id = 0x11
                                 serialbytes_list.extend(self.Dec2chr(N.abs(arg),nBytesArg))
                         else:        
-                            rospy.logwarn('LEDPanels: command argument type (signed int) not yet implemented.')
+                            rospy.logwarn('ledpanels: command argument type (signed int) not yet implemented.')
         else:
-            rospy.logwarn('Unknown LEDPanels command: %s' % command)
+            rospy.logwarn('Unknown ledpanels command: %s' % command)
                         
-        #rospy.logwarn ('LEDPanels: sending %s' % serialbytes_list)
+        #rospy.logwarn ('ledpanels: sending %s' % serialbytes_list)
         return serialbytes_list
                     
         
@@ -389,7 +389,7 @@ class LEDPanels():
 
     def PanelsCommand_callback(self, panelcommand):
         if self.initialized:
-            #rospy.logwarn('LEDPanels: %s(%d,%d,%d,%d,%d,%d)' % (panelcommand.command, panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4, panelcommand.arg5, panelcommand.arg6))
+            #rospy.logwarn('ledpanels: %s(%d,%d,%d,%d,%d,%d)' % (panelcommand.command, panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4, panelcommand.arg5, panelcommand.arg6))
             command = panelcommand.command.lower()
             serialbytes_list = self.SerialBytelistFromCommand(command, [panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4, panelcommand.arg5, panelcommand.arg6])
             self.MakeSurePortIsOpen()
@@ -397,16 +397,16 @@ class LEDPanels():
             try:
                 self.serial.write(''.join(serialbytes_list))
             except serial.SerialException, e:
-                rospy.logwarn('LEDPanels: Serial exception, trying to reopen: %s' % e)
+                rospy.logwarn('ledpanels: Serial exception, trying to reopen: %s' % e)
                 if self.serial.isOpen():
                     self.serial.close()
                 self.MakeSurePortIsOpen()
                 try:
                     self.serial.write(''.join(serialbytes_list))
                 except serial.SerialException, e:
-                    rospy.logwarn ('LEDPanels: Write FAILED to serial port %s: %s' % (self.serialport, e))
+                    rospy.logwarn ('ledpanels: Write FAILED to serial port %s: %s' % (self.serialport, e))
                 else:
-                    rospy.logwarn ('LEDPanels: Write succeeded to serial port %s.' % self.serialport)
+                    rospy.logwarn ('ledpanels: Write succeeded to serial port %s.' % self.serialport)
 
     def Main(self):
         panelcommand = MsgPanelsCommand(command='all_off')

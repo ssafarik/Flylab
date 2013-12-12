@@ -7,7 +7,7 @@
     <!--                                                            -->
 	<!-- ========================================================== -->
 	
-	<include file="$(find LEDPanels)/launch/main.launch" />
+	<include file="$(find ledpanels)/launch/main.launch" />
 	<include file="$(find fivebar)/launch/fivebar.launch" />
 
 	<include file="$(find flybowls)/launch/heatbowl_50mm.launch" /> 

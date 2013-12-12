@@ -8,7 +8,7 @@ from geometry_msgs.msg import Point, Twist
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
-from LEDPanels.msg import MsgPanelsCommand
+from ledpanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 
 

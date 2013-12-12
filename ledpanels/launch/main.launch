@@ -8,7 +8,7 @@
 	<!-- ========================================================== -->
     
 	
-	<node name="LEDPanels" pkg="LEDPanels" type="panels.py" required="true" />
+	<node name="ledpanels" pkg="ledpanels" type="ledpanels.py" required="true" />
 
 
 </launch>
