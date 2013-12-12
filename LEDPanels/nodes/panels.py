@@ -18,9 +18,9 @@ import subprocess
 # rosrun LEDPanels panels.py
 #
 # and then:
-# rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand all_on 0 0 0 0
-# rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand set_pattern_id 1 0 0 0
-# (panel commands take 0 to 4 parameters, but the rostopic command needs to see all four, hence the "all_on 0 0 0 0", etc).
+# rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand all_on 0 0 0 0 0 0
+# rostopic pub -1 LEDPanels/command LEDPanels/MsgPanelsCommand set_pattern_id 1 0 0 0 0 0
+# (panel commands take 0 to 6 parameters, but the rostopic command needs to see all six, hence the "all_on 0 0 0 0 0 0", etc).
 # 
 class LEDPanels():
     def __init__(self):
@@ -33,6 +33,7 @@ class LEDPanels():
         rospy.on_shutdown(self.OnShutdown_callback)
         
         self.commands = {
+                         # 1 byte commands:
                          'start':              {'id': 0x20, 'args': [], 'help': 'start(), Start display.'},
                          'stop':               {'id': 0x30, 'args': [], 'help': 'stop(), Stop display.'},
                          'start_w_trig':       {'id': 0x25, 'args': [], 'help': 'start_w_trig(), Start display w/ trigger.'},
@@ -75,7 +76,9 @@ class LEDPanels():
                          'disable_extern_trig':{'id': 0x24, 'args': [], 'help': 'reset_funccnt_y(), reset function y count'},
                          'read_and_set_max_voltage':{'id': 0x26, 'args': [], 'help': 'read_and_set_max_voltage()'},
                          
-                         # two byte commands:
+
+                         # *************************************************************************
+                         # 2 byte commands:
                          'reset':              {'id': 0x01, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}], 
                                                 'help': 'reset(panel_addr), Board reset'},
@@ -107,11 +110,12 @@ class LEDPanels():
                                                 'args': [{'nbytes': 1, 'min': 1, 'max': 6, 'unsigned': True}], 
                                                 'help': 'get_adc_value(channel_addr)'},
                          
-                         # three byte commands:
+                         # *************************************************************************
+                         # 3 byte commands:
                          'set_mode':           {'id': 0x10, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 6, 'unsigned': True}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 6, 'unsigned': True}], 
-                                                'help': 'set_mode(mode_x, mode_y), 0=funcx, 1=ch1-ch2, 2=CL+funcx, 3=ch5_sets_x, 4=funcx_sets_ind, 5=debugx; similar for y'},
+                                                'help': 'set_mode(mode_x, mode_y), 0: xrate=funcx, 1:xrate=ch0, 2:xrate=ch0+funcx, 3:x=ch2, 4:x=x0+funcx, 5:debugx, 0x61:custom pos=f(adc,func), 0x62:custom vel=f(adc,func); similar for y but at adc ch1/ch3'},
                          'address':            {'id': 0xFF, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}], 
@@ -119,7 +123,7 @@ class LEDPanels():
                          'set_posfunc_id':     {'id': 0x15, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}], 
-                                                'help': 'set_posfunc_id(channel, functionid), Set position'},
+                                                'help': 'set_posfunc_id(channel, functionid), Set position function.  functionid==0 means use default function.'},
                          'set_velfunc_id':     {'id': 0x20, 
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': True}], 
@@ -134,14 +138,22 @@ class LEDPanels():
                                                 'args': [{'nbytes': 1, 'min': 0, 'max': 10, 'unsigned': True}, 
                                                          {'nbytes': 1, 'min': 0, 'max': 10, 'unsigned': True}], 
                                                 'help': 'set_max_voltage(xmax,ymax), Set max voltage for X and Y on range (0,10).'},
-                         
-                         # four byte commands:     
+                         'set_voltage_range_adc':{'id': 0x62, 
+                                                'args': [{'nbytes': 1, 'min': 0, 'max': 7, 'unsigned': True}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 3, 'unsigned': True}], 
+                                                'help': 'set_voltage_range_adc(channel, range), Set input voltage range on an ADC.  range = 0:[0,+10], 1:[-5,+5], 2:[-2.5,+2.5], 3:[-10,+10]'},
+
+
+                         # *************************************************************************
+                         # 4 byte commands:     
                          'set_ao':             {'id': 0x10, 
                                                 'args': [{'nbytes': 1, 'min': 1, 'max': 4, 'unsigned': True}, 
                                                          {'nbytes': 2, 'min': -32767, 'max': 32767, 'unsigned': True}], # BUG: should this be signed?
                                                 'help': 'set_AO(chan, val), val ranges on (-32767,32767) aka (-10v,+10v)'},
+
                          
-                         # five byte commands:
+                         # *************************************************************************
+                         # 5 byte commands:
                          'set_position':       {'id': 0x70, 
                                                 'args': [{'nbytes': 2, 'min': 0, 'max': 2047, 'unsigned': True}, 
                                                          {'nbytes': 2, 'min': 0, 'max': 2047, 'unsigned': True}], 
@@ -151,8 +163,57 @@ class LEDPanels():
                                                          {'nbytes': 1, 'min': -128, 'max': 127, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': -128, 'max': 127, 'unsigned': False}, 
                                                          {'nbytes': 1, 'min': -128, 'max': 127, 'unsigned': False}], 
-                                                'help': 'set_gain_bias(gain_x, bias_x, gain_y, bias_y)'},
+                                                'help': 'set_gain_bias(gain_x, bias_x, gain_y, bias_y), with 8 bit arguments.'},
 
+
+                         # *************************************************************************
+                         # 7 byte commands:
+                         'set_mode_pos_custom_x':{'id': 0x63, 
+                                                'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}], 
+                                                'help': 'set_mode_pos_custom_x(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for x positions.  xpos = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127].'},
+                         'set_mode_pos_custom_y':{'id': 0x64, 
+                                                'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}], 
+                                                'help': 'set_mode_pos_custom_y(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for x positions.  ypos = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127].'},
+                         'set_mode_vel_custom_x': {'id': 0x65, 
+                                                'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}], 
+                                                'help': 'set_mode_vel_custom_x(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for x velocity.  xrate = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127].'},
+                         'set_mode_vel_custom_y': {'id': 0x66, 
+                                                'args': [{'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}, 
+                                                         {'nbytes': 1, 'min': 0, 'max': 0xFF, 'unsigned': False}], 
+                                                'help': 'set_mode_vel_custom_y(a0, a1, a2, a3, a4, a5), Set coefficients on input sources for y velocity.  yrate = a0*adc0 + a1*adc1 + a2*adc2 + a3*adc3 + a4*funcx + a5*funcy; a_ valid on [-128,+127].'},
+
+                         
+                         # *************************************************************************
+                         # 9 byte commands:
+                         'send_gain_bias_16':     {'id': 0x01, 
+                                                'args': [{'nbytes': 2, 'min': -32768, 'max': 32767, 'unsigned': False}, 
+                                                         {'nbytes': 2, 'min': -32768, 'max': 32767, 'unsigned': False}, 
+                                                         {'nbytes': 2, 'min': -32768, 'max': 32767, 'unsigned': False}, 
+                                                         {'nbytes': 2, 'min': -32768, 'max': 32767, 'unsigned': False}], 
+                                                'help': 'set_gain_bias_16(gain_x, bias_x, gain_y, bias_y), with 16 bit arguments.'},
+
+
+                         # *************************************************************************
+                         # 129 byte commands:
                          'send_laser_pattern': {'id': 0x3E, 
                                                 'args': [{'nbytes': 32, 'min': 0, 'max': 1.158e77, 'unsigned': True}, 
                                                          {'nbytes': 32, 'min': 0, 'max': 1.158e77, 'unsigned': True}, 
@@ -170,7 +231,7 @@ class LEDPanels():
         self.serialport = self.DiscoverSerialPort() 
         rospy.logwarn ('LEDPanels using %s' % self.serialport)
         if (self.serialport is not None):
-            self.serial = serial.Serial(self.serialport, baudrate=921600, rtscts=False, dsrdtr=False) # 8N1
+            self.serial = serial.Serial(self.serialport, baudrate=921600, rtscts=False, dsrdtr=False, timeout=1) # 8N1
             self.initialized = True
         else:
             rospy.logerr('LEDPanels serial port was not specified as a ROS parameter, nor was it found automatically.')
@@ -328,9 +389,9 @@ class LEDPanels():
 
     def PanelsCommand_callback(self, panelcommand):
         if self.initialized:
-            #rospy.logwarn('LEDPanels: %s(%d,%d,%d,%d)' % (panelcommand.command, panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4))
+            #rospy.logwarn('LEDPanels: %s(%d,%d,%d,%d,%d,%d)' % (panelcommand.command, panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4, panelcommand.arg5, panelcommand.arg6))
             command = panelcommand.command.lower()
-            serialbytes_list = self.SerialBytelistFromCommand(command, [panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4])
+            serialbytes_list = self.SerialBytelistFromCommand(command, [panelcommand.arg1, panelcommand.arg2, panelcommand.arg3, panelcommand.arg4, panelcommand.arg5, panelcommand.arg6])
             self.MakeSurePortIsOpen()
                         
             try:
