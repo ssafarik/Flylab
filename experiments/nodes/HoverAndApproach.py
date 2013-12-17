@@ -50,12 +50,12 @@ class Experiment():
         self.experimentparams.pre.robot.move.pattern.frameidPosition = '/Arena'
         self.experimentparams.pre.robot.move.pattern.frameidAngle = '/Arena'
         self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/10                # Patterns per second.0
+        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/10               # Patterns per second.0
         self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
         self.experimentparams.pre.robot.move.pattern.count = -1
         self.experimentparams.pre.robot.move.pattern.size.x = 30
         self.experimentparams.pre.robot.move.pattern.size.y = 0
-        self.experimentparams.pre.robot.move.pattern.direction = 1
+        self.experimentparams.pre.robot.move.pattern.direction = 1                  # Step forward (+1) or reverse (-1) through the pattern points.  0 means choose at random, +1 or -1.
 
         self.experimentparams.pre.lasergalvos.enabled = False
         
@@ -101,8 +101,8 @@ class Experiment():
         self.experimentparams.trial.robot.move.relative.distance = 4                    # Distance to the target point from the origin frame's position.
         self.experimentparams.trial.robot.move.relative.angleType = 'current'           # 'constant' or 'random' or 'current'.  Use given angle always, or choose random angle once per move.
         self.experimentparams.trial.robot.move.relative.angleOffset = 0                 # Angle to the target point from the origin frame's x-axis.
-        self.experimentparams.trial.robot.move.relative.angleOscMag = N.pi/2.0                 # Radians
-        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0.0                # Hz
+        self.experimentparams.trial.robot.move.relative.angleOscMag = N.pi/2.0          # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0.0              # Hz
         self.experimentparams.trial.robot.move.relative.speed = 25                      # Speed at which to move the robot toward the target point. 
         self.experimentparams.trial.robot.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random frtrial of it. 
         self.experimentparams.trial.robot.move.relative.tolerance = 1                   # When robot-to-target distance is within this tolerance, then the move is over.

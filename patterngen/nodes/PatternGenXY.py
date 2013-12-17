@@ -556,9 +556,12 @@ class PatternGenXY:
             self.pattern1.count             = msgPatternGen.count
             self.pattern1.size              = msgPatternGen.size
             self.pattern1.param             = msgPatternGen.param
-            self.pattern1.direction         = msgPatternGen.direction # Forward (+1) or reverse (-1) through the pattern points.
+            self.pattern1.direction         = msgPatternGen.direction # Forward (+1) or reverse (-1) through the pattern points.  0 means choose at random, +1 or -1.
+            
+            # If direction==0, then choose random +1 or -1.
             if (self.pattern1.direction==0):
-                self.pattern1.direction = 1 
+                self.pattern1.direction = 2*N.random.randint(2)-1
+                 
 
     	    self.dtPoint = rospy.Duration(1/self.pattern1.hzPoint)
     	    self.ratePoint = rospy.Rate(self.pattern1.hzPoint)
