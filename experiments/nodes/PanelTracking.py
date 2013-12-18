@@ -8,7 +8,7 @@ from geometry_msgs.msg import Point, Twist
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
-from LEDPanels.msg import MsgPanelsCommand
+from ledpanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 
 
@@ -18,7 +18,7 @@ class Experiment():
     def __init__(self):
         rospy.init_node('Experiment')
         
-        self.pubLEDPanels = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+        self.pubLEDPanels = rospy.Publisher('ledpanels/command', MsgPanelsCommand, latch=True)
         self.xPanelPattern = 0
         self.yPanelPattern = 0
         

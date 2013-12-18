@@ -26,7 +26,7 @@ function FlylabPlotPosition(varargin)
         iStart          = varargin{6};
         iStop           = varargin{7};
     else
-        fprintf ('Bad call to FlylabPlotPosition().\nParams are:  FlylabPlotPosition(filedata, iFrameParent,iFrameChildren, iTrigger, nSubsample[, iStart, iStop])\n');
+        fprintf ('ERROR: Bad call to FlylabPlotPosition().\nParams are:  FlylabPlotPosition(filedata, iFrameParent,iFrameChildren, iTrigger, nSubsample[, iStart, iStop])\n');
     end
     
     
@@ -54,7 +54,9 @@ function FlylabPlotPosition(varargin)
     
     for iFrameChild = iFrameChildren
         % Get object pose.
-        [pos, ang] = FlylabGetTransformedStates(filedata, iFrameParent, iFrameChild);
+        statesTransformed = FlylabGetTransformedStates(filedata, iFrameParent, iFrameChild);
+        pos = statesTransformed(:,1:2);
+        ang = statesTransformed(:,3);
 
         % Rotate if necessary so fly points north.
         if iFrameParent~=0
@@ -67,32 +69,34 @@ function FlylabPlotPosition(varargin)
         y = pos(iStart:nSubsample:iStop, 2);
         ang=ang(iStart:nSubsample:iStop);
 
-        iTriggerA = max(1, floor((iTrigger-iStart+1)/nSubsample));
-        xTrig = x(iTriggerA);
-        yTrig = y(iTriggerA);
-        
-        % Remove points outside a boundary.
-        if iFrameParent~=0
-            rMax = 30;
-        else
-            rMax = 100000;
-        end
-        iInBounds = find(x>-rMax & x<rMax & y>-rMax & y<rMax);
-        x = x(iInBounds);
-        y = y(iInBounds);
+        iTriggerA = min(max(1, floor((iTrigger-iStart+1)/nSubsample)), length(x));
+        if iTriggerA>0
+            xTrig = x(iTriggerA);
+            yTrig = y(iTriggerA);
+
+            % Remove points outside a boundary.
+            if iFrameParent~=0
+                rMax = 40;
+            else
+                rMax = 100000;
+            end
+            iInBounds = find(x>-rMax & x<rMax & y>-rMax & y<rMax);
+            x = x(iInBounds);
+            y = y(iInBounds);
 
 
-        % Draw the  positions, with circles on start and trigger.
-        if ~isempty(x)
-            scatterPose(x(1),  y(1),    0, radii(iFrameChild), colors(iFrameChild,:), 's', 'none');
-            scatterPose(xTrig, yTrig,   0, radii(iFrameChild), colors(iFrameChild,:), 'o', 'none');
-            scatterPose(x,     y,     ang, radii(iFrameChild), colors(iFrameChild,:), markers{iFrameChild});
-        end
+            % Draw the  positions, with circles on start and trigger.
+            if ~isempty(x)
+                scatterPose(x(1),  y(1),    0, radii(iFrameChild), colors(iFrameChild,:), 's', 'none');
+                scatterPose(xTrig, yTrig,   0, 4*radii(iFrameChild), colors(iFrameChild,:), 'o', 'none');
+                scatterPose(x,     y,     ang, 4*radii(iFrameChild), colors(iFrameChild,:), markers{iFrameChild});
+            end
 
-        if iFrameParent~=0
-            axis([-rMax rMax -rMax rMax]);
+            if iFrameParent~=0
+                axis([-rMax rMax -rMax rMax]);
+            end
+            axis ([-85 85 -85 85]);
         end
-        axis ([-85 85 -85 85]);
     end
     
     %axis off

@@ -213,6 +213,7 @@ class SaveBag:
 
 if __name__ == '__main__':
     rospy.init_node('SaveBag', log_level=rospy.INFO)
+    rospy.sleep(1)
     savebag = SaveBag()
     savebag.Main()
     

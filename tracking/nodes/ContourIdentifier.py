@@ -13,8 +13,7 @@ from geometry_msgs.msg import Point, PointStamped, PoseArray, Pose, PoseStamped,
 from std_msgs.msg import Header, ColorRGBA
 from visualization_msgs.msg import Marker
 from flycore.msg import MsgFrameState, TrackingCommand
-from pythonmodules import filters
-from pythonmodules import CircleFunctions
+from pythonmodules import filters, CircleFunctions, SetDict
 import Fly
 from munkres import Munkres
 
@@ -46,7 +45,8 @@ INDEX_ECC = 3
 #
 
 
-
+                
+    
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -63,18 +63,34 @@ class ContourIdentifier:
         self.iContours = []
         self.objects = []
         self.munkres = Munkres() # Hungarian assignment algorithm.
-        self.lock = threading.Lock()
+        self.lockParams = threading.Lock()
+        self.lockThreads = threading.Lock()
         
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
+        rospy.sleep(1)
         
         self.ResetFlyObjects()
         
         
+        # Get the parameters.    
+        with self.lockParams:    
+            self.params = rospy.get_param('/', {})
+            
+        defaults = {'camera':{'mask':{'x':0, 
+                                      'y':0,
+                                      'radius':25}},
+                    'arena':{'radius_inner':25,
+                             'radius_outer':30},
+                    'tracking':{'offsetEndEffectorMax': 15.0},
+                    'queue_size_contours':1
+                    }
+        SetDict.SetWithPreserve(self.params, defaults)
+
+        
         # Messages
-        queue_size_contours         = rospy.get_param('tracking/queue_size_contours', 1)
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
-        self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists', ContourinfoLists, self.ContourinfoLists_callback, queue_size=queue_size_contours)
+        self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists', ContourinfoLists, self.ContourinfoLists_callback, queue_size=self.params['tracking']['queue_size_contours'])
         self.pubArenaState          = rospy.Publisher('ArenaState', ArenaState)
         self.pubVisualState         = rospy.Publisher('VisualState', MsgFrameState)
         self.subStateEE             = rospy.Subscriber('end_effector', MsgFrameState, self.EndEffector_callback)
@@ -92,15 +108,8 @@ class ContourIdentifier:
         self.endeffector_endeffectorframe.point.x = 0
         self.endeffector_endeffectorframe.point.y = 0
         self.endeffector_endeffectorframe.point.z = 0
-        
 
-        self.xMask = rospy.get_param("camera/mask/x", 0) # Pixels
-        self.yMask = rospy.get_param("camera/mask/y", 0) # Pixels
-        self.radiusMask = rospy.get_param("camera/mask/radius", 25) # Pixels
-        self.radiusArenaInner = rospy.get_param("arena/radius_inner", 25) # Millimeters
-        self.radiusArenaOuter = rospy.get_param("arena/radius_outer", 30) # Millimeters
-        self.offsetEndEffectorMax = rospy.get_param('tracking/offsetEndEffectorMax', 15.0)
-        
+
         self.enabledExclusionzone = False
         self.pointExclusionzone_list = [Point(x=0.0, y=0.0)]
         self.radiusExclusionzone_list = [0.0]
@@ -121,8 +130,8 @@ class ContourIdentifier:
                                   pose=Pose(position=Point(x=0, 
                                                            y=0, 
                                                            z=0)),
-                                  scale=Vector3(x=self.radiusArenaOuter*2.0*1.05,
-                                                y=self.radiusArenaOuter*2.0*1.05,
+                                  scale=Vector3(x=self.params['arena']['radius_outer']*2.0*1.05,
+                                                y=self.params['arena']['radius_outer']*2.0*1.05,
                                                 z=0.01),
                                   color=ColorRGBA(a=0.05,
                                                   r=1.0,
@@ -138,8 +147,8 @@ class ContourIdentifier:
                                   pose=Pose(position=Point(x=0, 
                                                            y=0, 
                                                            z=0)),
-                                  scale=Vector3(x=self.radiusArenaInner*2.0*1.05,
-                                                y=self.radiusArenaInner*2.0*1.05,
+                                  scale=Vector3(x=self.params['arena']['radius_inner']*2.0*1.05,
+                                                y=self.params['arena']['radius_inner']*2.0*1.05,
                                                 z=0.01),
                                   color=ColorRGBA(a=0.05,
                                                   r=1.0,
@@ -178,7 +187,7 @@ class ContourIdentifier:
     # See TrackingCommand.msg for details.
     #
     def TrackingCommand_callback(self, trackingcommand):
-        with self.lock:
+        with self.lockThreads:
             if trackingcommand.command=='initialize':
                 self.enabledExclusionzone = trackingcommand.exclusionzones.enabled
                 self.pointExclusionzone_list = trackingcommand.exclusionzones.point_list
@@ -218,7 +227,7 @@ class ContourIdentifier:
     def ResetFlyObjects (self):
         # Save status.
         initializedSav = self.initialized
-        self.initialized = False
+        self.initialized = False # Unset this so we don't handle messages on the objects while we're working on them.
         
         for iObject in range(len(self.objects)):
             del self.objects[0]
@@ -234,7 +243,7 @@ class ContourIdentifier:
         # Add the robot(s), if any.
         for iRobot in self.iRobot_list:
             try:
-                self.objects.append(Fly.Fly(tfrx=self.tfrx, name="Robot"))#self.lock))
+                self.objects.append(Fly.Fly(tfrx=self.tfrx, name="Robot", lock=self.lockParams))
             except rospy.ServiceException, e:
                 rospy.logwarn ('Exception adding Fly() object: %s' % e)
                 
@@ -244,7 +253,7 @@ class ContourIdentifier:
         # Add the flies, if any.
         for iFly in self.iFly_list:
             try:
-                self.objects.append(Fly.Fly(tfrx=self.tfrx, name=("Fly%02d" % iName)))
+                self.objects.append(Fly.Fly(tfrx=self.tfrx, name=("Fly%02d" % iName), lock=self.lockParams))
             except rospy.ServiceException:
                 rospy.logwarn ('Exception adding Fly() object: %s' % e)
             iName += 1
@@ -270,8 +279,8 @@ class ContourIdentifier:
             contourinfolistsOut.imgRoi = []
             
             for iContour in range(len(contourinfolistsIn.x)):
-                if N.linalg.norm(N.array([contourinfolistsIn.x[iContour]-self.xMask, 
-                                          contourinfolistsIn.y[iContour]-self.yMask])) <= self.radiusMask:
+                if N.linalg.norm(N.array([contourinfolistsIn.x[iContour]-self.params['camera']['mask']['x'], 
+                                          contourinfolistsIn.y[iContour]-self.params['camera']['mask']['y']])) <= self.params['camera']['mask']['radius']:
                     contourinfolistsOut.x.append(contourinfolistsIn.x[iContour])
                     contourinfolistsOut.y.append(contourinfolistsIn.y[iContour])
                     contourinfolistsOut.angle.append(contourinfolistsIn.angle[iContour])
@@ -301,12 +310,12 @@ class ContourIdentifier:
                     rospy.logwarn ('CI Reconnected service %s()' % stSrv)
 
             
-            contourinfolistsOut = copy.copy(contourinfolistsIn)
+            contourinfolistsOut = copy.deepcopy(contourinfolistsIn)
             contourinfolistsOut.header.frame_id = '/Arena'
             contourinfolistsOut.x = response.xDst
             contourinfolistsOut.y = response.yDst
         else:
-            contourinfolistsOut = copy.copy(contourinfolistsIn)
+            contourinfolistsOut = copy.deepcopy(contourinfolistsIn)
             contourinfolistsOut.header.frame_id = '/Arena'
             contourinfolistsOut.x = []
             contourinfolistsOut.y = []
@@ -346,27 +355,30 @@ class ContourIdentifier:
             dPenalty = N.hypot(d0, d1)
     
             d += dPenalty
+            
         
-        
-        # Penalty for deviation of visual characteristics.
-        bMatchVisual = False    # True only seems to make it worse.
-        if (bMatchVisual):    
-            for m in range(len(xyObjects)):
-                for n in range(len(xyContours)):
-                    try:
-                        if (not N.isnan(xyObjects[m,INDEX_AMEAN])):
-                            gainArea = 0.1 
-                            areametric = gainArea * N.abs(xyContours[n,INDEX_AREA] - xyObjects[m,INDEX_AMEAN])
-                            d[m,n] += areametric
-                         
-                        if (not N.isnan(xyObjects[m,INDEX_EMEAN])):
-                            gainEcc = 10.0
-                            eccmetric = gainEcc * N.abs(xyContours[n,INDEX_ECC] - xyObjects[m,INDEX_EMEAN]) / N.max([xyContours[n,INDEX_ECC], xyObjects[m,INDEX_EMEAN]]) # Ranges 0 to 1.
-                            d[m,n] += eccmetric
-                         
-                         
-                    except TypeError:
-                        d[m,n] = None
+        # Penalty for deviation of visual characteristics: area and ecc.
+        gainArea = 0.1 
+        aPenalty = 0#gainArea * N.abs(N.subtract.outer(xyObjects[:,INDEX_AMEAN], xyContours[:,INDEX_AREA]))
+
+        gainEcc = 10.0
+        ePenalty = gainEcc * N.abs(N.subtract.outer(xyObjects[:,INDEX_EMEAN], xyContours[:,INDEX_ECC]))
+        d += (aPenalty + ePenalty)
+            
+#             for m in range(len(xyObjects)):
+#                 for n in range(len(xyContours)):
+#                     try:
+#                         if (bMatchArea and not N.isnan(xyObjects[m,INDEX_AMEAN])):
+#                             areametric = gainArea * N.abs(xyContours[n,INDEX_AREA] - xyObjects[m,INDEX_AMEAN])
+#                             d[m,n] += areametric
+#                          
+#                         if (bMatchEcc and not N.isnan(xyObjects[m,INDEX_EMEAN])):
+#                             eccmetric = gainEcc * N.abs(xyContours[n,INDEX_ECC] - xyObjects[m,INDEX_EMEAN])# / N.max([xyContours[n,INDEX_ECC], xyObjects[m,INDEX_EMEAN]]) # Ranges 0 to 1.
+#                             d[m,n] += eccmetric
+#                          
+#                          
+#                     except TypeError:
+#                         d[m,n] = None
                     
         return d
     
@@ -428,11 +440,9 @@ class ContourIdentifier:
                    
     def GetMatchMunkres(self, d):
         map = [None for i in range(len(d))]
-
         indexes = self.munkres.compute(d)
         for k in range(len(map)):
             map[k] = indexes[k][1]
-        
         return map
     
 
@@ -521,7 +531,7 @@ class ContourIdentifier:
             # Decide which position to use for robot matching.
             if (xyRobot is not None) and (xyEndEffector is not None):
                 # Don't let the fly walk away with the robot.
-                if (N.linalg.norm(xyRobot[0:2]-xyEndEffector[0:2]) < self.offsetEndEffectorMax):
+                if (N.linalg.norm(xyRobot[0:2]-xyEndEffector[0:2]) < self.params['tracking']['offsetEndEffectorMax']):
                     xy = xyRobot
                 else:
                     xy = xyEndEffector
@@ -537,7 +547,7 @@ class ContourIdentifier:
             if (xy is not None):                    
                 xyObjects[iRobot,:] = xy
 
-
+        
         # Flies into the objects list.    
         for iFly in self.iFly_list:
             xyObjects[iFly,:] = N.array([self.objects[iFly].state.pose.position.x,
@@ -555,9 +565,10 @@ class ContourIdentifier:
             if (not N.isnan(self.contourinfo_list[iContour].x)):
                 xyContours[iContour,:] = N.array([self.contourinfo_list[iContour].x,
                                                   self.contourinfo_list[iContour].y,
-                                                  self.contourinfo_list[iContour].area,  self.contourinfo_list[iContour].ecc])
+                                                  self.contourinfo_list[iContour].area,  
+                                                  self.contourinfo_list[iContour].ecc])
         
-
+        
         # Match objects with contourinfo_list.
         d = self.GetDistanceMatrix(xyObjects, xyContours)
         if d is not []:
@@ -571,12 +582,12 @@ class ContourIdentifier:
             if alg=='munkres':
                 mapObjectsMunkres = self.GetMatchMunkres(d)
                 mapContoursFromObjects = mapObjectsMunkres
-                
+            
             # Set the augmented entries to None.
             for m in range(len(mapContoursFromObjects)):
                 if (mapContoursFromObjects[m])>=len(self.contourinfo_list):
                     mapContoursFromObjects[m] = None
-
+            
             #for i in range(len(d)):
             #    rospy.logwarn(d[i])
             #rospy.logwarn ('CI mapObjectsGaleShapely =%s' % mapObjectsGaleShapely)
@@ -637,10 +648,9 @@ class ContourIdentifier:
 
     # ContourinfoLists_callback() is the main message handler for this node.
     def ContourinfoLists_callback(self, contourinfolistsPixels):
-        with self.lock:
+        with self.lockThreads:
             try:
                 if self.initialized:
-                    
                     if self.nRobots>0:
                         
                         # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
@@ -658,10 +668,10 @@ class ContourIdentifier:
                                                                   )
                                                     )
         
-        
+                    
                     contourinfolistsPixels = self.FilterContourinfolistsWithinMask(contourinfolistsPixels)
                     contourinfolists = self.TransformContourinfolistsArenaFromCamera(contourinfolistsPixels)
-        
+                    
                     # Create a null contourinfo.
                     contourinfoNone = Contourinfo()
                     contourinfoNone.header = contourinfolists.header
@@ -698,7 +708,7 @@ class ContourIdentifier:
                             contourinfo.imgRoi = contourinfolists.imgRoi[i]
                             self.contourinfo_list.append(contourinfo)
             
-        
+                    
                     # Figure out who is who in the camera image.
                     try:
                         self.mapContourinfoFromObject = self.MapContoursFromObjects()
@@ -707,7 +717,6 @@ class ContourIdentifier:
         
                         
                     if self.mapContourinfoFromObject is not None:
-                        
                         # Update the robot state w/ the contourinfo and end-effector positions.
                         for iRobot in self.iRobot_list:
                             if self.mapContourinfoFromObject[iRobot] is not None:
@@ -740,7 +749,6 @@ class ContourIdentifier:
                             #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].y)
                             #self.fidRobot.write(data)
                                 
-                        
                         # Update the flies' states.
                         for iFly in self.iFly_list:
                             if self.mapContourinfoFromObject[iFly] is not None:
@@ -761,10 +769,8 @@ class ContourIdentifier:
                             #    self.fidFly.write(data)
                         
         
-            
                         self.PublishArenaStateFromObjects()
         
-                        
                         # Publish the VisualState.
                         if (0 in self.iRobot_list) and (0 < len(self.objects)):
                             self.pubVisualState.publish(self.objects[0].state)
@@ -776,7 +782,6 @@ class ContourIdentifier:
                         self.pubMarker.publish(self.markerArenaOuter)
                         self.pubMarker.publish(self.markerArenaInner)
         
-                        
                         # Publish markers for all the exclusionzones.
                         if self.enabledExclusionzone:
                             for marker in self.markerExclusionzone_list:
@@ -785,7 +790,8 @@ class ContourIdentifier:
         
             except rospy.exceptions.ROSException, e:
                 rospy.loginfo('CI ROSException: %s' % e)
-                            
+                      
+
 
     
 if __name__ == '__main__':

@@ -1,12 +1,12 @@
 <launch>
 	<!-- ========================================================== -->
-	<!-- Configuration of the ZAP-HOT-FOOD learning experiment.     -->
+	<!-- Configuration of the ZAP-AREA experiment.                  -->
     <!--                                                            -->
     <!-- Edit this file to contain the elements of the particular   -->
     <!-- experiment.                                                -->
     <!--                                                            -->
     <!-- Launch this file to run the experiment, as in:             -->
-    <!-- roslaunch experiments zaphotfood.launch                    -->
+    <!-- roslaunch experiments zaparea.launch                       -->
     <!--                                                            -->
 	<!-- ========================================================== -->
 
@@ -15,7 +15,7 @@
 
 
 	<!-- ***  The Experiment  *** -->
-	<node pkg="experiments" type="ZapHotFood.py" name="Experiment" required="true" />
+	<node pkg="experiments" type="ZapArea.py" name="Experiment" required="true" />
 
 	
   

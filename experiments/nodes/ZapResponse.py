@@ -8,7 +8,7 @@ from geometry_msgs.msg import Point, Twist
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
-from LEDPanels.msg import MsgPanelsCommand
+from ledpanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 from tracking.msg import ArenaState
 
@@ -24,12 +24,13 @@ class ExperimentZapresponse():
         self.experimentparams = ExperimentParamsRequest()
         
         #flies = 'HCS'
-        flies = 'TrpA1_paralysis'
+        flies = 'TrpA1_sugar'
+        #flies = 'TrpA1_paralysis'
         #flies = 'TrpA1_wingextender'
-        t0 = 30     # off 
+        t0 = 120     # off 
         t1 = 3      # on
         t2 = 117    # off
-        laserpower = '120mW'
+        laserpower = '260mW'
         
         
         self.experimentparams.experiment.description = 'Laser is off for %d secs, on for %d secs, and off for %d secs' % (t0, t1, t2)

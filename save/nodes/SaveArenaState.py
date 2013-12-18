@@ -931,6 +931,7 @@ class SaveArenastate:
 
 if __name__ == '__main__':
     rospy.init_node('SaveArenastate', log_level=rospy.INFO)
+    rospy.sleep(1)
     savearenastate = SaveArenastate()
     savearenastate.Main()
     

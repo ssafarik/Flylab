@@ -11,7 +11,7 @@ import tf
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
 from std_msgs.msg import Header, ColorRGBA, String
 from flycore.msg import MsgFrameState, TrackingCommand
-from LEDPanels.msg import MsgPanelsCommand
+from ledpanels.msg import MsgPanelsCommand
 from tracking.msg import ArenaState
 from visualization_msgs.msg import Marker
 
@@ -32,7 +32,7 @@ class Reset (smach.State):
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
-        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+        self.pubLEDPanelsCommand = rospy.Publisher('ledpanels/command', MsgPanelsCommand, latch=True)
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -111,7 +111,7 @@ class Action (smach.State):
         self.ypanels    = rospy.get_param('ledpanels/ypanels', 1)
         queue_size_arenastate    = rospy.get_param('tracking/queue_size_arenastate', 1)
 
-        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+        self.pubLEDPanelsCommand = rospy.Publisher('ledpanels/command', MsgPanelsCommand, latch=True)
         self.subArenaState       = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
         self.Statefilter = ExperimentLibStatefilter.Statefilter()

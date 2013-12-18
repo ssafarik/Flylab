@@ -17,6 +17,7 @@ class TransformServerStageArena:
         self.calibration = None
 
         rospy.init_node('TransformServerStageArena')
+        rospy.sleep(1)
 
          
         self.tfrx = tf.TransformListener()

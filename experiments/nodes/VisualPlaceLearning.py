@@ -9,7 +9,7 @@ from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsReque
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from patterngen.msg import MsgPattern
-from LEDPanels.msg import MsgPanelsCommand
+from ledpanels.msg import MsgPanelsCommand
 
 
 

@@ -264,6 +264,7 @@ class SaveImages:
 
 if __name__ == '__main__':
     rospy.init_node('SaveImages', log_level=rospy.INFO)
+    rospy.sleep(1)
     saveimages = SaveImages()
     saveimages.Main()
     
