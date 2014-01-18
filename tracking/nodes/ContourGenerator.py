@@ -360,6 +360,10 @@ class ContourGenerator:
         return angle, ecc
         
 
+    # ContourinfoFromContour()
+    # Convert a contour (a hierarchical list) into 
+    # a contourinfo, a tuple of (x, y, area, angle, ecc).
+    #
     def ContourinfoFromContour(self, contour):
         area = cv2.contourArea(contour)
 

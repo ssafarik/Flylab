@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import division
-import numpy as N
+import numpy as np
 
 
 
@@ -8,7 +8,7 @@ import numpy as N
 #   Put the angle into the range of -pi to +pi.
 #
 def Rerange(self, angle):
-    angleOut = ((angle+N.pi) % (2.0*N.pi)) - N.pi
+    angleOut = ((angle+np.pi) % (2.0*np.pi)) - np.pi
     
     return angleOut
     
@@ -16,13 +16,13 @@ def Rerange(self, angle):
 
 # Get the distance between two angles.  Cannot be further than pi apart.
 def DistanceCircle(angle2, angle1):
-    angle1b = angle1 % (2.0*N.pi)
-    angle2b = angle2 % (2.0*N.pi)
+    angle1b = angle1 % (2.0*np.pi)
+    angle2b = angle2 % (2.0*np.pi)
     distb = angle2b - angle1b
-    if distb > N.pi:
-        dist = distb - (2.0*N.pi)
-    elif distb < -N.pi:
-        dist = distb + (2.0*N.pi)
+    if distb > np.pi:
+        dist = distb - (2.0*np.pi)
+    elif distb < -np.pi:
+        dist = distb + (2.0*np.pi)
     else:
         dist = distb
         
@@ -32,36 +32,36 @@ def DistanceCircle(angle2, angle1):
 # meaning that the arrow can be pointing either way.  Cannot be further than pi/2 apart.
 #
 def DistanceHalfCircle(angle2, angle1):
-    angle1b = angle1 % (2.0*N.pi)   # angle1 is good on 2pi.
-    angle2b = angle2 % (N.pi)       # angle2b on range [0,pi)
-    angle2c = angle2b + N.pi        # angle2c on range [pi,2pi)
+    angle1b = angle1 % (2.0*np.pi)   # angle1 is good on 2pi.
+    angle2b = angle2 % (np.pi)       # angle2b on range [0,pi)
+    angle2c = angle2b + np.pi        # angle2c on range [pi,2pi)
     
     distb = angle2b - angle1b
     distc = angle2c - angle1b
     
-    if distb > N.pi:
-        distb -= 2*N.pi
-    if distb < -N.pi:
-        distb += 2*N.pi
-    if distc > N.pi:
-        distc -= 2*N.pi
-    if distc < -N.pi:
-        distc += 2*N.pi
+    if distb > np.pi:
+        distb -= 2*np.pi
+    if distb < -np.pi:
+        distb += 2*np.pi
+    if distc > np.pi:
+        distc -= 2*np.pi
+    if distc < -np.pi:
+        distc += 2*np.pi
 
-    if N.abs(distb) < N.abs(distc):
+    if np.abs(distb) < np.abs(distc):
         dist = distb
     else:
         dist = distc
                         
 #    print distb, distc
-#    if distb > N.pi/2:
-#        dist = distb - (N.pi)
+#    if distb > np.pi/2:
+#        dist = distb - (np.pi)
 #        print "A"
-##    elif distb < -N.pi:
-##        dist = distb + (2*N.pi)
+##    elif distb < -np.pi:
+##        dist = distb + (2*np.pi)
 ##        print "B"
-#    elif distb < -N.pi/2:
-#        dist = distb + (N.pi)
+#    elif distb < -np.pi/2:
+#        dist = distb + (np.pi)
 #        print "C"
 #    else:
 #        dist = distb
@@ -106,33 +106,22 @@ def UnwrapHalfCircle(angle, anglePrev):
     return angleUnwrapped
 
 
-def DegreesFromRadians(angle):
-    if angle is not None:
-        return angle*180.0/N.pi
-    else:
-        return None
-
-def RadiansFromDegrees(angle):
-    if angle is not None:
-        return angle*N.pi/180.0
-    else:
-        return None
 
 if __name__ == '__main__':
-    pi = N.pi
-    start_angle = [N.pi/4.0, N.pi/4.0, 7.0/4.0*N.pi, 7.0/4.0*N.pi]
-    stop_angle = [0.0, 7.0/4.0*N.pi, 0.0, N.pi/4.0]
+    pi = np.pi
+    start_angle = [np.pi/4.0, np.pi/4.0, 7.0/4.0*np.pi, 7.0/4.0*np.pi]
+    stop_angle = [0.0, 7.0/4.0*np.pi, 0.0, np.pi/4.0]
     for ang in range(len(start_angle)):
         start_ang = start_angle[ang]
         stop_ang = stop_angle[ang]
         diff = DistanceCircle(start_ang,stop_ang)
-        print "start_angle = %s" % (str(DegreesFromRadians(start_ang)))
-        print "stop_angle = %s" % (str(DegreesFromRadians(stop_ang)))
-        print "diff = %s" % (str(DegreesFromRadians(diff)))
+        print "start_angle = %s" % (str(np.rad2deg(start_ang)))
+        print "stop_angle = %s" % (str(np.rad2deg(stop_ang)))
+        print "diff = %s" % (str(np.rad2deg(diff)))
 
         ang = stop_ang
         ang_prev = start_ang
         unwrapped_ang = UnwrapCircle(ang, ang_prev)
-        print "ang_prev = %s" % (str(DegreesFromRadians(ang_prev)))
-        print "ang = %s" % (str(DegreesFromRadians(ang)))
-        print "unwrapped_ang = %s" % (str(DegreesFromRadians(unwrapped_ang)))
+        print "ang_prev = %s" % (str(np.rad2deg(ang_prev)))
+        print "ang = %s" % (str(np.rad2deg(ang)))
+        print "unwrapped_ang = %s" % (str(np.rad2deg(unwrapped_ang)))
