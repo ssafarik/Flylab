@@ -39,7 +39,7 @@ class Statefilter:
     
                 if ('x' in positionLo_dict) or ('y' in positionLo_dict) or ('z' in positionLo_dict):
                     markerTarget = Marker(header=Header(stamp = state.header.stamp,
-                                                        frame_id='/Arena'),
+                                                        frame_id='Arena'),
                                           ns='statefilter',
                                           id=1,
                                           type=Marker.CUBE,

@@ -105,7 +105,7 @@ class Fly:
             self.pubImageSuperCount     = rospy.Publisher(self.name+'/image_supercount', Image)
             self.pubImageSuperGrad      = rospy.Publisher(self.name+'/image_supergrad', Image)
 
-        
+        rospy.logwarn('(%s) Filter time constants: rcFilterAngle=%s, rcFilterAngularVel=%s' % (self.name, self.params['tracking']['rcFilterAngle'], self.params['tracking']['rcFilterAngularVel']))
         self.kfState = filters.KalmanFilter()
         self.lpAngle = filters.LowPassCircleFilter(RC=self.params['tracking']['rcFilterAngle'])
         self.lpAngle.SetValue(0.0)
@@ -138,7 +138,7 @@ class Fly:
         self.isDead = False # TO DO: dead fly detection.
 
         self.state = MsgFrameState()
-        self.state.header.frame_id = '/Arena'
+        self.state.header.frame_id = 'Arena'
         self.state.pose.position.x = 0.0
         self.state.pose.position.y = 0.0
         self.state.pose.position.z = 0.0
@@ -735,7 +735,7 @@ class Fly:
             # The computed orientation overrides the visual orientation.
             if posesComputedExternal is not None:
                 try: 
-                    posesComputed = self.tfrx.transformPose('/Arena', posesComputedExternal)
+                    posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
                     q = posesComputed.pose.orientation
                     rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
                 except tf.Exception, e:
@@ -906,7 +906,7 @@ class Fly:
             # Publish a 3D model marker for the robot.
             if 'Robot' in self.name:
                 markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
-                                                    frame_id='/Arena'),
+                                                    frame_id='Arena'),
                                       ns=self.name,
                                       id=1,
                                       type=Marker.CYLINDER,

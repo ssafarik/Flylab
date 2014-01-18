@@ -203,8 +203,8 @@ class GalvoCalibrator:
     
     def SendInputPoints(self):
         pattern = MsgPattern()
-        pattern.frameidPosition = '/Arena'
-        pattern.frameidAngle    = '/Arena'
+        pattern.frameidPosition = 'Arena'
+        pattern.frameidAngle    = 'Arena'
         pattern.shape      = 'bypoints'
         pattern.hzPattern  = 1.0
         pattern.hzPoint    = 100.0
@@ -224,8 +224,8 @@ class GalvoCalibrator:
 
     def SendPoint(self, point):
         pattern = MsgPattern()
-        pattern.frameidPosition = '/Arena'
-        pattern.frameidAngle    = '/Arena'
+        pattern.frameidPosition = 'Arena'
+        pattern.frameidAngle    = 'Arena'
         pattern.shape      = 'bypoints'
         pattern.hzPattern  = 1.0
         pattern.hzPoint    = 100.0

@@ -398,7 +398,7 @@ class TriggerOnStates (smach.State):
         speed = None
         
         # If absolute speed (i.e. in the Arena frame), then try to use ArenaState speed.
-        if (frameidParent=='/Arena') and (self.arenastate is not None):
+        if (frameidParent=='Arena') and (self.arenastate is not None):
 
             # Check the robot.
             if (self.nRobots>0) and (frameidChild==self.arenastate.robot.name):
@@ -515,7 +515,7 @@ class TriggerOnStates (smach.State):
                 isSpeedAbsParentInRange = True
                 if (trigger.speedAbsParentMin is not None) and (trigger.speedAbsParentMax is not None):
                     isSpeedAbsParentInRange = False
-                    speedAbsParent = self.GetSpeedFrameToFrame('/Arena', trigger.frameidParent)# Absolute speed of the parent frame.
+                    speedAbsParent = self.GetSpeedFrameToFrame('Arena', trigger.frameidParent)# Absolute speed of the parent frame.
                     #rospy.loginfo ('EL parent speed=%s' % speedAbsParent)
                     if speedAbsParent is not None:
                         if (trigger.speedAbsParentMin <= speedAbsParent <= trigger.speedAbsParentMax):
@@ -525,7 +525,7 @@ class TriggerOnStates (smach.State):
                 isSpeedAbsChildInRange = True
                 if (trigger.speedAbsChildMin is not None) and (trigger.speedAbsChildMax is not None):
                     isSpeedAbsChildInRange = False
-                    speedAbsChild = self.GetSpeedFrameToFrame('/Arena', trigger.frameidChild)# Absolute speed of the child frame.
+                    speedAbsChild = self.GetSpeedFrameToFrame('Arena', trigger.frameidChild)# Absolute speed of the child frame.
                     #rospy.loginfo ('EL child speed=%s' % speedAbsChild)
                     if speedAbsChild is not None:
                         if (trigger.speedAbsChildMin <= speedAbsChild <= trigger.speedAbsChildMax):

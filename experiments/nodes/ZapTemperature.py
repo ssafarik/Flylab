@@ -52,7 +52,7 @@ class ExperimentZapafly():
 
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = '/Arena'
+        self.experimentparams.pre.trigger.frameidParent = 'Arena'
         self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
@@ -83,8 +83,8 @@ class ExperimentZapafly():
         if mode=='platepoint':
             # Draw a point.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = '/Arena',
-                                                                            frameidAngle   = '/Arena',
+                                                                            frameidPosition   = 'Arena',
+                                                                            frameidAngle   = 'Arena',
                                                                             shape      = 'constant',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -97,8 +97,8 @@ class ExperimentZapafly():
                                                                  )
         if mode=='plategrid':
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                            frameidPosition   = '/Arena',
-                                                                            frameidAngle   = '/Arena',
+                                                                            frameidPosition   = 'Arena',
+                                                                            frameidAngle   = 'Arena',
                                                                             shape      = 'grid',
                                                                             hzPattern  = 40.0,
                                                                             hzPoint    = 1000.0,
@@ -171,8 +171,8 @@ class ExperimentZapafly():
         if mode=='fixedmaze':
             # Draw a maze.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = '/Arena',
-                                                                                frameidAngle   = '/Arena',
+                                                                                frameidPosition   = 'Arena',
+                                                                                frameidAngle   = 'Arena',
                                                                                 shape      = 'grid',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,
@@ -186,8 +186,8 @@ class ExperimentZapafly():
         if mode=='fixedpoint':
             # Draw a point.
             self.experimentparams.trial.lasergalvos.pattern_list.append(MsgPattern(
-                                                                                frameidPosition   = '/Arena',
-                                                                                frameidAngle   = '/Arena',
+                                                                                frameidPosition   = 'Arena',
+                                                                                frameidAngle   = 'Arena',
                                                                                 shape      = 'constant',
                                                                                 hzPattern  = 40.0,
                                                                                 hzPoint    = 1000.0,

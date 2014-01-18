@@ -134,7 +134,7 @@ class ContourGenerator:
         self.ptsOriginImage.point.y = 0
         
         self.ptsOriginArena = PointStamped()
-        self.ptsOriginArena.header.frame_id = '/Arena'
+        self.ptsOriginArena.header.frame_id = 'Arena'
         self.ptsOriginArena.point.x = 0
         self.ptsOriginArena.point.y = 0
         
@@ -166,7 +166,7 @@ class ContourGenerator:
                 b = False
                 while not b:
                     try:
-                        self.tfrx.waitForTransform('/Arena', 
+                        self.tfrx.waitForTransform('Arena', 
                                                    self.ptsOriginImage.header.frame_id, 
                                                    self.ptsOriginImage.header.stamp, 
                                                    rospy.Duration(1.0))
@@ -174,7 +174,7 @@ class ContourGenerator:
                         rospy.logwarn('ExceptionA transforming mask frame %s->Arena:  %s' % (self.ptsOriginImage.header.frame_id, e))
                         
                     try:
-                        self.ptsOriginMask = self.tfrx.transformPoint('/Arena', self.ptsOriginImage)
+                        self.ptsOriginMask = self.tfrx.transformPoint('Arena', self.ptsOriginImage)
                         self.ptsOriginMask.point.x = -self.ptsOriginMask.point.x
                         self.ptsOriginMask.point.y = -self.ptsOriginMask.point.y
                         b = True
@@ -862,12 +862,12 @@ class ContourGenerator:
                     self.matProcessedFlip = cv2.flip(self.matProcessed, 0)
                     image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matProcessedFlip), 'passthrough')
                     image2.header = image.header
-                    image2.header.frame_id = '/Arena'
+                    image2.header.frame_id = 'Arena'
                     image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                     
                     camerainfo2 = CameraInfo()#copy.copy(self.camerainfo)
                     camerainfo2.header = self.header
-                    camerainfo2.header.frame_id = '/Arena'
+                    camerainfo2.header.frame_id = 'Arena'
                     camerainfo2.height = self.height
                     camerainfo2.width = self.width
                     k11 = rospy.get_param('/k11', 1.0)
