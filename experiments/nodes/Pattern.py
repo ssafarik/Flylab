@@ -73,8 +73,8 @@ class Experiment():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'pattern' # 'pattern' or 'relative'
-        self.experimentparams.trial.robot.move.pattern.frameidPosition = '/Arena'               # 
-        self.experimentparams.trial.robot.move.pattern.frameidAngle = '/Arena'               # 
+        self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
+        self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
         self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20  # Patterns per second.
         nPoints = 400

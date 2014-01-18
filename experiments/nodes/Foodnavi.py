@@ -53,7 +53,7 @@ class Experiment():
         self.experimentparams.pre.wait1 = 0.0
         
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = '/Arena'
+        self.experimentparams.pre.trigger.frameidParent = 'Arena'
         self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0

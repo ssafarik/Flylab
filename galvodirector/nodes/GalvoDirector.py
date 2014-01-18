@@ -95,7 +95,7 @@ class GalvoDirector:
         
         self.timeHeartbeat = None
         
-        self.pointcloudBeamsink = PointCloud(header=Header(frame_id='/Arena', 
+        self.pointcloudBeamsink = PointCloud(header=Header(frame_id='Arena', 
                                                            stamp=rospy.Time.now()),
                                              points=[Point(x=self.xBeamsink, 
                                                            y=self.yBeamsink, 
@@ -213,28 +213,28 @@ class GalvoDirector:
                         #t1 = rospy.Time.now().to_sec()
                         
                         try:
-                            pointcloud_template.header.stamp = self.tfrx.getLatestCommonTime('/Arena', pointcloud_template.header.frame_id)
+                            pointcloud_template.header.stamp = self.tfrx.getLatestCommonTime('Arena', pointcloud_template.header.frame_id)
                         except tf.Exception:
                             pointcloud_template.header.stamp = self.arenastate.flies[0].header.stamp # BUG: Need to make this use the correct fly #.
     
                         #t2 = rospy.Time.now().to_sec()
-                        if self.tfrx.canTransform('/Arena', 
+                        if self.tfrx.canTransform('Arena', 
                                                   pointcloud_template.header.frame_id, 
                                                   pointcloud_template.header.stamp):
                             try:
-                                pointcloud = self.tfrx.transformPointCloud('/Arena', pointcloud_template)
+                                pointcloud = self.tfrx.transformPointCloud('Arena', pointcloud_template)
                             except tf.Exception, e:
-                                rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, '/Arena', e))
+                                rospy.logwarn('Exception transforming pointcloud frame %s->%s: %s' % (pointcloud_template.header.frame_id, 'Arena', e))
                             else:
                                 self.pointcloud_list.append(pointcloud)
                         else:
-                            rospy.logwarn ('Cannot transform frame to %s from %s' % ('/Arena', pointcloud_template.header.frame_id))
+                            rospy.logwarn ('Cannot transform frame to %s from %s' % ('Arena', pointcloud_template.header.frame_id))
         
                         #t3 = rospy.Time.now().to_sec()
                         #rospy.logwarn('GalvoDirector, stamp=%s, wait dt=%0.5f, transform dt=%0.5f' % (pointcloud_template.header.stamp,(t2-t1),(t3-t2))) # BUG: Occasional 0.1 sec times.
                         #rospy.logwarn ('now,pointcloud_template,%s,%s' % (rospy.Time.now(), pointcloud_template.header.stamp))
         
-                        #rospy.logwarn('tfrx.getLatestCommonTime()=%s, stamp=%s' % (self.tfrx.getLatestCommonTime('/Arena', pointcloud_template.header.frame_id),pointcloud_template.header.stamp))
+                        #rospy.logwarn('tfrx.getLatestCommonTime()=%s, stamp=%s' % (self.tfrx.getLatestCommonTime('Arena', pointcloud_template.header.frame_id),pointcloud_template.header.stamp))
     
     
                     # Publish a pointcloud in volts and mm.
@@ -277,7 +277,7 @@ class GalvoDirector:
     def AddPatternToTemplates(self, req_gpp):
         if (self.initialized):
             resp_gpp = self.GetPatternPoints(req_gpp)
-            pointcloud = self.PointCloudFromPoints('/Arena', resp_gpp.pattern.points)
+            pointcloud = self.PointCloudFromPoints('Arena', resp_gpp.pattern.points)
             self.pointcloudtemplate_list.append(pointcloud)
             #rospy.logwarn(resp_gpp.pattern.points)
 
