@@ -23,14 +23,11 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Laser is on the fly except in southeast quarter."
-        self.experimentparams.experiment.maxTrials = 2
+        self.experimentparams.experiment.description = "Laser goes on when fly enters within 5mm of center, then off when it leaves.  Records for 120 more secs."
+        self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        #self.experimentparams.save.filenamebase = 'HCS_normal_150mW_' 
-        #self.experimentparams.save.filenamebase = 'TrpA1neg_AristaeIntact_150mW_' # 
-        #self.experimentparams.save.filenamebase = 'UAS_TrpA1_parentalcontrol_180mW_' 
-        self.experimentparams.save.filenamebase = 'UAS_TrpA1_geosmin_120mW_' 
+        self.experimentparams.save.filenamebase = "zaparea"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
@@ -44,22 +41,19 @@ class Experiment():
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
         self.experimentparams.flyspec.nFlies = 1
-        #self.experimentparams.flyspec.description = 'HCS normal'
-        #self.experimentparams.flyspec.description = 'TrpA1 neg Aristae Intact' #
-        #self.experimentparams.flyspec.description = 'UAS_TrpA1_parentalcontrol_180mW'
-        self.experimentparams.flyspec.description = 'UAS_TrpA1_geosmin_120mW' 
+        self.experimentparams.flyspec.description = "unspecified"
         
-        self.experimentparams.tracking.exclusionzones.enabled = False
-        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=48.0)]
-        self.experimentparams.tracking.exclusionzones.radius_list = [8.0]
+        self.experimentparams.tracking.exclusionzones.enabled = True
+        self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
+        self.experimentparams.tracking.exclusionzones.radius_list = [4.0]
         
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
         self.experimentparams.pre.wait1 = 0.0
         
-        self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = 'Arena'
+        self.experimentparams.pre.trigger.enabled = True
+        self.experimentparams.pre.trigger.frameidParent = '/Arena'
         self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
@@ -67,12 +61,12 @@ class Experiment():
         self.experimentparams.pre.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.pre.trigger.speedRelMin       =   0.0
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
-        self.experimentparams.pre.trigger.distanceMin =   0.0
-        self.experimentparams.pre.trigger.distanceMax = 999.0
+        self.experimentparams.pre.trigger.distanceMin =  0.0
+        self.experimentparams.pre.trigger.distanceMax = 60.0
         self.experimentparams.pre.trigger.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
-        self.experimentparams.pre.trigger.angleTestBilateral = False
+        self.experimentparams.pre.trigger.angleTestBilateral = True
         self.experimentparams.pre.trigger.timeHold = 0.0
         self.experimentparams.pre.trigger.timeout = -1
         
@@ -82,7 +76,6 @@ class Experiment():
         # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = False
-
         
         flies_list = range(1,1+self.experimentparams.flyspec.nFlies)
         
@@ -102,8 +95,8 @@ class Experiment():
                                                                             size       = Point(x=2,
                                                                                                y=2),
                                                                             preempt    = False,
-                                                                            param      = 3, # Peano curve level.
-                                                                            direction  = 1),
+                                                                            param      = 3,
+                                                                            direction  = 1), # Peano curve level.
                                                                  )
             #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'speed':5.0}")
             #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'speed':0.0}")
@@ -111,9 +104,9 @@ class Experiment():
             #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'linear':{'x':-6,'y':-6}}}")
             #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'velocity':{'angular':{'z':999}}}")
             #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'velocity':{'angular':{'z':0.5}}}")
-            self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'pose':{'position':{'x':100, 'y':0}}}")
-            self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'pose':{'position':{'x':0, 'y':-100}}}")
-            self.experimentparams.trial.lasergalvos.statefilterCriteria_list.append("exclusive")
+            #self.experimentparams.trial.lasergalvos.statefilterHi_list.append("{'pose':{'position':{'x':4, 'y':4}}}")  # This is the laser zone.
+            #self.experimentparams.trial.lasergalvos.statefilterLo_list.append("{'pose':{'position':{'x':-4, 'y':-4}}}")
+            #self.experimentparams.trial.lasergalvos.statefilterCriteria_list.append("inclusive")
         
         self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
@@ -124,7 +117,7 @@ class Experiment():
         self.experimentparams.trial.ledpanels.statefilterCriteria = ''
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.frameidParent = 'Arena'
+        self.experimentparams.post.trigger.frameidParent = '/Arena'
         self.experimentparams.post.trigger.frameidChild = 'Fly01'
         self.experimentparams.post.trigger.speedAbsParentMin =   0.0
         self.experimentparams.post.trigger.speedAbsParentMax = 999.0
@@ -132,16 +125,16 @@ class Experiment():
         self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.post.trigger.speedRelMin       =   0.0
         self.experimentparams.post.trigger.speedRelMax       = 999.0
-        self.experimentparams.post.trigger.distanceMin = 999.0
-        self.experimentparams.post.trigger.distanceMax = 111.0 # i.e. never
+        self.experimentparams.post.trigger.distanceMin =  10.0
+        self.experimentparams.post.trigger.distanceMax = 999.0
         self.experimentparams.post.trigger.angleMin =  0.0000 * N.pi / 180.0
         self.experimentparams.post.trigger.angleMax =359.9999 * N.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = False
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 1800
+        self.experimentparams.post.trigger.timeout = 30
 
-        self.experimentparams.post.wait = 0.0
+        self.experimentparams.post.wait = 120.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
                                                          startexperiment_callback = self.StartExperiment_callback, 

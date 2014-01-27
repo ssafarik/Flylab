@@ -3,7 +3,7 @@
     <param name="save/imageext"   type="string" value="png"/>
     <param name="save/imagetopic" type="string" value="camera/image_rect"/>
 
-    <node pkg="save" type="SaveArenaState.py" name="SaveArenastate" />
+    <node pkg="save" type="SaveCsv.py" name="SaveCsv" />
     <node pkg="save" type="SaveImages.py" name="SaveImages" />
     <node pkg="save" type="SaveBag.py" name="SaveBag" />
     
