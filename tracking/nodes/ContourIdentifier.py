@@ -568,7 +568,7 @@ class ContourIdentifier:
                 
                 
             # If not visual servoing, then make a fake contour exactly matching the robot.
-            if (not self.bUseVisualServoing):
+            if (not self.bUseVisualServoing) and (xyEndEffector is not None):
                 xyContours[iContour,:] = N.array([xyEndEffector[0],  # x
                                                   xyEndEffector[1],  # y
                                                   xyEndEffector[4],  # area

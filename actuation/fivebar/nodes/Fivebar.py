@@ -969,7 +969,7 @@ class Fivebar:
                                                               b=1.0),
                                               lifetime=rospy.Duration(1.0),
                                               points=[state.pose.position,
-                                                      self.stateVisual.pose.position.x])
+                                                      self.stateVisual.pose.position])
                     self.pubMarker.publish(markerToolOffset)
                 #rospy.logwarn ('K')
 
