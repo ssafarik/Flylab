@@ -285,9 +285,14 @@ class ContourGenerator:
             rospy.logwarn('establish_background started...')
 
         if (self.command=='initialize'):
-            self.nRobots = trackingcommand.nRobots
-            self.nFlies = trackingcommand.nFlies
-            self.nObjects = self.nRobots + self.nFlies
+            self.bUseVisualServoing = trackingcommand.bUseVisualServoing
+            if (self.bUseVisualServoing):
+                self.nRobots            = trackingcommand.nRobots
+            else:
+                self.nRobots            = max(trackingcommand.nRobots-1, 0)
+                
+            self.nFlies             = trackingcommand.nFlies
+            self.nObjects           = self.nRobots + self.nFlies
         
         
     

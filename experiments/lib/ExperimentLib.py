@@ -114,11 +114,12 @@ class StartExperiment (smach.State):
 
         # Set up the tracking.    
         userdata.experimentparamsOut = experimentparams
-        msgTrackingCommand = TrackingCommand()
-        msgTrackingCommand.command = 'initialize'
-        msgTrackingCommand.exclusionzones = experimentparams.tracking.exclusionzones
-        msgTrackingCommand.nRobots = experimentparams.robotspec.nRobots
-        msgTrackingCommand.nFlies = experimentparams.flyspec.nFlies
+        msgTrackingCommand                    = TrackingCommand()
+        msgTrackingCommand.command            = 'initialize'
+        msgTrackingCommand.exclusionzones     = experimentparams.tracking.exclusionzones
+        msgTrackingCommand.nRobots            = experimentparams.robotspec.nRobots
+        msgTrackingCommand.nFlies             = experimentparams.flyspec.nFlies
+        msgTrackingCommand.bUseVisualServoing = experimentparams.robotspec.isPresent
         self.pubTrackingCommand.publish(msgTrackingCommand)
         
         # Wait for the Arenastate to get published.
@@ -222,11 +223,12 @@ class StartTrial (smach.State):
 
         # Set up the tracking.    
         userdata.experimentparamsOut = experimentparams
-        msgTrackingCommand = TrackingCommand()
-        msgTrackingCommand.command = 'initialize'
-        msgTrackingCommand.exclusionzones = experimentparams.tracking.exclusionzones
-        msgTrackingCommand.nRobots = experimentparams.robotspec.nRobots
-        msgTrackingCommand.nFlies = experimentparams.flyspec.nFlies
+        msgTrackingCommand                    = TrackingCommand()
+        msgTrackingCommand.command            = 'initialize'
+        msgTrackingCommand.exclusionzones     = experimentparams.tracking.exclusionzones
+        msgTrackingCommand.nRobots            = experimentparams.robotspec.nRobots
+        msgTrackingCommand.nFlies             = experimentparams.flyspec.nFlies
+        msgTrackingCommand.bUseVisualServoing = experimentparams.robotspec.isPresent
         
         self.pubTrackingCommand.publish(msgTrackingCommand)
         

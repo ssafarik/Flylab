@@ -57,6 +57,7 @@ class ContourIdentifier:
         self.stateEndEffector = None  # If no robot exists, this will remain as None.  Set in ContourinfoLists_callback.
         self.nRobots = 0
         self.nFlies = 0
+        self.bUseVisualServoing = True
         
         self.contourinfo_list = []
         self.mapContourinfoFromObject = []      # A mapping from the (kalman) object number to the contourinfo number.
@@ -92,7 +93,7 @@ class ContourIdentifier:
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
         self.subContourinfoLists    = rospy.Subscriber('ContourinfoLists', ContourinfoLists, self.ContourinfoLists_callback, queue_size=self.params['tracking']['queue_size_contours'])
         self.pubArenaState          = rospy.Publisher('ArenaState', ArenaState)
-        self.pubVisualState         = rospy.Publisher('VisualState', MsgFrameState)
+        self.pubVisualState         = rospy.Publisher('visual_state', MsgFrameState)
         self.subStateEE             = rospy.Subscriber('end_effector', MsgFrameState, self.EndEffector_callback)
         self.pubStateEE             = rospy.Publisher('end_effector', MsgFrameState)
         
@@ -218,8 +219,12 @@ class ContourIdentifier:
                                                                                     b=1.0),
                                                                     lifetime=rospy.Duration(1.0))
                                                              )
-                self.nRobots = trackingcommand.nRobots
                 self.nFlies = trackingcommand.nFlies
+                
+                self.bUseVisualServoing = trackingcommand.bUseVisualServoing
+                self.nRobots            = trackingcommand.nRobots
+                    
+
                 rospy.loginfo('CI nRobots=%d, nFlies=%d' % (self.nRobots, self.nFlies))
                 self.ResetFlyObjects()
             
@@ -234,9 +239,9 @@ class ContourIdentifier:
         self.objects = []
 
         
-        self.iRobot_list = range(self.nRobots)
-        self.iFly_list = range(self.nRobots, self.nRobots+self.nFlies)
-        self.iAll_list = range(self.nRobots+self.nFlies)
+        self.iRobot_list        = range(self.nRobots)
+        self.iFly_list          = range(self.nRobots, self.nRobots+self.nFlies)
+        self.iAll_list          = range(self.nRobots+self.nFlies)
 
         iName = 0 # Counter for the object names.
         
@@ -337,7 +342,7 @@ class ContourIdentifier:
         
         # Make sure the robot gets first choice of the contours.
         # Set to 0 the robot's nearest contour.
-        for iRobot in range(self.nRobots):
+        for iRobot in self.iRobot_list:
             k = d[iRobot,:].argmin()
             d[iRobot,k] = 0.0
         
@@ -475,7 +480,20 @@ class ContourIdentifier:
         # Make the list of objects (i.e. robots & flies).
         xyObjects = N.zeros([self.nRobots+self.nFlies, 10])
         
-        # Robots into the objects list.
+        # At least as many contour slots as objects, with missing contours placed in a "pool" located far away (e.g. 55555,55555).
+        nContours = max(self.nRobots+self.nFlies, len(self.contourinfo_list))
+        iContour = 0    # This keeps track of the position in the list of contours, xyContours[].
+        
+        # If not using visual servoing, then make a fake contour for the robot.
+        if (not self.bUseVisualServoing):
+            nContours += self.nRobots
+            
+        xyContours = N.tile([55555.0, 55555.0, 1.0, 1.0], 
+                            (nContours,1)
+                            )
+
+
+        # Put robots into the objects list.
         for iRobot in self.iRobot_list:
             if (iRobot<len(self.objects)):
                 areaMin = self.objects[iRobot].areaMin
@@ -493,7 +511,7 @@ class ContourIdentifier:
                 eccMax = N.inf
                 
                 
-            # Get the computed position.
+            # Get the computed (mechanical) position.
             if (self.stateEndEffector is not None):
                 xComputed = self.stateEndEffector.pose.position.x
                 yComputed = self.stateEndEffector.pose.position.y
@@ -502,9 +520,9 @@ class ContourIdentifier:
                 yComputed = N.nan
                 
                 
-            # Get the robot xy.
+            # Get the robot Kalman xy.
             if (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible):
-                xyRobot = N.array([self.objects[iRobot].state.pose.position.x,
+                xyKalman = N.array([self.objects[iRobot].state.pose.position.x,
                                    self.objects[iRobot].state.pose.position.y,
                                    areaMin,  eccMin,
                                    areaMean, eccMean,
@@ -512,10 +530,10 @@ class ContourIdentifier:
                                    xComputed,                         
                                    yComputed])
             else:
-                xyRobot = None
+                xyKalman = None
                 
                 
-            # Get the end-effector xy.
+            # Get the robot computed xy.
             if (self.stateEndEffector is not None):
                 xyEndEffector = N.array([self.stateEndEffector.pose.position.x,
                                          self.stateEndEffector.pose.position.y,
@@ -529,26 +547,35 @@ class ContourIdentifier:
 
 
             # Decide which position to use for robot matching.
-            if (xyRobot is not None) and (xyEndEffector is not None):
+            if (xyKalman is not None) and (xyEndEffector is not None):
                 # Don't let the fly walk away with the robot.
-                if (N.linalg.norm(xyRobot[0:2]-xyEndEffector[0:2]) < self.params['tracking']['offsetEndEffectorMax']):
-                    xy = xyRobot
+                if (N.linalg.norm(xyKalman[0:2]-xyEndEffector[0:2]) < self.params['tracking']['offsetEndEffectorMax']):
+                    xyRobot = xyKalman
                 else:
-                    xy = xyEndEffector
-                    #rospy.logwarn('Too far away: % 0.1f' % N.linalg.norm(xyRobot[0:2]-xyEndEffector[0:2]))
+                    xyRobot = xyEndEffector
+                    #rospy.logwarn('Too far away: % 0.1f' % N.linalg.norm(xyKalman[0:2]-xyEndEffector[0:2]))
             else:
-                if (xyRobot is not None):
-                    xy = xyRobot
+                if (xyKalman is not None):
+                    xyRobot = xyKalman
                 elif (xyEndEffector is not None):
-                    xy = xyEndEffector
+                    xyRobot = xyEndEffector
                 else:
-                    xy = None
+                    xyRobot = None
                     
-            if (xy is not None):                    
-                xyObjects[iRobot,:] = xy
+            # Put the robot into the objects list.
+            if (xyRobot is not None):                    
+                xyObjects[iRobot,:] = xyRobot
+                
+                
+            # If not visual servoing, then make a fake contour exactly matching the robot.
+            if (not self.bUseVisualServoing):
+                xyContours[iContour,:] = N.array([xyEndEffector[0],  # x
+                                                  xyEndEffector[1],  # y
+                                                  xyEndEffector[4],  # area
+                                                  xyEndEffector[5]]) # ecc
 
         
-        # Flies into the objects list.    
+        # Put flies into the objects list.    
         for iFly in self.iFly_list:
             xyObjects[iFly,:] = N.array([self.objects[iFly].state.pose.position.x,
                                          self.objects[iFly].state.pose.position.y,
@@ -556,17 +583,17 @@ class ContourIdentifier:
                                          self.objects[iFly].areaMean, self.objects[iFly].eccMean,
                                          self.objects[iFly].areaMax,  self.objects[iFly].eccMax,
                                          N.nan, N.nan]) # Computed positions.
+
+        
             
-        # Make the list of contours.
-        # At least as many contour slots as objects, with missing contours placed in a "pool" located far away (e.g. 55555,55555).
-        xyContours = N.tile([55555.0, 55555.0, 1.0, 1.0], 
-                            (max(len(xyObjects),len(self.contourinfo_list)),1)) 
-        for iContour in range(len(self.contourinfo_list)):
+        # Put the contours into the contour list.
+        for i in range(len(self.contourinfo_list)):
             if (not N.isnan(self.contourinfo_list[iContour].x)):
                 xyContours[iContour,:] = N.array([self.contourinfo_list[iContour].x,
                                                   self.contourinfo_list[iContour].y,
                                                   self.contourinfo_list[iContour].area,  
                                                   self.contourinfo_list[iContour].ecc])
+            iContour += 1
         
         
         # Match objects with contourinfo_list.
@@ -604,7 +631,7 @@ class ContourIdentifier:
             
 #        rospy.logwarn ('----------------------------------')
 #        if (self.nRobots==1):
-#            rospy.logwarn ('CI xyRobot=%s' % xyRobot)
+#            rospy.logwarn ('CI xyKalman=%s' % xyKalman)
 
 #        rospy.logwarn ('CI xyObjects=%s' % xyObjects)
 #        rospy.logwarn ('CI xyContours=%s' % xyContours)
@@ -771,8 +798,8 @@ class ContourIdentifier:
         
                         self.PublishArenaStateFromObjects()
         
-                        # Publish the VisualState.
-                        if (0 in self.iRobot_list) and (0 < len(self.objects)):
+                        # Publish the visual_state.
+                        if (self.bUseVisualServoing) and (0 in self.iRobot_list) and (0 < len(self.objects)):
                             self.pubVisualState.publish(self.objects[0].state)
                         
                         

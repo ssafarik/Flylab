@@ -17,9 +17,9 @@ from tracking.msg import ArenaState
 
 
 ###############################################################################
-# Save() is a ROS node.  It saves Arenastate messages into .csv files.
+# SaveCsv() is a ROS node.  It saves Arenastate messages into .csv files.
 #
-class SaveArenastate:
+class SaveCsv:
     def __init__(self):
         self.initialized = False
 
@@ -56,9 +56,9 @@ class SaveArenastate:
         self.format_precision = "3"
         self.format_type = "f"
 
-        
+        # 2.84 added robotspec.isPresent
         #################################################################################
-        self.versionFile = '2.83'    # Increment this when the file format changes.
+        self.versionFile = '2.84'    # Increment this when the file format changes.
         #################################################################################
 
         
@@ -77,10 +77,12 @@ class SaveArenastate:
         self.headerRobotSpecTxt =   'nRobots, '\
                                     'widthRobot, '\
                                     'heightRobot, '\
+                                    'isPresent, '\
                                     'descriptionRobot\n'
         self.templateRobotSpec =    '{nRobots:s}, '\
                                     '{widthRobot:s}, '\
                                     '{heightRobot:s}, '\
+                                    '{isPresent:s}, '\
                                     '{descriptionRobot:s}\n'
                                   
         self.headerFlySpecTxt =     'nFlies, '\
@@ -503,6 +505,7 @@ class SaveArenastate:
                                                 nRobots                    = str(experimentparamsReq.robotspec.nRobots),
                                                 widthRobot                 = str(experimentparamsReq.robotspec.width),
                                                 heightRobot                = str(experimentparamsReq.robotspec.height),
+                                                isPresent                  = str(experimentparamsReq.robotspec.isPresent),
                                                 descriptionRobot           = str(experimentparamsReq.robotspec.description),
                                                 )
         headerFlySpec = self.templateFlySpec.format(
@@ -930,8 +933,8 @@ class SaveArenastate:
         
 
 if __name__ == '__main__':
-    rospy.init_node('SaveArenastate', log_level=rospy.INFO)
+    rospy.init_node('SaveCsv', log_level=rospy.INFO)
     rospy.sleep(1)
-    savearenastate = SaveArenastate()
+    savearenastate = SaveCsv()
     savearenastate.Main()
     
