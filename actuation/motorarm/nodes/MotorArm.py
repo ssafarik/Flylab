@@ -28,20 +28,20 @@ class MotorArm:
         rospy.on_shutdown(self.OnShutdown_callback)
 
         # Link lengths (millimeters)
-        self.L1 = rospy.get_param('motorarm/L1', 9.9)  # Length of link1
-        self.T = rospy.get_param('motorarm/T', 1 / 50)  # Nominal motor update period, i.e. sample rate.
+        self.L1       = rospy.get_param('motorarm/L1', 9.9)  # Length of link1
+        self.T        = rospy.get_param('motorarm/T', 1 / 50)  # Nominal motor update period, i.e. sample rate.
 
         # PID Gains & Parameters.
-        self.kP = rospy.get_param('motorarm/kP', 1.0)
-        self.kI = rospy.get_param('motorarm/kI', 0.0)
-        self.kD = rospy.get_param('motorarm/kD', 0.0)
-        self.maxI = rospy.get_param('motorarm/maxI', 40.0)
-        self.kWindup = rospy.get_param('motorarm/kWindup', 0.0)
+        self.kP       = rospy.get_param('motorarm/kP', 1.0)
+        self.kI       = rospy.get_param('motorarm/kI', 0.0)
+        self.kD       = rospy.get_param('motorarm/kD', 0.0)
+        self.maxI     = rospy.get_param('motorarm/maxI', 40.0)
+        self.kWindup  = rospy.get_param('motorarm/kWindup', 0.0)
 
-        self.kPv = rospy.get_param('motorarm/kPv', 0.0)
-        self.kIv = rospy.get_param('motorarm/kIv', 0.0)
-        self.kDv = rospy.get_param('motorarm/kDv', 0.0)
-        self.maxIv = rospy.get_param('motorarm/maxIv', 40.0)
+        self.kPv      = rospy.get_param('motorarm/kPv', 0.0)
+        self.kIv      = rospy.get_param('motorarm/kIv', 0.0)
+        self.kDv      = rospy.get_param('motorarm/kDv', 0.0)
+        self.maxIv    = rospy.get_param('motorarm/maxIv', 40.0)
         self.kWindupv = rospy.get_param('motorarm/kWindupv', 0.0)
 
         
@@ -73,7 +73,7 @@ class MotorArm:
         self.command_list = ['continue','exit_now']
         self.subCommand = rospy.Subscriber('broadcast/command', String, self.Command_callback)
 
-        self.subVisualState = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
+        self.subVisualState = rospy.Subscriber('visual_state', MsgFrameState, self.VisualState_callback)
         self.pubJointState = rospy.Publisher('joint_states', JointState)
         self.pubMarker = rospy.Publisher('visualization_marker', Marker)
         
@@ -82,13 +82,11 @@ class MotorArm:
 
         self.stateRef = MsgFrameState()
         self.stateVisual = None
-        self.ptEeMech = Point(0, 0, 0)
+        self.stateMech = MsgFrameState(pose=Pose(position=Point(0,0,0)))
 
         self.statePError = MsgFrameState()
         self.stateIError = MsgFrameState()
         self.stateDError = MsgFrameState()
-#        self.vecState     = N.array([0,0,0,0,0,0]) #  [x,y,z,vx,vy,vz]
-#        self.vecStatePrev = N.array([0,0,0,0,0,0]) #  [x,y,z,vx,vy,vz]
         
         self.statePID = MsgFrameState()
 
@@ -372,8 +370,12 @@ class MotorArm:
             rospy.sleep(0.5)
             
         rvStageState = SrvFrameStateResponse()
-        if (self.jointstate1 is not None):                    
-            rvStageState.state = self.stateVisual
+        rvStageState.state = None
+        if (self.jointstate1 is not None):
+            if (self.stateVisual is not None):             
+                rvStageState.state = self.stateVisual
+            else:
+                rvStageState.state = self.stateMech
         
         return rvStageState.state
 
@@ -417,7 +419,8 @@ class MotorArm:
     
 
     def VisualState_callback(self, state):
-        (self.stateVisual, isInArena) = self.TransformStateToFrame('Stage', state, doClipToArena=False)
+        with self.lock:
+            (self.stateVisual, isInArena) = self.TransformStateToFrame('Stage', state, doClipToArena=False)
         
         
     def HomeStage_callback(self, reqStageState):
@@ -495,7 +498,7 @@ class MotorArm:
                         rospy.logwarn ('MA FAILED to reconnect service %s(): %s' % (stSrv, e))
             
             if (self.jointstate1 is not None):                 
-                (angle1, self.ptEeMech.x, self.ptEeMech.y) = self.Get1xyFrom1(self.jointstate1.position)
+                (angle1, self.stateMech.pose.position.x, self.stateMech.pose.position.y) = self.Get1xyFrom1(self.jointstate1.position)
 
                 # Publish the joint states (for rviz, etc)    
                 self.js.header.seq = self.js.header.seq + 1
@@ -507,9 +510,7 @@ class MotorArm:
                 state = MsgFrameState()
                 state.header.stamp = self.time
                 state.header.frame_id = 'Stage'
-                state.pose.position.x = self.ptEeMech.x
-                state.pose.position.y = self.ptEeMech.y
-                state.pose.position.z = self.ptEeMech.z
+                state.pose.position = self.stateMech.pose.position
                 state.pose.orientation.x = qEE[0]
                 state.pose.orientation.y = qEE[1]
                 state.pose.orientation.z = qEE[2]
@@ -548,9 +549,7 @@ class MotorArm:
                                           id=2,
                                           type=Marker.SPHERE,
                                           action=0,
-                                          pose=Pose(position=Point(x=self.stateRef.pose.position.x,
-                                                                   y=self.stateRef.pose.position.y,
-                                                                   z=self.stateRef.pose.position.z)),
+                                          pose=Pose(self.stateRef.pose.position),
                                           scale=Vector3(x=3.0,
                                                         y=3.0,
                                                         z=3.0),
@@ -575,12 +574,8 @@ class MotorArm:
                                                               g=1.0,
                                                               b=1.0),
                                               lifetime=rospy.Duration(1.0),
-                                              points=[Point(x=state.pose.position.x,
-                                                            y=state.pose.position.y,
-                                                            z=state.pose.position.z),
-                                                      Point(x=self.stateVisual.pose.position.x,
-                                                            y=self.stateVisual.pose.position.y,
-                                                            z=self.stateVisual.pose.position.z)])
+                                              points=[state.pose.position,
+                                                      self.stateVisual.pose.position])
                     self.pubMarker.publish(markerToolOffset)
 
 
@@ -617,17 +612,22 @@ class MotorArm:
             
             # The previous error.
             self.statePErrorPrev = copy.deepcopy(self.statePError)
-            #self.vecStatePrev = self.vecState
             
+            # Use either visual servoing or not, as the case may be, depending on if we've received a visual state callback.
+            if (self.stateVisual is not None):
+                stateActuator = self.stateVisual
+            else:
+                stateActuator = self.stateMech
 
-            if (self.stateRef is not None) and (self.stateVisual is not None):
+
+            if (self.stateRef is not None):
                 # Error terms.
-                self.statePError.pose.position.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
-                self.statePError.pose.position.y = self.stateRef.pose.position.y - self.stateVisual.pose.position.y
-                self.statePError.pose.position.z = self.stateRef.pose.position.z - self.stateVisual.pose.position.z
-                self.statePError.velocity.linear.x = self.stateRef.velocity.linear.x - self.stateVisual.velocity.linear.x
-                self.statePError.velocity.linear.y = self.stateRef.velocity.linear.y - self.stateVisual.velocity.linear.y
-                self.statePError.velocity.linear.z = self.stateRef.velocity.linear.z - self.stateVisual.velocity.linear.z
+                self.statePError.pose.position.x = self.stateRef.pose.position.x - stateActuator.pose.position.x
+                self.statePError.pose.position.y = self.stateRef.pose.position.y - stateActuator.pose.position.y
+                self.statePError.pose.position.z = self.stateRef.pose.position.z - stateActuator.pose.position.z
+                self.statePError.velocity.linear.x = self.stateRef.velocity.linear.x - stateActuator.velocity.linear.x
+                self.statePError.velocity.linear.y = self.stateRef.velocity.linear.y - stateActuator.velocity.linear.y
+                self.statePError.velocity.linear.z = self.stateRef.velocity.linear.z - stateActuator.velocity.linear.z
 
                 self.stateIError.pose.position.x += self.statePError.pose.position.x
                 self.stateIError.pose.position.y += self.statePError.pose.position.y
@@ -650,14 +650,14 @@ class MotorArm:
                                                     z=self.kP*self.statePError.pose.position.z + self.kI*self.stateIError.pose.position.z + self.kD*self.stateDError.pose.position.z)
                                     
                 # Clip the integral error to the reachable workspace (prevents accumulating error due to singularity in radial direction).
-                (ptClipped, bClipped) = self.ClipPtToReachable(Point(x=self.ptEeMech.x + self.kI * self.stateIError.pose.position.x,
-                                                                     y=self.ptEeMech.y + self.kI * self.stateIError.pose.position.y))
+                (ptClipped, bClipped) = self.ClipPtToReachable(Point(x=self.stateMech.pose.position.x + self.kI * self.stateIError.pose.position.x,
+                                                                     y=self.stateMech.pose.position.y + self.kI * self.stateIError.pose.position.y))
                 if self.kI != 0:
-                    self.stateIError.pose.position.x = (ptClipped.x - self.ptEeMech.x) / self.kI
-                    self.stateIError.pose.position.y = (ptClipped.y - self.ptEeMech.y) / self.kI
+                    self.stateIError.pose.position.x = (ptClipped.x - self.stateMech.pose.position.x) / self.kI
+                    self.stateIError.pose.position.y = (ptClipped.y - self.stateMech.pose.position.y) / self.kI
                 else:
-                    self.stateIError.pose.position.x = (ptClipped.x - self.ptEeMech.x)
-                    self.stateIError.pose.position.y = (ptClipped.y - self.ptEeMech.y)
+                    self.stateIError.pose.position.x = (ptClipped.x - self.stateMech.pose.position.x)
+                    self.stateIError.pose.position.y = (ptClipped.y - self.stateMech.pose.position.y)
             
 
                 # Anti-windup
@@ -687,7 +687,7 @@ class MotorArm:
                 
             
                 # Get the angular positions for each joint.
-                angle1Mech = self.Get1FromPt(self.ptEeMech)
+                angle1Mech = self.Get1FromPt(self.stateMech.pose.position)
             
                 # Compute the velocity command.
                 xDot = (self.stateRef.velocity.linear.x + self.statePID.velocity.linear.x) + self.statePID.pose.position.x
@@ -695,8 +695,8 @@ class MotorArm:
 
 
                 # Pull the mechanical position back under the visual position.
-                xDot += (self.stateVisual.pose.position.x - self.ptEeMech.x)
-                yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
+                xDot += (stateActuator.pose.position.x - self.stateMech.pose.position.x)
+                yDot += (stateActuator.pose.position.y - self.stateMech.pose.position.y)
 
                 # Clip to max speed.
                 if (self.stateRef.speed != 0.0):  # If speed is unspecified, then this field is set to 0.0
@@ -710,13 +710,13 @@ class MotorArm:
                 
                 
                 # Clip to stay in workspace.
-                pts = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
+                pts = PointStamped(header=Header(stamp=stateActuator.header.stamp,
                                                  frame_id='Stage'),
-                                   point=Point(x = xDot + self.ptEeMech.x,
-                                               y = yDot + self.ptEeMech.y))
-                (ptsArena, isInArena)         = (pts,True)#self.ClipPtsToArena(pts) causes position error surges at certain points around the circle.
-                xDot = ptsArena.point.x - self.ptEeMech.x
-                yDot = ptsArena.point.y - self.ptEeMech.y
+                                   point=Point(x = xDot + self.stateMech.pose.position.x,
+                                               y = yDot + self.stateMech.pose.position.y))
+                (ptsArena, isInArena) = (pts,True)#self.ClipPtsToArena(pts) causes position error surges at certain points around the circle.
+                xDot = ptsArena.point.x - self.stateMech.pose.position.x
+                yDot = ptsArena.point.y - self.stateMech.pose.position.y
                 
                 
                 # Convert to motor coordinates.
@@ -724,7 +724,7 @@ class MotorArm:
                 theta1Dot = jInv.dot(N.array([[xDot],[yDot]])) 
                 
                 # Display the velocity vector in rviz.
-                ptBase = self.ptEeMech #self.stateVisual.pose.position
+                ptBase = self.stateMech.pose.position #stateActuator.pose.position
                 ptEnd = Point(x = ptBase.x + xDot,
                               y = ptBase.y + yDot,
                               z = ptBase.z + 0
@@ -749,7 +749,7 @@ class MotorArm:
 
                 if (self.bTune):
                     # Display the command vector in rviz.
-                    ptBase = self.stateVisual.pose.position
+                    ptBase = stateActuator.pose.position
                     ptEnd = Point(x = ptBase.x + self.statePID.pose.position.x,
                                   y = ptBase.y + self.statePID.pose.position.y,
                                   z = ptBase.z + self.statePID.pose.position.z
@@ -772,7 +772,7 @@ class MotorArm:
                     self.pubMarker.publish(markerCommand)
             
                     # Display P,I,D vectors in rviz.
-                    ptBase = self.stateVisual.pose.position #self.ptEeMech
+                    ptBase = stateActuator.pose.position #self.stateMech.pose.position
                     ptEnd = Point(x = ptBase.x + self.kP*self.statePError.pose.position.x,
                                   y = ptBase.y + self.kP*self.statePError.pose.position.y)
                     markerCommand= Marker(header=Header(stamp = self.time, frame_id='Stage'),
@@ -857,7 +857,7 @@ class MotorArm:
                 self.SendTransforms()
                 self.UpdateMotorCommandFromTarget()
             else:
-                angle1Mech   = self.Get1FromPt(self.ptEeMech)
+                angle1Mech   = self.Get1FromPt(self.stateMech.pose.position)
                 with self.lock:
                     try:
                         self.SetVelocity_joint1(Header(frame_id=self.names[0]), angle1Mech, 0.0)
