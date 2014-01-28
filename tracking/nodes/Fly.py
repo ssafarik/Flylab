@@ -48,11 +48,11 @@ class Fly:
         with self.lock:
             self.params = rospy.get_param('/', {})
 
-        defaults = {'tracking':{'rcFilterAngle':0.1,
-                                'dtVelocity': 0.2,
+        defaults = {'tracking':{'dtVelocity': 0.2,
                                 'dtForecast': 0.15,
                                 'rcFilterFlip':3.0,
                                 'rcFilterSpeed':0.2,
+                                'rcFilterAngle':0.1,
                                 'rcFilterAngularVel':0.1,
                                 'rcForeground':1.0,
                                 'speedThresholdForTravel':5.0,
@@ -176,8 +176,9 @@ class Fly:
                   cv.CV_FILLED)
         self.meanIntensityLeft  = None
         self.meanIntensityRight = None
-        
-        self.sumIntensityLeft = 0.0
+        self.varIntensityLeft  = None
+        self.varIntensityRight = None
+        self.sumIntensityLeft  = 0.0
         self.sumIntensityRight = 0.0
         self.sumSqDevIntensityLeft = 0.0
         self.stddevIntensityLeft  = 0.0 
@@ -406,10 +407,10 @@ class Fly:
     
         
     def UpdateRoiMean(self, npRoiReg):
-        if (self.count > 100):
+        if (self.count > 100) and (self.npfRoiMean is not None):
             # Exponentially weighted mean.
             alphaForeground = 1 - N.exp(-self.dt.to_sec() / self.params['tracking']['rcForeground'])
-            cv2.accumulateWeighted(N.float32(npRoiReg), self.npfRoiMean, alphaForeground) 
+            cv2.accumulateWeighted(N.float64(npRoiReg), self.npfRoiMean, alphaForeground)
         else:
             # Use straight mean for first N values.
             if (self.npfRoiSum is None):
@@ -533,188 +534,191 @@ class Fly:
     # Compute the left & right wing angles from the given contourinfo angle and image.
     #
     def GetWingAngles(self, contourinfo):
-        # Convert ROS image to numpy.
-        npRoiIn = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, "passthrough")))
-        
-        # Apply the fly-rotation mask.
-        npRoi = cv2.bitwise_and(npRoiIn, self.npMaskCircle)
-        
-        # Orient the fly to 0 degrees.
-        moments = cv2.moments(npRoi)
-        npRoiReg = self.RegisterImageRoi(npRoi, moments)
-        
-
-        # Update various images.
-        self.UpdateRoiSuperresolution(npRoi, moments)
-        self.UpdateWingMask(self.npfRoiMean)
-        self.UpdateRoiMean(npRoiReg)
-
-        
-        # Create a "wing foreground", i.e. Background Fly Subtraction.
-        diff = npRoiReg.astype(N.float32) - self.npfRoiMean*self.params['tracking']['scalarMeanFlySubtraction'] # Subtract a multiple of the average fly.
-        npWings = N.clip(diff, 0, N.iinfo(N.uint8).max).astype(N.uint8)
-        #npWings = npRoiReg 
-        
-        # Mask the input ROI.
-        #npRoiReg = cv2.bitwise_and(npRoiReg, self.npMaskWings)
-        
-        # Mask the wing foreground.
-        npWings = cv2.bitwise_and(npWings, self.npMaskWings)
-                        
-        # Create images with only pixels of left wing (i.e. image top) or right wing (i.e. image bottom).
-        npWingLeft   = N.vstack((npWings[:float(self.params['tracking']['roi']['height'])/2.0, :],
-                                 N.zeros([float(self.params['tracking']['roi']['height'])/2.0+1.0, self.params['tracking']['roi']['width']],dtype=N.uint8)))
-        npWingRight  = N.vstack((N.zeros([float(self.params['tracking']['roi']['height'])/2.0+1.0, self.params['tracking']['roi']['width']],dtype=N.uint8), 
-                                 npWings[(float(self.params['tracking']['roi']['height'])/2.0+1.0):, :]))
-        
-        # Wing moments.
-        momentsRoiReg = cv2.moments(npRoiReg)
-        momentsLeft  = cv2.moments(npWingLeft)
-        momentsRight = cv2.moments(npWingRight)
-
-        # Coordinates of body, and wings relative to wing hinge.
-        try:
-            xBody  = (momentsRoiReg['m10']/momentsRoiReg['m00'])
-            yBody  = (momentsRoiReg['m01']/momentsRoiReg['m00'])
-        except ZeroDivisionError:
-            xBody = float(self.params['tracking']['roi']['width'])/2.0
-            yBody = float(self.params['tracking']['roi']['height'])/2.0
+        if (contourinfo is not None) and (contourinfo.imgRoi is not None) and (len(contourinfo.imgRoi.data)>0):
+            # Convert ROS image to numpy.
+            npRoiIn = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, "passthrough")))
             
-        try:
-            xLeftAbs  = (momentsLeft['m10']/momentsLeft['m00'])   # Absolute pixel location.
-            yLeftAbs  = (momentsLeft['m01']/momentsLeft['m00'])
-        except ZeroDivisionError:
-            xLeftAbs = (xBody + self.params['tracking']['lengthBody']/4.0)
-            yLeftAbs = yBody
+            # Apply the fly-rotation mask.
+            npRoi = cv2.bitwise_and(npRoiIn, self.npMaskCircle)
             
-        xLeft = xLeftAbs - (xBody + self.params['tracking']['lengthBody']/4.0)      # Hinge-relative location.
-        yLeft = yLeftAbs - yBody
-        
+            # Orient the fly to 0 degrees.
+            moments = cv2.moments(npRoi)
+            npRoiReg = self.RegisterImageRoi(npRoi, moments)
             
-        try:
-            xRightAbs = (momentsRight['m10']/momentsRight['m00'])   # Absolute pixel location.
-            yRightAbs = (momentsRight['m01']/momentsRight['m00'])
-        except ZeroDivisionError:
-            xRightAbs = (xBody + self.params['tracking']['lengthBody']/4)
-            yRightAbs = yBody
-            
-        xRight = xRightAbs - (xBody + self.params['tracking']['lengthBody']/4.0)      # Hinge-relative location.
-        yRight = yRightAbs - yBody
-        
-
-#        if self.params['tracking']['nonessentialPublish']:
-#            # Mark a pixel for the body.
-#            x = N.round(xBody).astype(N.uint8)
-#            y = N.round(yBody).astype(N.uint8)
-#            npRoiReg[y, x] = 255.0
-
-        
-        # Wing intensity, after masking and mean fly subtraction.
-        intensityLeft = momentsLeft['m00']
-        intensityRight = momentsRight['m00']
-
-
-        # Wing intensity mean
-        self.sumIntensityLeft += intensityLeft
-        self.sumIntensityRight += intensityRight
-        if (self.count > 100):
-            # Exponentially weighted mean.
-            a = 1 - N.exp(-self.dt.to_sec() / self.params['tracking']['rcWingMean'])
-            self.meanIntensityLeft  = (1-a)*self.meanIntensityLeft  + a*intensityLeft 
-            self.meanIntensityRight = (1-a)*self.meanIntensityRight + a*intensityRight 
-        else:
-            # Use straight mean for first N values.
-            self.meanIntensityLeft  = self.sumIntensityLeft / self.count 
-            self.meanIntensityRight = self.sumIntensityRight / self.count 
-
-        
-        # Wing intensity deviation.
-        devIntensityLeft = (intensityLeft-self.meanIntensityLeft)
-        devIntensityRight = (intensityRight-self.meanIntensityRight)
-
-        if (self.count > 100):
-            # Exponentially weighted variance.
-            a = 1 - N.exp(-self.dt.to_sec() / self.params['tracking']['rcWingStdDev'])
-            self.varIntensityLeft  = (1-a)*self.varIntensityLeft  + a*devIntensityLeft**2
-            self.varIntensityRight  = (1-a)*self.varIntensityRight  + a*devIntensityRight**2
-        else:
-            # Use straight variance for first N values.
-            self.sumSqDevIntensityLeft  += devIntensityLeft**2 
-            self.sumSqDevIntensityRight += devIntensityRight**2
-            self.varIntensityLeft = self.sumSqDevIntensityLeft/self.count
-            self.varIntensityRight = self.sumSqDevIntensityRight/self.count
     
-        # Standard deviation.
-        self.stddevIntensityLeft  = N.sqrt(self.varIntensityLeft) 
-        self.stddevIntensityRight = N.sqrt(self.varIntensityRight) 
-
-        #if ('Fly01' in self.name):
-        #    rospy.logwarn('intensity: %9.4f, mean: %9.4f, stddev: %9.4f' % (intensityLeft, self.meanIntensityLeft, self.stddevIntensityLeft))
+            # Update various images.
+            self.UpdateRoiSuperresolution(npRoi, moments)
+            self.UpdateWingMask(self.npfRoiMean)
+            self.UpdateRoiMean(npRoiReg)
+    
+            
+            # Create a "wing foreground", i.e. Background Fly Subtraction.
+            diff = npRoiReg.astype(N.float32) - self.npfRoiMean*self.params['tracking']['scalarMeanFlySubtraction'] # Subtract a multiple of the average fly.
+            npWings = N.clip(diff, 0, N.iinfo(N.uint8).max).astype(N.uint8)
+            #npWings = npRoiReg 
+            
+            # Mask the input ROI.
+            #npRoiReg = cv2.bitwise_and(npRoiReg, self.npMaskWings)
+            
+            # Mask the wing foreground.
+            npWings = cv2.bitwise_and(npWings, self.npMaskWings)
+                            
+            # Create images with only pixels of left wing (i.e. image top) or right wing (i.e. image bottom).
+            npWingLeft   = N.vstack((npWings[:float(self.params['tracking']['roi']['height'])/2.0, :],
+                                     N.zeros([float(self.params['tracking']['roi']['height'])/2.0+1.0, self.params['tracking']['roi']['width']],dtype=N.uint8)))
+            npWingRight  = N.vstack((N.zeros([float(self.params['tracking']['roi']['height'])/2.0+1.0, self.params['tracking']['roi']['width']],dtype=N.uint8), 
+                                     npWings[(float(self.params['tracking']['roi']['height'])/2.0+1.0):, :]))
+            
+            # Wing moments.
+            momentsRoiReg = cv2.moments(npRoiReg)
+            momentsLeft  = cv2.moments(npWingLeft)
+            momentsRight = cv2.moments(npWingRight)
+    
+            # Coordinates of body, and wings relative to wing hinge.
+            try:
+                xBody  = (momentsRoiReg['m10']/momentsRoiReg['m00'])
+                yBody  = (momentsRoiReg['m01']/momentsRoiReg['m00'])
+            except ZeroDivisionError:
+                xBody = float(self.params['tracking']['roi']['width'])/2.0
+                yBody = float(self.params['tracking']['roi']['height'])/2.0
+                
+            try:
+                xLeftAbs  = (momentsLeft['m10']/momentsLeft['m00'])   # Absolute pixel location.
+                yLeftAbs  = (momentsLeft['m01']/momentsLeft['m00'])
+            except ZeroDivisionError:
+                xLeftAbs = (xBody + self.params['tracking']['lengthBody']/4.0)
+                yLeftAbs = yBody
+                
+            xLeft = xLeftAbs - (xBody + self.params['tracking']['lengthBody']/4.0)      # Hinge-relative location.
+            yLeft = yLeftAbs - yBody
+            
+                
+            try:
+                xRightAbs = (momentsRight['m10']/momentsRight['m00'])   # Absolute pixel location.
+                yRightAbs = (momentsRight['m01']/momentsRight['m00'])
+            except ZeroDivisionError:
+                xRightAbs = (xBody + self.params['tracking']['lengthBody']/4)
+                yRightAbs = yBody
+                
+            xRight = xRightAbs - (xBody + self.params['tracking']['lengthBody']/4.0)      # Hinge-relative location.
+            yRight = yRightAbs - yBody
+            
+    
+    #        if self.params['tracking']['nonessentialPublish']:
+    #            # Mark a pixel for the body.
+    #            x = N.round(xBody).astype(N.uint8)
+    #            y = N.round(yBody).astype(N.uint8)
+    #            npRoiReg[y, x] = 255.0
+    
+            
+            # Wing intensity, after masking and mean fly subtraction.
+            intensityLeft = momentsLeft['m00']
+            intensityRight = momentsRight['m00']
+    
+    
+            # Wing intensity mean
+            self.sumIntensityLeft += intensityLeft
+            self.sumIntensityRight += intensityRight
+            if (self.count > 100) and (self.meanIntensityLeft is not None):
+                # Exponentially weighted mean.
+                a = 1 - N.exp(-self.dt.to_sec() / self.params['tracking']['rcWingMean'])
+                self.meanIntensityLeft  = (1-a)*self.meanIntensityLeft  + a*intensityLeft 
+                self.meanIntensityRight = (1-a)*self.meanIntensityRight + a*intensityRight 
+            else:
+                # Use straight mean for first N values.
+                self.meanIntensityLeft  = self.sumIntensityLeft / self.count 
+                self.meanIntensityRight = self.sumIntensityRight / self.count 
+    
+            
+            # Wing intensity deviation.
+            devIntensityLeft = (intensityLeft-self.meanIntensityLeft)
+            devIntensityRight = (intensityRight-self.meanIntensityRight)
+    
+            if (self.count > 100) and (self.varIntensityLeft is not None):
+                # Exponentially weighted variance.
+                a = 1 - N.exp(-self.dt.to_sec() / self.params['tracking']['rcWingStdDev'])
+                self.varIntensityLeft  = (1-a)*self.varIntensityLeft  + a*devIntensityLeft**2
+                self.varIntensityRight  = (1-a)*self.varIntensityRight  + a*devIntensityRight**2
+            else:
+                # Use straight variance for first N values.
+                self.sumSqDevIntensityLeft  += devIntensityLeft**2 
+                self.sumSqDevIntensityRight += devIntensityRight**2
+                self.varIntensityLeft = self.sumSqDevIntensityLeft/self.count
+                self.varIntensityRight = self.sumSqDevIntensityRight/self.count
         
-        npToUse = npWings #npWingRight
-
-        #if (N.abs(devIntensityLeft) < self.params['tracking']['nStdDevWings']*self.stddevIntensityLeft):
-        if (       devIntensityLeft  < self.params['tracking']['nStdDevWings']*self.stddevIntensityLeft):
+            # Standard deviation.
+            self.stddevIntensityLeft  = N.sqrt(self.varIntensityLeft) 
+            self.stddevIntensityRight = N.sqrt(self.varIntensityRight) 
+    
+            #if ('Fly01' in self.name):
+            #    rospy.logwarn('intensity: %9.4f, mean: %9.4f, stddev: %9.4f' % (intensityLeft, self.meanIntensityLeft, self.stddevIntensityLeft))
+            
+            npToUse = npWings #npWingRight
+    
+            #if (N.abs(devIntensityLeft) < self.params['tracking']['nStdDevWings']*self.stddevIntensityLeft):
+            if (       devIntensityLeft  < self.params['tracking']['nStdDevWings']*self.stddevIntensityLeft):
+                angleLeft = N.pi
+            else:
+                angleLeft = N.arctan2(yLeft, xLeft)+N.pi
+    
+                if self.params['tracking']['nonessentialPublish']:
+                    
+                    # Mark a pixel for the left wing.
+                    if (momentsLeft['m00'] != 0):
+                        x = N.round(xLeftAbs).astype(N.uint8)
+                        y = N.round(yLeftAbs).astype(N.uint8)
+                        npRoiReg[y, x] = 255.0
+                        npToUse[y,x] = 255.0
+    
+                
+            #if (N.abs(devIntensityRight) < self.params['tracking']['nStdDevWings']*self.stddevIntensityRight):
+            if (       devIntensityRight  < self.params['tracking']['nStdDevWings']*self.stddevIntensityRight):
+                angleRight = N.pi
+            else:
+                angleRight = N.arctan2(yRight, xRight)+N.pi
+                
+                if self.params['tracking']['nonessentialPublish']:
+                    if (momentsRight['m00'] != 0):
+                    
+                    # Mark a pixel for the right wing.
+                        x = N.round(xRightAbs).astype(N.uint8)
+                        y = N.round(yRightAbs).astype(N.uint8)
+                        npRoiReg[y, x] = 255.0
+                        npToUse[y,x] = 255.0
+                
+            #npToUse[N.round(yBody).astype(N.uint8), N.round(xBody).astype(N.uint8)] = 255.0      # Set pixel at body center.
+            #npRoiReg[N.round(yBody).astype(N.uint8), N.round(xBody).astype(N.uint8)] = 255.0      # Set pixel at bosy center.
+    
+            # Nonessential stuff to publish.
+            if self.params['tracking']['nonessentialPublish']:
+                self.imgRoiReg  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npRoiReg), 'passthrough') 
+                self.imgRoiMean = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.clip(self.npfRoiMean*self.params['tracking']['scalarMeanFlySubtraction'], 0, N.iinfo(N.uint8).max).astype(N.uint8)), 'passthrough')
+    
+                imgWings = copy.copy(self.imgRoiReg)
+                npWings1 = npToUse.astype(N.uint8).reshape(npToUse.size)
+                imgWings.data = list(10*npWings1) # Make the wings more visible for debugging.
+                self.pubImageRoi.publish(contourinfo.imgRoi)
+                self.pubImageRoiReg.publish(self.imgRoiReg)
+                self.pubImageRoiMean.publish(self.imgRoiMean)
+                self.pubImageRoiWings.publish(imgWings)
+                
+                self.pubLeft.publish(angleLeft)
+                self.pubLeftIntensity.publish(intensityLeft)
+                self.pubLeftMeanIntensity.publish(self.meanIntensityLeft)
+                self.pubLeftMeanPlusStdDev.publish(self.meanIntensityLeft + self.params['tracking']['nStdDevWings']*self.stddevIntensityLeft)
+                self.pubLeftMeanMinusStdDev.publish(self.meanIntensityLeft - self.params['tracking']['nStdDevWings']*self.stddevIntensityLeft)
+                self.pubLeftDev.publish(devIntensityLeft)
+                
+                self.pubRight.publish(angleRight)
+                self.pubRightIntensity.publish(-intensityRight)
+                self.pubRightMeanIntensity.publish(-self.meanIntensityRight)
+                self.pubRightMeanPlusStdDev.publish(-(self.meanIntensityRight + self.params['tracking']['nStdDevWings']*self.stddevIntensityRight))
+                self.pubRightMeanMinusStdDev.publish(-(self.meanIntensityRight - self.params['tracking']['nStdDevWings']*self.stddevIntensityRight))
+                self.pubRightDev.publish(-devIntensityRight)
+        else:
             angleLeft = N.pi
-        else:
-            angleLeft = N.arctan2(yLeft, xLeft)+N.pi
-
-            if self.params['tracking']['nonessentialPublish']:
-                
-                # Mark a pixel for the left wing.
-                if (momentsLeft['m00'] != 0):
-                    x = N.round(xLeftAbs).astype(N.uint8)
-                    y = N.round(yLeftAbs).astype(N.uint8)
-                    npRoiReg[y, x] = 255.0
-                    npToUse[y,x] = 255.0
-
-            
-        #if (N.abs(devIntensityRight) < self.params['tracking']['nStdDevWings']*self.stddevIntensityRight):
-        if (       devIntensityRight  < self.params['tracking']['nStdDevWings']*self.stddevIntensityRight):
             angleRight = N.pi
-        else:
-            angleRight = N.arctan2(yRight, xRight)+N.pi
-            
-            if self.params['tracking']['nonessentialPublish']:
-                if (momentsRight['m00'] != 0):
                 
-                # Mark a pixel for the right wing.
-                    x = N.round(xRightAbs).astype(N.uint8)
-                    y = N.round(yRightAbs).astype(N.uint8)
-                    npRoiReg[y, x] = 255.0
-                    npToUse[y,x] = 255.0
-            
-        #npToUse[N.round(yBody).astype(N.uint8), N.round(xBody).astype(N.uint8)] = 255.0      # Set pixel at body center.
-        #npRoiReg[N.round(yBody).astype(N.uint8), N.round(xBody).astype(N.uint8)] = 255.0      # Set pixel at bosy center.
-
-        # Nonessential stuff to publish.
-        if self.params['tracking']['nonessentialPublish']:
-            self.imgRoiReg  = self.cvbridge.cv_to_imgmsg(cv.fromarray(npRoiReg), 'passthrough') 
-            self.imgRoiMean = self.cvbridge.cv_to_imgmsg(cv.fromarray(N.clip(self.npfRoiMean*self.params['tracking']['scalarMeanFlySubtraction'], 0, N.iinfo(N.uint8).max).astype(N.uint8)), 'passthrough')
-
-            imgWings = copy.copy(self.imgRoiReg)
-            npWings1 = npToUse.astype(N.uint8).reshape(npToUse.size)
-            imgWings.data = list(10*npWings1) # Make the wings more visible for debugging.
-            self.pubImageRoi.publish(contourinfo.imgRoi)
-            self.pubImageRoiReg.publish(self.imgRoiReg)
-            self.pubImageRoiMean.publish(self.imgRoiMean)
-            self.pubImageRoiWings.publish(imgWings)
-            
-            self.pubLeft.publish(angleLeft)
-            self.pubLeftIntensity.publish(intensityLeft)
-            self.pubLeftMeanIntensity.publish(self.meanIntensityLeft)
-            self.pubLeftMeanPlusStdDev.publish(self.meanIntensityLeft + self.params['tracking']['nStdDevWings']*self.stddevIntensityLeft)
-            self.pubLeftMeanMinusStdDev.publish(self.meanIntensityLeft - self.params['tracking']['nStdDevWings']*self.stddevIntensityLeft)
-            self.pubLeftDev.publish(devIntensityLeft)
-            
-            self.pubRight.publish(angleRight)
-            self.pubRightIntensity.publish(-intensityRight)
-            self.pubRightMeanIntensity.publish(-self.meanIntensityRight)
-            self.pubRightMeanPlusStdDev.publish(-(self.meanIntensityRight + self.params['tracking']['nStdDevWings']*self.stddevIntensityRight))
-            self.pubRightMeanMinusStdDev.publish(-(self.meanIntensityRight - self.params['tracking']['nStdDevWings']*self.stddevIntensityRight))
-            self.pubRightDev.publish(-devIntensityRight)
-
-            
 
         return (angleLeft, angleRight)
     
@@ -784,6 +788,7 @@ class Fly:
                 (xKalman,yKalman,vxKalman,vyKalman) = self.kfState.Update((self.contourinfo.x, self.contourinfo.y), contourinfo.header.stamp.to_sec())
                 (zKalman, vzKalman) = (0.0, 0.0)
                 #(xKalman,yKalman) = (self.contourinfo.x,self.contourinfo.y) # Unfiltered.
+
                 self.lpAngleContour.Update(angleSensed, contourinfo.header.stamp.to_sec())
                 self.apAngleContour.Update(angleSensed, contourinfo.header.stamp.to_sec())
 

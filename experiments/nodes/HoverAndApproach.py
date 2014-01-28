@@ -36,7 +36,7 @@ class Experiment():
         self.experimentparams.robotspec.nRobots = 1
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
-        self.experimentparams.robotspec.isPresent = True                            # Set this to False when you remove the robot, but still want the actuation.
+        self.experimentparams.robotspec.isPresent = False                           # Set this to False when you remove the robot, but still want the actuation.
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
         self.experimentparams.flyspec.nFlies = 1

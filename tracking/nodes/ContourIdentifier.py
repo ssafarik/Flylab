@@ -54,7 +54,7 @@ class ContourIdentifier:
 
     def __init__(self):
         self.initialized = False
-        self.stateEndEffector = None  # If no robot exists, this will remain as None.  Set in ContourinfoLists_callback.
+        self.stateMechanical = None  # If no robot exists, this will remain as None.  Set in ContourinfoLists_callback.
         self.nRobots = 0
         self.nFlies = 0
         self.bUseVisualServoing = True
@@ -83,7 +83,11 @@ class ContourIdentifier:
                                       'radius':25}},
                     'arena':{'radius_inner':25,
                              'radius_outer':30},
-                    'tracking':{'offsetEndEffectorMax': 15.0},
+                    'tracking':{'offsetEndEffectorMax': 15.0,
+                                'robot':{'width':1.0,
+                                         'length':1.0,
+                                         'height':1.0},
+                                },
                     'queue_size_contours':1
                     }
         SetDict.SetWithPreserve(self.params, defaults)
@@ -473,7 +477,7 @@ class ContourIdentifier:
 
 
     # MapContoursFromObjects()
-    #   Uses self.contourinfo_list, self.stateEndEffector, & self.objects,
+    #   Uses self.contourinfo_list, self.stateMechanical, & self.objects,
     #   Returns a list of indices such that self.objects[k] = contour[map[k]], and self.objects[0]=therobot
     #
     def MapContoursFromObjects(self):
@@ -481,18 +485,28 @@ class ContourIdentifier:
         xyObjects = N.zeros([self.nRobots+self.nFlies, 10])
         
         # At least as many contour slots as objects, with missing contours placed in a "pool" located far away (e.g. 55555,55555).
-        nContours = max(self.nRobots+self.nFlies, len(self.contourinfo_list))
+        if (self.bUseVisualServoing):
+            nContours = max(self.nRobots+self.nFlies, len(self.contourinfo_list))
+        else:
+            nContours = max(self.nRobots+self.nFlies, len(self.contourinfo_list)+1) # Space for a fake contour to match with the robot.
+            
         iContour = 0    # This keeps track of the position in the list of contours, xyContours[].
         
-        # If not using visual servoing, then make a fake contour for the robot.
-        if (not self.bUseVisualServoing):
-            nContours += self.nRobots
-            
         xyContours = N.tile([55555.0, 55555.0, 1.0, 1.0], 
                             (nContours,1)
                             )
 
 
+        # Put the contours into the contour list.
+        for i in range(len(self.contourinfo_list)):
+            if (not N.isnan(self.contourinfo_list[i].x)):
+                xyContours[iContour,:] = N.array([self.contourinfo_list[i].x,
+                                                  self.contourinfo_list[i].y,
+                                                  self.contourinfo_list[i].area,  
+                                                  self.contourinfo_list[i].ecc])
+            iContour += 1
+        
+        
         # Put robots into the objects list.
         for iRobot in self.iRobot_list:
             if (iRobot<len(self.objects)):
@@ -512,9 +526,9 @@ class ContourIdentifier:
                 
                 
             # Get the computed (mechanical) position.
-            if (self.stateEndEffector is not None):
-                xComputed = self.stateEndEffector.pose.position.x
-                yComputed = self.stateEndEffector.pose.position.y
+            if (self.stateMechanical is not None):
+                xComputed = self.stateMechanical.pose.position.x
+                yComputed = self.stateMechanical.pose.position.y
             else:
                 xComputed = N.nan
                 yComputed = N.nan
@@ -534,31 +548,31 @@ class ContourIdentifier:
                 
                 
             # Get the robot computed xy.
-            if (self.stateEndEffector is not None):
-                xyEndEffector = N.array([self.stateEndEffector.pose.position.x,
-                                         self.stateEndEffector.pose.position.y,
+            if (self.stateMechanical is not None):
+                xyMechanical = N.array([self.stateMechanical.pose.position.x,
+                                         self.stateMechanical.pose.position.y,
                                          areaMin,  eccMin,
                                          areaMean, eccMean,
                                          areaMax,  eccMax,
                                          xComputed, 
                                          yComputed])
             else:
-                xyEndEffector = None
+                xyMechanical = None
 
 
             # Decide which position to use for robot matching.
-            if (xyKalman is not None) and (xyEndEffector is not None):
+            if (xyKalman is not None) and (xyMechanical is not None):
                 # Don't let the fly walk away with the robot.
-                if (N.linalg.norm(xyKalman[0:2]-xyEndEffector[0:2]) < self.params['tracking']['offsetEndEffectorMax']):
+                if (N.linalg.norm(xyKalman[0:2]-xyMechanical[0:2]) < self.params['tracking']['offsetEndEffectorMax']):
                     xyRobot = xyKalman
                 else:
-                    xyRobot = xyEndEffector
-                    #rospy.logwarn('Too far away: % 0.1f' % N.linalg.norm(xyKalman[0:2]-xyEndEffector[0:2]))
+                    xyRobot = xyMechanical
+                    #rospy.logwarn('Too far away: % 0.1f' % N.linalg.norm(xyKalman[0:2]-xyMechanical[0:2]))
             else:
                 if (xyKalman is not None):
                     xyRobot = xyKalman
-                elif (xyEndEffector is not None):
-                    xyRobot = xyEndEffector
+                elif (xyMechanical is not None):
+                    xyRobot = xyMechanical
                 else:
                     xyRobot = None
                     
@@ -568,11 +582,12 @@ class ContourIdentifier:
                 
                 
             # If not visual servoing, then make a fake contour exactly matching the robot.
-            if (not self.bUseVisualServoing) and (xyEndEffector is not None):
-                xyContours[iContour,:] = N.array([xyEndEffector[0],  # x
-                                                  xyEndEffector[1],  # y
-                                                  xyEndEffector[4],  # area
-                                                  xyEndEffector[5]]) # ecc
+            if (not self.bUseVisualServoing) and (xyMechanical is not None):
+                xyContours[iContour,:] = N.array([xyMechanical[INDEX_X],  # x
+                                                  xyMechanical[INDEX_Y],  # y
+                                                  xyMechanical[INDEX_AMEAN],  # area
+                                                  xyMechanical[INDEX_EMEAN]]) # ecc
+                iContour += 1
 
         
         # Put flies into the objects list.    
@@ -586,16 +601,6 @@ class ContourIdentifier:
 
         
             
-        # Put the contours into the contour list.
-        for i in range(len(self.contourinfo_list)):
-            if (not N.isnan(self.contourinfo_list[iContour].x)):
-                xyContours[iContour,:] = N.array([self.contourinfo_list[iContour].x,
-                                                  self.contourinfo_list[iContour].y,
-                                                  self.contourinfo_list[iContour].area,  
-                                                  self.contourinfo_list[iContour].ecc])
-            iContour += 1
-        
-        
         # Match objects with contourinfo_list.
         d = self.GetDistanceMatrix(xyObjects, xyContours)
         if d is not []:
@@ -669,8 +674,8 @@ class ContourIdentifier:
         
 
     # Bring in the end effector state via messages.        
-    def EndEffector_callback(self, stateEndEffector):
-        self.stateEndEffector = stateEndEffector
+    def EndEffector_callback(self, stateMechanical):
+        self.stateMechanical = stateMechanical
         
 
     # ContourinfoLists_callback() is the main message handler for this node.
@@ -742,24 +747,34 @@ class ContourIdentifier:
                     except IndexError:
                         self.mapContourinfoFromObject = None
         
-                        
-                    if self.mapContourinfoFromObject is not None:
+                    if (self.mapContourinfoFromObject is not None):
                         # Update the robot state w/ the contourinfo and end-effector positions.
                         for iRobot in self.iRobot_list:
-                            if self.mapContourinfoFromObject[iRobot] is not None:
+                            if (self.mapContourinfoFromObject[iRobot] is not None):
                                 # For the robot, use the end-effector angle instead of the contourinfo angle.
-                                if self.stateEndEffector is not None:
-                                    q = self.stateEndEffector.pose.orientation
+                                if self.stateMechanical is not None:
+                                    q = self.stateMechanical.pose.orientation
                                     rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].angle = rpy[2]
-        
                                 contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iRobot]]
+                            elif (self.stateMechanical is not None):
+                                q = self.stateMechanical.pose.orientation
+                                rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
+                                area = N.pi * (self.params['tracking']['robot']['width']/2)**2
+                                contourinfo = Contourinfo(header=self.stateMechanical.header,
+                                                          x=self.stateMechanical.pose.position.x,
+                                                          y=self.stateMechanical.pose.position.y,
+                                                          angle=rpy[2],
+                                                          area=area,
+                                                          ecc=1.0,
+                                                          imgRoi=None
+                                                          )
                             else:
                                 contourinfo = contourinfoNone
                                  
                             # Use the computed pose if one exists.
-                            if self.stateEndEffector is not None:
-                                poses = PoseStamped(header=self.stateEndEffector.header, pose=self.stateEndEffector.pose)
+                            if self.stateMechanical is not None:
+                                poses = PoseStamped(header=self.stateMechanical.header, pose=self.stateMechanical.pose)
                             else:
                                 poses = None
                                 
@@ -768,8 +783,8 @@ class ContourIdentifier:
                                 self.objects[iRobot].Update(contourinfo, poses)
         
                             # Write a file (for getting Kalman covariances, etc).
-                            #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateEndEffector.pose.position.x,
-                            #                                     self.stateEndEffector.pose.position.y,
+                            #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateMechanical.pose.position.x,
+                            #                                     self.stateMechanical.pose.position.y,
                             #                                     self.objects[iRobot].state.pose.position.x, 
                             #                                     self.objects[iRobot].state.pose.position.y,
                             #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].x,
@@ -778,7 +793,7 @@ class ContourIdentifier:
                                 
                         # Update the flies' states.
                         for iFly in self.iFly_list:
-                            if self.mapContourinfoFromObject[iFly] is not None:
+                            if (self.mapContourinfoFromObject[iFly] is not None):
                                 contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iFly]]
                             else:
                                 contourinfo = contourinfoNone
