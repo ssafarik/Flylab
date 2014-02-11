@@ -92,7 +92,7 @@ class Experiment():
                                                                             count      = 1,
                                                                             size       = Point(x=3,
                                                                                                y=3),
-                                                                            preempt    = False,
+                                                                            restart    = False,
                                                                             param      = 2,
                                                                             direction  = 1), # Peano curve level.
                                                                  )

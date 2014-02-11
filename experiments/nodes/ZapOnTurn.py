@@ -92,7 +92,7 @@ class ExperimentZapOnTurn():
                                                                                 count      = 1,
                                                                                 size       = Point(x=2,
                                                                                                    y=2),
-                                                                                preempt    = False,
+                                                                                restart    = False,
                                                                                 param      = 3,
                                                                                 direction  = 1), # Peano curve level.
                                                                                 )

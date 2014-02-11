@@ -57,6 +57,7 @@ class Experiment():
         self.experimentparams.pre.robot.move.pattern.size.y = 0
         self.experimentparams.pre.robot.move.pattern.param = 0
         self.experimentparams.pre.robot.move.pattern.direction = 1
+        self.experimentparams.pre.robot.move.pattern.restart = True
         self.experimentparams.pre.robot.home.enabled = True
         self.experimentparams.pre.robot.home.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.pre.robot.home.y = 0.0
@@ -100,6 +101,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.pattern.param = 0
         self.experimentparams.trial.robot.move.pattern.direction = 1
+        self.experimentparams.trial.robot.move.pattern.restart = False  # Continue the pattern from where we are.
         self.experimentparams.trial.robot.home.enabled = True
         self.experimentparams.trial.robot.home.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.home.y = 0.0

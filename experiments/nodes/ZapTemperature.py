@@ -92,7 +92,7 @@ class ExperimentZapafly():
                                                                             count      = 1,
                                                                             size       = Point(x=0,
                                                                                                y=0),
-                                                                            preempt    = False,
+                                                                            restart    = False,
                                                                             param      = 2,
                                                                             direction  = 1), # Peano curve level.
                                                                  )
@@ -106,7 +106,7 @@ class ExperimentZapafly():
                                                                             count      = 1,
                                                                             size       = Point(x=1,
                                                                                                y=1),
-                                                                            preempt    = False,
+                                                                            restart    = False,
                                                                             param      = 3,
                                                                             direction  = 1), # Peano curve level.
                                                                  )
@@ -120,7 +120,7 @@ class ExperimentZapafly():
                                                                             count      = 1,
                                                                             size       = Point(x=3,
                                                                                                y=3),
-                                                                            preempt    = False,
+                                                                            restart    = False,
                                                                             param      = 2,
                                                                             direction  = 1), # Peano curve level.
                                                                  )
@@ -135,7 +135,7 @@ class ExperimentZapafly():
                                                                                 count      = 1,
                                                                                 size       = Point(x=3,
                                                                                                    y=3),
-                                                                                preempt    = False,
+                                                                                restart    = False,
                                                                                 param      = 2,
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
@@ -150,7 +150,7 @@ class ExperimentZapafly():
                                                                                 count      = 1,
                                                                                 size       = Point(x=6,
                                                                                                    y=6),
-                                                                                preempt    = False,
+                                                                                restart    = False,
                                                                                 param      = 2,
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
@@ -165,7 +165,7 @@ class ExperimentZapafly():
                                                                                 count      = 1,
                                                                                 size       = Point(x=6,
                                                                                                    y=6),
-                                                                                preempt    = False,
+                                                                                restart    = False,
                                                                                 param      = 2,
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
@@ -180,7 +180,7 @@ class ExperimentZapafly():
                                                                                 count      = 1,
                                                                                 size       = Point(x=140,
                                                                                                    y=140),
-                                                                                preempt    = False,
+                                                                                restart    = False,
                                                                                 param      = 2,
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
@@ -195,7 +195,7 @@ class ExperimentZapafly():
                                                                                 count      = 1,
                                                                                 size       = Point(x=0,
                                                                                                    y=0),
-                                                                                preempt    = False,
+                                                                                restart    = False,
                                                                                 param      = 2,
                                                                                 direction  = 1), # Peano curve level.
                                                                      )
