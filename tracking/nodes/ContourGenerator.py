@@ -7,7 +7,7 @@ import cv
 import cv2
 import copy
 import tf
-import numpy as N
+import numpy as np
 from scipy.cluster.vq import kmeans,vq
 import threading
 from cv_bridge import CvBridge, CvBridgeError
@@ -75,7 +75,7 @@ class ContourGenerator:
         # Messages
         self.camerainfo = None
         
-        #self.subCameraInfo          = rospy.Subscriber('camera/camera_info', CameraInfo, self.CameraInfo_callback)
+        self.subCameraInfo          = rospy.Subscriber('camera/camera_info', CameraInfo, self.CameraInfo_callback)
         self.subImageRect           = rospy.Subscriber('camera/image_rect', Image, self.Image_callback, queue_size=self.params['tracking']['queue_size_images'], buff_size=262144, tcp_nodelay=True)
         
         # The background image from disk needs to come in on a different topic than the background image from a replayed bag file, i.e. "camera/image_background_originate" so it
@@ -118,7 +118,7 @@ class ContourGenerator:
         self.rClosest = 55555
         self.bMerged = False
         
-        self.kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3)) #N.ones([3,3], dtype=N.uint8)
+        self.kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3)) #np.ones([3,3], dtype=np.uint8)
 
         
         # OpenCV
@@ -155,31 +155,31 @@ class ContourGenerator:
         if (self.header is not None) and (self.matImageRect is not None):
 
             # Initialize the images.
-            self.matProcessed         = N.zeros([self.height, self.width, 3], dtype=N.uint8)
-            self.matProcessedFlip     = N.zeros([self.height, self.width, 3], dtype=N.uint8)
-            self.matMask              = N.zeros([self.height, self.width], dtype=N.uint8)
-            self.matForeground        = N.zeros([self.height, self.width], dtype=N.uint8)
-            self.matThreshold         = N.zeros([self.height, self.width], dtype=N.uint8)
-            self.matMaskOthers        = N.zeros([self.height, self.width], dtype=N.uint8)
+            self.matProcessed         = np.zeros([self.height, self.width, 3], dtype=np.uint8)
+            self.matProcessedFlip     = np.zeros([self.height, self.width, 3], dtype=np.uint8)
+            self.matMask              = np.zeros([self.height, self.width], dtype=np.uint8)
+            self.matForeground        = np.zeros([self.height, self.width], dtype=np.uint8)
+            self.matThreshold         = np.zeros([self.height, self.width], dtype=np.uint8)
+            self.matMaskOthers        = np.zeros([self.height, self.width], dtype=np.uint8)
             
             if self.params['tracking']['usetransforms']:
                 b = False
                 while not b:
                     try:
-                        self.tfrx.waitForTransform('Arena', 
+                        self.tfrx.waitForTransform('Mask', 
                                                    self.ptsOriginImage.header.frame_id, 
                                                    self.ptsOriginImage.header.stamp, 
                                                    rospy.Duration(1.0))
                     except tf.Exception, e:
-                        rospy.logwarn('ExceptionA transforming mask frame %s->Arena:  %s' % (self.ptsOriginImage.header.frame_id, e))
+                        rospy.logwarn('ExceptionA transforming mask frame %s->Mask:  %s' % (self.ptsOriginImage.header.frame_id, e))
                         
                     try:
-                        self.ptsOriginMask = self.tfrx.transformPoint('Arena', self.ptsOriginImage)
+                        self.ptsOriginMask = self.tfrx.transformPoint('Mask', self.ptsOriginImage)
                         self.ptsOriginMask.point.x = -self.ptsOriginMask.point.x
                         self.ptsOriginMask.point.y = -self.ptsOriginMask.point.y
                         b = True
                     except tf.Exception, e:
-                        rospy.logwarn('ExceptionB transforming mask frame %s->Arena:  %s' % (self.ptsOriginImage.header.frame_id, e))
+                        rospy.logwarn('ExceptionB transforming mask frame %s->Mask:  %s' % (self.ptsOriginImage.header.frame_id, e))
             else:
                 self.ptsOriginMask = PointStamped(point=Point(x=0, y=0))
                         
@@ -252,12 +252,12 @@ class ContourGenerator:
             
         if (not self.selfPublishedBackground):
             try:
-                self.matBackground = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
+                self.matBackground = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
             except CvBridgeError, e:
                 rospy.logwarn ('Exception converting background image from ROS to opencv:  %s' % e)
                 self.matBackground = None
             else:
-                self.matfBackground = N.float32(self.matBackground)
+                self.matfBackground = np.float32(self.matBackground)
                 self.initBackground = True
         else:
             self.selfPublishedBackground = False
@@ -302,7 +302,7 @@ class ContourGenerator:
         
         
     def DrawAngleLine(self, matImage, x0, y0, angle, ecc, length):
-        if (not N.isnan(angle)) and (self.minEccForDisplay < ecc):
+        if (not np.isnan(angle)) and (self.minEccForDisplay < ecc):
             height, width = matImage.size
             y0 = height-y0
             
@@ -313,10 +313,10 @@ class ContourGenerator:
             ymax = height-1
     
             r = length/2
-            x1 = x0 - r * N.cos(angle)
-            y1 = y0 - r * N.sin(angle)
-            x2 = x0 + r * N.cos(angle)
-            y2 = y0 + r * N.sin(angle)
+            x1 = x0 - r * np.cos(angle)
+            y1 = y0 - r * np.sin(angle)
+            x2 = x0 + r * np.cos(angle)
+            y2 = y0 + r * np.sin(angle)
             
             
             cv.Line(matImage, 
@@ -338,7 +338,7 @@ class ContourGenerator:
         if u11 != 0: # Div by zero.
             inside = 4*u11*u11 + u20*u20 - 2*u20*u02 + u02*u02
             if inside >= 0: # Complex answer.
-                inside = N.sqrt(inside)
+                inside = np.sqrt(inside)
                 
                 # Eigenvalues & eigenvectors.
                 L1 = (u20+u02-inside)/2 
@@ -350,13 +350,13 @@ class ContourGenerator:
                 try:
                     if L2 < L1:
                         run = -V1
-                        ecc = L1/L2 # N.sqrt(1-(L1/L2)*(L1/L2))
+                        ecc = L1/L2 # np.sqrt(1-(L1/L2)*(L1/L2))
                       
                     else:
                         run = -V2
                         ecc = L2/L1
                       
-                    angle = -N.arctan2(rise, run)
+                    angle = -np.arctan2(rise, run)
 
                 except:
                     rospy.logwarn ('Exception in FindAngleEcc()')
@@ -376,11 +376,11 @@ class ContourGenerator:
             ((x,y), axes, degMinor) = cv2.fitEllipse(contour)
             
             degMajor = 90.0 - degMinor
-            angle = (((degMajor % 180.0)-180.0) * N.pi / 180.0) # Put on range -180 to 0, and convert to radians.
+            angle = (((degMajor % 180.0)-180.0) * np.pi / 180.0) # Put on range -180 to 0, and convert to radians.
 
             lenMajor = max(axes)
             lenMinor = min(axes)
-            ecc = N.sqrt(1.0-(lenMinor/lenMajor)**2.0)
+            ecc = np.sqrt(1.0-(lenMinor/lenMajor)**2.0)
         else:
             moments = cv2.moments(contour)
       
@@ -400,7 +400,7 @@ class ContourGenerator:
         
 #         if (ecc>0.6):
 #             rospy.logwarn('areas: %3.2f, %3.2f' % (area, area2))
-#             rospy.logwarn('angles: %+3.2f, %+3.2f' % (angle*180/N.pi, angle2*180/N.pi))
+#             rospy.logwarn('angles: %+3.2f, %+3.2f' % (angle*180/np.pi, angle2*180/np.pi))
 #             rospy.logwarn('ecc: %+3.2f, %+3.2f' % (ecc, ecc2))
 #             rospy.logwarn('-----')
 
@@ -460,14 +460,14 @@ class ContourGenerator:
                 self.matMaskOthers.fill(0)
                 
                 # Go through all the other contours.
-                normRoi = N.linalg.norm([self.params['tracking']['roi']['width'],self.params['tracking']['roi']['height']])
+                normRoi = np.linalg.norm([self.params['tracking']['roi']['width'],self.params['tracking']['roi']['height']])
                 for kContour in range(nContours):
                     if (kContour != iContour):
                         xk = contourinfolists_dict['x'][kContour]
                         yk = contourinfolists_dict['y'][kContour]
                         
                         # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
-                        if (N.linalg.norm([x-xk,y-yk]) < normRoi):
+                        if (np.linalg.norm([x-xk,y-yk]) < normRoi):
                             jContour = contourinfolists_dict['iContour'][kContour]
                             cv2.drawContours(self.matMaskOthers, contour_list, jContour, 255, cv.CV_FILLED, 4, self.hierarchy, 0)
                         
@@ -509,7 +509,7 @@ class ContourGenerator:
 
             # Remove the dups.
             contourinfolists_list = sorted(tuple(contourinfolists_list))
-            contourinfolists_list = [x for i, x in enumerate(contourinfolists_list) if (not i) or (N.linalg.norm(N.array(contourinfolists_list[i][0:2])-N.array(contourinfolists_list[i-1][0:2])) > self.params['tracking']['distanceDuplicateContour'])]
+            contourinfolists_list = [x for i, x in enumerate(contourinfolists_list) if (not i) or (np.linalg.norm(np.array(contourinfolists_list[i][0:2])-np.array(contourinfolists_list[i-1][0:2])) > self.params['tracking']['distanceDuplicateContour'])]
         
         
             # Count the contours.
@@ -537,13 +537,13 @@ class ContourGenerator:
         # Make an Nx2 array of contour positions.
         nContours = len(contour_list)
         contourinfolists_dict = self.GetContourinfolistsDictFromContourList(contour_list, None)
-        xyContours = N.array([contourinfolists_dict['x'], contourinfolists_dict['y']]).T
+        xyContours = np.array([contourinfolists_dict['x'], contourinfolists_dict['y']]).T
          
          
         # Compute the distances from each contour to each other contour, then find the min.
-        d0 = N.subtract.outer(xyContours[:,0], xyContours[:,0]) # nContours-by-nContours matrix of x-distances between contours.
-        d1 = N.subtract.outer(xyContours[:,1], xyContours[:,1]) # nContours-by-nContours matrix of y-distances between contours.
-        d = N.hypot(d0, d1) + N.eye(len(contour_list))*55555                # nContours-by-nContours matrix of 2-norm distances between contours (but can't be close to itself).
+        d0 = np.subtract.outer(xyContours[:,0], xyContours[:,0]) # nContours-by-nContours matrix of x-distances between contours.
+        d1 = np.subtract.outer(xyContours[:,1], xyContours[:,1]) # nContours-by-nContours matrix of y-distances between contours.
+        d = np.hypot(d0, d1) + np.eye(len(contour_list))*55555                # nContours-by-nContours matrix of 2-norm distances between contours (but can't be close to itself).
         self.rClosest = d.min() # Distance between the two closest contours (in pixels).
          
                  
@@ -556,7 +556,7 @@ class ContourGenerator:
 
         # Find the contour with the largest area.
         if (self.bMerged):
-            iContourMerged = contourinfolists_dict['iContour'][N.argmax(contourinfolists_dict['area'])]
+            iContourMerged = contourinfolists_dict['iContour'][np.argmax(contourinfolists_dict['area'])]
         else:
             iContourMerged = None
         
@@ -584,7 +584,7 @@ class ContourGenerator:
             
             # Divide into two, at the line connecting the two greatest defects.
             if (nDefects==2):
-                iBySize = N.argsort(defects[:,0,3]) # Sorted indices of defect size.
+                iBySize = np.argsort(defects[:,0,3]) # Sorted indices of defect size.
                 
                 # Get the two largest defects, in index order.
                 j = min(defects[iBySize[-1],0,2], defects[iBySize[-2],0,2])
@@ -592,15 +592,15 @@ class ContourGenerator:
                 
                 # Don't keep the shared points.
                 contoursOut.append(contourIn[j+1:k])
-                contoursOut.append(N.concatenate((contourIn[0:j],contourIn[k+1:len(contourIn)+1])))
+                contoursOut.append(np.concatenate((contourIn[0:j],contourIn[k+1:len(contourIn)+1])))
 
                 
             # Divide into three candidate contour pairs, and let the ContourIdentifier figure out which are the best match.
             if (nDefects>2):
-                iBySize = N.argsort(defects[:,0,3]) # Indices sorted by defect size.
+                iBySize = np.argsort(defects[:,0,3]) # Indices sorted by defect size.
                 
                 # Indices of three largest defects, sorted by point location.
-                iByLocation = N.array([defects[iBySize[-3],0,2], defects[iBySize[-2],0,2], defects[iBySize[-1],0,2]])
+                iByLocation = np.array([defects[iBySize[-3],0,2], defects[iBySize[-2],0,2], defects[iBySize[-1],0,2]])
                 iByLocation.sort()
 
                 # Indices of three largest defects, in location order.
@@ -611,20 +611,20 @@ class ContourGenerator:
                 # Three contours.
                 #contoursOut.append(contourIn[j+1:k])
                 #contoursOut.append(contourIn[k+1:m])
-                #contoursOut.append(N.concatenate((contourIn[0:j],contourIn[m+1:len(contourIn)+1])))
+                #contoursOut.append(np.concatenate((contourIn[0:j],contourIn[m+1:len(contourIn)+1])))
 
                 # Three pairs of contours.
                 (p1, p2) = (j, k)
                 contoursOut.append(contourIn[p1+1:p2])
-                contoursOut.append(N.concatenate((contourIn[0:p1],contourIn[p2+1:len(contourIn)+1])))
+                contoursOut.append(np.concatenate((contourIn[0:p1],contourIn[p2+1:len(contourIn)+1])))
 
                 (p1, p2) = (k, m)
                 contoursOut.append(contourIn[p1+1:p2])
-                contoursOut.append(N.concatenate((contourIn[0:p1],contourIn[p2+1:len(contourIn)+1])))
+                contoursOut.append(np.concatenate((contourIn[0:p1],contourIn[p2+1:len(contourIn)+1])))
                 
                 (p1, p2) = (j, m)
                 contoursOut.append(contourIn[p1+1:p2])
-                contoursOut.append(N.concatenate((contourIn[0:p1],contourIn[p2+1:len(contourIn)+1])))
+                contoursOut.append(np.concatenate((contourIn[0:p1],contourIn[p2+1:len(contourIn)+1])))
                 
                 
         else:
@@ -688,7 +688,7 @@ class ContourGenerator:
                                       (iContour-1 if iContour-1>=0 else -1),                       # PREV
                                       -1,                                                          # CHILD
                                       -1])                                                         # PARENT
-        self.hierarchy = N.array(self.hierarchy)
+        self.hierarchy = np.array(self.hierarchy)
                                          
 
         # Put the contours into the contourinfolists_dict.
@@ -735,7 +735,7 @@ class ContourGenerator:
             self.width = image.width
             # Convert ROS image to OpenCV image.
             try:
-                self.matImageRect = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
+                self.matImageRect = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
             except CvBridgeError, e:
                 rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
             if not self.initImages:
@@ -764,16 +764,16 @@ class ContourGenerator:
                 
                 
                 # Update the background.
-                #rospy.logwarn('types: %s' % [type(N.float32(self.matImageRect)), type(self.matfBackground), type(self.rcBackground)])
+                #rospy.logwarn('types: %s' % [type(np.float32(self.matImageRect)), type(self.matfBackground), type(self.rcBackground)])
                 if (self.bEstablishBackground):
                     rcBackground = self.params['tracking']['rcBackgroundEstablish']
                 else:
                     rcBackground = self.params['tracking']['rcBackground'] # Time constant for moving average background.
                 
-                alphaBackground = 1 - N.exp(-self.dt.to_sec() / rcBackground)
+                alphaBackground = 1 - np.exp(-self.dt.to_sec() / rcBackground)
                 
-                cv2.accumulateWeighted(N.float32(self.matImageRect), self.matfBackground, alphaBackground)
-                self.matBackground = N.uint8(self.matfBackground)
+                cv2.accumulateWeighted(np.float32(self.matImageRect), self.matfBackground, alphaBackground)
+                self.matBackground = np.uint8(self.matfBackground)
     
     
                 # Create the foreground.
@@ -865,26 +865,30 @@ class ContourGenerator:
                 # Publish a special image for use in rviz.
                 if self.pubImageRviz.get_num_connections() > 0:
                     self.matProcessedFlip = cv2.flip(self.matProcessed, 0)
-                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matProcessedFlip), 'passthrough')
+                    image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
                     image2.header = image.header
-                    image2.header.frame_id = 'Arena'
-                    image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
+#                     image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                     
-                    camerainfo2 = CameraInfo()#copy.copy(self.camerainfo)
-                    camerainfo2.header = self.header
-                    camerainfo2.header.frame_id = 'Arena'
-                    camerainfo2.height = self.height
-                    camerainfo2.width = self.width
-                    k11 = rospy.get_param('/k11', 1.0)
-                    k13 = rospy.get_param('/k13', 0.0)
-                    k22 = rospy.get_param('/k22', 1.0)
-                    k23 = rospy.get_param('/k23', 0.0)
-                    k33 = rospy.get_param('/k33', 1.0)
-                    p11 = rospy.get_param('/p11', -0.023)
-                    p13 = rospy.get_param('/p13', 0.0)
-                    p22 = rospy.get_param('/p22', +0.023)
-                    p23 = rospy.get_param('/p23', 0.0)
-                    p33 = rospy.get_param('/p33', 1.0)
+                    params = rospy.get_param('/', {})
+                    defaults = {'k11':914.816, 'k13':350.576, 'k22':914.587, 'k23':260.682, 'k33':1.0, 'p11':899.664, 'p13':351.087, 'p22':899.664, 'p23':260.384, 'p33':1.0}
+                    SetDict.SetWithPreserve(params, defaults)
+                     
+                    k11 = params['k11']
+                    k13 = params['k13']
+                    k22 = params['k22']
+                    k23 = params['k23']
+                    k33 = params['k33']
+                    p11 = params['p11']
+                    p13 = params['p13']
+                    p22 = params['p22']
+                    p23 = params['p23']
+                    p33 = params['p33']
+
+#                     camerainfo2 = CameraInfo()#copy.copy(self.camerainfo)
+#                     camerainfo2.header = image.header
+#                     camerainfo2.height = self.height
+#                     camerainfo2.width = self.width
+                    camerainfo2 = copy.copy(self.camerainfo)
                     camerainfo2.D = (0.0, 0.0, 0.0, 0.0, 0.0)
                     camerainfo2.K = (k11, 0.0, k13, \
                                      0.0, k22, k23, \
@@ -892,9 +896,11 @@ class ContourGenerator:
                     camerainfo2.R = (1.0, 0.0, 0.0, \
                                      0.0, 1.0, 0.0, \
                                      0.0, 0.0, 1.0)
-                    camerainfo2.P = (p11, 0.0,                    self.ptsOriginMask.point.x, 0.0, \
-                                     0.0, p22, camerainfo2.height-self.ptsOriginMask.point.y, 0.0, \
+                    camerainfo2.P = (p11, 0.0, p13, 0.0, \
+                                     0.0, p22, p23, 0.0, \
                                      0.0, 0.0,                                           1.0, 0.0)
+
+
                     self.pubCamerainfoRviz.publish(camerainfo2)
                     self.pubImageRviz.publish(image2)
                     
