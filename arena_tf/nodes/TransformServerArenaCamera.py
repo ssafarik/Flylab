@@ -5,7 +5,9 @@ import rospy
 import cv2
 import numpy as np
 import tf
+from geometry_msgs.msg import Transform, TransformStamped
 from sensor_msgs.msg import Image, CameraInfo
+from std_msgs.msg import Header
 from arena_tf.msg import CalibrationCamera
 import arena_tf.srv
 from experiment_srvs.srv import Trigger, ExperimentParams
@@ -190,25 +192,25 @@ class TransformServerArenaCamera:
             rz = params['arena_rvec_2']
             q = tf.transformations.quaternion_from_euler(rx, ry, rz)
 
-            #self.tfbx.sendTransform((x,y,z), q, self.camerainfo.header.stamp, 'Arena', 'ImageRect')
-            tfs = tf.TransformStamped()
-            tfs.header          = Header()
-            tfs.header.stamp    = self.camerainfo.header.stamp
-            tfs.header.frame_id = 'ImageRect'
-            tfs.child_frame_id  = 'Arena'
-            tfs.transform       = Transform(translation=(x,y,z), rotation=q))
-            self.tfbx.sendTransform(tfs)
+            self.tfbx.sendTransform((x,y,z), q, self.camerainfo.header.stamp, 'Arena', 'ImageRect')
+#             tfs = TransformStamped()
+#             tfs.header          = Header()
+#             tfs.header.stamp    = self.camerainfo.header.stamp
+#             tfs.header.frame_id = 'ImageRect'
+#             tfs.child_frame_id  = 'Arena'
+#             tfs.transform       = Transform(translation=(x,y,z), rotation=q)
+#             self.tfbx.sendTransform(tfs)
 
-#             self.tfbx.sendTransform((self.calibration.xMask,
-#                                      self.calibration.yMask,
-#                                      0.0),
-#                                     (0,0,0,1), 
-#                                     self.camerainfo.header.stamp, 
-#                                     'Mask', 'ImageRect')
-            tfs.header.frame_id = 'ImageRect'
-            tfs.child_frame_id  = 'Mask'
-            tfs.transform       = Transform(translation=(self.calibration.xMask, self.calibration.yMask, 0.0), rotation=(0,0,0,1)))
-            self.tfbx.sendTransform(tfs)
+            self.tfbx.sendTransform((self.calibration.xMask,
+                                     self.calibration.yMask,
+                                     0.0),
+                                    (0,0,0,1), 
+                                    self.camerainfo.header.stamp, 
+                                    'Mask', 'ImageRect')
+#             tfs.header.frame_id = 'ImageRect'
+#             tfs.child_frame_id  = 'Mask'
+#             tfs.transform       = Transform(translation=(self.calibration.xMask, self.calibration.yMask, 0.0), rotation=(0,0,0,1))
+#             self.tfbx.sendTransform(tfs)
       
         
     def Main(self):

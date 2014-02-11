@@ -549,7 +549,7 @@ class MotorArm:
                                           id=2,
                                           type=Marker.SPHERE,
                                           action=0,
-                                          pose=Pose(self.stateRef.pose.position),
+                                          pose=Pose(position=self.stateRef.pose.position),
                                           scale=Vector3(x=3.0,
                                                         y=3.0,
                                                         z=3.0),
