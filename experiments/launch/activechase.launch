@@ -1,0 +1,24 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the ACTIVECHASE experiment:              -->
+	<!--   The magnet drives in a circle, and the fly's behavior    -->
+	<!--   is recorded.                                             -->
+	<!--                                                            -->
+	<!-- Edit this file to contain the elements of the particular   -->
+	<!-- experiment.                                                -->
+	<!--                                                            -->
+	<!-- Launch this file to run the experiment, as in:             -->
+	<!-- roslaunch experiments passivechase.launch                  -->
+	<!--                                                            -->
+	<!-- ========================================================== -->
+
+	<!-- ***  Core stuff  *** -->
+    <include file="$(find flycore)/launch/main.launch" />
+
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="experiments" type="ActiveChase.py" name="Experiment" required="true" />
+
+	
+  
+</launch>
