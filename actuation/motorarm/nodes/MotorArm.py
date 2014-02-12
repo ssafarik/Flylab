@@ -80,7 +80,7 @@ class MotorArm:
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
 
-        self.stateRef = MsgFrameState()
+        self.stateRef = None #MsgFrameState()
         self.stateVisual = None
         self.stateMech = MsgFrameState(pose=Pose(position=Point(0,0,0)))
 
@@ -704,7 +704,7 @@ class MotorArm:
                 else:
                     speedMax = self.speedLinearMax
                     
-                pt = self.ClipPtMag(Point(x=xDot,y=yDot), self.speedLinearMax)
+                pt = self.ClipPtMag(Point(x=xDot,y=yDot), speedMax)
                 xDot = pt.x
                 yDot = pt.y
                 
@@ -722,7 +722,11 @@ class MotorArm:
                 # Convert to motor coordinates.
                 jInv = self.JacobianInv(angle1Mech)
                 theta1Dot = jInv.dot(N.array([[xDot],[yDot]])) 
-                
+#                 rospy.logwarn('angle1Mech=%0.2f, theta1Dot=%s, Perror=%s, Verror=%s, x,yDot=%s' % (angle1Mech, 
+#                                                                                         theta1Dot, 
+#                                                                                         (self.statePError.pose.position.x,self.statePError.pose.position.y), 
+#                                                                                         (self.statePError.velocity.linear.x,self.statePError.velocity.linear.y), 
+#                                                                                         (xDot, yDot)))
                 # Display the velocity vector in rviz.
                 ptBase = self.stateMech.pose.position #stateActuator.pose.position
                 ptEnd = Point(x = ptBase.x + xDot,

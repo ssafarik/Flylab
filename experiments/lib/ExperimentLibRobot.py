@@ -29,6 +29,8 @@ class Reset (smach.State):
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
+        self.pubSetPattern = rospy.Publisher('SetPattern', MsgPattern, latch=True)
+
         self.SetStageState = None
 
         rospy.on_shutdown(self.OnShutdown_callback)
@@ -57,7 +59,7 @@ class Reset (smach.State):
         rospy.loginfo("EL State ResetRobot(%s)" % [userdata.experimentparamsIn.trial.robot.home.enabled, userdata.experimentparamsIn.trial.robot.home.x, userdata.experimentparamsIn.trial.robot.home.y])
 
         rv = 'disabled'
-        if (userdata.experimentparamsIn.trial.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
+        if (userdata.experimentparamsIn.trial.robot.enabled or userdata.experimentparamsIn.pre.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
             self.target = MsgFrameState()
             self.timeStart = rospy.Time.now()
     
@@ -83,6 +85,21 @@ class Reset (smach.State):
                 if (self.commandExperiment=='exit_now'):
                     return 'aborted'
     
+            # Turn off any prior pattern generation.
+            msgPattern = MsgPattern()
+            msgPattern.shape = 'constant'
+            msgPattern.points = []
+            msgPattern.frameidPosition = 'Arena'
+            msgPattern.frameidAngle = 'Arena'
+            msgPattern.hzPattern = 1.0
+            msgPattern.hzPoint = 50
+            msgPattern.count = 0
+            msgPattern.size = Point(0.0, 0.0, 0.0)
+            msgPattern.restart = False
+            msgPattern.param = 0.0
+            msgPattern.direction = 1
+            self.pubSetPattern.publish (msgPattern)
+            rospy.sleep(1)
     
             # Send the command.
             self.target.header = self.arenastate.robot.header
@@ -94,15 +111,7 @@ class Reset (smach.State):
                                                                             pose=self.target.pose,
                                                                             speed = userdata.experimentparamsIn.trial.robot.home.speed)))
             except rospy.ServiceException, e:
-                stSrv = 'set_stage_state'
-                try:
-                    rospy.wait_for_service(stSrv)
-                    self.SetStageState = rospy.ServiceProxy(stSrv, SrvFrameState, persistent=True)
-                except rospy.ServiceException, e:
-                    rospy.logwarn ('EL FAILED to reconnect service %s(): %s' % (stSrv, e))
-                else:
-                    rospy.logwarn ('EL Reconnected service %s()' % stSrv)
-
+                rospy.logwarn ('EL FAILED service call to set_stage_state().')
 
             rv = 'aborted'
             while not rospy.is_shutdown():
@@ -113,7 +122,7 @@ class Reset (smach.State):
                 ptTarget = N.array([self.target.pose.position.x,
                                     self.target.pose.position.y])                
                 r = N.linalg.norm(ptRobot-ptTarget)
-                rospy.loginfo ('EL ResetHardware() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
+                #rospy.loginfo ('EL ResetHardware() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
                 
                 
                 if (r <= userdata.experimentparamsIn.trial.robot.home.tolerance):
@@ -162,7 +171,7 @@ class Action (smach.State):
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
-        self.pubPatternGen = rospy.Publisher('SetPattern', MsgPattern, latch=True)
+        self.pubSetPattern = rospy.Publisher('SetPattern', MsgPattern, latch=True)
 
         self.target = MsgFrameState()
         self.SetStageState = None
@@ -462,10 +471,10 @@ class Action (smach.State):
         msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
         msgPattern.count = self.paramsIn.robot.move.pattern.count
         msgPattern.size = self.paramsIn.robot.move.pattern.size
-        msgPattern.preempt = True
+        msgPattern.restart = self.paramsIn.robot.move.pattern.restart
         msgPattern.param = 0.0#self.paramsIn.robot.move.pattern.param
         msgPattern.direction = self.paramsIn.robot.move.pattern.direction
-        self.pubPatternGen.publish (msgPattern)
+        self.pubSetPattern.publish (msgPattern)
                 
 
         rv = 'aborted'
@@ -475,15 +484,6 @@ class Action (smach.State):
                 self.service_preempt()
                 rv = 'preempt'
                 break
-
-            
-            #if self.paramsIn.robot.move.timeout != -1:
-            #    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > self.paramsIn.robot.move.timeout:
-            #        rv = 'timeout'
-            #        break
-            
-            self.rosrate.sleep()
-
 
             # Handle commands.
             if (self.commandExperiment=='continue'):
@@ -503,20 +503,22 @@ class Action (smach.State):
                 rv = 'aborted'
                 break
 
+            self.rosrate.sleep()
+
 
         # Turn off the pattern
-        msgPattern.shape = self.paramsIn.robot.move.pattern.shape
-        msgPattern.points = []
-        msgPattern.frameidPosition = self.paramsIn.robot.move.pattern.frameidPosition
-        msgPattern.frameidAngle = self.paramsIn.robot.move.pattern.frameidAngle
-        msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
-        msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
-        msgPattern.count = 0
-        msgPattern.size = self.paramsIn.robot.move.pattern.size
-        msgPattern.preempt = True
-        msgPattern.param = 0.0#self.paramsIn.robot.move.pattern.param
-        msgPattern.direction = self.paramsIn.robot.move.pattern.direction
-        self.pubPatternGen.publish (msgPattern)
+#         msgPattern.shape = self.paramsIn.robot.move.pattern.shape
+#         msgPattern.points = []
+#         msgPattern.frameidPosition = self.paramsIn.robot.move.pattern.frameidPosition
+#         msgPattern.frameidAngle = self.paramsIn.robot.move.pattern.frameidAngle
+#         msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
+#         msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
+#         msgPattern.count = 0
+#         msgPattern.size = self.paramsIn.robot.move.pattern.size
+#         msgPattern.restart = self.paramsIn.robot.move.pattern.restart
+#         msgPattern.param = 0.0#self.paramsIn.robot.move.pattern.param
+#         msgPattern.direction = self.paramsIn.robot.move.pattern.direction
+#         self.pubSetPattern.publish (msgPattern)
 
         return rv
 # End class Action()        

@@ -43,12 +43,12 @@ class SaveCsv:
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.sub_arenastate = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
-        self.lockArenastate = threading.Lock()
+        self.lock = threading.Lock()
         
         self.filenameCsv = None
         self.fid = None
-        self.bSaveArenastate = False
-        self.bSavingArenastate = False
+        self.bSaveCsv = False
+        self.bSavingCsv = False
 
         self.format_align = ">"
         self.format_sign = " "
@@ -371,17 +371,17 @@ class SaveCsv:
         
         # Offer some services.
         self.services = {}
-        self.services['savearenastate/init'] = rospy.Service('savearenastate/init',            ExperimentParams, self.Init_callback)
-        self.services['savearenastate/trial_start'] = rospy.Service('savearenastate/trial_start',     ExperimentParams, self.TrialStart_callback)
-        self.services['savearenastate/trial_end'] = rospy.Service('savearenastate/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        self.services['savearenastate/trigger'] = rospy.Service('savearenastate/trigger',         Trigger,          self.Trigger_callback)
+        self.services['savearenastate/init']            = rospy.Service('savearenastate/init',            ExperimentParams, self.Init_callback)
+        self.services['savearenastate/trial_start']     = rospy.Service('savearenastate/trial_start',     ExperimentParams, self.TrialStart_callback)
+        self.services['savearenastate/trial_end']       = rospy.Service('savearenastate/trial_end',       ExperimentParams, self.TrialEnd_callback)
+        self.services['savearenastate/trigger']         = rospy.Service('savearenastate/trigger',         Trigger,          self.Trigger_callback)
         self.services['savearenastate/wait_until_done'] = rospy.Service('savearenastate/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
 
         self.initialized = True
 
 
     def OnShutdown_callback(self):
-        with self.lockArenastate:
+        with self.lock:
             if (self.fid is not None) and (not self.fid.closed):
                 self.fid.close()
                 rospy.logwarn('Closed csv file.')
@@ -416,39 +416,38 @@ class SaveCsv:
         self.bTriggered = reqTrigger.triggered
 
 
-        if (self.bSaveOnlyWhileTriggered) and (self.bSaveArenastate):
+        if (self.bSaveOnlyWhileTriggered) and (self.bSaveCsv):
             if (reqTrigger.triggered):
-                self.bSavingArenastate = True
+                self.bSavingCsv = True
             else:
-                self.bSavingArenastate = False
+                self.bSavingCsv = False
         
 
         # At the end of a run, close the file if we're no longer saving.
         if (self.bSaveOnlyWhileTriggered):
-            if (self.bSaveArenastate):
-                with self.lockArenastate:
+            if (self.bSaveCsv):
+                with self.lock:
                     if (bFallingEdge) and (self.fid is not None) and (not self.fid.closed):
                         self.fid.close()
                         rospy.logwarn('Closed csv file.')
 
-            
         return self.bTriggered
         
 
     # TrialStart_callback()
     # Open a new .csv file when we start a new trial.
-    # Possibly set flag self.bSavingArenastate to save arenastate.
+    # Possibly set flag self.bSavingCsv to save arenastate.
     # Returns with a file open.
     # 
     def TrialStart_callback(self, experimentparamsReq):
-        self.bSaveArenastate = experimentparamsReq.save.csv
+        self.bSaveCsv = experimentparamsReq.save.csv
         
         while (not self.initialized):
             rospy.sleep(0.5)
 
         self.bSaveOnlyWhileTriggered = experimentparamsReq.save.onlyWhileTriggered
 
-        if (self.bSaveArenastate):
+        if (self.bSaveCsv):
             # Get the directory:  dirBag = 'FlylabData/YYYY_MM_DD'
             self.dirCsv = self.dirBase + '/' + time.strftime('%Y_%m_%d')
 
@@ -460,9 +459,9 @@ class SaveCsv:
             
             # Determine if we should be saving.
             if (self.bSaveOnlyWhileTriggered):
-                self.bSavingArenastate = False
+                self.bSavingCsv = False
             else:
-                self.bSavingArenastate = True
+                self.bSavingCsv = True
             
             self.OpenCsvAndWriteHeader(experimentparamsReq)
 
@@ -478,9 +477,9 @@ class SaveCsv:
         while (not self.initialized):
             rospy.sleep(0.5)
 
-        if (self.bSaveArenastate):
+        if (self.bSaveCsv):
             # Close old .csv file if there was one.
-            with self.lockArenastate:
+            with self.lock:
                 if (self.fid is not None) and (not self.fid.closed):
                     self.fid.close()
                     rospy.logwarn('Closed csv file.')
@@ -755,7 +754,7 @@ class SaveCsv:
         #######################################################################
 
 
-        with self.lockArenastate:
+        with self.lock:
             fullpathCsv = self.dirCsv+'/'+self.filenameCsv
             self.fid = open(fullpathCsv, 'w')
             rospy.logwarn('Saving csv file:  %s' % fullpathCsv)
@@ -836,7 +835,7 @@ class SaveCsv:
     
 
     def ArenaState_callback(self, arenastate):
-        if (self.initialized) and (self.bSavingArenastate) and (self.fid is not None):
+        if (self.initialized) and (self.bSavingCsv) and (self.fid is not None):
 
             # Get latest time.
             stamp = max(0.0, arenastate.robot.header.stamp.to_sec())
@@ -912,7 +911,7 @@ class SaveCsv:
             
 
             # Write the robot & fly state to the file.
-            with self.lockArenastate:
+            with self.lock:
                 if (not self.fid.closed):
                     self.fid.write(stateRow)
 

@@ -38,7 +38,7 @@ class Experiment():
         self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
-        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.nFlies = 0
         self.experimentparams.flyspec.description = "unspecified"
         
         self.experimentparams.tracking.exclusionzones.enabled = False
@@ -70,7 +70,7 @@ class Experiment():
         self.experimentparams.pre.trigger.enabled = True
         self.experimentparams.pre.trigger.frameidParent = 'Fly01'
         self.experimentparams.pre.trigger.frameidChild = 'Robot'
-        self.experimentparams.pre.trigger.speedAbsParentMin =   5.0
+        self.experimentparams.pre.trigger.speedAbsParentMin =   4.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
         self.experimentparams.pre.trigger.speedAbsChildMax  = 999.0
@@ -94,14 +94,14 @@ class Experiment():
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'            # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/60
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/40
         self.experimentparams.trial.robot.move.pattern.hzPoint = 100
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.pattern.param = 0
         self.experimentparams.trial.robot.move.pattern.direction = 1
-        self.experimentparams.trial.robot.move.pattern.restart = False  # Continue the pattern from where we are.
+        self.experimentparams.trial.robot.move.pattern.restart = False  # False: Continue the new pattern from the old pattern's current location.
         self.experimentparams.trial.robot.home.enabled = True
         self.experimentparams.trial.robot.home.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.home.y = 0.0

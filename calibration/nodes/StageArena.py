@@ -129,7 +129,7 @@ class CalibrateStageArena():
             msgPattern.hzPoint = 100
             msgPattern.count = 1
             msgPattern.size = Point(x=0,y=0)
-            msgPattern.preempt = True
+            msgPattern.restart = True
             msgPattern.param = 0
             self.pubSetPattern.publish (msgPattern)
         
@@ -485,7 +485,7 @@ class CalibrateStageArena():
         msgPattern.count = 1
         msgPattern.size = Point(x=0,y=0)
         msgPattern.points = []
-        msgPattern.preempt = True
+        msgPattern.restart = True
         msgPattern.param = 0
         self.pubSetPattern.publish (msgPattern)
         rospy.sleep(2)
@@ -502,7 +502,7 @@ class CalibrateStageArena():
         msgPattern.count = -1
         msgPattern.points = []
         msgPattern.size = Point(x=0.9*rospy.get_param('arena/radius_inner', 25.4), y=0)
-        msgPattern.preempt = True
+        msgPattern.restart = True
         msgPattern.param = 0.0
         msgPattern.direction = 1
         self.pubSetPattern.publish (msgPattern)
@@ -517,7 +517,7 @@ class CalibrateStageArena():
         msgPattern.count = 1
         msgPattern.size = Point(x=0,y=0)
         msgPattern.points = []
-        msgPattern.preempt = True
+        msgPattern.restart = True
         msgPattern.param = 0
         self.pubSetPattern.publish (msgPattern)
     

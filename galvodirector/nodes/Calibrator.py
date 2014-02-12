@@ -212,7 +212,7 @@ class GalvoCalibrator:
         pattern.points     = self.pointsInput
         pattern.size.x     = 20.0
         pattern.size.y     = 20.0
-        pattern.preempt    = False
+        pattern.restart    = False
         pattern.param      = 0.0
         pattern.direction  = 1
     
@@ -233,7 +233,7 @@ class GalvoCalibrator:
         pattern.points     = [point,]
         pattern.size.x     = 0.0
         pattern.size.y     = 0.0
-        pattern.preempt    = False
+        pattern.restart    = False
         pattern.param      = 0.0
         pattern.direction  = 1
     

@@ -546,65 +546,79 @@ class PatternGenXY:
     #   Receive the message that sets up a pattern generation.
     #
     def SetPattern_callback (self, msgPattern):
-        with self.lock:
-            if (self.iPoint is not None):
-                iPointPrev = self.iPoint    # Save the prev cursor.
-                pointPrev = self.pattern1.points[iPointPrev] 
+        # To provide a glitch-free transition, do the time-consuming setup of pattern2, and copy it into place at end.
+        pattern2 = MsgPattern()
+        pattern2.isDirty           = True
+        pattern2.frameidPosition   = msgPattern.frameidPosition
+        pattern2.frameidAngle      = msgPattern.frameidAngle
+        pattern2.shape             = msgPattern.shape
+        pattern2.hzPattern         = msgPattern.hzPattern
+        pattern2.hzPoint           = msgPattern.hzPoint
+        pattern2.count             = msgPattern.count
+        pattern2.size              = msgPattern.size
+        pattern2.restart           = msgPattern.restart
+        pattern2.param             = msgPattern.param
+        pattern2.direction         = msgPattern.direction # Forward (+1) or reverse (-1) through the pattern points.  0 means choose at random, +1 or -1.
+        
+        # If direction==0, then choose random +1 or -1.
+        if (pattern2.direction==0):
+            pattern2.direction = 2*np.random.randint(2)-1
+             
+        dtPoint2 = rospy.Duration(1/pattern2.hzPoint)
+        ratePoint2 = rospy.Rate(pattern2.hzPoint)
+        if (pattern2.count==-1):
+            pattern2.count = 2147483640 # MAX_INT
+        
+        if (pattern2.shape=='bypoints'):
+            pattern2.points = msgPattern.points
             
-            self.pattern1.isDirty           = True
-            self.pattern1.frameidPosition   = msgPattern.frameidPosition
-            self.pattern1.frameidAngle      = msgPattern.frameidAngle
-            self.pattern1.shape             = msgPattern.shape
-            self.pattern1.hzPattern         = msgPattern.hzPattern
-            self.pattern1.hzPoint           = msgPattern.hzPoint
-            self.pattern1.count             = msgPattern.count
-            self.pattern1.size              = msgPattern.size
-            self.pattern1.restart           = msgPattern.restart
-            self.pattern1.param             = msgPattern.param
-            self.pattern1.direction         = msgPattern.direction # Forward (+1) or reverse (-1) through the pattern points.  0 means choose at random, +1 or -1.
-            
-            # If direction==0, then choose random +1 or -1.
-            if (self.pattern1.direction==0):
-                self.pattern1.direction = 2*np.random.randint(2)-1
-                 
-
-    	    self.dtPoint = rospy.Duration(1/self.pattern1.hzPoint)
-    	    self.ratePoint = rospy.Rate(self.pattern1.hzPoint)
-    
-            if (self.pattern1.count==-1):
-                self.pattern1.count = 2147483640 # MAX_INT
-            
-            if (self.pattern1.shape=='bypoints'):
-                self.pattern1.points = msgPattern.points
-                
-            self.UpdatePatternPoints(self.pattern1)
-            self.lenPattern1 = self.GetPathLength(self.pattern1.points)
-            
-            if (len(self.pattern1.points)>0):
-                if (self.pattern1.restart) or (self.iPoint is None): #  or (self.iPoint >= len(self.pattern1.points)) or (self.iPoint < 0)
-                    if (self.pattern1.direction > 0):
-                        self.iPoint = 0
-                    elif (self.pattern1.direction < 0):
-                        self.iPoint = len(self.pattern1.points)-1
-                    else:
-                        rospy.logwarn ('pattern.direction==0.  Pattern will not advance.')
-                        
-                else:   # Find the point in the new pattern nearest the current point in the last pattern.
-                    # Convert Point()'s to lists.
-                    xyPrev = [pointPrev.x, pointPrev.y]
-                    xyNew = []
-                    for pt in self.pattern1.points:
-                        xyNew.append[[pt.x,pt.y]]
-                        
-                    dxy = np.subtract(xyPrev, xyNew)
-                    dx = dxy[:,0]
-                    dy = dxy[:,1]
-                    d = N.hypot(dx, dy)
-                    iNearest = np.argmin(d) # Index into self.pattern1.points of the new cursor.
-                    self.iPoint = iNearest
+        self.UpdatePatternPoints(pattern2)
+        lenPattern2 = self.GetPathLength(pattern2.points)
+        
+        iPoint2 = self.iPoint
+        if (len(pattern2.points)>0):
+            if (pattern2.restart) or (iPoint2 is None): #  or (self.iPoint >= len(self.pattern1.points)) or (self.iPoint < 0)
+                if (pattern2.direction > 0):
+                    iPoint2a = 0
+                elif (pattern2.direction < 0):
+                    iPoint2a = len(pattern2.points)-1
+                else:
+                    iPoint2a = 0
+                    rospy.logwarn ('pattern.direction==0.  Pattern will not advance.')
                     
+            else:   # Find the point in the new pattern nearest the current point in the last pattern.
+                # Convert Point()'s to lists.
+                xyNew = []
+                for pt in pattern2.points:
+                    xyNew.append([pt.x,pt.y])
 
-	    #rospy.logwarn ('SetPattern_callback() points=%s' % self.pattern1.points)
+                #rospy.logwarn('%s, %s' % (self.iPoint, len(self.pattern1.points)))
+                if (self.iPoint is not None):
+                    pointPrev = self.pattern1.points[self.iPoint]   # Save the prev cursor.
+                     
+                xyPrev = [pointPrev.x, pointPrev.y]
+                    
+                dxy = np.subtract(xyPrev, xyNew)
+                dx = dxy[:,0]
+                dy = dxy[:,1]
+                d = np.hypot(dx, dy)
+                iNearest = np.argmin(d) # Index into self.pattern1.points of the new cursor.
+                iPoint2a = iNearest
+
+                    
+        with self.lock:
+            iPoint2b = self.iPoint
+            self.pattern1    = pattern2
+            self.dtPoint     = dtPoint2
+            self.ratePoint   = ratePoint2
+            self.lenPattern1 = lenPattern2
+            if (self.iPoint is not None):
+                self.iPoint  = (iPoint2a + (iPoint2b-iPoint2)) % len(pattern2.points) # Install the new iNearest, plus a correction for processing time.
+            else:
+                self.iPoint  = iPoint2a
+            #rospy.logwarn('New pattern.')
+                    
+        #rospy.logwarn ('SetPattern_callback() points=%s' % self.pattern1.points)
             
             
     def GetPatternPoints_callback(self, reqGetPatternPoints):
@@ -615,31 +629,32 @@ class PatternGenXY:
     
             
     def SendPointAndStep(self): 
-        if (self.iPoint is not None) and (self.pattern1.points is not None) and (len(self.pattern1.points)>0):
-            if self.pattern1.count>0:
-                direction = copy.copy(self.pattern1.direction)
-                bSuccess = False
-
-                pts = self.TransformPatternPoint()
-                vecNext = self.StepNextPatternPoint()
-                a = np.arctan2(vecNext.y, vecNext.x)
-
-                speed = self.lenPattern1 * self.pattern1.hzPattern
-                velocity = Twist(linear=Point(x = speed * np.cos(a),
-                                              y = speed * np.sin(a))) # BUG: We're ignoring angular velocity.
-                
-                #rospy.logwarn('iPoint=%d/%d, speed=% 4.1f, x=% 4.1f' % (self.iPoint, len(self.pattern1.points), speed, pts.point.x))
-                state=MsgFrameState(header=pts.header,
-                                    pose=Pose(position=pts.point),
-                                    velocity=velocity)#
-                resp = self.SignalOutput (state)
-                bSuccess = resp.success
-                if (not bSuccess):
-                    self.pattern1.direction = -direction # Back out until no longer clipped.  
-                    #rospy.logwarn('clipped')
-
-                        
-                #rospy.logwarn(self.iPoint)
+        with self.lock:
+            if (self.iPoint is not None) and (self.pattern1.points is not None) and (len(self.pattern1.points)>0):
+                if self.pattern1.count>0:
+                    direction = copy.copy(self.pattern1.direction)
+                    bSuccess = False
+    
+                    pts = self.TransformPatternPoint()
+                    vecNext = self.StepNextPatternPoint()
+                    a = np.arctan2(vecNext.y, vecNext.x)
+    
+                    speed = self.lenPattern1 * self.pattern1.hzPattern
+                    velocity = Twist(linear=Point(x = speed * np.cos(a),
+                                                  y = speed * np.sin(a))) # BUG: We're ignoring angular velocity.
+                    
+                    #rospy.logwarn('iPoint=%d/%d, speed=% 4.1f, x=% 4.1f' % (self.iPoint, len(self.pattern1.points), speed, pts.point.x))
+                    state=MsgFrameState(header=pts.header,
+                                        pose=Pose(position=pts.point),
+                                        velocity=velocity)#
+                    resp = self.SignalOutput (state)
+                    bSuccess = resp.success
+                    if (not bSuccess):
+                        self.pattern1.direction = -direction # Back out until no longer clipped.  
+                        #rospy.logwarn('clipped')
+    
+                    #pt = self.pattern1.points[self.iPoint]
+                    #rospy.logwarn('%s: (%f,%f,%f)' % (self.iPoint, pt.x, pt.y, pt.z))
 
 
 
@@ -670,14 +685,16 @@ class PatternGenXY:
             if self.iPoint >= len(self.pattern1.points):
                 #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=%d' % (self.iPoint, self.pattern1.count))
                 self.iPoint = 0
-                self.pattern1.count -= 1
+                if (self.pattern1.count>0):
+                    self.pattern1.count -= 1
                 self.UpdatePatternPoints(self.pattern1)
 
             # When the pattern output is completed, go to the next pattern.
             if (self.iPoint < 0):
                 #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=size %d' % (self.iPoint, self.pattern1.count))
                 self.iPoint = len(self.pattern1.points)-1
-                self.pattern1.count -= 1
+                if (self.pattern1.count>0):
+                    self.pattern1.count -= 1
                 self.UpdatePatternPoints(self.pattern1)
             
             ptNext = self.pattern1.points[self.iPoint]
