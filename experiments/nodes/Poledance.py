@@ -69,16 +69,16 @@ class Experiment():
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin =   0.0
-        self.experimentparams.pre.trigger.speedAbsChildMax =  999.0
+        self.experimentparams.pre.trigger.speedAbsChildMax =   4.0
         self.experimentparams.pre.trigger.speedRelMin =   0.0
         self.experimentparams.pre.trigger.speedRelMax = 999.0
         self.experimentparams.pre.trigger.distanceMin =   0.0
-        self.experimentparams.pre.trigger.distanceMax = 20.0
-        self.experimentparams.pre.trigger.angleMin = 0.0 * N.pi / 180.0
-        self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.distanceMax = 8.0
+        self.experimentparams.pre.trigger.angleMin = 45.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleMax =135.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
-        self.experimentparams.pre.trigger.angleTestBilateral = True
-        self.experimentparams.pre.trigger.timeHold = 0.0
+        self.experimentparams.pre.trigger.angleTestBilateral = False
+        self.experimentparams.pre.trigger.timeHold = 1.0
         self.experimentparams.pre.trigger.timeout = -1
         
         self.experimentparams.pre.wait2 = 0.0
@@ -95,7 +95,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = 0
-        self.experimentparams.trial.robot.move.pattern.size.y = -20
+        self.experimentparams.trial.robot.move.pattern.size.y = -30
         self.experimentparams.trial.robot.move.pattern.direction = 0                  # Step forward (+1) or reverse (-1) through the pattern points.  0 means choose at random, +1 or -1.
 
         self.experimentparams.trial.lasergalvos.enabled = False
@@ -124,7 +124,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 5.0
+        self.experimentparams.post.trigger.timeout = 600.0 
         
         self.experimentparams.post.wait = 0.0
         
