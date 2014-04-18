@@ -199,24 +199,28 @@ class Action (smach.State):
         self.arenastate = arenastate
 
 
-    def GetAngleFrame (self, arenastate, frameid):
-        stamp = arenastate.robot.header.stamp
-        if len(arenastate.flies)>0:
-            stamp = max(stamp,arenastate.flies[0].header.stamp)
-    
-        if self.tfrx.canTransform('Arena', frameid, stamp):        
-            (trans,q) = self.tfrx.lookupTransform('Arena', frameid, stamp)
-            rpy = tf.transformations.euler_from_quaternion(q)
-            angle = rpy[2] % (2.0 * N.pi)
+    # GetAngleFrame()
+    # Get the orientation angle of the given frameid in the Arena frame.
+    #
+    def GetAngleFrame (self, arenastate, frameidChild):
+        try:
+            stamp = self.tfrx.getLatestCommonTime('Arena', frameidChild)
+            (trans,q) = self.tfrx.lookupTransform('Arena', frameidChild, stamp)
+        except tf.Exception, e:
+            #rospy.logwarn('Exception in GetAngleFrame():  %s' % e)
+            angleOfChild = None
         else:
-            angle = 0.0
+            rpy = tf.transformations.euler_from_quaternion(q)
+            angleOfChild = rpy[2] % (2.0 * N.pi)
     
             
-        return angle
+        return angleOfChild
     
     
+    # GetAngleFrameToFrame()
+    # Get the angle of the child's position in the parent's frame.
+    #
     def GetAngleFrameToFrame (self, frameidParent, frameidChild):
-        angleToChild = None
         try:
             stamp = self.tfrx.getLatestCommonTime(frameidParent, frameidChild)
             pointC = PointStamped(header=Header(frame_id=frameidChild, stamp=stamp),
@@ -224,13 +228,16 @@ class Action (smach.State):
             pointP = self.tfrx.transformPoint(frameidParent, pointC)
         except tf.Exception, e:
             #rospy.logwarn('Exception in GetAngleFrameToFrame():  %s' % e)
-            pass
+            angleToChild = None
         else:
             angleToChild = N.arctan2(pointP.point.y, pointP.point.x) % (2.0*N.pi)
             
         return angleToChild
     
     
+    # GetPositionFrame()
+    # Get the position of the given frameid in the Arena frame.
+    #
     def GetPositionFrame (self, arenastate, frameid):
         stamp = arenastate.robot.header.stamp
         if len(arenastate.flies)>0:
@@ -344,19 +351,20 @@ class Action (smach.State):
                 if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
                     angleBase = self.GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
                     angleRel = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOriginAngle, 'Robot')
-                    if (angleRel is None):
-                        angleRel = 0.0
                     
             else:
                 rospy.logwarn ('EL, unknown robot.move.relative.angleType: %s' % self.paramsIn.robot.move.relative.angleType)
-                angleBase = 0.0
-                angleRel = 0.0    
+                angleBase = None
+                angleRel = None  
 
             # Oscillate the angle:  angleOsc = A * sin(2*pi * f * t) = A * sin(w * t)
             angleOsc = self.paramsIn.robot.move.relative.angleOscMag * N.sin(2.0 * N.pi * self.paramsIn.robot.move.relative.angleOscFreq * rospy.Time.now().to_sec())
                     
                 
-            angle = (angleBase + angleRel + angleSpeed + angleOsc) % (2.0*N.pi)
+            if (angleBase is not None) and (angleRel is not None):
+                angleTarget = (angleBase + angleRel + angleSpeed + angleOsc) % (2.0*N.pi)
+            else:
+                angleTarget = None
 
                                                    
             # Move a distance relative to whose position?
@@ -377,9 +385,9 @@ class Action (smach.State):
                 # Compute target point in workspace (i.e. Arena) coordinates.
                 #ptOrigin = N.array([posOrigin.x, posOrigin.y])
                 ptOrigin = self.GetPositionFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginPosition)
-                if (ptOrigin is not None):
+                if (ptOrigin is not None) and (angleTarget is not None):
                     d = self.paramsIn.robot.move.relative.distance
-                    ptRelative = d * N.array([N.cos(angle), N.sin(angle)])
+                    ptRelative = d * N.array([N.cos(angleTarget), N.sin(angleTarget)])
                     ptTarget = ptOrigin[0:2] + ptRelative
                     self.ptTarget = self.ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
 
