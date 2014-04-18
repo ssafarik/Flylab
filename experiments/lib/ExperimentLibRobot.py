@@ -9,7 +9,7 @@ import tf
 
 from geometry_msgs.msg import Point, PointStamped
 from std_msgs.msg import Header, String
-from flycore.msg import MsgFrameState
+from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from patterngen.msg import MsgPattern
 from tracking.msg import ArenaState
@@ -30,6 +30,7 @@ class Reset (smach.State):
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
         self.pubSetPattern = rospy.Publisher('SetPattern', MsgPattern, latch=True)
+        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
 
         self.SetStageState = None
 
@@ -60,6 +61,7 @@ class Reset (smach.State):
 
         rv = 'disabled'
         if (userdata.experimentparamsIn.trial.robot.enabled or userdata.experimentparamsIn.pre.robot.enabled) and (userdata.experimentparamsIn.trial.robot.home.enabled):
+            
             self.target = MsgFrameState()
             self.timeStart = rospy.Time.now()
     
@@ -101,7 +103,8 @@ class Reset (smach.State):
             self.pubSetPattern.publish (msgPattern)
             rospy.sleep(1)
     
-            # Send the command.
+            
+            # Send the 'home' command.
             self.target.header = self.arenastate.robot.header
             #self.target.header.stamp = rospy.Time.now()
             self.target.pose.position.x = userdata.experimentparamsIn.trial.robot.home.x
@@ -397,6 +400,7 @@ class Action (smach.State):
                     self.target.pose.position.y = self.ptTarget[1]
                     #rospy.logwarn (self.ptTarget)
                     if (doMove):
+                        #rospy.logwarn((self.target.pose.position.x,self.target.pose.position.y))
                         try:
                             self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
                                                                                         pose=self.target.pose,
@@ -515,18 +519,18 @@ class Action (smach.State):
 
 
         # Turn off the pattern
-#         msgPattern.shape = self.paramsIn.robot.move.pattern.shape
-#         msgPattern.points = []
-#         msgPattern.frameidPosition = self.paramsIn.robot.move.pattern.frameidPosition
-#         msgPattern.frameidAngle = self.paramsIn.robot.move.pattern.frameidAngle
-#         msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
-#         msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
-#         msgPattern.count = 0
-#         msgPattern.size = self.paramsIn.robot.move.pattern.size
-#         msgPattern.restart = self.paramsIn.robot.move.pattern.restart
-#         msgPattern.param = 0.0#self.paramsIn.robot.move.pattern.param
-#         msgPattern.direction = self.paramsIn.robot.move.pattern.direction
-#         self.pubSetPattern.publish (msgPattern)
+        msgPattern.shape = self.paramsIn.robot.move.pattern.shape
+        msgPattern.points = []
+        msgPattern.frameidPosition = self.paramsIn.robot.move.pattern.frameidPosition
+        msgPattern.frameidAngle = self.paramsIn.robot.move.pattern.frameidAngle
+        msgPattern.hzPattern = self.paramsIn.robot.move.pattern.hzPattern
+        msgPattern.hzPoint = self.paramsIn.robot.move.pattern.hzPoint
+        msgPattern.count = 0
+        msgPattern.size = self.paramsIn.robot.move.pattern.size
+        msgPattern.restart = self.paramsIn.robot.move.pattern.restart
+        msgPattern.param = 0.0#self.paramsIn.robot.move.pattern.param
+        msgPattern.direction = self.paramsIn.robot.move.pattern.direction
+        self.pubSetPattern.publish (msgPattern)
 
         return rv
 # End class Action()        

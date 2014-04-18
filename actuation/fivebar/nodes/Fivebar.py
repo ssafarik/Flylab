@@ -743,17 +743,17 @@ class Fivebar:
 
     # Take the target point from a signal generator, and set it as the tool reference.  
     # If the point falls outside the workspace, then clip it to the workspace, and return False.
-    def SignalInput_callback (self, srvSignalReq):
+    def SignalInput_callback (self, reqSignal):
         #rospy.logwarn('SignalInput_callback()')
         with self.lock:
             #rospy.logwarn('SignalInput_callback() locked')
-            rv = SrvSignalResponse()
+            rvSignal = SrvSignalResponse()
             
-            (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', srvSignalReq.state)
-            rv.success = isInArena
+            (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', reqSignal.state)
+            rvSignal.success = isInArena
         
         #rospy.logwarn('SignalInput_callback() free')
-        return rv
+        return rvSignal
 
 
     # Create a vector with direction of ptDir, and magnitude of ptMag.
