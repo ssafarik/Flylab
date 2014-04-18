@@ -78,7 +78,7 @@ class Experiment():
         self.experimentparams.pre.trigger.angleMax =135.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
         self.experimentparams.pre.trigger.angleTestBilateral = False
-        self.experimentparams.pre.trigger.timeHold = 1.0
+        self.experimentparams.pre.trigger.timeHold = 5.0
         self.experimentparams.pre.trigger.timeout = -1
         
         self.experimentparams.pre.wait2 = 0.0

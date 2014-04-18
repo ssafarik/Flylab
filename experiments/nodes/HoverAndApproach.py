@@ -36,7 +36,7 @@ class Experiment():
         self.experimentparams.robotspec.nRobots = 1
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
-        self.experimentparams.robotspec.isPresent = False                           # Set this to False when you remove the robot, but still want the actuation.
+        self.experimentparams.robotspec.isPresent = True                           # Set this to False when you remove the robot, but still want the actuation.
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
         self.experimentparams.flyspec.nFlies = 1
@@ -81,8 +81,8 @@ class Experiment():
         self.experimentparams.pre.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.pre.trigger.speedRelMin       =   0.0        # Relative speed of child to parent.
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
-        self.experimentparams.pre.trigger.distanceMin = 35.0               # Distance between child and parent frames.
-        self.experimentparams.pre.trigger.distanceMax = 45.0
+        self.experimentparams.pre.trigger.distanceMin = 25.0               # Distance between child and parent frames.
+        self.experimentparams.pre.trigger.distanceMax = 35.0
         self.experimentparams.pre.trigger.angleMin = 00.0 * N.pi / 180.0   # Angle of the child frame from the perspective of the parent frame.
         self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'          # 'inclusive' or 'exclusive' of the given angle range.
