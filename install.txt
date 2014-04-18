@@ -16,13 +16,13 @@ rosdep update
 
 
 # Get a few additional pieces.
+sudo apt-get install -y python-setuptools
+sudo apt-get install -y python-numpy
+sudo apt-get install -y python-scipy
+sudo apt-get install -y libdc1394-22-dev
+sudo apt-get install -y intltool
+sudo apt-get install -y gobject-introspection
 sudo easy_install munkres
-sudo apt-get install python-setuptools
-sudo apt-get install python-numpy
-sudo apt-get install python-scipy
-sudo apt-get install libdc1394-22-dev
-sudo apt-get install intltool
-sudo apt-get install gobject-introspection
 
 
 # Get the Flylab software.
@@ -44,9 +44,9 @@ sudo python ~/src.git/pylibusb/setup.py install
 
 # Get Aravis camera library.
 Download the latest release from https://wiki.gnome.org/Aravis, 
-for example:  http://ftp.acc.umu.se/pub/GNOME/sources/aravis/0.3/aravis-0.3.0.tar.xz 
-tar -xzf aravis-0.3.0.tar.xz   # To extract the files.
-cd aravix-0.3.0
+for example:  http://ftp.acc.umu.se/pub/GNOME/sources/aravis/0.3/aravis-0.3.1.tar.xz 
+tar -xzf aravis-0.3.1.tar.xz   # To extract the files.
+cd aravis-0.3.1
 ./configure
 make && sudo make install
 
