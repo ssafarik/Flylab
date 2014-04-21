@@ -862,6 +862,6 @@ class ContourIdentifier:
 if __name__ == '__main__':
     rospy.init_node('ContourIdentifier')
     ci = ContourIdentifier()
-    #ci.main()
-    cProfile.run('ci.main()', '/home/rancher/profile.pstats')    
+    ci.main()
+    #cProfile.run('ci.main()', '/home/rancher/profile.pstats')    
     
