@@ -67,6 +67,10 @@ class ContourIdentifier:
         self.lockParams = threading.Lock()
         self.lockThreads = threading.Lock()
         
+        # Set up the input cache.
+        self.cache = [None, None]
+        self.iWorking = 0
+        
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
         rospy.sleep(1)
@@ -685,160 +689,173 @@ class ContourIdentifier:
         self.stateKinematic = stateKinematic
         
 
-    # ContourinfoLists_callback() is the main message handler for this node.
     def ContourinfoLists_callback(self, contourinfolistsPixels):
-        with self.lockThreads:
-            try:
-                if (self.initialized):
-
-                    # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
-                    if (0 < self.nRobots):
-                        try:
-                            stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
-                            (translationEE,rotationEE) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
-                        except tf.Exception, e:
-                            pass    # No transform - Either the EE is still initializing, or because we're replaying a bag file.
-                            #rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
-                        else:
-                            self.pubStateEE.publish(MsgFrameState(header=Header(stamp=contourinfolistsPixels.header.stamp,
-                                                                                frame_id='Arena'),
-                                                                  pose=Pose(position=Point(translationEE[0],translationEE[1],translationEE[2]),
-                                                                            orientation=Quaternion(rotationEE[0],rotationEE[1],rotationEE[2],rotationEE[3]))
-                                                                  )
-                                                    )
+        # Point to the cache non-working entry.
+        iLoading = (self.iWorking+1) % 2
         
-                    # Apply the arena mask, and transform to arena frame.
-                    contourinfolistsPixels = self.FilterContourinfolistsWithinMask(contourinfolistsPixels)
-                    contourinfolists = self.TransformContourinfolistsArenaFromCamera(contourinfolistsPixels)
-                    
-        
-                    # Repackage the contourinfolists as a list of contourinfos, ignoring any that are in an exclusion zone.
-                    self.contourinfo_list = []            
-                    for i in range(len(contourinfolists.x)):
-                        inExclusionzone = False
-                        if (self.enabledExclusionzone):
-                            # See if the contourinfo is in any of the exclusionzones.
-                            for k in range(len(self.pointExclusionzone_list)):
-                                inExclusionzone = inExclusionzone or (N.linalg.norm([contourinfolists.x[i]-self.pointExclusionzone_list[k].x, 
-                                                                                     contourinfolists.y[i]-self.pointExclusionzone_list[k].y]) < self.radiusExclusionzone_list[k])
-                            
-                        if (not inExclusionzone): 
-                            contourinfo = Contourinfo()
-                            contourinfo.header = contourinfolists.header
-                            contourinfo.x      = contourinfolists.x[i]
-                            contourinfo.y      = contourinfolists.y[i]
-                            if (not N.isnan(contourinfolists.angle[i])):
-                                contourinfo.angle = contourinfolists.angle[i]
+        self.cache[self.iLoading] = contourinfolistsPixels 
+    
+    
+    def ProcessContourinfoLists(self):
+        if (self.cache[self.iWorking] is not None):
+            with self.lockThreads:
+                try:
+                    if (self.initialized):
+    
+                        # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
+                        if (0 < self.nRobots):
+                            try:
+                                stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
+                                (translationEE,rotationEE) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
+                            except tf.Exception, e:
+                                pass    # No transform - Either the EE is still initializing, or because we're replaying a bag file.
+                                #rospy.logwarn ('CI EndEffector not yet initialized: %s' % e)
                             else:
-                                contourinfo.angle = self.contouranglePrev
-                            self.contouranglePrev = contourinfo.angle
-                            
-                            contourinfo.area   = contourinfolists.area[i]
-                            contourinfo.ecc    = contourinfolists.ecc[i]
-                            contourinfo.imgRoi = contourinfolists.imgRoi[i]
-                            self.contourinfo_list.append(contourinfo)
+                                self.pubStateEE.publish(MsgFrameState(header=Header(stamp=contourinfolistsPixels.header.stamp,
+                                                                                    frame_id='Arena'),
+                                                                      pose=Pose(position=Point(translationEE[0],translationEE[1],translationEE[2]),
+                                                                                orientation=Quaternion(rotationEE[0],rotationEE[1],rotationEE[2],rotationEE[3]))
+                                                                      )
+                                                        )
             
-                    
-                    # Figure out who is who in the camera image.
-                    try:
-                        self.mapContourinfoFromObject = self.MapContoursFromObjects()
-                    except IndexError:
-                        self.mapContourinfoFromObject = None
-        
-                    if (self.mapContourinfoFromObject is not None):
-                        # Update the robot state w/ the contourinfo and end-effector positions.
-                        for iRobot in self.iRobot_list:
-                            if (self.mapContourinfoFromObject[iRobot] is not None):
+                        # Apply the arena mask, and transform to arena frame.
+                        contourinfolistsPixels = self.FilterContourinfolistsWithinMask(contourinfolistsPixels)
+                        contourinfolists = self.TransformContourinfolistsArenaFromCamera(contourinfolistsPixels)
+                        
+            
+                        # Repackage the contourinfolists as a list of contourinfos, ignoring any that are in an exclusion zone.
+                        self.contourinfo_list = []            
+                        for i in range(len(contourinfolists.x)):
+                            inExclusionzone = False
+                            if (self.enabledExclusionzone):
+                                # See if the contourinfo is in any of the exclusionzones.
+                                for k in range(len(self.pointExclusionzone_list)):
+                                    inExclusionzone = inExclusionzone or (N.linalg.norm([contourinfolists.x[i]-self.pointExclusionzone_list[k].x, 
+                                                                                         contourinfolists.y[i]-self.pointExclusionzone_list[k].y]) < self.radiusExclusionzone_list[k])
                                 
-                                # If the map points to a contourinfo, then use it.
-                                # For the robot, use the end-effector angle instead of the contourinfo angle.
-                                if (self.stateKinematic is not None):
+                            if (not inExclusionzone): 
+                                contourinfo = Contourinfo()
+                                contourinfo.header = contourinfolists.header
+                                contourinfo.x      = contourinfolists.x[i]
+                                contourinfo.y      = contourinfolists.y[i]
+                                if (not N.isnan(contourinfolists.angle[i])):
+                                    contourinfo.angle = contourinfolists.angle[i]
+                                else:
+                                    contourinfo.angle = self.contouranglePrev
+                                self.contouranglePrev = contourinfo.angle
+                                
+                                contourinfo.area   = contourinfolists.area[i]
+                                contourinfo.ecc    = contourinfolists.ecc[i]
+                                contourinfo.imgRoi = contourinfolists.imgRoi[i]
+                                self.contourinfo_list.append(contourinfo)
+                
+                        
+                        # Figure out who is who in the camera image.
+                        try:
+                            self.mapContourinfoFromObject = self.MapContoursFromObjects()
+                        except IndexError:
+                            self.mapContourinfoFromObject = None
+            
+                        if (self.mapContourinfoFromObject is not None):
+                            # Update the robot state w/ the contourinfo and end-effector positions.
+                            for iRobot in self.iRobot_list:
+                                if (self.mapContourinfoFromObject[iRobot] is not None):
+                                    
+                                    # If the map points to a contourinfo, then use it.
+                                    # For the robot, use the end-effector angle instead of the contourinfo angle.
+                                    if (self.stateKinematic is not None):
+                                        q = self.stateKinematic.pose.orientation
+                                        rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
+                                        self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].angle = rpy[2]
+                                    
+                                    # Use this contourinfo.    
+                                    contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iRobot]]
+                                    
+                                # Else use the kinematic state, if available.
+                                elif (self.stateKinematic is not None):
                                     q = self.stateKinematic.pose.orientation
                                     rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                                    self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].angle = rpy[2]
+                                    area = N.pi * (self.params['tracking']['robot']['width']/2)**2
+    
+                                    # Make a 'fake' contourinfo from kinematics.    
+                                    contourinfo = Contourinfo(header=self.stateKinematic.header,
+                                                              x=self.stateKinematic.pose.position.x,
+                                                              y=self.stateKinematic.pose.position.y,
+                                                              angle=rpy[2],
+                                                              area=area,
+                                                              ecc=1.0,
+                                                              imgRoi=None
+                                                              )
+                                else:
+                                    contourinfo = None
+                                     
+                                    
+                                # Update the object.
+                                if (iRobot < len(self.objects)):
+                                    self.objects[iRobot].Update(contourinfo)
+            
+                                # Write a file (for getting Kalman covariances, etc).
+                                #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateKinematic.pose.position.x,
+                                #                                     self.stateKinematic.pose.position.y,
+                                #                                     self.objects[iRobot].state.pose.position.x, 
+                                #                                     self.objects[iRobot].state.pose.position.y,
+                                #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].x,
+                                #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].y)
+                                #self.fidRobot.write(data)
+                                    
+                            # Update the flies' states.
+                            for iFly in self.iFly_list:
+                                if (self.mapContourinfoFromObject[iFly] is not None):
+                                    contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iFly]]
+                                else:
+                                    contourinfo = None
                                 
-                                # Use this contourinfo.    
-                                contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iRobot]]
-                                
-                            # Else use the kinematic state, if available.
-                            elif (self.stateKinematic is not None):
-                                q = self.stateKinematic.pose.orientation
-                                rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                                area = N.pi * (self.params['tracking']['robot']['width']/2)**2
-
-                                # Use this contourinfo.    
-                                contourinfo = Contourinfo(header=self.stateKinematic.header,
-                                                          x=self.stateKinematic.pose.position.x,
-                                                          y=self.stateKinematic.pose.position.y,
-                                                          angle=rpy[2],
-                                                          area=area,
-                                                          ecc=1.0,
-                                                          imgRoi=None
-                                                          )
-                            else:
-                                contourinfo = None
-                                 
-                                
-                            # Update the object.
-                            if (iRobot < len(self.objects)):
-                                self.objects[iRobot].Update(contourinfo)
-        
-                            # Write a file (for getting Kalman covariances, etc).
-                            #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateKinematic.pose.position.x,
-                            #                                     self.stateKinematic.pose.position.y,
-                            #                                     self.objects[iRobot].state.pose.position.x, 
-                            #                                     self.objects[iRobot].state.pose.position.y,
-                            #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].x,
-                            #                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].y)
-                            #self.fidRobot.write(data)
-                                
-                        # Update the flies' states.
-                        for iFly in self.iFly_list:
-                            if (self.mapContourinfoFromObject[iFly] is not None):
-                                contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iFly]]
-                            else:
-                                contourinfo = None
+                                if (iFly < len(self.objects)):
+                                    self.objects[iFly].Update(contourinfo)
+                                    
+                                # Write a file.
+                                #if self.mapContourinfoFromObject[1] is not None:
+                                #    data = '%s, %s, %s, %s\n' % (self.contourinfo_list[self.mapContourinfoFromObject[1]].x, 
+                                #                                 self.contourinfo_list[self.mapContourinfoFromObject[1]].y, 
+                                #                                 self.objects[1].state.pose.position.x, 
+                                #                                 self.objects[1].state.pose.position.y)
+                                #    self.fidFly.write(data)
                             
-                            if (iFly < len(self.objects)):
-                                self.objects[iFly].Update(contourinfo)
-                                
-                            # Write a file.
-                            #if self.mapContourinfoFromObject[1] is not None:
-                            #    data = '%s, %s, %s, %s\n' % (self.contourinfo_list[self.mapContourinfoFromObject[1]].x, 
-                            #                                 self.contourinfo_list[self.mapContourinfoFromObject[1]].y, 
-                            #                                 self.objects[1].state.pose.position.x, 
-                            #                                 self.objects[1].state.pose.position.y)
-                            #    self.fidFly.write(data)
-                        
-        
-                        self.PublishArenaStateFromObjects()
-        
-                        # Publish the visual_state.
-                        if (self.bUseVisualServoing) and (0 in self.iRobot_list) and (0 < len(self.objects)):
-                            self.pubVisualState.publish(self.objects[0].state)
-                        
-                        
-                        # Publish a marker to indicate the size of the arena.
-                        self.markerArenaOuter.header.stamp = contourinfolists.header.stamp
-                        self.markerArenaInner.header.stamp = contourinfolists.header.stamp
-                        self.pubMarker.publish(self.markerArenaOuter)
-                        self.pubMarker.publish(self.markerArenaInner)
-        
-                        # Publish markers for all the exclusionzones.
-                        if self.enabledExclusionzone:
-                            for marker in self.markerExclusionzone_list:
-                                marker.header.stamp = contourinfolists.header.stamp
-                                self.pubMarker.publish(marker)
-        
-            except rospy.exceptions.ROSException, e:
-                rospy.loginfo('CI ROSException: %s' % e)
+            
+                            self.PublishArenaStateFromObjects()
+            
+                            # Publish the visual_state.
+                            if (self.bUseVisualServoing) and (0 in self.iRobot_list) and (0 < len(self.objects)):
+                                self.pubVisualState.publish(self.objects[0].state)
+                            
+                            
+                            # Publish a marker to indicate the size of the arena.
+                            self.markerArenaOuter.header.stamp = contourinfolists.header.stamp
+                            self.markerArenaInner.header.stamp = contourinfolists.header.stamp
+                            self.pubMarker.publish(self.markerArenaOuter)
+                            self.pubMarker.publish(self.markerArenaInner)
+            
+                            # Publish markers for all the exclusionzones.
+                            if self.enabledExclusionzone:
+                                for marker in self.markerExclusionzone_list:
+                                    marker.header.stamp = contourinfolists.header.stamp
+                                    self.pubMarker.publish(marker)
+            
+                except rospy.exceptions.ROSException, e:
+                    rospy.loginfo('CI ROSException: %s' % e)
                       
+            # Mark this entry as done.
+            self.cache[self.iWorking] = None
+            
+        # Go to the other image.
+        self.iWorking = (self.iWorking+1) % 2
 
 
     
 if __name__ == '__main__':
     rospy.init_node('ContourIdentifier')
     ci = ContourIdentifier()
-    rospy.spin()
+    while (not rospy.is_shutdown()):
+        ci.ProcessContourinfoLists()
     
     
