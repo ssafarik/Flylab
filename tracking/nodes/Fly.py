@@ -725,8 +725,8 @@ class Fly:
     
     # Update()
     # Update the fly:  current state using the visual position and the computed position (if applicable), mean fly, superres, etc.
-    def Update(self, contourinfo, posesComputedExternal):
-        if self.initialized:
+    def Update(self, contourinfo):
+        if (self.initialized):
             self.count += 1
             self.contourinfo = contourinfo
             
@@ -736,29 +736,14 @@ class Fly:
             with self.lock:
                 SetDict.SetWithOverwrite(self.params, rospy.get_param('/',{}))
             
-            # The computed orientation overrides the visual orientation.
-            if posesComputedExternal is not None:
-                try: 
-                    posesComputed = self.tfrx.transformPose('Arena', posesComputedExternal)
-                    q = posesComputed.pose.orientation
-                    rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                except tf.Exception, e:
-                    rospy.logwarn('FLY Exception in Update(): %s' % e)
-                    angleSensed = contourinfo.angle
-                else:
-                    angleSensed = rpy[2]
-            else:
-                angleSensed = contourinfo.angle
-
-                
             
 
             # Update the position & orientation filters
             self.isVisible = False            
             if (self.contourinfo.x is not None) and \
                (self.contourinfo.y is not None) and \
-               (angleSensed is not None) and \
-               (not N.isnan(angleSensed)) and \
+               (contourinfo.angle is not None) and \
+               (not N.isnan(contourinfo.angle)) and \
                (self.contourinfo.area is not None) and \
                (self.contourinfo.ecc is not None):
                 
@@ -789,8 +774,8 @@ class Fly:
                 (zKalman, vzKalman) = (0.0, 0.0)
                 #(xKalman,yKalman) = (self.contourinfo.x,self.contourinfo.y) # Unfiltered.
 
-                self.lpAngleContour.Update(angleSensed, contourinfo.header.stamp.to_sec())
-                self.apAngleContour.Update(angleSensed, contourinfo.header.stamp.to_sec())
+                self.lpAngleContour.Update(contourinfo.angle, contourinfo.header.stamp.to_sec())
+                self.apAngleContour.Update(contourinfo.angle, contourinfo.header.stamp.to_sec())
 
                 (angleLeft, angleRight) = self.GetWingAngles(contourinfo)
                 
@@ -805,8 +790,8 @@ class Fly:
                 (zKalman, vzKalman) = (0.0, 0.0)
                 (angleLeft, angleRight) = (N.pi, N.pi)
 
-            if (angleSensed is None):
-                angleSensed = 0.0
+            if (contourinfo.angle is None):
+                contourinfo.angle = 0.0
                 
             # If good data, then use it.
             if (xKalman is not None) and (yKalman is not None):
@@ -841,7 +826,7 @@ class Fly:
             if 'Robot' not in self.name:
                 angle = self.GetResolvedAngleFiltered()
             else:
-                angle = angleSensed
+                angle = contourinfo.angle
             (self.state.pose.orientation.x, self.state.pose.orientation.y, self.state.pose.orientation.z, self.state.pose.orientation.w) = tf.transformations.quaternion_about_axis(angle, (0,0,1))
 
             # Get the angular velocities.

@@ -477,6 +477,7 @@ class ContourIdentifier:
 
 
     # MapContoursFromObjects()
+    #   Compute a mapping between the visual contours, on one side, and on the other the tracked objects & kinematic positions.
     #   Uses self.contourinfo_list, self.stateMechanical, & self.objects,
     #   Returns a list of indices such that self.objects[k] = contour[map[k]], and self.objects[0]=therobot
     #
@@ -525,13 +526,13 @@ class ContourIdentifier:
                 eccMax = N.inf
                 
                 
-            # Get the computed (mechanical) position.
+            # Get the mechanical position.
             if (self.stateMechanical is not None):
-                xComputed = self.stateMechanical.pose.position.x
-                yComputed = self.stateMechanical.pose.position.y
+                xMechanical = self.stateMechanical.pose.position.x
+                yMechanical = self.stateMechanical.pose.position.y
             else:
-                xComputed = N.nan
-                yComputed = N.nan
+                xMechanical = N.nan
+                yMechanical = N.nan
                 
                 
             # Get the robot Kalman xy.
@@ -541,8 +542,8 @@ class ContourIdentifier:
                                    areaMin,  eccMin,
                                    areaMean, eccMean,
                                    areaMax,  eccMax,
-                                   xComputed,                         
-                                   yComputed])
+                                   xMechanical,                         
+                                   yMechanical])
             else:
                 xyKalman = None
                 
@@ -554,8 +555,8 @@ class ContourIdentifier:
                                          areaMin,  eccMin,
                                          areaMean, eccMean,
                                          areaMax,  eccMax,
-                                         xComputed, 
-                                         yComputed])
+                                         xMechanical, 
+                                         yMechanical])
             else:
                 xyMechanical = None
 
@@ -683,9 +684,9 @@ class ContourIdentifier:
         with self.lockThreads:
             try:
                 if self.initialized:
-                    if self.nRobots>0:
-                        
-                        # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
+
+                    # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
+                    if (0 < self.nRobots):
                         try:
                             stamp = self.tfrx.getLatestCommonTime('Arena', 'EndEffector')
                             (translationEE,rotationEE) = self.tfrx.lookupTransform('Arena', 'EndEffector', stamp)
@@ -700,21 +701,12 @@ class ContourIdentifier:
                                                                   )
                                                     )
         
-                    
+                    # Apply the arena mask, and transform to arena frame.
                     contourinfolistsPixels = self.FilterContourinfolistsWithinMask(contourinfolistsPixels)
                     contourinfolists = self.TransformContourinfolistsArenaFromCamera(contourinfolistsPixels)
                     
-                    # Create a null contourinfo.
-                    contourinfoNone = Contourinfo()
-                    contourinfoNone.header = contourinfolists.header
-                    contourinfoNone.x = None
-                    contourinfoNone.y = None
-                    contourinfoNone.angle = None
-                    contourinfoNone.area = None
-                    contourinfoNone.ecc = None
-                    contourinfoNone.imgRoi = None
         
-                    # Repackage the contourinfolists into a list of contourinfos, ignoring any that are in the exclusion zone.
+                    # Repackage the contourinfolists as a list of contourinfos, ignoring any that are in an exclusion zone.
                     self.contourinfo_list = []            
                     for i in range(len(contourinfolists.x)):
                         inExclusionzone = False
@@ -752,15 +744,20 @@ class ContourIdentifier:
                         for iRobot in self.iRobot_list:
                             if (self.mapContourinfoFromObject[iRobot] is not None):
                                 # For the robot, use the end-effector angle instead of the contourinfo angle.
-                                if self.stateMechanical is not None:
+                                if (self.stateMechanical is not None):
                                     q = self.stateMechanical.pose.orientation
                                     rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
                                     self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].angle = rpy[2]
+                                
+                                # Use this contourinfo.    
                                 contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iRobot]]
+                                
                             elif (self.stateMechanical is not None):
                                 q = self.stateMechanical.pose.orientation
                                 rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
                                 area = N.pi * (self.params['tracking']['robot']['width']/2)**2
+
+                                # Use this contourinfo.    
                                 contourinfo = Contourinfo(header=self.stateMechanical.header,
                                                           x=self.stateMechanical.pose.position.x,
                                                           y=self.stateMechanical.pose.position.y,
@@ -770,17 +767,21 @@ class ContourIdentifier:
                                                           imgRoi=None
                                                           )
                             else:
+                                # Use null contourinfo.    
+                                contourinfoNone = Contourinfo()
+                                contourinfoNone.header = contourinfolists.header
+                                contourinfoNone.x = None
+                                contourinfoNone.y = None
+                                contourinfoNone.angle = None
+                                contourinfoNone.area = None
+                                contourinfoNone.ecc = None
+                                contourinfoNone.imgRoi = None
                                 contourinfo = contourinfoNone
                                  
-                            # Use the computed pose if one exists.
-                            if self.stateMechanical is not None:
-                                poses = PoseStamped(header=self.stateMechanical.header, pose=self.stateMechanical.pose)
-                            else:
-                                poses = None
                                 
                             # Update the object.
                             if (iRobot < len(self.objects)):
-                                self.objects[iRobot].Update(contourinfo, poses)
+                                self.objects[iRobot].Update(contourinfo)
         
                             # Write a file (for getting Kalman covariances, etc).
                             #data = '%s, %s, %s, %s, %s, %s\n' % (self.stateMechanical.pose.position.x,
@@ -796,11 +797,20 @@ class ContourIdentifier:
                             if (self.mapContourinfoFromObject[iFly] is not None):
                                 contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iFly]]
                             else:
+                                # Use null contourinfo.    
+                                contourinfoNone = Contourinfo()
+                                contourinfoNone.header = contourinfolists.header
+                                contourinfoNone.x = None
+                                contourinfoNone.y = None
+                                contourinfoNone.angle = None
+                                contourinfoNone.area = None
+                                contourinfoNone.ecc = None
+                                contourinfoNone.imgRoi = None
                                 contourinfo = contourinfoNone
                                 #rospy.logwarn ('No contourinfo for fly %d' % iFly)
                             
                             if (iFly < len(self.objects)):
-                                self.objects[iFly].Update(contourinfo, None)
+                                self.objects[iFly].Update(contourinfo)
                                 
                             # Write a file.
                             #if self.mapContourinfoFromObject[1] is not None:
