@@ -746,8 +746,8 @@ class Fly:
             self.dt = self.contourinfo.header.stamp - self.stampPrev
             self.stampPrev = self.contourinfo.header.stamp
             
-            with self.lock:
-                SetDict.SetWithOverwrite(self.params, rospy.get_param('/',{}))
+            #with self.lock:
+            #    SetDict.SetWithOverwrite(self.params, rospy.get_param('/',{}))
             
             
 
