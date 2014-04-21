@@ -16,6 +16,8 @@ from flycore.msg import MsgFrameState, TrackingCommand
 from pythonmodules import filters, CircleFunctions, SetDict
 import Fly
 from munkres import Munkres
+import cProfile
+
 
 INDEX_X = 0
 INDEX_Y = 1
@@ -693,11 +695,12 @@ class ContourIdentifier:
         # Point to the cache non-working entry.
         iLoading = (self.iWorking+1) % 2
         
-        self.cache[self.iLoading] = contourinfolistsPixels 
+        self.cache[iLoading] = contourinfolistsPixels 
     
     
     def ProcessContourinfoLists(self):
         if (self.cache[self.iWorking] is not None):
+            contourinfolistsPixels = self.cache[self.iWorking]
             with self.lockThreads:
                 try:
                     if (self.initialized):
@@ -851,11 +854,14 @@ class ContourIdentifier:
         self.iWorking = (self.iWorking+1) % 2
 
 
+    def main(self):
+        while (not rospy.is_shutdown()):
+            ci.ProcessContourinfoLists()
+
     
 if __name__ == '__main__':
     rospy.init_node('ContourIdentifier')
     ci = ContourIdentifier()
-    while (not rospy.is_shutdown()):
-        ci.ProcessContourinfoLists()
-    
+    #ci.main()
+    cProfile.run('ci.main()', '/home/rancher/profile.pstats')    
     
