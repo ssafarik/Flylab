@@ -489,7 +489,7 @@ class ContourIdentifier:
         if (self.bUseVisualServoing):
             nContours = max(self.nRobots+self.nFlies, len(self.contourinfo_list))
         else:
-            nContours = max(self.nRobots+self.nFlies, len(self.contourinfo_list)+1) # Space for a fake contour to match with the robot.
+            nContours = max(self.nRobots+self.nFlies, len(self.contourinfo_list)+self.nRobots) # Space for a fake contour to match with the robot.
             
         xyContours = N.tile([55555.0, 55555.0, 1.0, 1.0], 
                             (nContours,1)
@@ -565,16 +565,21 @@ class ContourIdentifier:
             if (xyKalman is not None) and (xyKinematic is not None):
                 # Don't let the fly walk away with the robot.
                 if (N.linalg.norm(xyKalman[0:2]-xyKinematic[0:2]) < self.params['tracking']['offsetEndEffectorMax']):
+                    rospy.logwarn('AA')
                     xyRobot = xyKalman
                 else:
+                    rospy.logwarn('AB')
                     xyRobot = xyKinematic
                     #rospy.logwarn('Too far away: % 0.1f' % N.linalg.norm(xyKalman[0:2]-xyKinematic[0:2]))
             else:
                 if (xyKalman is not None):
+                    rospy.logwarn('BA')
                     xyRobot = xyKalman
                 elif (xyKinematic is not None):
+                    rospy.logwarn('BB')
                     xyRobot = xyKinematic
                 else:
+                    rospy.logwarn('BC')
                     xyRobot = None
                     
             # Put the robot into the objects list.
@@ -604,15 +609,15 @@ class ContourIdentifier:
             
         # Match objects with contourinfo_list.
         d = self.GetDistanceMatrix(xyObjects, xyContours)
-        if d is not []:
+        if (d is not []):
             # Choose the algorithm.
             #alg = 'galeshapely'
             alg = 'munkres'
-            if alg=='galeshapely':
+            if (alg=='galeshapely'):
                 (mapObjectsGaleShapely, mapContours) = self.GetMatchGaleShapely(d)
                 mapContoursFromObjects = mapObjectsGaleShapely
                 
-            if alg=='munkres':
+            if (alg=='munkres'):
                 mapObjectsMunkres = self.GetMatchMunkres(d)
                 mapContoursFromObjects = mapObjectsMunkres
             
@@ -634,6 +639,12 @@ class ContourIdentifier:
                 
         else:
             mapContoursFromObjects = [None for k in self.iAll_list]
+            
+
+        # Mark the missing contours.
+        for i in range(len(mapContoursFromObjects)):            
+            if (len(self.contourinfo_list) <= mapContoursFromObjects[i]):
+                mapContoursFromObjects[i] = None
             
 #        rospy.logwarn ('----------------------------------')
 #        if (self.nRobots==1):
@@ -683,7 +694,7 @@ class ContourIdentifier:
     def ContourinfoLists_callback(self, contourinfolistsPixels):
         with self.lockThreads:
             try:
-                if self.initialized:
+                if (self.initialized):
 
                     # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
                     if (0 < self.nRobots):
@@ -743,6 +754,8 @@ class ContourIdentifier:
                         # Update the robot state w/ the contourinfo and end-effector positions.
                         for iRobot in self.iRobot_list:
                             if (self.mapContourinfoFromObject[iRobot] is not None):
+                                
+                                # If the map points to a contourinfo, then use it.
                                 # For the robot, use the end-effector angle instead of the contourinfo angle.
                                 if (self.stateKinematic is not None):
                                     q = self.stateKinematic.pose.orientation
@@ -752,6 +765,7 @@ class ContourIdentifier:
                                 # Use this contourinfo.    
                                 contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iRobot]]
                                 
+                            # Else use the kinematic state, if available.
                             elif (self.stateKinematic is not None):
                                 q = self.stateKinematic.pose.orientation
                                 rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
@@ -767,16 +781,7 @@ class ContourIdentifier:
                                                           imgRoi=None
                                                           )
                             else:
-                                # Use null contourinfo.    
-                                contourinfoNone = Contourinfo()
-                                contourinfoNone.header = contourinfolists.header
-                                contourinfoNone.x = None
-                                contourinfoNone.y = None
-                                contourinfoNone.angle = None
-                                contourinfoNone.area = None
-                                contourinfoNone.ecc = None
-                                contourinfoNone.imgRoi = None
-                                contourinfo = contourinfoNone
+                                contourinfo = None
                                  
                                 
                             # Update the object.
@@ -797,17 +802,7 @@ class ContourIdentifier:
                             if (self.mapContourinfoFromObject[iFly] is not None):
                                 contourinfo = self.contourinfo_list[self.mapContourinfoFromObject[iFly]]
                             else:
-                                # Use null contourinfo.    
-                                contourinfoNone = Contourinfo()
-                                contourinfoNone.header = contourinfolists.header
-                                contourinfoNone.x = None
-                                contourinfoNone.y = None
-                                contourinfoNone.angle = None
-                                contourinfoNone.area = None
-                                contourinfoNone.ecc = None
-                                contourinfoNone.imgRoi = None
-                                contourinfo = contourinfoNone
-                                #rospy.logwarn ('No contourinfo for fly %d' % iFly)
+                                contourinfo = None
                             
                             if (iFly < len(self.objects)):
                                 self.objects[iFly].Update(contourinfo)

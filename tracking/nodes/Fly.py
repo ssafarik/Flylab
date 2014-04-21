@@ -728,6 +728,19 @@ class Fly:
     def Update(self, contourinfo):
         if (self.initialized):
             self.count += 1
+            
+            if (contourinfo is None):
+                # Use null contourinfo.    
+                contourinfoNone = Contourinfo()
+                contourinfoNone.header = Header()
+                contourinfoNone.x = None
+                contourinfoNone.y = None
+                contourinfoNone.angle = None
+                contourinfoNone.area = None
+                contourinfoNone.ecc = None
+                contourinfoNone.imgRoi = None
+                contourinfo = contourinfoNone
+                
             self.contourinfo = contourinfo
             
             self.dt = self.contourinfo.header.stamp - self.stampPrev
