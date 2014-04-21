@@ -565,21 +565,16 @@ class ContourIdentifier:
             if (xyKalman is not None) and (xyKinematic is not None):
                 # Don't let the fly walk away with the robot.
                 if (N.linalg.norm(xyKalman[0:2]-xyKinematic[0:2]) < self.params['tracking']['offsetEndEffectorMax']):
-                    rospy.logwarn('AA')
                     xyRobot = xyKalman
                 else:
-                    rospy.logwarn('AB')
                     xyRobot = xyKinematic
                     #rospy.logwarn('Too far away: % 0.1f' % N.linalg.norm(xyKalman[0:2]-xyKinematic[0:2]))
             else:
                 if (xyKalman is not None):
-                    rospy.logwarn('BA')
                     xyRobot = xyKalman
                 elif (xyKinematic is not None):
-                    rospy.logwarn('BB')
                     xyRobot = xyKinematic
                 else:
-                    rospy.logwarn('BC')
                     xyRobot = None
                     
             # Put the robot into the objects list.
