@@ -852,6 +852,7 @@ class ContourGenerator:
                         try:
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
                             image2.header.stamp = image.header.stamp
+                            image2.encoding = 'mono8'
                             self.pubImageBackground.publish(image2)
                         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
                             rospy.logwarn ('Exception %s' % e)
@@ -863,6 +864,7 @@ class ContourGenerator:
                             self.matImageRect = cv2.add(self.matThreshold, self.matForeground)
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
                             image2.header.stamp = image.header.stamp
+                            image2.encoding = 'mono8'
                             self.pubImageThreshold.publish(image2)
                         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
                             rospy.logwarn ('Exception %s' % e)
@@ -873,6 +875,7 @@ class ContourGenerator:
                         try:
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matForeground), 'passthrough')
                             image2.header.stamp = image.header.stamp
+                            image2.encoding = 'mono8'
                             self.pubImageForeground.publish(image2)
                         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
                             rospy.logwarn ('Exception %s' % e)
@@ -883,6 +886,7 @@ class ContourGenerator:
                         self.matProcessedFlip = cv2.flip(self.matProcessed, 0)
                         image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
                         image2.header = image.header
+                            image2.encoding = 'mono8'
         #                     image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                         
                         params = rospy.get_param('/', {})
