@@ -15,21 +15,22 @@
 	<param name="robot_description"         textfile="$(find racetrack)/motorarm_urdf.xml" />	<!-- Contains 3D model of hardware. -->
 
 	<param name="motorarm/speed_max"   		type="double" value="50"/>             		<!-- Millimeters per second of end effector. -->
-	<param name="motorarm/L1"          		type="double" value="32"/>               <!-- 32.5 Link1 length in millimeters. -->
-	<param name="motorarm/angleOffset" 		type="double" value="-3.30"/>               <!-- Angle between the index switch and the 0 angle. -->
-	<param name="motorarm/T" 		        type="double" value="0.02"/>               <!-- Time period of motor update. -->
+	<param name="motorarm/L1"          		type="double" value="32"/>                  <!-- 32.5 Link1 length in millimeters. -->
+	<param name="motorarm/angleOffset" 		type="double" value="1.57"/>                <!-- Angle from the index switch to the 0 angle. -->
+	<param name="motorarm/T" 		        type="double" value="0.02"/>                <!-- Time period of motor update. -->
 
 <!--
 	<param name="motorarm/kP"      			type="double" value="1.0"/>
 	<param name="motorarm/kI"      			type="double" value="0.0"/>
 	<param name="motorarm/kD"      			type="double" value="0.0"/>
-	-->
+-->
 
-	<param name="motorarm/kP"      			type="double" value="1.0"/>
-	<param name="motorarm/kI"      			type="double" value="0.08"/>
+	<param name="motorarm/kP"      			type="double" value="1.1"/>
+	<param name="motorarm/kI"      			type="double" value="0.1"/>
 	<param name="motorarm/kD"      			type="double" value="40.0"/>
+
 	<param name="motorarm/kWindup" 			type="double" value="0.8"/>  
-	<param name="motorarm/maxI"    			type="double" value="30.0"/>  
+	<param name="motorarm/maxI"    			type="double" value="0.5"/>  
 	
 	<node name="joint1" pkg="rosSimpleStep" type="rosSimpleStep.py" args="--name='joint1' --id='0.0.0'"/>
 </launch>

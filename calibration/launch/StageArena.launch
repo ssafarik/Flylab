@@ -11,16 +11,14 @@
 	<!--                                                                    -->
 	<!-- ================================================================== -->
 	
-	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find robots)/launch/robots_1.launch" />
-	<include file="$(find flies)/launch/flies_0.launch" />
+	<include file="$(find config)/launch/main.launch" />
 	<include file="$(find patterngen)/launch/PatternGenXY.launch" />
 	<include file="$(find arena_tf)/launch/main.launch" />
 	<include file="$(find tracking)/launch/main.launch" />
 
-	<param name="camera/framerate" type="double" value="4"/> <!-- These are low since the processing time eventually causes ContourGenerator to hang on publishing ContourinfoLists. -->
-	<param name="camera/softwarerate" type="double" value="4"/>
+	<param name="camera/framerate" type="double" value="10"/> <!-- These are low since the processing time eventually causes ContourGenerator to hang on publishing ContourinfoLists. -->
+	<param name="camera/softwarerate" type="double" value="10"/>
 
-	<param name="motorarm/speed_max" type="double" value="20.4"/>
+	<param name="motorarm/speed_max" type="double" value="100"/>   <!--20.4" -->
 	<node pkg="calibration" type="StageArena.py" name="StageArenaCalibration" />
 </launch>

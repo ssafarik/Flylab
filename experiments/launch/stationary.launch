@@ -1,0 +1,18 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the STATIONARY experiment:                -->
+	<!--   The magnet doesn't move, and the fly's behavior          -->
+	<!--   is recorded.                                             -->
+	<!--                                                            -->
+	<!-- ========================================================== -->
+
+	<!-- ***  Core stuff  *** -->
+    <include file="$(find flycore)/launch/main.launch" />
+
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="experiments" type="Stationary.py" name="Experiment" required="true" />
+
+	
+  
+</launch>

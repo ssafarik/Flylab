@@ -14,7 +14,7 @@ from patterngen.msg import MsgPattern
 
 
 #######################################################################################################
-class Experiment():
+class ExperimentPassiveChase():
     def __init__(self):
         rospy.init_node('Experiment')
         
@@ -25,17 +25,17 @@ class Experiment():
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "activechase"
+        self.experimentparams.save.filenamebase = "stationary"
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
-        self.experimentparams.save.onlyWhileTriggered = False
+        self.experimentparams.save.onlyWhileTriggered = True
         
         self.experimentparams.robotspec.nRobots = 1
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
-        self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
+        self.experimentparams.robotspec.isPresent = False                            # Set this to False if you remove the robot, but still want the actuation.
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
         self.experimentparams.flyspec.nFlies = 1
@@ -45,41 +45,23 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.pre.robot.enabled = True
-        self.experimentparams.pre.robot.move.mode = 'pattern' # 'pattern' or 'relative'
-        self.experimentparams.pre.robot.move.pattern.frameidPosition = 'Arena'            # 
-        self.experimentparams.pre.robot.move.pattern.frameidAngle = 'Arena'               # 
-        self.experimentparams.pre.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/20
-        self.experimentparams.pre.robot.move.pattern.hzPoint = 100
-        self.experimentparams.pre.robot.move.pattern.count = -1
-        self.experimentparams.pre.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
-        self.experimentparams.pre.robot.move.pattern.size.y = 0
-        self.experimentparams.pre.robot.move.pattern.param = 0
-        self.experimentparams.pre.robot.move.pattern.direction = 1
-        self.experimentparams.pre.robot.move.pattern.restart = True
-        self.experimentparams.pre.robot.home.enabled = True
-        self.experimentparams.pre.robot.home.x = rospy.get_param('motorarm/L1', 999)
-        self.experimentparams.pre.robot.home.y = 0.0
-        self.experimentparams.pre.robot.home.speed = 20
-        self.experimentparams.pre.robot.home.tolerance = 2
-
+        self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
         self.experimentparams.pre.wait1 = 0#150.0
-        self.experimentparams.pre.trigger.enabled = True
+        self.experimentparams.pre.trigger.enabled = False
         self.experimentparams.pre.trigger.frameidParent = 'Fly01'
         self.experimentparams.pre.trigger.frameidChild = 'Robot'
-        self.experimentparams.pre.trigger.speedAbsParentMin =   4.0
+        self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
         self.experimentparams.pre.trigger.speedAbsChildMin  =   0.0
         self.experimentparams.pre.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.pre.trigger.speedRelMin       =   0.0
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
         self.experimentparams.pre.trigger.distanceMin =   0.0
-        self.experimentparams.pre.trigger.distanceMax =   7.0
+        self.experimentparams.pre.trigger.distanceMax = 999.0
         self.experimentparams.pre.trigger.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.pre.trigger.angleMax = 60.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
         self.experimentparams.pre.trigger.angleTestBilateral = True
         self.experimentparams.pre.trigger.timeHold = 0.0
@@ -93,15 +75,14 @@ class Experiment():
         self.experimentparams.trial.robot.move.mode = 'pattern' # 'pattern' or 'relative'
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'            # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
-        self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/40
+        self.experimentparams.trial.robot.move.pattern.shape = 'constant' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1
         self.experimentparams.trial.robot.move.pattern.hzPoint = 100
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.move.pattern.size.y = 0
         self.experimentparams.trial.robot.move.pattern.param = 0
         self.experimentparams.trial.robot.move.pattern.direction = 1
-        self.experimentparams.trial.robot.move.pattern.restart = False  # False: Continue the new pattern from the old pattern's current location.
         self.experimentparams.trial.robot.home.enabled = True
         self.experimentparams.trial.robot.home.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.home.y = 0.0
@@ -112,7 +93,7 @@ class Experiment():
         self.experimentparams.trial.lasergalvos.enabled = False
 
         
-        self.experimentparams.trial.ledpanels.enabled = False
+        self.experimentparams.trial.ledpanels.enabled = True
         self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = 1
         self.experimentparams.trial.ledpanels.origin.x = 0 
@@ -125,13 +106,13 @@ class Experiment():
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly01'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
-        self.experimentparams.post.trigger.speedAbsParentMin =   0.0
-        self.experimentparams.post.trigger.speedAbsParentMax = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMin = 999.0
+        self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. NEVER
         self.experimentparams.post.trigger.speedAbsChildMin  =   0.0
         self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.post.trigger.speedRelMin       =   0.0
         self.experimentparams.post.trigger.speedRelMax       = 999.0
-        self.experimentparams.post.trigger.distanceMin =  30.0
+        self.experimentparams.post.trigger.distanceMin = 0.0
         self.experimentparams.post.trigger.distanceMax = 999.0
         self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
@@ -172,7 +153,7 @@ class Experiment():
 
 if __name__ == '__main__':
     #try:
-        experiment = Experiment()
+        experiment = ExperimentPassiveChase()
         experiment.Run()
         
     #except:
