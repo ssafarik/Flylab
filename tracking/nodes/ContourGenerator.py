@@ -886,7 +886,7 @@ class ContourGenerator:
                         self.matProcessedFlip = cv2.flip(self.matProcessed, 0)
                         image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
                         image2.header = image.header
-                            image2.encoding = 'mono8'
+                        image2.encoding = 'mono8'
         #                     image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                         
                         params = rospy.get_param('/', {})
