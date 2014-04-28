@@ -450,7 +450,7 @@ class TriggerOnStates (smach.State):
         if (self.commandExperiment != 'pause_now'):
             dt = timeNow - self.timePrev
         else:
-            dt = rospy.Time(0)
+            dt = rospy.Duration(0)
 
         self.timePrev = timeNow
         self.timeElapsed = self.timeElapsed + dt
@@ -646,6 +646,7 @@ class TriggerOnTime (smach.State):
 
 
     def CommandExperiment_callback(self, msgString):
+        #rospy.logwarn('TriggerOnTime received: %s' % msgString.data)
         self.commandExperiment = msgString.data
             
         
@@ -654,7 +655,7 @@ class TriggerOnTime (smach.State):
         if (self.commandExperiment != 'pause_now'):
             dt = timeNow - self.timePrev
         else:
-            dt = rospy.Time(0)
+            dt = rospy.Duration(0)
 
         self.timePrev = timeNow
         self.timeElapsed = self.timeElapsed + dt

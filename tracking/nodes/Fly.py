@@ -729,7 +729,11 @@ class Fly:
         if (self.initialized):
             self.count += 1
             
-            if (contourinfo is None):
+            if (contourinfo is not None):
+                bValidContourinfo = True
+            else:
+                bValidContourinfo = False
+
                 # Use null contourinfo.    
                 contourinfoNone = Contourinfo()
                 contourinfoNone.header = Header()
@@ -740,6 +744,7 @@ class Fly:
                 contourinfoNone.ecc = None
                 contourinfoNone.imgRoi = None
                 contourinfo = contourinfoNone
+
                 
             self.contourinfo = contourinfo
             
@@ -753,12 +758,9 @@ class Fly:
 
             # Update the position & orientation filters
             self.isVisible = False            
-            if (self.contourinfo.x is not None) and \
-               (self.contourinfo.y is not None) and \
+            if (bValidContourinfo) and \
                (contourinfo.angle is not None) and \
-               (not N.isnan(contourinfo.angle)) and \
-               (self.contourinfo.area is not None) and \
-               (self.contourinfo.ecc is not None):
+               (not N.isnan(contourinfo.angle)):
                 
                 # Update min/max ecc & area.
                 if contourinfo.ecc < self.eccMin:
@@ -868,65 +870,66 @@ class Fly:
             self.UpdateFlipState()
             
                 
-            # Send the Raw transform.
-            if self.isVisible and (not N.isnan(self.contourinfo.angle)):
-                self.tfbx.sendTransform((self.contourinfo.x, 
-                                         self.contourinfo.y, 
-                                         0.0),
-                                        tf.transformations.quaternion_about_axis(self.contourinfo.angle, (0,0,1)),
-                                        self.contourinfo.header.stamp,
-                                        self.name+"Contour",
-                                        "Arena")
-            
-            # Send the Filtered transform.
-            if self.state.pose.position.x is not None:
-                q = self.state.pose.orientation
-                self.tfbx.sendTransform((self.state.pose.position.x, 
-                                         self.state.pose.position.y, 
-                                         self.state.pose.position.z),
-                                        (q.x, q.y, q.z, q.w),
-                                        self.state.header.stamp,
-                                        self.name,
-                                        self.state.header.frame_id)
+            if (bValidContourinfo):
+                # Send the Raw transform.
+                if self.isVisible and (not N.isnan(self.contourinfo.angle)):
+                    self.tfbx.sendTransform((self.contourinfo.x, 
+                                             self.contourinfo.y, 
+                                             0.0),
+                                            tf.transformations.quaternion_about_axis(self.contourinfo.angle, (0,0,1)),
+                                            self.contourinfo.header.stamp,
+                                            self.name+"Contour",
+                                            "Arena")
                 
-
-            # Send the Forecast transform.
-            if self.state.pose.position.x is not None:
-                poseForecast = Pose()#copy.copy(self.state.pose)
-                poseForecast.position.x = self.state.pose.position.x + self.state.velocity.linear.x * self.params['tracking']['dtForecast']
-                poseForecast.position.y = self.state.pose.position.y + self.state.velocity.linear.y * self.params['tracking']['dtForecast']
-                poseForecast.position.z = self.state.pose.position.z + self.state.velocity.linear.z * self.params['tracking']['dtForecast']
-                q = self.state.pose.orientation
-                self.tfbx.sendTransform((poseForecast.position.x, 
-                                         poseForecast.position.y, 
-                                         poseForecast.position.z),
-                                        (q.x, q.y, q.z, q.w),
-                                        self.state.header.stamp,
-                                        self.name+'Forecast',
-                                        self.state.header.frame_id)
-                
-
-            # Publish a 3D model marker for the robot.
-            if 'Robot' in self.name:
-                markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
-                                                    frame_id='Arena'),
-                                      ns=self.name,
-                                      id=1,
-                                      type=Marker.CYLINDER,
-                                      action=0,
-                                      pose=Pose(position=Point(x=self.state.pose.position.x, 
-                                                               y=self.state.pose.position.y, 
-                                                               z=self.state.pose.position.z),
-                                                orientation=self.state.pose.orientation),
-                                      scale=Vector3(x=self.params['tracking']['robot']['width'],
-                                                    y=self.params['tracking']['robot']['length'],
-                                                    z=self.params['tracking']['robot']['height']),
-                                      color=ColorRGBA(a=0.7,
-                                                      r=0.5,
-                                                      g=0.5,
-                                                      b=0.5),
-                                      lifetime=rospy.Duration(0.5))
-                self.pubMarker.publish(markerRobot)
+                # Send the Filtered transform.
+                if self.state.pose.position.x is not None:
+                    q = self.state.pose.orientation
+                    self.tfbx.sendTransform((self.state.pose.position.x, 
+                                             self.state.pose.position.y, 
+                                             self.state.pose.position.z),
+                                            (q.x, q.y, q.z, q.w),
+                                            self.state.header.stamp,
+                                            self.name,
+                                            self.state.header.frame_id)
+                    
+    
+                # Send the Forecast transform.
+                if self.state.pose.position.x is not None:
+                    poseForecast = Pose()#copy.copy(self.state.pose)
+                    poseForecast.position.x = self.state.pose.position.x + self.state.velocity.linear.x * self.params['tracking']['dtForecast']
+                    poseForecast.position.y = self.state.pose.position.y + self.state.velocity.linear.y * self.params['tracking']['dtForecast']
+                    poseForecast.position.z = self.state.pose.position.z + self.state.velocity.linear.z * self.params['tracking']['dtForecast']
+                    q = self.state.pose.orientation
+                    self.tfbx.sendTransform((poseForecast.position.x, 
+                                             poseForecast.position.y, 
+                                             poseForecast.position.z),
+                                            (q.x, q.y, q.z, q.w),
+                                            self.state.header.stamp,
+                                            self.name+'Forecast',
+                                            self.state.header.frame_id)
+                    
+    
+                # Publish a 3D model marker for the robot.
+                if 'Robot' in self.name:
+                    markerRobot = Marker(header=Header(stamp = self.state.header.stamp,
+                                                        frame_id='Arena'),
+                                          ns=self.name,
+                                          id=1,
+                                          type=Marker.CYLINDER,
+                                          action=0,
+                                          pose=Pose(position=Point(x=self.state.pose.position.x, 
+                                                                   y=self.state.pose.position.y, 
+                                                                   z=self.state.pose.position.z),
+                                                    orientation=self.state.pose.orientation),
+                                          scale=Vector3(x=self.params['tracking']['robot']['width'],
+                                                        y=self.params['tracking']['robot']['length'],
+                                                        z=self.params['tracking']['robot']['height']),
+                                          color=ColorRGBA(a=0.7,
+                                                          r=0.5,
+                                                          g=0.5,
+                                                          b=0.5),
+                                          lifetime=rospy.Duration(0.5))
+                    self.pubMarker.publish(markerRobot)
                 
             self.updated = True
         
