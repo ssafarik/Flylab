@@ -445,6 +445,18 @@ class TriggerOnStates (smach.State):
 
 
 
+    def step_time_elapsed(self):
+        timeNow = rospy.Time.now()
+        if (self.commandExperiment != 'pause_now'):
+            dt = timeNow - self.timePrev
+        else:
+            dt = rospy.Time(0)
+
+        self.timePrev = timeNow
+        self.timeElapsed = self.timeElapsed + dt
+
+        
+        
     def execute(self, userdata):
         rospy.loginfo('EL State TriggerOnStates(%s)' % (self.mode))
 
@@ -457,15 +469,18 @@ class TriggerOnStates (smach.State):
             trigger = userdata.experimentparamsIn.post.trigger
 
         rv = 'disabled'
-        if trigger.enabled:
-            self.timeStart = rospy.Time.now()
+        if (trigger.enabled):
+            self.timePrev = rospy.Time.now()
+            self.timeElapsed = rospy.Time(0)
+            
             self.isTriggered = False
             self.timeTriggered  = None
             
             # Wait for an arenastate.
-            while self.arenastate is None:
-                if trigger.timeout != -1:
-                    if (rospy.Time.now().to_sec()-self.timeStart.to_sec()) > trigger.timeout:
+            while (self.arenastate is None):
+                self.step_time_elapsed()
+                if (trigger.timeout != -1):
+                    if ((self.timeElapsed.to_sec()) > trigger.timeout):
                         return 'timeout'
                 #if self.preempt_requested():
                 #    self.service_preempt()
@@ -474,7 +489,9 @@ class TriggerOnStates (smach.State):
                 rospy.sleep(1.0)
     
             rv = 'aborted'
-            while not rospy.is_shutdown():
+            while (not rospy.is_shutdown()):
+                self.step_time_elapsed()
+                
                 # Test for distance.
                 isDistanceInRange = True
                 distance = None
@@ -552,7 +569,7 @@ class TriggerOnStates (smach.State):
                     # Set the pending trigger start time.
                     if not self.isTriggered:
                         self.isTriggered = True
-                        self.timeTriggered = rospy.Time.now()
+                        self.timeTriggered = self.timeElapsed
                 else:
                     # Cancel a pending trigger.
                     self.isTriggered = False
@@ -565,9 +582,9 @@ class TriggerOnStates (smach.State):
 
                 # If pending trigger has lasted longer than requested duration, then set trigger.
                 if (self.isTriggered):
-                    duration = rospy.Time.now().to_sec() - self.timeTriggered.to_sec()
+                    duration = self.timeElapsed.to_sec() - self.timeTriggered.to_sec()
                     
-                    if duration >= trigger.timeHold:
+                    if (trigger.timeHold <= duration):
                         rv = 'success'
                         break
                     
@@ -578,14 +595,14 @@ class TriggerOnStates (smach.State):
                     break
 
                     
-                if self.preempt_requested():
+                if (self.preempt_requested()):
                     rospy.loginfo('preempt requested: TriggerOnStates()')
                     self.service_preempt()
                     rv = 'preempt'
                     break
                 
-                if trigger.timeout != -1:
-                    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > trigger.timeout:
+                if (trigger.timeout != -1):
+                    if (trigger.timeout < self.timeElapsed.to_sec()):
                         rv = 'timeout'
                         break
                 
@@ -632,6 +649,18 @@ class TriggerOnTime (smach.State):
         self.commandExperiment = msgString.data
             
         
+    def step_time_elapsed(self):
+        timeNow = rospy.Time.now()
+        if (self.commandExperiment != 'pause_now'):
+            dt = timeNow - self.timePrev
+        else:
+            dt = rospy.Time(0)
+
+        self.timePrev = timeNow
+        self.timeElapsed = self.timeElapsed + dt
+
+        
+        
     def execute(self, userdata):
         if self.mode=='pre1':
             elapsedMax = userdata.experimentparamsIn.pre.wait1
@@ -644,13 +673,15 @@ class TriggerOnTime (smach.State):
             
 
         rospy.loginfo('EL State TriggerOnTime(%s, %s)' % (self.mode, elapsedMax))
+
+        self.timePrev = rospy.Time.now()
+        self.timeElapsed = rospy.Time(0)
             
         rv = 'success'
-        self.timeTriggered = rospy.Time.now()
         while not rospy.is_shutdown():
-            elapsed = rospy.Time.now().to_sec() - self.timeTriggered.to_sec()
+            self.step_time_elapsed()
 
-            if elapsed >= elapsedMax:
+            if (elapsedMax <= self.timeElapsed.to_sec()):
                 rv = 'success'
                 break
 
