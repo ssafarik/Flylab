@@ -47,7 +47,7 @@ class PatternGenXY:
         self.command = 'continue'
         self.command_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
         
-        self.subCommand          = rospy.Subscriber('broadcast/command', String, self.Command_callback)
+        self.subCommand          = rospy.Subscriber('experiment/command', String, self.Command_callback)
         self.subSetPattern       = rospy.Subscriber('SetPattern', MsgPattern, self.SetPattern_callback)
         self.tfrx = tf.TransformListener()
         

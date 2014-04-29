@@ -171,11 +171,11 @@ class EndExperiment (smach.State):
 #              new_trial service (which begins recording).
 #
 # Experiment may be paused & restarted via the commandlines:
-# rostopic pub -1 broadcast/command std_msgs/String pause_now
-# rostopic pub -1 broadcast/command std_msgs/String pause_after_trial 
-# rostopic pub -1 broadcast/command std_msgs/String continue
-# rostopic pub -1 broadcast/command std_msgs/String exit_now
-# rostopic pub -1 broadcast/command std_msgs/String exit_after_trial
+# rostopic pub -1 experiment/command std_msgs/String pause_now
+# rostopic pub -1 experiment/command std_msgs/String pause_after_trial 
+# rostopic pub -1 experiment/command std_msgs/String continue
+# rostopic pub -1 experiment/command std_msgs/String exit_now
+# rostopic pub -1 experiment/command std_msgs/String exit_after_trial
 #
 class StartTrial (smach.State):
     def __init__(self):
@@ -265,8 +265,8 @@ class EndTrial (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
-        self.pubCommand = rospy.Publisher('broadcast/command', String)
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.pubCommand = rospy.Publisher('experiment/command', String)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
         self.bSelfPublished = False
 
         
@@ -365,7 +365,7 @@ class TriggerOnStates (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -642,7 +642,7 @@ class TriggerOnTime (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):

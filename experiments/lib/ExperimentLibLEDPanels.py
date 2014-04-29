@@ -40,7 +40,7 @@ class Reset (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -122,7 +122,7 @@ class Action (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
 

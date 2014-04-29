@@ -42,6 +42,7 @@ class SaveCsv:
         ############# Arenastate/CSV stuff
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.sub_arenastate = rospy.Subscriber("ArenaState", ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
         self.lock = threading.Lock()
         
@@ -49,6 +50,7 @@ class SaveCsv:
         self.fid = None
         self.bSaveCsv = False
         self.bSavingCsv = False
+        self.commandExperiment = 'continue'
 
         self.format_align = ">"
         self.format_sign = " "
@@ -395,6 +397,11 @@ class SaveCsv:
         return True
 
 
+    def CommandExperiment_callback(self, msgString):
+        #rospy.logwarn('TriggerOnTime received: %s' % msgString.data)
+        self.commandExperiment = msgString.data
+            
+        
 
     # Trigger_callback() 
     #    This gets called when the triggering state changes, either a trigger state has succeeded,
@@ -835,7 +842,7 @@ class SaveCsv:
     
 
     def ArenaState_callback(self, arenastate):
-        if (self.initialized) and (self.bSavingCsv) and (self.fid is not None):
+        if (self.initialized) and (self.bSavingCsv) and (self.fid is not None) and (self.commandExperiment != 'pause_now'):
 
             # Get latest time.
             stamp = max(0.0, arenastate.robot.header.stamp.to_sec())

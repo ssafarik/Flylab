@@ -72,7 +72,7 @@ class MotorArm:
         # Command messages.
         self.command = 'continue'
         self.command_list = ['continue','exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.Command_callback)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
 
         self.subVisualState = rospy.Subscriber('visual_state', MsgFrameState, self.VisualState_callback)
         self.pubJointState = rospy.Publisher('joint_states', JointState)
