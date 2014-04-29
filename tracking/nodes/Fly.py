@@ -29,7 +29,7 @@ globalLock2 = threading.Lock()
 ###############################################################################
 # class Fly()
 # Implements a fly or robot object in a 2D arena. 
-# Updates its state based on an image "contour" from a single camera.
+# Updates its state based on an image 'contour' from a single camera.
 #
 class Fly:
     def __init__(self, name=None, tfrx=None, lock=None):
@@ -80,12 +80,12 @@ class Fly:
         
         # Nonessential stuff to publish.
         if self.params['tracking']['nonessentialPublish']:
-            self.pubImageRoiMean        = rospy.Publisher(self.name+"/image_mean", Image)
-            self.pubImageRoi            = rospy.Publisher(self.name+"/image", Image)
-            self.pubImageRoiReg         = rospy.Publisher(self.name+"/image_reg", Image)
-            self.pubImageRoiWings       = rospy.Publisher(self.name+"/image_wings", Image)
-            self.pubImageMaskWings      = rospy.Publisher(self.name+"/image_mask_wings", Image)
-            self.pubImageMaskBody       = rospy.Publisher(self.name+"/image_mask_body", Image)
+            self.pubImageRoiMean        = rospy.Publisher(self.name+'/image_mean', Image)
+            self.pubImageRoi            = rospy.Publisher(self.name+'/image', Image)
+            self.pubImageRoiReg         = rospy.Publisher(self.name+'/image_reg', Image)
+            self.pubImageRoiWings       = rospy.Publisher(self.name+'/image_wings', Image)
+            self.pubImageMaskWings      = rospy.Publisher(self.name+'/image_mask_wings', Image)
+            self.pubImageMaskBody       = rospy.Publisher(self.name+'/image_mask_body', Image)
             
             self.pubLeft                = rospy.Publisher(self.name+'/leftwing', Float32)
             self.pubLeftIntensity       = rospy.Publisher(self.name+'/leftintensity', Float32)
@@ -229,7 +229,7 @@ class Fly:
 
     # GetNextFlipValue()
     #   Using self.contourinfo, self.state, and self.angleOfTravelRecent,
-    #   we determine a value to use for updating the "flip" filter,
+    #   we determine a value to use for updating the 'flip' filter,
     #   which varies on [-1,+1], and the sign of which determines if to flip.
     #
     # Returns the chosen flip value.
@@ -536,7 +536,7 @@ class Fly:
     def GetWingAngles(self, contourinfo):
         if (contourinfo is not None) and (contourinfo.imgRoi is not None) and (len(contourinfo.imgRoi.data)>0):
             # Convert ROS image to numpy.
-            npRoiIn = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, "passthrough")))
+            npRoiIn = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(contourinfo.imgRoi, 'passthrough')))
             
             # Apply the fly-rotation mask.
             npRoi = cv2.bitwise_and(npRoiIn, self.npMaskCircle)
@@ -552,7 +552,7 @@ class Fly:
             self.UpdateRoiMean(npRoiReg)
     
             
-            # Create a "wing foreground", i.e. Background Fly Subtraction.
+            # Create a 'wing foreground', i.e. Background Fly Subtraction.
             diff = npRoiReg.astype(N.float32) - self.npfRoiMean*self.params['tracking']['scalarMeanFlySubtraction'] # Subtract a multiple of the average fly.
             npWings = N.clip(diff, 0, N.iinfo(N.uint8).max).astype(N.uint8)
             #npWings = npRoiReg 
@@ -729,7 +729,8 @@ class Fly:
         if (self.initialized):
             self.count += 1
             
-            if (contourinfo is not None):
+            #rospy.logwarn(contourinfo)    
+            if (contourinfo is not None) and (not N.isnan(contourinfo.x)) and (not N.isnan(contourinfo.y)) and (not N.isnan(contourinfo.angle)):
                 bValidContourinfo = True
             else:
                 bValidContourinfo = False
@@ -745,7 +746,6 @@ class Fly:
                 contourinfoNone.imgRoi = None
                 contourinfo = contourinfoNone
 
-                
             self.contourinfo = contourinfo
             
             self.dt = self.contourinfo.header.stamp - self.stampPrev
@@ -758,9 +758,7 @@ class Fly:
 
             # Update the position & orientation filters
             self.isVisible = False            
-            if (bValidContourinfo) and \
-               (contourinfo.angle is not None) and \
-               (not N.isnan(contourinfo.angle)):
+            if (bValidContourinfo):
                 
                 # Update min/max ecc & area.
                 if contourinfo.ecc < self.eccMin:
@@ -795,7 +793,7 @@ class Fly:
                 (angleLeft, angleRight) = self.GetWingAngles(contourinfo)
                 
                 
-                if N.abs(self.contourinfo.x)>9999 or N.abs(xKalman)>9999:
+                if (N.abs(self.contourinfo.x)>9999) or (N.abs(xKalman)>9999):
                     rospy.logwarn ('FLY LARGE CONTOUR, x,x=%s, %s.  Check your background image, lighting, and the parameter tracking/diff_threshold.' % (self.contourinfo.x, xKalman))
 
 
@@ -872,14 +870,14 @@ class Fly:
                 
             if (bValidContourinfo):
                 # Send the Raw transform.
-                if self.isVisible and (not N.isnan(self.contourinfo.angle)):
+                if self.isVisible:
                     self.tfbx.sendTransform((self.contourinfo.x, 
                                              self.contourinfo.y, 
                                              0.0),
                                             tf.transformations.quaternion_about_axis(self.contourinfo.angle, (0,0,1)),
                                             self.contourinfo.header.stamp,
-                                            self.name+"Contour",
-                                            "Arena")
+                                            self.name+'Contour',
+                                            'Arena')
                 
                 # Send the Filtered transform.
                 if self.state.pose.position.x is not None:

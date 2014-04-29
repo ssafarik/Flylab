@@ -416,9 +416,9 @@ class TriggerOnStates (smach.State):
     
             else:    # Get the speed via transforms.
                 try:
-                    stamp = self.tfrx.getLatestCommonTime(frameidParent, frameidChild)
-                    ((vx,vy,vz),(wx,wy,wz)) = self.tfrx.lookupTwist(frameidChild, frameidParent, stamp-self.dtVelocity, self.dtVelocity)
-                except (tf.Exception, AttributeError), e:
+                    stamp = self.tfrx.getLatestCommonTime(frameidParent, frameidChild) - self.dtVelocity
+                    ((vx,vy,vz),(wx,wy,wz)) = self.tfrx.lookupTwist(frameidChild, frameidParent, stamp, self.dtVelocity)
+                except (tf.Exception, AttributeError, TypeError), e:
                     ((vx,vy,vz),(wx,wy,wz)) = ((0,0,0),(0,0,0))
     
                 speed = N.linalg.norm(N.array([vx,vy,vz]))

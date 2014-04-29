@@ -108,6 +108,15 @@ class TransformServerArenaCamera:
     
             Hinv = np.dot(K, RT)
             Hinv = Hinv / Hinv[-1,-1]    # Hinv transforms arena->camera.
+            
+#             rospy.logwarn(P)
+#             rospy.logwarn(K)
+#             rospy.logwarn(R)
+#             rospy.logwarn(T)
+#             rospy.logwarn(RT)
+#             rospy.logwarn(np.dot(K, RT))
+#             rospy.logwarn(Hinv)
+#             rospy.logwarn('-------')
         else:
             Hinv = None
             

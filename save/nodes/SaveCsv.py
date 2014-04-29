@@ -8,7 +8,7 @@ import sys
 import time, os, subprocess
 import threading
 import numpy as N
-
+from std_msgs.msg import String
 from flycore.msg import MsgFrameState
 from experiment_srvs.srv import Trigger, ExperimentParams
 from tracking.msg import ArenaState

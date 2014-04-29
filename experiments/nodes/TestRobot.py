@@ -15,18 +15,18 @@ from patterngen.msg import MsgPattern
 
 
 #######################################################################################################
-class ExperimentChase():
+class ExperimentTestRobot():
     def __init__(self):
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Testing Robot Movement"
+        self.experimentparams.experiment.description = 'Testing Robot Movement'
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
-        self.experimentparams.save.filenamebase = "test"
+        self.experimentparams.save.filenamebase = 'test'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = True
@@ -37,10 +37,10 @@ class ExperimentChase():
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
         self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
-        self.experimentparams.robotspec.description = "Black oxide magnet"
+        self.experimentparams.robotspec.description = 'Black oxide magnet'
 
         self.experimentparams.flyspec.nFlies = 0
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = 'unspecified'
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=50.0, y=68.0)]
@@ -60,8 +60,8 @@ class ExperimentChase():
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'pattern'        
         self.experimentparams.trial.robot.move.relative.tracking = False
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Robot"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly01Forecast"
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = 'Arena'
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = 'Arena'
         self.experimentparams.trial.robot.move.relative.distance = 20
         self.experimentparams.trial.robot.move.relative.angleType = 'constant'
         self.experimentparams.trial.robot.move.relative.angleOffset = 0
@@ -100,7 +100,7 @@ class ExperimentChase():
 
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.frameidParent = 'Fly01'
+        self.experimentparams.post.trigger.frameidParent = 'Arena'
         self.experimentparams.post.trigger.frameidChild = 'Robot'
         self.experimentparams.post.trigger.speedAbsParentMin = 999.0
         self.experimentparams.post.trigger.speedAbsParentMax = 111.0 # i.e. Never.
@@ -148,7 +148,7 @@ class ExperimentChase():
 
 if __name__ == '__main__':
     #try:
-        experiment = ExperimentChase()
+        experiment = ExperimentTestRobot()
         experiment.Run()
         
     #except:
