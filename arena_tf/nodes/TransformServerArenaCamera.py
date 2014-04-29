@@ -104,7 +104,8 @@ class TransformServerArenaCamera:
             # Make a 2D [R|T] transform.  Drop the Z coord.
             RT = np.zeros((3,3))
             RT[:-1,:-1] = R[:-1,:-1]
-            RT[:,-1] = T[:-1,-1]
+            RT[0:2,-1] = T[0:2,-1]
+            RT[-1,-1] = T[-1,-1]
     
             Hinv = np.dot(K, RT)
             Hinv = Hinv / Hinv[-1,-1]    # Hinv transforms arena->camera.

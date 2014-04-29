@@ -5,7 +5,7 @@ import rospy
 import copy
 import cv
 import cv2
-import numpy as N
+import numpy as np
 import tf
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Point, PointStamped
@@ -19,8 +19,8 @@ FRAME_CAMERA="Camera"
 
 class CalibrateCameraArena:
     def __init__(self):
-        self.initialized = False
-        self.initialized_images = False
+        self.bInitialized = False
+        self.bInitialized_images = False
         rospy.init_node('CalibrateCameraArena')
 
         self.cvbridge = CvBridge()
@@ -58,33 +58,33 @@ class CalibrateCameraArena:
         self.sizeDeadzone = (2,2)
         self.criteriaTerm = (cv.CV_TERMCRIT_ITER | cv.CV_TERMCRIT_EPS, 100, 0.01)
         
-        self.pointsArena         = N.zeros([self.nCorners, 3], dtype=N.float32)
-        self.pointsImage         = N.zeros([self.nCorners, 2], dtype=N.float32)
-        self.pointsAxes          = N.zeros([4, 3], dtype=N.float32)
-        self.pointsAxesProjected = N.zeros([4, 2], dtype=N.float32)
+        self.pointsArena         = np.zeros([self.nCorners, 3], dtype=np.float32)
+        self.pointsImage         = np.zeros([self.nCorners, 2], dtype=np.float32)
+        self.pointsAxes          = np.zeros([4, 3], dtype=np.float32)
+        self.pointsAxesProjected = np.zeros([4, 2], dtype=np.float32)
 
-        self.rvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
-        self.rvec2     = N.zeros([1, 3], dtype=N.float32).squeeze()
-        self.rvec2_avg = N.zeros([1, 3], dtype=N.float32).squeeze()
-        self.sumWrap   = N.zeros([1, 3], dtype=N.float32).squeeze()
-        self.tvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
-        self.tvec2     = N.zeros([1, 3], dtype=N.float32).squeeze()
-        self.tvec2_avg = N.zeros([1, 3], dtype=N.float32).squeeze()
+        self.rvec      = np.zeros([1, 3], dtype=np.float32).squeeze()
+        self.rvec2     = np.zeros([1, 3], dtype=np.float32).squeeze()
+        self.rvec2_avg = np.zeros([1, 3], dtype=np.float32).squeeze()
+        self.sumWrap   = np.zeros([1, 3], dtype=np.float32).squeeze()
+        self.tvec      = np.zeros([1, 3], dtype=np.float32).squeeze()
+        self.tvec2     = np.zeros([1, 3], dtype=np.float32).squeeze()
+        self.tvec2_avg = np.zeros([1, 3], dtype=np.float32).squeeze()
 
         self.nMeasurements = 0
         self.alpha = 0.001 # For moving averages.
         
-        self.initialized = True
+        self.bInitialized = True
     
     
     def CameraInfo_callback (self, msgCameraInfo):
         self.camerainfo = msgCameraInfo
-        self.K = N.reshape(self.camerainfo.P,[3,4])[0:3,0:3] # camerainfo.K and camerainfo.D apply to image_raw; P w/ D=0 applies to image_rect.
-        self.D = N.array([0.0, 0.0, 0.0, 0.0, 0.0])
+        self.K = np.reshape(self.camerainfo.P,[3,4])[0:3,0:3] # camerainfo.K and camerainfo.D apply to image_raw; P w/ D=0 applies to image_rect.
+        self.D = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
       
 
     def Point_callback(self, point):
-        if self.initialized and self.initialized_images:
+        if self.bInitialized and self.bInitialized_images:
             self.ptOriginArena.point.x += point.x
             self.ptOriginArena.point.y += -point.y
             self.radiusMask += point.z
@@ -92,29 +92,31 @@ class CalibrateCameraArena:
         
     def InitializeImages(self, (height,width)):
         if self.camerainfo is not None:
-            self.imgProcessed = N.zeros([height, width],    dtype=N.uint8)
-            self.imgMask      = N.zeros([height, width],    dtype=N.uint8)
-            self.imgDisplay   = N.zeros([height, width, 3], dtype=N.uint8)
+            self.imgProcessed = np.zeros([height, width],    dtype=np.uint8)
+            self.imgMask      = np.zeros([height, width],    dtype=np.uint8)
+            self.imgDisplay   = np.zeros([height, width, 3], dtype=np.uint8)
             
             self.ptOriginArena.point.x = self.xMask #width/2 - self.camerainfo.P[2] #self.KK_cx
             self.ptOriginArena.point.y = self.yMask #height/2 - self.camerainfo.P[6] #self.KK_cy
-            self.initialized_images = True
+            self.bInitialized_images = True
 
 
     def PrepareImageCorners(self, corners):
         for iCorner in range(self.nCorners):
-            (x,y) = corners[iCorner]
+            # Idealized position of the corner.
             self.pointsArena[iCorner][0] = (iCorner // self.nCols)*self.checker_size
             self.pointsArena[iCorner][1] = (iCorner % self.nCols)*self.checker_size
             self.pointsArena[iCorner][2] = 0.0
 
+            # Actual position of the corner.
+            (x,y) = corners[iCorner]
             self.pointsImage[iCorner][0] = x
             self.pointsImage[iCorner][1] = y
 
 
     def DrawOriginAxes(self, cvimage, rvec, tvec):
         if self.camerainfo is not None:
-            self.pointsAxes       = N.zeros([4, 3], dtype=N.float32) #cv.CreateMat(4, 3, cv.CV_32FC1)
+            self.pointsAxes       = np.zeros([4, 3], dtype=np.float32) #cv.CreateMat(4, 3, cv.CV_32FC1)
             self.pointsAxes[0][:] = 0.0               # (0,0,0)T origin point,    pt[0] 
             self.pointsAxes[1][0] = self.checker_size # (1,0,0)T point on x-axis, pt[1]
             self.pointsAxes[2][1] = self.checker_size # (0,1,0)T point on y-axis, pt[2]
@@ -162,21 +164,22 @@ class CalibrateCameraArena:
                 (R,jacobian) = cv2.Rodrigues(self.rvec)
                 T = tf.transformations.translation_matrix(self.tvec)
                 
-                RT = N.zeros((3,3))
+                RT = np.zeros((3,3))
                 RT[:-1,:-1] = R[:-1,:-1]
-                RT[:,-1] = T[:-1,-1]
+                RT[0:2,-1] = T[0:2,-1]
+                RT[-1,-1] = T[-1,-1]
                 
                 
                 # H is/mightbe the transform from camera point to arena point.
-                Hinv = N.dot(self.K, RT)
+                Hinv = np.dot(self.K, RT)
                 Hinv = Hinv / Hinv[-1,-1]
-                H = N.linalg.inv(Hinv)
+                H = np.linalg.inv(Hinv)
                 self.Hinv = Hinv
                 self.H = H
                 
                 
                 self.tfbx.sendTransform(self.tvec,
-                                          tf.transformations.quaternion_about_axis(N.linalg.norm(self.rvec), self.rvec),
+                                          tf.transformations.quaternion_about_axis(np.linalg.norm(self.rvec), self.rvec),
                                           self.stampImage,
                                           FRAME_CHECKERBOARD,
                                           FRAME_IMAGERECT)
@@ -190,13 +193,13 @@ class CalibrateCameraArena:
         Y = [self.ptOriginArena.point.y, self.ptOriginArena.point.y]
         Z = [1,                          1]
         
-        pointsCamera = N.array([X,Y,Z])
-        pointsArena = N.dot(self.H, pointsCamera).transpose()
+        pointsCamera = np.array([X,Y,Z])
+        pointsArena = np.dot(self.H, pointsCamera).transpose()
         x0 = pointsArena[0,0]
         x1 = pointsArena[1,0]
         y0 = pointsArena[0,1]
         y1 = pointsArena[1,1]
-        angleRot = N.arctan2((y1-y0),(x1-x0))
+        angleRot = np.arctan2((y1-y0),(x1-x0))
         
         transCheckerboardArena = pointsArena[0,:]
         transCheckerboardArena[2] = 0
@@ -221,41 +224,48 @@ class CalibrateCameraArena:
             self.rvec2Prev = self.rvec2
             (rvec2, jacobian) = cv2.Rodrigues(rotMat)
             rvec2 = rvec2.squeeze()
-            if (N.any(rvec2 != 0.0)):
+            if (np.any(rvec2 != 0.0)):
                 self.rvec2 = rvec2
-                signWrap = ((N.abs(self.rvec2Prev-self.rvec2)>N.pi) * N.sign(self.rvec2Prev-self.rvec2)).astype('float32')    # An array of -1/0/+1 indicating wrap and direction.
-                self.sumWrap += signWrap * 2*N.pi                                           # The cumulative correction for wrapping.
+                signWrap = ((np.abs(self.rvec2Prev-self.rvec2)>np.pi) * np.sign(self.rvec2Prev-self.rvec2)).astype('float32')    # An array of -1/0/+1 indicating wrap and direction.
+                self.sumWrap += signWrap * 2*np.pi                                           # The cumulative correction for wrapping.
     
-                self.tvec2 = N.array(trans)
+                self.tvec2 = np.array(trans)
 
                 if (self.nMeasurements<10):
                     self.rvec2_avg = self.rvec2+self.sumWrap 
                     self.tvec2_avg = self.tvec2 
-                    self.rvec2_avg = (self.rvec2_avg+2*N.pi)%(4*N.pi) - 2*N.pi # On range [-2pi,+2pi]
+                    self.rvec2_avg = (self.rvec2_avg+2*np.pi)%(4*np.pi) - 2*np.pi # On range [-2pi,+2pi]
                 self.nMeasurements += 1
                     
                 part1 = self.rvec2_avg
-                part2 = ((self.rvec2+self.sumWrap)+2*N.pi)%(4*N.pi) - 2*N.pi # On range [-2pi,+2pi]
+                part2 = ((self.rvec2+self.sumWrap)+2*np.pi)%(4*np.pi) - 2*np.pi # On range [-2pi,+2pi]
                 self.rvec2_avg = (1.0-self.alpha)*part1 + self.alpha*part2
                 self.tvec2_avg = (1.0-self.alpha)*self.tvec2_avg + self.alpha*self.tvec2
     
+                rospy.set_param('camera/arena_tvec_0', float(self.tvec2[0]))
+                rospy.set_param('camera/arena_tvec_1', float(self.tvec2[1]))
+                rospy.set_param('camera/arena_tvec_2', float(self.tvec2[2]))
+                rospy.set_param('camera/arena_rvec_0', float(self.rvec2[0]))
+                rospy.set_param('camera/arena_rvec_1', float(self.rvec2[1]))
+                rospy.set_param('camera/arena_rvec_2', float(self.rvec2[2]))
+
                 
                 # self.image_arena_origin_found = True
                 #self.DrawOriginAxes(self.imgDisplay, self.rvec2, self.tvec2)
 
 
     def Image_callback(self, image):
-        if self.initialized:
+        if self.bInitialized:
             self.stampImage = image.header.stamp
             try:
-                imgInput = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
+                imgInput = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
             except CvBridgeError, e:
                 rospy.logwarn('Exception CvBridgeError in image callback: %s' % e)
             
-            if not self.initialized_images:
+            if not self.bInitialized_images:
                 self.InitializeImages(imgInput.shape)
             
-            if self.initialized_images:
+            if self.bInitialized_images:
                 xText = 25
                 yText = 25
                 dyText = 20
@@ -305,12 +315,12 @@ class CalibrateCameraArena:
                     cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                     yText += dyText
 
-                    display_text = "rvec cur=[%+3.3f, %+3.3f, %+3.3f] avg=[%3.3f, %3.3f, %3.3f]" % ((self.rvec2[0]+N.pi)%(2*N.pi)-N.pi,     
-                                                                                                    (self.rvec2[1]+N.pi)%(2*N.pi)-N.pi,     
-                                                                                                    (self.rvec2[2]+N.pi)%(2*N.pi)-N.pi,
-                                                                                                    (self.rvec2_avg[0]+N.pi)%(2*N.pi)-N.pi, 
-                                                                                                    (self.rvec2_avg[1]+N.pi)%(2*N.pi)-N.pi, 
-                                                                                                    (self.rvec2_avg[2]+N.pi)%(2*N.pi)-N.pi)
+                    display_text = "rvec cur=[%+3.3f, %+3.3f, %+3.3f] avg=[%3.3f, %3.3f, %3.3f]" % ((self.rvec2[0]+np.pi)%(2*np.pi)-np.pi,     
+                                                                                                    (self.rvec2[1]+np.pi)%(2*np.pi)-np.pi,     
+                                                                                                    (self.rvec2[2]+np.pi)%(2*np.pi)-np.pi,
+                                                                                                    (self.rvec2_avg[0]+np.pi)%(2*np.pi)-np.pi, 
+                                                                                                    (self.rvec2_avg[1]+np.pi)%(2*np.pi)-np.pi, 
+                                                                                                    (self.rvec2_avg[2]+np.pi)%(2*np.pi)-np.pi)
                     cv2.putText(self.imgDisplay, display_text,
                                (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                     yText += dyText
