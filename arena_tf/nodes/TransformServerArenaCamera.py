@@ -26,7 +26,8 @@ class TransformServerArenaCamera:
         
         self.tfbx = tf.TransformBroadcaster()
 
-        
+        self.xMask = None
+        self.yMask = None
 
         self.Hinv = np.identity(3)
         self.subCameraInfo           = rospy.Subscriber('camera/camera_info',           CameraInfo,        self.CameraInfo_callback)
@@ -36,8 +37,8 @@ class TransformServerArenaCamera:
 
 
         self.services = {}
-        self.services['camera_from_arena'] = rospy.Service('camera_from_arena', arena_tf.srv.ArenaCameraConversion, self.CameraFromArena_callback)
-        self.services['arena_from_camera'] = rospy.Service('arena_from_camera', arena_tf.srv.ArenaCameraConversion, self.ArenaFromCamera_callback)
+        self.services['image_from_arena'] = rospy.Service('image_from_arena', arena_tf.srv.ArenaCameraConversion, self.ImageFromArena_callback)
+        self.services['arena_from_image'] = rospy.Service('arena_from_image', arena_tf.srv.ArenaCameraConversion, self.ArenaFromImage_callback)
         
         self.services['transformserverarenacamera/init']            = rospy.Service('transformserverarenacamera/init',            ExperimentParams, self.Init_callback)
         self.services['transformserverarenacamera/trial_start']     = rospy.Service('transformserverarenacamera/trial_start',     ExperimentParams, self.TrialStart_callback)
@@ -90,10 +91,23 @@ class TransformServerArenaCamera:
         
         
     def GetTransformArenaFromImageRect(self, camerainfo):
-        if (self.calibration is not None) and (self.camerainfo is None):
+        if (self.calibration is not None):
+            self.K_raw = np.reshape(np.array(camerainfo.K),[3,3])
+            self.D_raw = np.array(camerainfo.D)
+            
             P = np.reshape(np.array(camerainfo.P),[3,4])
-            #K = np.reshape(np.array(camerainfo.K),[3,3])
-            K = P[0:3,0:3] # P is the matrix that applies to image_rect.
+            self.K_rect = P[0:3,0:3] # P is the matrix that applies to image_rect.
+
+            if (self.xMask is not None):            
+                self.K_rect[0,2] = self.xMask
+                self.K_rect[1,2] = self.yMask
+            else:
+                self.K_rect -= np.array([[0,0,20],
+                                        [0,0,8],
+                                        [0,0,0]]) # BUG: Fudge factor for racetrack.
+
+#            rospy.logwarn((self.K_rect[0,2], self.K_rect[1,2], self.xMask, self.yMask))
+            self.D_rect = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
             
     
             rvec = np.array([self.calibration.arena_rvec_0, self.calibration.arena_rvec_1, self.calibration.arena_rvec_2], dtype=np.float32)
@@ -104,18 +118,19 @@ class TransformServerArenaCamera:
             # Make a 2D [R|T] transform.  Drop the Z coord.
             RT = np.zeros((3,3))
             RT[:-1,:-1] = R[:-1,:-1]
-            RT[0:2,-1] = T[0:2,-1]
-            RT[-1,-1] = T[-1,-1]
-    
-            Hinv = np.dot(K, RT)
+            #RT[0:2,-1] = T[0:2,-1]
+            #RT[-1,-1] = T[-1,-1]
+            RT[:,-1] = T[:-1,-1]
+            
+            Hinv = np.dot(self.K_rect, RT)
             Hinv = Hinv / Hinv[-1,-1]    # Hinv transforms arena->camera.
             
 #             rospy.logwarn(P)
-#             rospy.logwarn(K)
+#             rospy.logwarn(self.K_rect)
 #             rospy.logwarn(R)
 #             rospy.logwarn(T)
 #             rospy.logwarn(RT)
-#             rospy.logwarn(np.dot(K, RT))
+#             rospy.logwarn(np.dot(self.K_rect, RT))
 #             rospy.logwarn(Hinv)
 #             rospy.logwarn('-------')
         else:
@@ -125,7 +140,7 @@ class TransformServerArenaCamera:
         
         
     def CameraInfo_callback (self, camerainfo):
-        if (self.calibration is not None) and (self.camerainfo is None):
+        if (not self.initialized):
             self.Hinv = self.GetTransformArenaFromImageRect(camerainfo)
             if (self.Hinv is not None):
                 try:
@@ -134,17 +149,24 @@ class TransformServerArenaCamera:
                     rospy.logwarn('Exception inverting Hinv: %s.  Is camera_info getting published?' % e)
                 
                 self.initialized = True
+            else:
+                self.H = None
+                self.initialized = False
             
+
         if (camerainfo is not None):
             self.camerainfo = camerainfo
             
 
-    def CameraFromArena_callback(self, req):
+    # ImageFromArena_callback()
+    # Get image coordinates from arena coordinates.
+    #
+    def ImageFromArena_callback(self, req):
         if (self.initialized):
-            point_count = min(len(req.xSrc), len(req.ySrc))
+            nPoints = min(len(req.xSrc), len(req.ySrc))
             xSrc = list(req.xSrc)
             ySrc = list(req.ySrc)
-            zSrc = [1]*point_count
+            zSrc = [1]*nPoints
             arena_points = np.array([xSrc, ySrc, zSrc])
 
             imagerect_points = np.dot(self.Hinv, arena_points)
@@ -161,15 +183,18 @@ class TransformServerArenaCamera:
         return {'xDst': xDst,
                 'yDst': yDst}
 
-    def ArenaFromCamera_callback(self, req):
+    # ArenaFromImage_callback()
+    # Get arena coordinates from image coordinates.
+    #
+    def ArenaFromImage_callback(self, req):
         if (self.initialized):
-            point_count = min(len(req.xSrc), len(req.ySrc))
+            nPoints = min(len(req.xSrc), len(req.ySrc))
             xSrc = list(req.xSrc)
             ySrc = list(req.ySrc)
-            zSrc = [1]*point_count
+            zSrc = [1]*nPoints
             imagerect_points = np.array([xSrc, ySrc, zSrc])
-            
             arena_points = np.dot(self.H, imagerect_points)
+            #rospy.logwarn((imagerect_points,arena_points))
             #P = np.reshape(np.array(self.camerainfo.P),[3,4])[0:3,0:3]
             #arena_points = np.dot(P, imagerect_points)
     
@@ -189,11 +214,14 @@ class TransformServerArenaCamera:
                                     (0,0,0,1), 
                                     self.camerainfo.header.stamp, 
                                     'ImageRaw', 'Camera')
-            self.tfbx.sendTransform((0,0,0), 
-                                    (0,0,0,1), 
-                                    self.camerainfo.header.stamp, 
+
+            x = self.K_raw[0,2] - self.K_rect[0,2]
+            y = self.K_raw[1,2] - self.K_rect[1,2]
+            z = 0.0
+            self.tfbx.sendTransform((x,y,z), (0,0,0,1), self.camerainfo.header.stamp, 
                                     'ImageRect', 'ImageRaw')
-            params = rospy.get_param('camera')
+            
+            params = rospy.get_param('camera', {})
             x = params['arena_tvec_0']
             y = params['arena_tvec_1']
             z = params['arena_tvec_2']
@@ -202,7 +230,22 @@ class TransformServerArenaCamera:
             rz = params['arena_rvec_2']
             q = tf.transformations.quaternion_from_euler(rx, ry, rz)
 
-            self.tfbx.sendTransform((x,y,z), q, self.camerainfo.header.stamp, 'Arena', 'ImageRect')
+            if ('mask' in params):
+                self.xMask = params['mask']['x']
+                self.yMask = params['mask']['y']
+                self.radiusMask = params['mask']['radius']
+            else:
+                self.xMask = None
+                self.yMask = None
+                self.radiusMask = 10
+                
+            
+            
+            x = self.K_rect[0,2]
+            y = self.K_rect[1,2]
+            z = 0.0
+            self.tfbx.sendTransform((x,y,z), q, self.camerainfo.header.stamp, 
+                                    'Arena', 'ImageRect')
 #             tfs = TransformStamped()
 #             tfs.header          = Header()
 #             tfs.header.stamp    = self.camerainfo.header.stamp

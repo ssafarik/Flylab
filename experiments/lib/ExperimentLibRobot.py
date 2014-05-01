@@ -32,7 +32,7 @@ class Reset (smach.State):
         self.pubSetPattern = rospy.Publisher('SetPattern', MsgPattern, latch=True)
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
 
-        self.SetStageState = None
+        self.SetStageStateRef = None
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -65,11 +65,11 @@ class Reset (smach.State):
             self.target = MsgFrameState()
             self.timeStart = rospy.Time.now()
     
-            if (self.SetStageState is None):
-                stSrv = 'set_stage_state'
+            if (self.SetStageStateRef is None):
+                stSrv = 'set_stage_state_ref'
                 try:
                     rospy.wait_for_service(stSrv)
-                    self.SetStageState = rospy.ServiceProxy(stSrv, SrvFrameState, persistent=True)
+                    self.SetStageStateRef = rospy.ServiceProxy(stSrv, SrvFrameState, persistent=True)
                 except rospy.ServiceException, e:
                     rospy.logwarn ('EL FAILED to connect service %s(): %s' % (stSrv, e))
             
@@ -110,11 +110,11 @@ class Reset (smach.State):
             self.target.pose.position.x = userdata.experimentparamsIn.trial.robot.home.x
             self.target.pose.position.y = userdata.experimentparamsIn.trial.robot.home.y
             try:
-                self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
+                self.SetStageStateRef(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
                                                                             pose=self.target.pose,
                                                                             speed = userdata.experimentparamsIn.trial.robot.home.speed)))
             except rospy.ServiceException, e:
-                rospy.logwarn ('EL FAILED service call to set_stage_state().')
+                rospy.logwarn ('EL FAILED service call to set_stage_state_ref().')
 
             rv = 'aborted'
             while not rospy.is_shutdown():
@@ -177,7 +177,7 @@ class Action (smach.State):
         self.pubSetPattern = rospy.Publisher('SetPattern', MsgPattern, latch=True)
 
         self.target = MsgFrameState()
-        self.SetStageState = None
+        self.SetStageStateRef = None
 
         self.radiusMovement = float(rospy.get_param("arena/radius_inner","25.4"))
         
@@ -282,11 +282,11 @@ class Action (smach.State):
         if self.paramsIn.robot.enabled:
             rv = 'aborted'
             
-            if (self.SetStageState is None):
-                stSrv = 'set_stage_state'
+            if (self.SetStageStateRef is None):
+                stSrv = 'set_stage_state_ref'
                 try:
                     rospy.wait_for_service(stSrv)
-                    self.SetStageState = rospy.ServiceProxy(stSrv, SrvFrameState, persistent=True)
+                    self.SetStageStateRef = rospy.ServiceProxy(stSrv, SrvFrameState, persistent=True)
                 except rospy.ServiceException, e:
                     rospy.logwarn ('EL FAILED to connect service %s(): %s' % (stSrv, e))
             
@@ -402,17 +402,17 @@ class Action (smach.State):
                     if (doMove):
                         #rospy.logwarn((self.target.pose.position.x,self.target.pose.position.y))
                         try:
-                            self.SetStageState(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
+                            self.SetStageStateRef(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
                                                                                         pose=self.target.pose,
                                                                                         speed = speedTarget # Max allowed speed.
                                                                                         )
                                                                     )
                                                )
                         except rospy.ServiceException, e:
-                            stSrv = 'set_stage_state'
+                            stSrv = 'set_stage_state_ref'
                             try:
                                 rospy.wait_for_service(stSrv)
-                                self.SetStageState = rospy.ServiceProxy(stSrv, SrvFrameState, persistent=True)
+                                self.SetStageStateRef = rospy.ServiceProxy(stSrv, SrvFrameState, persistent=True)
                             except rospy.ServiceException, e:
                                 rospy.logwarn ('EL FAILED to reconnect service %s(): %s' % (stSrv, e))
                             else:

@@ -300,35 +300,6 @@ class ContourGenerator:
         
         
     
-    def MmFromPixels (self, xIn):
-        response = self.camera_from_arena(xIn, xIn)
-        return (response.xDst, response.yDst)
-        
-        
-    def DrawAngleLine(self, matImage, x0, y0, angle, ecc, length):
-        if (not np.isnan(angle)) and (self.minEccForDisplay < ecc):
-            height, width = matImage.size
-            y0 = height-y0
-            
-            # line segment for orientation
-            xmin = 0
-            ymin = 0
-            xmax = width-1
-            ymax = height-1
-    
-            r = length/2
-            x1 = x0 - r * np.cos(angle)
-            y1 = y0 - r * np.sin(angle)
-            x2 = x0 + r * np.cos(angle)
-            y2 = y0 + r * np.sin(angle)
-            
-            
-            cv.Line(matImage, 
-                    (int(x1),int(y1)),
-                    (int(x2),int(y2)), 
-                    cv.CV_RGB(0,self.color_max,0))
-
-    
     # Given the various image moments, compute the angle and eccentricity.
     # Angle is set to NaN when the image is circular. 
     # Eigenvalues/vectors of
@@ -887,12 +858,11 @@ class ContourGenerator:
                         image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
                         image2.header = image.header
                         image2.encoding = 'mono8'
-        #                     image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                         
                         params = rospy.get_param('/', {})
-                        defaults = {'k11':914.816, 'k13':350.576, 'k22':914.587, 'k23':260.682, 'k33':1.0, 'p11':899.664, 'p13':351.087, 'p22':899.664, 'p23':260.384, 'p33':1.0}
+                        defaults = {'k11':1000, 'k13':320, 'k22':1000, 'k23':240, 'k33':1.0, 'p11':1000, 'p13':320, 'p22':1000, 'p23':240, 'p33':1.0}
                         SetDict.SetWithPreserve(params, defaults)
-                         
+                          
                         k11 = params['k11']
                         k13 = params['k13']
                         k22 = params['k22']
@@ -908,17 +878,27 @@ class ContourGenerator:
         #                     camerainfo2.header = image.header
         #                     camerainfo2.height = self.height
         #                     camerainfo2.width = self.width
+                        z = rospy.get_param('camera/arena_tvec_2')
+                        mag = z/self.camerainfo.K[0]
                         camerainfo2 = copy.copy(self.camerainfo)
                         camerainfo2.D = (0.0, 0.0, 0.0, 0.0, 0.0)
-                        camerainfo2.K = (k11, 0.0, k13, \
-                                         0.0, k22, k23, \
-                                         0.0, 0.0, k33)
+#                         camerainfo2.K = (mag*self.camerainfo.K[0], mag*self.camerainfo.K[1], mag*self.camerainfo.K[2], \
+#                                          mag*self.camerainfo.K[3], mag*self.camerainfo.K[4], mag*self.camerainfo.K[5], \
+#                                              self.camerainfo.K[6],     self.camerainfo.K[7], self.camerainfo.K[8])
+                        camerainfo2.K = (k11, 0,   k13, \
+                                         0,   k22, k23, \
+                                         0,   0,   k33)
+                                         
                         camerainfo2.R = (1.0, 0.0, 0.0, \
                                          0.0, 1.0, 0.0, \
                                          0.0, 0.0, 1.0)
-                        camerainfo2.P = (p11, 0.0, p13, 0.0, \
-                                         0.0, p22, p23, 0.0, \
-                                         0.0, 0.0,                                           1.0, 0.0)
+                        mag = z/self.camerainfo.P[0]
+#                         camerainfo2.P = (mag*self.camerainfo.P[0], mag*self.camerainfo.P[1], mag*self.camerainfo.P[2],  self.camerainfo.P[3], \
+#                                          mag*self.camerainfo.P[4], mag*self.camerainfo.P[5], mag*self.camerainfo.P[6],  self.camerainfo.P[7], \
+#                                              self.camerainfo.P[8],     self.camerainfo.P[9],     self.camerainfo.P[10], self.camerainfo.P[11])
+                        camerainfo2.P = (p11, 0,   p13, 0, \
+                                         0,   p22, p23, 0, \
+                                         0,   0,   p33, 0)
         
         
                         self.pubCamerainfoRviz.publish(camerainfo2)

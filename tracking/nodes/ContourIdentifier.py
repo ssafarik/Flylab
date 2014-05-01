@@ -168,7 +168,7 @@ class ContourIdentifier:
                                   lifetime=rospy.Duration(1.0))
 
 
-        stSrv = 'arena_from_camera'
+        stSrv = 'arena_from_image'
         try:
             rospy.wait_for_service(stSrv)
             self.ArenaFromCamera = rospy.ServiceProxy(stSrv, ArenaCameraConversion, persistent=True)
@@ -315,7 +315,7 @@ class ContourIdentifier:
             try:
                 response = self.ArenaFromCamera(contourinfolistsIn.x, contourinfolistsIn.y)
             except rospy.ServiceException, e:
-                stSrv = 'arena_from_camera'
+                stSrv = 'arena_from_image'
                 try:
                     rospy.wait_for_service(stSrv)
                     self.ArenaFromCamera = rospy.ServiceProxy(stSrv, ArenaCameraConversion, persistent=True)

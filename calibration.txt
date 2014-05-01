@@ -44,8 +44,8 @@
 
 ############################### Camera Intrinsic Parameters (i.e. Lens distortion):
 # Launch the camera node with adjusted settings.
-1.  $ roslaunch <your device name> camera.launch
-    # For example:  roslaunch racetrack camera.launch
+1.  $ roslaunch <your device name> camera_tracking.launch
+    # For example:  roslaunch racetrack camera_tracking.launch
 
 # Calibrate for distortion.
 2.  # Print ~/git/Flylab/calibration/patterns/camera_calibration_pattern_30mm.pdf (or other appropriate size).

@@ -14,7 +14,7 @@ class TransformServerStageArena:
         self.initialized = False
         self.initConstructor = False
 
-        self.calibration = None
+        self.calibration_stage = None
 
         rospy.init_node('TransformServerStageArena')
         rospy.sleep(1)
@@ -48,7 +48,7 @@ class TransformServerStageArena:
             rospy.sleep(0.1)
         
             
-        self.calibration = calibration
+        self.calibration_stage = calibration
         self.initialized = True
         
         
@@ -59,10 +59,10 @@ class TransformServerStageArena:
     # Publishes the calibration.
     #
     def TrialStart_callback(self, experimentparams):
-        while (self.calibration is None):
+        while (self.calibration_stage is None):
             rospy.sleep(0.5)
 
-        self.pubCalibrationSet.publish(self.calibration)
+        self.pubCalibrationSet.publish(self.calibration_stage)
             
         return True
                 
@@ -81,13 +81,13 @@ class TransformServerStageArena:
         
     def SendTransforms(self):
         if (self.initialized):
-            self.tfbx.sendTransform((self.calibration.arena_x,
-                                     self.calibration.arena_y,
-                                     self.calibration.arena_z),
-                                    (self.calibration.arena_qx,
-                                     self.calibration.arena_qy,
-                                     self.calibration.arena_qz,
-                                     self.calibration.arena_qw),
+            self.tfbx.sendTransform((self.calibration_stage.arena_x,
+                                     self.calibration_stage.arena_y,
+                                     self.calibration_stage.arena_z),
+                                    (self.calibration_stage.arena_qx,
+                                     self.calibration_stage.arena_qy,
+                                     self.calibration_stage.arena_qz,
+                                     self.calibration_stage.arena_qw),
                                     rospy.Time.now(),
                                     "Stage",     # child
                                     "Arena"      # parent

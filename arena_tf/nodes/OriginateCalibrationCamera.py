@@ -22,7 +22,7 @@ class OriginateCalibrationCamera:
     def __init__(self):
         
         # Messages
-        self.pubCalibrationOriginate         = rospy.Publisher("camera/calibration_originate", CalibrationCamera, latch=True)
+        self.pubCalibrationOriginate         = rospy.Publisher('camera/calibration_originate', CalibrationCamera, latch=True)
         
 
         # Load the calibration params.
@@ -52,5 +52,5 @@ if __name__ == '__main__':
         cal = OriginateCalibrationCamera()
         cal.Main()
     except rospy.exceptions.ROSInterruptException:
-        rospy.loginfo("Shutting down")
+        rospy.loginfo('Shutting down')
   

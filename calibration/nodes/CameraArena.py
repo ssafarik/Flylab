@@ -11,10 +11,9 @@ from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Point, PointStamped
 from sensor_msgs.msg import Image, CameraInfo
 
-FRAME_CHECKERBOARD="Checkerboard"
-FRAME_IMAGERECT="ImageRect"
-FRAME_ARENA="Arena"
-FRAME_CAMERA="Camera"
+FRAME_CHECKERBOARD='Checkerboard'
+FRAME_IMAGE='ImageRect'
+FRAME_ARENA='Arena'
 
 
 class CalibrateCameraArena:
@@ -27,22 +26,27 @@ class CalibrateCameraArena:
         
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
-        self.subCameraInfo  = rospy.Subscriber("camera/camera_info", CameraInfo, self.CameraInfo_callback)
-        self.subImage       = rospy.Subscriber("camera/image_rect", Image, self.Image_callback)
-        self.subPoint       = rospy.Subscriber("Joystick/Commands", Point, self.Point_callback)
+        self.subCameraInfo  = rospy.Subscriber('camera/camera_info', CameraInfo, self.CameraInfo_callback)
+        self.subImage       = rospy.Subscriber('camera/image_rect', Image, self.Image_callback)
+        self.subPoint       = rospy.Subscriber('Joystick/Commands', Point, self.Point_callback)
         
         self.camerainfo = None
         self.colorMax = 255
         self.colorFont = cv.CV_RGB(self.colorMax,0,0)
         
         self.ptOriginArena = PointStamped()
-        self.ptOriginArena.header.frame_id = FRAME_CAMERA
+        self.ptOriginArena.header.frame_id = FRAME_IMAGE
 
-        self.ptOriginCamera = PointStamped()
-        self.ptOriginCamera.header.frame_id = FRAME_CAMERA
-        self.ptOriginCamera.point.x = 0
-        self.ptOriginCamera.point.y = 0
-        
+        params = rospy.get_param('camera', {})
+        if ('mask' in params):
+            self.xMask = params['mask']['x']
+            self.yMask = params['mask']['y']
+            self.radiusMask = params['mask']['radius']
+        else:
+            self.xMask = 0
+            self.yMask = 0
+            self.radiusMask = 10
+
         
         # Checkerboard info
         self.sizeCheckerboard = (8,6)
@@ -50,13 +54,10 @@ class CalibrateCameraArena:
         self.nRows = self.sizeCheckerboard[1]
         self.nCorners = self.nCols * self.nRows
         self.checker_size = rospy.get_param('calibration/checker_size', 15)
-        self.xMask = rospy.get_param ('camera/mask/x', 0)
-        self.yMask = rospy.get_param ('camera/mask/y', 0)
-        self.radiusMask = rospy.get_param ('camera/mask/radius', 10)
         
         self.sizeWindow = (4,4)
         self.sizeDeadzone = (2,2)
-        self.criteriaTerm = (cv.CV_TERMCRIT_ITER | cv.CV_TERMCRIT_EPS, 100, 0.01)
+        self.terminationCriteria = (cv.CV_TERMCRIT_ITER | cv.CV_TERMCRIT_EPS, 100, 0.01)
         
         self.pointsArena         = np.zeros([self.nCorners, 3], dtype=np.float32)
         self.pointsImage         = np.zeros([self.nCorners, 2], dtype=np.float32)
@@ -79,8 +80,8 @@ class CalibrateCameraArena:
     
     def CameraInfo_callback (self, msgCameraInfo):
         self.camerainfo = msgCameraInfo
-        self.K = np.reshape(self.camerainfo.P,[3,4])[0:3,0:3] # camerainfo.K and camerainfo.D apply to image_raw; P w/ D=0 applies to image_rect.
-        self.D = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
+        self.K_rect = np.reshape(self.camerainfo.P,[3,4])[0:3,0:3] # camerainfo.K and camerainfo.D apply to image_raw; P w/ D=0 applies to image_rect.
+        self.D_rect = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
       
 
     def Point_callback(self, point):
@@ -96,12 +97,15 @@ class CalibrateCameraArena:
             self.imgMask      = np.zeros([height, width],    dtype=np.uint8)
             self.imgDisplay   = np.zeros([height, width, 3], dtype=np.uint8)
             
-            self.ptOriginArena.point.x = self.xMask #width/2 - self.camerainfo.P[2] #self.KK_cx
-            self.ptOriginArena.point.y = self.yMask #height/2 - self.camerainfo.P[6] #self.KK_cy
+            self.ptOriginArena.point.x = self.xMask
+            self.ptOriginArena.point.y = self.yMask
             self.bInitialized_images = True
 
 
     def PrepareImageCorners(self, corners):
+        (x0,y0) = (None,None)
+        m = None
+        a = 0.01
         for iCorner in range(self.nCorners):
             # Idealized position of the corner.
             self.pointsArena[iCorner][0] = (iCorner // self.nCols)*self.checker_size
@@ -112,6 +116,20 @@ class CalibrateCameraArena:
             (x,y) = corners[iCorner]
             self.pointsImage[iCorner][0] = x
             self.pointsImage[iCorner][1] = y
+
+#             # Find the mean distance between neighbor points.            
+#             if (x0 is not None):
+#                 d = np.linalg.norm([x-x0,y-y0])
+#                 if (m is not None):
+#                     if (d < m*2):
+#                         m = (1-a)*m + a*d
+#                 else:
+#                     m = d
+#                     
+#             (x0,y0) = (x,y)
+#             
+#         self.pixels_per_mm = m / self.checker_size
+            
 
 
     def DrawOriginAxes(self, cvimage, rvec, tvec):
@@ -126,8 +144,8 @@ class CalibrateCameraArena:
             (self.pointsAxesProjected,jacobian) = cv2.projectPoints(self.pointsAxes,
                                                                     rvec,
                                                                     tvec,
-                                                                    self.K,
-                                                                    self.D
+                                                                    self.K_rect,
+                                                                    self.D_rect
                                                                     )
                 
             # origin point
@@ -151,15 +169,16 @@ class CalibrateCameraArena:
         if self.camerainfo is not None:
             (bFoundChessboard, cornersImage) = cv2.findChessboardCorners(self.imgProcessed, self.sizeCheckerboard)
             if (bFoundChessboard) and (len(cornersImage)==self.nCorners):
-                cv2.cornerSubPix(self.imgProcessed, cornersImage, self.sizeWindow, self.sizeDeadzone, self.criteriaTerm)
+                cv2.cornerSubPix(self.imgProcessed, cornersImage, self.sizeWindow, self.sizeDeadzone, self.terminationCriteria)
                 cv2.drawChessboardCorners(self.imgDisplay, self.sizeCheckerboard, cornersImage, bFoundChessboard)
                 self.PrepareImageCorners(cornersImage.squeeze())
                 (rv, self.rvec, self.tvec) = cv2.solvePnP(self.pointsArena, 
                                                           self.pointsImage, 
-                                                          self.K, 
-                                                          self.D)
+                                                          self.K_rect, 
+                                                          self.D_rect)
                 self.rvec = self.rvec.squeeze()
                 self.tvec = self.tvec.squeeze()
+                #rospy.logwarn(np.linalg.norm(self.rvec))
                 
                 (R,jacobian) = cv2.Rodrigues(self.rvec)
                 T = tf.transformations.translation_matrix(self.tvec)
@@ -171,7 +190,7 @@ class CalibrateCameraArena:
                 
                 
                 # H is/mightbe the transform from camera point to arena point.
-                Hinv = np.dot(self.K, RT)
+                Hinv = np.dot(self.K_rect, RT)
                 Hinv = Hinv / Hinv[-1,-1]
                 H = np.linalg.inv(Hinv)
                 self.Hinv = Hinv
@@ -182,7 +201,7 @@ class CalibrateCameraArena:
                                           tf.transformations.quaternion_about_axis(np.linalg.norm(self.rvec), self.rvec),
                                           self.stampImage,
                                           FRAME_CHECKERBOARD,
-                                          FRAME_IMAGERECT)
+                                          FRAME_IMAGE)
                 
                 self.DrawOriginAxes(self.imgDisplay, self.rvec, self.tvec)
                 self.RemapExtrinsics()
@@ -211,8 +230,8 @@ class CalibrateCameraArena:
                                     FRAME_ARENA,
                                     FRAME_CHECKERBOARD)
         
-            self.tfrx.waitForTransform(FRAME_IMAGERECT, FRAME_ARENA, self.stampImage, rospy.Duration(1.0))
-            (trans, quat) = self.tfrx.lookupTransform(FRAME_IMAGERECT, FRAME_ARENA, self.stampImage)
+            self.tfrx.waitForTransform(FRAME_IMAGE, FRAME_ARENA, self.stampImage, rospy.Duration(1.0))
+            (trans, quat) = self.tfrx.lookupTransform(FRAME_IMAGE, FRAME_ARENA, self.stampImage)
             quatMat = tf.transformations.quaternion_matrix(quat)  # Returns a 4x4 numpy.array of float64.
             
             
@@ -242,12 +261,13 @@ class CalibrateCameraArena:
                 self.rvec2_avg = (1.0-self.alpha)*part1 + self.alpha*part2
                 self.tvec2_avg = (1.0-self.alpha)*self.tvec2_avg + self.alpha*self.tvec2
     
-                rospy.set_param('camera/arena_tvec_0', float(self.tvec2[0]))
-                rospy.set_param('camera/arena_tvec_1', float(self.tvec2[1]))
-                rospy.set_param('camera/arena_tvec_2', float(self.tvec2[2]))
-                rospy.set_param('camera/arena_rvec_0', float(self.rvec2[0]))
-                rospy.set_param('camera/arena_rvec_1', float(self.rvec2[1]))
-                rospy.set_param('camera/arena_rvec_2', float(self.rvec2[2]))
+                params = {'arena_tvec_0':float(self.tvec2[0]),
+                          'arena_tvec_1':float(self.tvec2[1]),
+                          'arena_tvec_2':float(self.tvec2[2]),
+                          'arena_rvec_0':float(self.rvec2[0]),
+                          'arena_rvec_1':float(self.rvec2[1]),
+                          'arena_rvec_2':float(self.rvec2[2])}
+                #rospy.set_param('camera', params)
 
                 
                 # self.image_arena_origin_found = True
@@ -258,11 +278,12 @@ class CalibrateCameraArena:
         if self.bInitialized:
             self.stampImage = image.header.stamp
             try:
-                imgInput = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
+                imgInput = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
             except CvBridgeError, e:
                 rospy.logwarn('Exception CvBridgeError in image callback: %s' % e)
+
             
-            if not self.bInitialized_images:
+            if (not self.bInitialized_images):
                 self.InitializeImages(imgInput.shape)
             
             if self.bInitialized_images:
@@ -273,63 +294,57 @@ class CalibrateCameraArena:
                 self.imgProcessed = copy.copy(imgInput)
                 self.imgDisplay = cv2.cvtColor(imgInput, cv.CV_GRAY2RGB)
                 
-                display_text = "checker_size=%0.3f" % self.checker_size
+                display_text = 'checker_size=%0.3f' % self.checker_size
                 cv2.putText(self.imgDisplay, display_text,
                            (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                 yText += dyText
         
-                display_text = "originArena = [%0.0f, %0.0f]" % (self.ptOriginArena.point.x, self.ptOriginArena.point.y)
+                display_text = 'originArena = [%0.0f, %0.0f]' % (self.ptOriginArena.point.x, self.ptOriginArena.point.y)
                 cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
                 yText += dyText
                 
-                try:
-                    self.ptOriginCameraUndistorted = self.tfrx.transformPoint(FRAME_IMAGERECT, self.ptOriginCamera) # This only works for the origin point.  Merely put into the image_rect frame.
-                    self.ptOriginArenaUndistorted = self.tfrx.transformPoint(FRAME_IMAGERECT, self.ptOriginArena)   # Other points should go through something like image_proc node.
-                except tf.Exception, e:
-                    rospy.logwarn('tf.Exception in Image_callback(): %s' % e)
-                else:
-                    # Update image mask
-                    cv2.circle(self.imgMask, 
-                               (int(self.ptOriginArenaUndistorted.point.x), int(self.ptOriginArenaUndistorted.point.y)), 
-                               int(self.radiusMask), self.colorMax, cv.CV_FILLED)
-                    self.imgProcessed = cv2.bitwise_and(self.imgProcessed, self.imgMask)
-                    self.FindExtrinsics()
+                # Update image mask
+                cv2.circle(self.imgMask, 
+                           (int(self.ptOriginArena.point.x), int(self.ptOriginArena.point.y)), 
+                           int(self.radiusMask), self.colorMax, cv.CV_FILLED)
+                self.imgProcessed = cv2.bitwise_and(self.imgProcessed, self.imgMask)
+                self.FindExtrinsics()
 
-                    # Draw the camera origin.
-                    cv2.circle(self.imgDisplay, 
-                               (int(self.ptOriginCameraUndistorted.point.x),int(self.ptOriginCameraUndistorted.point.y)), 
-                               3, cv.CV_RGB(self.colorMax,0,self.colorMax), cv.CV_FILLED)
-                    
-                    # Draw the arena origin.
-                    cv2.circle(self.imgDisplay, 
-                               (int(self.ptOriginArenaUndistorted.point.x),int(self.ptOriginArenaUndistorted.point.y)), 
-                               3, cv.CV_RGB(0,self.colorMax,0), cv.CV_FILLED)
-                    
-                    # Draw the mask circle
-                    cv2.circle(self.imgDisplay, 
-                               (int(self.ptOriginArenaUndistorted.point.x),int(self.ptOriginArenaUndistorted.point.y)), 
-                               int(self.radiusMask), cv.CV_RGB(0,self.colorMax,0))
-                    
-                    
-                    display_text = "radiusMask = " + str(int(self.radiusMask))
-                    cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
-                    yText += dyText
+                # Draw the arena origin.
+                cv2.circle(self.imgDisplay, 
+                           (int(self.ptOriginArena.point.x),int(self.ptOriginArena.point.y)), 
+                           3, cv.CV_RGB(0,self.colorMax,0), cv.CV_FILLED)
+                
+                # Draw the mask circle
+                cv2.circle(self.imgDisplay, 
+                           (int(self.ptOriginArena.point.x),int(self.ptOriginArena.point.y)), 
+                           int(self.radiusMask), cv.CV_RGB(0,self.colorMax,0))
+                
+                
+                display_text = 'radiusMask = ' + str(int(self.radiusMask))
+                cv2.putText(self.imgDisplay, display_text, (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                yText += dyText
 
-                    display_text = "rvec cur=[%+3.3f, %+3.3f, %+3.3f] avg=[%3.3f, %3.3f, %3.3f]" % ((self.rvec2[0]+np.pi)%(2*np.pi)-np.pi,     
-                                                                                                    (self.rvec2[1]+np.pi)%(2*np.pi)-np.pi,     
-                                                                                                    (self.rvec2[2]+np.pi)%(2*np.pi)-np.pi,
-                                                                                                    (self.rvec2_avg[0]+np.pi)%(2*np.pi)-np.pi, 
-                                                                                                    (self.rvec2_avg[1]+np.pi)%(2*np.pi)-np.pi, 
-                                                                                                    (self.rvec2_avg[2]+np.pi)%(2*np.pi)-np.pi)
-                    cv2.putText(self.imgDisplay, display_text,
-                               (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
-                    yText += dyText
-                    
-                    display_text = "tvec cur=[%+3.3f, %+3.3f, %+3.3f] avg=[%3.3f, %3.3f, %3.3f]" % (self.tvec2[0],     self.tvec2[1],     self.tvec2[2],
-                                                                                                    self.tvec2_avg[0], self.tvec2_avg[1], self.tvec2_avg[2])
-                    cv2.putText(self.imgDisplay, display_text,
-                                (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
-                    yText += dyText
+                display_text = 'rvec cur=[%+3.3f, %+3.3f, %+3.3f] avg=[%3.3f, %3.3f, %3.3f]' % ((self.rvec2[0]+np.pi)%(2*np.pi)-np.pi,     
+                                                                                                (self.rvec2[1]+np.pi)%(2*np.pi)-np.pi,     
+                                                                                                (self.rvec2[2]+np.pi)%(2*np.pi)-np.pi,
+                                                                                                (self.rvec2_avg[0]+np.pi)%(2*np.pi)-np.pi, 
+                                                                                                (self.rvec2_avg[1]+np.pi)%(2*np.pi)-np.pi, 
+                                                                                                (self.rvec2_avg[2]+np.pi)%(2*np.pi)-np.pi)
+                cv2.putText(self.imgDisplay, display_text,
+                           (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                yText += dyText
+                
+                display_text = 'tvec cur=[%+3.3f, %+3.3f, %+3.3f] avg=[%3.3f, %3.3f, %3.3f]' % (self.tvec2[0],     self.tvec2[1],     self.tvec2[2],
+                                                                                                self.tvec2_avg[0], self.tvec2_avg[1], self.tvec2_avg[2])
+                cv2.putText(self.imgDisplay, display_text,
+                            (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                yText += dyText
+
+                display_text = 'pixels_per_mm=%3.3f' % (self.K_rect[0,0]/self.tvec2_avg[2])
+                cv2.putText(self.imgDisplay, display_text,
+                            (xText,yText), cv.CV_FONT_HERSHEY_TRIPLEX, 0.5, self.colorFont)
+                yText += dyText
     
                 
                 cv2.imshow('Camera Arena Calibration', self.imgDisplay)
@@ -343,6 +358,6 @@ if __name__ == '__main__':
     try:
         rospy.spin()
     except:
-        print "Shutting down"
+        print 'Shutting down'
     cv2.destroyAllWindows()
 

@@ -131,11 +131,11 @@ class Fivebar:
         
         # Publish & Subscribe
         self.services = {}
-        self.services['set_stage_state'] = rospy.Service('set_stage_state',    SrvFrameState, self.SetStageState_callback)
-        self.services['get_stage_state'] = rospy.Service('get_stage_state',    SrvFrameState, self.GetStageState_callback)
-        self.services['home_stage']      = rospy.Service('home_stage',         SrvFrameState, self.HomeStage_callback)
-        self.services['calibrate_stage'] = rospy.Service('calibrate_stage',    SrvFrameState, self.Calibrate_callback)
-        self.services['signal_input']    = rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
+        self.services['set_stage_state_ref'] = rospy.Service('set_stage_state_ref', SrvFrameState, self.SetStageStateRef_callback)
+        self.services['get_stage_state'] = rospy.Service('get_stage_state',         SrvFrameState, self.GetStageState_callback)
+        self.services['home_stage']      = rospy.Service('home_stage',              SrvFrameState, self.HomeStage_callback)
+        self.services['calibrate_stage'] = rospy.Service('calibrate_stage',         SrvFrameState, self.Calibrate_callback)
+        self.services['signal_input']    = rospy.Service('signal_input',            SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
         # Command messages.
@@ -725,11 +725,11 @@ class Fivebar:
         return rvStageState.state
 
         
-    # SetStageState_callback()
+    # SetStageStateRef_callback()
     #   Updates the target command.
     #
-    def SetStageState_callback(self, reqStageState):
-        #rospy.logwarn('SetStageState_callback()')
+    def SetStageStateRef_callback(self, reqStageState):
+        #rospy.logwarn('SetStageStateRef_callback()')
         while not self.initialized:
             rospy.sleep(0.5)
             
@@ -906,7 +906,7 @@ class Fivebar:
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
                                         state.header.stamp,
                                         "link5",     # child
-                                        "link3"      # parentset_stage_state
+                                        "link3"      # parent
                                         )
                 #rospy.logwarn ('E')
                 #rospy.logwarn ('E: %s, %s, %s' % ((self.L0, 0.0, 0.0), tf.transformations.quaternion_from_euler(0.0, 0.0, angle2+self.q2CenterE), state.header.stamp))

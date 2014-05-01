@@ -14,14 +14,14 @@ from patterngen.msg import MsgPattern
 
 
 #######################################################################################################
-class ExperimentPassiveChase():
+class ExperimentStationary():
     def __init__(self):
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Fly Chases Robot Moving in Circle"
+        self.experimentparams.experiment.description = "Fly with a stationary robot"
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.trial = 1
         
@@ -153,7 +153,7 @@ class ExperimentPassiveChase():
 
 if __name__ == '__main__':
     #try:
-        experiment = ExperimentPassiveChase()
+        experiment = ExperimentStationary()
         experiment.Run()
         
     #except:
