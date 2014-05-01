@@ -1,6 +1,0 @@
-<launch>
-  <param name="hz_drawupdate" type="double" value="100"/>
-
-  <node pkg="image_gui" type="DrawObjects.py" name="DrawObjects" />
-  <node pkg="image_gui" type="DisplayDraw.py" name="DisplayDraw" />
-</launch>
