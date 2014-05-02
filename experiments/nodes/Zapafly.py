@@ -25,7 +25,7 @@ class Experiment():
         
         self.experimentparams.experiment.description = "See how long the fly lives with Laser (200mW)"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "HCS_trytokill_"
         self.experimentparams.save.csv = True

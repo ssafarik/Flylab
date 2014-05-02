@@ -23,7 +23,7 @@ class ExperimentStationary():
         
         self.experimentparams.experiment.description = "Fly with a stationary robot"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "stationary"
         self.experimentparams.save.csv = True

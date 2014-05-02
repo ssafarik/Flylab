@@ -25,7 +25,7 @@ class Experiment():
         
         self.experimentparams.experiment.description = "Laser is on the fly when fly not moving east on left half arena."
         self.experimentparams.experiment.maxTrials = 10
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         #self.experimentparams.save.filenamebase = 'HCS_normal_150mW_' 
         #self.experimentparams.save.filenamebase = 'TrpA1neg_AristaeIntact_150mW_' # 

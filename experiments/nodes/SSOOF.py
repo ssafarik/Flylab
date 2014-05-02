@@ -23,7 +23,7 @@ class ExperimentSSOOF():
         
         self.experimentparams.experiment.description = "ScareShitOutOfFly"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 28
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "ssoof"
         self.experimentparams.save.csv = True

@@ -25,7 +25,7 @@ class ExperimentZapOnTurn():
         
         self.experimentparams.experiment.description = "Laser when fly turns CW"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "zaponturn"
         self.experimentparams.save.csv = True

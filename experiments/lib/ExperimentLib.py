@@ -46,6 +46,10 @@ g_notify_list = ['savearenastate',
                  'transformserverarenacamera', 
                  'transformserverarenastage']
 
+# The time that the experiment started.
+g_timeExperimentElapsed = 0.0
+
+
 #######################################################################################################
 #######################################################################################################
 # NotifyServices()
@@ -104,11 +108,14 @@ class StartExperiment (smach.State):
 
 
     def execute(self, userdata):
+        global g_timeExperimentElapsed
+        
         experimentparams = userdata.experimentparamsIn
         rospy.loginfo('EL State StartExperiment(%s)' % experimentparams)
 
         experimentparams.experiment.trial = experimentparams.experiment.trial-1 
         userdata.experimentparamsOut = experimentparams
+        g_timeExperimentElapsed = 0.0
         
         self.ExperimentStartServices.notify(experimentparams)
 
@@ -203,13 +210,20 @@ class StartTrial (smach.State):
 
     def execute(self, userdata):
         rv = 'exit'
+        now = rospy.Time.now().to_sec()
         experimentparams = userdata.experimentparamsIn
+
+        experimentparams.experiment.timeTrialStart = g_timeExperimentElapsed
+        
         experimentparams.experiment.trial = userdata.experimentparamsIn.experiment.trial+1
         if (experimentparams.experiment.maxTrials != -1):
             if (experimentparams.experiment.maxTrials < experimentparams.experiment.trial):
                 return rv
 
-        now = rospy.Time.now().to_sec()
+        if (experimentparams.experiment.timeout != -1):
+            if (experimentparams.experiment.timeout <= g_timeExperimentElapsed):
+                return rv
+
         experimentparams.save.timestamp = '%04d%02d%02d%02d%02d%02d' % (time.localtime(now).tm_year,
                                                                         time.localtime(now).tm_mon,
                                                                         time.localtime(now).tm_mday,
@@ -446,6 +460,8 @@ class TriggerOnStates (smach.State):
 
 
     def step_time_elapsed(self):
+        global g_timeExperimentElapsed
+        
         timeNow = rospy.Time.now()
         if (self.commandExperiment != 'pause_now'):
             dt = timeNow - self.timePrev
@@ -454,6 +470,7 @@ class TriggerOnStates (smach.State):
 
         self.timePrev = timeNow
         self.timeElapsed = self.timeElapsed + dt
+        g_timeExperimentElapsed += dt.to_sec()
 
         
         
@@ -601,10 +618,18 @@ class TriggerOnStates (smach.State):
                     rv = 'preempt'
                     break
                 
+                # Check for trigger timeout.
                 if (trigger.timeout != -1):
                     if (trigger.timeout < self.timeElapsed.to_sec()):
                         rv = 'timeout'
                         break
+
+                # Check for experiment timeout.
+                if (userdata.experimentparamsIn.experiment.timeout != -1):
+                    if (userdata.experimentparamsIn.experiment.timeout <= g_timeExperimentElapsed):
+                        rv = 'timeout'
+                        break
+                    
                 
                 self.rosrate.sleep()
 
@@ -651,6 +676,8 @@ class TriggerOnTime (smach.State):
             
         
     def step_time_elapsed(self):
+        global g_timeExperimentElapsed
+
         timeNow = rospy.Time.now()
         if (self.commandExperiment != 'pause_now'):
             dt = timeNow - self.timePrev
@@ -659,21 +686,23 @@ class TriggerOnTime (smach.State):
 
         self.timePrev = timeNow
         self.timeElapsed = self.timeElapsed + dt
+        g_timeExperimentElapsed += dt.to_sec()
+
 
         
         
     def execute(self, userdata):
         if self.mode=='pre1':
-            elapsedMax = userdata.experimentparamsIn.pre.wait1
+            timeMax = userdata.experimentparamsIn.pre.wait1
         elif self.mode=='pre2':
-            elapsedMax = userdata.experimentparamsIn.pre.wait2
+            timeMax = userdata.experimentparamsIn.pre.wait2
         elif self.mode=='post':
-            elapsedMax = userdata.experimentparamsIn.post.wait
+            timeMax = userdata.experimentparamsIn.post.wait
         else:
             rospy.logwarn ('TriggerOnTime mode must be one of: pre1, pre2, post.')
             
 
-        rospy.loginfo('EL State TriggerOnTime(%s, %s)' % (self.mode, elapsedMax))
+        rospy.loginfo('EL State TriggerOnTime(%s, %s)' % (self.mode, timeMax))
 
         self.timePrev = rospy.Time.now()
         self.timeElapsed = rospy.Time(0)
@@ -682,13 +711,19 @@ class TriggerOnTime (smach.State):
         while not rospy.is_shutdown():
             self.step_time_elapsed()
 
-            if (elapsedMax <= self.timeElapsed.to_sec()):
+            if (timeMax <= self.timeElapsed.to_sec()):
                 rv = 'success'
                 break
 
             if (self.commandExperiment=='exit_now'):
                 rv = 'aborted'
                 break
+
+            # Check for experiment timeout.
+            if (userdata.experimentparamsIn.experiment.timeout != -1):
+                if (userdata.experimentparamsIn.experiment.timeout <= g_timeExperimentElapsed):
+                    rv = 'timeout'
+                    break
 
             rospy.sleep(0.1)
 

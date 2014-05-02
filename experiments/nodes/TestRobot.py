@@ -24,7 +24,7 @@ class ExperimentTestRobot():
         
         self.experimentparams.experiment.description = 'Testing Robot Movement'
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = 'test'
         self.experimentparams.save.csv = True

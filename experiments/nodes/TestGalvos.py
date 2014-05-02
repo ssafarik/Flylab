@@ -25,7 +25,7 @@ class Experiment():
         
         self.experimentparams.experiment.description = "Test the galvos"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "test"
         self.experimentparams.save.csv = True

@@ -25,7 +25,7 @@ class ExperimentZapafly():
         
         self.experimentparams.experiment.description = "Aim laser at fly"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "zap"
         self.experimentparams.save.csv = True

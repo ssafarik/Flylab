@@ -23,7 +23,7 @@ class Experiment():
         
         self.experimentparams.experiment.description = "Fly Chases Robot Moving in Circle"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "activechase"
         self.experimentparams.save.csv = True
@@ -50,15 +50,15 @@ class Experiment():
         self.experimentparams.pre.robot.move.pattern.frameidPosition = 'Arena'            # 
         self.experimentparams.pre.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.pre.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/20
+        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/40
         self.experimentparams.pre.robot.move.pattern.hzPoint = 100
         self.experimentparams.pre.robot.move.pattern.count = -1
         self.experimentparams.pre.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.pre.robot.move.pattern.size.y = 0
         self.experimentparams.pre.robot.move.pattern.param = 0
         self.experimentparams.pre.robot.move.pattern.direction = 1
-        self.experimentparams.pre.robot.move.pattern.restart = True
-        self.experimentparams.pre.robot.home.enabled = True
+        self.experimentparams.pre.robot.move.pattern.restart = False
+        self.experimentparams.pre.robot.home.enabled = False
         self.experimentparams.pre.robot.home.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.pre.robot.home.y = 0.0
         self.experimentparams.pre.robot.home.speed = 20
@@ -94,7 +94,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'            # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
         self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/40
+        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/80
         self.experimentparams.trial.robot.move.pattern.hzPoint = 100
         self.experimentparams.trial.robot.move.pattern.count = -1
         self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
@@ -102,7 +102,7 @@ class Experiment():
         self.experimentparams.trial.robot.move.pattern.param = 0
         self.experimentparams.trial.robot.move.pattern.direction = 1
         self.experimentparams.trial.robot.move.pattern.restart = False  # False: Continue the new pattern from the old pattern's current location.
-        self.experimentparams.trial.robot.home.enabled = True
+        self.experimentparams.trial.robot.home.enabled = False
         self.experimentparams.trial.robot.home.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.trial.robot.home.y = 0.0
         self.experimentparams.trial.robot.home.speed = 20
@@ -131,7 +131,7 @@ class Experiment():
         self.experimentparams.post.trigger.speedAbsChildMax  = 999.0
         self.experimentparams.post.trigger.speedRelMin       =   0.0
         self.experimentparams.post.trigger.speedRelMax       = 999.0
-        self.experimentparams.post.trigger.distanceMin =  30.0
+        self.experimentparams.post.trigger.distanceMin =  15.0
         self.experimentparams.post.trigger.distanceMax = 999.0
         self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
         self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0

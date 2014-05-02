@@ -35,7 +35,7 @@ class ExperimentZapresponse():
         
         self.experimentparams.experiment.description = 'Laser is off for %d secs, on for %d secs, and off for %d secs' % (t0, t1, t2)
         self.experimentparams.experiment.maxTrials = 100
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "zapresponse_%s_%02ds_%02ds_%02ds_%s_" % (flies, t0, t1, t2, laserpower)
         self.experimentparams.save.csv = True

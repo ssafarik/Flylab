@@ -25,7 +25,7 @@ class Experiment():
         
         self.experimentparams.experiment.description = "Laser goes on when fly enters within 5mm of center, then off when it leaves.  Records for 120 more secs."
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "zaparea"
         self.experimentparams.save.csv = True

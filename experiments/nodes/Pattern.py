@@ -23,7 +23,7 @@ class Experiment():
         
         self.experimentparams.experiment.description = "Open Loop Pattern Following"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "pattern"
         self.experimentparams.save.csv = False

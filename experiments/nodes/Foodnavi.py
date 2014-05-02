@@ -25,7 +25,7 @@ class Experiment():
 
         self.experimentparams.experiment.description = "Navigation with food ysa"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         # self.experimentparams.save.filenamebase = "foodnavi_%s_%s_%s_" % (flyspec, foodspec, gender)       
         self.experimentparams.save.filenamebase = "foodnavi"

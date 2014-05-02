@@ -24,7 +24,7 @@ class Experiment():
         
         self.experimentparams.experiment.description = "Hover and Approach"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         self.experimentparams.save.filenamebase = "hoverapproach_fly1_1"
         self.experimentparams.save.csv = True
