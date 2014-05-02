@@ -29,7 +29,6 @@
   <depend package="experiment_srvs"/>
   <depend package="flycore" />
   <depend package="galvodirector" />
-  <depend package="image_gui" />
   <depend package="ledpanels" />
   <depend package="patterngen" />
   <depend package="pythonmodules" />
