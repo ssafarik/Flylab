@@ -90,6 +90,9 @@ class MotorArm:
         
         self.statePID = MsgFrameState()
 
+        self.angposRef = 0.0
+        self.angvelRef = 0.0
+        
         self.angposMech = None
         self.angposPError = 0.0
         self.angvelPError = 0.0
