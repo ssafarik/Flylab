@@ -16,10 +16,10 @@
   
   <!-- The mask circle in camera coordinates (i.e. pixels).    -->
   <param name="camera/mask/x" type="double" value="324"/>
-  <param name="camera/mask/y" type="double" value="244"/>
+  <param name="camera/mask/y" type="double" value="224"/>
   <param name="camera/mask/radius" type="double" value="224"/>  <!-- pixels -->
 
-  <param name="calibration/checker_size" type="double" value="14.0" />
+  <param name="calibration/checker_size" type="double" value="5.0" />
 
 
 
