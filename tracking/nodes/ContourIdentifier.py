@@ -373,10 +373,10 @@ class ContourIdentifier:
             
         
         # Penalty for deviation of visual characteristics: area and ecc.
-        gainArea = 0.1 
-        aPenalty = 0#gainArea * N.abs(N.subtract.outer(xyObjects[:,INDEX_AMEAN], xyContours[:,INDEX_AREA]))
+        gainArea = 0.0 #0.1 
+        aPenalty = gainArea * N.abs(N.subtract.outer(xyObjects[:,INDEX_AMEAN], xyContours[:,INDEX_AREA]))
 
-        gainEcc = 10.0
+        gainEcc = 0.0 #10.0
         ePenalty = gainEcc * N.abs(N.subtract.outer(xyObjects[:,INDEX_EMEAN], xyContours[:,INDEX_ECC]))
         d += (aPenalty + ePenalty)
             

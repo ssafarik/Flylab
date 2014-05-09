@@ -5,7 +5,7 @@
   <param name="tracking/rcBackground"               type="double" value="250000"/>                   <!-- Moving average for dynamic background. -->
   <param name="tracking/rcForeground"               type="double" value="2"/>                      <!-- Moving average for foreground objects (e.g. Fly1/image_mean). -->
   <param name="tracking/rcFilterAngle"              type="double" value="0.0"/>
-  <param name="tracking/rcFilterFlip"          		type="double" value="3.0"/>
+  <param name="tracking/rcFilterFlip"          		type="double" value="1.5"/>
   <param name="tracking/speedThresholdForTravel"    type="double" value="5.0"/>
   <param name="tracking/areaContourMin"             type="double" value="4"/>
   <param name="tracking/roi/height"                 type="int" value="21"/>                        <!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
