@@ -50,8 +50,8 @@ class ContourGenerator:
 
         self.bEqualizeHist = False
         self.header = None
-        self.matImageRect = None
-        self.matBackground = None
+        self.imgImageRect = None
+        self.imgBackground = None
         
         self.command = None # Valid values:  None, or 'establish_background'
         self.bEstablishBackground = False # Gets set to true when user requests to establish a new background automatically.
@@ -97,8 +97,6 @@ class ContourGenerator:
         self.pubImageForeground     = rospy.Publisher('camera/image_foreground', Image)
         self.pubImageThreshold      = rospy.Publisher('camera/image_threshold', Image)
         self.pubImageRoi            = rospy.Publisher('camera/image_roi', Image)
-        self.pubImageRviz           = rospy.Publisher('camera_rviz/image_rect', Image)
-        self.pubCamerainfoRviz      = rospy.Publisher('camera_rviz/camera_info', CameraInfo)
         self.pubContourinfoLists    = rospy.Publisher('ContourinfoLists', ContourinfoLists)
         self.seq = 0
         self.selfPublishedBackground = False
@@ -135,11 +133,6 @@ class ContourGenerator:
         
         # Coordinate Systems
         
-        self.ptsOriginImage = PointStamped()
-        self.ptsOriginImage.header.frame_id = 'ImageRect'
-        self.ptsOriginImage.point.x = 0
-        self.ptsOriginImage.point.y = 0
-        
         self.ptsOriginArena = PointStamped()
         self.ptsOriginArena.header.frame_id = 'Arena'
         self.ptsOriginArena.point.x = 0
@@ -159,38 +152,46 @@ class ContourGenerator:
         
 
     def InitializeImages(self):
-        if (self.header is not None) and (self.matImageRect is not None):
+        if (self.header is not None) and (self.imgImageRect is not None):
 
             # Initialize the images.
-            self.matProcessed         = np.zeros([self.height, self.width, 3], dtype=np.uint8)
-            self.matProcessedFlip     = np.zeros([self.height, self.width, 3], dtype=np.uint8)
-            self.matMask              = np.zeros([self.height, self.width], dtype=np.uint8)
-            self.matForeground        = np.zeros([self.height, self.width], dtype=np.uint8)
-            self.matThreshold         = np.zeros([self.height, self.width], dtype=np.uint8)
-            self.matMaskOthers        = np.zeros([self.height, self.width], dtype=np.uint8)
+            self.imgProcessed         = np.zeros([self.height, self.width, 3], dtype=np.uint8)
+            self.imgProcessedFlip     = np.zeros([self.height, self.width, 3], dtype=np.uint8)
+            self.imgMask              = np.zeros([self.height, self.width], dtype=np.uint8)
+            self.imgForeground        = np.zeros([self.height, self.width], dtype=np.uint8)
+            self.imgThreshold         = np.zeros([self.height, self.width], dtype=np.uint8)
+            self.imgMaskOthers        = np.zeros([self.height, self.width], dtype=np.uint8)
+
+            # Origin of the mask in the Mask frame.
+            ptsOriginMaskMask = PointStamped()
+            ptsOriginMaskMask.header.frame_id = 'Mask'
+            ptsOriginMaskMask.point.x = 0
+            ptsOriginMaskMask.point.y = 0
             
             if (self.params['tracking']['usetransforms']):
                 b = False
                 while not b:
                     try:
-                        self.tfrx.waitForTransform('Mask', 
-                                                   self.ptsOriginImage.header.frame_id, 
-                                                   self.ptsOriginImage.header.stamp, 
+                        self.tfrx.waitForTransform('ImageRect', 
+                                                   ptsOriginMaskMask.header.frame_id, 
+                                                   ptsOriginMaskMask.header.stamp, 
                                                    rospy.Duration(1.0))
                     except tf.Exception, e:
-                        rospy.logwarn('ExceptionA transforming mask frame %s->Mask:  %s' % (self.ptsOriginImage.header.frame_id, e))
+                        rospy.logwarn('ExceptionA transforming mask frame %s->ImageRect:  %s' % (ptsOriginMaskMask.header.frame_id, e))
                         
                     try:
-                        self.ptsOriginMask = self.tfrx.transformPoint('Mask', self.ptsOriginImage)
-                        self.ptsOriginMask.point.x = -self.ptsOriginMask.point.x
-                        self.ptsOriginMask.point.y = -self.ptsOriginMask.point.y
+                        # Get the origin of the mask in the ImageRect frame.
+                        self.ptsOriginMask = self.tfrx.transformPoint('ImageRect', ptsOriginMaskMask)
+                        #self.ptsOriginMask.point.x *= -1
+                        #self.ptsOriginMask.point.y *= -1
                         b = True
                     except tf.Exception, e:
-                        rospy.logwarn('ExceptionB transforming mask frame %s->Mask:  %s' % (self.ptsOriginImage.header.frame_id, e))
+                        rospy.logwarn('ExceptionB transforming mask frame ImageRect->Mask:  %s' % e)
             else:
-                self.ptsOriginMask = PointStamped(point=Point(x=0, y=0))
+                self.ptsOriginMask = PointStamped(header=Header(frame_id='ImageRect'), 
+                                                  point=Point(x=0, y=0))
                         
-            cv2.circle(self.matMask,
+            cv2.circle(self.imgMask,
                       (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
                       int(self.params['camera']['mask']['radius']), 
                       self.color_max, 
@@ -212,9 +213,9 @@ class ContourGenerator:
 
             
         # Publish the current background image.
-        if (self.matBackground is not None):#(self.pubImageBackground.get_num_connections() > 0) and (self.matBackground is not None):
+        if (self.imgBackground is not None):#(self.pubImageBackground.get_num_connections() > 0) and (self.imgBackground is not None):
             try:
-                imgBackground = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
+                imgBackground = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgBackground), 'passthrough')
                 imgBackground.header.stamp = self.header.stamp
                 self.selfPublishedBackground = True
                 self.pubImageBackgroundSet.publish(imgBackground)
@@ -233,9 +234,9 @@ class ContourGenerator:
 
         # Publish the current background image.
         if (reqTrigger.triggered):
-            if (self.matBackground is not None):#(self.pubImageBackground.get_num_connections() > 0) and (self.matBackground is not None):
+            if (self.imgBackground is not None):#(self.pubImageBackground.get_num_connections() > 0) and (self.imgBackground is not None):
                 try:
-                    imgBackground = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
+                    imgBackground = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgBackground), 'passthrough')
                     imgBackground.header.stamp = self.header.stamp
                     self.selfPublishedBackground = True
                     self.pubImageBackgroundSet.publish(imgBackground)
@@ -259,12 +260,12 @@ class ContourGenerator:
             
         if (not self.selfPublishedBackground):
             try:
-                self.matBackground = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
+                self.imgBackground = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
             except CvBridgeError, e:
                 rospy.logwarn ('Exception converting background image from ROS to opencv:  %s' % e)
-                self.matBackground = None
+                self.imgBackground = None
             else:
-                self.matfBackground = np.float32(self.matBackground)
+                self.imgfBackground = np.float32(self.imgBackground)
                 self.bInitBackground = True
         else:
             self.selfPublishedBackground = False
@@ -391,7 +392,7 @@ class ContourGenerator:
     # computes the contour image minus the other contour images...
     # and appends the contourinfo members to their respective lists.
     #
-    def GetContourinfolistsDictFromContourList(self, contour_list, matForeground):
+    def GetContourinfolistsDictFromContourList(self, contour_list, imgForeground):
         contourinfolists_dict = {'x':[], 'y':[], 'angle':[], 'area':[], 'ecc':[], 'imgRoi':[], 'iContour':[]}#, 'contour':[]}
         
         for iContour in range(len(contour_list)):
@@ -429,13 +430,13 @@ class ContourGenerator:
     
     
             # Get the ROI pixels for each contour, minus the pixels of the other contours.
-            if (matForeground is not None):
+            if (imgForeground is not None):
                 nContours = len(contourinfolists_dict['x'])
                 #for iContour in range(nContours):
                 x = contourinfolists_dict['x'][iContour]
                 y = contourinfolists_dict['y'][iContour]
     
-                self.matMaskOthers.fill(0)
+                self.imgMaskOthers.fill(0)
                 
                 # Go through all the other contours.
                 normRoi = np.linalg.norm([self.params['tracking']['roi']['width'],self.params['tracking']['roi']['height']])
@@ -447,14 +448,14 @@ class ContourGenerator:
                         # If the kth ROI can overlap with the ith ROI, then add that fly's pixels to the subtraction mask.  
                         if (np.linalg.norm([x-xk,y-yk]) < normRoi):
                             jContour = contourinfolists_dict['iContour'][kContour]
-                            cv2.drawContours(self.matMaskOthers, contour_list, jContour, 255, cv.CV_FILLED, 4, self.hierarchy, 0)
+                            cv2.drawContours(self.imgMaskOthers, contour_list, jContour, 255, cv.CV_FILLED, 4, self.hierarchy, 0)
                         
-                self.matMaskOthers = cv2.dilate(self.matMaskOthers, self.kernel, iterations=2)
-                matOthers = cv2.bitwise_and(self.matMaskOthers, matForeground)
-                matRoi = cv2.getRectSubPix(matForeground - matOthers, 
+                self.imgMaskOthers = cv2.dilate(self.imgMaskOthers, self.kernel, iterations=2)
+                imgOthers = cv2.bitwise_and(self.imgMaskOthers, imgForeground)
+                imgRoi = cv2.getRectSubPix(imgForeground - imgOthers, 
                                            (self.params['tracking']['roi']['width'], self.params['tracking']['roi']['height']), 
                                            (x,y))
-                imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(matRoi), 'passthrough')
+                imgRoi = self.cvbridge.cv_to_imgmsg(cv.fromarray(imgRoi), 'passthrough')
                 contourinfolists_dict['imgRoi'][iContour] = imgRoi
                 
     
@@ -618,11 +619,11 @@ class ContourGenerator:
         
         
         
-    def ContourinfoListsFromImage(self, matThreshold, matForeground):
+    def ContourinfoListsFromImage(self, imgThreshold, imgForeground):
         # Find contours
-        sumImage = cv2.sumElems(matThreshold)
-        if (self.minSumImage < sumImage[0]):
-            (contours,hierarchy) = cv2.findContours(matThreshold, mode=cv2.RETR_CCOMP, method=cv2.CHAIN_APPROX_NONE )#cv2.CHAIN_APPROX_SIMPLE) # Modifies matThreshold.
+        sumImage = cv2.sumElems(imgThreshold)
+        if self.minSumImage < sumImage[0]:
+            (contours,hierarchy) = cv2.findContours(imgThreshold, mode=cv2.RETR_CCOMP, method=cv2.CHAIN_APPROX_NONE )#cv2.CHAIN_APPROX_SIMPLE) # Modifies imgThreshold.
         else:
             (contours,hierarchy) = (None, None)
             
@@ -670,7 +671,7 @@ class ContourGenerator:
                                          
 
         # Put the contours into the contourinfolists_dict.
-        contourinfolists_dict = self.GetContourinfolistsDictFromContourList(self.contour_list, matForeground)
+        contourinfolists_dict = self.GetContourinfolistsDictFromContourList(self.contour_list, imgForeground)
                 
                     
         
@@ -744,7 +745,7 @@ class ContourGenerator:
                 self.width = rosimg.width
                 # Convert ROS image to OpenCV image.
                 try:
-                    self.matImageRect = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(rosimg, 'passthrough')))
+                    self.imgImageRect = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(rosimg, 'passthrough')))
                 except CvBridgeError, e:
                     rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
                 if (not self.bInitImages):
@@ -763,8 +764,8 @@ class ContourGenerator:
                     
                     # Create the mask.
                     if (self.paramsPrev['camera']['mask']['radius'] != self.params['camera']['mask']['radius']):
-                        self.matMask.fill(0)
-                        cv2.circle(self.matMask,
+                        self.imgMask.fill(0)
+                        cv2.circle(self.imgMask,
                                   (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
                                   int(self.params['camera']['mask']['radius']), 
                                   self.color_max, 
@@ -772,11 +773,11 @@ class ContourGenerator:
                     
                     # Normalize the histogram.
                     if (self.bEqualizeHist):
-                        self.matImageRect = cv2.equalizeHist(self.matImageRect)
+                        self.imgImageRect = cv2.equalizeHist(self.imgImageRect)
                     
                     
                     # Update the background.
-                    #rospy.logwarn('types: %s' % [type(np.float32(self.matImageRect)), type(self.matfBackground), type(self.rcBackground)])
+                    #rospy.logwarn('types: %s' % [type(np.float32(self.imgImageRect)), type(self.imgfBackground), type(self.rcBackground)])
                     if (self.bEstablishBackground):
                         rcBackground = self.params['tracking']['rcBackgroundEstablish']
                     else:
@@ -784,39 +785,39 @@ class ContourGenerator:
                     
                     alphaBackground = 1 - np.exp(-self.dt.to_sec() / rcBackground)
                     
-                    cv2.accumulateWeighted(np.float32(self.matImageRect), self.matfBackground, alphaBackground)
-                    self.matBackground = np.uint8(self.matfBackground)
+                    cv2.accumulateWeighted(np.float32(self.imgImageRect), self.imgfBackground, alphaBackground)
+                    self.imgBackground = np.uint8(self.imgfBackground)
         
         
                     # Create the foreground.
                     if (self.bEqualizeHist):
-                        matBackgroundEq = cv2.equalizeHist(self.matBackground)
+                        imgBackgroundEq = cv2.equalizeHist(self.imgBackground)
         
-                    if (self.params['tracking']['usebackgroundsubtraction']) and (self.matBackground is not None):
-                        self.matForeground = cv2.absdiff(self.matImageRect, self.matBackground)
+                    if (self.params['tracking']['usebackgroundsubtraction']) and (self.imgBackground is not None):
+                        self.imgForeground = cv2.absdiff(self.imgImageRect, self.imgBackground)
                     else:
-                        self.matForeground = self.matImageRect
+                        self.imgForeground = self.imgImageRect
         
                     
                     # Threshold
-                    (threshold,self.matThreshold) = cv2.threshold(self.matForeground, 
+                    (threshold,self.imgThreshold) = cv2.threshold(self.imgForeground, 
                                                      self.params['tracking']['diff_threshold'], 
                                                      self.max_8U, 
                                                      cv2.THRESH_TOZERO)
         
                     
                     # Apply the arena mask to the threshold image.
-                    self.matThreshold = cv2.bitwise_and(self.matThreshold, self.matMask)
+                    self.imgThreshold = cv2.bitwise_and(self.imgThreshold, self.imgMask)
         
                     # Get the ContourinfoLists.
-                    self.contourinfolists = self.ContourinfoListsFromImage(self.matThreshold, self.matForeground)    # Modifies self.matThreshold
+                    self.contourinfolists = self.ContourinfoListsFromImage(self.imgThreshold, self.imgForeground)    # Modifies self.imgThreshold
                     self.pubContourinfoLists.publish(self.contourinfolists)
                     
                     # Convert to color for display image
                     if (0 < self.pubImageProcessed.get_num_connections()):
                         # Apply the arena mask to the camera image, and convert it to color.
-                        self.matImageRect = cv2.bitwise_and(self.matImageRect, self.matMask)
-                        self.matProcessed = cv2.cvtColor(self.matImageRect, cv.CV_GRAY2RGB)
+                        self.imgImageRect = cv2.bitwise_and(self.imgImageRect, self.imgMask)
+                        self.imgProcessed = cv2.cvtColor(self.imgImageRect, cv.CV_GRAY2RGB)
                         
                         # Draw contours on Processed image.
                         colors = [cv.CV_RGB(0,              0,              self.color_max), # blue
@@ -829,13 +830,13 @@ class ContourGenerator:
                             for k in range(len(self.contour_list)):
                                 #color = cv.CV_RGB(0,0,self.color_max)
                                 color = colors[k % len(colors)]
-                                cv2.drawContours(self.matProcessed, self.contour_list, k, color, thickness=1, maxLevel=1)
+                                cv2.drawContours(self.imgProcessed, self.contour_list, k, color, thickness=1, maxLevel=1)
                         
                     
                     # Publish processed image
                     if (0 < self.pubImageProcessed.get_num_connections()):
                         try:
-                            image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matProcessed), 'passthrough')
+                            image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgProcessed), 'passthrough')
                             image2.header = rosimg.header
                             image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                             #rospy.logwarn(image2.encoding)
@@ -844,9 +845,9 @@ class ContourGenerator:
                             rospy.logwarn ('Exception %s' % e)
                     
                     # Publish background image
-                    if (self.pubImageBackground.get_num_connections() > 0) and (self.matBackground is not None):
+                    if (self.pubImageBackground.get_num_connections() > 0) and (self.imgBackground is not None):
                         try:
-                            image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
+                            image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgBackground), 'passthrough')
                             image2.header.stamp = rosimg.header.stamp
                             image2.encoding = 'mono8'
                             self.pubImageBackground.publish(image2)
@@ -857,8 +858,8 @@ class ContourGenerator:
                     # Publish thresholded image
                     if (0 < self.pubImageThreshold.get_num_connections()):
                         try:
-                            self.matImageRect = cv2.add(self.matThreshold, self.matForeground)
-                            image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
+                            self.imgImageRect = cv2.add(self.imgThreshold, self.imgForeground)
+                            image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgImageRect), 'passthrough')
                             image2.header.stamp = rosimg.header.stamp
                             image2.encoding = 'mono8'
                             self.pubImageThreshold.publish(image2)
@@ -869,7 +870,7 @@ class ContourGenerator:
                     # Publish foreground image
                     if (0 < self.pubImageForeground.get_num_connections()):
                         try:
-                            image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matForeground), 'passthrough')
+                            image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgForeground), 'passthrough')
                             image2.header.stamp = rosimg.header.stamp
                             image2.encoding = 'mono8'
                             self.pubImageForeground.publish(image2)
@@ -879,8 +880,8 @@ class ContourGenerator:
                       
                     # Publish a special image for use in rviz.
                     if (0 < self.pubImageRviz.get_num_connections()):
-                        self.matProcessedFlip = cv2.flip(self.matProcessed, 0)
-                        image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
+                        self.imgProcessedFlip = cv2.flip(self.imgProcessed, 0)
+                        image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgImageRect), 'passthrough')
                         image2.header = rosimg.header
                         image2.encoding = 'mono8'
                         

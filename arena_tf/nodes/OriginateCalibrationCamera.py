@@ -26,23 +26,36 @@ class OriginateCalibrationCamera:
         
 
         # Load the calibration params.
-        calibration = CalibrationCamera()
+        self.calibration = CalibrationCamera()
         
-        calibration.xMask        = rospy.get_param('camera/mask/x', 0.0) 
-        calibration.yMask        = rospy.get_param('camera/mask/y', 0.0) 
-        calibration.arena_rvec_0 = rospy.get_param('camera/arena_rvec_0', 3.14159)
-        calibration.arena_rvec_1 = rospy.get_param('camera/arena_rvec_1', 0.0)
-        calibration.arena_rvec_2 = rospy.get_param('camera/arena_rvec_2', 0.0)
-        calibration.arena_tvec_0 = rospy.get_param('camera/arena_tvec_0', 0.0)
-        calibration.arena_tvec_1 = rospy.get_param('camera/arena_tvec_1', 0.0)
-        calibration.arena_tvec_2 = rospy.get_param('camera/arena_tvec_2', 0.0)
+        self.calibration.xMask        = rospy.get_param('camera/mask/x', 0.0) 
+        self.calibration.yMask        = rospy.get_param('camera/mask/y', 0.0) 
+        self.calibration.arena_rvec_0 = rospy.get_param('camera/arena_rvec_0', 3.14159)
+        self.calibration.arena_rvec_1 = rospy.get_param('camera/arena_rvec_1', 0.0)
+        self.calibration.arena_rvec_2 = rospy.get_param('camera/arena_rvec_2', 0.0)
+        self.calibration.arena_tvec_0 = rospy.get_param('camera/arena_tvec_0', 0.0)
+        self.calibration.arena_tvec_1 = rospy.get_param('camera/arena_tvec_1', 0.0)
+        self.calibration.arena_tvec_2 = rospy.get_param('camera/arena_tvec_2', 0.0)
             
-        self.pubCalibrationOriginate.publish(calibration)
+        self.pubCalibrationOriginate.publish(self.calibration)
             
 
 
     def Main(self):
-        rospy.spin()
+        rosrate = rospy.Rate(10)
+        while (not rospy.is_shutdown()):
+            #pass
+            self.calibration.xMask        = rospy.get_param('camera/mask/x', 0.0) 
+            self.calibration.yMask        = rospy.get_param('camera/mask/y', 0.0) 
+            self.calibration.arena_rvec_0 = rospy.get_param('camera/arena_rvec_0', 3.14159)
+            self.calibration.arena_rvec_1 = rospy.get_param('camera/arena_rvec_1', 0.0)
+            self.calibration.arena_rvec_2 = rospy.get_param('camera/arena_rvec_2', 0.0)
+            self.calibration.arena_tvec_0 = rospy.get_param('camera/arena_tvec_0', 0.0)
+            self.calibration.arena_tvec_1 = rospy.get_param('camera/arena_tvec_1', 0.0)
+            self.calibration.arena_tvec_2 = rospy.get_param('camera/arena_tvec_2', 0.0)
+                
+            self.pubCalibrationOriginate.publish(self.calibration)
+            rosrate.sleep()
       
 
 if __name__ == '__main__':
