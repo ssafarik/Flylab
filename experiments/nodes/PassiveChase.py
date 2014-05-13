@@ -23,7 +23,7 @@ class ExperimentPassiveChase():
         
         self.experimentparams.experiment.description = "Fly Chases Robot Moving in Circle"
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.timeout = 15
+        self.experimentparams.experiment.timeout = 600
         
         self.experimentparams.save.filenamebase = "passivechase"
         self.experimentparams.save.csv = True

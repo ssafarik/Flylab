@@ -171,7 +171,7 @@ class ContourIdentifier:
         stSrv = 'arena_from_image'
         try:
             rospy.wait_for_service(stSrv)
-            self.ArenaFromCamera = rospy.ServiceProxy(stSrv, ArenaCameraConversion, persistent=True)
+            self.ArenaFromImage = rospy.ServiceProxy(stSrv, ArenaCameraConversion, persistent=True)
         except rospy.ServiceException, e:
             rospy.logwarn ('CI FAILED to connect service %s(): %s' % (stSrv, e))
 
@@ -306,19 +306,19 @@ class ContourIdentifier:
         return contourinfolistsOut
         
         
-    # TransformContourinfolistsArenaFromCamera()
+    # TransformContourinfolistsArenaFromImage()
     # Transform the points in contourinfolistsIn to be in the Arena frame.
     #
-    def TransformContourinfolistsArenaFromCamera(self, contourinfolistsIn):
+    def TransformContourinfolistsArenaFromImage(self, contourinfolistsIn):
         if self.initialized:
             
             try:
-                response = self.ArenaFromCamera(contourinfolistsIn.x, contourinfolistsIn.y)
+                response = self.ArenaFromImage(contourinfolistsIn.x, contourinfolistsIn.y)
             except rospy.ServiceException, e:
                 stSrv = 'arena_from_image'
                 try:
                     rospy.wait_for_service(stSrv)
-                    self.ArenaFromCamera = rospy.ServiceProxy(stSrv, ArenaCameraConversion, persistent=True)
+                    self.ArenaFromImage = rospy.ServiceProxy(stSrv, ArenaCameraConversion, persistent=True)
                 except rospy.ServiceException, e:
                     rospy.logwarn ('CI FAILED to connect service %s(): %s' % (stSrv, e))
                 else:
@@ -723,7 +723,7 @@ class ContourIdentifier:
             
                         # Apply the arena mask, and transform to arena frame.
                         contourinfolistsPixels = self.FilterContourinfolistsWithinMask(contourinfolistsPixels)
-                        contourinfolists = self.TransformContourinfolistsArenaFromCamera(contourinfolistsPixels)
+                        contourinfolists = self.TransformContourinfolistsArenaFromImage(contourinfolistsPixels)
                         
             
                         # Repackage the contourinfolists as a list of contourinfos, ignoring any that are in an exclusion zone.
