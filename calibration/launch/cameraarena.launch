@@ -15,8 +15,8 @@
 	<!-- ================================================================== -->
 	
 	<include file="$(find config)/launch/main.launch" />
-	<include file="$(find arena_tf)/launch/main.launch" />
-	<include file="$(find tracking)/launch/main.launch" />
+	<!-- <include file="$(find arena_tf)/launch/main.launch" /> -->
+	<!-- <include file="$(find tracking)/launch/main.launch" /> -->
 
 	<node pkg="calibration" type="CameraArena.py" name="CameraArenaCalibration"/>
 </launch>

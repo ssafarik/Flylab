@@ -15,6 +15,7 @@ from geometry_msgs.msg import Point, PointStamped
 from std_msgs.msg import String
 from sensor_msgs.msg import Image, CameraInfo
 
+from arena_tf.msg import CalibrationCamera
 from arena_tf.srv import ArenaCameraConversion
 from flycore.msg import TrackingCommand
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
@@ -38,6 +39,7 @@ class ContourGenerator:
         self.bInitConstructor = False
         self.bInitBackground = False
         self.bInitImages = False
+        self.bInitMask = False
         self.bInitialized = False
         
         self.lock = threading.Lock()
@@ -52,6 +54,9 @@ class ContourGenerator:
         self.header = None
         self.imgImageRect = None
         self.imgBackground = None
+        
+        self.calibration = None
+        self.scale = 1.0
         
         self.command = None # Valid values:  None, or 'establish_background'
         self.bEstablishBackground = False # Gets set to true when user requests to establish a new background automatically.
@@ -82,8 +87,10 @@ class ContourGenerator:
         # Messages
         self.camerainfo = None
         
-        self.subCameraInfo          = rospy.Subscriber('camera/camera_info', CameraInfo, self.CameraInfo_callback)
-        self.subImageRect           = rospy.Subscriber('camera/image_rect', Image, self.Image_callback, queue_size=self.params['tracking']['queue_size_images'], buff_size=262144, tcp_nodelay=True)
+        self.subCameraInfo           = rospy.Subscriber('camera/camera_info', CameraInfo, self.CameraInfo_callback)
+        self.subImageRect            = rospy.Subscriber('camera/image_rect', Image, self.Image_callback, queue_size=self.params['tracking']['queue_size_images'], buff_size=262144, tcp_nodelay=True)
+        self.subCalibrationOriginate = rospy.Subscriber('camera/calibration_originate', CalibrationCamera, self.Calibration_callback)
+        self.subCalibrationSet       = rospy.Subscriber('camera/calibration_set',       CalibrationCamera, self.Calibration_callback)
         
         # The background image from disk needs to come in on a different topic than the background image from a replayed bag file, i.e. "camera/image_background_originate" so it
         # doesn't go directly into the bag file that's being recorded.
@@ -191,14 +198,24 @@ class ContourGenerator:
                 self.ptsOriginMask = PointStamped(header=Header(frame_id='ImageRect'), 
                                                   point=Point(x=0, y=0))
                         
-            cv2.circle(self.imgMask,
-                      (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
-                      int(self.params['camera']['mask']['radius']), 
-                      self.color_max, 
-                      cv.CV_FILLED)
+#             cv2.circle(self.imgMask,
+#                       (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
+#                       int(self.params['camera']['mask']['radius']), 
+#                       self.color_max, 
+#                       cv.CV_FILLED)
             
                 
             self.bInitImages = True
+
+
+    # Receive calibration values (wherever they came from).
+    def Calibration_callback (self, calibration):
+        while (not self.bInitConstructor):
+            rospy.loginfo('Waiting for initConstructor.')
+            rospy.sleep(0.1)
+        
+            
+        self.calibration = calibration
 
 
     def Init_callback(self, experimentparamsChoices):
@@ -254,7 +271,7 @@ class ContourGenerator:
 
     def ImageBackgroundSet_callback (self, image):
         while (not self.bInitConstructor):
-            rospy.loginfo('Waiting for initConstructor.')
+            rospy.loginfo('Waiting for bInitConstructor.')
             rospy.sleep(0.5)
         
             
@@ -275,6 +292,9 @@ class ContourGenerator:
         if (self.bInitConstructor):
             self.camerainfo = msgCameraInfo
             
+            if (self.calibration is not None):
+                self.scale = self.camerainfo.P[0] / self.calibration.arena_tvec_2
+
             if (not self.bInitialized):
                 self.InitializeImages()
         
@@ -763,10 +783,13 @@ class ContourGenerator:
                         SetDict.SetWithOverwrite(self.params, rospy.get_param('/',{}))
                     
                     # Create the mask.
-                    if (self.paramsPrev['camera']['mask']['radius'] != self.params['camera']['mask']['radius']):
+                    if self.paramsPrev['camera']['mask']['radius'] != self.params['camera']['mask']['radius']:
+                        self.bInitMask = False
+                        
+                    if (not self.bInitMask):
                         self.imgMask.fill(0)
                         cv2.circle(self.imgMask,
-                                  (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
+                                  (int(self.ptsOriginMask.point.x * self.scale),int(self.ptsOriginMask.point.y * self.scale)),
                                   int(self.params['camera']['mask']['radius']), 
                                   self.color_max, 
                                   cv.CV_FILLED)
