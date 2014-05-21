@@ -15,6 +15,7 @@ from tracking.msg import ArenaState
 from geometry_msgs.msg import Point
 from std_msgs.msg import Header, String
 from patterngen.msg import MsgPattern
+from flycore.msg import CircleZones, MsgFrameState, TrackingCommand
 
 
 
@@ -43,6 +44,7 @@ class GalvoCalibrator:
         self.subCommand    = rospy.Subscriber('experiment/command', String, self.Command_callback)
 
         self.pubGalvodirectorCommand = rospy.Publisher('galvodirector/command', MsgGalvoCommand)
+        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
 
 
         self.pointsInput = [
@@ -278,8 +280,20 @@ class GalvoCalibrator:
     def Main(self):
         rosRate = rospy.Rate(0.5)#(0.1)
 
+        msgTrackingCommand                    = TrackingCommand()
+        msgTrackingCommand.command            = 'initialize'
+        msgTrackingCommand.exclusionzones     = CircleZones(enabled = False, point_list = [], radius_list = [])
+        msgTrackingCommand.nRobots            = 0
+        msgTrackingCommand.nFlies             = 1
+        msgTrackingCommand.bUseVisualServoing = True
+        self.pubTrackingCommand.publish(msgTrackingCommand)
+
+        rospy.logwarn('Galvo Calibrator waiting for an ArenaState...')
         while (not self.initialized):    
             rospy.sleep(0.5)
+        rospy.logwarn('Galvo Calibrator initialized.')
+
+        
 
         rospy.logwarn ('Find the regression parameter values, and enter them in params_galvos.launch')
         plt.figure(1)

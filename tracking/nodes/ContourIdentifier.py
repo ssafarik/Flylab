@@ -248,7 +248,6 @@ class ContourIdentifier:
             del self.objects[0]
         self.objects = []
 
-        
         self.iRobot_list        = range(self.nRobots)
         self.iFly_list          = range(self.nRobots, self.nRobots+self.nFlies)
         self.iAll_list          = range(self.nRobots+self.nFlies)
@@ -483,7 +482,7 @@ class ContourIdentifier:
 
 
     # MapContoursFromObjects()
-    #   Compute a mapping between the visual contours, on one hand, and on the other hand the tracked & kinematic positions.
+    #   Compute a mapping between the visual contours and the tracked & kinematic positions.
     #   Uses self.contourinfo_list, self.stateKinematic, & self.objects,
     #   Returns a list of indices such that self.objects[k] = contour[map[k]], where k==0 is the robot.
     #
@@ -607,7 +606,6 @@ class ContourIdentifier:
                                          N.nan, N.nan]) # Kinematic positions.
 
         
-            
         # Match objects with contourinfo_list.
         d = self.GetDistanceMatrix(xyObjects, xyContours)
         if (d is not []):
