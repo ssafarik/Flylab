@@ -1,0 +1,12 @@
+experiment_msgs/ExperimentSettings   experiment
+experiment_msgs/SaveSettings         save
+experiment_msgs/RobotSpec            robotspec
+experiment_msgs/FlySpec              flyspec
+flycore/TrackingCommand              tracking
+experiment_msgs/HomeSettings         home
+experiment_msgs/PreSettingsChoices   pre
+experiment_msgs/TrialSettingsChoices trial
+experiment_msgs/PostSettings         post
+---
+bool 				                 succeeded
+

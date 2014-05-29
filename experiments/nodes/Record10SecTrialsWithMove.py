@@ -21,11 +21,11 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Record 10 Second Trials With Robot Move"
+        self.experimentparams.experiment.description = 'Record 10 Second Trials With Robot Move'
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.timeout = -1
         
-        self.experimentparams.save.filenamebase = "tensec"
+        self.experimentparams.save.filenamebase = 'tensec'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
@@ -36,15 +36,21 @@ class Experiment():
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
         self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
-        self.experimentparams.robotspec.description = "Black oxide magnet"
+        self.experimentparams.robotspec.description = 'Black oxide magnet'
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = 'unspecified'
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
+        self.experimentparams.home.enabled = True
+        self.experimentparams.home.x = 0.0
+        self.experimentparams.home.y = 0.0
+        self.experimentparams.home.speed = 20
+        self.experimentparams.home.tolerance = 2
+
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
@@ -73,32 +79,27 @@ class Experiment():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'pattern'
-        self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'            # 
-        self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
-        self.experimentparams.trial.robot.move.pattern.shape = 'circle' # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20
-        self.experimentparams.trial.robot.move.pattern.hzPoint = 10
-        self.experimentparams.trial.robot.move.pattern.count = -1
-        self.experimentparams.trial.robot.move.pattern.size.x = rospy.get_param('motorarm/L1', 999)
-        self.experimentparams.trial.robot.move.pattern.size.y = 0
-        self.experimentparams.trial.robot.move.pattern.param = 0
-        self.experimentparams.trial.robot.move.pattern.direction = 1
-        self.experimentparams.trial.robot.home.enabled = True
-        self.experimentparams.trial.robot.home.x = 0.0
-        self.experimentparams.trial.robot.home.y = 0.0
-        self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.tolerance = 2
+        self.experimentparams.trial.robot.move.pattern.frameidPosition = ['Arena']            # 
+        self.experimentparams.trial.robot.move.pattern.frameidAngle = ['Arena']               # 
+        self.experimentparams.trial.robot.move.pattern.shape = ['circle'] # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
+        self.experimentparams.trial.robot.move.pattern.hzPattern = [1/20]
+        self.experimentparams.trial.robot.move.pattern.hzPoint = [10]
+        self.experimentparams.trial.robot.move.pattern.count = [-1]
+        self.experimentparams.trial.robot.move.pattern.size.x = [rospy.get_param('motorarm/L1', 999)]
+        self.experimentparams.trial.robot.move.pattern.size.y = [0]
+        self.experimentparams.trial.robot.move.pattern.param = [0]
+        self.experimentparams.trial.robot.move.pattern.direction = [1]
         
         
         self.experimentparams.trial.lasergalvos.enabled = False
         
         self.experimentparams.trial.ledpanels.enabled = False
-        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
-        self.experimentparams.trial.ledpanels.statefilterHi = ''
-        self.experimentparams.trial.ledpanels.statefilterLo = ''
-        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
+        self.experimentparams.trial.ledpanels.command = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = [1]
+        self.experimentparams.trial.ledpanels.frame_id = ['Fly01Forecast']
+        self.experimentparams.trial.ledpanels.statefilterHi = ['']
+        self.experimentparams.trial.ledpanels.statefilterLo = ['']
+        self.experimentparams.trial.ledpanels.statefilterCriteria = ['']
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly01'
@@ -153,7 +154,7 @@ if __name__ == '__main__':
         experiment.Run()
         
     except KeyboardInterrupt:
-        rospy.loginfo("Shutting down")
+        rospy.loginfo('Shutting down')
 
         
 

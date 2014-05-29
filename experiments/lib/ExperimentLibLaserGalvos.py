@@ -24,7 +24,7 @@ class Reset (smach.State):
     def __init__(self, tfrx=None):
         smach.State.__init__(self, 
                              outcomes=['success','disabled','preempt','aborted'],
-                             input_keys=['experimentparamsIn'])
+                             input_keys=['experimentparamsChoicesIn'])
 
         self.arenastate = None
         self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
@@ -60,7 +60,7 @@ class Reset (smach.State):
     def execute(self, userdata):
         rospy.loginfo("EL State ResetGalvos()")
 
-        if (userdata.experimentparamsIn.trial.lasergalvos.enabled):
+        if (userdata.experimentparamsChoicesIn.trial.lasergalvos.enabled):
             commandGalvoBeamsink = MsgGalvoCommand()
             commandGalvoBeamsink.enable_laser = False # False will send it to the beamsink.
             self.pubGalvoCommand.publish(commandGalvoBeamsink)

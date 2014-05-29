@@ -20,7 +20,7 @@ class calc(smach.State):
     def execute(self, userdata):
         for idx in range(5):
             if self.preempt_requested():
-                print "state calc is being preempted!!!"
+                print 'state calc is being preempted!!!'
                 self.service_preempt()
                 return 'preempted'
             rospy.sleep(1.0)
@@ -52,7 +52,7 @@ def reset_cb(ud, msg):
 
 
 def main():
-    rospy.init_node("preemption_example")
+    rospy.init_node('preemption_example')
 
     foo_concurrence = smach.Concurrence(outcomes=['concurrence_done', 'concurrence_reset'],
                                         default_outcome='concurrence_done',
@@ -61,7 +61,7 @@ def main():
 
     with foo_concurrence:
         smach.Concurrence.add('CALC', calc())
-        smach.Concurrence.add('RESET', smach_ros.MonitorState("/sm_reset", Empty, reset_cb))
+        smach.Concurrence.add('RESET', smach_ros.MonitorState('/sm_reset', Empty, reset_cb))
 
     sm = smach.StateMachine(outcomes=['DONE'])
     with sm:
@@ -75,5 +75,5 @@ def main():
     rospy.spin()
     sis.stop()
 
-if __name__=="__main__":
+if __name__=='__main__':
     main()

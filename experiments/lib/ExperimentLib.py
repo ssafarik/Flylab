@@ -13,7 +13,7 @@ from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion
 from std_msgs.msg import Header, ColorRGBA, String
 from std_srvs.srv import Empty
 
-from experiment_srvs.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
 from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from tracking.msg import ArenaState
@@ -86,8 +86,8 @@ class StartExperiment (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
                              outcomes=['success','aborted'],
-                             input_keys=['experimentparamsIn'],
-                             output_keys=['experimentparamsOut'])
+                             input_keys=['experimentparamsChoicesIn'],
+                             output_keys=['experimentparamsChoicesOut'])
 
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
 
@@ -95,7 +95,7 @@ class StartExperiment (smach.State):
         for name in g_notify_list:
             services_dict[name+'/init'] = None
              
-        self.ExperimentStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParams) #ExperimentStartServices()
+        self.ExperimentStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParamsChoices) #ExperimentStartServices()
         self.ExperimentStartServices.attach()
 
         self.arenastate = None
@@ -110,23 +110,23 @@ class StartExperiment (smach.State):
     def execute(self, userdata):
         global g_timeExperimentElapsed
         
-        experimentparams = userdata.experimentparamsIn
-        rospy.loginfo('EL State StartExperiment(%s)' % experimentparams)
+        experimentparamsChoices = userdata.experimentparamsChoicesIn
+        rospy.loginfo('EL State StartExperiment(%s)' % experimentparamsChoices)
 
-        experimentparams.experiment.trial = experimentparams.experiment.trial-1 
-        userdata.experimentparamsOut = experimentparams
+        experimentparamsChoices.experiment.trial = experimentparamsChoices.experiment.trial-1 
+        userdata.experimentparamsChoicesOut = experimentparamsChoices
         g_timeExperimentElapsed = 0.0
         
-        self.ExperimentStartServices.notify(experimentparams)
+        self.ExperimentStartServices.notify(experimentparamsChoices)
 
         # Set up the tracking.    
-        userdata.experimentparamsOut = experimentparams
+        userdata.experimentparamsChoicesOut = experimentparamsChoices
         msgTrackingCommand                    = TrackingCommand()
         msgTrackingCommand.command            = 'initialize'
-        msgTrackingCommand.exclusionzones     = experimentparams.tracking.exclusionzones
-        msgTrackingCommand.nRobots            = experimentparams.robotspec.nRobots
-        msgTrackingCommand.nFlies             = experimentparams.flyspec.nFlies
-        msgTrackingCommand.bUseVisualServoing = experimentparams.robotspec.isPresent
+        msgTrackingCommand.exclusionzones     = experimentparamsChoices.tracking.exclusionzones
+        msgTrackingCommand.nRobots            = experimentparamsChoices.robotspec.nRobots
+        msgTrackingCommand.nFlies             = experimentparamsChoices.flyspec.nFlies
+        msgTrackingCommand.bUseVisualServoing = experimentparamsChoices.robotspec.isPresent
         self.pubTrackingCommand.publish(msgTrackingCommand)
         
         # Wait for the Arenastate to get published.
@@ -146,25 +146,25 @@ class EndExperiment (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
                              outcomes=['success','aborted'],
-                             input_keys=['experimentparamsIn'],
-                             output_keys=['experimentparamsOut'])
+                             input_keys=['experimentparamsChoicesIn'],
+                             output_keys=['experimentparamsChoicesOut'])
 
         services_dict = {}
         for name in g_notify_list:
             services_dict[name+'/wait_until_done'] = None
             
-        self.ExperimentEndServices = NotifyServices(services_dict=services_dict, type=ExperimentParams) #ExperimentEndServices()
+        self.ExperimentEndServices = NotifyServices(services_dict=services_dict, type=ExperimentParamsChoices) #ExperimentEndServices()
         self.ExperimentEndServices.attach()
         
         
 
     def execute(self, userdata):
-        experimentparams = userdata.experimentparamsIn
-        rospy.loginfo('EL State EndExperiment(%s)' % experimentparams)
+        experimentparamsChoices = userdata.experimentparamsChoicesIn
+        rospy.loginfo('EL State EndExperiment(%s)' % experimentparamsChoices)
 
-        userdata.experimentparamsOut = experimentparams
+        userdata.experimentparamsChoicesOut = experimentparamsChoices
         
-        self.ExperimentEndServices.notify(experimentparams)
+        self.ExperimentEndServices.notify(experimentparamsChoices)
             
         #rospy.loginfo ('EL Exiting EndExperiment()')
         return 'success'
@@ -188,7 +188,7 @@ class StartTrial (smach.State):
     def __init__(self):
         smach.State.__init__(self, 
                              outcomes=['continue','exit','aborted'],
-                             input_keys=['experimentparamsIn'],
+                             input_keys=['experimentparamsChoicesIn'],
                              output_keys=['experimentparamsOut'])
         self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
         
@@ -197,33 +197,205 @@ class StartTrial (smach.State):
         for name in g_notify_list:
             services_dict[name+'/trigger'] = None
 
-        self.TriggerServices = NotifyServices(services_dict=services_dict, type=Trigger) #TriggerServices()
+        self.TriggerServices = NotifyServices(services_dict=services_dict, type=Trigger)
         self.TriggerServices.attach()
         
         services_dict = {}
         for name in g_notify_list:
             services_dict[name+'/trial_start'] = None
 
-        self.TrialStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParams) #TrialStartServices()
+        self.TrialStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParams)
         self.TrialStartServices.attach()
 
 
+    # Choose()
+    # Return one random entry from the given list.
+    #
+    def Choose(self, choices):
+        if (len(choices)>0):
+            choice = choices[np.random.randint(len(choices))]
+        else:
+            choice = None
+        
+        return choice
+    
+    
     def execute(self, userdata):
         rv = 'exit'
         now = rospy.Time.now().to_sec()
-        experimentparams = userdata.experimentparamsIn
+        experimentparamsChoices = userdata.experimentparamsChoicesIn
 
-        experimentparams.experiment.timeTrialStart = g_timeExperimentElapsed
+        # Make a choice for the experimentparams.        
+        experimentparams = ExperimentParams()
         
-        experimentparams.experiment.trial = userdata.experimentparamsIn.experiment.trial+1
+        experimentparams.experiment.description                         =             experimentparamsChoices.experiment.description
+        experimentparams.experiment.maxTrials                           =             experimentparamsChoices.experiment.maxTrials
+        experimentparams.experiment.timeout                             =             experimentparamsChoices.experiment.timeout
+        
+        experimentparams.save.filenamebase                              =             experimentparamsChoices.save.filenamebase
+        experimentparams.save.csv                                       =             experimentparamsChoices.save.csv
+        experimentparams.save.bag                                       =             experimentparamsChoices.save.bag
+        experimentparams.save.mov                                       =             experimentparamsChoices.save.mov
+        experimentparams.save.imagetopic_list                           =             experimentparamsChoices.save.imagetopic_list
+        experimentparams.save.onlyWhileTriggered                        =             experimentparamsChoices.save.onlyWhileTriggered
+        
+        experimentparams.robotspec.nRobots                              =             experimentparamsChoices.robotspec.nRobots
+        experimentparams.robotspec.width                                =             experimentparamsChoices.robotspec.width
+        experimentparams.robotspec.height                               =             experimentparamsChoices.robotspec.height
+        experimentparams.robotspec.isPresent                            =             experimentparamsChoices.robotspec.isPresent
+        experimentparams.robotspec.description                          =             experimentparamsChoices.robotspec.description
+
+        experimentparams.flyspec.nFlies                                 =             experimentparamsChoices.flyspec.nFlies
+        experimentparams.flyspec.description                            =             experimentparamsChoices.flyspec.description
+        
+        experimentparams.tracking.exclusionzones.enabled                =             experimentparamsChoices.tracking.exclusionzones.enabled
+        experimentparams.tracking.exclusionzones.point_list             =             experimentparamsChoices.tracking.exclusionzones.point_list
+        experimentparams.tracking.exclusionzones.radius_list            =             experimentparamsChoices.tracking.exclusionzones.radius_list
+        
+        experimentparams.home.enabled                                   =             experimentparamsChoices.home.enabled
+        experimentparams.home.x                                         =             experimentparamsChoices.home.x
+        experimentparams.home.y                                         =             experimentparamsChoices.home.y
+        experimentparams.home.speed                                     =             experimentparamsChoices.home.speed
+        experimentparams.home.tolerance                                 =             experimentparamsChoices.home.tolerance
+
+        experimentparams.pre.robot.enabled                              =             experimentparamsChoices.pre.robot.enabled
+        experimentparams.pre.robot.move.mode                            = self.Choose(experimentparamsChoices.pre.robot.move.mode)
+        experimentparams.pre.robot.move.relative.tracking               = self.Choose(experimentparams.pre.robot.move.relative.tracking)                   
+        experimentparams.pre.robot.move.relative.frameidOriginPosition  = self.Choose(experimentparams.pre.robot.move.relative.frameidOriginPosition)
+        experimentparams.pre.robot.move.relative.frameidOriginAngle     = self.Choose(experimentparams.pre.robot.move.relative.frameidOriginAngle)
+        experimentparams.pre.robot.move.relative.distance               = self.Choose(experimentparams.pre.robot.move.relative.distance)
+        experimentparams.pre.robot.move.relative.angleType              = self.Choose(experimentparams.pre.robot.move.relative.angleType)
+        experimentparams.pre.robot.move.relative.angleOffset            = self.Choose(experimentparams.pre.robot.move.relative.angleOffset)
+        experimentparams.pre.robot.move.relative.angleOscMag            = self.Choose(experimentparams.pre.robot.move.relative.angleOscMag)
+        experimentparams.pre.robot.move.relative.angleOscFreq           = self.Choose(experimentparams.pre.robot.move.relative.angleOscFreq)
+        experimentparams.pre.robot.move.relative.speedType              = self.Choose(experimentparams.pre.robot.move.relative.speedType)
+        experimentparams.pre.robot.move.relative.speed                  = self.Choose(experimentparams.pre.robot.move.relative.speed)
+        experimentparams.pre.robot.move.relative.tolerance              = self.Choose(experimentparams.pre.robot.move.relative.tolerance)
+        experimentparams.pre.robot.move.pattern.frameidPosition         = self.Choose(experimentparamsChoices.pre.robot.move.pattern.frameidPosition)
+        experimentparams.pre.robot.move.pattern.frameidAngle            = self.Choose(experimentparamsChoices.pre.robot.move.pattern.frameidAngle)
+        experimentparams.pre.robot.move.pattern.shape                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.shape)
+        experimentparams.pre.robot.move.pattern.hzPattern               = self.Choose(experimentparamsChoices.pre.robot.move.pattern.hzPattern)
+        experimentparams.pre.robot.move.pattern.hzPoint                 = self.Choose(experimentparamsChoices.pre.robot.move.pattern.hzPoint)
+        experimentparams.pre.robot.move.pattern.count                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.count)
+        experimentparams.pre.robot.move.pattern.size.x                  = self.Choose(experimentparamsChoices.pre.robot.move.pattern.size.x)
+        experimentparams.pre.robot.move.pattern.size.y                  = self.Choose(experimentparamsChoices.pre.robot.move.pattern.size.y)
+        experimentparams.pre.robot.move.pattern.param                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.param)
+        experimentparams.pre.robot.move.pattern.direction               = self.Choose(experimentparamsChoices.pre.robot.move.pattern.direction)
+        experimentparams.pre.robot.move.pattern.restart                 = self.Choose(experimentparamsChoices.pre.robot.move.pattern.restart)
+        
+        experimentparams.pre.lasergalvos                                =             experimentparamsChoices.pre.lasergalvos
+        
+        experimentparams.pre.ledpanels.enabled                          =             experimentparamsChoices.pre.ledpanels.enabled
+        experimentparams.pre.ledpanels.command                          = self.Choose(experimentparams.pre.ledpanels.command)
+        experimentparams.pre.ledpanels.idPattern                        = self.Choose(experimentparams.pre.ledpanels.idPattern)
+        experimentparams.pre.ledpanels.origin.x                         = self.Choose(experimentparams.pre.ledpanels.origin.x)
+        experimentparams.pre.ledpanels.origin.y                         = self.Choose(experimentparams.pre.ledpanels.origin.y)
+        experimentparams.pre.ledpanels.frame_id                         = self.Choose(experimentparams.pre.ledpanels.frame_id)
+        experimentparams.pre.ledpanels.statefilterHi                    = self.Choose(experimentparams.pre.ledpanels.statefilterHi)
+        experimentparams.pre.ledpanels.statefilterLo                    = self.Choose(experimentparams.pre.ledpanels.statefilterLo)
+        experimentparams.pre.ledpanels.statefilterCriteria              = self.Choose(experimentparams.pre.ledpanels.statefilterCriteria)
+        
+        experimentparams.pre.wait1                                      =             experimentparamsChoices.pre.wait1
+        
+        experimentparams.pre.trigger.enabled                            =             experimentparamsChoices.pre.trigger.enabled
+        experimentparams.pre.trigger.frameidParent                      =             experimentparamsChoices.pre.trigger.frameidParent
+        experimentparams.pre.trigger.frameidChild                       =             experimentparamsChoices.pre.trigger.frameidChild
+        experimentparams.pre.trigger.speedAbsParentMin                  =             experimentparamsChoices.pre.trigger.speedAbsParentMin
+        experimentparams.pre.trigger.speedAbsParentMax                  =             experimentparamsChoices.pre.trigger.speedAbsParentMax
+        experimentparams.pre.trigger.speedAbsChildMin                   =             experimentparamsChoices.pre.trigger.speedAbsChildMin
+        experimentparams.pre.trigger.speedAbsChildMax                   =             experimentparamsChoices.pre.trigger.speedAbsChildMax
+        experimentparams.pre.trigger.speedRelMin                        =             experimentparamsChoices.pre.trigger.speedRelMin
+        experimentparams.pre.trigger.speedRelMax                        =             experimentparamsChoices.pre.trigger.speedRelMax
+        experimentparams.pre.trigger.distanceMin                        =             experimentparamsChoices.pre.trigger.distanceMin
+        experimentparams.pre.trigger.distanceMax                        =             experimentparamsChoices.pre.trigger.distanceMax
+        experimentparams.pre.trigger.angleMin                           =             experimentparamsChoices.pre.trigger.angleMin
+        experimentparams.pre.trigger.angleMax                           =             experimentparamsChoices.pre.trigger.angleMax
+        experimentparams.pre.trigger.angleTest                          =             experimentparamsChoices.pre.trigger.angleTest
+        experimentparams.pre.trigger.angleTestBilateral                 =             experimentparamsChoices.pre.trigger.angleTestBilateral
+        experimentparams.pre.trigger.timeHold                           =             experimentparamsChoices.pre.trigger.timeHold
+        experimentparams.pre.trigger.timeout                            =             experimentparamsChoices.pre.trigger.timeout
+        
+        experimentparams.pre.wait2                                      =             experimentparamsChoices.pre.wait2
+        
+
+        # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
+        # The first one to finish preempts the others.
+        experimentparams.trial.robot.enabled                            =             experimentparamsChoices.trial.robot.enabled
+        experimentparams.trial.robot.move.mode                          =             experimentparamsChoices.trial.robot.move.mode
+        experimentparams.trial.robot.move.relative.tracking             = self.Choose(experimentparams.trial.robot.move.relative.tracking)                   
+        experimentparams.trial.robot.move.relative.frameidOriginPosition = self.Choose(experimentparams.trial.robot.move.relative.frameidOriginPosition)
+        experimentparams.trial.robot.move.relative.frameidOriginAngle   = self.Choose(experimentparams.trial.robot.move.relative.frameidOriginAngle)
+        experimentparams.trial.robot.move.relative.distance             = self.Choose.enabled(experimentparams.trial.robot.move.relative.distance)
+        experimentparams.trial.robot.move.relative.angleType            = self.Choose(experimentparams.trial.robot.move.relative.angleType)
+        experimentparams.trial.robot.move.relative.angleOffset          = self.Choose(experimentparams.trial.robot.move.relative.angleOffset)
+        experimentparams.trial.robot.move.relative.angleOscMag          = self.Choose(experimentparams.trial.robot.move.relative.angleOscMag)
+        experimentparams.trial.robot.move.relative.angleOscFreq         = self.Choose(experimentparams.trial.robot.move.relative.angleOscFreq)
+        experimentparams.trial.robot.move.relative.speedType            = self.Choose(experimentparams.trial.robot.move.relative.speedType)
+        experimentparams.trial.robot.move.relative.speed                = self.Choose(experimentparams.trial.robot.move.relative.speed)
+        experimentparams.trial.robot.move.relative.tolerance            = self.Choose(experimentparams.trial.robot.move.relative.tolerance)
+        experimentparams.trial.robot.move.pattern.frameidPosition       = self.Choose(experimentparamsChoices.trial.robot.move.pattern.frameidPosition)
+        experimentparams.trial.robot.move.pattern.frameidAngle          = self.Choose(experimentparamsChoices.trial.robot.move.pattern.frameidAngle)
+        experimentparams.trial.robot.move.pattern.shape                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.shape)
+        experimentparams.trial.robot.move.pattern.hzPattern             = self.Choose(experimentparamsChoices.trial.robot.move.pattern.hzPattern)
+        experimentparams.trial.robot.move.pattern.hzPoint               = self.Choose(experimentparamsChoices.trial.robot.move.pattern.hzPoint)
+        experimentparams.trial.robot.move.pattern.count                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.count)
+        experimentparams.trial.robot.move.pattern.size.x                = self.Choose(experimentparamsChoices.trial.robot.move.pattern.size.x)
+        experimentparams.trial.robot.move.pattern.size.y                = self.Choose(experimentparamsChoices.trial.robot.move.pattern.size.y)
+        experimentparams.trial.robot.move.pattern.param                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.param)
+        experimentparams.trial.robot.move.pattern.direction             = self.Choose(experimentparamsChoices.trial.robot.move.pattern.direction)
+        experimentparams.trial.robot.move.pattern.restart               = self.Choose(experimentparamsChoices.trial.robot.move.pattern.restart)
+        
+        
+        experimentparams.trial.lasergalvos                              =             experimentparamsChoices.trial.lasergalvos
+
+        
+        experimentparams.trial.ledpanels.enabled                        =             experimentparamsChoices.trial.ledpanels.enabled
+        experimentparams.trial.ledpanels.command                        = self.Choose(experimentparamsChoices.trial.ledpanels.command)
+        experimentparams.trial.ledpanels.idPattern                      = self.Choose(experimentparamsChoices.trial.ledpanels.idPattern)
+        experimentparams.trial.ledpanels.origin.x                       = self.Choose(experimentparamsChoices.trial.ledpanels.origin.x)
+        experimentparams.trial.ledpanels.origin.y                       = self.Choose(experimentparamsChoices.trial.ledpanels.origin.y)
+        experimentparams.trial.ledpanels.frame_id                       = self.Choose(experimentparamsChoices.trial.ledpanels.frame_id)
+        experimentparams.trial.ledpanels.statefilterHi                  = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterHi)
+        experimentparams.trial.ledpanels.statefilterLo                  = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterLo)
+        experimentparams.trial.ledpanels.statefilterCriteria            = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterCriteria)
+
+        experimentparams.post.trigger.enabled                           =             experimentparamsChoices.post.trigger.enabled
+        experimentparams.post.trigger.frameidParent                     =             experimentparamsChoices.post.trigger.frameidParent
+        experimentparams.post.trigger.frameidChild                      =             experimentparamsChoices.post.trigger.frameidChild
+        experimentparams.post.trigger.speedAbsParentMin                 =             experimentparamsChoices.post.trigger.speedAbsParentMin
+        experimentparams.post.trigger.speedAbsParentMax                 =             experimentparamsChoices.post.trigger.speedAbsParentMax
+        experimentparams.post.trigger.speedAbsChildMin                  =             experimentparamsChoices.post.trigger.speedAbsChildMin
+        experimentparams.post.trigger.speedAbsChildMax                  =             experimentparamsChoices.post.trigger.speedAbsChildMax
+        experimentparams.post.trigger.speedRelMin                       =             experimentparamsChoices.post.trigger.speedRelMin
+        experimentparams.post.trigger.speedRelMax                       =             experimentparamsChoices.post.trigger.speedRelMax
+        experimentparams.post.trigger.distanceMin                       =             experimentparamsChoices.post.trigger.distanceMin
+        experimentparams.post.trigger.distanceMax                       =             experimentparamsChoices.post.trigger.distanceMax
+        experimentparams.post.trigger.angleMin                          =             experimentparamsChoices.post.trigger.angleMin
+        experimentparams.post.trigger.angleMax                          =             experimentparamsChoices.post.trigger.angleMax
+        experimentparams.post.trigger.angleTest                         =             experimentparamsChoices.post.trigger.angleTest
+        experimentparams.post.trigger.angleTestBilateral                =             experimentparamsChoices.post.trigger.angleTestBilateral
+        experimentparams.post.trigger.timeHold                          =             experimentparamsChoices.post.trigger.timeHold
+        experimentparams.post.trigger.timeout                           =             experimentparamsChoices.post.trigger.timeout
+
+        experimentparams.post.wait                                      =             experimentparamsChoices.post.wait
+        
+        
+
+        # Set the start time.
+        experimentparams.experiment.timeTrialStart = g_timeExperimentElapsed
+
+        # Increment the trial counter, and check for end.        
+        experimentparams.experiment.trial = userdata.experimentparamsChoicesIn.experiment.trial+1
         if (experimentparams.experiment.maxTrials != -1):
             if (experimentparams.experiment.maxTrials < experimentparams.experiment.trial):
                 return rv
 
+        # Check for timeout.
         if (experimentparams.experiment.timeout != -1):
             if (experimentparams.experiment.timeout <= g_timeExperimentElapsed):
                 return rv
 
+        # Make the timestamp.
         experimentparams.save.timestamp = '%04d%02d%02d%02d%02d%02d' % (time.localtime(now).tm_year,
                                                                         time.localtime(now).tm_mon,
                                                                         time.localtime(now).tm_mday,
@@ -235,14 +407,16 @@ class StartTrial (smach.State):
         rospy.loginfo ('EL State StartTrial(%s)' % experimentparams.experiment.trial)
 
 
+        # Set the output data.
+        userdata.experimentparamsOut            = experimentparams
+
         # Set up the tracking.    
-        userdata.experimentparamsOut = experimentparams
-        msgTrackingCommand                    = TrackingCommand()
-        msgTrackingCommand.command            = 'initialize'
-        msgTrackingCommand.exclusionzones     = experimentparams.tracking.exclusionzones
-        msgTrackingCommand.nRobots            = experimentparams.robotspec.nRobots
-        msgTrackingCommand.nFlies             = experimentparams.flyspec.nFlies
-        msgTrackingCommand.bUseVisualServoing = experimentparams.robotspec.isPresent
+        msgTrackingCommand                      = TrackingCommand()
+        msgTrackingCommand.command              = 'initialize'
+        msgTrackingCommand.exclusionzones       = experimentparams.tracking.exclusionzones
+        msgTrackingCommand.nRobots              = experimentparams.robotspec.nRobots
+        msgTrackingCommand.nFlies               = experimentparams.flyspec.nFlies
+        msgTrackingCommand.bUseVisualServoing   = experimentparams.robotspec.isPresent
         
         self.pubTrackingCommand.publish(msgTrackingCommand)
         
@@ -744,7 +918,7 @@ class TriggerOnTime (smach.State):
 #######################################################################################################
 #######################################################################################################
 class ExperimentLib():
-    def __init__(self, experimentparams=None, startexperiment_callback=None, starttrial_callback=None, endtrial_callback=None):
+    def __init__(self, experimentparamsChoices=None, startexperiment_callback=None, starttrial_callback=None, endtrial_callback=None):
         
         self.actions_dict = g_actions_dict
         
@@ -759,7 +933,20 @@ class ExperimentLib():
         # Create the state machine.
         ################################################################################### Top level
         self.smachTop = smach.StateMachine(outcomes = ['success','aborted'])
-        self.smachTop.userdata.experimentparams = experimentparams
+        self.smachTop.userdata.experimentparamsChoices = experimentparamsChoices
+
+
+        # Create the 'RESET' concurrency state.
+        ################################################################################### RESET
+        smachReset = smach.Concurrence(outcomes = ['success','aborted'],
+                                         default_outcome = 'aborted',
+                                         child_termination_cb = self.AnyResetTerm_callback,
+                                         outcome_cb = self.AllResetTerm_callback,
+                                         input_keys = ['experimentparamsChoicesIn'])
+        with smachReset:
+            for (name,classHardware) in self.actions_dict.iteritems():
+                smach.Concurrence.add(name, 
+                                      classHardware.Reset (tfrx=self.tfrx))
 
 
         ################################################################################### Pre Qualifier:  wait -> trigger -> wait.
@@ -820,19 +1007,6 @@ class ExperimentLib():
                                   TriggerOnStates(mode='post', tfrx=self.tfrx))
 
 
-        # Create the 'RESET' concurrency state.
-        ################################################################################### RESET
-        smachReset = smach.Concurrence(outcomes = ['success','aborted'],
-                                         default_outcome = 'aborted',
-                                         child_termination_cb = self.AnyResetTerm_callback,
-                                         outcome_cb = self.AllResetTerm_callback,
-                                         input_keys = ['experimentparamsIn'])
-        with smachReset:
-            for (name,classHardware) in self.actions_dict.iteritems():
-                smach.Concurrence.add(name, 
-                                      classHardware.Reset (tfrx=self.tfrx))
-
-
         ##############################################
         # Now create the main state machine.
         ##############################################
@@ -847,8 +1021,8 @@ class ExperimentLib():
                                    StartExperiment(),
                                    transitions={'success':stateAfterStartExperiment,
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
+                                   remapping={'experimentparamsChoicesIn':'experimentparamsChoices',
+                                              'experimentparamsChoicesOut':'experimentparamsChoices'})
 
 
             ################################################################################### STARTEXPERIMENTCALLBACK -> RESETHARDWARE
@@ -856,12 +1030,12 @@ class ExperimentLib():
                 smach.StateMachine.add('STARTEXPERIMENTCALLBACK', 
                                        smach.CBState(startexperiment_callback, 
                                                      outcomes = ['success','aborted'],
-                                                     input_keys = ['experimentparamsIn'],
-                                                     output_keys = ['experimentparamsOut']),
+                                                     input_keys = ['experimentparamsChoicesIn'],
+                                                     output_keys = ['experimentparamsChoicesOut']),
                                        transitions={'success':'RESETHARDWARE',
                                                     'aborted':'aborted'},
-                                       remapping={'experimentparamsIn':'experimentparams',
-                                                  'experimentparamsOut':'experimentparams'})
+                                       remapping={'experimentparamsChoicesIn':'experimentparamsChoices',
+                                                  'experimentparamsChoicesOut':'experimentparamsChoices'})
 
 
 
@@ -875,7 +1049,7 @@ class ExperimentLib():
                                    smachReset,
                                    transitions={'success':stateAfterResetHardware,
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparams'})
+                                   remapping={'experimentparamsChoicesIn':'experimentparamsChoices'})
 
 
             ################################################################################### STARTTRIALCALLBACK -> STARTTRIAL
@@ -883,12 +1057,12 @@ class ExperimentLib():
                 smach.StateMachine.add('STARTTRIALCALLBACK', 
                                        smach.CBState(starttrial_callback, 
                                                      outcomes = ['success','aborted'],
-                                                     input_keys = ['experimentparamsIn'],
-                                                     output_keys = ['experimentparamsOut']),
+                                                     input_keys = ['experimentparamsChoicesIn'],
+                                                     output_keys = ['experimentparamsChoicesOut']),
                                        transitions={'success':'STARTTRIAL',
                                                     'aborted':'aborted'},
-                                       remapping={'experimentparamsIn':'experimentparams',
-                                                  'experimentparamsOut':'experimentparams'})
+                                       remapping={'experimentparamsChoicesIn':'experimentparamsChoices',
+                                                  'experimentparamsChoicesOut':'experimentparamsChoices'})
 
 
             ################################################################################### STARTTRIAL -> PRE
@@ -897,7 +1071,7 @@ class ExperimentLib():
                                    transitions={'continue':'PRE',         # Trigger service signal goes False.
                                                 'exit':'ENDEXPERIMENT',           # Trigger service signal goes False.
                                                 'aborted':'aborted'},       # Trigger service signal goes False.
-                                   remapping={'experimentparamsIn':'experimentparams',
+                                   remapping={'experimentparamsChoicesIn':'experimentparamsChoices',
                                               'experimentparamsOut':'experimentparams'})
 
 
@@ -929,7 +1103,7 @@ class ExperimentLib():
             if endtrial_callback is not None:
                 stateAfterPostWait = 'ENDTRIALCALLBACK'
             else:
-                stateAfterPostWait = 'RESETHARDWARE'
+                stateAfterPostWait = 'ENDTRIAL'
 
             smach.StateMachine.add('POSTWAIT', 
                                    TriggerOnTime(mode='post', tfrx=self.tfrx),
@@ -965,8 +1139,8 @@ class ExperimentLib():
                                    EndExperiment(),
                                    transitions={'success':'success',
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparams',
-                                              'experimentparamsOut':'experimentparams'})
+                                   remapping={'experimentparamsChoicesIn':'experimentparamsChoices',
+                                              'experimentparamsChoicesOut':'experimentparamsChoices'})
 
 
         self.sis = smach_ros.IntrospectionServer('sis_experiment',

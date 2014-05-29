@@ -39,7 +39,7 @@ class Experiment():
         #self.experimentparams.save.filenamebase = 'UAS_TrpA1_parentalcontrol_180mW_' 
         #self.experimentparams.save.filenamebase = 'posvel_TrpA1_geosmin_fed_120mW_' 
         #self.experimentparams.save.filenamebase = 'posvel_TrpA1_CVA_260mW_'
-        self.experimentparams.save.filenamebase = "zapresponsearea_%s_%dmm_%02ds_%02ds_%s_" % (flies, radius, t1, t2, laserpower)
+        self.experimentparams.save.filenamebase = 'zapresponsearea_%s_%dmm_%02ds_%02ds_%s_' % (flies, radius, t1, t2, laserpower)
          
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
@@ -51,7 +51,7 @@ class Experiment():
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
         self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
-        self.experimentparams.robotspec.description = "none"
+        self.experimentparams.robotspec.description = 'none'
 
         self.experimentparams.flyspec.nFlies = 1
         self.experimentparams.flyspec.description = flies 
@@ -59,6 +59,8 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=48.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [8.0]
+        
+        self.experimentparams.home.enabled = False
         
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
@@ -126,12 +128,12 @@ class Experiment():
             #self.experimentparams.trial.lasergalvos.statefilterCriteria_list.append('inclusive') # 'inclusive'=laserOn if all criteria are satisfied, laserOff if any criteria is violated.
         
         self.experimentparams.trial.ledpanels.enabled = True
-        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 3
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
-        self.experimentparams.trial.ledpanels.statefilterHi = ''
-        self.experimentparams.trial.ledpanels.statefilterLo = ''
-        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
+        self.experimentparams.trial.ledpanels.command = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = [3]
+        self.experimentparams.trial.ledpanels.frame_id = ['Fly01Forecast']
+        self.experimentparams.trial.ledpanels.statefilterHi = ['']
+        self.experimentparams.trial.ledpanels.statefilterLo = ['']
+        self.experimentparams.trial.ledpanels.statefilterCriteria = ['']
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Arena'

@@ -46,6 +46,12 @@ class ExperimentTestRobot():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=50.0, y=68.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
+        self.experimentparams.home.enabled = True
+        self.experimentparams.home.x = 0.0
+        self.experimentparams.home.y = 0.0
+        self.experimentparams.home.speed = 20
+        self.experimentparams.home.tolerance = 35
+
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
@@ -59,41 +65,36 @@ class ExperimentTestRobot():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'pattern'        
-        self.experimentparams.trial.robot.move.relative.tracking = False
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = 'Arena'
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = 'Arena'
-        self.experimentparams.trial.robot.move.relative.distance = 20
-        self.experimentparams.trial.robot.move.relative.angleType = 'constant'
-        self.experimentparams.trial.robot.move.relative.angleOffset = 0
-        self.experimentparams.trial.robot.move.relative.angleOscMag = 0 # Radians
-        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0   # Hz
-        self.experimentparams.trial.robot.move.relative.speed = 20
-        self.experimentparams.trial.robot.move.relative.speedType = 'constant'
-        self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.trial.robot.move.pattern.frameidPosition = 'Arena'               # 
-        self.experimentparams.trial.robot.move.pattern.frameidAngle = 'Arena'               # 
+        self.experimentparams.trial.robot.move.relative.tracking = [False]
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = ['Arena']
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = ['Arena']
+        self.experimentparams.trial.robot.move.relative.distance = [20]
+        self.experimentparams.trial.robot.move.relative.angleType = ['constant']
+        self.experimentparams.trial.robot.move.relative.angleOffset = [0]
+        self.experimentparams.trial.robot.move.relative.angleOscMag = [0] # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = [0]   # Hz
+        self.experimentparams.trial.robot.move.relative.speed = [20]
+        self.experimentparams.trial.robot.move.relative.speedType = ['constant']
+        self.experimentparams.trial.robot.move.relative.tolerance = [-1.0] # i.e. never get there.
+        self.experimentparams.trial.robot.move.pattern.frameidPosition = ['Arena']               # 
+        self.experimentparams.trial.robot.move.pattern.frameidAngle = ['Arena']               # 
 
         if (False):
 # Four points step response.
-            self.experimentparams.trial.robot.move.pattern.shape = 'square'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-            self.experimentparams.trial.robot.move.pattern.hzPattern = 1/16               # Patterns per second.
-            self.experimentparams.trial.robot.move.pattern.hzPoint = 1/4                   # Points per second in the pattern.
+            self.experimentparams.trial.robot.move.pattern.shape = ['square']               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+            self.experimentparams.trial.robot.move.pattern.hzPattern = [1/16]               # Patterns per second.
+            self.experimentparams.trial.robot.move.pattern.hzPoint = [1/4]                   # Points per second in the pattern.
         else:
 # Smooth circle.
-            self.experimentparams.trial.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-            self.experimentparams.trial.robot.move.pattern.hzPattern = 1/20               # Patterns per second.
-            self.experimentparams.trial.robot.move.pattern.hzPoint = 50                   # Points per second in the pattern.
+            self.experimentparams.trial.robot.move.pattern.shape = ['circle']               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+            self.experimentparams.trial.robot.move.pattern.hzPattern = [1/20]               # Patterns per second.
+            self.experimentparams.trial.robot.move.pattern.hzPoint = [50]                   # Points per second in the pattern.
 
-        self.experimentparams.trial.robot.move.pattern.count = -1
-        self.experimentparams.trial.robot.move.pattern.size.x = 32
-        self.experimentparams.trial.robot.move.pattern.size.y = 0
-        self.experimentparams.trial.robot.move.pattern.param = 0
-        self.experimentparams.trial.robot.move.pattern.direction = 1
-        self.experimentparams.trial.robot.home.enabled = True
-        self.experimentparams.trial.robot.home.x = 0.0
-        self.experimentparams.trial.robot.home.y = 0.0
-        self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.tolerance = 35
+        self.experimentparams.trial.robot.move.pattern.count = [-1]
+        self.experimentparams.trial.robot.move.pattern.size.x = [32]
+        self.experimentparams.trial.robot.move.pattern.size.y = [0]
+        self.experimentparams.trial.robot.move.pattern.param = [0]
+        self.experimentparams.trial.robot.move.pattern.direction = [1]
 
         self.experimentparams.trial.lasergalvos.enabled = False
         self.experimentparams.trial.ledpanels.enabled = False
