@@ -125,7 +125,7 @@ class Reset (smach.State):
                 r = np.linalg.norm(ptRobot-ptTarget)
                 #rospy.loginfo ('EL ResetHardware() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
                 
-                rospy.logwarn('Distance to home: %f, tolerance: %f' % (r, userdata.experimentparamsChoicesIn.home.tolerance))
+                #rospy.logwarn('Distance to home: %f, tolerance: %f' % (r, userdata.experimentparamsChoicesIn.home.tolerance))
                 if (r <= userdata.experimentparamsChoicesIn.home.tolerance):
                     rospy.sleep(0.5) # Allow some settling time.
                     rv = 'success'
@@ -266,6 +266,18 @@ class Action (smach.State):
         return [xOut,yOut]
     
     
+    # Choose()
+    # Return one random entry from the given list.
+    #
+    def Choose(self, choices):
+        if (len(choices)>0):
+            choice = choices[np.random.randint(len(choices))]
+        else:
+            choice = None
+        
+        return choice
+    
+    
     def execute(self, userdata):
         if self.mode == 'pre':
             self.paramsIn = userdata.experimentparamsIn.pre
@@ -315,6 +327,20 @@ class Action (smach.State):
         self.ptTarget = None
         rv = 'aborted'
 
+        # Choose one of the choices.
+        relative = MoveRelative()
+        relative.tracking               = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.frameidOriginPosition  = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.frameidOriginAngle     = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.distance               = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.angleType              = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.angleOffset            = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.angleOscMag            = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.angleOscFreq           = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.speedType              = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.speed                  = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        relative.tolerance              = self.Choose(self.paramsIn.robot.move.relative.tracking)
+        
         
         while not rospy.is_shutdown():
             posRobot = self.arenastate.robot.pose.position # Assumed in the 'Arena' frame.
@@ -322,42 +348,42 @@ class Action (smach.State):
             
             # Get a random speed once per move, non-random speed always.
             angleSpeed = 0.0
-            if (self.paramsIn.robot.move.relative.speedType=='random'):
+            if (relative.speedType=='random'):
                 if (self.ptTarget is None):
                     # Choose a random speed in range [-speed,+speed]                     
-                    speedTarget = self.paramsIn.robot.move.relative.speed * (2.0*np.random.random() - 1.0) # Choose a random speed, plus or minus.
+                    speedTarget = relative.speed * (2.0*np.random.random() - 1.0) # Choose a random speed, plus or minus.
                     # Convert speed to +speed and angle.                     
                     if speedTarget < 0:
                         speedTarget = -speedTarget
                         angleSpeed = np.pi
             else:
-                speedTarget = self.paramsIn.robot.move.relative.speed
+                speedTarget = relative.speed
 
             
             
-            if (self.paramsIn.robot.move.relative.angleType=='random'):     
+            if (relative.angleType=='random'):     
                 if (self.ptTarget is None):                                 # Get a random angle once per move.
                     angleBase = 2.0*np.pi * np.random.random()
                     angleRel = 0.0
                 # else we already computed the angle.
                     
-            elif (self.paramsIn.robot.move.relative.angleType=='constant'):
-                if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
-                    angleBase = self.GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
-                    angleRel = self.paramsIn.robot.move.relative.angleOffset
+            elif (relative.angleType=='constant'):
+                if (self.ptTarget is None) or (relative.tracking):
+                    angleBase = self.GetAngleFrame(self.arenastate, relative.frameidOriginAngle)
+                    angleRel = relative.angleOffset
 
-            elif (self.paramsIn.robot.move.relative.angleType=='current'):
-                if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
-                    angleBase = self.GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
-                    angleRel = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOriginAngle, 'Robot')
+            elif (relative.angleType=='current'):
+                if (self.ptTarget is None) or (relative.tracking):
+                    angleBase = self.GetAngleFrame(self.arenastate, relative.frameidOriginAngle)
+                    angleRel = self.GetAngleFrameToFrame(relative.frameidOriginAngle, 'Robot')
                     
             else:
-                rospy.logwarn ('EL, unknown robot.move.relative.angleType: %s' % self.paramsIn.robot.move.relative.angleType)
+                rospy.logwarn ('EL, unknown robot.move.relative.angleType: %s' % relative.angleType)
                 angleBase = None
                 angleRel = None  
 
             # Oscillate the angle:  angleOsc = A * sin(2*pi * f * t) = A * sin(w * t)
-            angleOsc = self.paramsIn.robot.move.relative.angleOscMag * np.sin(2.0 * np.pi * self.paramsIn.robot.move.relative.angleOscFreq * rospy.Time.now().to_sec())
+            angleOsc = relative.angleOscMag * np.sin(2.0 * np.pi * relative.angleOscFreq * rospy.Time.now().to_sec())
                     
                 
             if (angleBase is not None) and (angleRel is not None):
@@ -367,10 +393,10 @@ class Action (smach.State):
 
                                                    
             # Move a distance relative to whose position?
-            #if self.paramsIn.robot.move.relative.frameidOriginPosition=='Fly1' and (len(self.arenastate.flies)>0):
+            #if relative.frameidOriginPosition=='Fly1' and (len(self.arenastate.flies)>0):
             #    posOrigin = posFly
             #    doMove = True
-            #elif self.paramsIn.robot.move.relative.frameidOriginPosition=='Robot':
+            #elif relative.frameidOriginPosition=='Robot':
             #    posOrigin = posRobot
             #    doMove = True
             #else:
@@ -379,13 +405,13 @@ class Action (smach.State):
             
 
             # If we need to calculate a target.
-            if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
+            if (self.ptTarget is None) or (relative.tracking):
                 doMove = True
                 # Compute target point in workspace (i.e. Arena) coordinates.
                 #ptOrigin = np.array([posOrigin.x, posOrigin.y])
-                ptOrigin = self.GetPositionFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginPosition)
+                ptOrigin = self.GetPositionFrame(self.arenastate, relative.frameidOriginPosition)
                 if (ptOrigin is not None) and (angleTarget is not None):
-                    d = self.paramsIn.robot.move.relative.distance
+                    d = relative.distance
                     ptRelative = d * np.array([np.cos(angleTarget), np.sin(angleTarget)])
                     ptTarget = ptOrigin[0:2] + ptRelative
                     self.ptTarget = self.ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
@@ -422,7 +448,7 @@ class Action (smach.State):
             # Check if we're there yet.
             if self.ptTarget is not None:
                 r = np.linalg.norm(ptRobot-self.ptTarget)
-                if (r <= self.paramsIn.robot.move.relative.tolerance):
+                if (r <= relative.tolerance):
                     rv = 'success'
                     break
 
@@ -471,17 +497,17 @@ class Action (smach.State):
         msgPattern = MsgPattern()
 
         # Choose one from each set of choices at random.
-        msgPattern.shape            = self.paramsIn.robot.move.pattern.shape
+        msgPattern.shape            = self.Choose(self.paramsIn.robot.move.pattern.shape)
         msgPattern.points           = []
-        msgPattern.frameidPosition  = self.paramsIn.robot.move.pattern.frameidPosition
-        msgPattern.frameidAngle     = self.paramsIn.robot.move.pattern.frameidAngle
-        msgPattern.hzPattern        = self.paramsIn.robot.move.pattern.hzPattern
-        msgPattern.hzPoint          = self.paramsIn.robot.move.pattern.hzPoint
-        msgPattern.count            = self.paramsIn.robot.move.pattern.count
-        msgPattern.size             = self.paramsIn.robot.move.pattern.size
-        msgPattern.restart          = self.paramsIn.robot.move.pattern.restart
-        msgPattern.param            = 0.0#self.paramsIn.robot.move.pattern.param
-        msgPattern.direction        = self.paramsIn.robot.move.pattern.direction
+        msgPattern.frameidPosition  = self.Choose(self.paramsIn.robot.move.pattern.frameidPosition)
+        msgPattern.frameidAngle     = self.Choose(self.paramsIn.robot.move.pattern.frameidAngle)
+        msgPattern.hzPattern        = self.Choose(self.paramsIn.robot.move.pattern.hzPattern)
+        msgPattern.hzPoint          = self.Choose(self.paramsIn.robot.move.pattern.hzPoint)
+        msgPattern.count            = self.Choose(self.paramsIn.robot.move.pattern.count)
+        msgPattern.size             = self.Choose(self.paramsIn.robot.move.pattern.size)
+        msgPattern.restart          = self.Choose(self.paramsIn.robot.move.pattern.restart)
+        msgPattern.param            = 0.0#self.Choose(self.paramsIn.robot.move.pattern.param)
+        msgPattern.direction        = self.Choose(self.paramsIn.robot.move.pattern.direction)
         self.pubSetPattern.publish (msgPattern)
                 
 

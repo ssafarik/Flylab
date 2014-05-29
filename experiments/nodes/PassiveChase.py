@@ -49,7 +49,7 @@ class ExperimentPassiveChase():
         self.experimentparams.home.x = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.home.y = 0.0
         self.experimentparams.home.speed = 20
-        self.experimentparams.home.tolerance = 4
+        self.experimentparams.home.tolerance = 2
 
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False

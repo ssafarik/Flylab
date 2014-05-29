@@ -45,11 +45,11 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.home.enabled                        = False
-        self.experimentparams.home.x                              = rospy.get_param('motorarm/L1', 999)
-        self.experimentparams.home.y                              = 0.0
-        self.experimentparams.home.speed                          = 20
-        self.experimentparams.home.tolerance                      = 2
+        self.experimentparams.home.robot.enabled                        = False
+        self.experimentparams.home.robot.x                              = rospy.get_param('motorarm/L1', 999)
+        self.experimentparams.home.robot.y                              = 0.0
+        self.experimentparams.home.robot.speed                          = 20
+        self.experimentparams.home.robot.tolerance                      = 2
         
         self.experimentparams.pre.robot.enabled                         = True
         self.experimentparams.pre.robot.move.mode                       = 'pattern' # 'pattern' or 'relative'
