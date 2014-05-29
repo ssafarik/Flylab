@@ -21,11 +21,11 @@ class ExperimentSSOOF():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "ScareShitOutOfFly"
+        self.experimentparams.experiment.description = 'ScareShitOutOfFly'
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.timeout = -1
         
-        self.experimentparams.save.filenamebase = "ssoof"
+        self.experimentparams.save.filenamebase = 'ssoof'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
@@ -36,15 +36,21 @@ class ExperimentSSOOF():
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
         self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
-        self.experimentparams.robotspec.description = "Black oxide magnet"
+        self.experimentparams.robotspec.description = 'Black oxide magnet'
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = 'unspecified'
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
+        self.experimentparams.home.enabled = True
+        self.experimentparams.home.x = 0.0
+        self.experimentparams.home.y = 0.0
+        self.experimentparams.home.speed = 20
+        self.experimentparams.home.tolerance = 2
+
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
@@ -75,33 +81,28 @@ class ExperimentSSOOF():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'relative'        
-        self.experimentparams.trial.robot.move.relative.tracking = True
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly01"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly01"
-        self.experimentparams.trial.robot.move.relative.distance = 1
-        self.experimentparams.trial.robot.move.relative.angleType = 'constant'
-        self.experimentparams.trial.robot.move.relative.angleOffset = 0
-        self.experimentparams.trial.robot.move.relative.angleOscMag = 0 # Radians
-        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0   # Hz
-        self.experimentparams.trial.robot.move.relative.speed = 20
-        self.experimentparams.trial.robot.move.relative.speedType = 'constant'
-        self.experimentparams.trial.robot.move.relative.tolerance = 2
-        self.experimentparams.trial.robot.home.enabled = True
-        self.experimentparams.trial.robot.home.x = 0.0
-        self.experimentparams.trial.robot.home.y = 0.0
-        self.experimentparams.trial.robot.home.speed = 20
-        self.experimentparams.trial.robot.home.tolerance = 2
+        self.experimentparams.trial.robot.move.relative.tracking = [True]
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = ['Fly01']
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = ['Fly01']
+        self.experimentparams.trial.robot.move.relative.distance = [1]
+        self.experimentparams.trial.robot.move.relative.angleType = ['constant']
+        self.experimentparams.trial.robot.move.relative.angleOffset = [0]
+        self.experimentparams.trial.robot.move.relative.angleOscMag = [0] # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = [0]   # Hz
+        self.experimentparams.trial.robot.move.relative.speed = [20]
+        self.experimentparams.trial.robot.move.relative.speedType = ['constant]
+        self.experimentparams.trial.robot.move.relative.tolerance = [2]
         
        
         self.experimentparams.trial.lasergalvos.enabled = False
         
         self.experimentparams.trial.ledpanels.enabled = False
-        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
-        self.experimentparams.trial.ledpanels.statefilterHi = ''
-        self.experimentparams.trial.ledpanels.statefilterLo = ''
-        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
+        self.experimentparams.trial.ledpanels.command = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = [1]
+        self.experimentparams.trial.ledpanels.frame_id = ['Fly01Forecast']
+        self.experimentparams.trial.ledpanels.statefilterHi = ['']
+        self.experimentparams.trial.ledpanels.statefilterLo = ['']
+        self.experimentparams.trial.ledpanels.statefilterCriteria = ['']
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly01'
@@ -157,6 +158,6 @@ if __name__ == '__main__':
         experiment.Run()
         
     except KeyboardInterrupt:
-        rospy.loginfo("Shutting down")
+        rospy.loginfo('Shutting down')
 
         

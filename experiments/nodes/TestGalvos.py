@@ -23,11 +23,11 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Test the galvos"
+        self.experimentparams.experiment.description = 'Test the galvos'
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.timeout = -1
         
-        self.experimentparams.save.filenamebase = "test"
+        self.experimentparams.save.filenamebase = 'test'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
@@ -38,15 +38,21 @@ class Experiment():
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
         self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
-        self.experimentparams.robotspec.description = "Black oxide magnet"
+        self.experimentparams.robotspec.description = 'Black oxide magnet'
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = 'unspecified'
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0]
         
+        self.experimentparams.home.enabled = False
+        self.experimentparams.home.x = 0.0
+        self.experimentparams.home.y = 0.0
+        self.experimentparams.home.speed = 20
+        self.experimentparams.home.tolerance = 2
+
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
@@ -191,12 +197,12 @@ class Experiment():
         
         
         self.experimentparams.trial.ledpanels.enabled = False
-        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
-        self.experimentparams.trial.ledpanels.statefilterHi = ''
-        self.experimentparams.trial.ledpanels.statefilterLo = ''
-        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
+        self.experimentparams.trial.ledpanels.command = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = [1]
+        self.experimentparams.trial.ledpanels.frame_id = ['Fly01Forecast']
+        self.experimentparams.trial.ledpanels.statefilterHi = ['']
+        self.experimentparams.trial.ledpanels.statefilterLo = ['']
+        self.experimentparams.trial.ledpanels.statefilterCriteria = ['']
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.distanceMin = 999.0

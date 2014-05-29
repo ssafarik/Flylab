@@ -25,7 +25,7 @@ class Reset (smach.State):
         self.tfrx = tfrx
         smach.State.__init__(self, 
                              outcomes=['success','disabled','preempt','aborted'],
-                             input_keys=['experimentparamsIn'])
+                             input_keys=['experimentparamsChoicesIn'])
 
         self.arenastate = None
         self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
@@ -61,18 +61,18 @@ class Reset (smach.State):
         rospy.loginfo("EL State ResetLEDPanels()")
 
         rv = 'disabled'
-        if (userdata.experimentparamsIn.pre.ledpanels.enabled):
+        if (userdata.experimentparamsChoicesIn.pre.ledpanels.enabled):
             rv = 'success'
             msgPanelsCommand = MsgPanelsCommand(command='stop')
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
 
             msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', 
-                                                arg1=userdata.experimentparamsIn.pre.ledpanels.idPattern)
+                                                arg1=userdata.experimentparamsChoicesIn.pre.ledpanels.idPattern)
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
 
             msgPanelsCommand = MsgPanelsCommand(command='set_position', 
-                                                arg1=userdata.experimentparamsIn.pre.ledpanels.origin.x, 
-                                                arg2=userdata.experimentparamsIn.pre.ledpanels.origin.y)  # Set (x,y) position for the experiment.
+                                                arg1=userdata.experimentparamsChoicesIn.pre.ledpanels.origin.x, 
+                                                arg2=userdata.experimentparamsChoicesIn.pre.ledpanels.origin.y)  # Set (x,y) position for the experiment.
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
         else:
             msgPanelsCommand = MsgPanelsCommand(command='all_off')

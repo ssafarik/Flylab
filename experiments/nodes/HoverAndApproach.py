@@ -22,11 +22,11 @@ class Experiment():
         # Fill out the data structure that defines the experiment.
         self.experimentparams = ExperimentParamsRequest()
         
-        self.experimentparams.experiment.description = "Hover and Approach"
+        self.experimentparams.experiment.description = 'Hover and Approach'
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.timeout = -1
         
-        self.experimentparams.save.filenamebase = "hoverapproach_fly1_1"
+        self.experimentparams.save.filenamebase = 'hoverapproach_fly1_1'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = True
@@ -37,38 +37,44 @@ class Experiment():
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
         self.experimentparams.robotspec.isPresent = True                           # Set this to False when you remove the robot, but still want the actuation.
-        self.experimentparams.robotspec.description = "Black oxide magnet"
+        self.experimentparams.robotspec.description = 'Black oxide magnet'
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = 'unspecified'
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
+        self.experimentparams.home.enabled = True
+        self.experimentparams.home.x = 30.0
+        self.experimentparams.home.y = 0.0
+        self.experimentparams.home.speed = 25.0
+        self.experimentparams.home.tolerance = 2
+
         self.experimentparams.pre.robot.enabled = True
         self.experimentparams.pre.robot.move.mode = 'pattern'                       # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
-        self.experimentparams.pre.robot.move.pattern.frameidPosition = 'Arena'
-        self.experimentparams.pre.robot.move.pattern.frameidAngle = 'Arena'
-        self.experimentparams.pre.robot.move.pattern.shape = 'circle'               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
-        self.experimentparams.pre.robot.move.pattern.hzPattern = 1/10               # Patterns per second.0
-        self.experimentparams.pre.robot.move.pattern.hzPoint = 20                   # The update rate for the actuator.
-        self.experimentparams.pre.robot.move.pattern.count = -1
-        self.experimentparams.pre.robot.move.pattern.size.x = 30
-        self.experimentparams.pre.robot.move.pattern.size.y = 0
-        self.experimentparams.pre.robot.move.pattern.direction = 0                  # Step forward (+1) or reverse (-1) through the pattern points.  0 means choose at random, +1 or -1.
+        self.experimentparams.pre.robot.move.pattern.frameidPosition = ['Arena']
+        self.experimentparams.pre.robot.move.pattern.frameidAngle = ['Arena']
+        self.experimentparams.pre.robot.move.pattern.shape = ['circle']               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
+        self.experimentparams.pre.robot.move.pattern.hzPattern = [1/10]               # Patterns per second.0
+        self.experimentparams.pre.robot.move.pattern.hzPoint = [20]                   # The update rate for the actuator.
+        self.experimentparams.pre.robot.move.pattern.count = [-1]
+        self.experimentparams.pre.robot.move.pattern.size.x = [30]
+        self.experimentparams.pre.robot.move.pattern.size.y = [0]
+        self.experimentparams.pre.robot.move.pattern.direction = [-1,1]               # Step forward (+1) or reverse (-1) through the pattern points.  0 means choose at random, +1 or -1.
 
         self.experimentparams.pre.lasergalvos.enabled = False
         
         self.experimentparams.pre.ledpanels.enabled = True
-        self.experimentparams.pre.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.pre.ledpanels.idPattern = 1 
-        self.experimentparams.pre.ledpanels.origin.x = 0 
-        self.experimentparams.pre.ledpanels.origin.y = 0 
-        self.experimentparams.pre.ledpanels.frame_id = 'Fly01'
-        self.experimentparams.pre.ledpanels.statefilterHi = ''
-        self.experimentparams.pre.ledpanels.statefilterLo = ''
-        self.experimentparams.pre.ledpanels.statefilterCriteria = ''
+        self.experimentparams.pre.ledpanels.command = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.pre.ledpanels.idPattern = [1] 
+        self.experimentparams.pre.ledpanels.origin.x = [0] 
+        self.experimentparams.pre.ledpanels.origin.y = [0] 
+        self.experimentparams.pre.ledpanels.frame_id = ['Fly01']
+        self.experimentparams.pre.ledpanels.statefilterHi = ['']
+        self.experimentparams.pre.ledpanels.statefilterLo = ['']
+        self.experimentparams.pre.ledpanels.statefilterCriteria = ['']
 
 
         self.experimentparams.pre.wait1 = 0.0
@@ -96,35 +102,30 @@ class Experiment():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'relative'                        # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
-        self.experimentparams.trial.robot.move.relative.tracking = True                 # True=update the target point continually.  False=the target point is set at the trigger time. 
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly01Forecast"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly01Forecast"
-        self.experimentparams.trial.robot.move.relative.distance = 4                    # Distance to the target point from the origin frame's position.
-        self.experimentparams.trial.robot.move.relative.angleType = 'current'           # 'constant' or 'random' or 'current'.  Use given angle always, or choose random angle once per move.
-        self.experimentparams.trial.robot.move.relative.angleOffset = 0                 # Angle to the target point from the origin frame's x-axis.
-        self.experimentparams.trial.robot.move.relative.angleOscMag = N.pi/2.0          # Radians
-        self.experimentparams.trial.robot.move.relative.angleOscFreq = 0.0              # Hz
-        self.experimentparams.trial.robot.move.relative.speed = 25                      # Speed at which to move the robot toward the target point. 
-        self.experimentparams.trial.robot.move.relative.speedType = 'constant'          # 'constant' or 'random'.  Use the given value, or a random fraction of it. 
-        self.experimentparams.trial.robot.move.relative.tolerance = 1                   # When robot-to-target distance is within this tolerance, then the move is over.
-        self.experimentparams.trial.robot.home.enabled = True
-        self.experimentparams.trial.robot.home.x = 30.0
-        self.experimentparams.trial.robot.home.y = 0.0
-        self.experimentparams.trial.robot.home.speed = 25
-        self.experimentparams.trial.robot.home.tolerance = 2
+        self.experimentparams.trial.robot.move.relative.tracking = [True]                 # True=update the target point continually.  False=the target point is set at the trigger time. 
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = ['Fly01Forecast']
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = ['Fly01Forecast']
+        self.experimentparams.trial.robot.move.relative.distance = [4]                    # Distance to the target point from the origin frame's position.
+        self.experimentparams.trial.robot.move.relative.angleType = ['current']           # 'constant' or 'random' or 'current'.  Use given angle always, or choose random angle once per move.
+        self.experimentparams.trial.robot.move.relative.angleOffset = [0]                 # Angle to the target point from the origin frame's x-axis.
+        self.experimentparams.trial.robot.move.relative.angleOscMag = [N.pi/2.0]          # Radians
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = [0.0]              # Hz
+        self.experimentparams.trial.robot.move.relative.speed = [25]                      # Speed at which to move the robot toward the target point. 
+        self.experimentparams.trial.robot.move.relative.speedType = ['constant']          # 'constant' or 'random'.  Use the given value, or a random fraction of it. 
+        self.experimentparams.trial.robot.move.relative.tolerance = [1]                   # When robot-to-target distance is within this tolerance, then the move is over.
         
         
         self.experimentparams.trial.lasergalvos.enabled = False
         
         self.experimentparams.trial.ledpanels.enabled = True
-        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.origin.x = 0 
-        self.experimentparams.trial.ledpanels.origin.y = 0 
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
-        self.experimentparams.trial.ledpanels.statefilterHi = ''
-        self.experimentparams.trial.ledpanels.statefilterLo = ''
-        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
+        self.experimentparams.trial.ledpanels.command = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = [1]
+        self.experimentparams.trial.ledpanels.origin.x = [0]
+        self.experimentparams.trial.ledpanels.origin.y = [0]
+        self.experimentparams.trial.ledpanels.frame_id = ['Fly01Forecast']
+        self.experimentparams.trial.ledpanels.statefilterHi = ['']
+        self.experimentparams.trial.ledpanels.statefilterLo = ['']
+        self.experimentparams.trial.ledpanels.statefilterCriteria = ['']
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly01'
@@ -180,6 +181,6 @@ if __name__ == '__main__':
         experiment.Run()
         
     except KeyboardInterrupt:
-        rospy.loginfo("Shutting down")
+        rospy.loginfo('Shutting down')
 
         
