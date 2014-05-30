@@ -377,7 +377,7 @@ class SaveCsv:
         self.services['savearenastate/trial_start']     = rospy.Service('savearenastate/trial_start',     ExperimentParams,        self.TrialStart_callback)
         self.services['savearenastate/trial_end']       = rospy.Service('savearenastate/trial_end',       ExperimentParams,        self.TrialEnd_callback)
         self.services['savearenastate/trigger']         = rospy.Service('savearenastate/trigger',         Trigger,                 self.Trigger_callback)
-        self.services['savearenastate/wait_until_done'] = rospy.Service('savearenastate/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
+        self.services['savearenastate/wait_until_done'] = rospy.Service('savearenastate/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
 
         self.initialized = True
 
@@ -923,7 +923,7 @@ class SaveCsv:
                     self.fid.write(stateRow)
 
 
-    def WaitUntilDone_callback(self, experimentparams):
+    def WaitUntilDone_callback(self, experimentparamsChoices):
         return True
 
             

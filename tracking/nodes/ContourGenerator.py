@@ -150,7 +150,7 @@ class ContourGenerator:
         self.services['tracking/trial_start']       = rospy.Service('tracking/trial_start',     ExperimentParams,        self.TrialStart_callback)
         self.services['tracking/trial_end']         = rospy.Service('tracking/trial_end',       ExperimentParams,        self.TrialEnd_callback)
         self.services['tracking/trigger']           = rospy.Service('tracking/trigger',         Trigger,                 self.Trigger_callback)
-        self.services['tracking/wait_until_done']   = rospy.Service('tracking/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
+        self.services['tracking/wait_until_done']   = rospy.Service('tracking/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
 
         self.initConstructor = True
         
@@ -244,7 +244,7 @@ class ContourGenerator:
     def TrialEnd_callback(self, experimentparams):
         return True
 
-    def WaitUntilDone_callback(self, experimentparams):
+    def WaitUntilDone_callback(self, experimentparamsChoices):
         return True
 
 

@@ -32,7 +32,7 @@ class TransformServerStageArena:
         self.services['transformserverarenastage/trial_start']     = rospy.Service('transformserverarenastage/trial_start',     ExperimentParams,        self.TrialStart_callback)
         self.services['transformserverarenastage/trial_end']       = rospy.Service('transformserverarenastage/trial_end',       ExperimentParams,        self.TrialEnd_callback)
         self.services['transformserverarenastage/trigger']         = rospy.Service('transformserverarenastage/trigger',         Trigger,                 self.Trigger_callback)
-        self.services['transformserverarenastage/wait_until_done'] = rospy.Service('transformserverarenastage/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
+        self.services['transformserverarenastage/wait_until_done'] = rospy.Service('transformserverarenastage/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
 
         self.initConstructor = True
 
@@ -73,7 +73,7 @@ class TransformServerStageArena:
     def TrialEnd_callback(self, experimentparams):
         return True
 
-    def WaitUntilDone_callback(self, experimentparams):
+    def WaitUntilDone_callback(self, experimentparamsChoices):
         return True
         
         

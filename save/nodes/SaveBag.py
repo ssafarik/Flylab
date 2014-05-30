@@ -54,7 +54,7 @@ class SaveBag:
         self.services['savebag/trial_start']     = rospy.Service('savebag/trial_start',     ExperimentParams,        self.TrialStart_callback)
         self.services['savebag/trial_end']       = rospy.Service('savebag/trial_end',       ExperimentParams,        self.TrialEnd_callback)
         self.services['savebag/trigger']         = rospy.Service('savebag/trigger',         Trigger,                 self.Trigger_callback)
-        self.services['savebag/wait_until_done'] = rospy.Service('savebag/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
+        self.services['savebag/wait_until_done'] = rospy.Service('savebag/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
         
         self.initialized = True
 
@@ -71,7 +71,7 @@ class SaveBag:
 
 
 
-    def WaitUntilDone_callback(self, experimentparams):
+    def WaitUntilDone_callback(self, experimentparamsChoices):
         #self.processRosbag.wait()
         return True
 

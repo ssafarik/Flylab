@@ -136,7 +136,7 @@ class ExperimentTestRobot():
 
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
     def StartTrial_callback(self, userdata):
-        userdata.experimentparamsOut = userdata.experimentparamsIn
+        userdata.experimentparamsChoicesOut = userdata.experimentparamsChoicesIn
         return 'success'
 
     # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.

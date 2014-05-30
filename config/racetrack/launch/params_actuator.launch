@@ -15,7 +15,7 @@
 	<param name="robot_description"         textfile="$(find racetrack)/motorarm_urdf.xml" />	<!-- Contains 3D model of hardware. -->
 
 	<param name="motorarm/speed_max"   		type="double" value="50"/>             		<!-- Millimeters per second of end effector. -->
-	<param name="motorarm/L1"          		type="double" value="31.5"/>                  <!-- 32.5 Link1 length in millimeters. -->
+	<param name="motorarm/L1"          		type="double" value="28"/>                  <!-- 32.5 Link1 length in millimeters. -->
 	<param name="motorarm/angleOffset" 		type="double" value="1.57"/>                <!-- Angle from the index switch to the 0 angle. -->
 	<param name="motorarm/T" 		        type="double" value="0.02"/>                <!-- Time period of motor update. -->
 

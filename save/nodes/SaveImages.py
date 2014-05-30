@@ -70,7 +70,7 @@ class SaveImages:
         self.services['saveimages/trial_start']     = rospy.Service('saveimages/trial_start',     ExperimentParams,        self.TrialStart_callback)
         self.services['saveimages/trial_end']       = rospy.Service('saveimages/trial_end',       ExperimentParams,        self.TrialEnd_callback)
         self.services['saveimages/trigger']         = rospy.Service('saveimages/trigger',         Trigger,                 self.Trigger_callback)
-        self.services['saveimages/wait_until_done'] = rospy.Service('saveimages/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
+        self.services['saveimages/wait_until_done'] = rospy.Service('saveimages/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
         
         self.initialized = True
 
@@ -95,7 +95,7 @@ class SaveImages:
 
 
 
-    def WaitUntilDone_callback(self, experimentparams):
+    def WaitUntilDone_callback(self, experimentparamsChoices):
         for imagetopic,value in self.processVideoConversion.iteritems():
             self.processVideoConversion[imagetopic].wait()
 

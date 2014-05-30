@@ -44,7 +44,7 @@ class TransformServerArenaCamera:
         self.services['transformserverarenacamera/trial_start']     = rospy.Service('transformserverarenacamera/trial_start',     ExperimentParams,        self.TrialStart_callback)
         self.services['transformserverarenacamera/trial_end']       = rospy.Service('transformserverarenacamera/trial_end',       ExperimentParams,        self.TrialEnd_callback)
         self.services['transformserverarenacamera/trigger']         = rospy.Service('transformserverarenacamera/trigger',         Trigger,                 self.Trigger_callback)
-        self.services['transformserverarenacamera/wait_until_done'] = rospy.Service('transformserverarenacamera/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
+        self.services['transformserverarenacamera/wait_until_done'] = rospy.Service('transformserverarenacamera/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
         
         
         self.initConstructor = True
@@ -85,7 +85,7 @@ class TransformServerArenaCamera:
     def TrialEnd_callback(self, experimentparams):
         return True
 
-    def WaitUntilDone_callback(self, experimentparams):
+    def WaitUntilDone_callback(self, experimentparamsChoices):
         return True
         
         
