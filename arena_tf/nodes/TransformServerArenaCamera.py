@@ -244,15 +244,8 @@ class TransformServerArenaCamera:
             x = self.K_rect[0,2]
             y = self.K_rect[1,2]
             z = 0.0
-            self.tfbx.sendTransform((x,y,z), q, self.camerainfo.header.stamp, 
-                                    'Arena', 'ImageRect')
-#             tfs = TransformStamped()
-#             tfs.header          = Header()
-#             tfs.header.stamp    = self.camerainfo.header.stamp
-#             tfs.header.frame_id = 'ImageRect'
-#             tfs.child_frame_id  = 'Arena'
-#             tfs.transform       = Transform(translation=(x,y,z), rotation=q)
-#             self.tfbx.sendTransform(tfs)
+#             self.tfbx.sendTransform((x,y,z), q, self.camerainfo.header.stamp, 
+#                                     'Arena', 'ImageRect')
 
             self.tfbx.sendTransform((self.calibration.xMask,
                                      self.calibration.yMask,
@@ -260,10 +253,9 @@ class TransformServerArenaCamera:
                                     (0,0,0,1), 
                                     self.camerainfo.header.stamp, 
                                     'Mask', 'ImageRect')
-#             tfs.header.frame_id = 'ImageRect'
-#             tfs.child_frame_id  = 'Mask'
-#             tfs.transform       = Transform(translation=(self.calibration.xMask, self.calibration.yMask, 0.0), rotation=(0,0,0,1))
-#             self.tfbx.sendTransform(tfs)
+
+            self.tfbx.sendTransform((0,0,0), (0,0,0,1), self.camerainfo.header.stamp, 
+                                    'Arena', 'Mask')
       
         
     def Main(self):

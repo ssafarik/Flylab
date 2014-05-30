@@ -29,8 +29,8 @@
   <param name="camera/arena_rvec_0" type="double" value="-3.068" />
   <param name="camera/arena_rvec_1" type="double" value="-0.001" />
   <param name="camera/arena_rvec_2" type="double" value="-0.032" />
-  <param name="camera/arena_tvec_0" type="double" value="0.0" />   <!-- Adjust for camera/arena alignment here. -->
-  <param name="camera/arena_tvec_1" type="double" value="0.0" />   <!-- Adjust for camera/arena alignment here. -->
+  <param name="camera/arena_tvec_0" type="double" value="-3.3" />   <!-- Adjust for camera/arena alignment here. -->
+  <param name="camera/arena_tvec_1" type="double" value="0.5" />   <!-- Adjust for camera/arena alignment here. -->
   <param name="camera/arena_tvec_2" type="double" value="333.3" />
 
 
