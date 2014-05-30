@@ -10,7 +10,7 @@ from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import Header
 from arena_tf.msg import CalibrationCamera
 import arena_tf.srv
-from experiment_srvs.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
 
 
 
@@ -40,11 +40,11 @@ class TransformServerArenaCamera:
         self.services['image_from_arena'] = rospy.Service('image_from_arena', arena_tf.srv.ArenaCameraConversion, self.ImageFromArena_callback)
         self.services['arena_from_image'] = rospy.Service('arena_from_image', arena_tf.srv.ArenaCameraConversion, self.ArenaFromImage_callback)
         
-        self.services['transformserverarenacamera/init']            = rospy.Service('transformserverarenacamera/init',            ExperimentParams, self.Init_callback)
-        self.services['transformserverarenacamera/trial_start']     = rospy.Service('transformserverarenacamera/trial_start',     ExperimentParams, self.TrialStart_callback)
-        self.services['transformserverarenacamera/trial_end']       = rospy.Service('transformserverarenacamera/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        self.services['transformserverarenacamera/trigger']         = rospy.Service('transformserverarenacamera/trigger',         Trigger,          self.Trigger_callback)
-        self.services['transformserverarenacamera/wait_until_done'] = rospy.Service('transformserverarenacamera/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services['transformserverarenacamera/init']            = rospy.Service('transformserverarenacamera/init',            ExperimentParamsChoices, self.Init_callback)
+        self.services['transformserverarenacamera/trial_start']     = rospy.Service('transformserverarenacamera/trial_start',     ExperimentParams,        self.TrialStart_callback)
+        self.services['transformserverarenacamera/trial_end']       = rospy.Service('transformserverarenacamera/trial_end',       ExperimentParams,        self.TrialEnd_callback)
+        self.services['transformserverarenacamera/trigger']         = rospy.Service('transformserverarenacamera/trigger',         Trigger,                 self.Trigger_callback)
+        self.services['transformserverarenacamera/wait_until_done'] = rospy.Service('transformserverarenacamera/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
         
         
         self.initConstructor = True
@@ -64,7 +64,7 @@ class TransformServerArenaCamera:
         self.calibration = calibration
 
 
-    def Init_callback(self, experimentparams):
+    def Init_callback(self, experimentparamsChoices):
         return True
 
     # TrialStart_callback()

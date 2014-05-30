@@ -14,7 +14,7 @@ import cv
 from cv_bridge import CvBridge, CvBridgeError
 
 from flycore.msg import MsgFrameState
-from experiment_srvs.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
 
 
 
@@ -66,11 +66,11 @@ class SaveImages:
         
         # Offer some services.
         self.services = {}
-        self.services['saveimages/init']            = rospy.Service('saveimages/init',            ExperimentParams, self.Init_callback)
-        self.services['saveimages/trial_start']     = rospy.Service('saveimages/trial_start',     ExperimentParams, self.TrialStart_callback)
-        self.services['saveimages/trial_end']       = rospy.Service('saveimages/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        self.services['saveimages/trigger']         = rospy.Service('saveimages/trigger',         Trigger,          self.Trigger_callback)
-        self.services['saveimages/wait_until_done'] = rospy.Service('saveimages/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services['saveimages/init']            = rospy.Service('saveimages/init',            ExperimentParamsChoices, self.Init_callback)
+        self.services['saveimages/trial_start']     = rospy.Service('saveimages/trial_start',     ExperimentParams,        self.TrialStart_callback)
+        self.services['saveimages/trial_end']       = rospy.Service('saveimages/trial_end',       ExperimentParams,        self.TrialEnd_callback)
+        self.services['saveimages/trigger']         = rospy.Service('saveimages/trigger',         Trigger,                 self.Trigger_callback)
+        self.services['saveimages/wait_until_done'] = rospy.Service('saveimages/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
         
         self.initialized = True
 
@@ -83,9 +83,9 @@ class SaveImages:
             
         
 
-    # Service callback to perform initialization that requires experimentparams, e.g. subscribing to image topics.
-    def Init_callback(self, experimentparams):
-        self.paramsSave = experimentparams.save
+    # Service callback to perform initialization, e.g. subscribing to image topics.
+    def Init_callback(self, experimentparamsChoices):
+        self.paramsSave = experimentparamsChoices.save
         
         for imagetopic in self.paramsSave.imagetopic_list:
             rospy.loginfo('Subscribing to %s' % imagetopic)

@@ -5,7 +5,7 @@ import rospy
 import numpy as N
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
-from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from ledpanels.msg import MsgPanelsCommand
@@ -21,7 +21,7 @@ class Experiment():
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
-        self.experimentparams = ExperimentParamsRequest()
+        self.experimentparams = ExperimentParamsChoicesRequest()
         
         self.experimentparams.experiment.description = "Laser goes on when fly enters within 5mm of center, then off when it leaves.  Records for 120 more secs."
         self.experimentparams.experiment.maxTrials = -1
@@ -156,7 +156,7 @@ class Experiment():
 
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
     def StartTrial_callback(self, userdata):
-        userdata.experimentparamsOut = userdata.experimentparamsIn
+        userdata.experimentparamsChoicesOut = userdata.experimentparamsChoicesIn
         return 'success'
 
     # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.

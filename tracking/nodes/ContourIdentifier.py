@@ -699,10 +699,9 @@ class ContourIdentifier:
     def ProcessContourinfoLists(self):
         if (self.cache[self.iWorking] is not None):
             contourinfolistsPixels = self.cache[self.iWorking]
-            with self.lockThreads:
-                try:
-                    if (self.initialized):
-    
+            if (self.initialized):
+                with self.lockThreads:
+                    try:
                         # Publish state of the EndEffector for ourselves (so we get the EE via bag-recordable message rather than via tf. 
                         if (0 < self.nRobots):
                             try:
@@ -756,7 +755,7 @@ class ContourIdentifier:
                             self.mapContourinfoFromObject = self.MapContoursFromObjects()
                         except IndexError:
                             self.mapContourinfoFromObject = None
-            
+
                         if (self.mapContourinfoFromObject is not None):
                             # Update the robot state w/ the contourinfo and end-effector positions.
                             for iRobot in self.iRobot_list:
@@ -842,8 +841,8 @@ class ContourIdentifier:
                                     marker.header.stamp = contourinfolists.header.stamp
                                     self.pubMarker.publish(marker)
             
-                except rospy.exceptions.ROSException, e:
-                    rospy.loginfo('CI ROSException: %s' % e)
+                    except rospy.exceptions.ROSException, e:
+                        rospy.loginfo('CI ROSException: %s' % e)
                       
             # Mark this entry as done.
             self.cache[self.iWorking] = None

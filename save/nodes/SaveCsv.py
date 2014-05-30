@@ -10,7 +10,7 @@ import threading
 import numpy as N
 from std_msgs.msg import String
 from flycore.msg import MsgFrameState
-from experiment_srvs.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
 from tracking.msg import ArenaState
 
 
@@ -373,11 +373,11 @@ class SaveCsv:
         
         # Offer some services.
         self.services = {}
-        self.services['savearenastate/init']            = rospy.Service('savearenastate/init',            ExperimentParams, self.Init_callback)
-        self.services['savearenastate/trial_start']     = rospy.Service('savearenastate/trial_start',     ExperimentParams, self.TrialStart_callback)
-        self.services['savearenastate/trial_end']       = rospy.Service('savearenastate/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        self.services['savearenastate/trigger']         = rospy.Service('savearenastate/trigger',         Trigger,          self.Trigger_callback)
-        self.services['savearenastate/wait_until_done'] = rospy.Service('savearenastate/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services['savearenastate/init']            = rospy.Service('savearenastate/init',            ExperimentParamsChoices, self.Init_callback)
+        self.services['savearenastate/trial_start']     = rospy.Service('savearenastate/trial_start',     ExperimentParams,        self.TrialStart_callback)
+        self.services['savearenastate/trial_end']       = rospy.Service('savearenastate/trial_end',       ExperimentParams,        self.TrialEnd_callback)
+        self.services['savearenastate/trigger']         = rospy.Service('savearenastate/trigger',         Trigger,                 self.Trigger_callback)
+        self.services['savearenastate/wait_until_done'] = rospy.Service('savearenastate/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
 
         self.initialized = True
 
@@ -391,8 +391,8 @@ class SaveCsv:
         
 
     # Service callback to perform initialization that requires experimentparams, e.g. subscribing to image topics.
-    def Init_callback(self, experimentparams):
-        self.paramsSave = experimentparams.save
+    def Init_callback(self, experimentparamsChoices):
+        self.paramsSave = experimentparamsChoices.save
 
         return True
 

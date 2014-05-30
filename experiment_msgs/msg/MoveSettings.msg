@@ -1,4 +1,4 @@
-string                          mode  # 'pattern' or 'relative'
-MoveRelativeChoices             relative
-patterngen/MsgPatternChoices    pattern
+string                   mode  # 'pattern' or 'relative'
+MoveRelative             relative
+patterngen/MsgPattern    pattern
 

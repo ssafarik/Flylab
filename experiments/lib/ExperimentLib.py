@@ -3,7 +3,7 @@ from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
 import copy
-import numpy as N
+import numpy as np
 import smach
 import smach_ros
 import tf
@@ -13,7 +13,7 @@ from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion
 from std_msgs.msg import Header, ColorRGBA, String
 from std_srvs.srv import Empty
 
-from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoices
 from flycore.msg import MsgFrameState, TrackingCommand
 from flycore.srv import SrvFrameState, SrvFrameStateRequest
 from tracking.msg import ArenaState
@@ -220,165 +220,355 @@ class StartTrial (smach.State):
         return choice
     
     
-    def execute(self, userdata):
-        rv = 'exit'
-        now = rospy.Time.now().to_sec()
-        experimentparamsChoices = userdata.experimentparamsChoicesIn
-
+    def IterFields(self, obj):
+        for objsub,val in obj.__dict__.iteritems():
+            if (not callable(objsub)):
+                if ('.msg.' in str(type(objsub))):
+                    self.IterFields(name+'.'+namesub)
+                else:
+                    #rospy.logwarn('%s: %s' % (name+'.'+namesub, type(name+'.'+namesub)))
+                    rospy.logwarn(objsub)
+#         for d in dir(experimentparamsChoices):
+#             if (d[0]!='_'):
+#                 obj = eval('experimentparamsChoices.'+d)
+#                 if  ('instancemethod' not in str(type(obj))):
+#                     rospy.logwarn('%s: %s' % ('experimentparamsChoices.'+d, type(obj)))
+#                     if ('.msg.' in str(type(obj))):
+#                         for d2 in dir(obj):
+#                             if (d2[0]!='_'):
+#                                 obj2 = eval('experimentparamsChoices.'+d+'.'+d2)
+#                                 if  ('instancemethod' not in str(type(obj2))):
+#                                     rospy.logwarn('%s: %s' % ('experimentparamsChoices.'+d+'.'+d2, type(obj2)))
+                        
+    
+    def GetChoices(self, experimentparamsChoices):
         # Make a choice for the experimentparams.        
-        experimentparams = ExperimentParams()
+        experimentparamsTemp = ExperimentParamsRequest()
+        experimentparams     = ExperimentParamsRequest()
         
-        experimentparams.experiment.description                         =             experimentparamsChoices.experiment.description
-        experimentparams.experiment.maxTrials                           =             experimentparamsChoices.experiment.maxTrials
-        experimentparams.experiment.timeout                             =             experimentparamsChoices.experiment.timeout
         
-        experimentparams.save.filenamebase                              =             experimentparamsChoices.save.filenamebase
-        experimentparams.save.csv                                       =             experimentparamsChoices.save.csv
-        experimentparams.save.bag                                       =             experimentparamsChoices.save.bag
-        experimentparams.save.mov                                       =             experimentparamsChoices.save.mov
-        experimentparams.save.imagetopic_list                           =             experimentparamsChoices.save.imagetopic_list
-        experimentparams.save.onlyWhileTriggered                        =             experimentparamsChoices.save.onlyWhileTriggered
+        #########################################
+        # Make a temporary random choice, but it might have None values.
+        experimentparamsTemp.experiment.description                             =             experimentparamsChoices.experiment.description
+        experimentparamsTemp.experiment.maxTrials                               =             experimentparamsChoices.experiment.maxTrials
+        experimentparamsTemp.experiment.timeout                                 =             experimentparamsChoices.experiment.timeout
         
-        experimentparams.robotspec.nRobots                              =             experimentparamsChoices.robotspec.nRobots
-        experimentparams.robotspec.width                                =             experimentparamsChoices.robotspec.width
-        experimentparams.robotspec.height                               =             experimentparamsChoices.robotspec.height
-        experimentparams.robotspec.isPresent                            =             experimentparamsChoices.robotspec.isPresent
-        experimentparams.robotspec.description                          =             experimentparamsChoices.robotspec.description
+        experimentparamsTemp.save.filenamebase                                  =             experimentparamsChoices.save.filenamebase
+        experimentparamsTemp.save.csv                                           =             experimentparamsChoices.save.csv
+        experimentparamsTemp.save.bag                                           =             experimentparamsChoices.save.bag
+        experimentparamsTemp.save.mov                                           =             experimentparamsChoices.save.mov
+        experimentparamsTemp.save.imagetopic_list                               =             experimentparamsChoices.save.imagetopic_list
+        experimentparamsTemp.save.onlyWhileTriggered                            =             experimentparamsChoices.save.onlyWhileTriggered
+        
+        experimentparamsTemp.robotspec.nRobots                                  =             experimentparamsChoices.robotspec.nRobots
+        experimentparamsTemp.robotspec.width                                    =             experimentparamsChoices.robotspec.width
+        experimentparamsTemp.robotspec.height                                   =             experimentparamsChoices.robotspec.height
+        experimentparamsTemp.robotspec.isPresent                                =             experimentparamsChoices.robotspec.isPresent
+        experimentparamsTemp.robotspec.description                              =             experimentparamsChoices.robotspec.description
 
-        experimentparams.flyspec.nFlies                                 =             experimentparamsChoices.flyspec.nFlies
-        experimentparams.flyspec.description                            =             experimentparamsChoices.flyspec.description
+        experimentparamsTemp.flyspec.nFlies                                     =             experimentparamsChoices.flyspec.nFlies
+        experimentparamsTemp.flyspec.description                                =             experimentparamsChoices.flyspec.description
         
-        experimentparams.tracking.exclusionzones.enabled                =             experimentparamsChoices.tracking.exclusionzones.enabled
-        experimentparams.tracking.exclusionzones.point_list             =             experimentparamsChoices.tracking.exclusionzones.point_list
-        experimentparams.tracking.exclusionzones.radius_list            =             experimentparamsChoices.tracking.exclusionzones.radius_list
+        experimentparamsTemp.tracking.exclusionzones.enabled                    =             experimentparamsChoices.tracking.exclusionzones.enabled
+        experimentparamsTemp.tracking.exclusionzones.point_list                 =             experimentparamsChoices.tracking.exclusionzones.point_list
+        experimentparamsTemp.tracking.exclusionzones.radius_list                =             experimentparamsChoices.tracking.exclusionzones.radius_list
         
-        experimentparams.home.enabled                                   =             experimentparamsChoices.home.enabled
-        experimentparams.home.x                                         =             experimentparamsChoices.home.x
-        experimentparams.home.y                                         =             experimentparamsChoices.home.y
-        experimentparams.home.speed                                     =             experimentparamsChoices.home.speed
-        experimentparams.home.tolerance                                 =             experimentparamsChoices.home.tolerance
+        experimentparamsTemp.home.enabled                                       =             experimentparamsChoices.home.enabled
+        if (experimentparamsTemp.home.enabled):
+            experimentparamsTemp.home.x                                         =             experimentparamsChoices.home.x
+            experimentparamsTemp.home.y                                         =             experimentparamsChoices.home.y
+            experimentparamsTemp.home.speed                                     =             experimentparamsChoices.home.speed
+            experimentparamsTemp.home.tolerance                                 =             experimentparamsChoices.home.tolerance
 
-        experimentparams.pre.robot.enabled                              =             experimentparamsChoices.pre.robot.enabled
-        experimentparams.pre.robot.move.mode                            = self.Choose(experimentparamsChoices.pre.robot.move.mode)
-        experimentparams.pre.robot.move.relative.tracking               = self.Choose(experimentparams.pre.robot.move.relative.tracking)                   
-        experimentparams.pre.robot.move.relative.frameidOriginPosition  = self.Choose(experimentparams.pre.robot.move.relative.frameidOriginPosition)
-        experimentparams.pre.robot.move.relative.frameidOriginAngle     = self.Choose(experimentparams.pre.robot.move.relative.frameidOriginAngle)
-        experimentparams.pre.robot.move.relative.distance               = self.Choose(experimentparams.pre.robot.move.relative.distance)
-        experimentparams.pre.robot.move.relative.angleType              = self.Choose(experimentparams.pre.robot.move.relative.angleType)
-        experimentparams.pre.robot.move.relative.angleOffset            = self.Choose(experimentparams.pre.robot.move.relative.angleOffset)
-        experimentparams.pre.robot.move.relative.angleOscMag            = self.Choose(experimentparams.pre.robot.move.relative.angleOscMag)
-        experimentparams.pre.robot.move.relative.angleOscFreq           = self.Choose(experimentparams.pre.robot.move.relative.angleOscFreq)
-        experimentparams.pre.robot.move.relative.speedType              = self.Choose(experimentparams.pre.robot.move.relative.speedType)
-        experimentparams.pre.robot.move.relative.speed                  = self.Choose(experimentparams.pre.robot.move.relative.speed)
-        experimentparams.pre.robot.move.relative.tolerance              = self.Choose(experimentparams.pre.robot.move.relative.tolerance)
-        experimentparams.pre.robot.move.pattern.frameidPosition         = self.Choose(experimentparamsChoices.pre.robot.move.pattern.frameidPosition)
-        experimentparams.pre.robot.move.pattern.frameidAngle            = self.Choose(experimentparamsChoices.pre.robot.move.pattern.frameidAngle)
-        experimentparams.pre.robot.move.pattern.shape                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.shape)
-        experimentparams.pre.robot.move.pattern.hzPattern               = self.Choose(experimentparamsChoices.pre.robot.move.pattern.hzPattern)
-        experimentparams.pre.robot.move.pattern.hzPoint                 = self.Choose(experimentparamsChoices.pre.robot.move.pattern.hzPoint)
-        experimentparams.pre.robot.move.pattern.count                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.count)
-        experimentparams.pre.robot.move.pattern.size.x                  = self.Choose(experimentparamsChoices.pre.robot.move.pattern.size.x)
-        experimentparams.pre.robot.move.pattern.size.y                  = self.Choose(experimentparamsChoices.pre.robot.move.pattern.size.y)
-        experimentparams.pre.robot.move.pattern.param                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.param)
-        experimentparams.pre.robot.move.pattern.direction               = self.Choose(experimentparamsChoices.pre.robot.move.pattern.direction)
-        experimentparams.pre.robot.move.pattern.restart                 = self.Choose(experimentparamsChoices.pre.robot.move.pattern.restart)
+        experimentparamsTemp.pre.robot.enabled                                  =             experimentparamsChoices.pre.robot.enabled
+        if (experimentparamsTemp.pre.robot.enabled):
+            experimentparamsTemp.pre.robot.move.mode                            =             experimentparamsChoices.pre.robot.move.mode
+            experimentparamsTemp.pre.robot.move.relative.tracking               = self.Choose(experimentparamsChoices.pre.robot.move.relative.tracking)                   
+            experimentparamsTemp.pre.robot.move.relative.frameidOriginPosition  = self.Choose(experimentparamsChoices.pre.robot.move.relative.frameidOriginPosition)
+            experimentparamsTemp.pre.robot.move.relative.frameidOriginAngle     = self.Choose(experimentparamsChoices.pre.robot.move.relative.frameidOriginAngle)
+            experimentparamsTemp.pre.robot.move.relative.distance               = self.Choose(experimentparamsChoices.pre.robot.move.relative.distance)
+            experimentparamsTemp.pre.robot.move.relative.angleType              = self.Choose(experimentparamsChoices.pre.robot.move.relative.angleType)
+            experimentparamsTemp.pre.robot.move.relative.angleOffset            = self.Choose(experimentparamsChoices.pre.robot.move.relative.angleOffset)
+            experimentparamsTemp.pre.robot.move.relative.angleOscMag            = self.Choose(experimentparamsChoices.pre.robot.move.relative.angleOscMag)
+            experimentparamsTemp.pre.robot.move.relative.angleOscFreq           = self.Choose(experimentparamsChoices.pre.robot.move.relative.angleOscFreq)
+            experimentparamsTemp.pre.robot.move.relative.speedType              = self.Choose(experimentparamsChoices.pre.robot.move.relative.speedType)
+            experimentparamsTemp.pre.robot.move.relative.speed                  = self.Choose(experimentparamsChoices.pre.robot.move.relative.speed)
+            experimentparamsTemp.pre.robot.move.relative.tolerance              = self.Choose(experimentparamsChoices.pre.robot.move.relative.tolerance)
+            experimentparamsTemp.pre.robot.move.pattern.frameidPosition         = self.Choose(experimentparamsChoices.pre.robot.move.pattern.frameidPosition)
+            experimentparamsTemp.pre.robot.move.pattern.frameidAngle            = self.Choose(experimentparamsChoices.pre.robot.move.pattern.frameidAngle)
+            experimentparamsTemp.pre.robot.move.pattern.shape                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.shape)
+            experimentparamsTemp.pre.robot.move.pattern.hzPattern               = self.Choose(experimentparamsChoices.pre.robot.move.pattern.hzPattern)
+            experimentparamsTemp.pre.robot.move.pattern.hzPoint                 = self.Choose(experimentparamsChoices.pre.robot.move.pattern.hzPoint)
+            experimentparamsTemp.pre.robot.move.pattern.count                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.count)
+            experimentparamsTemp.pre.robot.move.pattern.size                    = self.Choose(experimentparamsChoices.pre.robot.move.pattern.size)
+            experimentparamsTemp.pre.robot.move.pattern.param                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.param)
+            experimentparamsTemp.pre.robot.move.pattern.direction               = self.Choose(experimentparamsChoices.pre.robot.move.pattern.direction)
+            experimentparamsTemp.pre.robot.move.pattern.restart                 = self.Choose(experimentparamsChoices.pre.robot.move.pattern.restart)
         
-        experimentparams.pre.lasergalvos                                =             experimentparamsChoices.pre.lasergalvos
+        experimentparamsTemp.pre.lasergalvos                                    =             experimentparamsChoices.pre.lasergalvos
         
-        experimentparams.pre.ledpanels.enabled                          =             experimentparamsChoices.pre.ledpanels.enabled
-        experimentparams.pre.ledpanels.command                          = self.Choose(experimentparams.pre.ledpanels.command)
-        experimentparams.pre.ledpanels.idPattern                        = self.Choose(experimentparams.pre.ledpanels.idPattern)
-        experimentparams.pre.ledpanels.origin.x                         = self.Choose(experimentparams.pre.ledpanels.origin.x)
-        experimentparams.pre.ledpanels.origin.y                         = self.Choose(experimentparams.pre.ledpanels.origin.y)
-        experimentparams.pre.ledpanels.frame_id                         = self.Choose(experimentparams.pre.ledpanels.frame_id)
-        experimentparams.pre.ledpanels.statefilterHi                    = self.Choose(experimentparams.pre.ledpanels.statefilterHi)
-        experimentparams.pre.ledpanels.statefilterLo                    = self.Choose(experimentparams.pre.ledpanels.statefilterLo)
-        experimentparams.pre.ledpanels.statefilterCriteria              = self.Choose(experimentparams.pre.ledpanels.statefilterCriteria)
+        experimentparamsTemp.pre.ledpanels.enabled                              =             experimentparamsChoices.pre.ledpanels.enabled
+        if (experimentparamsTemp.pre.ledpanels.enabled):
+            experimentparamsTemp.pre.ledpanels.command                          = self.Choose(experimentparamsChoices.pre.ledpanels.command)
+            experimentparamsTemp.pre.ledpanels.idPattern                        = self.Choose(experimentparamsChoices.pre.ledpanels.idPattern)
+            experimentparamsTemp.pre.ledpanels.origin                           = self.Choose(experimentparamsChoices.pre.ledpanels.origin)
+            experimentparamsTemp.pre.ledpanels.frame_id                         = self.Choose(experimentparamsChoices.pre.ledpanels.frame_id)
+            experimentparamsTemp.pre.ledpanels.statefilterHi                    = self.Choose(experimentparamsChoices.pre.ledpanels.statefilterHi)
+            experimentparamsTemp.pre.ledpanels.statefilterLo                    = self.Choose(experimentparamsChoices.pre.ledpanels.statefilterLo)
+            experimentparamsTemp.pre.ledpanels.statefilterCriteria              = self.Choose(experimentparamsChoices.pre.ledpanels.statefilterCriteria)
         
-        experimentparams.pre.wait1                                      =             experimentparamsChoices.pre.wait1
+        experimentparamsTemp.pre.wait1                                          =             experimentparamsChoices.pre.wait1
         
-        experimentparams.pre.trigger.enabled                            =             experimentparamsChoices.pre.trigger.enabled
-        experimentparams.pre.trigger.frameidParent                      =             experimentparamsChoices.pre.trigger.frameidParent
-        experimentparams.pre.trigger.frameidChild                       =             experimentparamsChoices.pre.trigger.frameidChild
-        experimentparams.pre.trigger.speedAbsParentMin                  =             experimentparamsChoices.pre.trigger.speedAbsParentMin
-        experimentparams.pre.trigger.speedAbsParentMax                  =             experimentparamsChoices.pre.trigger.speedAbsParentMax
-        experimentparams.pre.trigger.speedAbsChildMin                   =             experimentparamsChoices.pre.trigger.speedAbsChildMin
-        experimentparams.pre.trigger.speedAbsChildMax                   =             experimentparamsChoices.pre.trigger.speedAbsChildMax
-        experimentparams.pre.trigger.speedRelMin                        =             experimentparamsChoices.pre.trigger.speedRelMin
-        experimentparams.pre.trigger.speedRelMax                        =             experimentparamsChoices.pre.trigger.speedRelMax
-        experimentparams.pre.trigger.distanceMin                        =             experimentparamsChoices.pre.trigger.distanceMin
-        experimentparams.pre.trigger.distanceMax                        =             experimentparamsChoices.pre.trigger.distanceMax
-        experimentparams.pre.trigger.angleMin                           =             experimentparamsChoices.pre.trigger.angleMin
-        experimentparams.pre.trigger.angleMax                           =             experimentparamsChoices.pre.trigger.angleMax
-        experimentparams.pre.trigger.angleTest                          =             experimentparamsChoices.pre.trigger.angleTest
-        experimentparams.pre.trigger.angleTestBilateral                 =             experimentparamsChoices.pre.trigger.angleTestBilateral
-        experimentparams.pre.trigger.timeHold                           =             experimentparamsChoices.pre.trigger.timeHold
-        experimentparams.pre.trigger.timeout                            =             experimentparamsChoices.pre.trigger.timeout
+        experimentparamsTemp.pre.trigger.enabled                                =             experimentparamsChoices.pre.trigger.enabled
+        if (experimentparamsTemp.pre.trigger.enabled):
+            experimentparamsTemp.pre.trigger.frameidParent                      =             experimentparamsChoices.pre.trigger.frameidParent
+            experimentparamsTemp.pre.trigger.frameidChild                       =             experimentparamsChoices.pre.trigger.frameidChild
+            experimentparamsTemp.pre.trigger.speedAbsParentMin                  =             experimentparamsChoices.pre.trigger.speedAbsParentMin
+            experimentparamsTemp.pre.trigger.speedAbsParentMax                  =             experimentparamsChoices.pre.trigger.speedAbsParentMax
+            experimentparamsTemp.pre.trigger.speedAbsChildMin                   =             experimentparamsChoices.pre.trigger.speedAbsChildMin
+            experimentparamsTemp.pre.trigger.speedAbsChildMax                   =             experimentparamsChoices.pre.trigger.speedAbsChildMax
+            experimentparamsTemp.pre.trigger.speedRelMin                        =             experimentparamsChoices.pre.trigger.speedRelMin
+            experimentparamsTemp.pre.trigger.speedRelMax                        =             experimentparamsChoices.pre.trigger.speedRelMax
+            experimentparamsTemp.pre.trigger.distanceMin                        =             experimentparamsChoices.pre.trigger.distanceMin
+            experimentparamsTemp.pre.trigger.distanceMax                        =             experimentparamsChoices.pre.trigger.distanceMax
+            experimentparamsTemp.pre.trigger.angleMin                           =             experimentparamsChoices.pre.trigger.angleMin
+            experimentparamsTemp.pre.trigger.angleMax                           =             experimentparamsChoices.pre.trigger.angleMax
+            experimentparamsTemp.pre.trigger.angleTest                          =             experimentparamsChoices.pre.trigger.angleTest
+            experimentparamsTemp.pre.trigger.angleTestBilateral                 =             experimentparamsChoices.pre.trigger.angleTestBilateral
+            experimentparamsTemp.pre.trigger.timeHold                           =             experimentparamsChoices.pre.trigger.timeHold
+            experimentparamsTemp.pre.trigger.timeout                            =             experimentparamsChoices.pre.trigger.timeout
         
-        experimentparams.pre.wait2                                      =             experimentparamsChoices.pre.wait2
+        experimentparamsTemp.pre.wait2                                          =             experimentparamsChoices.pre.wait2
         
 
         # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
-        experimentparams.trial.robot.enabled                            =             experimentparamsChoices.trial.robot.enabled
-        experimentparams.trial.robot.move.mode                          =             experimentparamsChoices.trial.robot.move.mode
-        experimentparams.trial.robot.move.relative.tracking             = self.Choose(experimentparams.trial.robot.move.relative.tracking)                   
-        experimentparams.trial.robot.move.relative.frameidOriginPosition = self.Choose(experimentparams.trial.robot.move.relative.frameidOriginPosition)
-        experimentparams.trial.robot.move.relative.frameidOriginAngle   = self.Choose(experimentparams.trial.robot.move.relative.frameidOriginAngle)
-        experimentparams.trial.robot.move.relative.distance             = self.Choose.enabled(experimentparams.trial.robot.move.relative.distance)
-        experimentparams.trial.robot.move.relative.angleType            = self.Choose(experimentparams.trial.robot.move.relative.angleType)
-        experimentparams.trial.robot.move.relative.angleOffset          = self.Choose(experimentparams.trial.robot.move.relative.angleOffset)
-        experimentparams.trial.robot.move.relative.angleOscMag          = self.Choose(experimentparams.trial.robot.move.relative.angleOscMag)
-        experimentparams.trial.robot.move.relative.angleOscFreq         = self.Choose(experimentparams.trial.robot.move.relative.angleOscFreq)
-        experimentparams.trial.robot.move.relative.speedType            = self.Choose(experimentparams.trial.robot.move.relative.speedType)
-        experimentparams.trial.robot.move.relative.speed                = self.Choose(experimentparams.trial.robot.move.relative.speed)
-        experimentparams.trial.robot.move.relative.tolerance            = self.Choose(experimentparams.trial.robot.move.relative.tolerance)
-        experimentparams.trial.robot.move.pattern.frameidPosition       = self.Choose(experimentparamsChoices.trial.robot.move.pattern.frameidPosition)
-        experimentparams.trial.robot.move.pattern.frameidAngle          = self.Choose(experimentparamsChoices.trial.robot.move.pattern.frameidAngle)
-        experimentparams.trial.robot.move.pattern.shape                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.shape)
-        experimentparams.trial.robot.move.pattern.hzPattern             = self.Choose(experimentparamsChoices.trial.robot.move.pattern.hzPattern)
-        experimentparams.trial.robot.move.pattern.hzPoint               = self.Choose(experimentparamsChoices.trial.robot.move.pattern.hzPoint)
-        experimentparams.trial.robot.move.pattern.count                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.count)
-        experimentparams.trial.robot.move.pattern.size.x                = self.Choose(experimentparamsChoices.trial.robot.move.pattern.size.x)
-        experimentparams.trial.robot.move.pattern.size.y                = self.Choose(experimentparamsChoices.trial.robot.move.pattern.size.y)
-        experimentparams.trial.robot.move.pattern.param                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.param)
-        experimentparams.trial.robot.move.pattern.direction             = self.Choose(experimentparamsChoices.trial.robot.move.pattern.direction)
-        experimentparams.trial.robot.move.pattern.restart               = self.Choose(experimentparamsChoices.trial.robot.move.pattern.restart)
+        experimentparamsTemp.trial.robot.enabled                                =             experimentparamsChoices.trial.robot.enabled
+        if (experimentparamsTemp.trial.robot.enabled):
+            experimentparamsTemp.trial.robot.move.mode                          =             experimentparamsChoices.trial.robot.move.mode
+            experimentparamsTemp.trial.robot.move.relative.tracking             = self.Choose(experimentparamsChoices.trial.robot.move.relative.tracking)                   
+            experimentparamsTemp.trial.robot.move.relative.frameidOriginPosition = self.Choose(experimentparamsChoices.trial.robot.move.relative.frameidOriginPosition)
+            experimentparamsTemp.trial.robot.move.relative.frameidOriginAngle   = self.Choose(experimentparamsChoices.trial.robot.move.relative.frameidOriginAngle)
+            experimentparamsTemp.trial.robot.move.relative.distance             = self.Choose(experimentparamsChoices.trial.robot.move.relative.distance)
+            experimentparamsTemp.trial.robot.move.relative.angleType            = self.Choose(experimentparamsChoices.trial.robot.move.relative.angleType)
+            experimentparamsTemp.trial.robot.move.relative.angleOffset          = self.Choose(experimentparamsChoices.trial.robot.move.relative.angleOffset)
+            experimentparamsTemp.trial.robot.move.relative.angleOscMag          = self.Choose(experimentparamsChoices.trial.robot.move.relative.angleOscMag)
+            experimentparamsTemp.trial.robot.move.relative.angleOscFreq         = self.Choose(experimentparamsChoices.trial.robot.move.relative.angleOscFreq)
+            experimentparamsTemp.trial.robot.move.relative.speedType            = self.Choose(experimentparamsChoices.trial.robot.move.relative.speedType)
+            experimentparamsTemp.trial.robot.move.relative.speed                = self.Choose(experimentparamsChoices.trial.robot.move.relative.speed)
+            experimentparamsTemp.trial.robot.move.relative.tolerance            = self.Choose(experimentparamsChoices.trial.robot.move.relative.tolerance)
+            experimentparamsTemp.trial.robot.move.pattern.frameidPosition       = self.Choose(experimentparamsChoices.trial.robot.move.pattern.frameidPosition)
+            experimentparamsTemp.trial.robot.move.pattern.frameidAngle          = self.Choose(experimentparamsChoices.trial.robot.move.pattern.frameidAngle)
+            experimentparamsTemp.trial.robot.move.pattern.shape                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.shape)
+            experimentparamsTemp.trial.robot.move.pattern.hzPattern             = self.Choose(experimentparamsChoices.trial.robot.move.pattern.hzPattern)
+            experimentparamsTemp.trial.robot.move.pattern.hzPoint               = self.Choose(experimentparamsChoices.trial.robot.move.pattern.hzPoint)
+            experimentparamsTemp.trial.robot.move.pattern.count                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.count)
+            experimentparamsTemp.trial.robot.move.pattern.size                  = self.Choose(experimentparamsChoices.trial.robot.move.pattern.size)
+            experimentparamsTemp.trial.robot.move.pattern.param                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.param)
+            experimentparamsTemp.trial.robot.move.pattern.direction             = self.Choose(experimentparamsChoices.trial.robot.move.pattern.direction)
+            experimentparamsTemp.trial.robot.move.pattern.restart               = self.Choose(experimentparamsChoices.trial.robot.move.pattern.restart)
         
         
-        experimentparams.trial.lasergalvos                              =             experimentparamsChoices.trial.lasergalvos
+        experimentparamsTemp.trial.lasergalvos                                  =             experimentparamsChoices.trial.lasergalvos
 
         
-        experimentparams.trial.ledpanels.enabled                        =             experimentparamsChoices.trial.ledpanels.enabled
-        experimentparams.trial.ledpanels.command                        = self.Choose(experimentparamsChoices.trial.ledpanels.command)
-        experimentparams.trial.ledpanels.idPattern                      = self.Choose(experimentparamsChoices.trial.ledpanels.idPattern)
-        experimentparams.trial.ledpanels.origin.x                       = self.Choose(experimentparamsChoices.trial.ledpanels.origin.x)
-        experimentparams.trial.ledpanels.origin.y                       = self.Choose(experimentparamsChoices.trial.ledpanels.origin.y)
-        experimentparams.trial.ledpanels.frame_id                       = self.Choose(experimentparamsChoices.trial.ledpanels.frame_id)
-        experimentparams.trial.ledpanels.statefilterHi                  = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterHi)
-        experimentparams.trial.ledpanels.statefilterLo                  = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterLo)
-        experimentparams.trial.ledpanels.statefilterCriteria            = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterCriteria)
+        experimentparamsTemp.trial.ledpanels.enabled                            =             experimentparamsChoices.trial.ledpanels.enabled
+        if (experimentparamsTemp.trial.ledpanels.enabled):
+            experimentparamsTemp.trial.ledpanels.command                        = self.Choose(experimentparamsChoices.trial.ledpanels.command)
+            experimentparamsTemp.trial.ledpanels.idPattern                      = self.Choose(experimentparamsChoices.trial.ledpanels.idPattern)
+            experimentparamsTemp.trial.ledpanels.origin                         = self.Choose(experimentparamsChoices.trial.ledpanels.origin)
+            experimentparamsTemp.trial.ledpanels.frame_id                       = self.Choose(experimentparamsChoices.trial.ledpanels.frame_id)
+            experimentparamsTemp.trial.ledpanels.statefilterHi                  = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterHi)
+            experimentparamsTemp.trial.ledpanels.statefilterLo                  = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterLo)
+            experimentparamsTemp.trial.ledpanels.statefilterCriteria            = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterCriteria)
 
-        experimentparams.post.trigger.enabled                           =             experimentparamsChoices.post.trigger.enabled
-        experimentparams.post.trigger.frameidParent                     =             experimentparamsChoices.post.trigger.frameidParent
-        experimentparams.post.trigger.frameidChild                      =             experimentparamsChoices.post.trigger.frameidChild
-        experimentparams.post.trigger.speedAbsParentMin                 =             experimentparamsChoices.post.trigger.speedAbsParentMin
-        experimentparams.post.trigger.speedAbsParentMax                 =             experimentparamsChoices.post.trigger.speedAbsParentMax
-        experimentparams.post.trigger.speedAbsChildMin                  =             experimentparamsChoices.post.trigger.speedAbsChildMin
-        experimentparams.post.trigger.speedAbsChildMax                  =             experimentparamsChoices.post.trigger.speedAbsChildMax
-        experimentparams.post.trigger.speedRelMin                       =             experimentparamsChoices.post.trigger.speedRelMin
-        experimentparams.post.trigger.speedRelMax                       =             experimentparamsChoices.post.trigger.speedRelMax
-        experimentparams.post.trigger.distanceMin                       =             experimentparamsChoices.post.trigger.distanceMin
-        experimentparams.post.trigger.distanceMax                       =             experimentparamsChoices.post.trigger.distanceMax
-        experimentparams.post.trigger.angleMin                          =             experimentparamsChoices.post.trigger.angleMin
-        experimentparams.post.trigger.angleMax                          =             experimentparamsChoices.post.trigger.angleMax
-        experimentparams.post.trigger.angleTest                         =             experimentparamsChoices.post.trigger.angleTest
-        experimentparams.post.trigger.angleTestBilateral                =             experimentparamsChoices.post.trigger.angleTestBilateral
-        experimentparams.post.trigger.timeHold                          =             experimentparamsChoices.post.trigger.timeHold
-        experimentparams.post.trigger.timeout                           =             experimentparamsChoices.post.trigger.timeout
+        experimentparamsTemp.post.trigger.enabled                               =             experimentparamsChoices.post.trigger.enabled
+        if (experimentparamsTemp.post.trigger.enabled):
+            experimentparamsTemp.post.trigger.frameidParent                     =             experimentparamsChoices.post.trigger.frameidParent
+            experimentparamsTemp.post.trigger.frameidChild                      =             experimentparamsChoices.post.trigger.frameidChild
+            experimentparamsTemp.post.trigger.speedAbsParentMin                 =             experimentparamsChoices.post.trigger.speedAbsParentMin
+            experimentparamsTemp.post.trigger.speedAbsParentMax                 =             experimentparamsChoices.post.trigger.speedAbsParentMax
+            experimentparamsTemp.post.trigger.speedAbsChildMin                  =             experimentparamsChoices.post.trigger.speedAbsChildMin
+            experimentparamsTemp.post.trigger.speedAbsChildMax                  =             experimentparamsChoices.post.trigger.speedAbsChildMax
+            experimentparamsTemp.post.trigger.speedRelMin                       =             experimentparamsChoices.post.trigger.speedRelMin
+            experimentparamsTemp.post.trigger.speedRelMax                       =             experimentparamsChoices.post.trigger.speedRelMax
+            experimentparamsTemp.post.trigger.distanceMin                       =             experimentparamsChoices.post.trigger.distanceMin
+            experimentparamsTemp.post.trigger.distanceMax                       =             experimentparamsChoices.post.trigger.distanceMax
+            experimentparamsTemp.post.trigger.angleMin                          =             experimentparamsChoices.post.trigger.angleMin
+            experimentparamsTemp.post.trigger.angleMax                          =             experimentparamsChoices.post.trigger.angleMax
+            experimentparamsTemp.post.trigger.angleTest                         =             experimentparamsChoices.post.trigger.angleTest
+            experimentparamsTemp.post.trigger.angleTestBilateral                =             experimentparamsChoices.post.trigger.angleTestBilateral
+            experimentparamsTemp.post.trigger.timeHold                          =             experimentparamsChoices.post.trigger.timeHold
+            experimentparamsTemp.post.trigger.timeout                           =             experimentparamsChoices.post.trigger.timeout
 
-        experimentparams.post.wait                                      =             experimentparamsChoices.post.wait
+        experimentparamsTemp.post.wait                                          =             experimentparamsChoices.post.wait
+
+
         
+        #########################################
+        # Use those temp values which are not None, otherwise keep the default values.
+        experimentparams.experiment.description                             = (experimentparams.experiment.description, experimentparamsTemp.experiment.description)[experimentparamsTemp.experiment.description is not None]
+        experimentparams.experiment.maxTrials                               = (experimentparams.experiment.maxTrials, experimentparamsTemp.experiment.maxTrials)[experimentparamsTemp.experiment.maxTrials is not None]
+        experimentparams.experiment.timeout                                 = (experimentparams.experiment.timeout, experimentparamsTemp.experiment.timeout)[experimentparamsTemp.experiment.timeout is not None]
+        
+        experimentparams.save.filenamebase                                  = (experimentparams.save.filenamebase, experimentparamsTemp.save.filenamebase)[experimentparamsTemp.save.filenamebase is not None]
+        experimentparams.save.csv                                           = (experimentparams.save.csv, experimentparamsTemp.save.csv)[experimentparamsTemp.save.csv is not None]
+        experimentparams.save.bag                                           = (experimentparams.save.bag, experimentparamsTemp.save.bag)[experimentparamsTemp.save.bag is not None]
+        experimentparams.save.mov                                           = (experimentparams.save.mov, experimentparamsTemp.save.mov)[experimentparamsTemp.save.mov is not None]
+        experimentparams.save.imagetopic_list                               = (experimentparams.save.imagetopic_list, experimentparamsTemp.save.imagetopic_list)[experimentparamsTemp.save.imagetopic_list is not None]
+        experimentparams.save.onlyWhileTriggered                            = (experimentparams.save.onlyWhileTriggered, experimentparamsTemp.save.onlyWhileTriggered)[experimentparamsTemp.save.onlyWhileTriggered is not None]
+        
+        experimentparams.robotspec.nRobots                                  = (experimentparams.robotspec.nRobots, experimentparamsTemp.robotspec.nRobots)[experimentparamsTemp.robotspec.nRobots is not None]
+        experimentparams.robotspec.width                                    = (experimentparams.robotspec.width, experimentparamsTemp.robotspec.width)[experimentparamsTemp.robotspec.width is not None]
+        experimentparams.robotspec.height                                   = (experimentparams.robotspec.height, experimentparamsTemp.robotspec.height)[experimentparamsTemp.robotspec.height is not None]
+        experimentparams.robotspec.isPresent                                = (experimentparams.robotspec.isPresent, experimentparamsTemp.robotspec.isPresent)[experimentparamsTemp.robotspec.isPresent is not None]
+        experimentparams.robotspec.description                              = (experimentparams.robotspec.description, experimentparamsTemp.robotspec.description)[experimentparamsTemp.robotspec.description is not None]
+
+        experimentparams.flyspec.nFlies                                     = (experimentparams.flyspec.nFlies, experimentparamsTemp.flyspec.nFlies)[experimentparamsTemp.flyspec.nFlies is not None]
+        experimentparams.flyspec.description                                = (experimentparams.flyspec.description, experimentparamsTemp.flyspec.description)[experimentparamsTemp.flyspec.description is not None]
+        
+        experimentparams.tracking.exclusionzones.enabled                    = (experimentparams.tracking.exclusionzones.enabled, experimentparamsTemp.tracking.exclusionzones.enabled)[experimentparamsTemp.tracking.exclusionzones.enabled is not None]
+        experimentparams.tracking.exclusionzones.point_list                 = (experimentparams.tracking.exclusionzones.point_list, experimentparamsTemp.tracking.exclusionzones.point_list)[experimentparamsTemp.tracking.exclusionzones.point_list is not None]
+        experimentparams.tracking.exclusionzones.radius_list                = (experimentparams.tracking.exclusionzones.radius_list, experimentparamsTemp.tracking.exclusionzones.radius_list)[experimentparamsTemp.tracking.exclusionzones.radius_list is not None]
+        
+        experimentparams.home.enabled                                       = (experimentparams.home.enabled, experimentparamsTemp.home.enabled)[experimentparamsTemp.home.enabled is not None]
+        if (experimentparams.home.enabled):
+            experimentparams.home.x                                         = (experimentparams.home.x, experimentparamsTemp.home.x)[experimentparamsTemp.home.x is not None]
+            experimentparams.home.y                                         = (experimentparams.home.y, experimentparamsTemp.home.y)[experimentparamsTemp.home.y is not None]
+            experimentparams.home.speed                                     = (experimentparams.home.speed, experimentparamsTemp.home.speed)[experimentparamsTemp.home.speed is not None]
+            experimentparams.home.tolerance                                 = (experimentparams.home.tolerance, experimentparamsTemp.home.tolerance)[experimentparamsTemp.home.tolerance is not None]
+
+        experimentparams.pre.robot.enabled                                  = (experimentparams.pre.robot.enabled, experimentparamsTemp.pre.robot.enabled)[experimentparamsTemp.pre.robot.enabled is not None]
+        if (experimentparams.pre.robot.enabled):
+            experimentparams.pre.robot.move.mode                            = (experimentparams.pre.robot.move.mode, experimentparamsTemp.pre.robot.move.mode)[experimentparamsTemp.pre.robot.move.mode is not None]
+            experimentparams.pre.robot.move.relative.tracking               = (experimentparams.pre.robot.move.relative.tracking, experimentparamsTemp.pre.robot.move.relative.tracking)[experimentparamsTemp.pre.robot.move.relative.tracking is not None]                   
+            experimentparams.pre.robot.move.relative.frameidOriginPosition  = (experimentparams.pre.robot.move.relative.frameidOriginPosition, experimentparamsTemp.pre.robot.move.relative.frameidOriginPosition)[experimentparamsTemp.pre.robot.move.relative.frameidOriginPosition is not None]
+            experimentparams.pre.robot.move.relative.frameidOriginAngle     = (experimentparams.pre.robot.move.relative.frameidOriginAngle, experimentparamsTemp.pre.robot.move.relative.frameidOriginAngle)[experimentparamsTemp.pre.robot.move.relative.frameidOriginAngle is not None]
+            experimentparams.pre.robot.move.relative.distance               = (experimentparams.pre.robot.move.relative.distance, experimentparamsTemp.pre.robot.move.relative.distance)[experimentparamsTemp.pre.robot.move.relative.distance is not None]
+            experimentparams.pre.robot.move.relative.angleType              = (experimentparams.pre.robot.move.relative.angleType, experimentparamsTemp.pre.robot.move.relative.angleType)[experimentparamsTemp.pre.robot.move.relative.angleType is not None]
+            experimentparams.pre.robot.move.relative.angleOffset            = (experimentparams.pre.robot.move.relative.angleOffset, experimentparamsTemp.pre.robot.move.relative.angleOffset)[experimentparamsTemp.pre.robot.move.relative.angleOffset is not None]
+            experimentparams.pre.robot.move.relative.angleOscMag            = (experimentparams.pre.robot.move.relative.angleOscMag, experimentparamsTemp.pre.robot.move.relative.angleOscMag)[experimentparamsTemp.pre.robot.move.relative.angleOscMag is not None]
+            experimentparams.pre.robot.move.relative.angleOscFreq           = (experimentparams.pre.robot.move.relative.angleOscFreq, experimentparamsTemp.pre.robot.move.relative.angleOscFreq)[experimentparamsTemp.pre.robot.move.relative.angleOscFreq is not None]
+            experimentparams.pre.robot.move.relative.speedType              = (experimentparams.pre.robot.move.relative.speedType, experimentparamsTemp.pre.robot.move.relative.speedType)[experimentparamsTemp.pre.robot.move.relative.speedType is not None]
+            experimentparams.pre.robot.move.relative.speed                  = (experimentparams.pre.robot.move.relative.speed, experimentparamsTemp.pre.robot.move.relative.speed)[experimentparamsTemp.pre.robot.move.relative.speed is not None]
+            experimentparams.pre.robot.move.relative.tolerance              = (experimentparams.pre.robot.move.relative.tolerance, experimentparamsTemp.pre.robot.move.relative.tolerance)[experimentparamsTemp.pre.robot.move.relative.tolerance is not None]
+            experimentparams.pre.robot.move.pattern.frameidPosition         = (experimentparams.pre.robot.move.pattern.frameidPosition, experimentparamsTemp.pre.robot.move.pattern.frameidPosition)[experimentparamsTemp.pre.robot.move.pattern.frameidPosition is not None]
+            experimentparams.pre.robot.move.pattern.frameidAngle            = (experimentparams.pre.robot.move.pattern.frameidAngle, experimentparamsTemp.pre.robot.move.pattern.frameidAngle)[experimentparamsTemp.pre.robot.move.pattern.frameidAngle is not None]
+            experimentparams.pre.robot.move.pattern.shape                   = (experimentparams.pre.robot.move.pattern.shape, experimentparamsTemp.pre.robot.move.pattern.shape)[experimentparamsTemp.pre.robot.move.pattern.shape is not None]
+            experimentparams.pre.robot.move.pattern.hzPattern               = (experimentparams.pre.robot.move.pattern.hzPattern, experimentparamsTemp.pre.robot.move.pattern.hzPattern)[experimentparamsTemp.pre.robot.move.pattern.hzPattern is not None]
+            experimentparams.pre.robot.move.pattern.hzPoint                 = (experimentparams.pre.robot.move.pattern.hzPoint, experimentparamsTemp.pre.robot.move.pattern.hzPoint)[experimentparamsTemp.pre.robot.move.pattern.hzPoint is not None]
+            experimentparams.pre.robot.move.pattern.count                   = (experimentparams.pre.robot.move.pattern.count, experimentparamsTemp.pre.robot.move.pattern.count)[experimentparamsTemp.pre.robot.move.pattern.count is not None]
+            experimentparams.pre.robot.move.pattern.size                    = (experimentparams.pre.robot.move.pattern.size, experimentparamsTemp.pre.robot.move.pattern.size)[experimentparamsTemp.pre.robot.move.pattern.size is not None]
+            experimentparams.pre.robot.move.pattern.param                   = (experimentparams.pre.robot.move.pattern.param, experimentparamsTemp.pre.robot.move.pattern.param)[experimentparamsTemp.pre.robot.move.pattern.param is not None]
+            experimentparams.pre.robot.move.pattern.direction               = (experimentparams.pre.robot.move.pattern.direction, experimentparamsTemp.pre.robot.move.pattern.direction)[experimentparamsTemp.pre.robot.move.pattern.direction is not None]
+            experimentparams.pre.robot.move.pattern.restart                 = (experimentparams.pre.robot.move.pattern.restart, experimentparamsTemp.pre.robot.move.pattern.restart)[experimentparamsTemp.pre.robot.move.pattern.restart is not None]
+        
+        experimentparams.pre.lasergalvos                                    = (experimentparams.pre.lasergalvos, experimentparamsTemp.pre.lasergalvos)[experimentparamsTemp.pre.lasergalvos is not None]
+        
+        experimentparams.pre.ledpanels.enabled                              = (experimentparams.pre.ledpanels.enabled, experimentparamsTemp.pre.ledpanels.enabled)[experimentparamsTemp.pre.ledpanels.enabled is not None]
+        if (experimentparams.pre.ledpanels.enabled):
+            experimentparams.pre.ledpanels.command                          = (experimentparams.pre.ledpanels.command, experimentparamsTemp.pre.ledpanels.command)[experimentparamsTemp.pre.ledpanels.command is not None]
+            experimentparams.pre.ledpanels.idPattern                        = (experimentparams.pre.ledpanels.idPattern, experimentparamsTemp.pre.ledpanels.idPattern)[experimentparamsTemp.pre.ledpanels.idPattern is not None]
+            experimentparams.pre.ledpanels.origin                           = (experimentparams.pre.ledpanels.origin, experimentparamsTemp.pre.ledpanels.origin)[experimentparamsTemp.pre.ledpanels.origin is not None]
+            experimentparams.pre.ledpanels.frame_id                         = (experimentparams.pre.ledpanels.frame_id, experimentparamsTemp.pre.ledpanels.frame_id)[experimentparamsTemp.pre.ledpanels.frame_id is not None]
+            experimentparams.pre.ledpanels.statefilterHi                    = (experimentparams.pre.ledpanels.statefilterHi, experimentparamsTemp.pre.ledpanels.statefilterHi)[experimentparamsTemp.pre.ledpanels.statefilterHi is not None]
+            experimentparams.pre.ledpanels.statefilterLo                    = (experimentparams.pre.ledpanels.statefilterLo, experimentparamsTemp.pre.ledpanels.statefilterLo)[experimentparamsTemp.pre.ledpanels.statefilterLo is not None]
+            experimentparams.pre.ledpanels.statefilterCriteria              = (experimentparams.pre.ledpanels.statefilterCriteria, experimentparamsTemp.pre.ledpanels.statefilterCriteria)[experimentparamsTemp.pre.ledpanels.statefilterCriteria is not None]
+        
+        experimentparams.pre.wait1                                          = (experimentparams.pre.wait1, experimentparamsTemp.pre.wait1)[experimentparamsTemp.pre.wait1 is not None]
+        
+        experimentparams.pre.trigger.enabled                                = (experimentparams.pre.trigger.enabled, experimentparamsTemp.pre.trigger.enabled)[experimentparamsTemp.pre.trigger.enabled is not None]
+        if (experimentparams.pre.trigger.enabled):
+            experimentparams.pre.trigger.frameidParent                      = (experimentparams.pre.trigger.frameidParent, experimentparamsTemp.pre.trigger.frameidParent)[experimentparamsTemp.pre.trigger.frameidParent is not None]
+            experimentparams.pre.trigger.frameidChild                       = (experimentparams.pre.trigger.frameidChild, experimentparamsTemp.pre.trigger.frameidChild)[experimentparamsTemp.pre.trigger.frameidChild is not None]
+            experimentparams.pre.trigger.speedAbsParentMin                  = (experimentparams.pre.trigger.speedAbsParentMin, experimentparamsTemp.pre.trigger.speedAbsParentMin)[experimentparamsTemp.pre.trigger.speedAbsParentMin is not None]
+            experimentparams.pre.trigger.speedAbsParentMax                  = (experimentparams.pre.trigger.speedAbsParentMax, experimentparamsTemp.pre.trigger.speedAbsParentMax)[experimentparamsTemp.pre.trigger.speedAbsParentMax is not None]
+            experimentparams.pre.trigger.speedAbsChildMin                   = (experimentparams.pre.trigger.speedAbsChildMin, experimentparamsTemp.pre.trigger.speedAbsChildMin)[experimentparamsTemp.pre.trigger.speedAbsChildMin is not None]
+            experimentparams.pre.trigger.speedAbsChildMax                   = (experimentparams.pre.trigger.speedAbsChildMax, experimentparamsTemp.pre.trigger.speedAbsChildMax)[experimentparamsTemp.pre.trigger.speedAbsChildMax is not None]
+            experimentparams.pre.trigger.speedRelMin                        = (experimentparams.pre.trigger.speedRelMin, experimentparamsTemp.pre.trigger.speedRelMin)[experimentparamsTemp.pre.trigger.speedRelMin is not None]
+            experimentparams.pre.trigger.speedRelMax                        = (experimentparams.pre.trigger.speedRelMax, experimentparamsTemp.pre.trigger.speedRelMax)[experimentparamsTemp.pre.trigger.speedRelMax is not None]
+            experimentparams.pre.trigger.distanceMin                        = (experimentparams.pre.trigger.distanceMin, experimentparamsTemp.pre.trigger.distanceMin)[experimentparamsTemp.pre.trigger.distanceMin is not None]
+            experimentparams.pre.trigger.distanceMax                        = (experimentparams.pre.trigger.distanceMax, experimentparamsTemp.pre.trigger.distanceMax)[experimentparamsTemp.pre.trigger.distanceMax is not None]
+            experimentparams.pre.trigger.angleMin                           = (experimentparams.pre.trigger.angleMin, experimentparamsTemp.pre.trigger.angleMin)[experimentparamsTemp.pre.trigger.angleMin is not None]
+            experimentparams.pre.trigger.angleMax                           = (experimentparams.pre.trigger.angleMax, experimentparamsTemp.pre.trigger.angleMax)[experimentparamsTemp.pre.trigger.angleMax is not None]
+            experimentparams.pre.trigger.angleTest                          = (experimentparams.pre.trigger.angleTest, experimentparamsTemp.pre.trigger.angleTest)[experimentparamsTemp.pre.trigger.angleTest is not None]
+            experimentparams.pre.trigger.angleTestBilateral                 = (experimentparams.pre.trigger.angleTestBilateral, experimentparamsTemp.pre.trigger.angleTestBilateral)[experimentparamsTemp.pre.trigger.angleTestBilateral is not None]
+            experimentparams.pre.trigger.timeHold                           = (experimentparams.pre.trigger.timeHold, experimentparamsTemp.pre.trigger.timeHold)[experimentparamsTemp.pre.trigger.timeHold is not None]
+            experimentparams.pre.trigger.timeout                            = (experimentparams.pre.trigger.timeout, experimentparamsTemp.pre.trigger.timeout)[experimentparamsTemp.pre.trigger.timeout is not None]
+        
+        experimentparams.pre.wait2                                          = (experimentparams.pre.wait2, experimentparamsTemp.pre.wait2)[experimentparamsTemp.pre.wait2 is not None]
+        
+
+        # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
+        # The first one to finish preempts the others.
+        experimentparams.trial.robot.enabled                                = (experimentparams.trial.robot.enabled, experimentparamsTemp.trial.robot.enabled)[experimentparamsTemp.trial.robot.enabled is not None]
+        if (experimentparams.trial.robot.enabled):
+            experimentparams.trial.robot.move.mode                          = (experimentparams.trial.robot.move.mode, experimentparamsTemp.trial.robot.move.mode)[experimentparamsTemp.trial.robot.move.mode is not None]
+            experimentparams.trial.robot.move.relative.tracking             = (experimentparams.trial.robot.move.relative.tracking, experimentparamsTemp.trial.robot.move.relative.tracking)[experimentparamsTemp.trial.robot.move.relative.tracking is not None]                   
+            experimentparams.trial.robot.move.relative.frameidOriginPosition = (experimentparams.trial.robot.move.relative.frameidOriginPosition, experimentparamsTemp.trial.robot.move.relative.frameidOriginPosition)[experimentparamsTemp.trial.robot.move.relative.frameidOriginPosition is not None]
+            experimentparams.trial.robot.move.relative.frameidOriginAngle   = (experimentparams.trial.robot.move.relative.frameidOriginAngle, experimentparamsTemp.trial.robot.move.relative.frameidOriginAngle)[experimentparamsTemp.trial.robot.move.relative.frameidOriginAngle is not None]
+            experimentparams.trial.robot.move.relative.distance             = (experimentparams.trial.robot.move.relative.distance, experimentparamsTemp.trial.robot.move.relative.distance)[experimentparamsTemp.trial.robot.move.relative.distance is not None]
+            experimentparams.trial.robot.move.relative.angleType            = (experimentparams.trial.robot.move.relative.angleType, experimentparamsTemp.trial.robot.move.relative.angleType)[experimentparamsTemp.trial.robot.move.relative.angleType is not None]
+            experimentparams.trial.robot.move.relative.angleOffset          = (experimentparams.trial.robot.move.relative.angleOffset, experimentparamsTemp.trial.robot.move.relative.angleOffset)[experimentparamsTemp.trial.robot.move.relative.angleOffset is not None]
+            experimentparams.trial.robot.move.relative.angleOscMag          = (experimentparams.trial.robot.move.relative.angleOscMag, experimentparamsTemp.trial.robot.move.relative.angleOscMag)[experimentparamsTemp.trial.robot.move.relative.angleOscMag is not None]
+            experimentparams.trial.robot.move.relative.angleOscFreq         = (experimentparams.trial.robot.move.relative.angleOscFreq, experimentparamsTemp.trial.robot.move.relative.angleOscFreq)[experimentparamsTemp.trial.robot.move.relative.angleOscFreq is not None]
+            experimentparams.trial.robot.move.relative.speedType            = (experimentparams.trial.robot.move.relative.speedType, experimentparamsTemp.trial.robot.move.relative.speedType)[experimentparamsTemp.trial.robot.move.relative.speedType is not None]
+            experimentparams.trial.robot.move.relative.speed                = (experimentparams.trial.robot.move.relative.speed, experimentparamsTemp.trial.robot.move.relative.speed)[experimentparamsTemp.trial.robot.move.relative.speed is not None]
+            experimentparams.trial.robot.move.relative.tolerance            = (experimentparams.trial.robot.move.relative.tolerance, experimentparamsTemp.trial.robot.move.relative.tolerance)[experimentparamsTemp.trial.robot.move.relative.tolerance is not None]
+            experimentparams.trial.robot.move.pattern.frameidPosition       = (experimentparams.trial.robot.move.pattern.frameidPosition, experimentparamsTemp.trial.robot.move.pattern.frameidPosition)[experimentparamsTemp.trial.robot.move.pattern.frameidPosition is not None]
+            experimentparams.trial.robot.move.pattern.frameidAngle          = (experimentparams.trial.robot.move.pattern.frameidAngle, experimentparamsTemp.trial.robot.move.pattern.frameidAngle)[experimentparamsTemp.trial.robot.move.pattern.frameidAngle is not None]
+            experimentparams.trial.robot.move.pattern.shape                 = (experimentparams.trial.robot.move.pattern.shape, experimentparamsTemp.trial.robot.move.pattern.shape)[experimentparamsTemp.trial.robot.move.pattern.shape is not None]
+            experimentparams.trial.robot.move.pattern.hzPattern             = (experimentparams.trial.robot.move.pattern.hzPattern, experimentparamsTemp.trial.robot.move.pattern.hzPattern)[experimentparamsTemp.trial.robot.move.pattern.hzPattern is not None]
+            experimentparams.trial.robot.move.pattern.hzPoint               = (experimentparams.trial.robot.move.pattern.hzPoint, experimentparamsTemp.trial.robot.move.pattern.hzPoint)[experimentparamsTemp.trial.robot.move.pattern.hzPoint is not None]
+            experimentparams.trial.robot.move.pattern.count                 = (experimentparams.trial.robot.move.pattern.count, experimentparamsTemp.trial.robot.move.pattern.count)[experimentparamsTemp.trial.robot.move.pattern.count is not None]
+            experimentparams.trial.robot.move.pattern.size                  = (experimentparams.trial.robot.move.pattern.size, experimentparamsTemp.trial.robot.move.pattern.size)[experimentparamsTemp.trial.robot.move.pattern.size is not None]
+            experimentparams.trial.robot.move.pattern.param                 = (experimentparams.trial.robot.move.pattern.param, experimentparamsTemp.trial.robot.move.pattern.param)[experimentparamsTemp.trial.robot.move.pattern.param is not None]
+            experimentparams.trial.robot.move.pattern.direction             = (experimentparams.trial.robot.move.pattern.direction, experimentparamsTemp.trial.robot.move.pattern.direction)[experimentparamsTemp.trial.robot.move.pattern.direction is not None]
+            experimentparams.trial.robot.move.pattern.restart               = (experimentparams.trial.robot.move.pattern.restart, experimentparamsTemp.trial.robot.move.pattern.restart)[experimentparamsTemp.trial.robot.move.pattern.restart is not None]
+        
+        
+        experimentparams.trial.lasergalvos                                  = (experimentparams.trial.lasergalvos, experimentparamsTemp.trial.lasergalvos)[experimentparamsTemp.trial.lasergalvos is not None]
+
+        
+        experimentparams.trial.ledpanels.enabled                            = (experimentparams.trial.ledpanels.enabled, experimentparamsTemp.trial.ledpanels.enabled)[experimentparamsTemp.trial.ledpanels.enabled is not None]
+        if (experimentparams.trial.ledpanels.enabled):
+            experimentparams.trial.ledpanels.command                        = (experimentparams.trial.ledpanels.command, experimentparamsTemp.trial.ledpanels.command)[experimentparamsTemp.trial.ledpanels.command is not None]
+            experimentparams.trial.ledpanels.idPattern                      = (experimentparams.trial.ledpanels.idPattern, experimentparamsTemp.trial.ledpanels.idPattern)[experimentparamsTemp.trial.ledpanels.idPattern is not None]
+            experimentparams.trial.ledpanels.origin                         = (experimentparams.trial.ledpanels.origin, experimentparamsTemp.trial.ledpanels.origin)[experimentparamsTemp.trial.ledpanels.origin is not None]
+            experimentparams.trial.ledpanels.frame_id                       = (experimentparams.trial.ledpanels.frame_id, experimentparamsTemp.trial.ledpanels.frame_id)[experimentparamsTemp.trial.ledpanels.frame_id is not None]
+            experimentparams.trial.ledpanels.statefilterHi                  = (experimentparams.trial.ledpanels.statefilterHi, experimentparamsTemp.trial.ledpanels.statefilterHi)[experimentparamsTemp.trial.ledpanels.statefilterHi is not None]
+            experimentparams.trial.ledpanels.statefilterLo                  = (experimentparams.trial.ledpanels.statefilterLo, experimentparamsTemp.trial.ledpanels.statefilterLo)[experimentparamsTemp.trial.ledpanels.statefilterLo is not None]
+            experimentparams.trial.ledpanels.statefilterCriteria            = (experimentparams.trial.ledpanels.statefilterCriteria, experimentparamsTemp.trial.ledpanels.statefilterCriteria)[experimentparamsTemp.trial.ledpanels.statefilterCriteria is not None]
+
+        experimentparams.post.trigger.enabled                               = (experimentparams.post.trigger.enabled, experimentparamsTemp.post.trigger.enabled)[experimentparamsTemp.post.trigger.enabled is not None]
+        if (experimentparams.post.trigger.enabled):
+            experimentparams.post.trigger.frameidParent                     = (experimentparams.post.trigger.frameidParent, experimentparamsTemp.post.trigger.frameidParent)[experimentparamsTemp.post.trigger.frameidParent is not None]
+            experimentparams.post.trigger.frameidChild                      = (experimentparams.post.trigger.frameidChild, experimentparamsTemp.post.trigger.frameidChild)[experimentparamsTemp.post.trigger.frameidChild is not None]
+            experimentparams.post.trigger.speedAbsParentMin                 = (experimentparams.post.trigger.speedAbsParentMin, experimentparamsTemp.post.trigger.speedAbsParentMin)[experimentparamsTemp.post.trigger.speedAbsParentMin is not None]
+            experimentparams.post.trigger.speedAbsParentMax                 = (experimentparams.post.trigger.speedAbsParentMax, experimentparamsTemp.post.trigger.speedAbsParentMax)[experimentparamsTemp.post.trigger.speedAbsParentMax is not None]
+            experimentparams.post.trigger.speedAbsChildMin                  = (experimentparams.post.trigger.speedAbsChildMin, experimentparamsTemp.post.trigger.speedAbsChildMin)[experimentparamsTemp.post.trigger.speedAbsChildMin is not None]
+            experimentparams.post.trigger.speedAbsChildMax                  = (experimentparams.post.trigger.speedAbsChildMax, experimentparamsTemp.post.trigger.speedAbsChildMax)[experimentparamsTemp.post.trigger.speedAbsChildMax is not None]
+            experimentparams.post.trigger.speedRelMin                       = (experimentparams.post.trigger.speedRelMin, experimentparamsTemp.post.trigger.speedRelMin)[experimentparamsTemp.post.trigger.speedRelMin is not None]
+            experimentparams.post.trigger.speedRelMax                       = (experimentparams.post.trigger.speedRelMax, experimentparamsTemp.post.trigger.speedRelMax)[experimentparamsTemp.post.trigger.speedRelMax is not None]
+            experimentparams.post.trigger.distanceMin                       = (experimentparams.post.trigger.distanceMin, experimentparamsTemp.post.trigger.distanceMin)[experimentparamsTemp.post.trigger.distanceMin is not None]
+            experimentparams.post.trigger.distanceMax                       = (experimentparams.post.trigger.distanceMax, experimentparamsTemp.post.trigger.distanceMax)[experimentparamsTemp.post.trigger.distanceMax is not None]
+            experimentparams.post.trigger.angleMin                          = (experimentparams.post.trigger.angleMin, experimentparamsTemp.post.trigger.angleMin)[experimentparamsTemp.post.trigger.angleMin is not None]
+            experimentparams.post.trigger.angleMax                          = (experimentparams.post.trigger.angleMax, experimentparamsTemp.post.trigger.angleMax)[experimentparamsTemp.post.trigger.angleMax is not None]
+            experimentparams.post.trigger.angleTest                         = (experimentparams.post.trigger.angleTest, experimentparamsTemp.post.trigger.angleTest)[experimentparamsTemp.post.trigger.angleTest is not None]
+            experimentparams.post.trigger.angleTestBilateral                = (experimentparams.post.trigger.angleTestBilateral, experimentparamsTemp.post.trigger.angleTestBilateral)[experimentparamsTemp.post.trigger.angleTestBilateral is not None]
+            experimentparams.post.trigger.timeHold                          = (experimentparams.post.trigger.timeHold, experimentparamsTemp.post.trigger.timeHold)[experimentparamsTemp.post.trigger.timeHold is not None]
+            experimentparams.post.trigger.timeout                           = (experimentparams.post.trigger.timeout, experimentparamsTemp.post.trigger.timeout)[experimentparamsTemp.post.trigger.timeout is not None]
+
+        experimentparams.post.wait                                          = (experimentparams.post.wait, experimentparamsTemp.post.wait)[experimentparamsTemp.post.wait is not None]
+        
+        return experimentparams
+        
+        
+    def execute(self, userdata):
+        rv = 'exit'
+        now = rospy.Time.now().to_sec()
+        experimentparamsChoices = userdata.experimentparamsChoicesIn
+        experimentparams = self.GetChoices(experimentparamsChoices)
         
 
         # Set the start time.
@@ -425,7 +615,8 @@ class StartTrial (smach.State):
         try:
             self.TrialStartServices.notify(experimentparams)
             rv = 'continue'
-        except rospy.ServiceException:
+        except (rospy.ServiceException, Exception), e:
+            rospy.logwarn('self.TrialStartServices.notify(): %s' % e)
             rv = 'aborted'
 
 
@@ -579,7 +770,7 @@ class TriggerOnStates (smach.State):
         except tf.Exception:
             pass
         else:
-            distance = N.linalg.norm([pointP.point.x, pointP.point.y, pointP.point.z])
+            distance = np.linalg.norm([pointP.point.x, pointP.point.y, pointP.point.z])
             
         return distance
 
@@ -609,7 +800,7 @@ class TriggerOnStates (smach.State):
                 except (tf.Exception, AttributeError, TypeError), e:
                     ((vx,vy,vz),(wx,wy,wz)) = ((0,0,0),(0,0,0))
     
-                speed = N.linalg.norm(N.array([vx,vy,vz]))
+                speed = np.linalg.norm(np.array([vx,vy,vz]))
         else:
             speed = 0.0
             
@@ -627,7 +818,7 @@ class TriggerOnStates (smach.State):
             #rospy.logwarn('Exception in GetFrameToFrame():  %s' % e)
             pass
         else:
-            angleToChild = N.arctan2(pointP.point.y, pointP.point.x) % (2.0*N.pi)
+            angleToChild = np.arctan2(pointP.point.y, pointP.point.x) % (2.0*np.pi)
             
         return angleToChild
 
@@ -697,10 +888,10 @@ class TriggerOnStates (smach.State):
                 if (trigger.angleMin is not None) and (trigger.angleMax is not None):
                     angle = self.GetAngleFrameToFrame(trigger.frameidParent, trigger.frameidChild)
                     
-                    angleA1 = trigger.angleMin % (2.0*N.pi)
-                    angleA2 = trigger.angleMax % (2.0*N.pi)
-                    angleB1 = (2.0*N.pi - angleA2) # % (2.0*N.pi)
-                    angleB2 = (2.0*N.pi - angleA1) # % (2.0*N.pi)
+                    angleA1 = trigger.angleMin % (2.0*np.pi)
+                    angleA2 = trigger.angleMax % (2.0*np.pi)
+                    angleB1 = (2.0*np.pi - angleA2) # % (2.0*np.pi)
+                    angleB2 = (2.0*np.pi - angleA1) # % (2.0*np.pi)
     
                     if angle is not None:
                         # Test for angle meeting the angle criteria.
@@ -712,7 +903,7 @@ class TriggerOnStates (smach.State):
                                     isAngleInRange = True
                                     
                             elif trigger.angleTest=='exclusive':
-                                if (0.0 <= angle < angleA1) or (angleA2 < angle < angleB1) or (angleB2 < angle <= (2.0*N.pi)):
+                                if (0.0 <= angle < angleA1) or (angleA2 < angle < angleB1) or (angleB2 < angle <= (2.0*np.pi)):
                                     isAngleInRange = True
                         else:
                             if trigger.angleTest=='inclusive':
@@ -934,6 +1125,7 @@ class ExperimentLib():
         ################################################################################### Top level
         self.smachTop = smach.StateMachine(outcomes = ['success','aborted'])
         self.smachTop.userdata.experimentparamsChoices = experimentparamsChoices
+        #self.smachTop.userdata.experimentparams = ExperimentParams() #experimentparams # Should get set in START_TRIAL.
 
 
         # Create the 'RESET' concurrency state.
@@ -946,18 +1138,20 @@ class ExperimentLib():
         with smachReset:
             for (name,classHardware) in self.actions_dict.iteritems():
                 smach.Concurrence.add(name, 
-                                      classHardware.Reset (tfrx=self.tfrx))
+                                      classHardware.Reset (tfrx=self.tfrx),
+                                      remapping={'experimentparamsChoicesIn':'experimentparamsChoicesIn'})
 
 
         ################################################################################### Pre Qualifier:  wait -> trigger -> wait.
-        self.smachPreQualifier = smach.StateMachine(outcomes = ['success','preempt','aborted'])
-        self.smachPreQualifier.userdata.experimentparams = experimentparams
+        self.smachPreQualifier = smach.StateMachine(outcomes = ['success','preempt','aborted'],
+                                                    input_keys = ['experimentparamsIn'])
+        #self.smachPreQualifier.userdata.experimentparams = self.smachTop.userdata.experimentparams #experimentparams # Should get set in START_TRIAL.
         with self.smachPreQualifier:
             smach.StateMachine.add('PREWAIT1', 
                                    TriggerOnTime(mode='pre1', tfrx=self.tfrx),
                                    transitions={'success':'PRETRIGGER',   # Trigger service signal goes True.
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparams'})
+                                   remapping={'experimentparamsIn':'experimentparamsIn'})
 
 
             smach.StateMachine.add('PRETRIGGER', 
@@ -967,14 +1161,14 @@ class ExperimentLib():
                                                 'timeout':'PREWAIT2',        # Trigger service signal goes True.
                                                 'preempt':'preempt',
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparams'})
+                                   remapping={'experimentparamsIn':'experimentparamsIn'})
 
 
             smach.StateMachine.add('PREWAIT2', 
                                    TriggerOnTime(mode='pre2', tfrx=self.tfrx),
                                    transitions={'success':'success',   # Trigger service signal goes True.
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparams'})
+                                   remapping={'experimentparamsIn':'experimentparamsIn'})
         
         
         # Create the 'Pre' concurrency state.  This is where the pre qualifier runs alongside the pre actions.
@@ -986,10 +1180,12 @@ class ExperimentLib():
                                        input_keys = ['experimentparamsIn'])
         with smachPre:
             smach.Concurrence.add('PREQUALIFIER', 
-                                  self.smachPreQualifier)
+                                  self.smachPreQualifier,
+                                  remapping={'experimentparamsIn':'experimentparamsIn'})
             for (name,classHardware) in self.actions_dict.iteritems():   # Add a state for each action class in the dict.
                 smach.Concurrence.add(name, 
-                                      classHardware.Action (mode='pre', tfrx=self.tfrx))
+                                      classHardware.Action (mode='pre', tfrx=self.tfrx),
+                                      remapping={'experimentparamsIn':'experimentparamsIn'})
 
         
         # Create the main 'Trial' concurrency state.
@@ -1002,9 +1198,11 @@ class ExperimentLib():
         with smachTrial:
             for (name,classHardware) in self.actions_dict.iteritems():   # Add a state for each action class in the dict.
                 smach.Concurrence.add(name, 
-                                      classHardware.Action (mode='trial', tfrx=self.tfrx))
+                                      classHardware.Action (mode='trial', tfrx=self.tfrx),
+                                      remapping={'experimentparamsIn':'experimentparamsIn'})
             smach.Concurrence.add('POSTTRIGGER', 
-                                  TriggerOnStates(mode='post', tfrx=self.tfrx))
+                                  TriggerOnStates(mode='post', tfrx=self.tfrx),
+                                  remapping={'experimentparamsIn':'experimentparamsIn'})
 
 
         ##############################################

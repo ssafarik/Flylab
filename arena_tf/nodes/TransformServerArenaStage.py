@@ -6,7 +6,7 @@ import numpy as N
 import tf
 from arena_tf.msg import CalibrationStage
 from geometry_msgs.msg import Point, Quaternion
-from experiment_srvs.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
 
 
 class TransformServerStageArena:
@@ -28,11 +28,11 @@ class TransformServerStageArena:
         self.pubCalibrationSet       = rospy.Publisher('stage/calibration_set',        CalibrationStage, latch=True)                # We republish the data at each trial.
 
         self.services = {}
-        self.services['transformserverarenastage/init']            = rospy.Service('transformserverarenastage/init',            ExperimentParams, self.Init_callback)
-        self.services['transformserverarenastage/trial_start']     = rospy.Service('transformserverarenastage/trial_start',     ExperimentParams, self.TrialStart_callback)
-        self.services['transformserverarenastage/trial_end']       = rospy.Service('transformserverarenastage/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        self.services['transformserverarenastage/trigger']         = rospy.Service('transformserverarenastage/trigger',         Trigger,          self.Trigger_callback)
-        self.services['transformserverarenastage/wait_until_done'] = rospy.Service('transformserverarenastage/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services['transformserverarenastage/init']            = rospy.Service('transformserverarenastage/init',            ExperimentParamsChoices, self.Init_callback)
+        self.services['transformserverarenastage/trial_start']     = rospy.Service('transformserverarenastage/trial_start',     ExperimentParams,        self.TrialStart_callback)
+        self.services['transformserverarenastage/trial_end']       = rospy.Service('transformserverarenastage/trial_end',       ExperimentParams,        self.TrialEnd_callback)
+        self.services['transformserverarenastage/trigger']         = rospy.Service('transformserverarenastage/trigger',         Trigger,                 self.Trigger_callback)
+        self.services['transformserverarenastage/wait_until_done'] = rospy.Service('transformserverarenastage/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
 
         self.initConstructor = True
 
@@ -52,7 +52,7 @@ class TransformServerStageArena:
         self.initialized = True
         
         
-    def Init_callback(self, experimentparams):
+    def Init_callback(self, experimentparamsChoices):
         return True
 
     # TrialStart_callback()

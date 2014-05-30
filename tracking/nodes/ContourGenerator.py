@@ -17,7 +17,7 @@ from sensor_msgs.msg import Image, CameraInfo
 
 from arena_tf.srv import ArenaCameraConversion
 from flycore.msg import TrackingCommand
-from experiment_srvs.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
 from tracking.msg import ContourinfoLists
 from pythonmodules import SetDict
 import cProfile
@@ -85,8 +85,8 @@ class ContourGenerator:
         # The background image from disk needs to come in on a different topic than the background image from a replayed bag file, i.e. "camera/image_background_originate" so it
         # doesn't go directly into the bag file that's being recorded.
         self.subImageBackgroundOriginate = rospy.Subscriber('camera/image_background_originate', Image, self.ImageBackgroundSet_callback, queue_size=self.params['tracking']['queue_size_images'], buff_size=262144, tcp_nodelay=True) 
-        self.subImageBackgroundSet  = rospy.Subscriber('camera/image_background_set', Image, self.ImageBackgroundSet_callback, queue_size=self.params['tracking']['queue_size_images'], buff_size=262144, tcp_nodelay=True)
-        self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
+        self.subImageBackgroundSet       = rospy.Subscriber('camera/image_background_set',       Image, self.ImageBackgroundSet_callback, queue_size=self.params['tracking']['queue_size_images'], buff_size=262144, tcp_nodelay=True)
+        self.subTrackingCommand          = rospy.Subscriber('tracking/command',                  TrackingCommand, self.TrackingCommand_callback)
         
         self.pubImageProcessed      = rospy.Publisher('camera/image_processed', Image)
         self.pubImageBackground     = rospy.Publisher('camera/image_background', Image)
@@ -146,11 +146,11 @@ class ContourGenerator:
         self.stampPrev = None#rospy.Time.now()
         
         self.services = {}
-        self.services['tracking/init'] = rospy.Service('tracking/init',            ExperimentParams, self.Init_callback)
-        self.services['tracking/trial_start'] = rospy.Service('tracking/trial_start',     ExperimentParams, self.TrialStart_callback)
-        self.services['tracking/trial_end'] = rospy.Service('tracking/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        self.services['tracking/trigger'] = rospy.Service('tracking/trigger',         Trigger,          self.Trigger_callback)
-        self.services['tracking/wait_until_done'] = rospy.Service('tracking/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services['tracking/init']              = rospy.Service('tracking/init',            ExperimentParamsChoices, self.Init_callback)
+        self.services['tracking/trial_start']       = rospy.Service('tracking/trial_start',     ExperimentParams,        self.TrialStart_callback)
+        self.services['tracking/trial_end']         = rospy.Service('tracking/trial_end',       ExperimentParams,        self.TrialEnd_callback)
+        self.services['tracking/trigger']           = rospy.Service('tracking/trigger',         Trigger,                 self.Trigger_callback)
+        self.services['tracking/wait_until_done']   = rospy.Service('tracking/wait_until_done', ExperimentParams,        self.WaitUntilDone_callback)
 
         self.initConstructor = True
         
@@ -197,7 +197,7 @@ class ContourGenerator:
             self.initImages = True
 
 
-    def Init_callback(self, experimentparams):
+    def Init_callback(self, experimentparamsChoices):
         return True
 
     # TrialStart_callback()
