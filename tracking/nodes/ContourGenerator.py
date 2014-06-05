@@ -103,7 +103,7 @@ class ContourGenerator:
         self.seq = 0
         self.selfPublishedBackground = False
         
-        if self.params['tracking']['usetransforms']:
+        if (self.params['tracking']['usetransforms']):
             self.tfrx = tf.TransformListener()
             rospy.sleep(1)
         
@@ -169,7 +169,7 @@ class ContourGenerator:
             self.matThreshold         = np.zeros([self.height, self.width], dtype=np.uint8)
             self.matMaskOthers        = np.zeros([self.height, self.width], dtype=np.uint8)
             
-            if self.params['tracking']['usetransforms']:
+            if (self.params['tracking']['usetransforms']):
                 b = False
                 while not b:
                     try:
@@ -271,10 +271,10 @@ class ContourGenerator:
         
         
     def CameraInfo_callback (self, msgCameraInfo):
-        if self.bInitConstructor:
+        if (self.bInitConstructor):
             self.camerainfo = msgCameraInfo
             
-            if not self.bInitialized:
+            if (not self.bInitialized):
                 self.InitializeImages()
         
             if (self.bInitImages and self.bInitBackground):
@@ -313,9 +313,9 @@ class ContourGenerator:
         angle = float('NaN')
         ecc = 1.0
         
-        if u11 != 0: # Div by zero.
+        if (u11 != 0): # Div by zero.
             inside = 4*u11*u11 + u20*u20 - 2*u20*u02 + u02*u02
-            if inside >= 0: # Complex answer.
+            if (inside >= 0): # Complex answer.
                 inside = np.sqrt(inside)
                 
                 # Eigenvalues & eigenvectors.
@@ -326,7 +326,7 @@ class ContourGenerator:
                 
                 rise = 1
                 try:
-                    if L2 < L1:
+                    if (L2 < L1):
                         run = -V1
                         ecc = L1/L2 # np.sqrt(1-(L1/L2)*(L1/L2))
                       
@@ -350,7 +350,7 @@ class ContourGenerator:
     def ContourinfoFromContour(self, contour):
         area = cv2.contourArea(contour)
 
-        if (len(contour)>=5):
+        if (5 <= len(contour)):
             ((x,y), axes, degMinor) = cv2.fitEllipse(contour)
             
             degMajor = 90.0 - degMinor
@@ -406,7 +406,7 @@ class ContourGenerator:
             ptsContour.point.y = y
             
             try:
-                if self.params['tracking']['usetransforms']:
+                if (self.params['tracking']['usetransforms']):
                     self.ptsOutput = self.tfrx.transformPoint(self.params['tracking']['frameid_contours'], ptsContour)
                 else:
                     self.ptsOutput = ptsContour
@@ -472,7 +472,7 @@ class ContourGenerator:
         contourinfolists = ContourinfoLists()
         
             
-        if (len(contoursIn_list) > 0):
+        if (0 < len(contoursIn_list)):
             # Skip too-small contours, and repackage the data as a list of lists, i.e. [[x,y,a,a,e,i,i],[x,y,a,a,e,i,i],...]
             contourinfolists_list = []
             for iContour in range(len(contoursIn_list)):
@@ -551,7 +551,7 @@ class ContourGenerator:
             nDefects = len(defects)
             
             # Divide into two, based on kmeans clustering.
-            if (nDefects<2):
+            if (nDefects < 2):
                 contourInB = contourIn.squeeze()
                 centroids,_ = kmeans(contourInB, 2)    # Make two clusters.
                 iAssignment,_ = vq(contourInB, centroids)          # Assign points to clusters.
@@ -574,7 +574,7 @@ class ContourGenerator:
 
                 
             # Divide into three candidate contour pairs, and let the ContourIdentifier figure out which are the best match.
-            if (nDefects>2):
+            if (2 < nDefects):
                 iBySize = np.argsort(defects[:,0,3]) # Indices sorted by defect size.
                 
                 # Indices of three largest defects, sorted by point location.
@@ -621,7 +621,7 @@ class ContourGenerator:
     def ContourinfoListsFromImage(self, matThreshold, matForeground):
         # Find contours
         sumImage = cv2.sumElems(matThreshold)
-        if self.minSumImage < sumImage[0]:
+        if (self.minSumImage < sumImage[0]):
             (contours,hierarchy) = cv2.findContours(matThreshold, mode=cv2.RETR_CCOMP, method=cv2.CHAIN_APPROX_NONE )#cv2.CHAIN_APPROX_SIMPLE) # Modifies matThreshold.
         else:
             (contours,hierarchy) = (None, None)
@@ -643,7 +643,7 @@ class ContourGenerator:
 
             
 
-        if (self.nContours > 0):
+        if (0 < self.nContours):
 
             # Determine if two contours have merged, and need to be split.
             #rospy.logwarn(self.contour_list)
@@ -680,7 +680,7 @@ class ContourGenerator:
         contourinfolists.header.stamp = self.header.stamp
         contourinfolists.header.frame_id = self.params['tracking']['frameid_contours'] # i.e. Camera
         self.seq += 1
-        if self.nContours > 0:
+        if (0 < self.nContours):
             contourinfolists.x = contourinfolists_dict['x']
             contourinfolists.y = contourinfolists_dict['y']
             contourinfolists.angle = contourinfolists_dict['angle']
@@ -729,7 +729,7 @@ class ContourGenerator:
             try:
                 #rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
                 #self.timePrev = rospy.Time.now().to_sec()
-                if not self.bInitConstructor:
+                if (not self.bInitConstructor):
                     return
         
                 if (self.stampPrev is not None):
@@ -756,13 +756,13 @@ class ContourGenerator:
                 if (self.bInitialized):        
                     # Check for new params.
                     tParams = rospy.Time.now()
-                    if ((tParams-self.tParamsPrev).to_sec() > 1):
+                    if (1 < (tParams-self.tParamsPrev).to_sec()):
                         self.tParamsPrev = tParams
                         self.paramsPrev = copy.deepcopy(self.params) 
                         SetDict.SetWithOverwrite(self.params, rospy.get_param('/',{}))
                     
                     # Create the mask.
-                    if self.paramsPrev['camera']['mask']['radius'] != self.params['camera']['mask']['radius']:
+                    if (self.paramsPrev['camera']['mask']['radius'] != self.params['camera']['mask']['radius']):
                         self.matMask.fill(0)
                         cv2.circle(self.matMask,
                                   (int(self.ptsOriginMask.point.x),int(self.ptsOriginMask.point.y)),
@@ -771,7 +771,7 @@ class ContourGenerator:
                                   cv.CV_FILLED)
                     
                     # Normalize the histogram.
-                    if self.bEqualizeHist:
+                    if (self.bEqualizeHist):
                         self.matImageRect = cv2.equalizeHist(self.matImageRect)
                     
                     
@@ -789,7 +789,7 @@ class ContourGenerator:
         
         
                     # Create the foreground.
-                    if self.bEqualizeHist:
+                    if (self.bEqualizeHist):
                         matBackgroundEq = cv2.equalizeHist(self.matBackground)
         
                     if (self.params['tracking']['usebackgroundsubtraction']) and (self.matBackground is not None):
@@ -813,7 +813,7 @@ class ContourGenerator:
                     self.pubContourinfoLists.publish(self.contourinfolists)
                     
                     # Convert to color for display image
-                    if self.pubImageProcessed.get_num_connections() > 0:
+                    if (0 < self.pubImageProcessed.get_num_connections()):
                         # Apply the arena mask to the camera image, and convert it to color.
                         self.matImageRect = cv2.bitwise_and(self.matImageRect, self.matMask)
                         self.matProcessed = cv2.cvtColor(self.matImageRect, cv.CV_GRAY2RGB)
@@ -825,7 +825,7 @@ class ContourGenerator:
                                   cv.CV_RGB(self.color_max, self.color_max, 0             ), # yellow
                                   cv.CV_RGB(self.color_max, 0,              self.color_max), # magenta
                                   cv.CV_RGB(0,              self.color_max, self.color_max)] # cyan
-                        if self.contour_list:
+                        if (self.contour_list):
                             for k in range(len(self.contour_list)):
                                 #color = cv.CV_RGB(0,0,self.color_max)
                                 color = colors[k % len(colors)]
@@ -833,10 +833,10 @@ class ContourGenerator:
                         
                     
                     # Publish processed image
-                    if self.pubImageProcessed.get_num_connections() > 0:
+                    if (0 < self.pubImageProcessed.get_num_connections()):
                         try:
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matProcessed), 'passthrough')
-                            image2.header = image.header
+                            image2.header = rosimg.header
                             image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                             #rospy.logwarn(image2.encoding)
                             self.pubImageProcessed.publish(image2)
@@ -847,7 +847,7 @@ class ContourGenerator:
                     if (self.pubImageBackground.get_num_connections() > 0) and (self.matBackground is not None):
                         try:
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matBackground), 'passthrough')
-                            image2.header.stamp = image.header.stamp
+                            image2.header.stamp = rosimg.header.stamp
                             image2.encoding = 'mono8'
                             self.pubImageBackground.publish(image2)
                         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
@@ -855,11 +855,11 @@ class ContourGenerator:
         
                     
                     # Publish thresholded image
-                    if self.pubImageThreshold.get_num_connections() > 0:
+                    if (0 < self.pubImageThreshold.get_num_connections()):
                         try:
                             self.matImageRect = cv2.add(self.matThreshold, self.matForeground)
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
-                            image2.header.stamp = image.header.stamp
+                            image2.header.stamp = rosimg.header.stamp
                             image2.encoding = 'mono8'
                             self.pubImageThreshold.publish(image2)
                         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
@@ -867,10 +867,10 @@ class ContourGenerator:
         
                       
                     # Publish foreground image
-                    if self.pubImageForeground.get_num_connections() > 0:
+                    if (0 < self.pubImageForeground.get_num_connections()):
                         try:
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matForeground), 'passthrough')
-                            image2.header.stamp = image.header.stamp
+                            image2.header.stamp = rosimg.header.stamp
                             image2.encoding = 'mono8'
                             self.pubImageForeground.publish(image2)
                         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
@@ -878,10 +878,10 @@ class ContourGenerator:
         
                       
                     # Publish a special image for use in rviz.
-                    if self.pubImageRviz.get_num_connections() > 0:
+                    if (0 < self.pubImageRviz.get_num_connections()):
                         self.matProcessedFlip = cv2.flip(self.matProcessed, 0)
                         image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.matImageRect), 'passthrough')
-                        image2.header = image.header
+                        image2.header = rosimg.header
                         image2.encoding = 'mono8'
                         
                         params = rospy.get_param('/', {})
@@ -900,7 +900,7 @@ class ContourGenerator:
                         p33 = params['p33']
         
         #                     camerainfo2 = CameraInfo()#copy.copy(self.camerainfo)
-        #                     camerainfo2.header = image.header
+        #                     camerainfo2.header = rosimg.header
         #                     camerainfo2.height = self.height
         #                     camerainfo2.width = self.width
                         z = rospy.get_param('camera/arena_tvec_2')
@@ -956,7 +956,7 @@ class ContourGenerator:
         
       
 
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     rospy.init_node('ContourGenerator') #, anonymous=True)
         
     cg = ContourGenerator()
