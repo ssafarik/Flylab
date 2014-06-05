@@ -11,8 +11,8 @@ from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoic
 
 class TransformServerStageArena:
     def __init__(self):
-        self.initialized = False
-        self.initConstructor = False
+        self.bInitialized = False
+        self.bInitializedConstructor = False
 
         self.calibration_stage = None
 
@@ -34,7 +34,7 @@ class TransformServerStageArena:
         self.services['transformserverarenastage/trigger']         = rospy.Service('transformserverarenastage/trigger',         Trigger,                 self.Trigger_callback)
         self.services['transformserverarenastage/wait_until_done'] = rospy.Service('transformserverarenastage/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
 
-        self.initConstructor = True
+        self.bInitializedConstructor = True
 
 
     # Receive calibration values (wherever they came from), and republish them (for the bag file).
@@ -43,13 +43,13 @@ class TransformServerStageArena:
     # or
     # -- bagfile -> here.
     def Calibration_callback (self, calibration):
-        while (not self.initConstructor):
-            rospy.loginfo('Waiting for initConstructor.')
+        while (not self.bInitializedConstructor):
+            rospy.loginfo('Waiting for bInitializedConstructor.')
             rospy.sleep(0.1)
         
             
         self.calibration_stage = calibration
-        self.initialized = True
+        self.bInitialized = True
         
         
     def Init_callback(self, experimentparamsChoices):
@@ -80,7 +80,7 @@ class TransformServerStageArena:
         
         
     def SendTransforms(self):
-        if (self.initialized):
+        if (self.bInitialized):
             self.tfbx.sendTransform((self.calibration_stage.arena_x,
                                      self.calibration_stage.arena_y,
                                      self.calibration_stage.arena_z),
@@ -89,8 +89,8 @@ class TransformServerStageArena:
                                      self.calibration_stage.arena_qz,
                                      self.calibration_stage.arena_qw),
                                     rospy.Time.now(),
-                                    "Stage",     # child
-                                    "Arena"      # parent
+                                    'Stage',     # child
+                                    'Arena'      # parent
                                     )
         
         
@@ -109,7 +109,7 @@ class TransformServerStageArena:
             
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tsps = TransformServerStageArena()
     tsps.Main()
     

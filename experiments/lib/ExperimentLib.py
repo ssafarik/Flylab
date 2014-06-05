@@ -594,7 +594,7 @@ class StartTrial (smach.State):
                                                                         time.localtime(now).tm_sec)
         
 
-        rospy.loginfo ('EL State StartTrial(%s)' % experimentparams.experiment.trial)
+        rospy.logwarn ('EL State StartTrial(%s)' % experimentparams.experiment.trial)
 
 
         # Set the output data.
@@ -1355,7 +1355,7 @@ class ExperimentLib():
         
     # Gets called upon ANY 'reset' state termination.
     def AnyResetTerm_callback(self, outcome_map):
-        #rospy.logwarn('AnyResetTerm_callback(%s)' % repr(outcome_map))
+        rospy.logwarn('AnyResetTerm_callback(%s)' % repr(outcome_map))
         rv = False
         
         # rv==True:  preempt all remaining states.
@@ -1366,7 +1366,7 @@ class ExperimentLib():
     # Gets called after all 'reset' states are terminated.
     # If any states aborted, then abort.
     def AllResetTerm_callback(self, outcome_map):
-        #rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
+        rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
         #rospy.logwarn('actions_dict=%s' % repr(self.actions_dict))
         
         rv = 'success'

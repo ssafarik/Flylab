@@ -78,19 +78,19 @@
 2.  # Measure the checker square size, and enter that number (in millimeters) in Flylab/config/<your hardware>/launch/params_calibration.launch  
 
 # Move the center and radius of the circle to correspond to the arena.
-3.  $ roslaunch calibration CameraArena.launch
+3.  $ roslaunch calibration camera_arena.launch
 4.  $ rostopic pub -1 Joystick/Commands geometry_msgs/Point -- dx dy dr            #(where dx,dy,dr are replaced with numbers)
 5.  $ roscd <your device name>/launch
 6.  # Enter values for mask/x, mask/y, mask/radius in the file Flylab/config/<your hardware>/launch/params_calibration.launch. 
-7.  $ <ctrl>+C (to shutdown CameraArena.launch)
+7.  $ <ctrl>+C (to shutdown camera_arena.launch)
  
 # Get the rvec and tvec values.
 8.  # Position the checkerboard pattern on the arena, mounted *very flat* and roughly centered in image.
-9.  $ roslaunch calibration CameraArena.launch
+9.  $ roslaunch calibration camera_arena.launch
 10. # Wait for rvec and tvec average values to stabilize.
 11. $ roscd <your device name>/launch
 12. # Edit Flylab/config/<your hardware>/launch/params_calibration.launch with average rvec and tvec values. 
-13. $ <ctrl>+C (to shutdown CameraArena.launch)
+13. $ <ctrl>+C (to shutdown camera_arena.launch)
 
 
 
@@ -111,9 +111,9 @@
 
 
 ############################### Stage Extrinsic Parameters (i.e. Relationship of Stage to Arena):
-1. $ roslaunch calibration StageArena.launch
+1. $ roslaunch calibration stage_arena.launch
 2. # Wait while the magnet drives in a pattern to cover the arena.  After a number of cycles, the calibration values should converge.
 3. # Edit Flylab/config/<your hardware/launch/params_calibration.launch with translation vector and quaternion values.
-4. # <ctrl>+C to shutdown StageArena.launch
+4. # <ctrl>+C to shutdown stage_arena.launch
 
 
