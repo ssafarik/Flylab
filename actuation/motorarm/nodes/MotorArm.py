@@ -108,12 +108,6 @@ class MotorArm:
         self.timePrev = rospy.Time.now()
         self.time = rospy.Time.now()
         
-        self.request = SrvFrameStateRequest()
-        self.request.state.header.frame_id = 'Stage'
-        self.request.state.pose.position.x = 0.0
-        self.request.state.pose.position.y = 0.0
-        self.request.state.pose.position.z = 0.0
-
 
     def CommandExperiment_callback(self, msgString):
         self.commandExperiment = msgString.data
@@ -943,7 +937,7 @@ class MotorArm:
             
     
 
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     try:
         motorarm = MotorArm()
         motorarm.Main()
