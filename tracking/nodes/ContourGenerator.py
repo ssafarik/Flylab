@@ -35,16 +35,19 @@ class ContourGenerator:
     def __init__(self):
         
         # Image Initialization
-        self.initConstructor = False
-        self.initBackground = False
-        self.initImages = False
-        self.initialized = False
+        self.bInitConstructor = False
+        self.bInitBackground = False
+        self.bInitImages = False
+        self.bInitialized = False
         
         self.lock = threading.Lock()
+        self.lockBuffer = threading.Lock()
 
-        self.cache = [None, None]
-        self.iWorking = 0
-                
+        nQueue              = 2
+        self.bufferImages   = [None]*nQueue # Circular buffer for incoming images.
+        self.iImgLoading    = 0  # Index of the next slot to load.
+        self.iImgWorking    = 0  # Index of the slot to process, i.e. the oldest image in the buffer.
+
         self.bEqualizeHist = False
         self.header = None
         self.matImageRect = None
@@ -152,7 +155,7 @@ class ContourGenerator:
         self.services['tracking/trigger']           = rospy.Service('tracking/trigger',         Trigger,                 self.Trigger_callback)
         self.services['tracking/wait_until_done']   = rospy.Service('tracking/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
 
-        self.initConstructor = True
+        self.bInitConstructor = True
         
 
     def InitializeImages(self):
@@ -194,7 +197,7 @@ class ContourGenerator:
                       cv.CV_FILLED)
             
                 
-            self.initImages = True
+            self.bInitImages = True
 
 
     def Init_callback(self, experimentparamsChoices):
@@ -204,7 +207,7 @@ class ContourGenerator:
     # Publishes the current background image.
     #
     def TrialStart_callback(self, experimentparams):
-        while (not self.initialized):
+        while (not self.bInitialized):
             rospy.sleep(0.5)
 
             
@@ -225,7 +228,7 @@ class ContourGenerator:
     # Publishes the current background image.
     #
     def Trigger_callback(self, reqTrigger):
-        while (not self.initialized):
+        while (not self.bInitialized):
             rospy.sleep(0.5)
 
         # Publish the current background image.
@@ -249,7 +252,7 @@ class ContourGenerator:
 
 
     def ImageBackgroundSet_callback (self, image):
-        while (not self.initConstructor):
+        while (not self.bInitConstructor):
             rospy.loginfo('Waiting for initConstructor.')
             rospy.sleep(0.5)
         
@@ -262,20 +265,20 @@ class ContourGenerator:
                 self.matBackground = None
             else:
                 self.matfBackground = np.float32(self.matBackground)
-                self.initBackground = True
+                self.bInitBackground = True
         else:
             self.selfPublishedBackground = False
         
         
     def CameraInfo_callback (self, msgCameraInfo):
-        if self.initConstructor:
+        if self.bInitConstructor:
             self.camerainfo = msgCameraInfo
             
-            if not self.initialized:
+            if not self.bInitialized:
                 self.InitializeImages()
         
-            if (self.initImages and self.initBackground):
-                self.initialized = True
+            if (self.bInitImages and self.bInitBackground):
+                self.bInitialized = True
             
     # TrackingCommand_callback()
     # Receives commands to change the tracking behavior.
@@ -691,44 +694,66 @@ class ContourGenerator:
         return contourinfolists  
         
 
-    def Image_callback(self, image):
-        # Point to the cache non-working entry.
-        iLoading = (self.iWorking+1) % 2
-        self.cache[iLoading] = image 
+    def Image_callback(self, rosimg):
+        # Receive the image:
+        with self.lockBuffer:
+            if (self.bufferImages[self.iImgLoading] is None):   # There's an empty slot in the buffer.
+                iImgLoadingNext = (self.iImgLoading+1) % len(self.bufferImages)
+                iImgWorkingNext = self.iImgWorking
+                self.iDroppedFrame = 0
+            else:                                               # The buffer is full; we'll overwrite the oldest entry.
+                iImgLoadingNext = (self.iImgLoading+1) % len(self.bufferImages)
+                iImgWorkingNext = (self.iImgWorking+1) % len(self.bufferImages)
+                self.iDroppedFrame += 1
+
+            self.bufferImages[self.iImgLoading] = rosimg
+            self.iImgLoading = iImgLoadingNext
+            self.iImgWorking = iImgWorkingNext
     
     
     def ProcessImage(self):
-        if (self.cache[self.iWorking] is not None):
-            image = self.cache[self.iWorking]
+        rosimg = None
+        
+        with self.lockBuffer:
+            if (self.bufferImages[self.iImgWorking] is not None):
+                rosimg = self.bufferImages[self.iImgWorking]
+                
+                # Mark this buffer entry as available for loading.
+                self.bufferImages[self.iImgWorking] = None
+    
+                # Go to the next image.
+                self.iImgWorking = (self.iImgWorking+1) % len(self.bufferImages)
 
+        
+        if (rosimg is not None):
             try:
                 #rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
                 #self.timePrev = rospy.Time.now().to_sec()
-                if not self.initConstructor:
+                if not self.bInitConstructor:
                     return
         
                 if (self.stampPrev is not None):
-                    self.dt = image.header.stamp - self.stampPrev
+                    self.dt = rosimg.header.stamp - self.stampPrev
                 else:
                     self.dt = rospy.Time(0)
-                self.stampPrev = image.header.stamp
+                self.stampPrev = rosimg.header.stamp
                 
         
-                self.header = image.header
-                self.height = image.height
-                self.width = image.width
+                self.header = rosimg.header
+                self.height = rosimg.height
+                self.width = rosimg.width
                 # Convert ROS image to OpenCV image.
                 try:
-                    self.matImageRect = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
+                    self.matImageRect = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(rosimg, 'passthrough')))
                 except CvBridgeError, e:
                     rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
-                if not self.initImages:
+                if (not self.bInitImages):
                     self.InitializeImages()
-                if (self.initImages and self.initBackground):
-                    self.initialized = True
+                if (self.bInitImages and self.bInitBackground):
+                    self.bInitialized = True
                     
-                #rospy.logwarn('%s', (self.initConstructor, self.initImages, self.initBackground, self.initialized))
-                if self.initialized:        
+                #rospy.logwarn('%s', (self.bInitConstructor, self.bInitImages, self.bInitBackground, self.bInitialized))
+                if (self.bInitialized):        
                     # Check for new params.
                     tParams = rospy.Time.now()
                     if ((tParams-self.tParamsPrev).to_sec() > 1):
@@ -918,12 +943,6 @@ class ContourGenerator:
                         self.nImagesContoursEstablished = 0
             except rospy.exceptions.ROSException, e:
                 rospy.loginfo('CG ROSException: %s' % e)
-
-            # Mark this entry as done.
-            self.cache[self.iWorking] = None
-            
-        # Go to the other image.
-        self.iWorking = (self.iWorking+1) % 2
 
         
         
