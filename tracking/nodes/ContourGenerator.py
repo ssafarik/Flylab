@@ -149,11 +149,19 @@ class ContourGenerator:
         self.stampPrev = None#rospy.Time.now()
         
         self.services = {}
+<<<<<<< HEAD
         self.services['tracking/init']              = rospy.Service('tracking/init',            ExperimentParamsChoices, self.Init_callback)
         self.services['tracking/trial_start']       = rospy.Service('tracking/trial_start',     ExperimentParams,        self.TrialStart_callback)
         self.services['tracking/trial_end']         = rospy.Service('tracking/trial_end',       ExperimentParams,        self.TrialEnd_callback)
         self.services['tracking/trigger']           = rospy.Service('tracking/trigger',         Trigger,                 self.Trigger_callback)
         self.services['tracking/wait_until_done']   = rospy.Service('tracking/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
+=======
+        self.services['tracking/init'] = rospy.Service('tracking/init',                       ExperimentParams, self.Init_callback)
+        self.services['tracking/trial_start'] = rospy.Service('tracking/trial_start',         ExperimentParams, self.TrialStart_callback)
+        self.services['tracking/trial_end'] = rospy.Service('tracking/trial_end',             ExperimentParams, self.TrialEnd_callback)
+        self.services['tracking/trigger'] = rospy.Service('tracking/trigger',                 Trigger,          self.Trigger_callback)
+        self.services['tracking/wait_until_done'] = rospy.Service('tracking/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
 
         self.bInitConstructor = True
         
@@ -289,13 +297,21 @@ class ContourGenerator:
         
         
     def CameraInfo_callback (self, msgCameraInfo):
+<<<<<<< HEAD
         if (self.bInitConstructor):
+=======
+        if self.bInitConstructor:
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
             self.camerainfo = msgCameraInfo
             
             if (self.calibration is not None):
                 self.scale = self.camerainfo.P[0] / self.calibration.arena_tvec_2
 
+<<<<<<< HEAD
             if (not self.bInitialized):
+=======
+            if not self.bInitialized:
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                 self.InitializeImages()
         
             if (self.bInitImages and self.bInitBackground):
@@ -715,6 +731,7 @@ class ContourGenerator:
         return contourinfolists  
         
 
+<<<<<<< HEAD
     def Image_callback(self, rosimg):
         # Receive the image:
         with self.lockBuffer:
@@ -744,12 +761,24 @@ class ContourGenerator:
     
                 # Go to the next image.
                 self.iImgWorking = (self.iImgWorking+1) % len(self.bufferImages)
+=======
+    def Image_callback(self, rosimage):
+        # Point to the cache non-working entry.
+        iLoading = (self.iWorking+1) % 2
+        self.cache[iLoading] = rosimage 
+    
+    
+    def ProcessImage(self):
+        if (self.cache[self.iWorking] is not None):
+            rosimage = self.cache[self.iWorking]
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
 
         
         if (rosimg is not None):
             try:
                 #rospy.logwarn('Image_callback(now-prev=%s)' % (rospy.Time.now().to_sec()-self.timePrev))
                 #self.timePrev = rospy.Time.now().to_sec()
+<<<<<<< HEAD
                 if (not self.bInitConstructor):
                     return
         
@@ -769,12 +798,37 @@ class ContourGenerator:
                 except CvBridgeError, e:
                     rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
                 if (not self.bInitImages):
+=======
+                if not self.bInitConstructor:
+                    return
+        
+                if (self.stampPrev is not None):
+                    self.dt = rosimage.header.stamp - self.stampPrev
+                else:
+                    self.dt = rospy.Time(0)
+                self.stampPrev = rosimage.header.stamp
+                
+        
+                self.header = rosimage.header
+                self.height = rosimage.height
+                self.width = rosimage.width
+                # Convert ROS image to OpenCV image.
+                try:
+                    self.imgImageRect = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(rosimage, 'passthrough')))
+                except CvBridgeError, e:
+                    rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
+                if not self.bInitImages:
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                     self.InitializeImages()
                 if (self.bInitImages and self.bInitBackground):
                     self.bInitialized = True
                     
                 #rospy.logwarn('%s', (self.bInitConstructor, self.bInitImages, self.bInitBackground, self.bInitialized))
+<<<<<<< HEAD
                 if (self.bInitialized):        
+=======
+                if self.bInitialized:        
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                     # Check for new params.
                     tParams = rospy.Time.now()
                     if (1 < (tParams-self.tParamsPrev).to_sec()):
@@ -795,7 +849,11 @@ class ContourGenerator:
                                   cv.CV_FILLED)
                     
                     # Normalize the histogram.
+<<<<<<< HEAD
                     if (self.bEqualizeHist):
+=======
+                    if self.bEqualizeHist:
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                         self.imgImageRect = cv2.equalizeHist(self.imgImageRect)
                     
                     
@@ -813,7 +871,11 @@ class ContourGenerator:
         
         
                     # Create the foreground.
+<<<<<<< HEAD
                     if (self.bEqualizeHist):
+=======
+                    if self.bEqualizeHist:
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                         imgBackgroundEq = cv2.equalizeHist(self.imgBackground)
         
                     if (self.params['tracking']['usebackgroundsubtraction']) and (self.imgBackground is not None):
@@ -860,7 +922,11 @@ class ContourGenerator:
                     if (0 < self.pubImageProcessed.get_num_connections()):
                         try:
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgProcessed), 'passthrough')
+<<<<<<< HEAD
                             image2.header = rosimg.header
+=======
+                            image2.header = rosimage.header
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                             image2.encoding = 'bgr8' # Fix a bug introduced in ROS fuerte.
                             #rospy.logwarn(image2.encoding)
                             self.pubImageProcessed.publish(image2)
@@ -871,7 +937,11 @@ class ContourGenerator:
                     if (self.pubImageBackground.get_num_connections() > 0) and (self.imgBackground is not None):
                         try:
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgBackground), 'passthrough')
+<<<<<<< HEAD
                             image2.header.stamp = rosimg.header.stamp
+=======
+                            image2.header.stamp = rosimage.header.stamp
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                             image2.encoding = 'mono8'
                             self.pubImageBackground.publish(image2)
                         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
@@ -883,7 +953,11 @@ class ContourGenerator:
                         try:
                             self.imgImageRect = cv2.add(self.imgThreshold, self.imgForeground)
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgImageRect), 'passthrough')
+<<<<<<< HEAD
                             image2.header.stamp = rosimg.header.stamp
+=======
+                            image2.header.stamp = rosimage.header.stamp
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                             image2.encoding = 'mono8'
                             self.pubImageThreshold.publish(image2)
                         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
@@ -894,13 +968,18 @@ class ContourGenerator:
                     if (0 < self.pubImageForeground.get_num_connections()):
                         try:
                             image2 = self.cvbridge.cv_to_imgmsg(cv.fromarray(self.imgForeground), 'passthrough')
+<<<<<<< HEAD
                             image2.header.stamp = rosimg.header.stamp
+=======
+                            image2.header.stamp = rosimage.header.stamp
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                             image2.encoding = 'mono8'
                             self.pubImageForeground.publish(image2)
                         except (MemoryError, CvBridgeError, rospy.exceptions.ROSException), e:
                             rospy.logwarn ('Exception %s' % e)
         
                       
+<<<<<<< HEAD
                     # Publish a special image for use in rviz.
                     if (0 < self.pubImageRviz.get_num_connections()):
                         self.imgProcessedFlip = cv2.flip(self.imgProcessed, 0)
@@ -954,6 +1033,8 @@ class ContourGenerator:
                         self.pubImageRviz.publish(image2)
                         
         
+=======
+>>>>>>> b78fdf5b84f5c43d014f772f1e1d23377f5c5628
                     # When automatically establishing a new background, determine if the background has stabilized.                
                     if (self.bEstablishBackground) and (self.nContours==self.nContoursEstablish):
                         self.nImagesContoursEstablished += 1

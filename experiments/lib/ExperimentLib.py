@@ -277,8 +277,7 @@ class StartTrial (smach.State):
         experimentparams.pre.robot.move.pattern.hzPattern               = self.Choose(experimentparamsChoices.pre.robot.move.pattern.hzPattern)
         experimentparams.pre.robot.move.pattern.hzPoint                 = self.Choose(experimentparamsChoices.pre.robot.move.pattern.hzPoint)
         experimentparams.pre.robot.move.pattern.count                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.count)
-        experimentparams.pre.robot.move.pattern.size.x                  = self.Choose(experimentparamsChoices.pre.robot.move.pattern.size.x)
-        experimentparams.pre.robot.move.pattern.size.y                  = self.Choose(experimentparamsChoices.pre.robot.move.pattern.size.y)
+        experimentparams.pre.robot.move.pattern.size                    = self.Choose(experimentparamsChoices.pre.robot.move.pattern.size)
         experimentparams.pre.robot.move.pattern.param                   = self.Choose(experimentparamsChoices.pre.robot.move.pattern.param)
         experimentparams.pre.robot.move.pattern.direction               = self.Choose(experimentparamsChoices.pre.robot.move.pattern.direction)
         experimentparams.pre.robot.move.pattern.restart                 = self.Choose(experimentparamsChoices.pre.robot.move.pattern.restart)
@@ -286,14 +285,13 @@ class StartTrial (smach.State):
         experimentparams.pre.lasergalvos                                =             experimentparamsChoices.pre.lasergalvos
         
         experimentparams.pre.ledpanels.enabled                          =             experimentparamsChoices.pre.ledpanels.enabled
-        experimentparams.pre.ledpanels.command                          = self.Choose(experimentparams.pre.ledpanels.command)
-        experimentparams.pre.ledpanels.idPattern                        = self.Choose(experimentparams.pre.ledpanels.idPattern)
-        experimentparams.pre.ledpanels.origin.x                         = self.Choose(experimentparams.pre.ledpanels.origin.x)
-        experimentparams.pre.ledpanels.origin.y                         = self.Choose(experimentparams.pre.ledpanels.origin.y)
-        experimentparams.pre.ledpanels.frame_id                         = self.Choose(experimentparams.pre.ledpanels.frame_id)
-        experimentparams.pre.ledpanels.statefilterHi                    = self.Choose(experimentparams.pre.ledpanels.statefilterHi)
-        experimentparams.pre.ledpanels.statefilterLo                    = self.Choose(experimentparams.pre.ledpanels.statefilterLo)
-        experimentparams.pre.ledpanels.statefilterCriteria              = self.Choose(experimentparams.pre.ledpanels.statefilterCriteria)
+        experimentparams.pre.ledpanels.command                          = self.Choose(experimentparamsChoices.pre.ledpanels.command)
+        experimentparams.pre.ledpanels.idPattern                        = self.Choose(experimentparamsChoices.pre.ledpanels.idPattern)
+        experimentparams.pre.ledpanels.origin                           = self.Choose(experimentparamsChoices.pre.ledpanels.origin)
+        experimentparams.pre.ledpanels.frame_id                         = self.Choose(experimentparamsChoices.pre.ledpanels.frame_id)
+        experimentparams.pre.ledpanels.statefilterHi                    = self.Choose(experimentparamsChoices.pre.ledpanels.statefilterHi)
+        experimentparams.pre.ledpanels.statefilterLo                    = self.Choose(experimentparamsChoices.pre.ledpanels.statefilterLo)
+        experimentparams.pre.ledpanels.statefilterCriteria              = self.Choose(experimentparamsChoices.pre.ledpanels.statefilterCriteria)
         
         experimentparams.pre.wait1                                      =             experimentparamsChoices.pre.wait1
         
@@ -339,8 +337,7 @@ class StartTrial (smach.State):
         experimentparams.trial.robot.move.pattern.hzPattern             = self.Choose(experimentparamsChoices.trial.robot.move.pattern.hzPattern)
         experimentparams.trial.robot.move.pattern.hzPoint               = self.Choose(experimentparamsChoices.trial.robot.move.pattern.hzPoint)
         experimentparams.trial.robot.move.pattern.count                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.count)
-        experimentparams.trial.robot.move.pattern.size.x                = self.Choose(experimentparamsChoices.trial.robot.move.pattern.size.x)
-        experimentparams.trial.robot.move.pattern.size.y                = self.Choose(experimentparamsChoices.trial.robot.move.pattern.size.y)
+        experimentparams.trial.robot.move.pattern.size                  = self.Choose(experimentparamsChoices.trial.robot.move.pattern.size)
         experimentparams.trial.robot.move.pattern.param                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.param)
         experimentparams.trial.robot.move.pattern.direction             = self.Choose(experimentparamsChoices.trial.robot.move.pattern.direction)
         experimentparams.trial.robot.move.pattern.restart               = self.Choose(experimentparamsChoices.trial.robot.move.pattern.restart)
@@ -352,8 +349,7 @@ class StartTrial (smach.State):
         experimentparams.trial.ledpanels.enabled                        =             experimentparamsChoices.trial.ledpanels.enabled
         experimentparams.trial.ledpanels.command                        = self.Choose(experimentparamsChoices.trial.ledpanels.command)
         experimentparams.trial.ledpanels.idPattern                      = self.Choose(experimentparamsChoices.trial.ledpanels.idPattern)
-        experimentparams.trial.ledpanels.origin.x                       = self.Choose(experimentparamsChoices.trial.ledpanels.origin.x)
-        experimentparams.trial.ledpanels.origin.y                       = self.Choose(experimentparamsChoices.trial.ledpanels.origin.y)
+        experimentparams.trial.ledpanels.origin                         = self.Choose(experimentparamsChoices.trial.ledpanels.origin)
         experimentparams.trial.ledpanels.frame_id                       = self.Choose(experimentparamsChoices.trial.ledpanels.frame_id)
         experimentparams.trial.ledpanels.statefilterHi                  = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterHi)
         experimentparams.trial.ledpanels.statefilterLo                  = self.Choose(experimentparamsChoices.trial.ledpanels.statefilterLo)
@@ -406,6 +402,9 @@ class StartTrial (smach.State):
 
         rospy.logwarn ('EL State StartTrial(%s)' % experimentparams.experiment.trial)
 
+
+        # Set the output data.
+        userdata.experimentparamsOut            = experimentparams
 
         # Set the output data.
         userdata.experimentparamsOut            = experimentparams

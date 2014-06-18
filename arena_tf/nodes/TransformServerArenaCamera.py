@@ -197,8 +197,6 @@ class TransformServerArenaCamera:
             #ptaArena = np.array([xSrc, ySrc, zSrc, oSrc])
             #ptaImage = np.dot(self.i_Hinv3_a, ptaArena)
             #T = np.array([self.K_rect[0,2], self.K_rect[1,2], 0])
-
-
             ptaArena = np.array([xSrc, ySrc, oSrc])
             ptaImage = np.dot(self.i_Hinv_a, ptaArena)
 
