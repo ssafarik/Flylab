@@ -13,10 +13,7 @@
 
 ############################### Point to your hardware:
 1. # Determine the name of your experimental hardware, i.e. <your device name>
-2. $ <ctrl> + <alt> + T        # To open a new terminal window.
-3. $ roscd config/launch
-4. $ gedit hardware.launch
-5. # Edit hardware.launch to point to your .launch file.
+2. # Edit ~/.bashrc, and append "export RIG=your device name
 
 
 
@@ -30,6 +27,8 @@
 5.  $ <ctrl> + <shift> + T        # To open a new terminal window tab.
 6.  $ rosrun image_view image_view image:=camera/image_raw   
 
+# Choose A or B:
+# A
 # Open the camera properties window.
 7.  $ <ctrl> + <shift> + T        # To open a new terminal window tab.
 8.  $ rosrun dynamic_reconfigure reconfigure_gui camera
@@ -40,6 +39,15 @@
 10. # Close the Dynamic Reconfigure window.
 11. $ <ctrl>+C (to kill the camera node).
 
+# B
+# Get current values of the camera parameters.
+7. $ rosrun dynamic_reconfigure dynparam get camera
+
+# Set the exposure time.
+8. $ rosrun dynamic_reconfigure dynparam set camera ExposureTimeAbs nnnn
+(where nnnn is the time in microseconds).
+
+9. When you have a good value, enter it into the params_camera.launch file
 
 
 ############################### Camera Intrinsic Parameters (i.e. Lens distortion):
