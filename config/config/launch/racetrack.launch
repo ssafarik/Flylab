@@ -11,8 +11,8 @@
 	<include file="$(find racetrack)/launch/params_tracking.launch" />
 	<include file="$(find flybowls)/launch/flybowl_50mm.launch" /> 
 
-	<include file="$(find motorarm)/launch/motorarm.launch" />
 	<include file="$(find racetrack)/launch/params_actuator.launch" />
+	<include file="$(find motorarm)/launch/motorarm.launch" />
 
 	
     <!-- Get input from the camera, and from the background image file. -->
