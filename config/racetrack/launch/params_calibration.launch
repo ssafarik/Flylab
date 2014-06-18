@@ -7,7 +7,7 @@
   <!-- =================================================================== -->
   <!-- Arena-Camera transform.                                             -->
   <!--                                                                     -->
-  <!-- "roslaunch calibration CameraArena.launch"                          -->
+  <!-- "roslaunch calibration camera_arena.launch"                          -->
   <!--                                                                     -->
   <!-- Use the following command to move the center and radius of the      -->
   <!-- circle to correspond to the arena:                                  -->
@@ -24,7 +24,7 @@
 
 
 
-  <!-- These values come from CameraArena.launch, with a checkerboard on the arena. -->
+  <!-- These values come from camera_arena.launch, with a checkerboard on the arena. -->
 
   <param name="camera/arena_rvec_0" type="double" value="-3.068" />
   <param name="camera/arena_rvec_1" type="double" value="-0.001" />
@@ -39,7 +39,7 @@
   <!-- where you align the computed end-effector position with the visual -->
   <!-- end-effector position.                                             -->
   <!--                                                                    -->
-  <!-- "roslaunch calibration StageArena.launch"                          -->
+  <!-- "roslaunch calibration stage_arena.launch"                          -->
   <!-- Then let it run until the Translation Vector and Quaternion        -->
   <!-- stabilize.  Then copy the translation & quaternion values to       -->
   <!-- the args below, as:  x,y,z,qx,qy,qz,qw                             -->

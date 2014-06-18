@@ -19,8 +19,8 @@ from patterngen.srv import SrvSignal, SrvSignalResponse
 class MotorArm:
 
     def __init__(self):
-        self.initialized = False
-        self.initializedServices = False
+        self.bInitialized = False
+        self.bInitializedServices = False
         self.lock = threading.Lock()
         
         rospy.loginfo('Opening MotorArm device...')
@@ -108,12 +108,6 @@ class MotorArm:
         self.timePrev = rospy.Time.now()
         self.time = rospy.Time.now()
         
-        self.request = SrvFrameStateRequest()
-        self.request.state.header.frame_id = 'Stage'
-        self.request.state.pose.position.x = 0.0
-        self.request.state.pose.position.y = 0.0
-        self.request.state.pose.position.z = 0.0
-
 
     def CommandExperiment_callback(self, msgString):
         self.commandExperiment = msgString.data
@@ -152,7 +146,7 @@ class MotorArm:
             rospy.logwarn ('MA FAILED %s: %s' % (stSrv, e))
 
 
-        self.initializedServices = True
+        self.bInitializedServices = True
         
 
     # Transform a PointStamped to the given frame.
@@ -377,7 +371,7 @@ class MotorArm:
         return state
     
     def GetStageState (self):
-        while not self.initializedServices:
+        while not self.bInitializedServices:
             rospy.sleep(0.5)
             
         rvStageState = SrvFrameStateResponse()
@@ -395,7 +389,7 @@ class MotorArm:
     #   Updates the target command.
     #
     def SetStageStateRef_callback(self, reqStageState):
-        while not self.initialized:
+        while not self.bInitialized:
             rospy.sleep(0.5)
             
         Jinv = self.JacobianInv(self.angposMech)
@@ -446,7 +440,7 @@ class MotorArm:
         
         
     def HomeStage_callback(self, reqStageState):
-        while not self.initialized:
+        while not self.bInitialized:
             rospy.sleep(0.1)
             
         with self.lock:
@@ -468,10 +462,7 @@ class MotorArm:
         # Convert parking coordinates to angles.
         self.xPark = 0.0
         self.yPark = 0.0
-        with self.lock:
-            q1park = self.Get1FromXy(self.xPark, self.yPark)
-
-        q1park = 0.0
+        q1park = 0.0 #self.Get1FromXy(self.xPark, self.yPark)
         q1origin = rospy.get_param('motorarm/angleOffset', 0.0)  # Angle distance of index switch to 0 angle.
 
         rospy.loginfo ('MA Calibrating: q1origin=%s, q1park=%s' % (q1origin, q1park))
@@ -511,7 +502,7 @@ class MotorArm:
 
 
     def SendTransforms(self):  
-        if self.initialized:
+        if (self.bInitialized):
             with self.lock:
                 try:
                     self.jointstate1 = self.GetState_joint1()
@@ -561,17 +552,17 @@ class MotorArm:
                                         'link0'  # parent
                                         )
                 
-                # Frame EndEffector
+                # Frame EndEffector (i.e. the driver magnet)
                 self.tfbx.sendTransform((state.pose.position.x, state.pose.position.y, state.pose.position.z),
                                         qEE,
                                         state.header.stamp,
                                         'EndEffector',  # child
-                                        state.header.frame_id  # parent
+                                        'Stage'  # parent
                                         )
                 
                 
                 # Frame Target
-                if self.stateRef is not None:
+                if (self.stateRef is not None):
                     markerTarget = Marker(header=self.stateRef.header,
                                           ns='target',
                                           id=2,
@@ -588,7 +579,7 @@ class MotorArm:
                                           lifetime=rospy.Duration(1.0))
                     self.pubMarker.publish(markerTarget)
 
-                if self.stateVisual is not None:
+                if (self.stateVisual is not None):
                     markerToolOffset = Marker(header=state.header,
                                               ns='tooloffset',
                                               id=3,
@@ -917,7 +908,7 @@ class MotorArm:
     def Main(self):
         self.AttachServices()
         self.Calibrate_callback(None)
-        self.initialized = True
+        self.bInitialized = True
 
         # Process messages forever.
         rosrate = rospy.Rate(1 / self.T)
@@ -946,7 +937,7 @@ class MotorArm:
             
     
 
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     try:
         motorarm = MotorArm()
         motorarm.Main()

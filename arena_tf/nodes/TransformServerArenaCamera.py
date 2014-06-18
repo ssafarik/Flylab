@@ -16,8 +16,8 @@ from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoic
 
 class TransformServerArenaCamera:
     def __init__(self):
-        self.initialized = False
-        self.initConstructor = False
+        self.bInitialized = False
+        self.bInitializedConstructor = False
         
         self.camerainfo = None
         self.calibration = None
@@ -47,7 +47,7 @@ class TransformServerArenaCamera:
         self.services['transformserverarenacamera/wait_until_done'] = rospy.Service('transformserverarenacamera/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
         
         
-        self.initConstructor = True
+        self.bInitializedConstructor = True
 
 
     # Receive calibration values (wherever they came from), and republish them (for the bag file).
@@ -56,8 +56,8 @@ class TransformServerArenaCamera:
     # or
     # -- bagfile -> here.
     def Calibration_callback (self, calibration):
-        while (not self.initConstructor):
-            rospy.loginfo('Waiting for initConstructor.')
+        while (not self.bInitializedConstructor):
+            rospy.loginfo('Waiting for bInitializedConstructor.')
             rospy.sleep(0.1)
         
             
@@ -140,7 +140,7 @@ class TransformServerArenaCamera:
         
         
     def CameraInfo_callback (self, camerainfo):
-        if (not self.initialized):
+        if (not self.bInitialized):
             self.Hinv = self.GetTransformArenaFromImageRect(camerainfo)
             if (self.Hinv is not None):
                 try:
@@ -148,10 +148,10 @@ class TransformServerArenaCamera:
                 except Exception, e:
                     rospy.logwarn('Exception inverting Hinv: %s.  Is camera_info getting published?' % e)
                 
-                self.initialized = True
+                self.bInitialized = True
             else:
                 self.H = None
-                self.initialized = False
+                self.bInitialized = False
             
 
         if (camerainfo is not None):
@@ -162,7 +162,7 @@ class TransformServerArenaCamera:
     # Get image coordinates from arena coordinates.
     #
     def ImageFromArena_callback(self, req):
-        if (self.initialized):
+        if (self.bInitialized):
             nPoints = min(len(req.xSrc), len(req.ySrc))
             xSrc = list(req.xSrc)
             ySrc = list(req.ySrc)
@@ -187,7 +187,7 @@ class TransformServerArenaCamera:
     # Get arena coordinates from image coordinates.
     #
     def ArenaFromImage_callback(self, req):
-        if (self.initialized):
+        if (self.bInitialized):
             nPoints = min(len(req.xSrc), len(req.ySrc))
             xSrc = list(req.xSrc)
             ySrc = list(req.ySrc)
@@ -209,7 +209,7 @@ class TransformServerArenaCamera:
         
 
     def SendTransforms(self):      
-        if (self.initialized) and (self.camerainfo is not None):
+        if (self.bInitialized) and (self.camerainfo is not None):
             self.tfbx.sendTransform((0,0,0), 
                                     (0,0,0,1), 
                                     self.camerainfo.header.stamp, 

@@ -154,6 +154,7 @@ class Experiment():
 
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
     def StartTrial_callback(self, userdata):
+        rospy.logwarn('StartTrial_callback()')
         userdata.experimentparamsChoicesOut = userdata.experimentparamsChoicesIn
         return 'success'
 

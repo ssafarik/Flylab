@@ -68,10 +68,14 @@ class ContourIdentifier:
         self.munkres = Munkres() # Hungarian assignment algorithm.
         self.lockParams = threading.Lock()
         self.lockThreads = threading.Lock()
-        
+
         # Set up the input cache.
-        self.cache = [None, None]
-        self.iWorking = 0
+        self.lockBuffer = threading.Lock()
+        nQueue              = 2
+        self.bufferContourinfolists   = [None]*nQueue # Circular buffer for incoming images.
+        self.iBufferLoading    = 0  # Index of the next slot to load.
+        self.iBufferWorking    = 0  # Index of the slot to process, i.e. the oldest image in the buffer.
+        
         
         self.tfrx = tf.TransformListener()
         self.tfbx = tf.TransformBroadcaster()
@@ -690,15 +694,39 @@ class ContourIdentifier:
         
 
     def ContourinfoLists_callback(self, contourinfolistsPixels):
-        # Point to the cache non-working entry.
-        iLoading = (self.iWorking+1) % 2
-        
-        self.cache[iLoading] = contourinfolistsPixels 
+        # Receive the data:
+        with self.lockBuffer:
+            if (self.bufferContourinfolists[self.iBufferLoading] is None):   # There's an empty slot in the buffer.
+                iBufferLoadingNext = (self.iBufferLoading+1) % len(self.bufferContourinfolists)
+                iBufferWorkingNext = self.iBufferWorking
+                self.iDroppedData = 0
+            else:                                               # The buffer is full; we'll overwrite the oldest entry.
+                iBufferLoadingNext = (self.iBufferLoading+1) % len(self.bufferContourinfolists)
+                iBufferWorkingNext = (self.iBufferWorking+1) % len(self.bufferContourinfolists)
+                self.iDroppedData += 1
+
+            self.bufferContourinfolists[self.iBufferLoading] = contourinfolistsPixels
+            self.iBufferLoading = iBufferLoadingNext
+            self.iBufferWorking = iBufferWorkingNext
+    
+    
     
     
     def ProcessContourinfoLists(self):
-        if (self.cache[self.iWorking] is not None):
-            contourinfolistsPixels = self.cache[self.iWorking]
+        contourinfolistsPixels = None
+        
+        with self.lockBuffer:
+            if (self.bufferContourinfolists[self.iBufferWorking] is not None):
+                contourinfolistsPixels = self.bufferContourinfolists[self.iBufferWorking]
+                
+                # Mark this buffer entry as available for loading.
+                self.bufferContourinfolists[self.iBufferWorking] = None
+    
+                # Go to the next slot.
+                self.iBufferWorking = (self.iBufferWorking+1) % len(self.bufferContourinfolists)
+
+
+        if (contourinfolistsPixels is not None):
             if (self.initialized):
                 with self.lockThreads:
                     try:
@@ -844,11 +872,6 @@ class ContourIdentifier:
                     except rospy.exceptions.ROSException, e:
                         rospy.loginfo('CI ROSException: %s' % e)
                       
-            # Mark this entry as done.
-            self.cache[self.iWorking] = None
-            
-        # Go to the other image.
-        self.iWorking = (self.iWorking+1) % 2
 
 
     def main(self):
