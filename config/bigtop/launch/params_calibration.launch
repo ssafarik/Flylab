@@ -27,8 +27,8 @@
   <param name="camera/arena_rvec_0" type="double" value="3.141"/>
   <param name="camera/arena_rvec_1" type="double" value="0.000"/>
   <param name="camera/arena_rvec_2" type="double" value="-0.002"/>
-  <param name="camera/arena_tvec_0" type="double" value="-0.003"/> <!-- Adjust for arena alignment here. -->
-  <param name="camera/arena_tvec_1" type="double" value="-0.003"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera/arena_tvec_0" type="double" value="4.2"/> <!-- Adjust for arena alignment here. -->
+  <param name="camera/arena_tvec_1" type="double" value="2.5"/> <!-- Adjust for arena alignment here. -->
   <param name="camera/arena_tvec_2" type="double" value="368.403"/>
 
   
@@ -44,7 +44,7 @@
   <!--                                                                    -->
   <!-- ================================================================== -->
   
-  <param name="stage/arena_x" type="double" value="4.7"/>  <!-- Adjust for stage/arena alignment here. -->
+  <param name="stage/arena_x" type="double" value="0.0"/>  <!-- Adjust for stage/arena alignment here. -->
   <param name="stage/arena_y" type="double" value="0.0"/>  <!-- Adjust for stage/arena alignment here. -->
   <param name="stage/arena_z" type="double" value="0.0"/>
   <param name="stage/arena_qx" type="double" value="0.0"/>
