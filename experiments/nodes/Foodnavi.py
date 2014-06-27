@@ -5,13 +5,11 @@ import rospy
 import numpy as N
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
-from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
+from experiment_srvs.srv import Trigger, ExperimentParamsChoices, ExperimentParamsChoicesRequest
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
 from ledpanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
-from tracking.msg import ArenaState
-
 
 
 
@@ -49,10 +47,6 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.radius_list = [0]
         
         self.experimentparams.home.enabled = False
-        self.experimentparams.home.x = 0.0
-        self.experimentparams.home.y = 0.0
-        self.experimentparams.home.speed = 20
-        self.experimentparams.home.tolerance = 2
 
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
