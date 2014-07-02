@@ -23,9 +23,9 @@ class ExperimentPassiveChase():
         
         self.experimentparams.experiment.description = 'Fly Chases Robot Moving in Circle'
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.timeout = 600
+        self.experimentparams.experiment.timeout = 600000000
         
-        self.experimentparams.save.filenamebase = 'passivechase'
+        self.experimentparams.save.filenamebase = 'heatedpassivechase'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
@@ -82,7 +82,7 @@ class ExperimentPassiveChase():
         self.experimentparams.trial.robot.move.pattern.frameidPosition = ['Arena']            # 
         self.experimentparams.trial.robot.move.pattern.frameidAngle = ['Arena']               # 
         self.experimentparams.trial.robot.move.pattern.shape = ['circle'] # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.trial.robot.move.pattern.hzPattern = [1/40]
+        self.experimentparams.trial.robot.move.pattern.hzPattern = [1/15]
         self.experimentparams.trial.robot.move.pattern.hzPoint = [100]
         self.experimentparams.trial.robot.move.pattern.count = [-1]
         self.experimentparams.trial.robot.move.pattern.size = [Point(x=rospy.get_param('motorarm/L1', 999),

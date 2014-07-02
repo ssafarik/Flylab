@@ -25,7 +25,7 @@ class Experiment():
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.timeout = 600
         
-        self.experimentparams.save.filenamebase = 'activechase'
+        self.experimentparams.save.filenamebase = 'activechase_fly13_'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
