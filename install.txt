@@ -26,6 +26,14 @@ sudo apt-get install -y gobject-introspection
 sudo easy_install munkres
 
 
+# Get the motmot software (only used for saving .fmf files).
+cd ~/src.git
+git clone git://github.com/motmot/motmot.git
+cd motmot
+git submodule update --init
+sudo python setup.py install
+
+
 # Get the Flylab software.
 cd ~/src.git
 git clone https://github.com/ssafarik/Flylab.git
