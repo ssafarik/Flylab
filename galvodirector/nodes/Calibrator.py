@@ -15,6 +15,7 @@ from tracking.msg import ArenaState
 from geometry_msgs.msg import Point
 from std_msgs.msg import Header, String
 from patterngen.msg import MsgPattern
+from flycore.msg import CircleZones, MsgFrameState, TrackingCommand
 
 
 
@@ -40,9 +41,10 @@ class GalvoCalibrator:
         
         # Messages
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback)
-        self.subCommand    = rospy.Subscriber('broadcast/command', String, self.Command_callback)
+        self.subCommand    = rospy.Subscriber('experiment/command', String, self.Command_callback)
 
         self.pubGalvodirectorCommand = rospy.Publisher('galvodirector/command', MsgGalvoCommand)
+        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
 
 
         self.pointsInput = [
@@ -203,8 +205,8 @@ class GalvoCalibrator:
     
     def SendInputPoints(self):
         pattern = MsgPattern()
-        pattern.frameidPosition = '/Arena'
-        pattern.frameidAngle    = '/Arena'
+        pattern.frameidPosition = 'Arena'
+        pattern.frameidAngle    = 'Arena'
         pattern.shape      = 'bypoints'
         pattern.hzPattern  = 1.0
         pattern.hzPoint    = 100.0
@@ -212,7 +214,7 @@ class GalvoCalibrator:
         pattern.points     = self.pointsInput
         pattern.size.x     = 20.0
         pattern.size.y     = 20.0
-        pattern.preempt    = False
+        pattern.restart    = False
         pattern.param      = 0.0
         pattern.direction  = 1
     
@@ -224,8 +226,8 @@ class GalvoCalibrator:
 
     def SendPoint(self, point):
         pattern = MsgPattern()
-        pattern.frameidPosition = '/Arena'
-        pattern.frameidAngle    = '/Arena'
+        pattern.frameidPosition = 'Arena'
+        pattern.frameidAngle    = 'Arena'
         pattern.shape      = 'bypoints'
         pattern.hzPattern  = 1.0
         pattern.hzPoint    = 100.0
@@ -233,7 +235,7 @@ class GalvoCalibrator:
         pattern.points     = [point,]
         pattern.size.x     = 0.0
         pattern.size.y     = 0.0
-        pattern.preempt    = False
+        pattern.restart    = False
         pattern.param      = 0.0
         pattern.direction  = 1
     
@@ -276,10 +278,22 @@ class GalvoCalibrator:
 
 
     def Main(self):
-        rosRate = rospy.Rate(0.5)#(0.1)
+        rosRate = rospy.Rate(0.5)
 
+        msgTrackingCommand                    = TrackingCommand()
+        msgTrackingCommand.command            = 'initialize'
+        msgTrackingCommand.exclusionzones     = CircleZones(enabled = False, point_list = [], radius_list = [])
+        msgTrackingCommand.nRobots            = 0
+        msgTrackingCommand.nFlies             = 1
+        msgTrackingCommand.bUseVisualServoing = True
+        self.pubTrackingCommand.publish(msgTrackingCommand)
+
+        rospy.logwarn('Galvo Calibrator waiting for an ArenaState...')
         while (not self.initialized):    
             rospy.sleep(0.5)
+        rospy.logwarn('Galvo Calibrator initialized.')
+
+        
 
         rospy.logwarn ('Find the regression parameter values, and enter them in params_galvos.launch')
         plt.figure(1)
@@ -296,9 +310,9 @@ class GalvoCalibrator:
             bUseRandomPoints = True
             if (bUseRandomPoints):
                 # Specify the location of a circle (in volts) where we'll choose the input points.
-                r = 3.5
-                cx = -0.25
-                cy = 3.5
+                r = 2.5#3.5
+                cx = -0.1#-0.25
+                cy = 3.5#3.5
                 
                 for i in range(10):
                     # Choose a random point in the circle.

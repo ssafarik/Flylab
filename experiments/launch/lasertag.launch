@@ -1,0 +1,24 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the LASERTAG experiment:                  -->
+	<!--   The magnet drives in a circle with laser on or off until -->
+	<!--   fly begins chasing.                                      -->
+	<!--                                                            -->
+	<!-- Edit this file to contain the elements of the particular   -->
+	<!-- experiment.                                                -->
+	<!--                                                            -->
+	<!-- Launch this file to run the experiment, as in:             -->
+	<!-- roslaunch experiments lasertag.launch                      -->
+	<!--                                                            -->
+	<!-- ========================================================== -->
+
+	<!-- ***  Core stuff  *** -->
+    <include file="$(find flycore)/launch/main.launch" />
+
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="experiments" type="LaserTag.py" name="Experiment" required="true" />
+
+	
+  
+</launch>

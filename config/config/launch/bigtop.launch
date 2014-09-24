@@ -7,15 +7,20 @@
     <!--                                                            -->
 	<!-- ========================================================== -->
 
-	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" /> 
 	<include file="$(find bigtop)/launch/params_calibration.launch" />
 	<include file="$(find bigtop)/launch/params_tracking.launch" />
+	<include file="$(find flybowls)/launch/flybowl_50mm.launch" /> 
+
+
+<!--	<include file="$(find bigtop)/launch/params_ledpanels.launch" /> -->
+<!--	<include file="$(find ledpanels)/launch/main.launch" /> -->
+
 	<include file="$(find bigtop)/launch/params_galvos.launch" />
-	<include file="$(find bigtop)/launch/params_ledpanels.launch" />
-
-
-	<include file="$(find LEDPanels)/launch/main.launch" />
 	<include file="$(find galvodirector)/launch/main.launch" />
+
+	<include file="$(find bigtop)/launch/params_actuator.launch" />
+	<include file="$(find motorarm)/launch/motorarm.launch" />
+
     <include file="$(find bigtop)/launch/camera_aux.launch" />
     <!-- <include file="$(find bigtop)/launch/camera_flir.launch" /> -->
 

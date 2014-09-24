@@ -5,10 +5,10 @@ import rospy
 import numpy as N
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
-from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
-from LEDPanels.msg import MsgPanelsCommand
+from ledpanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 
 
@@ -19,49 +19,52 @@ class Experiment():
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
-        self.experimentparams = ExperimentParamsRequest()
+        self.experimentparams = ExperimentParamsChoicesRequest()
         
-        self.experimentparams.experiment.description = "Chase with Oscillation"
+        self.experimentparams.experiment.description = 'Chase with Oscillation'
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
-        self.experimentparams.save.filenamebase = "chaseosc_"
+        self.experimentparams.save.filenamebase = 'chaseosc_'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
+        self.experimentparams.save.fmf = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.robotspec.nRobots = 1
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
-        self.experimentparams.robotspec.description = "Black oxide magnet"
+        self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
+        self.experimentparams.robotspec.description = 'Black oxide magnet'
 
         self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = 'unspecified'
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
+        self.experimentparams.home.enabled = False
+        self.experimentparams.home.x = 0.0
+        self.experimentparams.home.y = 0.0
+        self.experimentparams.home.speed = 20
+        self.experimentparams.home.tolerance = 2
+
         self.experimentparams.pre.robot.enabled = True
         self.experimentparams.pre.robot.move.mode = 'relative'        
-        self.experimentparams.pre.robot.move.relative.tracking = True
-        self.experimentparams.pre.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
-        self.experimentparams.pre.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
-        self.experimentparams.pre.robot.move.relative.distance = 28
-        self.experimentparams.pre.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
-        self.experimentparams.pre.robot.move.relative.angleOffset = N.pi    # Radians from origin to target.
-        self.experimentparams.pre.robot.move.relative.angleOscMag = 0  # Radian magnitude of the added oscillation.
-        self.experimentparams.pre.robot.move.relative.angleOscFreq = 1.0    # Hz of the added oscillation.
-        self.experimentparams.pre.robot.move.relative.speed = 10 #5.2
-        self.experimentparams.pre.robot.move.relative.speedType = 'constant'
-        self.experimentparams.pre.robot.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.pre.robot.home.enabled = False
-        self.experimentparams.pre.robot.home.x = 0.0
-        self.experimentparams.pre.robot.home.y = 0.0
-        self.experimentparams.pre.robot.home.speed = 30
-        self.experimentparams.pre.robot.home.tolerance = 2
+        self.experimentparams.pre.robot.move.relative.tracking =[ True]
+        self.experimentparams.pre.robot.move.relative.frameidOriginPosition = ['Fly1Forecast']
+        self.experimentparams.pre.robot.move.relative.frameidOriginAngle = ['Fly1Forecast']
+        self.experimentparams.pre.robot.move.relative.distance = [28]
+        self.experimentparams.pre.robot.move.relative.angleType = ['current'] # 'constant' or 'random' or 'current'
+        self.experimentparams.pre.robot.move.relative.angleOffset = [N.pi]    # Radians from origin to target.
+        self.experimentparams.pre.robot.move.relative.angleOscMag = [0]  # Radian magnitude of the added oscillation.
+        self.experimentparams.pre.robot.move.relative.angleOscFreq = [1.0]    # Hz of the added oscillation.
+        self.experimentparams.pre.robot.move.relative.speed = [10] #5.2
+        self.experimentparams.pre.robot.move.relative.speedType = ['constant']
+        self.experimentparams.pre.robot.move.relative.tolerance = [-1.0] # i.e. never get there.
 
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
@@ -90,35 +93,29 @@ class Experiment():
         # The first one to finish preempts the others.
         self.experimentparams.trial.robot.enabled = True
         self.experimentparams.trial.robot.move.mode = 'relative'        
-        self.experimentparams.trial.robot.move.relative.tracking = True
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = "Fly1Forecast"
-        self.experimentparams.trial.robot.move.relative.distance = 8
-        self.experimentparams.trial.robot.move.relative.angleType = 'current' # 'constant' or 'random' or 'current'
-        self.experimentparams.trial.robot.move.relative.angleOffset = N.pi    # Radians from origin to target.
-        self.experimentparams.trial.robot.move.relative.angleOscMag = N.pi/2  # Radian magnitude of the added oscillation.
-        self.experimentparams.trial.robot.move.relative.angleOscFreq = 1.0    # Hz of the added oscillation.
-        self.experimentparams.trial.robot.move.relative.speed = 10 #5.2
-        self.experimentparams.trial.robot.move.relative.speedType = 'constant'
-        self.experimentparams.trial.robot.move.relative.tolerance = -1.0 # i.e. never get there.
-        self.experimentparams.trial.robot.home.enabled = False
-        self.experimentparams.trial.robot.home.x = 0.0
-        self.experimentparams.trial.robot.home.y = 0.0
-        self.experimentparams.trial.robot.home.speed = 30
-        self.experimentparams.trial.robot.home.tolerance = 2
+        self.experimentparams.trial.robot.move.relative.tracking = [True]
+        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = ['Fly1Forecast']
+        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = ['Fly1Forecast']
+        self.experimentparams.trial.robot.move.relative.distance = [8]
+        self.experimentparams.trial.robot.move.relative.angleType = ['current'] # 'constant' or 'random' or 'current'
+        self.experimentparams.trial.robot.move.relative.angleOffset = [N.pi]    # Radians from origin to target.
+        self.experimentparams.trial.robot.move.relative.angleOscMag = [N.pi/2]  # Radian magnitude of the added oscillation.
+        self.experimentparams.trial.robot.move.relative.angleOscFreq = [1.0]    # Hz of the added oscillation.
+        self.experimentparams.trial.robot.move.relative.speed = [10] #5.2
+        self.experimentparams.trial.robot.move.relative.speedType = ['constant']
+        self.experimentparams.trial.robot.move.relative.tolerance = [-1.0] # i.e. never get there.
         
         
         self.experimentparams.trial.lasergalvos.enabled = False
         
         self.experimentparams.trial.ledpanels.enabled = True
-        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 1
-        self.experimentparams.trial.ledpanels.origin.x = 0 
-        self.experimentparams.trial.ledpanels.origin.y = 0 
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly1Forecast'
-        self.experimentparams.trial.ledpanels.statefilterHi = ''
-        self.experimentparams.trial.ledpanels.statefilterLo = ''
-        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
+        self.experimentparams.trial.ledpanels.command = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = [1]
+        self.experimentparams.trial.ledpanels.origin = [Point(x=0, y=0)] 
+        self.experimentparams.trial.ledpanels.frame_id = ['Fly1Forecast']
+        self.experimentparams.trial.ledpanels.statefilterHi = ['']
+        self.experimentparams.trial.ledpanels.statefilterLo = ['']
+        self.experimentparams.trial.ledpanels.statefilterCriteria = ['']
 
         self.experimentparams.post.trigger.enabled = True
         self.experimentparams.post.trigger.frameidParent = 'Fly1'
@@ -158,7 +155,7 @@ class Experiment():
 
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
     def StartTrial_callback(self, userdata):
-        userdata.experimentparamsOut = userdata.experimentparamsIn
+        userdata.experimentparamsChoicesOut = userdata.experimentparamsChoicesIn
         return 'success'
 
     # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.

@@ -32,8 +32,8 @@ class FlylabGUI:
     	self.builder.add_from_file(self.gladefile)
     	self.builder.connect_signals(self) #Connect GUI event functions.
     	
-    	self.pubBroadcastCommand = rospy.Publisher('broadcast/command', String)
-        self.subBroadcastCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+    	self.pubBroadcastCommand = rospy.Publisher('experiment/command', String)
+        self.subBroadcastCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
     	self.pubTrackingCommand   = rospy.Publisher('tracking/command', TrackingCommand)
 
 

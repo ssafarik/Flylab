@@ -9,33 +9,33 @@
     <!-- from there.                                                -->
 	<!-- ========================================================== -->
 
-    <param name="galvodriver/hzDaqClock" type="double" value="250000.0"/>
+    <param name="galvodriver/hzDaqClock" type="double" value="120000.0"/>
     <param name="galvodriver/hzGalvoRate" type="double" value="40000.0"/>   <!-- This is the rate the galvos can move from point to point, based on quality desired. -->
 	<param name="galvodriver/hzUSB" type="double" value="50.0"/>  <!-- The fastest that the DAQ can be updated over USB.  Galvodriver makes sure to stay slower than this rate. -->
     <param name="galvodirector/xBeamsink" type="double" value="0.0" />  <!-- volts -->
     <param name="galvodirector/yBeamsink" type="double" value="-10.0" />  <!-- volts -->
 
     
-
     <!-- Least Squares for y = a3*x**3 + a2*x**2 + a1*x + a0.  Millimeters to Volts: -->
-    <param name="galvodirector/a3" type="double" value="-1.26487e-07" />
-    <param name="galvodirector/a2" type="double" value="1.42924e-06" />
-    <param name="galvodirector/a1" type="double" value="0.0528306" />
-    <param name="galvodirector/a0" type="double" value="-0.219368" />
-    <param name="galvodirector/b3" type="double" value="2.72008e-07" />
-    <param name="galvodirector/b2" type="double" value="-8.91973e-06" />
-    <param name="galvodirector/b1" type="double" value="-0.0529175" />
-    <param name="galvodirector/b0" type="double" value="3.60264" />
-    
+    <param name="galvodirector/a3" type="double" value="-3.69757e-08" />
+    <param name="galvodirector/a2" type="double" value="6.60812e-07" />
+    <param name="galvodirector/a1" type="double" value="0.0506636" />
+    <param name="galvodirector/a0" type="double" value="-0.238945" />
+    <param name="galvodirector/b3" type="double" value="1.1227e-07" />
+    <param name="galvodirector/b2" type="double" value="-8.80985e-06" />
+    <param name="galvodirector/b1" type="double" value="-0.0503516" />
+    <param name="galvodirector/b0" type="double" value="3.55218" />
+
     <!-- Least Squares for y = a3i*x**3 + a2i*x**2 + a1i*x + a0i.  Volts to Millimeters: -->
-    <param name="galvodirector/a3i" type="double" value="0.0144464" />
-    <param name="galvodirector/a2i" type="double" value="0.00490769" />
-    <param name="galvodirector/a1i" type="double" value="18.9315" />
-    <param name="galvodirector/a0i" type="double" value="4.13669" />
-    <param name="galvodirector/b3i" type="double" value="-0.0232455" />
-    <param name="galvodirector/b2i" type="double" value="0.0742489" />
-    <param name="galvodirector/b1i" type="double" value="-18.5115" />
-    <param name="galvodirector/b0i" type="double" value="67.1802" />
+    <param name="galvodirector/a3i" type="double" value="0.0814613" />
+    <param name="galvodirector/a2i" type="double" value="0.0390241" />
+    <param name="galvodirector/a1i" type="double" value="19.4369" />
+    <param name="galvodirector/a0i" type="double" value="4.66495" />
+    <param name="galvodirector/b3i" type="double" value="0.0446111" />
+    <param name="galvodirector/b2i" type="double" value="-0.622272" />
+    <param name="galvodirector/b1i" type="double" value="-17.2832" />
+    <param name="galvodirector/b0i" type="double" value="67.3775" />
+
     
 </launch>
 

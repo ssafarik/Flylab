@@ -1,20 +1,24 @@
 <launch>
-  <param name="tracking/diff_threshold"             type="double" value="60"/>                     <!-- Adjust this based on light brightness, etc, to get good contours. -->
-  <param name="tracking/thresholdWings"             type="double" value="20"/>                     <!-- Threshold for foreground objects detection. -->
-  <param name="tracking/thresholdBody"              type="double" value="30"/>                     <!-- Threshold for fly body detection. -->
-  <param name="tracking/dtForecast"                 type="double" value="0.10"/>                   <!-- Time to forecast future fly states. -->
-  <param name="tracking/rcBackground"               type="double" value="20000"/>                  <!-- Moving average for dynamic background. -->
-  <param name="tracking/rcForeground"               type="double" value="20"/>                     <!-- Moving average for foreground objects (e.g. Fly1/image_mean). -->
-  <param name="tracking/scalarFlyMean"              type="double" value="1.2"/>                    <!-- Subtract this multiple of the fly mean image for wing detection. -->
-  <param name="tracking/wingmetric_threshold"       type="double" value="1.5"/>                    <!-- Number of std devs the sum of wing pixels must differ from mean to count as a wing-extension. -->
   <param name="tracking/filenameBackground"         type="string" value="~/background.png"/>       <!-- Location of the initial background image. -->
+  <param name="tracking/diff_threshold"             type="double" value="20"/>                     <!-- Adjust this based on light brightness, etc, to get good contours. -->
+  <param name="tracking/dtForecast"                 type="double" value="0.10"/>                   <!-- Time to forecast future fly states. -->
+  <param name="tracking/rcBackground"               type="double" value="200000"/>                  <!-- Moving average for dynamic background. -->
+  <param name="tracking/rcForeground"               type="double" value="20"/>                     <!-- Moving average for foreground objects (e.g. Fly1/image_mean). -->
+  <param name="tracking/rcFilterAngle"              type="double" value="0.0"/>
+  <param name="tracking/rcFilterFlip"               type="double" value="3.0"/>
   <param name="tracking/speedThresholdForTravel"    type="double" value="5.0"/>
   <param name="tracking/areaContourMin"             type="double" value="4"/>
   <param name="tracking/roi/height"                 type="int" value="25"/>                        <!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
   <param name="tracking/roi/width"                  type="int" value="25"/>                        <!-- Size of the ROI of the fly.  Should be odd to allow for center pixel. -->
-  <param name="tracking/lengthBody"                 type="int" value="14"/>                        <!-- Fly body length in pixels. -->
-  <param name="tracking/widthBody"                  type="int" value="7"/>                         <!-- Fly body width in pixels. -->
   <param name="tracking/offsetEndEffectorMax"       type="double" value="15.0"/>
-  <param name="tracking/rcFilterAngle"              type="double" value="0.0"/>
   
+  <!-- Wing detection params. -->  
+  <param name="tracking/lengthBody"                 type="int" value="11"/>                        <!-- Fly body length in pixels. -->
+  <param name="tracking/widthBody"                  type="int" value="5"/>                         <!-- Fly body width in pixels. -->
+  <param name="tracking/thresholdBody"              type="double" value="60"/>                     <!-- Threshold for fly body mask creation. -->
+  <param name="tracking/scalarMeanFlySubtraction"   type="double" value="1.5"/>                    <!-- Subtract this multiple of the fly mean image for wing detection. -->
+  <param name="tracking/nStdDevWings"               type="double" value="4.0"/>                    <!-- Number of std devs the sum of wing pixels must differ from mean to count as a wing-extension. -->
+  <param name="tracking/rcWingMean"                 type="double" value="10.0"/>                   <!-- Time constant of mean wing intensity. -->
+  <param name="tracking/rcWingStdDev"               type="double" value="100.0"/>                  <!-- Time constant of stddev wing intensity. -->
+
 </launch>

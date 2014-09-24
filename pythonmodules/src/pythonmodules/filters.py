@@ -69,7 +69,12 @@ class LowPassHalfCircleFilter:
                 zUnwrapped = CircleFunctions.UnwrapHalfCircle(z, self.zf)
                 
                 dt = t - self.t
-                alpha = dt/(self.RC + dt)
+                tt = (self.RC + dt)
+                if (tt>0.0):
+                    alpha = dt/(self.RC + dt)
+                else:
+                    alpha = 0.0
+                    
                 self.zf = (1.0 - alpha)*self.zf + alpha*zUnwrapped
             else: # Initialized, but no measurement.
                 pass

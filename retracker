@@ -1,9 +1,13 @@
 #!/bin/bash
 
-
-for fn in `ls $BAGFILESPEC`; do 
+if [ "$BAGFILESPEC" = "" ]; then 
+  echo "BAGFILESPEC is not set.  Use \"export BAGFILESPEC=/path/to/file*.bag\""
+else  
+  for fn in `ls $BAGFILESPEC`; do
+    echo "******************************** Retracking: $fn"
     export BAGFILE=$fn
     RETRACK=1 roslaunch experiments retrack.launch
+  done
+fi
 
-done
 

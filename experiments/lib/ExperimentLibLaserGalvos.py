@@ -24,7 +24,7 @@ class Reset (smach.State):
     def __init__(self, tfrx=None):
         smach.State.__init__(self, 
                              outcomes=['success','disabled','preempt','aborted'],
-                             input_keys=['experimentparamsIn'])
+                             input_keys=['experimentparamsChoicesIn'])
 
         self.arenastate = None
         self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
@@ -39,7 +39,7 @@ class Reset (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
         
 
@@ -60,7 +60,7 @@ class Reset (smach.State):
     def execute(self, userdata):
         rospy.loginfo("EL State ResetGalvos()")
 
-        if (userdata.experimentparamsIn.trial.lasergalvos.enabled):
+        if (userdata.experimentparamsChoicesIn.trial.lasergalvos.enabled):
             commandGalvoBeamsink = MsgGalvoCommand()
             commandGalvoBeamsink.enable_laser = False # False will send it to the beamsink.
             self.pubGalvoCommand.publish(commandGalvoBeamsink)
@@ -109,7 +109,7 @@ class Action (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -204,15 +204,15 @@ class Action (smach.State):
                         stamp=None
                         if (pose is None) or (velocity is None):
                             try:
-                                stamp = self.tfrx.getLatestCommonTime('/Arena', pattern.frameidPosition)
+                                stamp = self.tfrx.getLatestCommonTime('Arena', pattern.frameidPosition)
                             except tf.Exception:
                                 pass
 
                             
                         # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                        if (pose is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', pattern.frameidPosition, stamp):
+                        if (pose is None) and (stamp is not None) and self.tfrx.canTransform('Arena', pattern.frameidPosition, stamp):
                             try:
-                                poseStamped = self.tfrx.transformPose('/Arena', PoseStamped(header=Header(stamp=stamp,
+                                poseStamped = self.tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
                                                                                                           frame_id=pattern.frameidPosition),
                                                                                             pose=Pose(position=Point(0,0,0),
                                                                                                       orientation=Quaternion(0,0,0,1)
@@ -225,9 +225,9 @@ class Action (smach.State):
 
                                 
                         # If we still need the velocity, then get it from ROS.
-                        if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', pattern.frameidPosition, stamp):
+                        if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('Arena', pattern.frameidPosition, stamp):
                             try:
-                                velocity_tuple = self.tfrx.lookupTwist('/Arena', pattern.frameidPosition, stamp, self.dtVelocity)
+                                velocity_tuple = self.tfrx.lookupTwist('Arena', pattern.frameidPosition, stamp, self.dtVelocity)
                             except tf.Exception:
                                 velocity = None
                             else:

@@ -5,10 +5,10 @@ import rospy
 import numpy as N
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
-from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
-from LEDPanels.msg import MsgPanelsCommand
+from ledpanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 from tracking.msg import ArenaState
 
@@ -21,11 +21,11 @@ class Experiment():
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
-        self.experimentparams = ExperimentParamsRequest()
+        self.experimentparams = ExperimentParamsChoicesRequest()
         
-        self.experimentparams.experiment.description = "Laser is on the fly when fly moving west."
+        self.experimentparams.experiment.description = 'Laser is on the fly when fly moving west.'
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
         #self.experimentparams.save.filenamebase = 'HCS_normal_150mW_' 
         #self.experimentparams.save.filenamebase = 'TrpA1neg_AristaeIntact_150mW_' # 
@@ -34,13 +34,15 @@ class Experiment():
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = False
         self.experimentparams.save.mov = False
+        self.experimentparams.save.fmf = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False # Saves always.
 
         self.experimentparams.robotspec.nRobots = 0
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
-        self.experimentparams.robotspec.description = "Black oxide magnet"
+        self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
+        self.experimentparams.robotspec.description = 'Black oxide magnet'
 
         self.experimentparams.flyspec.nFlies = 1
         #self.experimentparams.flyspec.description = 'HCS normal'
@@ -52,13 +54,15 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=45.0, y=48.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [8.0]
         
+        self.experimentparams.home.enabled = False
+        
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
         self.experimentparams.pre.wait1 = 0.0
         
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = '/Arena'
+        self.experimentparams.pre.trigger.frameidParent = 'Arena'
         self.experimentparams.pre.trigger.frameidChild = 'Fly01'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
@@ -100,7 +104,7 @@ class Experiment():
                                                                             count      = 1,
                                                                             size       = Point(x=2,
                                                                                                y=2),
-                                                                            preempt    = False,
+                                                                            restart    = False,
                                                                             param      = 3, # Peano curve level.
                                                                             direction  = 1),
                                                                  )
@@ -115,15 +119,15 @@ class Experiment():
             self.experimentparams.trial.lasergalvos.statefilterCriteria_list.append('inclusive') # 'inclusive'=laserOn if all criteria are satisfied, laserOff if any criteria is violated.
         
         self.experimentparams.trial.ledpanels.enabled = True
-        self.experimentparams.trial.ledpanels.command = 'fixed'  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
-        self.experimentparams.trial.ledpanels.idPattern = 3
-        self.experimentparams.trial.ledpanels.frame_id = 'Fly01Forecast'
-        self.experimentparams.trial.ledpanels.statefilterHi = ''
-        self.experimentparams.trial.ledpanels.statefilterLo = ''
-        self.experimentparams.trial.ledpanels.statefilterCriteria = ''
+        self.experimentparams.trial.ledpanels.command = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
+        self.experimentparams.trial.ledpanels.idPattern = [3]
+        self.experimentparams.trial.ledpanels.frame_id = ['Fly01Forecast']
+        self.experimentparams.trial.ledpanels.statefilterHi = ['']
+        self.experimentparams.trial.ledpanels.statefilterLo = ['']
+        self.experimentparams.trial.ledpanels.statefilterCriteria = ['']
 
         self.experimentparams.post.trigger.enabled = True
-        self.experimentparams.post.trigger.frameidParent = '/Arena'
+        self.experimentparams.post.trigger.frameidParent = 'Arena'
         self.experimentparams.post.trigger.frameidChild = 'Fly01'
         self.experimentparams.post.trigger.speedAbsParentMin =   0.0
         self.experimentparams.post.trigger.speedAbsParentMax = 999.0
@@ -160,7 +164,7 @@ class Experiment():
 
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
     def StartTrial_callback(self, userdata):
-        userdata.experimentparamsOut = userdata.experimentparamsIn
+        userdata.experimentparamsChoicesOut = userdata.experimentparamsChoicesIn
         return 'success'
 
     # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.

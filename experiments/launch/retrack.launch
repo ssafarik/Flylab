@@ -9,7 +9,7 @@
 
     
     <!-- ***  Core stuff  *** -->
-    <param name="use_sim_time"                 type="bool" value="true"/>
+    <param name="use_sim_time"                 type="bool" value="false"/>
     <include file="$(find flycore)/launch/main.launch" />
     <node pkg="experiments" type="Retrack.py" name="Experiment" required="true" />
     <include file="$(find config)/launch/playbag.launch" >
@@ -23,20 +23,22 @@
  
 
     <!-- STEP 2:  Edit the following lines to show the hardware you recorded the .bag file upon. -->
-    <include file="$(find racetrack)/launch/params_tracking.launch" />
-    <include file="$(find racetrack)/launch/params_calibration.launch" />
-	<include file="$(find flybowls)/launch/heatbowl_50mm.launch" />
+    <include file="$(find breadpan)/launch/params_tracking.launch" />
+    <include file="$(find breadpan)/launch/params_calibration.launch" />
+	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" />
 
 
     <!-- 
-        STEP 3:  Set the bag filespec of the file(s) you want to retrack:    
-                export BAGFILESPEC=/asdf/filename*.bag
+        STEP 3:  Set the bag filespec of the file(s) you want to retrack:
+            export BAGFILESPEC=/asdf/filename*.bag
+            export RIG=racetrack           # ...or bigtop or colosseum or breadpan, etc    
     -->
 
 
     <!-- 
-        STEP 4:  Run the retracker (in the same terminal window as step 3):    
-                  retracker
+        STEP 4:  Run the retracker (in the same terminal window as step 3):
+            cd ~/src.git/Flylab    
+            ./retracker
     -->
     
     

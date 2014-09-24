@@ -7,7 +7,7 @@
   <!-- =================================================================== -->
   <!-- Arena-Camera transform.                                             -->
   <!--                                                                     -->
-  <!-- "roslaunch calibration CameraArena.launch"                          -->
+  <!-- "roslaunch calibration camera_arena.launch"                          -->
   <!--                                                                     -->
   <!-- Use the following command to move the center and radius of the      -->
   <!-- circle to correspond to the arena:                                  -->
@@ -16,17 +16,17 @@
   <!-- =================================================================== -->
   
 
-  <!-- Set the checker_size before running the CameraArena.launch calibration.    -->
+  <!-- Set the checker_size before running the camera_arena.launch calibration.    -->
   <param name="calibration/checker_size" type="double" value="7.5" />
 
   <!-- The mask circle in camera coordinates (i.e. pixels).    -->
   <param name="camera/mask/x"      type="double" value="356"/>
-  <param name="camera/mask/y"      type="double" value="249"/>
-  <param name="camera/mask/radius" type="double" value="225"/>
+  <param name="camera/mask/y"      type="double" value="251"/>
+  <param name="camera/mask/radius" type="double" value="220"/> <!-- 209 -->
 
 
 
-  <!-- These values come from CameraArena.launch, with a checkerboard on the arena. -->
+  <!-- These values come from camera_arena.launch, with a checkerboard on the arena. -->
   <param name="camera/arena_rvec_0" type="double" value="-3.127"/>
   <param name="camera/arena_rvec_1" type="double" value="0.000"/>
   <param name="camera/arena_rvec_2" type="double" value="0.003"/>
@@ -40,14 +40,14 @@
   <!-- where you align the kinematic end-effector position with the       -->
   <!-- visual end-effector position.                                      -->
   <!--                                                                    -->
-  <!-- "roslaunch calibration StageArena.launch"                          -->
+  <!-- "roslaunch calibration stage_arena.launch"                          -->
   <!-- Then let it run until the "Translation" and "Quaternion"           -->
   <!-- stabilize.  Then copy the translation & quaternion values to       -->
   <!-- the "args" below, e.g.  as:  x,y,z, qx,qy,qz,qw                    -->
   <!--                                                                    -->
   <!-- ================================================================== -->
   
-  <!-- These values come from StageArena.launch. -->
+  <!-- These values come from stage_arena.launch. -->
   <param name="stage/arena_x" type="double" value="-2.64"/>
   <param name="stage/arena_y" type="double" value="4.24"/> 
   <param name="stage/arena_z" type="double" value="0.0"/>

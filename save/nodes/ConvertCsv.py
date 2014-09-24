@@ -11,7 +11,7 @@ import numpy as N
 ## How to use this utility:
 ##
 ##   Step 1. Edit the following lines for your input and output directories, and version:  
-versionToWrite = 'latest'  # '2.2' or '2.6' or '2.7' or '2.8' or '2.81' or '2.82' or '2.83' or 'latest'
+versionToWrite = 'latest'  # '2.2' or '2.6' or '2.7' or '2.8' or '2.81' or '2.82' or '2.83' or '2.84' or 'latest'
 dirIn   = '/home/ssafarik/FlylabData_oldversions'
 dirOut  = '/home/ssafarik/FlylabData_converted'
 
@@ -1113,53 +1113,63 @@ class ConvertCsv:
         
 
         #######################################################################
-#         # version 999 changes... 
-#         self.headerVersionFileTxt_V999 =self.headerVersionFileTxt_V888
-#         self.templateVersionFile_V999 = self.templateVersionFile_V888
-#         self.headerExperimentTxt_V999 = self.headerExperimentTxt_V888
-#         self.templateExperiment_V999 =  self.templateExperiment_V888
-#         self.headerRobotSpecTxt_V999 =      self.headerRobotSpecTxt_V888
-#         self.templateRobotSpec_V999 =      self.templateRobotSpec_V888
-#         self.headerFlySpecTxt_V999 =      self.headerFlySpecTxt_V888
-#         self.templateFlySpec_V999 =       self.templateFlySpec_V888
-#         self.headerTrackingTxtA_V999 =  self.headerTrackingTxtA_V888
-#         self.headerTrackingTxtB_V999 =  self.headerTrackingTxtB_V888
-#         self.templateTrackingA_V999 =   self.templateTrackingA_V888
-#         self.templateTrackingB_V999 =   self.templateTrackingB_V888
-#         self.headerPreRobotTxt_V999 =   self.headerPreRobotTxt_V888
-#         self.templatePreRobot_V999 =    self.templatePreRobot_V888
-#                                     
-#         self.headerPreLaserTxt_V999 =   self.headerPreLaserTxt_V888
-#         self.templatePreLaser_V999 =    self.templatePreLaser_V888
-#         self.headerPreLEDPanelsTxt_V999 = self.headerPreLEDPanelsTxt_V888
-#         self.templatePreLEDPanels_V999 = self.templatePreLEDPanels_V888
-#         self.headerPreWait1Txt_V999 =   self.headerPreWait1Txt_V888
-#         self.templatePreWait1_V999 =    self.templatePreWait1_V888
-#         self.headerPreTriggerTxt_V999 = self.headerPreTriggerTxt_V888
-#         self.templatePreTrigger_V999 =  self.templatePreTrigger_V888
-#         self.headerPreWait2Txt_V999 =   self.headerPreWait2Txt_V888
-#         self.templatePreWait2_V999 =    self.templatePreWait2_V888
-#         self.headerTrialRobotTxt_V999 = self.headerTrialRobotTxt_V888
-#         self.templateTrialRobot_V999 =  self.templateTrialRobot_V888
-#                                     
-#         self.headerTrialLaserTxt_V999 =  self.headerTrialLaserTxt_V888
-#         self.templateTrialLaser_V999 =   self.templateTrialLaser_V888
-#         self.headerTrialLEDPanelsTxt_V999 = self.headerTrialLEDPanelsTxt_V888
-#         self.templateTrialLEDPanels_V999 = self.templateTrialLEDPanels_V888
-#         self.headerPostTriggerTxt_V999 = self.headerPostTriggerTxt_V888
-#         self.templatePostTrigger_V999 = self.templatePostTrigger_V888
-#         self.headerPostWaitTxt_V999 =    self.headerPostWaitTxt_V888
-#         self.templatePostWait_V999 =    self.templatePostWait_V888
-# 
-#         
-#         # The state lines.
-#         self.stateLeftTxt_V999           = self.stateLeftTxt_V888
-#         self.stateRobotTxt_V999          = self.stateRobotTxt_V888
-#         self.stateFlyTxt_V999            = self.stateFlyTxt_V888
-#         self.templateStateLeft_V999      = self.templateStateLeft_V888
-#         self.templateStateRobot_V999     = self.templateStateRobot_V888
-#         self.templateStateFly_V999       = self.templateStateFly_V888
+        # version 2.84 added robotspec.isPresent
+        self.headerVersionFileTxt_V284 =self.headerVersionFileTxt_V283
+        self.templateVersionFile_V284 = self.templateVersionFile_V283
+        self.headerExperimentTxt_V284 = self.headerExperimentTxt_V283
+        self.templateExperiment_V284 =  self.templateExperiment_V283
+        self.headerRobotSpecTxt_V284 =  'nRobots, '\
+                                        'widthRobot, '\
+                                        'heightRobot, '\
+                                        'isPresent, '\
+                                        'descriptionRobot\n'
+        self.templateRobotSpec_V284 =   '{nRobots:s}, '\
+                                        '{widthRobot:s}, '\
+                                        '{heightRobot:s}, '\
+                                        '{isPresent:s}, '\
+                                        '{descriptionRobot:s}\n'
+                                  
+        self.headerFlySpecTxt_V284 =    self.headerFlySpecTxt_V283
+        self.templateFlySpec_V284 =     self.templateFlySpec_V283
+        self.headerTrackingTxtA_V284 =  self.headerTrackingTxtA_V283
+        self.headerTrackingTxtB_V284 =  self.headerTrackingTxtB_V283
+        self.templateTrackingA_V284 =   self.templateTrackingA_V283
+        self.templateTrackingB_V284 =   self.templateTrackingB_V283
+        self.headerPreRobotTxt_V284 =   self.headerPreRobotTxt_V283
+        self.templatePreRobot_V284 =    self.templatePreRobot_V283
+                                    
+        self.headerPreLaserTxt_V284 =   self.headerPreLaserTxt_V283
+        self.templatePreLaser_V284 =    self.templatePreLaser_V283
+        self.headerPreLEDPanelsTxt_V284 = self.headerPreLEDPanelsTxt_V283
+        self.templatePreLEDPanels_V284 = self.templatePreLEDPanels_V283
+        self.headerPreWait1Txt_V284 =   self.headerPreWait1Txt_V283
+        self.templatePreWait1_V284 =    self.templatePreWait1_V283
+        self.headerPreTriggerTxt_V284 = self.headerPreTriggerTxt_V283
+        self.templatePreTrigger_V284 =  self.templatePreTrigger_V283
+        self.headerPreWait2Txt_V284 =   self.headerPreWait2Txt_V283
+        self.templatePreWait2_V284 =    self.templatePreWait2_V283
+        self.headerTrialRobotTxt_V284 = self.headerTrialRobotTxt_V283
+        self.templateTrialRobot_V284 =  self.templateTrialRobot_V283
+                                    
+        self.headerTrialLaserTxt_V284 =  self.headerTrialLaserTxt_V283
+        self.templateTrialLaser_V284 =   self.templateTrialLaser_V283
+        self.headerTrialLEDPanelsTxt_V284 = self.headerTrialLEDPanelsTxt_V283
+        self.templateTrialLEDPanels_V284 = self.templateTrialLEDPanels_V283
+        self.headerPostTriggerTxt_V284 = self.headerPostTriggerTxt_V283
+        self.templatePostTrigger_V284 = self.templatePostTrigger_V283
+        self.headerPostWaitTxt_V284 =    self.headerPostWaitTxt_V283
+        self.templatePostWait_V284 =    self.templatePostWait_V283
+
         
+        # The state lines.
+        self.stateLeftTxt_V284           = self.stateLeftTxt_V283
+        self.stateRobotTxt_V284          = self.stateRobotTxt_V283
+        self.stateFlyTxt_V284            = self.stateFlyTxt_V283
+        self.templateStateLeft_V284      = self.templateStateLeft_V283
+        self.templateStateRobot_V284     = self.templateStateRobot_V283
+        self.templateStateFly_V284       = self.templateStateFly_V283
+        
+
         #######################################################################
         
 
@@ -1289,6 +1299,7 @@ class ConvertCsv:
             self.param_nRobots                      = '0'
             self.param_widthRobot                   = '0'
             self.param_heightRobot                  = '0'
+            self.param_isPresent                    = 'True'
             self.param_visibleRobot                 = 'unspecified'
             self.param_paintRobot                   = 'unspecified'
             self.param_scentRobot                   = 'unspecified'
@@ -1821,7 +1832,7 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-            if (versionIn in ['2.6', '2.7', '2.8', '2.81', '2.82', '2.83']):
+            if (versionIn in ['2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
                 i = 0;
                 headerVersionTxt    = line[i]; i=i+1
                 headerVersion       = line[i]; i=i+1
@@ -1893,7 +1904,7 @@ class ConvertCsv:
         ##################################################################
 
         ### Experiment Setup
-        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83']):
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
@@ -1917,6 +1928,13 @@ class ConvertCsv:
             self.param_widthRobot                   = field_list[1]
             self.param_heightRobot                  = field_list[2]
             self.param_descriptionRobot             = field_list[3]
+        if (versionIn in ['2.84']):
+            field_list = self.ListFromCsv(headerRobotSpec)
+            self.param_nRobots                      = field_list[0]
+            self.param_widthRobot                   = field_list[1]
+            self.param_heightRobot                  = field_list[2]
+            self.param_isPresent                    = field_list[3]
+            self.param_descriptionRobot             = field_list[4]
 
         
         ### Flies
@@ -1929,14 +1947,14 @@ class ConvertCsv:
             self.param_typeFlies                    = field_list[1]
             self.param_genderFlies                  = field_list[2]
             self.param_descriptionFlies             = self.param_typeFlies + ';' + self.param_genderFlies
-        if (versionIn in ['2.83']):
+        if (versionIn in ['2.83', '2.84']):
             field_list = self.ListFromCsv(headerFlySpec)
             self.param_nFlies                       = field_list[0]
             self.param_descriptionFlies             = field_list[1]
             
 
         ### Exclusion Zone.
-        if (versionIn in ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83']):
+        if (versionIn in ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerTracking)
             self.param_trackingExclusionzoneEnabled     = field_list[0]
             if len(field_list)>1:
@@ -1950,7 +1968,7 @@ class ConvertCsv:
 
         
         ### Pre Wait1
-        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83']):
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerPreWait1)
             self.param_preWait1                    = field_list[0]
 
@@ -2021,7 +2039,7 @@ class ConvertCsv:
             self.param_preRobotMoveRelSpeed            = field_list[17]
             self.param_preRobotMoveRelSpeedType        = field_list[18]
             self.param_preRobotMoveRelTolerance        = field_list[19]
-        if (versionIn in ['2.82', '2.83']):
+        if (versionIn in ['2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerPreRobot)
             self.param_preRobotEnabled                 = field_list[0]
             self.param_preRobotMovePatternFramePosition= field_list[1]
@@ -2058,7 +2076,7 @@ class ConvertCsv:
             self.param_preLEDPanelsStatefilterHi        = field_list[5]
             self.param_preLEDPanelsStatefilterCriteria  = field_list[6]
             self.param_preLEDPanelsTimeout              = field_list[7]
-        if (versionIn in ['2.81', '2.82', '2.83']):
+        if (versionIn in ['2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerPreLEDPanels)
             self.param_preLEDPanelsEnabled              = field_list[0]
             self.param_preLEDPanelsCommand              = field_list[1]
@@ -2101,7 +2119,7 @@ class ConvertCsv:
             self.param_preLaserStatefilterHi           = field_list[12]
             self.param_preLaserStatefilterCriteria     = field_list[13]
             self.param_preLaserTimeout                 = field_list[14]
-        if (versionIn in ['2.81', '2.82', '2.83']):
+        if (versionIn in ['2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerPreLaser)
             self.param_preLaserEnabled                 = field_list[0]
             self.param_preLaserPatternFramePosition    = field_list[1]
@@ -2137,7 +2155,7 @@ class ConvertCsv:
             self.param_preTriggerAngleTestBilateral   = field_list[12]
             self.param_preTriggerTimeHold             = field_list[13]
             self.param_preTriggerTimeout              = field_list[14]
-        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83']):
+        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerPreTrigger)
             self.param_preTriggerEnabled              = field_list[0]
             self.param_preTriggerFrameidParent        = field_list[1]
@@ -2159,7 +2177,7 @@ class ConvertCsv:
 
 
         ### Pre Wait2.
-        if (versionIn in ['2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83']):
+        if (versionIn in ['2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerPreWait2)
             self.param_preWait2                         = field_list[0]
 
@@ -2267,7 +2285,7 @@ class ConvertCsv:
             self.param_trialRobotMoveRelSpeed            = field_list[17]
             self.param_trialRobotMoveRelSpeedType        = field_list[18]
             self.param_trialRobotMoveRelTolerance        = field_list[19]
-        if (versionIn in ['2.82', '2.83']):
+        if (versionIn in ['2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerTrialRobot)
             self.param_trialRobotEnabled                 = field_list[0]
             self.param_trialRobotMovePatternFramePosition= field_list[1]
@@ -2304,7 +2322,7 @@ class ConvertCsv:
             self.param_trialLEDPanelsStatefilterHi        = field_list[5]
             self.param_trialLEDPanelsStatefilterCriteria  = field_list[6]
             self.param_trialLEDPanelsTimeout              = field_list[7]
-        if (versionIn in ['2.81', '2.82', '2.83']):
+        if (versionIn in ['2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerTrialLEDPanels)
             self.param_trialLEDPanelsEnabled              = field_list[0]
             self.param_trialLEDPanelsCommand              = field_list[1]
@@ -2363,7 +2381,7 @@ class ConvertCsv:
             self.param_trialLaserStatefilterHi           = field_list[12]
             self.param_trialLaserStatefilterCriteria     = field_list[13]
             self.param_trialLaserTimeout                 = field_list[14]
-        if (versionIn in ['2.81', '2.82', '2.83']):
+        if (versionIn in ['2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerTrialLaser)
             self.param_trialLaserEnabled                 = field_list[0]
             self.param_trialLaserPatternFramePosition    = field_list[1]
@@ -2399,7 +2417,7 @@ class ConvertCsv:
             self.param_postTriggerAngleTestBilateral   = field_list[12]
             self.param_postTriggerTimeHold             = field_list[13]
             self.param_postTriggerTimeout              = field_list[14]
-        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83']):
+        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerPostTrigger)
             self.param_postTriggerEnabled              = field_list[0]
             self.param_postTriggerFrameidParent        = field_list[1]
@@ -2421,7 +2439,7 @@ class ConvertCsv:
 
 
         ### Post Wait.
-        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83']):
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
             field_list = self.ListFromCsv(headerPostWait)
             self.param_postWait                     = field_list[0]
 
@@ -3885,6 +3903,261 @@ class ConvertCsv:
             fid.write('\n')
             
 
+    def WriteHeader_V284(self, filename):
+        headerVersionFile_V284 = self.templateVersionFile_V284.format(
+                                                versionFile              = '2.84',
+                                                ) 
+        headerExperiment_V284 = self.templateExperiment_V284.format(
+                                                date_time                  = self.param_date_time,
+                                                description                = self.param_description,
+                                                maxTrials                  = self.param_maxTrials,
+                                                trial                      = self.param_trial,
+                                                )
+        headerRobotSpec_V284 = self.templateRobotSpec_V284.format(
+                                                nRobots                    = self.param_nRobots,
+                                                widthRobot                 = self.param_widthRobot,
+                                                heightRobot                = self.param_heightRobot,
+                                                isPresent                  = self.param_isPresent,
+                                                descriptionRobot           = self.param_descriptionRobot,
+                                                )
+        headerFlySpec_V284 = self.templateFlySpec_V284.format(
+                                                nFlies                     = self.param_nFlies,
+                                                descriptionFlies           = self.param_descriptionFlies,
+                                                )
+
+        self.headerTrackingTxt_V284 = self.headerTrackingTxtA_V284
+        headerTracking_V284 = self.templateTrackingA_V284.format(
+                                                       trackingExclusionzoneEnabled = self.param_trackingExclusionzoneEnabled
+                                                       )
+        for i in range(len(self.param_trackingExclusionzoneX_list)):
+            self.headerTrackingTxt_V284 += self.headerTrackingTxtB_V284
+            headerTracking_V284 += self.templateTrackingB_V284.format(
+                                                trackingExclusionzoneX       = str(self.param_trackingExclusionzoneX_list[i]),
+                                                trackingExclusionzoneY       = str(self.param_trackingExclusionzoneY_list[i]),
+                                                trackingExclusionzoneRadius  = str(self.param_trackingExclusionzoneRadius_list[i]),
+                                                )
+        self.headerTrackingTxt_V284 += '\n'
+        headerTracking_V284 += '\n'
+
+        #######################################################################
+        headerPreRobot_V284 = self.templatePreRobot_V284.format(
+                                                preRobotEnabled               = self.param_preRobotEnabled,
+                                                preRobotMovePatternFramePosition= self.param_preRobotMovePatternFramePosition,
+                                                preRobotMovePatternFrameAngle = self.param_preRobotMovePatternFrameAngle,
+                                                preRobotMovePatternShape      = self.param_preRobotMovePatternShape,
+                                                preRobotMovePatternHzPattern  = self.param_preRobotMovePatternHzPattern,
+                                                preRobotMovePatternHzPoint    = self.param_preRobotMovePatternHzPoint,
+                                                preRobotMovePatternCount      = self.param_preRobotMovePatternCount,
+                                                preRobotMovePatternSizeX      = self.param_preRobotMovePatternSizeX,
+                                                preRobotMovePatternSizeY      = self.param_preRobotMovePatternSizeY,
+                                                preRobotMovePatternParam      = self.param_preRobotMovePatternParam,
+                                                preRobotMovePatternDirection  = self.param_preRobotMovePatternDirection,
+                                                preRobotMoveRelTracking       = self.param_preRobotMoveRelTracking,
+                                                preRobotMoveRelOriginPosition = self.param_preRobotMoveRelOriginPosition,
+                                                preRobotMoveRelOriginAngle    = self.param_preRobotMoveRelOriginAngle,
+                                                preRobotMoveRelDistance       = self.param_preRobotMoveRelDistance,
+                                                preRobotMoveRelAngleOffset    = self.param_preRobotMoveRelAngleOffset,
+                                                preRobotMoveRelAngleType      = self.param_preRobotMoveRelAngleType,
+                                                preRobotMoveRelAngleOscMag    = self.param_preRobotMoveRelAngleOscMag,
+                                                preRobotMoveRelAngleOscFreq   = self.param_preRobotMoveRelAngleOscFreq,
+                                                preRobotMoveRelSpeed          = self.param_preRobotMoveRelSpeed,
+                                                preRobotMoveRelSpeedType      = self.param_preRobotMoveRelSpeedType,
+                                                preRobotMoveRelTolerance      = self.param_preRobotMoveRelTolerance,
+                                                )
+        headerPreLaser_V284 = self.templatePreLaser_V284.format(
+                                                preLaserEnabled               = self.param_preLaserEnabled,
+                                                preLaserPatternFramePosition  = self.param_preLaserPatternFramePosition,
+                                                preLaserPatternFrameAngle     = self.param_preLaserPatternFrameAngle,
+                                                preLaserPatternShape          = self.param_preLaserPatternShape,
+                                                preLaserPatternHzPattern      = self.param_preLaserPatternHzPattern,
+                                                preLaserPatternHzPoint        = self.param_preLaserPatternHzPoint,
+                                                preLaserPatternCount          = self.param_preLaserPatternCount,
+                                                preLaserPatternSizeX          = self.param_preLaserPatternSizeX,
+                                                preLaserPatternSizeY          = self.param_preLaserPatternSizeY,
+                                                preLaserPatternParam          = self.param_preLaserPatternParam,
+                                                preLaserPatternDirection      = self.param_preLaserPatternDirection,
+                                                preLaserStatefilterHi         = self.param_preLaserStatefilterHi,
+                                                preLaserStatefilterLo         = self.param_preLaserStatefilterLo,
+                                                preLaserStatefilterCriteria   = self.param_preLaserStatefilterCriteria,
+                                                )
+        headerPreLEDPanels_V284 = self.templatePreLEDPanels_V284.format(
+                                                preLEDPanelsEnabled = self.param_preLEDPanelsEnabled,
+                                                preLEDPanelsCommand = self.param_preLEDPanelsCommand,
+                                                preLEDPanelsIdPattern = self.param_preLEDPanelsIdPattern,
+                                                preLEDPanelsFrameid = self.param_preLEDPanelsFrameid,
+                                                preLEDPanelsStatefilterLo = self.param_preLEDPanelsStatefilterLo,
+                                                preLEDPanelsStatefilterHi = self.param_preLEDPanelsStatefilterHi,
+                                                preLEDPanelsStatefilterCriteria = self.param_preLEDPanelsStatefilterHi,
+                                                )
+        
+        #######################################################################
+        headerPreWait1_V284 = self.templatePreWait1_V284.format(
+                                                preWait1                  = self.param_preWait1,
+                                                )
+        headerPreTrigger_V284 = self.templatePreTrigger_V284.format(
+                                                preTriggerEnabled            = self.param_preTriggerEnabled,
+                                                preTriggerFrameidParent      = self.param_preTriggerFrameidParent,
+                                                preTriggerFrameidChild       = self.param_preTriggerFrameidChild,
+                                                preTriggerSpeedAbsParentMin  = self.param_preTriggerSpeedAbsParentMin,
+                                                preTriggerSpeedAbsParentMax  = self.param_preTriggerSpeedAbsParentMax,
+                                                preTriggerSpeedAbsChildMin   = self.param_preTriggerSpeedAbsChildMin,
+                                                preTriggerSpeedAbsChildMax   = self.param_preTriggerSpeedAbsChildMax,
+                                                preTriggerSpeedRelMin        = self.param_preTriggerSpeedRelMin,
+                                                preTriggerSpeedRelMax        = self.param_preTriggerSpeedRelMax,
+                                                preTriggerDistanceMin        = self.param_preTriggerDistanceMin,
+                                                preTriggerDistanceMax        = self.param_preTriggerDistanceMax,
+                                                preTriggerAngleMin           = self.param_preTriggerAngleMin,
+                                                preTriggerAngleMax           = self.param_preTriggerAngleMax,
+                                                preTriggerAngleTest          = self.param_preTriggerAngleTest,
+                                                preTriggerAngleTestBilateral = self.param_preTriggerAngleTestBilateral,
+                                                preTriggerTimeHold           = self.param_preTriggerTimeHold,
+                                                preTriggerTimeout            = self.param_preTriggerTimeout,
+                                                )
+        headerPreWait2_V284 = self.templatePreWait2_V284.format(
+                                                preWait2                  = self.param_preWait2,
+                                                )
+        #######################################################################
+        headerTrialRobot_V284 = self.templateTrialRobot_V284.format(
+                                                trialRobotEnabled               = self.param_trialRobotEnabled,
+                                                trialRobotMovePatternFramePosition= self.param_trialRobotMovePatternFramePosition,
+                                                trialRobotMovePatternFrameAngle = self.param_trialRobotMovePatternFrameAngle,
+                                                trialRobotMovePatternShape      = self.param_trialRobotMovePatternShape,
+                                                trialRobotMovePatternHzPattern  = self.param_trialRobotMovePatternHzPattern,
+                                                trialRobotMovePatternHzPoint    = self.param_trialRobotMovePatternHzPoint,
+                                                trialRobotMovePatternCount      = self.param_trialRobotMovePatternCount,
+                                                trialRobotMovePatternSizeX      = self.param_trialRobotMovePatternSizeX,
+                                                trialRobotMovePatternSizeY      = self.param_trialRobotMovePatternSizeY,
+                                                trialRobotMovePatternParam      = self.param_trialRobotMovePatternParam,
+                                                trialRobotMovePatternDirection  = self.param_trialRobotMovePatternDirection,
+                                                trialRobotMoveRelTracking       = self.param_trialRobotMoveRelTracking,
+                                                trialRobotMoveRelOriginPosition = self.param_trialRobotMoveRelOriginPosition,
+                                                trialRobotMoveRelOriginAngle    = self.param_trialRobotMoveRelOriginAngle,
+                                                trialRobotMoveRelDistance       = self.param_trialRobotMoveRelDistance,
+                                                trialRobotMoveRelAngleOffset    = self.param_trialRobotMoveRelAngleOffset,
+                                                trialRobotMoveRelAngleType      = self.param_trialRobotMoveRelAngleType,
+                                                trialRobotMoveRelAngleOscMag    = self.param_trialRobotMoveRelAngleOscMag,
+                                                trialRobotMoveRelAngleOscFreq   = self.param_trialRobotMoveRelAngleOscFreq,
+                                                trialRobotMoveRelSpeed          = self.param_trialRobotMoveRelSpeed,
+                                                trialRobotMoveRelSpeedType      = self.param_trialRobotMoveRelSpeedType,
+                                                trialRobotMoveRelTolerance      = self.param_trialRobotMoveRelTolerance,
+                                                )
+        
+        headerTrialLaser_V284 = self.templateTrialLaser_V284.format(
+                                                trialLaserEnabled               = self.param_trialLaserEnabled,
+                                                trialLaserPatternFramePosition  = self.param_trialLaserPatternFramePosition,
+                                                trialLaserPatternFrameAngle     = self.param_trialLaserPatternFrameAngle,
+                                                trialLaserPatternShape          = self.param_trialLaserPatternShape,
+                                                trialLaserPatternHzPattern      = self.param_trialLaserPatternHzPattern,
+                                                trialLaserPatternHzPoint        = self.param_trialLaserPatternHzPoint,
+                                                trialLaserPatternCount          = self.param_trialLaserPatternCount,
+                                                trialLaserPatternSizeX          = self.param_trialLaserPatternSizeX,
+                                                trialLaserPatternSizeY          = self.param_trialLaserPatternSizeY,
+                                                trialLaserPatternParam          = self.param_trialLaserPatternParam,
+                                                trialLaserPatternDirection      = self.param_trialLaserPatternDirection,
+                                                trialLaserStatefilterHi         = self.param_trialLaserStatefilterHi,
+                                                trialLaserStatefilterLo         = self.param_trialLaserStatefilterLo,
+                                                trialLaserStatefilterCriteria   = self.param_trialLaserStatefilterCriteria,
+                                                )
+        headerTrialLEDPanels_V284 = self.templateTrialLEDPanels_V284.format(
+                                                trialLEDPanelsEnabled           = self.param_trialLEDPanelsEnabled,
+                                                trialLEDPanelsCommand           = self.param_trialLEDPanelsCommand,
+                                                trialLEDPanelsIdPattern         = self.param_trialLEDPanelsIdPattern,
+                                                trialLEDPanelsFrameid           = self.param_trialLEDPanelsFrameid,
+                                                trialLEDPanelsStatefilterLo     = self.param_trialLEDPanelsStatefilterLo,
+                                                trialLEDPanelsStatefilterHi     = self.param_trialLEDPanelsStatefilterHi,
+                                                trialLEDPanelsStatefilterCriteria = self.param_trialLEDPanelsStatefilterHi,
+                                                )
+            
+        #######################################################################
+        headerPostTrigger_V284 = self.templatePostTrigger_V284.format(
+                                                postTriggerEnabled            = str(self.param_postTriggerEnabled),
+                                                postTriggerFrameidParent      = str(self.param_postTriggerFrameidParent),
+                                                postTriggerFrameidChild       = str(self.param_postTriggerFrameidChild),
+                                                postTriggerSpeedAbsParentMin  = str(self.param_postTriggerSpeedAbsParentMin),
+                                                postTriggerSpeedAbsParentMax  = str(self.param_postTriggerSpeedAbsParentMax),
+                                                postTriggerSpeedAbsChildMin   = str(self.param_postTriggerSpeedAbsChildMin),
+                                                postTriggerSpeedAbsChildMax   = str(self.param_postTriggerSpeedAbsChildMax),
+                                                postTriggerSpeedRelMin        = str(self.param_postTriggerSpeedRelMin),
+                                                postTriggerSpeedRelMax        = str(self.param_postTriggerSpeedRelMax),
+                                                postTriggerDistanceMin        = str(self.param_postTriggerDistanceMin),
+                                                postTriggerDistanceMax        = str(self.param_postTriggerDistanceMax),
+                                                postTriggerAngleMin           = str(self.param_postTriggerAngleMin),
+                                                postTriggerAngleMax           = str(self.param_postTriggerAngleMax),
+                                                postTriggerAngleTest          = str(self.param_postTriggerAngleTest),
+                                                postTriggerAngleTestBilateral = str(self.param_postTriggerAngleTestBilateral),
+                                                postTriggerTimeHold           = str(self.param_postTriggerTimeHold),
+                                                postTriggerTimeout            = str(self.param_postTriggerTimeout),
+                                                )
+        headerPostWait_V284 = self.templatePostWait_V284.format(
+                                                postWait                      = str(self.param_postWait),
+                                                )
+
+        with open(filename, 'w') as fid:
+            fid.write(self.headerVersionFileTxt_V284)
+            fid.write(headerVersionFile_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerExperimentTxt_V284)
+            fid.write(headerExperiment_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerRobotSpecTxt_V284)
+            fid.write(headerRobotSpec_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerFlySpecTxt_V284)
+            fid.write(headerFlySpec_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerTrackingTxt_V284)
+            fid.write(headerTracking_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerPreRobotTxt_V284)
+            fid.write(headerPreRobot_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerPreLaserTxt_V284)
+            fid.write(headerPreLaser_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerPreLEDPanelsTxt_V284)
+            fid.write(headerPreLEDPanels_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerPreWait1Txt_V284)
+            fid.write(headerPreWait1_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerPreTriggerTxt_V284)
+            fid.write(headerPreTrigger_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerPreWait2Txt_V284)
+            fid.write(headerPreWait2_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerTrialRobotTxt_V284)
+            fid.write(headerTrialRobot_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerTrialLaserTxt_V284)
+            fid.write(headerTrialLaser_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerTrialLEDPanelsTxt_V284)
+            fid.write(headerTrialLEDPanels_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerPostTriggerTxt_V284)
+            fid.write(headerPostTrigger_V284)
+            fid.write('\n')
+    
+            fid.write(self.headerPostWaitTxt_V284)
+            fid.write(headerPostWait_V284)
+            fid.write('\n')
+            
+
     # Write the state lines from any-version input file to a pre-2.6 version output file.
     # Pre-version 2.6 doesn't include the 'triggered' column, nor the 'wings' columns.
     def WriteStateLines_Vpre26(self, filenameIn, filenameOut):
@@ -4164,6 +4437,10 @@ class ConvertCsv:
         self.WriteStateLines_V27(filenameIn, filenameOut)
 
 
+    def WriteStateLines_V284(self, filenameIn, filenameOut):
+        self.WriteStateLines_V27(filenameIn, filenameOut)
+
+
     # ConvertFile()
     # Convert a single file from one version to another.
     #
@@ -4198,16 +4475,20 @@ class ConvertCsv:
             self.WriteHeader_V282(filenameOut)
             self.WriteStateLines_V282(filenameIn, filenameOut)
         
-        elif (self.versionToWrite=='2.83') or (self.versionToWrite=='latest'):
+        elif (self.versionToWrite=='2.83'):
             self.WriteHeader_V283(filenameOut)
             self.WriteStateLines_V283(filenameIn, filenameOut)
+        
+        elif (self.versionToWrite=='2.84') or (self.versionToWrite=='latest'):
+            self.WriteHeader_V284(filenameOut)
+            self.WriteStateLines_V284(filenameIn, filenameOut)
         
 
     # Convert all the .csv files in the input directory to a given version in the output directory.
     #
     def ConvertDirToDir(self, dirInBase, dirOutBase):
         
-        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', 'latest']): 
+        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', 'latest']): 
             dirsIn = glob.glob(dirInBase+'/*')
             for d in dirsIn:
                 dirLeaf = d.split('/')[-1]
@@ -4222,11 +4503,11 @@ class ConvertCsv:
                     self.ConvertFile(filenameIn, dirOut)
                         
         else:
-            print ('Only versions "2.2", "2.6", "2.7", "2.8", "2.81", "2.82", "2.83", and "latest" are supported for writing.')
+            print ('Only versions "2.2", "2.6", "2.7", "2.8", "2.81", "2.82", "2.83", "2.84", and "latest" are supported for writing.')
             
 
     def ConvertTree(self, dirIn, dirOut, whatToCopy):
-        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', 'latest']): 
+        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', 'latest']): 
             if (dirIn != dirOut):
                 names = os.listdir(dirIn)
             
@@ -4270,7 +4551,7 @@ class ConvertCsv:
             else:
                 print "Source and Dest dirs must be different."
         else:
-            print ('Only versions "2.2", "2.6", "2.7", "2.8", "2.81", "2.82", "2.83", and "latest" are supported for writing.')
+            print ('Only versions "2.2", "2.6", "2.7", "2.8", "2.81", "2.82", "2.83", "2.84", and "latest" are supported for writing.')
             
         
 if __name__ == '__main__':

@@ -2,7 +2,7 @@
 import roslib; roslib.load_manifest('patterngen')
 import rospy
 import copy
-import numpy as N
+import numpy as np
 import threading
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Twist
 from std_msgs.msg import String
@@ -12,6 +12,8 @@ from flycore.msg import MsgFrameState
 from patterngen.msg import MsgPattern
 from patterngen.srv import *
 
+class Struct:
+    pass
 
 
 class PatternGenXY:
@@ -21,33 +23,31 @@ class PatternGenXY:
         rospy.loginfo ("PatternGenXY name=%s", __name__)
 
         # The pattern for continuous output.
-        self.pattern1 = MsgPattern()
-        self.pattern1.shape = 'none'
-        self.pattern1.hzPattern = 1.0
-        self.pattern1.hzPoint = 50
-        self.pattern1.count = 0
-        self.pattern1.points = []
-        self.pattern1.frameidPosition = '/Arena'
-        self.pattern1.frameidAngle = '/Arena'
-        self.pattern1.size = Point(25.4, 25.4, 0.0)
-        self.pattern1.preempt = True
-        self.pattern1.param = 0.0
-        self.pattern1.isDirty = True
-        self.lenPattern1 = 0.0
+        self.output = Struct()
+        self.output.pattern = MsgPattern()
+        self.output.pattern.shape = 'none'
+        self.output.pattern.hzPattern = 1.0
+        self.output.pattern.hzPoint = 50
+        self.output.pattern.count = 0
+        self.output.pattern.points = []
+        self.output.pattern.frameidPosition = 'Arena'
+        self.output.pattern.frameidAngle = 'Arena'
+        self.output.pattern.size = Point(25.4, 25.4, 0.0)
+        self.output.pattern.restart = True
+        self.output.pattern.param = 0.0
+        self.output.pattern.isDirty = True
+        self.output.pathlen = 0.0
+        self.output.ratePoint = rospy.Rate(self.output.pattern.hzPoint)
+        self.output.iPoint = None
 
-        self.iPoint = None
-
-        self.lock = threading.Lock()
+        self.output.lock = threading.Lock()
         
-        #self.dtPattern = rospy.Duration(1/self.pattern1.hzPattern)
-        self.dtPoint = rospy.Duration(1/self.pattern1.hzPoint)
-        self.ratePoint = rospy.Rate(self.pattern1.hzPoint)
         
 
         self.command = 'continue'
         self.command_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
         
-        self.subCommand          = rospy.Subscriber('broadcast/command', String, self.Command_callback)
+        self.subCommand          = rospy.Subscriber('experiment/command', String, self.Command_callback)
         self.subSetPattern       = rospy.Subscriber('SetPattern', MsgPattern, self.SetPattern_callback)
         self.tfrx = tf.TransformListener()
         
@@ -63,7 +63,6 @@ class PatternGenXY:
             self.SignalOutput = rospy.ServiceProxy(self.stSignalInput, SrvSignal)
         except rospy.ServiceException, e:
             rospy.loginfo ("FAILED %s: %s"%(self.stSignalInput,e))
-        rospy.loginfo('Passed: '+self.stSignalInput)
         
         
 
@@ -82,14 +81,14 @@ class PatternGenXY:
     
     def GetPointsCircle(self, pattern):
         nPoints = int(pattern.hzPoint/pattern.hzPattern)
-        q = 0.0 #N.pi/2.0  # Starting position
-        dq = 2.0*N.pi/nPoints
-        r = N.linalg.norm([pattern.size.x, pattern.size.y])
+        q = 0.0 #np.pi/2.0  # Starting position
+        dq = 2.0*np.pi/nPoints
+        r = np.linalg.norm([pattern.size.x, pattern.size.y])
 
         points = []
         for i in range(nPoints):
-            points.append(Point(x=r*N.cos(q), 
-                                y=r*N.sin(q)))
+            points.append(Point(x=r*np.cos(q), 
+                                y=r*np.sin(q)))
             q = q + dq    # Step around the circle
 
 	return points
@@ -112,17 +111,17 @@ class PatternGenXY:
             for i in range(nPointsSide):
                 points.append(Point(x=x, y=y))
 
-                if iSide==0:
+                if (iSide==0):
                     dx =  step
                     dy =  0.0
-                elif iSide==1:
+                elif (iSide==1):
                     dx =  0.0
                     dy =  step
-                elif iSide==2:
+                elif (iSide==2):
                     
                     dx = -step
                     dy =  0.0
-                elif iSide==3:
+                elif (iSide==3):
                     dx =  0.0
                     dy = -step
                 
@@ -159,9 +158,9 @@ class PatternGenXY:
         pitchSpiral = 2
         nRevolutionsPerPattern = 2 * 2 * pitchSpiral  # nCworCCW * nInOrOut * pitch
         nPointsPerRevolution = nPoints / nRevolutionsPerPattern
-        q = 2.0 * N.pi * N.random.random()
-        dq = 2.0 * N.pi/nPointsPerRevolution
-        radius = N.linalg.norm([pattern.size.x, pattern.size.y])
+        q = 2.0 * np.pi * np.random.random()
+        dq = 2.0 * np.pi/nPointsPerRevolution
+        radius = np.linalg.norm([pattern.size.x, pattern.size.y])
         
         rmax = radius
         rmin = 0.10
@@ -173,8 +172,8 @@ class PatternGenXY:
             for iINorOUT in range(2):
                 for iRev in range(pitchSpiral):  # Number of revolutions.
                     for iPoint in range(nPointsPerRevolution):
-                        points.append(Point(x=r*N.cos(q), 
-                                            y=r*N.sin(q)))
+                        points.append(Point(x=r*np.cos(q), 
+                                            y=r*np.sin(q)))
                         q = q + dq # Step around the circle.
                         r = r + dr
             
@@ -182,7 +181,7 @@ class PatternGenXY:
                 dr = -dr
         
         #if r<rmin: 
-            q = q + N.pi * (1.0 - 0.1*N.random.random()) # So we don't always retrace the same path.
+            q = q + np.pi * (1.0 - 0.1*np.random.random()) # So we don't always retrace the same path.
             dq = -dq
             
 
@@ -209,7 +208,7 @@ class PatternGenXY:
             x = x+xDelta
             y = y+yDelta
 
-        # Alternatively do something like:  points = N.linspace([xStart,yStart],[xEnd,yEnd],nPoints)
+        # Alternatively do something like:  points = np.linspace([xStart,yStart],[xEnd,yEnd],nPoints)
         
         return points
     
@@ -224,8 +223,8 @@ class PatternGenXY:
         ymax =  pattern.size.y / 2
 
         points = []        
-        for x in N.linspace(xmin, xmax, nPointsSide+1):
-            for y in N.linspace(ymin, ymax, nPointsSide+1):
+        for x in np.linspace(xmin, xmax, nPointsSide+1):
+            for y in np.linspace(ymin, ymax, nPointsSide+1):
                 points.append(Point(x,y,0))
 
     
@@ -254,7 +253,7 @@ class PatternGenXY:
             
         
         def A(self, level):
-            if level > 0:
+            if (0 < level):
                 self.I(level-1)
                 self.Up()
                 self.J(level-1)
@@ -265,7 +264,7 @@ class PatternGenXY:
                 #self.Down()
     
         def B(self, level):
-            if level > 0:
+            if (0 < level):
                 self.D(level-1)
                 self.Right()
                 self.C(level-1)
@@ -276,7 +275,7 @@ class PatternGenXY:
                 #self.Down()
     
         def C(self, level):
-            if level > 0:
+            if (0 < level):
                 self.E(level-1)
                 self.Right()
                 self.C(level-1)
@@ -287,7 +286,7 @@ class PatternGenXY:
                 #self.Down()
     
         def D(self, level):
-            if level > 0:
+            if (0 < level):
                 self.B(level-1)
                 self.Down()
                 self.D(level-1)
@@ -298,7 +297,7 @@ class PatternGenXY:
                 #self.Right()
     
         def E(self, level):
-            if level > 0:
+            if (0 < level):
                 self.C(level-1)
                 self.Down()
                 self.D(level-1)
@@ -309,7 +308,7 @@ class PatternGenXY:
                 #self.Right()
     
         def F(self, level):
-            if level > 0:
+            if (0 < level):
                 self.J(level-1)
                 self.Left()
                 self.I(level-1)
@@ -320,7 +319,7 @@ class PatternGenXY:
                 #self.Right()
     
         def G(self, level):
-            if level > 0:
+            if (0 < level):
                 self.C(level-1)
                 self.Down()
                 self.D(level-1)
@@ -331,7 +330,7 @@ class PatternGenXY:
                 #self.Up()
     
         def H(self, level):
-            if level > 0:
+            if (0 < level):
                 self.J(level-1)
                 self.Left()
                 self.I(level-1)
@@ -342,7 +341,7 @@ class PatternGenXY:
                 #self.Up()
     
         def I(self, level):
-            if level > 0:
+            if (0 < level):
                 self.K(level-1)
                 self.Left()
                 self.I(level-1)
@@ -353,7 +352,7 @@ class PatternGenXY:
                 #self.Up()
     
         def J(self, level):
-            if level > 0:
+            if (0 < level):
                 self.H(level-1)
                 self.Up()
                 self.J(level-1)
@@ -364,7 +363,7 @@ class PatternGenXY:
                 #self.Left()
     
         def K(self, level):
-            if level > 0:
+            if (0 < level):
                 self.I(level-1)
                 self.Up()
                 self.J(level-1)
@@ -375,7 +374,7 @@ class PatternGenXY:
                 #self.Left()
     
         def L(self, level):
-            if level > 0:
+            if (0 < level):
                 self.D(level-1)
                 self.Right()
                 self.C(level-1)
@@ -458,7 +457,7 @@ class PatternGenXY:
          }
         
         point_list = []
-        if pattern.shape in points_bychar:
+        if (pattern.shape in points_bychar):
             xy_list = points_bychar[pattern.shape]
             for xy in xy_list:
                 point_list.append(Point(x=xy[0] * pattern.size.x / 10.0, 
@@ -469,11 +468,11 @@ class PatternGenXY:
 
     # Add intermediate points such that the point-point spacing is no greater than dr.
     def InterpolatePoints (self, points, dr):
-        if dr>0.0:
+        if (0.0 < dr):
             points_new = []
             for i in range(len(points)-1): # So we can interpolate from point i to point i+1.
-                r = N.linalg.norm([points[i+1].x-points[i].x, points[i+1].y-points[i].y])
-                n = N.ceil(r / dr)
+                r = np.linalg.norm([points[i+1].x-points[i].x, points[i+1].y-points[i].y])
+                n = np.ceil(r / dr)
                 dx = (points[i+1].x-points[i].x) / n
                 dy = (points[i+1].y-points[i].y) / n
                 x = 0.0
@@ -493,31 +492,31 @@ class PatternGenXY:
 
     def UpdatePatternPoints (self, pattern):      
         if (pattern.isDirty):  
-            if pattern.shape == 'constant':
+            if (pattern.shape == 'constant'):
                 pattern.points = self.GetPointsConstant(pattern)
-            elif pattern.shape == 'point':
+            elif (pattern.shape == 'point'):
                 pattern.points = self.GetPointsConstant(pattern)
-            elif pattern.shape == 'circle':
+            elif (pattern.shape == 'circle'):
                 pattern.points = self.GetPointsCircle(pattern)
-            elif pattern.shape == 'square':
+            elif (pattern.shape == 'square'):
                 pattern.points = self.GetPointsSquare(pattern)
-            elif pattern.shape == 'flylogo':
+            elif (pattern.shape == 'flylogo'):
                 pattern.points = self.GetPointsFlylogo(pattern)
-            elif pattern.shape == 'spiral':
+            elif (pattern.shape == 'spiral'):
                 pattern.points = self.GetPointsSpiral(pattern)
-            elif pattern.shape == 'ramp':
+            elif (pattern.shape == 'ramp'):
                 pattern.points = self.GetPointsRamp(pattern)
-            elif pattern.shape == 'peano':
+            elif (pattern.shape == 'peano'):
                 pattern.points = self.GetPointsPeano(pattern)
-            elif pattern.shape == 'grid':
+            elif (pattern.shape == 'grid'):
                 pattern.points = self.GetPointsGrid(pattern)
-            elif pattern.shape == 'raster':
+            elif (pattern.shape == 'raster'):
                 pattern.points = self.GetPointsGridRaster(pattern)
-            elif (len(pattern.shape)==1) and (pattern.shape.isalnum()):
+            elif ((len(pattern.shape)==1) and (pattern.shape.isalnum())):
                 pattern.points = self.GetPointsCharacter(pattern)
-            elif pattern.shape == 'bypoints':
+            elif (pattern.shape == 'bypoints'):
                 pass
-            elif pattern.shape == 'none':
+            elif (pattern.shape == 'none'):
                 pattern.points = []
             else:
                 pattern.points = []
@@ -528,137 +527,179 @@ class PatternGenXY:
                 
                 
     def GetPathLength(self, points):
-        lenTotal = 0.0
-        if (len(points)>0):
+        pathlen = 0.0
+        if (0 < len(points)):
             ptCur = points[0]
             for pt in points:
-                lenTotal += N.linalg.norm([pt.x-ptCur.x, 
-                                          pt.y-ptCur.y])
+                pathlen += np.linalg.norm([pt.x-ptCur.x, 
+                                           pt.y-ptCur.y])
                 ptCur = pt
                 
-            lenTotal += N.linalg.norm([points[-1].x-ptCur.x, 
-                                      points[-1].y-ptCur.y])
+            pathlen += np.linalg.norm([points[-1].x-ptCur.x, 
+                                       points[-1].y-ptCur.y])
             
-        return lenTotal
+        return pathlen
     
         
     # PatternGen_callback() 
     #   Receive the message that sets up a pattern generation.
     #
-    def SetPattern_callback (self, msgPatternGen):
-        with self.lock:
-            self.pattern1.isDirty           = True
-            self.pattern1.frameidPosition   = msgPatternGen.frameidPosition
-            self.pattern1.frameidAngle      = msgPatternGen.frameidAngle
-            self.pattern1.shape             = msgPatternGen.shape
-            self.pattern1.hzPattern         = msgPatternGen.hzPattern
-            self.pattern1.hzPoint           = msgPatternGen.hzPoint
-            self.pattern1.count             = msgPatternGen.count
-            self.pattern1.size              = msgPatternGen.size
-            self.pattern1.param             = msgPatternGen.param
-            self.pattern1.direction         = msgPatternGen.direction # Forward (+1) or reverse (-1) through the pattern points.
-            if (self.pattern1.direction==0):
-                self.pattern1.direction = 1 
+    def SetPattern_callback (self, msgPattern):
+        iPointPre = self.output.iPoint
 
-    	    self.dtPoint = rospy.Duration(1/self.pattern1.hzPoint)
-    	    self.ratePoint = rospy.Rate(self.pattern1.hzPoint)
-    
-            if self.pattern1.count==-1:
-                self.pattern1.count = 2147483640 # MAX_INT
+        # To provide a glitch-free transition, do the time-consuming setup of outputTmp first, then copy it into place at the end.
+        outputTmp = Struct()
+        outputTmp.pattern = MsgPattern()
+        outputTmp.pattern.isDirty           = True
+        outputTmp.pattern.frameidPosition   = msgPattern.frameidPosition
+        outputTmp.pattern.frameidAngle      = msgPattern.frameidAngle
+        outputTmp.pattern.shape             = msgPattern.shape
+        outputTmp.pattern.hzPattern         = msgPattern.hzPattern
+        outputTmp.pattern.hzPoint           = msgPattern.hzPoint
+        outputTmp.pattern.count             = msgPattern.count
+        outputTmp.pattern.size              = msgPattern.size
+        outputTmp.pattern.restart           = msgPattern.restart
+        outputTmp.pattern.param             = msgPattern.param
+        outputTmp.pattern.direction         = msgPattern.direction # Forward (+1) or reverse (-1) through the pattern points.  0 means choose at random, +1 or -1.
+        
+        # If direction==0, then choose random +1 or -1.
+        if (outputTmp.pattern.direction==0):
+            outputTmp.pattern.direction = 2*np.random.randint(2)-1
+             
+        outputTmp.ratePoint = rospy.Rate(outputTmp.pattern.hzPoint)
+        if (outputTmp.pattern.count==-1):
+            outputTmp.pattern.count = 2147483640 # MAX_INT
+        
+        if (outputTmp.pattern.shape=='bypoints'):
+            outputTmp.pattern.points = msgPattern.points
             
-            if self.pattern1.shape=='bypoints':
-                self.pattern1.points = msgPatternGen.points
-                
-            self.UpdatePatternPoints(self.pattern1)
-            self.lenPattern1 = self.GetPathLength(self.pattern1.points)
-            
-            if (len(self.pattern1.points)>0):
-                if (msgPatternGen.preempt) or (self.iPoint >= len(self.pattern1.points)) or (self.iPoint < 0) or (self.iPoint is None):
-                    if (self.pattern1.direction > 0):
-                        self.iPoint = 0
-                    elif (self.pattern1.direction < 0):
-                        self.iPoint = len(self.pattern1.points)-1
-                    else:
-                        rospy.logwarn ('pattern.direction==0.  Pattern will not advance.')
+        self.UpdatePatternPoints(outputTmp.pattern)
+        outputTmp.pathlen = self.GetPathLength(outputTmp.pattern.points)
+        
+        if (0 < len(outputTmp.pattern.points)):
+            if (not outputTmp.pattern.restart) and (iPointPre is not None):
+                # Find the point in the new pattern nearest the current point in the last pattern.
+                # Convert Point()'s to lists.
+                xyNew = []
+                for pt in outputTmp.pattern.points:
+                    xyNew.append([pt.x,pt.y])
+
+                #rospy.logwarn('%s, %s' % (self.output.iPoint, len(self.output.pattern.points)))
+                if (self.output.iPoint is not None):
+                    pointPrev = self.output.pattern.points[self.output.iPoint]   # Save the prev cursor.
+                     
+                xyPrev = [pointPrev.x, pointPrev.y]
                     
+                dxy = np.subtract(xyPrev, xyNew)
+                dx = dxy[:,0]
+                dy = dxy[:,1]
+                d = np.hypot(dx, dy)
+                iNearest = np.argmin(d) # Index into self.output.pattern.points of the new cursor.
+                iPointTmp = iNearest
+            else:
+                if (0 < outputTmp.pattern.direction):
+                    iPointTmp = 0
+                elif (outputTmp.pattern.direction < 0):
+                    iPointTmp = len(outputTmp.pattern.points)-1
+                else:
+                    iPointTmp = 0
+                    rospy.logwarn ('pattern.direction==0.  Pattern will not advance.')
+                    
+                
 
-	    #rospy.logwarn ('SetPattern_callback() points=%s' % self.pattern1.points)
+
+            if (iPointPre is not None):
+                iPointPost = self.output.iPoint
+                outputTmp.iPoint = (iPointTmp + (iPointPost-iPointPre)) % len(outputTmp.pattern.points) # Install the new iNearest, plus a correction for processing time.
+            else:
+                outputTmp.iPoint = iPointTmp
+
+                
+        with self.output.lock:
+            self.output.pattern   = outputTmp.pattern
+            self.output.ratePoint = outputTmp.ratePoint
+            self.output.pathlen   = outputTmp.pathlen
+            self.output.iPoint    = outputTmp.iPoint
+
+        #rospy.logwarn ('SetPattern_callback() points=%s' % self.output.pattern.points)
             
             
     def GetPatternPoints_callback(self, reqGetPatternPoints):
-        with self.lock:
-            self.UpdatePatternPoints(reqGetPatternPoints.pattern)
+        #with self.output.lock:
+        self.UpdatePatternPoints(reqGetPatternPoints.pattern)
             
         return SrvGetPatternPointsResponse(pattern=reqGetPatternPoints.pattern)
     
             
-    def SendSignalPoint(self): 
-        if (self.iPoint is not None) and (self.pattern1.points is not None) and (len(self.pattern1.points)>0):
-            if self.pattern1.count>0:
-                direction = copy.copy(self.pattern1.direction)
+    def SendPointAndStep(self, output): 
+        with output.lock:
+            if (output.iPoint is not None) and (output.pattern.points is not None) and (0 < len(output.pattern.points)) and (0 < output.pattern.count):
+                direction = copy.copy(output.pattern.direction)
                 bSuccess = False
 
-                pts = self.TransformPatternPoint()
-                vecNext = self.StepNextPatternPoint()
-                a = N.arctan2(vecNext.y, vecNext.x)
+                pts = self.TransformPatternPoint(output)
+                vecNext = self.StepNextPatternPoint(output)
+                a = np.arctan2(vecNext.y, vecNext.x)
 
-                speed = self.lenPattern1 * self.pattern1.hzPattern
-                velocity = Twist(linear=Point(x = speed * N.cos(a),
-                                              y = speed * N.sin(a))) # BUG: We're ignoring angular velocity.
+                speed = output.pathlen * output.pattern.hzPattern
+                velocity = Twist(linear=Point(x = speed * np.cos(a),
+                                              y = speed * np.sin(a))) # TODO: We're ignoring angular velocity.
                 
-                #rospy.logwarn('iPoint=%d/%d, speed=% 4.1f, x=% 4.1f' % (self.iPoint, len(self.pattern1.points), speed, pts.point.x))
+                #rospy.logwarn('iPoint=%d/%d, speed=% 4.1f, x=% 4.1f' % (output.iPoint, len(output.pattern.points), speed, pts.point.x))
                 state=MsgFrameState(header=pts.header,
                                     pose=Pose(position=pts.point),
                                     velocity=velocity)#
                 resp = self.SignalOutput (state)
                 bSuccess = resp.success
                 if (not bSuccess):
-                    self.pattern1.direction = -direction # Back out until no longer clipped.  
+                    output.pattern.direction = -direction # Back out until no longer clipped.  
                     #rospy.logwarn('clipped')
 
-                        
-                #rospy.logwarn(self.iPoint)
+                #pt = output.pattern.points[output.iPoint]
+                #rospy.logwarn('%s: (%f,%f,%f)' % (output.iPoint, pt.x, pt.y, pt.z))
 
 
 
-    def TransformPatternPoint(self):
+    def TransformPatternPoint(self, output):
         pts = PointStamped()
                       
         try:  
-            pts.header.stamp = self.tfrx.getLatestCommonTime('/Arena', self.pattern1.frameidPosition)
-            (pos,q) = self.tfrx.lookupTransform('/Arena', self.pattern1.frameidPosition, pts.header.stamp)
+            pts.header.stamp = self.tfrx.getLatestCommonTime('Arena', output.pattern.frameidPosition)
+            (pos,q) = self.tfrx.lookupTransform('Arena', output.pattern.frameidPosition, pts.header.stamp)
         except tf.Exception, e:
-            rospy.logwarn('Exception transforming %s->Arena in TransformPatternPoint():  %s' % (self.pattern1.frameidPosition,e))
+            rospy.logwarn('Exception transforming %s->Arena in TransformPatternPoint():  %s' % (output.pattern.frameidPosition,e))
         else:
-            pts.header.frame_id = '/Arena'
-            pts.point = copy.copy(self.pattern1.points[self.iPoint])
+            pts.header.frame_id = 'Arena'
+            pts.point = copy.copy(output.pattern.points[output.iPoint])
             pts.point.x += pos[0]
             pts.point.y += pos[1]
         
         return pts
                 
 
-    def StepNextPatternPoint(self):                    
+    def StepNextPatternPoint(self, output):                    
         #rospy.logwarn ('PG pt=%s' % [pts.point.x, pts.point.y])
-        ptCur = self.pattern1.points[self.iPoint]
-        self.iPoint += self.pattern1.direction
+        ptCur = output.pattern.points[output.iPoint]
+        output.iPoint += output.pattern.direction
         
         # When the pattern output is completed, go to the next pattern.
-        if (len(self.pattern1.points)>0):
-            if self.iPoint >= len(self.pattern1.points):
-                #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=%d' % (self.iPoint, self.pattern1.count))
-                self.iPoint = 0
-                self.pattern1.count -= 1
-                self.UpdatePatternPoints(self.pattern1)
+        if (0 < len(output.pattern.points)):
+            if (output.iPoint >= len(output.pattern.points)):
+                #rospy.logwarn('EndOfPattern: output.iPoint=%d, count=%d' % (output.iPoint, output.pattern.count))
+                output.iPoint = 0
+                if (0 < output.pattern.count):
+                    output.pattern.count -= 1
+                self.UpdatePatternPoints(output.pattern)
 
             # When the pattern output is completed, go to the next pattern.
-            if (self.iPoint < 0):
-                #rospy.logwarn('EndOfPattern: self.iPoint=%d, count=size %d' % (self.iPoint, self.pattern1.count))
-                self.iPoint = len(self.pattern1.points)-1
-                self.pattern1.count -= 1
-                self.UpdatePatternPoints(self.pattern1)
+            if (output.iPoint < 0):
+                #rospy.logwarn('EndOfPattern: output.iPoint=%d, count=size %d' % (output.iPoint, output.pattern.count))
+                output.iPoint = len(output.pattern.points)-1
+                if (0 < output.pattern.count):
+                    output.pattern.count -= 1
+                self.UpdatePatternPoints(output.pattern)
             
-            ptNext = self.pattern1.points[self.iPoint]
+            ptNext = output.pattern.points[output.iPoint]
             
             # Vector to the next point.
             dPoint = Point(x=ptNext.x-ptCur.x,
@@ -672,9 +713,9 @@ class PatternGenXY:
     def Main(self):
         while (not rospy.is_shutdown()) and (self.command != 'exit_now'):
             if (self.command != 'pause_now'):
-                self.SendSignalPoint()
+                self.SendPointAndStep(self.output)
                 
-            self.ratePoint.sleep()
+            self.output.ratePoint.sleep()
 
         # Shutdown all the services we offered.
         for key in self.services:
@@ -683,7 +724,7 @@ class PatternGenXY:
             
 
 
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     try:
         patterngen = PatternGenXY()
         patterngen.Main()

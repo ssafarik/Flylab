@@ -46,6 +46,7 @@ class OriginateCalibrationStage:
 
 if __name__ == '__main__':
     rospy.init_node('OriginateCalibrationStage')
+    rospy.sleep(1)
     try:
         cal = OriginateCalibrationStage()
         cal.Main()
