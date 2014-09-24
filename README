@@ -75,11 +75,11 @@ Each experiment consists of one or more trials, and the results of each trial ar
 
 In the "experiments" directory there is a set of experiments files (*.py).  An experiment is started via the <experimentname>.launch file, and that starts all of the other needed Flylab components.  
 
-Internally an experiment runs as a state machine, which just means that it goes through a sequence of states like a flowchart.  Progress through the flowchart is partially determined by a triggering mechanism where you get to specify the trigger conditions.  The flowchart structure is shown in the file Flylab/ExperimentStateMachine.jpg.
+Internally an experiment runs as a state machine, which just means that it goes through a sequence of states like a flowchart.  Progress through the flowchart is partially determined by a triggering mechanism where you get to specify the trigger conditions.
 
 During operation, you may view the state machine graph of the experiment with the following ROS command:  rosrun smach_viewer smach_viewer.py
 
-Refer to the file experimentparams.txt for details of the experiment parameters.
+Experiment parameters are documented in the experiment.py files, and please refer to these files for examples.
 
 
 
@@ -132,8 +132,10 @@ Messages:
     "experiment/command", with commands "continue", "pause_now", and "exit_now"
 
 Services:
-    "set_stage_state_ref"    Set the reference state for the mechanism.  It will go there.
-    "signal_input"           Set the reference state for the mechanism.  It will go there.
+    "set_stage_state_ref"    Set the reference state for the mechanism.  
+                             It will go there.
+    "signal_input"           Set the reference state for the mechanism.  
+                             It will go there.
     "get_stage_state"        Return the current state of the mechanism.
     "home_stage"             Go to the home position.
     "calibrate_stage"        Find the limit switches, then go to home position.
@@ -145,7 +147,8 @@ Laser Galvos
 At present, the galvos use a National Instruments DAQ, and that requires Windows.  Subsequently, the galvodriver needs a Windows machine (e.g. galvobox) to run, while the rest of Flylab runs on Ubuntu.  See Flylab/install.txt for details.
 
 As a user of Flylab, your interface to the galvos is primarily through the experimentparams data structure contained in your experiment file.  In each of the experimentparams "pre" and "trial" sections, you'll find a "lasergalvos" section, with the following fields:
-    .lasergalvos.enabled =                  Use the laser, or not.  (True | False)
+    .lasergalvos.enabled =                  Use the laser, or not.  
+                                            (True | False)
     .lasergalvos.pattern_list =             a list of MsgPattern data, see 
                                             below,
                                             i.e. [MsgPattern, MsgPattern, ...]
@@ -250,7 +253,8 @@ Camera Parameters
 There are three main types of camera: ethernet, firewire, and usb.  Each type uses a different driver (with the exception of Firefly usb cameras that use the firewire driver), and each driver enables a different set of parameters.  Some description is given here, but please look at existing params_camera.launch files in the Flylab/config/RIG/launch directories for examples.
 
 Ethernet, using the camera_aravis driver:
-    guid                  String identifying the camera.  Defaults to the first camera if not set.
+    guid                  String identifying the camera.  Defaults to the 
+                          first camera if not set.
     Acquire               True/false turns the camera on/off.
     ExposureAuto          Off/Once/Continuous
     GainAuto              Off/Once/Continuous
@@ -261,11 +265,13 @@ Ethernet, using the camera_aravis driver:
     TriggerMode           Off/
     TriggerSource         Line1/Line2/Software
     softwaretriggerrate   Frames per second, driven by the software driver.
-    frame_id              String to use the the frame_id field of the ROS Image header.
+    frame_id              String to use the the frame_id field of the 
+                          ROS Image header.
     mtu                   Max transmission unit, bytes per network packet.
 
 Firewire or USB, using the 1394 driver:
-    video_mode            String specifying the camera mode, usually "format7_mode0"
+    video_mode            String specifying the camera mode, 
+                          usually "format7_mode0"
     frame_rate            Frames per second.
     shutter               Time the shutter is open.  (units?)
  
@@ -274,9 +280,14 @@ Firewire or USB, using the 1394 driver:
 Some useful commands:
 -----------------------
 roslaunch experiments <experimentname>.launch            # Run an experiment.
-rostopic echo camera/image_raw/header                    # Show image headers to see if the camera is sending images.
-rosrun image_view image_view image:=camera/image_rect &  # Open a window to show image_rect.
-rosrun smach_viewer smach_viewer.py                      # Show the state machine graph.
-rqt_console                                              # Show ROS messages, logs, etc.
+rostopic echo camera/image_raw/header                    # Show image headers 
+                                                         # to see if the camera 
+                                                         # is sending images.
+rosrun image_view image_view image:=camera/image_rect &  # Open a window to 
+                                                         # show image_rect.
+rosrun smach_viewer smach_viewer.py                      # Show the state 
+                                                         # machine graph.
+rqt_console                                              # Show ROS messages, 
+                                                         # logs, etc.
 
 
