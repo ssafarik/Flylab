@@ -225,14 +225,18 @@ $ rosrun Flylab retracker
 
 Extract images or video from a .bag file
 ---------------------------
-You may process a .bag file and save the contained images to .png files, and optionally to a .mov file.  
-Specify the .bag file and the image topic on the command line, and optionally the .mov filename to write as a movie file. 
+You may process a .bag file and save the contained images to .png / .mov / .fmf files.  
+Specify the .bag file and the image topic on the command line, and optionally the .mov or .fmf filename. 
 
-$ rosrun save bag2png.py <bagfile> <imagetopic>] [filename.mov]
+$ rosrun save bagconverter.py <bagfile> <imagetopic> [filename.mov | filename.fmf]
 
-For example:
-$ rosrun save bag2png.py yourfile.bag /camera/image_rect /home/rancher/asdf.mov
+Examples:
+$ rosrun save bagconverter.py yourfile.bag /camera/image_rect /home/rancher/asdf.mov
+$ rosrun save bagconverter.py yourfile.bag /camera/image_rect /home/rancher/asdf.fmf
 
+
+Before you run the above command, it may help to see what's in the .bag via the following command:
+$ rosbag info yourfile.bag
 
 
 Parameters

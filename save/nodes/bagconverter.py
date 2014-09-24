@@ -7,12 +7,12 @@
 # Specify the .bag file and the image topic on the command line, and
 # optionally the .mov filename to write as a movie file. 
 #
-#   rosrun save bag2png.py <bagfile> <imagetopic>] [filename.mov | filename.fmf]
+#   rosrun save bagconverter.py <bagfile> <imagetopic>] [filename.mov | filename.fmf]
 #
 # for example:
-#   rosrun save bag2png.py yourfile.bag /camera/image_rect /home/rancher/asdf.mov
+#   rosrun save bagconverter.py yourfile.bag /camera/image_rect /home/rancher/asdf.mov
 # or:
-#   rosrun save bag2png.py yourfile.bag /camera/image_rect /home/rancher/asdf.fmf
+#   rosrun save bagconverter.py yourfile.bag /camera/image_rect /home/rancher/asdf.fmf
 #
 #
 
@@ -45,8 +45,9 @@ if (len(sys.argv)==4):
     elif ('.fmf' in sys.argv[3]):
         filenameFmf = sys.argv[3]
     else:
-        print('bag2png: Third parameter must be the full path spec of the .mov or .fmf file to write.')
-    
+        print('bagconverter: Third parameter must be the full path spec of the .mov or .fmf file to write.')
+
+# Process the .bag file.    
 if (len(sys.argv)>=3):
     # Get the first and second command parameters.
     bag = rosbag.Bag(sys.argv[1])
@@ -146,13 +147,13 @@ if (len(sys.argv)>=3):
         
                     
     if (iImage==0):
-        print('Please specify a valid image topic:  bag2png filename.bag imagetopic [filename.mov]')
+        print('Please specify a valid image topic:  bagconverter filename.bag imagetopic [filename.mov]')
         print('Topics in %s are:' % sys.argv[1])
         for (i,c) in bag._connections.iteritems():
             print(c.topic)
             
 else:
-    print ('Usage:  bag2png filename.bag imagetopic [filename.mov]')
+    print ('Usage:  bagconverter filename.bag imagetopic [filename.mov]')
     print ('  Extracts the image files from a .bag file, and writes them to')
     print ('  disk in a subdirectory named from the imagetopic.')
     print ('  Can also then optionally convert those images to a .mov file.')

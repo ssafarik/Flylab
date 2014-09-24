@@ -46,7 +46,6 @@ class SaveImages:
         self.imageext = rospy.get_param('save/imageext', 'png')
         
         self.cvbridge = CvBridge()
-        self.lockImage = threading.Lock()
         self.lockMov = threading.Lock()
         self.filename = None
         self.fid = None
@@ -83,10 +82,9 @@ class SaveImages:
 
 
     def OnShutdown_callback(self):
-        with self.lockImage:
-            if (self.fileErrors is not None) and (not self.fileErrors.closed):
-                self.fileErrors.close()
-                self.fileErrors = None
+        if (self.fileErrors is not None) and (not self.fileErrors.closed):
+            self.fileErrors.close()
+            self.fileErrors = None
             
         
 
