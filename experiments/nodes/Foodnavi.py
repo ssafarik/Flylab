@@ -40,8 +40,8 @@ class Experiment():
         self.experimentparams.robotspec.height = 1.5875
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
-        self.experimentparams.flyspec.nFlies = 1
-        self.experimentparams.flyspec.description = "HCS male"
+        self.experimentparams.flyspec.nFlies = 2
+        self.experimentparams.flyspec.description = "HCS female"
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]

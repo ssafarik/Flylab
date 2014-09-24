@@ -39,7 +39,7 @@ class Experiment():
         self.experimentparams.robotspec.height = 1.5875
         self.experimentparams.robotspec.description = "Black oxide magnet"
 
-        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.nFlies = 4
         self.experimentparams.flyspec.description = "unspecified"
         
         self.experimentparams.tracking.exclusionzones.enabled = False
@@ -102,7 +102,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 7200
+        self.experimentparams.post.trigger.timeout = 7200 # 5400 = 1.5 hr
         self.experimentparams.post.wait = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 
