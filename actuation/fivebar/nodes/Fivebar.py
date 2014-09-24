@@ -140,7 +140,7 @@ class Fivebar:
 
         # Command messages.
         self.command = 'continue'
-        self.command_list = ['continue','exit_now']
+        self.command_list = ['continue', 'pause_now', 'exit_now']
         self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
 
         self.subVisualState = rospy.Subscriber('visual_state', MsgFrameState, self.VisualState_callback)
@@ -1281,7 +1281,7 @@ class Fivebar:
                 self.SendTransforms()
                 self.UpdateMotorCommandFromTarget()
 
-            else:
+            else: # 'continue'
                 (angle1Mech,  angle2Mech,  angle3Mech,  angle4Mech)   = self.Get1234FromPt(self.stateMech.pose.position)
                 with self.lock:
                     try:

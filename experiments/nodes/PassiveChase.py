@@ -23,12 +23,13 @@ class ExperimentPassiveChase():
         
         self.experimentparams.experiment.description = 'Fly Chases Robot Moving in Circle'
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.timeout = 600
+        self.experimentparams.experiment.timeout = 6000
         
-        self.experimentparams.save.filenamebase = 'passivechase'
+        self.experimentparams.save.filenamebase = 'heatedpassivechase'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
+        self.experimentparams.save.fmf = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = True
         

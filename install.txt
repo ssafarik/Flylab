@@ -11,6 +11,7 @@
 # Install ROS Hydro on Ubuntu.
 sudo apt-get install ros-hydro-desktop-full
 sudo apt-get install ros-hydro-cmake-modules
+sudo apt-get install ros-hydro-smach-viewer
 sudo rosdep init
 rosdep update
 
@@ -23,6 +24,15 @@ sudo apt-get install -y libdc1394-22-dev
 sudo apt-get install -y intltool
 sudo apt-get install -y gobject-introspection
 sudo easy_install munkres
+
+
+# Get the motmot software (used for saving .fmf files).
+cd ~/src.git
+git clone git://github.com/motmot/motmot.git
+cd motmot
+git submodule update --init
+cd FlyMovieFormat
+sudo python setup.py install
 
 
 # Get the Flylab software.
@@ -76,14 +86,29 @@ cd ~/catkin && catkin_make
 rosmake flylaball
 
 
+# Galvos Setup:
+# If you are using the galvos, at present you must have a Windows machine to run the National Instruments DAQ (a non-Windows DAQ would be appreciated, and writing a linux-based galvodriver should not be difficult).  The software in Flylab/galvodriver compiles on Windows with the free version of Microsoft Visual C++ 2010 Express, and requires the National Instruments driver API "NiDAQ" available from them.
+1. Have a Windows machine on the same network as the Ubuntu machine.
+2. Download and install the free MS Visual C++ 2010 Express
+3. Download and install NiDAQmx
+4. Open the galvodriver code in MSVC, and compile it.
+
+ 
 # Verify that you have proper hardware:  i.e. a Flylab rig (the "RIG=___" line in your .bashrc) that consists 
 # of, at minimum, a tracking camera (preferably ethernet) and an arena for flies to walk around.  It might also 
 # have a robotic mechanism, a laser/galvo system, LED panels, lighting, etc. 
 # 
 
 
+# Calibrate
+# Perform the steps given in the files:
+Flylab/calibrate_camera.txt
+Flylab/calibrate_actuator.txt
+Flylab/calibrate_galvos.txt
+ 
+
 # You're done!
-# Assuming that flylaball finished without errors, and that you have functioning Flylab hardware, then you 
+# Assuming that "rosmake flylaball" finished without errors, and that you have functioning Flylab hardware, then you 
 # should be able to run an experiment, for example:
 roslaunch experiments testtracking.launch  
 

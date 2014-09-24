@@ -29,6 +29,7 @@ class Experiment():
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
+        self.experimentparams.save.fmf = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         
@@ -38,7 +39,7 @@ class Experiment():
         self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
         self.experimentparams.robotspec.description = 'Black oxide magnet'
 
-        self.experimentparams.flyspec.nFlies = 1
+        self.experimentparams.flyspec.nFlies = 2
         self.experimentparams.flyspec.description = 'unspecified'
         
         self.experimentparams.tracking.exclusionzones.enabled = False
@@ -94,7 +95,7 @@ class Experiment():
         
         self.experimentparams.trial.lasergalvos.enabled = False
         
-        self.experimentparams.trial.ledpanels.enabled = True
+        self.experimentparams.trial.ledpanels.enabled = False
         self.experimentparams.trial.ledpanels.command = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern = [1]
         self.experimentparams.trial.ledpanels.origin = [Point(x=0, y=0)] 
@@ -119,7 +120,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 600
+        self.experimentparams.post.trigger.timeout = 1200
 
         self.experimentparams.post.wait = 0.0
         

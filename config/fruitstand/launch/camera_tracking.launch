@@ -1,0 +1,14 @@
+<launch>
+
+	<!-- ========================================================== -->
+	<!-- Configuration of the camera attached to the FRUITSTAND.    -->
+
+	<!-- ========================================================== -->
+
+    <param name="camera/image_rect/compressed/format" type="string" value="jpeg" /> 
+	<include file="$(find fruitstand)/launch/params_camera_tracking.launch" ns="camera" />
+
+	<node name="camera"     pkg="camera_aravis" type="camnode" />
+	<node name="image_proc" pkg="image_proc"    type="image_proc" ns="camera" />
+  
+</launch>

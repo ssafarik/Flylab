@@ -784,7 +784,12 @@ class ContourGenerator:
                     
                     alphaBackground = 1 - np.exp(-self.dt.to_sec() / rcBackground)
                     
-                    cv2.accumulateWeighted(np.float32(self.matImageRect), self.matfBackground, alphaBackground)
+                    try:
+                        cv2.accumulateWeighted(np.float32(self.matImageRect), self.matfBackground, alphaBackground)
+                    except cv2.error:
+                        rospy.logerr('Most likely your background image file did not come from this camera.')
+                        rospy.logerr('Please delete the file (%s) and try again.' % self.params['tracking']['filenameBackground'])
+                        
                     self.matBackground = np.uint8(self.matfBackground)
         
         

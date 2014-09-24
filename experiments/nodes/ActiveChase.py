@@ -25,10 +25,11 @@ class Experiment():
         self.experimentparams.experiment.maxTrials = -1
         self.experimentparams.experiment.timeout = 600
         
-        self.experimentparams.save.filenamebase = 'activechase'
+        self.experimentparams.save.filenamebase = 'activechase_fly13_'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
+        self.experimentparams.save.fmf = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         

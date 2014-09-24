@@ -1,7 +1,7 @@
 # The class GalvoCalibrator commands the galvos to a set of input points,
-# and reads the output points from the tracking system. 
-#
-# It then computes a linear relationship between the two, and displays it to the screen.
+# and reads the points output from the tracking system.  It then computes 
+# a polynomial relationship between the two, and displays it to the screen,
+# whereupon you enter it into the appropriate params_galvos.launch file
 #
 #
 # Instructions:
