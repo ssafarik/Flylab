@@ -14,7 +14,7 @@
 	<!--                                                                    -->
 	<!-- ================================================================== -->
 	
-	<include file="$(find config)/launch/hardware.launch" />
+	<include file="$(find config)/launch/main.launch" />
 	<include file="$(find arena_tf)/launch/main.launch" />
 	<include file="$(find tracking)/launch/main.launch" />
 

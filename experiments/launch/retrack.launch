@@ -23,9 +23,9 @@
  
 
     <!-- STEP 2:  Edit the following lines to show the hardware you recorded the .bag file upon. -->
-    <include file="$(find racetrack)/launch/params_tracking.launch" />
-    <include file="$(find racetrack)/launch/params_calibration.launch" />
-	<include file="$(find flybowls)/launch/heatbowl_50mm.launch" />
+    <include file="$(find breadpan)/launch/params_tracking.launch" />
+    <include file="$(find breadpan)/launch/params_calibration.launch" />
+	<include file="$(find flybowls)/launch/heatbowl_85mm.launch" />
 
 
     <!-- 
