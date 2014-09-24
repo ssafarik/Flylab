@@ -11,27 +11,28 @@
 # Install ROS Hydro on Ubuntu.
 sudo apt-get install ros-hydro-desktop-full
 sudo apt-get install ros-hydro-cmake-modules
+sudo apt-get install ros-hydro-smach-viewer
 sudo rosdep init
 rosdep update
 
 
-# Add the following lines to your ~/.bashrc
-source /opt/ros/hydro/setup.bash
-export ROS_PACKAGE_PATH=~/src.git:~/src.hg:$ROS_PACKAGE_PATH    # (Assuming your ROS projects are in these two directories).
-export ROS_IP=123.456.789.012                                   # (i.e. your ip)
-export ROS_MASTER_URI=http://localhost:11311
-export PYTHONPATH=~/src.git/Flylab/arena_tf/src:~/src.git/Flylab/flycore/src:$PYTHONPATH
-export RIG=bigtop                                               # (change this to the name of your Flylab rig)
-
-
 # Get a few additional pieces.
+sudo apt-get install -y python-setuptools
+sudo apt-get install -y python-numpy
+sudo apt-get install -y python-scipy
+sudo apt-get install -y libdc1394-22-dev
+sudo apt-get install -y intltool
+sudo apt-get install -y gobject-introspection
 sudo easy_install munkres
-sudo apt-get install python-setuptools
-sudo apt-get install python-numpy
-sudo apt-get install python-scipy
-sudo apt-get install libdc1394-22-dev
-sudo apt-get install intltool
-sudo apt-get install gobject-introspection
+
+
+# Get the motmot software (used for saving .fmf files).
+cd ~/src.git
+git clone git://github.com/motmot/motmot.git
+cd motmot
+git submodule update --init
+cd FlyMovieFormat
+sudo python setup.py install
 
 
 # Get the Flylab software.
@@ -52,32 +53,62 @@ sudo python ~/src.git/pylibusb/setup.py install
 
 
 # Get Aravis camera library.
-cd ~/src.git
-git clone http://git.gnome.org/cgit/aravis
-cd ~/src.git/aravis
-# Edit configure.ac, and comment out the line:  GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
-./autogen.sh             
-make
-sudo make install
+Download the latest release from https://wiki.gnome.org/Aravis, 
+for example:  http://ftp.acc.umu.se/pub/GNOME/sources/aravis/0.3/aravis-0.3.1.tar.xz 
+tar -xzf aravis-0.3.1.tar.xz   # To extract the files.
+cd aravis-0.3.1
+./configure
+make && sudo make install
 
 
-# Get camera_aravis ROS driver for aravis.
-cd ~/src.git
+# Set up a catkin workspace.
+mkdir -p ~/catkin/src
+
+
+# Run the following commands (adjust them first if necessary).
+echo "source /opt/ros/hydro/setup.bash" >> ~/.bashrc
+echo "export ROS_IP=123.456.789.012" >> ~/.bashrc                                   # (i.e. your ip)
+echo "export ROS_MASTER_URI=http://localhost:11311" >> ~/.bashrc
+echo "export PYTHONPATH=~/src.git/Flylab/arena_tf/src:~/src.git/Flylab/flycore/src:$PYTHONPATH" >> ~/.bashrc
+echo "source ~/catkin/devel/setup.bash" >> ~/.bashrc
+echo "export ROS_PACKAGE_PATH=~/src.git:~/src.hg:~/catkin:$ROS_PACKAGE_PATH" >> ~/.bashrc    # (Assuming your ROS projects are in these two directories).
+echo "export RIG=bigtop" >> ~/.bashrc                                               # (change this to the name of your Flylab rig)
+source ~/.bashrc
+
+
+# Get camera_aravis.
+cd ~/catkin/src
 git clone http://github.com/ssafarik/camera_aravis.git
+cd ~/catkin && catkin_make
 
 
 # Make the Flylab software.
 rosmake flylaball
 
 
+# Galvos Setup:
+# If you are using the galvos, at present you must have a Windows machine to run the National Instruments DAQ (a non-Windows DAQ would be appreciated, and writing a linux-based galvodriver should not be difficult).  The software in Flylab/galvodriver compiles on Windows with the free version of Microsoft Visual C++ 2010 Express, and requires the National Instruments driver API "NiDAQ" available from them.
+1. Have a Windows machine on the same network as the Ubuntu machine.
+2. Download and install the free MS Visual C++ 2010 Express
+3. Download and install NiDAQmx
+4. Open the galvodriver code in MSVC, and compile it.
+
+ 
 # Verify that you have proper hardware:  i.e. a Flylab rig (the "RIG=___" line in your .bashrc) that consists 
 # of, at minimum, a tracking camera (preferably ethernet) and an arena for flies to walk around.  It might also 
 # have a robotic mechanism, a laser/galvo system, LED panels, lighting, etc. 
 # 
 
 
+# Calibrate
+# Perform the steps given in the files:
+Flylab/calibrate_camera.txt
+Flylab/calibrate_actuator.txt
+Flylab/calibrate_galvos.txt
+ 
+
 # You're done!
-# Assuming that flylaball finished without errors, and that you have functioning Flylab hardware, then you 
+# Assuming that "rosmake flylaball" finished without errors, and that you have functioning Flylab hardware, then you 
 # should be able to run an experiment, for example:
 roslaunch experiments testtracking.launch  
 

@@ -1,0 +1,30 @@
+class update_experiment_msgs_RobotSpec_ef209713cf8e199d5326c35847c21bd7(MessageUpdateRule):
+    old_type = "experiment_msgs/RobotSpec"
+    old_full_text = """
+int32    nRobots
+float64  width
+float64  height
+string   description
+"""
+
+    new_type = "experiment_msgs/RobotSpec"
+    new_full_text = """
+int32    nRobots
+bool     isPresent
+float64  width
+float64  height
+string   description
+"""
+
+    order = 0
+    migrated_types = []
+
+    valid = True
+    def update(self, old_msg, new_msg):
+        new_msg.nRobots     = old_msg.nRobots
+        new_msg.isPresent   = True
+        new_msg.width       = old_msg.width
+        new_msg.height      = old_msg.height
+        new_msg.description = old_msg.description
+        
+        

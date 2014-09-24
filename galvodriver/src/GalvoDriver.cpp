@@ -70,7 +70,7 @@ int 					g_bNeedToReset=FALSE;	// If true, then reset the DAQ.  Checked periodic
 
 // ************************************
 // Function Prototypes.
-void 				GalvoPointCloud_callback (const sensor_msgs::PointCloud::ConstPtr& pointcloud);
+void 				GalvoPointcloud_callback (const sensor_msgs::PointCloud::ConstPtr& pointcloud);
 void 				UpdatePointsFromPointcloud (void);
 void 				HandleDAQError (int32 e);
 void 				WritePoints (TaskHandle hTask);
@@ -98,18 +98,18 @@ void HandleDAQError(int32 e)
 
 
 // ************************************
-// GalvoPointCloud_callback()
+// GalvoPointcloud_callback()
 // Save the given pointcloud to g_pointcloud
 //
-void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointcloud)
+void GalvoPointcloud_callback(const sensor_msgs::PointCloud::ConstPtr& pPointcloud)
 {
 	double	hzDaqClock = 0.0;
 	
 
 	// Copy the given pointcloud, if it contains points.
 	//g_lockPointcloud.lock();
-	if (pointcloud->points.size()>0)
-		g_pointcloud = sensor_msgs::PointCloud(*pointcloud); 
+	if (pPointcloud->points.size()>0)
+		g_pointcloud = sensor_msgs::PointCloud(*pPointcloud);
 
 	//g_lockPointcloud.unlock();
 
@@ -121,7 +121,7 @@ void GalvoPointCloud_callback(const sensor_msgs::PointCloud::ConstPtr& pointclou
 //	}
 	//cout << g_nPointsBufferDaq << " ";
 
-} // GalvoPointCloud_callback()
+} // GalvoPointcloud_callback()
 
 
 //*********************************************
@@ -502,7 +502,7 @@ int main(int argc, char **argv)
 	hzSpin = 2.0 * g_hzUSB;
 	ros::Rate           rosRate(hzSpin);
 	
-	ros::Subscriber subGalvoPoints = node.subscribe("galvodriver/pointcloud", 2, GalvoPointCloud_callback);
+	ros::Subscriber subGalvoPoints = node.subscribe("galvodriver/pointcloud", 2, GalvoPointcloud_callback);
 	ROS_WARN ("Listening on galvodriver/pointcloud, hzDaqClock=%0.2f", g_hzDaqClock);
 	ros::Publisher	pubHeartbeat = node.advertise<std_msgs::Time>("galvodriver/heartbeat", 10);
 
@@ -560,10 +560,10 @@ int main(int argc, char **argv)
 	ResetDAQ();
 	g_nPointsPointcloudEx = 2; // 2 for two points.
 	g_pPointcloudExPoints = new float64[g_nPointsPointcloudEx * 2]; // 2 for (x,y)
-	g_pPointcloudExPoints[0] =   0.0;
-	g_pPointcloudExPoints[1] = -10.0;
-	g_pPointcloudExPoints[2] =   0.0;
-	g_pPointcloudExPoints[3] = -10.0;
+	g_pPointcloudExPoints[0] = g_xBeamsink;
+	g_pPointcloudExPoints[1] = g_yBeamsink;
+	g_pPointcloudExPoints[2] = g_xBeamsink;
+	g_pPointcloudExPoints[3] = g_yBeamsink;
 	WritePoints(g_hTask);
 	
 	//e = DAQmxStopTask (g_hTask);

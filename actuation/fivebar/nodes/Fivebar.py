@@ -131,19 +131,19 @@ class Fivebar:
         
         # Publish & Subscribe
         self.services = {}
-        self.services['set_stage_state'] = rospy.Service('set_stage_state',    SrvFrameState, self.SetStageState_callback)
-        self.services['get_stage_state'] = rospy.Service('get_stage_state',    SrvFrameState, self.GetStageState_callback)
-        self.services['home_stage']      = rospy.Service('home_stage',         SrvFrameState, self.HomeStage_callback)
-        self.services['calibrate_stage'] = rospy.Service('calibrate_stage',    SrvFrameState, self.Calibrate_callback)
-        self.services['signal_input']    = rospy.Service('signal_input',       SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
+        self.services['set_stage_state_ref'] = rospy.Service('set_stage_state_ref', SrvFrameState, self.SetStageStateRef_callback)
+        self.services['get_stage_state'] = rospy.Service('get_stage_state',         SrvFrameState, self.GetStageState_callback)
+        self.services['home_stage']      = rospy.Service('home_stage',              SrvFrameState, self.HomeStage_callback)
+        self.services['calibrate_stage'] = rospy.Service('calibrate_stage',         SrvFrameState, self.Calibrate_callback)
+        self.services['signal_input']    = rospy.Service('signal_input',            SrvSignal,     self.SignalInput_callback) # For receiving input from a signal generator.
 
 
         # Command messages.
         self.command = 'continue'
-        self.command_list = ['continue','exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.Command_callback)
+        self.command_list = ['continue', 'pause_now', 'exit_now']
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.Command_callback)
 
-        self.subVisualState = rospy.Subscriber('VisualState', MsgFrameState, self.VisualState_callback)
+        self.subVisualState = rospy.Subscriber('visual_state', MsgFrameState, self.VisualState_callback)
         self.pubJointState = rospy.Publisher('joint_states', JointState)
         self.pubMarker = rospy.Publisher('visualization_marker', Marker)
         
@@ -152,7 +152,7 @@ class Fivebar:
 
         self.stateRef = None
         self.stateVisual = None
-        self.ptEeMech = Point(0, 0, 0)
+        self.stateMech = MsgFrameState(pose=Pose(position=Point(0,0,0)))
 
         self.statePError = MsgFrameState()
         self.stateIError = MsgFrameState()
@@ -184,9 +184,12 @@ class Fivebar:
         self.request.state.pose.position.x = 0.0
         self.request.state.pose.position.y = 0.0
         self.request.state.pose.position.z = 0.0
+        
+        self.n = 0
 
 
     def Command_callback(self, msgString):
+        rospy.logwarn('Command_callback()')
         self.command = msgString.data
             
 
@@ -404,7 +407,7 @@ class Fivebar:
         isInArena = True
         
         # Transform to Arena frame.
-        ptsArena = self.TransformPointToFrame('/Arena', ptsIn)
+        ptsArena = self.TransformPointToFrame('Arena', ptsIn)
 
         # Clip to arena radius.
         (ptClipped, bClipped) = self.ClipPtToRadius(ptsArena.point, self.radiusArena)
@@ -703,6 +706,7 @@ class Fivebar:
     
     
     def GetStageState_callback(self, reqStageState):
+        #rospy.logwarn('GetStageState_callback()')
         state = self.GetStageState()
         return state
     
@@ -711,17 +715,21 @@ class Fivebar:
             rospy.sleep(0.5)
             
         rvStageState = SrvFrameStateResponse()
-        if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
-            rvStageState.state = self.stateVisual
+        rvStageState.state = None
+        if (self.jointstate1 is not None) and (self.jointstate2 is not None):
+            if (self.stateVisual is not None):                     
+                rvStageState.state = self.stateVisual
+            else:
+                rvStageState.state = self.stateMech
         
         return rvStageState.state
 
         
-    # SetStageState_callback()
+    # SetStageStateRef_callback()
     #   Updates the target command.
     #
-    def SetStageState_callback(self, reqStageState):
-        #rospy.logwarn('SetStageState_callback(): %s' % reqStageState)
+    def SetStageStateRef_callback(self, reqStageState):
+        #rospy.logwarn('SetStageStateRef_callback()')
         while not self.initialized:
             rospy.sleep(0.5)
             
@@ -735,14 +743,17 @@ class Fivebar:
 
     # Take the target point from a signal generator, and set it as the tool reference.  
     # If the point falls outside the workspace, then clip it to the workspace, and return False.
-    def SignalInput_callback (self, srvSignalReq):
-        #rospy.logwarn('SignalInput_callback(): %s' % srvSignalReq)
-        rv = SrvSignalResponse()
+    def SignalInput_callback (self, reqSignal):
+        #rospy.logwarn('SignalInput_callback()')
+        with self.lock:
+            #rospy.logwarn('SignalInput_callback() locked')
+            rvSignal = SrvSignalResponse()
+            
+            (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', reqSignal.state)
+            rvSignal.success = isInArena
         
-        (self.stateRef, isInArena) = self.TransformStateToFrame('Stage', srvSignalReq.state)
-        rv.success = isInArena
-        
-        return rv
+        #rospy.logwarn('SignalInput_callback() free')
+        return rvSignal
 
 
     # Create a vector with direction of ptDir, and magnitude of ptMag.
@@ -757,10 +768,16 @@ class Fivebar:
     
 
     def VisualState_callback(self, state):
-        (self.stateVisual, isInArena) = self.TransformStateToFrame('Stage', state, doClipToArena=False)
+        #rospy.logwarn('VisualState_callback()')
+        with self.lock:
+            #rospy.logwarn('VisualState_callback() locked')
+            (self.stateVisual, isInArena) = self.TransformStateToFrame('Stage', state, doClipToArena=False)
+                
+        #rospy.logwarn('VisualState_callback() free')
         
         
     def HomeStage_callback(self, reqStageState):
+        #rospy.logwarn('HomeStage_callback()')
         while not self.initialized:
             rospy.sleep(0.1)
             
@@ -777,6 +794,7 @@ class Fivebar:
         
         
     def Calibrate_callback(self, req):
+        #rospy.logwarn('Calibrate_callback()')
         # Integer values for directions - used in usb set/get
         POSITIVE = 0
         NEGATIVE = 1
@@ -815,7 +833,9 @@ class Fivebar:
 
     def SendTransforms(self):  
         if self.initialized:
+            #rospy.logwarn('SendTransforms()')
             with self.lock:
+                #rospy.logwarn('SendTransforms() locked')
                 try:
                     self.jointstate1 = self.GetState_joint1()
                 except rospy.ServiceException, e:
@@ -835,10 +855,9 @@ class Fivebar:
                         self.GetState_joint2 = rospy.ServiceProxy(stSrv, SrvJointState, persistent=True)
                     except rospy.ServiceException, e:
                         rospy.logwarn ('5B FAILED to reconnect service %s(): %s' % (stSrv, e))
-                    
-
+                        
             if (self.jointstate1 is not None) and (self.jointstate2 is not None):                    
-                (angle1,angle2,angle3,angle4, self.ptEeMech.x, self.ptEeMech.y) = self.Get1234xyFrom12(self.jointstate1.position, self.jointstate2.position)
+                (angle1,angle2,angle3,angle4, self.stateMech.pose.position.x, self.stateMech.pose.position.y) = self.Get1234xyFrom12(self.jointstate1.position, self.jointstate2.position)
 
                 # Publish the joint states (for rviz, etc)    
                 self.js.header.seq = self.js.header.seq + 1
@@ -850,15 +869,14 @@ class Fivebar:
                 state = MsgFrameState()
                 state.header.stamp = self.time
                 state.header.frame_id = 'Stage'
-                state.pose.position.x = self.ptEeMech.x
-                state.pose.position.y = self.ptEeMech.y
-                state.pose.position.z = self.ptEeMech.z
+                state.pose.position = self.stateMech.pose.position
                 state.pose.orientation.x = qEE[0]
                 state.pose.orientation.y = qEE[1]
                 state.pose.orientation.z = qEE[2]
                 state.pose.orientation.w = qEE[3]
-
-        
+                
+                #rospy.logwarn ('A')
+                #rospy.logwarn ('A: %s, %s, %s' % ((-self.L3/2, -246.31423, 0.0),tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0), state.header.stamp))
                 # Publish the link transforms.
                 self.tfbx.sendTransform((-self.L3/2, -246.31423, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
@@ -866,40 +884,48 @@ class Fivebar:
                                         'link0',  # child
                                         'Stage'  # parent
                                         )
-
+                #rospy.logwarn ('B')
+                #rospy.logwarn ('B: %s, %s, %s' % ((0.0, 0.0, 0.0), tf.transformations.quaternion_from_euler(0.0, 0.0, angle1+self.q1CenterE), state.header.stamp))
                 self.tfbx.sendTransform((0.0, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle1+self.q1CenterE),
                                         state.header.stamp,
                                         'link1',  # child
                                         'link0'  # parent
                                         )
+                #rospy.logwarn ('C')
+                #rospy.logwarn ('C: %s, %s, %s' % ((self.L1, 0.0, 0.0), tf.transformations.quaternion_from_euler(0.0, 0.0, angle3), state.header.stamp))
                 self.tfbx.sendTransform((self.L1, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle3),
                                         state.header.stamp,
                                         "link3",     # child
                                         "link1"      # parent
                                         )
-        
+                #rospy.logwarn ('D')
+                #rospy.logwarn ('D: %s, %s, %s' % ((self.L3, 0.0, 0.0), tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0), state.header.stamp))
                 self.tfbx.sendTransform((self.L3, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
                                         state.header.stamp,
                                         "link5",     # child
-                                        "link3"      # parentset_stage_state
+                                        "link3"      # parent
                                         )
-
+                #rospy.logwarn ('E')
+                #rospy.logwarn ('E: %s, %s, %s' % ((self.L0, 0.0, 0.0), tf.transformations.quaternion_from_euler(0.0, 0.0, angle2+self.q2CenterE), state.header.stamp))
                 self.tfbx.sendTransform((self.L0, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle2+self.q2CenterE),
                                         state.header.stamp,
                                         "link2",     # child
                                         "link0"      # parent
                                         )
+                #rospy.logwarn ('F')
+                #rospy.logwarn ('F: %s, %s, %s' % ((self.L2, 0.0, 0.0), tf.transformations.quaternion_from_euler(0.0, 0.0, angle4), state.header.stamp))
                 self.tfbx.sendTransform((self.L2, 0.0, 0.0), 
                                         tf.transformations.quaternion_from_euler(0.0, 0.0, angle4),
                                         state.header.stamp,
                                         "link4",     # child
                                         "link2"      # parent
                                         )
-                
+                #rospy.logwarn ('G')
+                #rospy.logwarn('G: %s, %s, %s' % ((state.pose.position.x, state.pose.position.y, state.pose.position.z), qEE, state.header.stamp))
                 
                 # Frame EndEffector
                 self.tfbx.sendTransform((state.pose.position.x, state.pose.position.y, state.pose.position.z),
@@ -909,7 +935,7 @@ class Fivebar:
                                         state.header.frame_id  # parent
                                         )
 
-                
+                #rospy.logwarn ('H')
                 # Frame Target
                 if self.stateRef is not None:
                     markerTarget = Marker(header=self.stateRef.header,
@@ -917,9 +943,7 @@ class Fivebar:
                                           id=0,
                                           type=Marker.SPHERE,
                                           action=0,
-                                          pose=Pose(position=Point(x=self.stateRef.pose.position.x,
-                                                                   y=self.stateRef.pose.position.y,
-                                                                   z=self.stateRef.pose.position.z)),
+                                          pose=Pose(position=self.stateRef.pose.position),
                                           scale=Vector3(x=3.0,
                                                         y=3.0,
                                                         z=3.0),
@@ -944,14 +968,12 @@ class Fivebar:
                                                               g=1.0,
                                                               b=1.0),
                                               lifetime=rospy.Duration(1.0),
-                                              points=[Point(x=state.pose.position.x,
-                                                            y=state.pose.position.y,
-                                                            z=state.pose.position.z),
-                                                        Point(x=self.stateVisual.pose.position.x,
-                                                              y=self.stateVisual.pose.position.y,
-                                                              z=self.stateVisual.pose.position.z)])
+                                              points=[state.pose.position,
+                                                      self.stateVisual.pose.position])
                     self.pubMarker.publish(markerToolOffset)
+                #rospy.logwarn ('K')
 
+            #rospy.logwarn('SendTransforms() free')
 
 
     # UpdateMotorCommandFromTarget()
@@ -987,15 +1009,22 @@ class Fivebar:
             # The previous error.
             self.statePErrorPrev = copy.deepcopy(self.statePError)
             
+            
+            # Use either visual servoing, or not, as the case may be, depending on if we've received a visual state callback.
+            if (self.stateVisual is not None):
+                stateActuator = self.stateVisual
+            else:
+                stateActuator = self.stateMech
+                
 
-            if (self.stateRef is not None) and (self.stateVisual is not None):
+            if (self.stateRef is not None):
                 # Error terms.
-                self.statePError.pose.position.x = self.stateRef.pose.position.x - self.stateVisual.pose.position.x
-                self.statePError.pose.position.y = self.stateRef.pose.position.y - self.stateVisual.pose.position.y
-                self.statePError.pose.position.z = self.stateRef.pose.position.z - self.stateVisual.pose.position.z
-                self.statePError.velocity.linear.x = self.stateRef.velocity.linear.x - self.stateVisual.velocity.linear.x
-                self.statePError.velocity.linear.y = self.stateRef.velocity.linear.y - self.stateVisual.velocity.linear.y
-                self.statePError.velocity.linear.z = self.stateRef.velocity.linear.z - self.stateVisual.velocity.linear.z
+                self.statePError.pose.position.x = self.stateRef.pose.position.x - stateActuator.pose.position.x
+                self.statePError.pose.position.y = self.stateRef.pose.position.y - stateActuator.pose.position.y
+                self.statePError.pose.position.z = self.stateRef.pose.position.z - stateActuator.pose.position.z
+                self.statePError.velocity.linear.x = self.stateRef.velocity.linear.x - stateActuator.velocity.linear.x
+                self.statePError.velocity.linear.y = self.stateRef.velocity.linear.y - stateActuator.velocity.linear.y
+                self.statePError.velocity.linear.z = self.stateRef.velocity.linear.z - stateActuator.velocity.linear.z
 
                 self.stateIError.pose.position.x += self.statePError.pose.position.x
                 self.stateIError.pose.position.y += self.statePError.pose.position.y
@@ -1019,12 +1048,12 @@ class Fivebar:
 #                                 self.stateRef.velocity.linear.y, 
 #                                 self.stateRef.velocity.linear.z])
 #                 
-#                 xVis = N.array([self.stateVisual.pose.position.x, 
-#                                 self.stateVisual.pose.position.y, 
-#                                 self.stateVisual.pose.position.z,
-#                                 self.stateVisual.velocity.linear.x, 
-#                                 self.stateVisual.velocity.linear.y, 
-#                                 self.stateVisual.velocity.linear.z])
+#                 xVis = N.array([stateActuator.pose.position.x, 
+#                                 stateActuator.pose.position.y, 
+#                                 stateActuator.pose.position.z,
+#                                 stateActuator.velocity.linear.x, 
+#                                 stateActuator.velocity.linear.y, 
+#                                 stateActuator.velocity.linear.z])
                 
                 
                 # PID control of the visual position error.
@@ -1059,7 +1088,7 @@ class Fivebar:
                 
             
                 # Get the angular positions for each joint.
-                (angle1Mech,   angle2Mech,   angle3Mech,   angle4Mech)    = self.Get1234FromPt(self.ptEeMech)
+                (angle1Mech,   angle2Mech,   angle3Mech,   angle4Mech)    = self.Get1234FromPt(self.stateMech.pose.position)
 
                 
                 # Compute the velocity command.
@@ -1068,8 +1097,8 @@ class Fivebar:
 
 
                 # Pull the mechanical position back under the visual position.
-                xDot += (self.stateVisual.pose.position.x - self.ptEeMech.x)
-                yDot += (self.stateVisual.pose.position.y - self.ptEeMech.y)
+                xDot += (stateActuator.pose.position.x - self.stateMech.pose.position.x)
+                yDot += (stateActuator.pose.position.y - self.stateMech.pose.position.y)
 
                 # Clip to max allowed speed.
                 if (self.stateRef.speed != 0.0):  # If speed is unspecified, then this field is set to 0.0
@@ -1083,13 +1112,13 @@ class Fivebar:
                 
                 
                 # Clip to stay in workspace.
-                pts = PointStamped(header=Header(stamp=self.stateVisual.header.stamp,
+                pts = PointStamped(header=Header(stamp=stateActuator.header.stamp,
                                                  frame_id='Stage'),
-                                   point=Point(x = xDot + self.ptEeMech.x,
-                                               y = yDot + self.ptEeMech.y))
+                                   point=Point(x = xDot + self.stateMech.pose.position.x,
+                                               y = yDot + self.stateMech.pose.position.y))
                 (ptsArena, isInArena)         = self.ClipPtsToArena(pts)
-                xDot = ptsArena.point.x - self.ptEeMech.x
-                yDot = ptsArena.point.y - self.ptEeMech.y
+                xDot = ptsArena.point.x - self.stateMech.pose.position.x
+                yDot = ptsArena.point.y - self.stateMech.pose.position.y
                 
                 
                 # Convert to motor coordinates.
@@ -1098,7 +1127,7 @@ class Fivebar:
                 
                 
                 # Display the velocity vector in rviz.
-                ptBase = self.ptEeMech #self.stateVisual.pose.position
+                ptBase = self.stateMech.pose.position # self.ptEeMech #stateActuator.pose.position
                 ptEnd = Point(x = ptBase.x + xDot,
                               y = ptBase.y + yDot,
                               z = ptBase.z + 0
@@ -1123,7 +1152,7 @@ class Fivebar:
 
                 if (self.bTune):
                     # Display the command vector in rviz.
-                    ptBase = self.stateVisual.pose.position
+                    ptBase = stateActuator.pose.position
                     ptEnd = Point(x = ptBase.x + self.statePID.pose.position.x,
                                   y = ptBase.y + self.statePID.pose.position.y,
                                   z = ptBase.z + self.statePID.pose.position.z
@@ -1146,7 +1175,7 @@ class Fivebar:
                     self.pubMarker.publish(markerCommand)
             
                     # Display P,I,D vectors in rviz.
-                    ptBase = self.stateVisual.pose.position #self.ptEeMech
+                    ptBase = stateActuator.pose.position #self.ptEeMech
                     ptEnd = Point(x = ptBase.x + self.kP*self.statePError.pose.position.x,
                                   y = ptBase.y + self.kP*self.statePError.pose.position.y)
                     markerCommand= Marker(header=Header(stamp = self.time, frame_id='Stage'),
@@ -1220,6 +1249,7 @@ class Fivebar:
 
         
     def OnShutdown_callback(self):
+        rospy.logwarn('OnShutdown_callback()')
         self.GetState_joint1.close()
         self.SetVelocity_joint1.close()
 
@@ -1242,6 +1272,7 @@ class Fivebar:
         rosrate = rospy.Rate(1 / self.T)
 
         while (not rospy.is_shutdown()) and (self.command != 'exit_now'):
+            #rospy.logwarn ('Loop---------------')
             if (self.command != 'pause_now'):
                 self.time = rospy.Time.now()
                 self.dt = self.time - self.timePrev
@@ -1249,15 +1280,15 @@ class Fivebar:
                 
                 self.SendTransforms()
                 self.UpdateMotorCommandFromTarget()
-            else:
-                (angle1Mech,  angle2Mech,  angle3Mech,  angle4Mech)   = self.Get1234FromPt(self.ptEeMech)
+
+            else: # 'continue'
+                (angle1Mech,  angle2Mech,  angle3Mech,  angle4Mech)   = self.Get1234FromPt(self.stateMech.pose.position)
                 with self.lock:
                     try:
                         self.SetVelocity_joint1(Header(frame_id=self.names[0]), angle1Mech, 0.0)
                         self.SetVelocity_joint2(Header(frame_id=self.names[1]), angle2Mech, 0.0)
                     except (rospy.ServiceException, rospy.exceptions.ROSInterruptException, IOError), e:
                         rospy.logwarn ("5B Exception:  %s" % e)
-                
             rosrate.sleep()
             
             

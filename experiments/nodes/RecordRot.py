@@ -5,10 +5,10 @@ import rospy
 import numpy as N
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
-from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
 from flycore.msg import MsgFrameState
 from galvodirector.msg import MsgGalvoCommand
-from LEDPanels.msg import MsgPanelsCommand
+from ledpanels.msg import MsgPanelsCommand
 from patterngen.msg import MsgPattern
 
 
@@ -19,37 +19,45 @@ class Experiment():
         rospy.init_node('Experiment')
         
         # Fill out the data structure that defines the experiment.
-        self.experimentparams = ExperimentParamsRequest()
+        self.experimentparams = ExperimentParamsChoicesRequest()
         
-        self.experimentparams.experiment.description = "Record the Rotcam"
+        self.experimentparams.experiment.description = 'Record the Rotcam'
         self.experimentparams.experiment.maxTrials = -1
-        self.experimentparams.experiment.trial = 1
+        self.experimentparams.experiment.timeout = -1
         
-        self.experimentparams.save.filenamebase = "rotcam"
+        self.experimentparams.save.filenamebase = 'rotcam'
         self.experimentparams.save.csv = True
         self.experimentparams.save.bag = True
         self.experimentparams.save.mov = False
+        self.experimentparams.save.fmf = False
         self.experimentparams.save.imagetopic_list = ['camera/image_rect']
         self.experimentparams.save.onlyWhileTriggered = False
         
         self.experimentparams.robotspec.nRobots = 0
         self.experimentparams.robotspec.width = 1.5875
         self.experimentparams.robotspec.height = 1.5875
-        self.experimentparams.robotspec.description = "Black oxide magnet"
+        self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
+        self.experimentparams.robotspec.description = 'Black oxide magnet'
 
         self.experimentparams.flyspec.nFlies = 10
-        self.experimentparams.flyspec.description = "unspecified"
+        self.experimentparams.flyspec.description = 'unspecified'
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=-79, y=28)]
         self.experimentparams.tracking.exclusionzones.radius_list = [3.0]
         
+        self.experimentparams.home.enabled = False
+        self.experimentparams.home.x = 0.0
+        self.experimentparams.home.y = 0.0
+        self.experimentparams.home.speed = 20
+        self.experimentparams.home.tolerance = 2
+
         self.experimentparams.pre.robot.enabled = False
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
         self.experimentparams.pre.wait1 = 0.0
         self.experimentparams.pre.trigger.enabled = False
-        self.experimentparams.pre.trigger.frameidParent = '/Arena'
+        self.experimentparams.pre.trigger.frameidParent = 'Arena'
         self.experimentparams.pre.trigger.frameidChild = 'Fly1'
         self.experimentparams.pre.trigger.speedAbsParentMin =   0.0
         self.experimentparams.pre.trigger.speedAbsParentMax = 999.0
@@ -109,7 +117,7 @@ class Experiment():
 
     # This function gets called at the start of a new trial.  Use this to alter the experiment params from trial to trial.
     def StartTrial_callback(self, userdata):
-        userdata.experimentparamsOut = userdata.experimentparamsIn
+        userdata.experimentparamsChoicesOut = userdata.experimentparamsChoicesIn
         return 'success'
 
     # This function gets called at the end of a new trial.  Use this to alter the experiment params from trial to trial.
@@ -125,6 +133,6 @@ if __name__ == '__main__':
         experiment.Run()
         
     except KeyboardInterrupt:
-        rospy.loginfo("Shutting down")
+        rospy.loginfo('Shutting down')
 
         

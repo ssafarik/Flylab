@@ -28,7 +28,6 @@ class OriginateBackground:
     def __init__(self):
 
         self.initialized = False        
-        self.bUseBackgroundSubtraction  = rospy.get_param('tracking/usebackgroundsubtraction', True)    # Set False to turn off bg subtraction.        
         
         # Messages
         self.subTrackingCommand     = rospy.Subscriber('tracking/command', TrackingCommand, self.TrackingCommand_callback)
@@ -102,6 +101,7 @@ class OriginateBackground:
 
 def main(args):
     rospy.init_node('OriginateBackground')
+    rospy.sleep(1)
     try:
         bg = OriginateBackground()
         bg.Main()

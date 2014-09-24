@@ -6,7 +6,7 @@
   <!-- =================================================================== -->
   <!-- Arena-Camera transform.                                             -->
   <!--                                                                     -->
-  <!-- "roslaunch calibration CameraArena.launch"                          -->
+  <!-- "roslaunch calibration camera_arena.launch"                          -->
   <!--                                                                     -->
   <!-- Use the following command to move the center and radius of the      -->
   <!-- circle to correspond to the arena:                                  -->

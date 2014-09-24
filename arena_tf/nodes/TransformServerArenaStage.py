@@ -6,17 +6,18 @@ import numpy as N
 import tf
 from arena_tf.msg import CalibrationStage
 from geometry_msgs.msg import Point, Quaternion
-from experiment_srvs.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
 
 
 class TransformServerStageArena:
     def __init__(self):
-        self.initialized = False
-        self.initConstructor = False
+        self.bInitialized = False
+        self.bInitializedConstructor = False
 
-        self.calibration = None
+        self.calibration_stage = None
 
         rospy.init_node('TransformServerStageArena')
+        rospy.sleep(1)
 
          
         self.tfrx = tf.TransformListener()
@@ -27,13 +28,13 @@ class TransformServerStageArena:
         self.pubCalibrationSet       = rospy.Publisher('stage/calibration_set',        CalibrationStage, latch=True)                # We republish the data at each trial.
 
         self.services = {}
-        self.services['transformserverarenastage/init']            = rospy.Service('transformserverarenastage/init',            ExperimentParams, self.Init_callback)
-        self.services['transformserverarenastage/trial_start']     = rospy.Service('transformserverarenastage/trial_start',     ExperimentParams, self.TrialStart_callback)
-        self.services['transformserverarenastage/trial_end']       = rospy.Service('transformserverarenastage/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        self.services['transformserverarenastage/trigger']         = rospy.Service('transformserverarenastage/trigger',         Trigger,          self.Trigger_callback)
-        self.services['transformserverarenastage/wait_until_done'] = rospy.Service('transformserverarenastage/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services['transformserverarenastage/init']            = rospy.Service('transformserverarenastage/init',            ExperimentParamsChoices, self.Init_callback)
+        self.services['transformserverarenastage/trial_start']     = rospy.Service('transformserverarenastage/trial_start',     ExperimentParams,        self.TrialStart_callback)
+        self.services['transformserverarenastage/trial_end']       = rospy.Service('transformserverarenastage/trial_end',       ExperimentParams,        self.TrialEnd_callback)
+        self.services['transformserverarenastage/trigger']         = rospy.Service('transformserverarenastage/trigger',         Trigger,                 self.Trigger_callback)
+        self.services['transformserverarenastage/wait_until_done'] = rospy.Service('transformserverarenastage/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
 
-        self.initConstructor = True
+        self.bInitializedConstructor = True
 
 
     # Receive calibration values (wherever they came from), and republish them (for the bag file).
@@ -42,26 +43,26 @@ class TransformServerStageArena:
     # or
     # -- bagfile -> here.
     def Calibration_callback (self, calibration):
-        while (not self.initConstructor):
-            rospy.loginfo('Waiting for initConstructor.')
+        while (not self.bInitializedConstructor):
+            rospy.loginfo('Waiting for bInitializedConstructor.')
             rospy.sleep(0.1)
         
             
-        self.calibration = calibration
-        self.initialized = True
+        self.calibration_stage = calibration
+        self.bInitialized = True
         
         
-    def Init_callback(self, experimentparams):
+    def Init_callback(self, experimentparamsChoices):
         return True
 
     # TrialStart_callback()
     # Publishes the calibration.
     #
     def TrialStart_callback(self, experimentparams):
-        while (self.calibration is None):
+        while (self.calibration_stage is None):
             rospy.sleep(0.5)
 
-        self.pubCalibrationSet.publish(self.calibration)
+        self.pubCalibrationSet.publish(self.calibration_stage)
             
         return True
                 
@@ -72,35 +73,35 @@ class TransformServerStageArena:
     def TrialEnd_callback(self, experimentparams):
         return True
 
-    def WaitUntilDone_callback(self, experimentparams):
+    def WaitUntilDone_callback(self, experimentparamsChoices):
         return True
         
         
         
         
     def SendTransforms(self):
-        if (self.initialized):
-            self.tfbx.sendTransform((self.calibration.arena_x,
-                                     self.calibration.arena_y,
-                                     self.calibration.arena_z),
-                                    (self.calibration.arena_qx,
-                                     self.calibration.arena_qy,
-                                     self.calibration.arena_qz,
-                                     self.calibration.arena_qw),
+        if (self.bInitialized):
+            self.tfbx.sendTransform((self.calibration_stage.arena_x,
+                                     self.calibration_stage.arena_y,
+                                     self.calibration_stage.arena_z),
+                                    (self.calibration_stage.arena_qx,
+                                     self.calibration_stage.arena_qy,
+                                     self.calibration_stage.arena_qz,
+                                     self.calibration_stage.arena_qw),
                                     rospy.Time.now(),
-                                    "Stage",     # child
-                                    "Arena"      # parent
+                                    'Stage',     # child
+                                    'Arena'      # parent
                                     )
         
         
     def Main(self):
         rate = rospy.Rate(100) # BUG: Reducing this causes erratic behavior w/ patterngen & fivebar. 
         while not rospy.is_shutdown():
-            try:
-                self.SendTransforms()
-                rate.sleep()
-            except (tf.Exception, rospy.exceptions.ROSInterruptException), e:
-                pass # ROS shutting down.
+            #try:
+            self.SendTransforms()
+            rate.sleep()
+            #except (tf.Exception, rospy.exceptions.ROSInterruptException), e:
+            #    pass # ROS shutting down.
 
         # Shutdown all the services we offered.
         for key in self.services:
@@ -108,7 +109,7 @@ class TransformServerStageArena:
             
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tsps = TransformServerStageArena()
     tsps.Main()
     

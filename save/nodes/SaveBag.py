@@ -14,7 +14,7 @@ import cv
 from cv_bridge import CvBridge, CvBridgeError
 
 from flycore.msg import MsgFrameState
-from experiment_srvs.srv import Trigger, ExperimentParams
+from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
 
 
 
@@ -50,11 +50,11 @@ class SaveBag:
         
         # Offer some services.
         self.services = {}
-        self.services['savebag/init']            = rospy.Service('savebag/init',            ExperimentParams, self.Init_callback)
-        self.services['savebag/trial_start']     = rospy.Service('savebag/trial_start',     ExperimentParams, self.TrialStart_callback)
-        self.services['savebag/trial_end']       = rospy.Service('savebag/trial_end',       ExperimentParams, self.TrialEnd_callback)
-        self.services['savebag/trigger']         = rospy.Service('savebag/trigger',         Trigger,          self.Trigger_callback)
-        self.services['savebag/wait_until_done'] = rospy.Service('savebag/wait_until_done', ExperimentParams, self.WaitUntilDone_callback)
+        self.services['savebag/init']            = rospy.Service('savebag/init',            ExperimentParamsChoices, self.Init_callback)
+        self.services['savebag/trial_start']     = rospy.Service('savebag/trial_start',     ExperimentParams,        self.TrialStart_callback)
+        self.services['savebag/trial_end']       = rospy.Service('savebag/trial_end',       ExperimentParams,        self.TrialEnd_callback)
+        self.services['savebag/trigger']         = rospy.Service('savebag/trigger',         Trigger,                 self.Trigger_callback)
+        self.services['savebag/wait_until_done'] = rospy.Service('savebag/wait_until_done', ExperimentParamsChoices, self.WaitUntilDone_callback)
         
         self.initialized = True
 
@@ -64,14 +64,14 @@ class SaveBag:
         
 
     # Service callback to perform initialization that requires experimentparams, e.g. subscribing to image topics.
-    def Init_callback(self, experimentparams):
-        self.paramsSave = experimentparams.save
+    def Init_callback(self, experimentparamsChoices):
+        self.paramsSave = experimentparamsChoices.save
         
         return True
 
 
 
-    def WaitUntilDone_callback(self, experimentparams):
+    def WaitUntilDone_callback(self, experimentparamsChoices):
         #self.processRosbag.wait()
         return True
 
@@ -213,6 +213,7 @@ class SaveBag:
 
 if __name__ == '__main__':
     rospy.init_node('SaveBag', log_level=rospy.INFO)
+    rospy.sleep(1)
     savebag = SaveBag()
     savebag.Main()
     

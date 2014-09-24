@@ -11,7 +11,7 @@ import tf
 from geometry_msgs.msg import Pose, PoseStamped, Point, PointStamped, Quaternion, Twist, Vector3
 from std_msgs.msg import Header, ColorRGBA, String
 from flycore.msg import MsgFrameState, TrackingCommand
-from LEDPanels.msg import MsgPanelsCommand
+from ledpanels.msg import MsgPanelsCommand
 from tracking.msg import ArenaState
 from visualization_msgs.msg import Marker
 
@@ -25,14 +25,14 @@ class Reset (smach.State):
         self.tfrx = tfrx
         smach.State.__init__(self, 
                              outcomes=['success','disabled','preempt','aborted'],
-                             input_keys=['experimentparamsIn'])
+                             input_keys=['experimentparamsChoicesIn'])
 
         self.arenastate = None
         self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
 
         queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
         self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
-        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+        self.pubLEDPanelsCommand = rospy.Publisher('ledpanels/command', MsgPanelsCommand, latch=True)
 
         rospy.on_shutdown(self.OnShutdown_callback)
         
@@ -40,7 +40,7 @@ class Reset (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
     def CommandExperiment_callback(self, msgString):
@@ -61,18 +61,18 @@ class Reset (smach.State):
         rospy.loginfo("EL State ResetLEDPanels()")
 
         rv = 'disabled'
-        if (userdata.experimentparamsIn.pre.ledpanels.enabled):
+        if (userdata.experimentparamsChoicesIn.pre.ledpanels.enabled):
             rv = 'success'
             msgPanelsCommand = MsgPanelsCommand(command='stop')
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
 
             msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', 
-                                                arg1=userdata.experimentparamsIn.pre.ledpanels.idPattern)
+                                                arg1=userdata.experimentparamsChoicesIn.pre.ledpanels.idPattern)
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
 
             msgPanelsCommand = MsgPanelsCommand(command='set_position', 
-                                                arg1=userdata.experimentparamsIn.pre.ledpanels.origin.x, 
-                                                arg2=userdata.experimentparamsIn.pre.ledpanels.origin.y)  # Set (x,y) position for the experiment.
+                                                arg1=userdata.experimentparamsChoicesIn.pre.ledpanels.origin.x, 
+                                                arg2=userdata.experimentparamsChoicesIn.pre.ledpanels.origin.y)  # Set (x,y) position for the experiment.
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
         else:
             msgPanelsCommand = MsgPanelsCommand(command='all_off')
@@ -111,7 +111,7 @@ class Action (smach.State):
         self.ypanels    = rospy.get_param('ledpanels/ypanels', 1)
         queue_size_arenastate    = rospy.get_param('tracking/queue_size_arenastate', 1)
 
-        self.pubLEDPanelsCommand = rospy.Publisher('LEDPanels/command', MsgPanelsCommand, latch=True)
+        self.pubLEDPanelsCommand = rospy.Publisher('ledpanels/command', MsgPanelsCommand, latch=True)
         self.subArenaState       = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
 
         self.Statefilter = ExperimentLibStatefilter.Statefilter()
@@ -122,7 +122,7 @@ class Action (smach.State):
         # Command messages.
         self.commandExperiment = 'continue'
         self.commandExperiment_list = ['continue','pause_now','pause_after_trial', 'exit_after_trial', 'exit_now']
-        self.subCommand = rospy.Subscriber('broadcast/command', String, self.CommandExperiment_callback)
+        self.subCommand = rospy.Subscriber('experiment/command', String, self.CommandExperiment_callback)
 
 
 
@@ -195,15 +195,15 @@ class Action (smach.State):
                 stamp=None
                 if (pose is None) or (velocity is None):
                     try:
-                        stamp = self.tfrx.getLatestCommonTime('/Arena', self.paramsIn.ledpanels.frame_id)
+                        stamp = self.tfrx.getLatestCommonTime('Arena', self.paramsIn.ledpanels.frame_id)
                     except tf.Exception:
                         pass
 
                     
                 # If we still need the pose (i.e. the frame wasn't in arenastate), then get it from ROS.
-                if (pose is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', self.paramsIn.ledpanels.frame_id, stamp):
+                if (pose is None) and (stamp is not None) and self.tfrx.canTransform('Arena', self.paramsIn.ledpanels.frame_id, stamp):
                     try:
-                        poseStamped = self.tfrx.transformPose('/Arena', PoseStamped(header=Header(stamp=stamp,
+                        poseStamped = self.tfrx.transformPose('Arena', PoseStamped(header=Header(stamp=stamp,
                                                                                               frame_id=self.paramsIn.ledpanels.frame_id),
                                                                                 pose=Pose(position=Point(0,0,0),
                                                                                           orientation=Quaternion(0,0,0,1)
@@ -216,9 +216,9 @@ class Action (smach.State):
 
                         
                 # If we still need the velocity, then get it from ROS.
-                if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('/Arena', self.paramsIn.ledpanels.frame_id, stamp):
+                if (velocity is None) and (stamp is not None) and self.tfrx.canTransform('Arena', self.paramsIn.ledpanels.frame_id, stamp):
                     try:
-                        velocity_tuple = self.tfrx.lookupTwist('/Arena', self.paramsIn.ledpanels.frame_id, stamp, self.dtVelocity)
+                        velocity_tuple = self.tfrx.lookupTwist('Arena', self.paramsIn.ledpanels.frame_id, stamp, self.dtVelocity)
                     except tf.Exception:
                         velocity = None
                     else:

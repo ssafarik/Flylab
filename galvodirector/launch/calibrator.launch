@@ -28,13 +28,8 @@
 	<!-- ==========================================================    -->
 
 	<!-- ***  Core stuff  *** -->
-	<include file="$(find flycore)/launch/flycore.launch" />
+	<include file="$(find flycore)/launch/main.launch" />
 	
-	<!-- ***  Hardware, Flies, and Robot  *** -->
-	<include file="$(find config)/launch/hardware.launch" />
-	<include file="$(find robots)/launch/robots_0.launch" />
-	<include file="$(find flies)/launch/flies_1.launch" />
-
 	<param name="galvodriver/hzPoint" type="double" value="250000.0"/>
 	<param name="tracking/diff_threshold" type="double" value="100.0"/>
 	
