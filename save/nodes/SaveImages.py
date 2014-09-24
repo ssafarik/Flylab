@@ -274,7 +274,7 @@ class SaveImages:
         if (imagetopic not in self.fmf_dict):
             self.fmf_dict[imagetopic] = FlyMovieFormat.FlyMovieSaver(self.fullpathFmf_dict[imagetopic], 
                                                                      version=3, 
-                                                                     format=image.encoding.upper(), 
+                                                                     format=image.encoding.upper(), # BUG: This isn't quite right, as the ROS encodings don't all match those in FlyMovieFormat.py
                                                                      bits_per_pixel = int(8 * image.step / image.width))
             
         # Cast the pixels to the proper type, then add the frame to the .fmf
