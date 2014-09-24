@@ -241,7 +241,7 @@ class StartTrial (smach.State):
 #                                     rospy.logwarn('%s: %s' % ('experimentparamsChoices.'+d+'.'+d2, type(obj2)))
                         
     
-    def GetChoices(self, experimentparamsChoices):
+    def GetChoice(self, experimentparamsChoices):
         # Make a choice for the experimentparams.        
         experimentparamsTemp = ExperimentParamsRequest()
         experimentparams     = ExperimentParamsRequest()
@@ -257,6 +257,7 @@ class StartTrial (smach.State):
         experimentparamsTemp.save.csv                                           =             experimentparamsChoices.save.csv
         experimentparamsTemp.save.bag                                           =             experimentparamsChoices.save.bag
         experimentparamsTemp.save.mov                                           =             experimentparamsChoices.save.mov
+        experimentparamsTemp.save.fmf                                           =             experimentparamsChoices.save.fmf
         experimentparamsTemp.save.imagetopic_list                               =             experimentparamsChoices.save.imagetopic_list
         experimentparamsTemp.save.onlyWhileTriggered                            =             experimentparamsChoices.save.onlyWhileTriggered
         
@@ -415,6 +416,7 @@ class StartTrial (smach.State):
         experimentparams.save.csv                                           = (experimentparams.save.csv, experimentparamsTemp.save.csv)[experimentparamsTemp.save.csv is not None]
         experimentparams.save.bag                                           = (experimentparams.save.bag, experimentparamsTemp.save.bag)[experimentparamsTemp.save.bag is not None]
         experimentparams.save.mov                                           = (experimentparams.save.mov, experimentparamsTemp.save.mov)[experimentparamsTemp.save.mov is not None]
+        experimentparams.save.fmf                                           = (experimentparams.save.fmf, experimentparamsTemp.save.fmf)[experimentparamsTemp.save.fmf is not None]
         experimentparams.save.imagetopic_list                               = (experimentparams.save.imagetopic_list, experimentparamsTemp.save.imagetopic_list)[experimentparamsTemp.save.imagetopic_list is not None]
         experimentparams.save.onlyWhileTriggered                            = (experimentparams.save.onlyWhileTriggered, experimentparamsTemp.save.onlyWhileTriggered)[experimentparamsTemp.save.onlyWhileTriggered is not None]
         
@@ -568,7 +570,7 @@ class StartTrial (smach.State):
         rv = 'exit'
         now = rospy.Time.now().to_sec()
         experimentparamsChoices = userdata.experimentparamsChoicesIn
-        experimentparams = self.GetChoices(experimentparamsChoices)
+        experimentparams = self.GetChoice(experimentparamsChoices)
         
 
         # Set the start time.
@@ -1355,7 +1357,7 @@ class ExperimentLib():
         
     # Gets called upon ANY 'reset' state termination.
     def AnyResetTerm_callback(self, outcome_map):
-        rospy.logwarn('AnyResetTerm_callback(%s)' % repr(outcome_map))
+        #rospy.logwarn('AnyResetTerm_callback(%s)' % repr(outcome_map))
         rv = False
         
         # rv==True:  preempt all remaining states.

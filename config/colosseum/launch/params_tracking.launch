@@ -1,8 +1,8 @@
 <launch>
   <param name="tracking/filenameBackground"         type="string" value="~/background.png"/>       <!-- Location of the initial background image. -->
-  <param name="tracking/diff_threshold"             type="double" value="60"/>                     <!-- Adjust this based on light brightness, etc, to get good contours. -->
+  <param name="tracking/diff_threshold"             type="double" value="20"/>                     <!-- Adjust this based on light brightness, etc, to get good contours. -->
   <param name="tracking/dtForecast"                 type="double" value="0.10"/>                   <!-- Time to forecast future fly states. -->
-  <param name="tracking/rcBackground"               type="double" value="20000"/>                  <!-- Moving average for dynamic background. -->
+  <param name="tracking/rcBackground"               type="double" value="200000"/>                  <!-- Moving average for dynamic background. -->
   <param name="tracking/rcForeground"               type="double" value="20"/>                     <!-- Moving average for foreground objects (e.g. Fly1/image_mean). -->
   <param name="tracking/rcFilterAngle"              type="double" value="0.0"/>
   <param name="tracking/rcFilterFlip"               type="double" value="3.0"/>
