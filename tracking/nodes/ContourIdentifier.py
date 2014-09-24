@@ -787,11 +787,11 @@ class ContourIdentifier:
                         if (self.mapContourinfoFromObject is not None):
                             # Update the robot state w/ the contourinfo and end-effector positions.
                             for iRobot in self.iRobot_list:
+                                    # If the map points to a contourinfo, then use it.
                                 if (self.mapContourinfoFromObject[iRobot] is not None):
                                     
-                                    # If the map points to a contourinfo, then use it.
                                     # For the robot, use the end-effector angle instead of the contourinfo angle.
-                                    if (self.stateKinematic is not None):
+                                    if (False):#(self.stateKinematic is not None):
                                         q = self.stateKinematic.pose.orientation
                                         rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
                                         self.contourinfo_list[self.mapContourinfoFromObject[iRobot]].angle = rpy[2]
