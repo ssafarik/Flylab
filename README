@@ -117,6 +117,9 @@ When an image comes in from the camera, it goes through a processing sequence th
 5. Decide which end of the fly is the head, i.e. orientation detection.  See param rcFilterFlip.
 6. Publish the results as an ArenaState message.
 
+When Flylab is running, you can see the ArenaState messages via the command:
+$ rostopic echo ArenaState
+
 
 
 LED Panels
@@ -127,6 +130,8 @@ The ROS node called ledpanels listens to the topic "ledpanels/command", and conv
 
 Robotic Actuators
 ---------------------------
+Here is an architectural overview.  Please see the file Flylab/readme_experiments.txt for more detail on the operation of the robot.
+
 There are two mechanisms currently supported, the Fivebar and the Motorarm.  The Fivebar mechanism has two degrees of freedom, and allows movement in both X and Y within its workspace.  The Motorarm is a single dof mechanism that moves in a circle.  Each mechanism performs visual servoing when provided with the visual position (via the "visual_state" message callback).
 
 The ROS node for each supports the same interface:
@@ -146,53 +151,25 @@ Services:
 
 Laser Galvos
 ---------------------------
+Here is an overview.  Please see the following files for more detail on the operation of the galvos:
+* Flylab/readme_experiments.txt 
+* Flylab/calibrate_galvos.txt 
+ 
+ 
+To run an experiment using the galvos:
+ 1. Turn on illumination.
+ 2. Turn on the ThorLabs "Laser Diode Controller".
+ 3. Turn on the Acopian "Galvos Power Supply".
+ 4. Turn on the "Enable IR Laser" switch.
+ 5. Verify that all the safety panels (and their switches) are closed.  
+ 6. The laser diode controller "OPEN" LED should be off.
+ 7. Adjust the laser power as desired.
+ 8. Run roscore
+ 9. (On the Windows galvobox machine) run galvodriver w/ roscore already running.
+10. roslaunch experiments <nameofexperiment.py>
+
+
 At present, the galvos use a National Instruments DAQ, and that requires Windows.  Subsequently, the galvodriver needs a Windows machine (e.g. galvobox) to run, while the rest of Flylab runs on Ubuntu.  See Flylab/install.txt for details.
-
-As a user of Flylab, your interface to the galvos is primarily through the experimentparams data structure contained in your experiment file.  In each of the experimentparams "pre" and "trial" sections, you'll find a "lasergalvos" section, with the following fields:
-    .lasergalvos.enabled =                  Use the laser, or not.  
-                                            (True | False)
-    .lasergalvos.pattern_list =             a list of MsgPattern data, see 
-                                            below,
-                                            i.e. [MsgPattern, MsgPattern, ...]
-    .lasergalvos.statefilterLo_list =       a list of lower-bound states of 
-                                            where you do or don't want the 
-                                            laser to operate (in the format
-                                            of textual dictionaries),
-                                            i.e. [{'field1':LowerLimit, 
-                                                   'field2':LowerLimit}, 
-                                                  ...]
-    .lasergalvos.statefilterHi_list =       a list of upper-bound states of 
-                                            where you do or don't want the 
-                                            laser to operate (in the format
-                                            of textual dictionaries), 
-                                            i.e. [{'field1':UpperLimit, 
-                                                   'field2':UpperLimit}, 
-                                                  ...]
-    .lasergalvos.statefilterCriteria_list = list of "inclusive" or "exclusive" 
-                                            entries, each entry matching one
-                                            of the Lo,Hi entries above.  This
-                                            setting means to operate the laser
-                                            inside or outside, respectively,
-                                            the given bounds.
-
-For example:
-    self.experimentparams.trial.lasergalvos.statefilterLo_list = ["{'pose':{'position':{'x':100, 'y':0}}}"]
-    self.experimentparams.trial.lasergalvos.statefilterHi_list = ["{'pose':{'position':{'x':0, 'y':-100}}}"]
-    self.experimentparams.trial.lasergalvos.statefilterCriteria_list = ["exclusive"]
-    self.experimentparams.trial.lasergalvos.pattern_list = [
-                                    MsgPattern(
-                                        frameidPosition = 'Fly01Forecast',
-                                        frameidAngle    = 'Fly01Forecast',
-                                        shape      = 'grid',
-                                        hzPattern  = 40.0,
-                                        hzPoint    = 1000.0,
-                                        count      = 1,
-                                        size       = Point(x=2,
-                                                           y=2),
-                                        restart    = False,
-                                        param      = 3, # Peano curve level.
-                                        direction  = 1)
-                                    ]
 
 Some notes on the software architecture:
 The galvos software is split into several components, the GalvoDirector, GalvoDriver, plus the PatternGenerator.  Their functions are as follows.

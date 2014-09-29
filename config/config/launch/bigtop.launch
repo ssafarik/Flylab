@@ -7,6 +7,8 @@
     <!--                                                            -->
 	<!-- ========================================================== -->
 
+    <node pkg="bigtop" type="instructions.sh" name="instructions" output="screen" />
+
 	<include file="$(find bigtop)/launch/params_calibration.launch" />
 	<include file="$(find bigtop)/launch/params_tracking.launch" />
 	<include file="$(find flybowls)/launch/flybowl_50mm.launch" /> 
