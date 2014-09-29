@@ -1281,7 +1281,7 @@ class Fivebar:
                 self.SendTransforms()
                 self.UpdateMotorCommandFromTarget()
 
-            else: 'continue'
+            else: # 'continue'
                 (angle1Mech,  angle2Mech,  angle3Mech,  angle4Mech)   = self.Get1234FromPt(self.stateMech.pose.position)
                 with self.lock:
                     try:

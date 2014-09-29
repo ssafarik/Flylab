@@ -17,24 +17,24 @@
 
     
     <!-- Least Squares for y = a3*x**3 + a2*x**2 + a1*x + a0.  Millimeters to Volts: -->
-    <param name="galvodirector/a3" type="double" value="-5.06933e-08" />
-    <param name="galvodirector/a2" type="double" value="4.75069e-06" />
-    <param name="galvodirector/a1" type="double" value="0.0532413" />
-    <param name="galvodirector/a0" type="double" value="-0.643204" />
-    <param name="galvodirector/b3" type="double" value="1.26701e-07" />
-    <param name="galvodirector/b2" type="double" value="-1.25031e-05" />
-    <param name="galvodirector/b1" type="double" value="-0.053238" />
-    <param name="galvodirector/b0" type="double" value="3.42689" />
+    <param name="galvodirector/a3" type="double" value="-3.69757e-08" />
+    <param name="galvodirector/a2" type="double" value="6.60812e-07" />
+    <param name="galvodirector/a1" type="double" value="0.0506636" />
+    <param name="galvodirector/a0" type="double" value="-0.238945" />
+    <param name="galvodirector/b3" type="double" value="1.1227e-07" />
+    <param name="galvodirector/b2" type="double" value="-8.80985e-06" />
+    <param name="galvodirector/b1" type="double" value="-0.0503516" />
+    <param name="galvodirector/b0" type="double" value="3.55218" />
 
     <!-- Least Squares for y = a3i*x**3 + a2i*x**2 + a1i*x + a0i.  Volts to Millimeters: -->
-    <param name="galvodirector/a3i" type="double" value="0.00562104" />
-    <param name="galvodirector/a2i" type="double" value="-0.021093" />
-    <param name="galvodirector/a1i" type="double" value="18.7522" />
-    <param name="galvodirector/a0i" type="double" value="12.0735" />
-    <param name="galvodirector/b3i" type="double" value="-0.0136774" />
-    <param name="galvodirector/b2i" type="double" value="0.0334364" />
-    <param name="galvodirector/b1i" type="double" value="-18.5262" />
-    <param name="galvodirector/b0i" type="double" value="63.7074" />
+    <param name="galvodirector/a3i" type="double" value="0.0814613" />
+    <param name="galvodirector/a2i" type="double" value="0.0390241" />
+    <param name="galvodirector/a1i" type="double" value="19.4369" />
+    <param name="galvodirector/a0i" type="double" value="4.66495" />
+    <param name="galvodirector/b3i" type="double" value="0.0446111" />
+    <param name="galvodirector/b2i" type="double" value="-0.622272" />
+    <param name="galvodirector/b1i" type="double" value="-17.2832" />
+    <param name="galvodirector/b0i" type="double" value="67.3775" />
 
     
 </launch>

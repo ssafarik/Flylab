@@ -39,8 +39,8 @@ class Experiment():
         self.experimentparams.robotspec.isPresent = True                            # Set this to False if you remove the robot, but still want the actuation.
         self.experimentparams.robotspec.description = 'Black oxide magnet'
 
-        self.experimentparams.flyspec.nFlies = 2
-        self.experimentparams.flyspec.description = 'unspecified'
+        self.experimentparams.flyspec.nFlies = 4
+        self.experimentparams.flyspec.description = "unspecified"
         
         self.experimentparams.tracking.exclusionzones.enabled = False
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.00304053, y=0.00015492)]
@@ -104,7 +104,7 @@ class Experiment():
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0
-        self.experimentparams.post.trigger.timeout = 7200
+        self.experimentparams.post.trigger.timeout = 7200 # 5400 = 1.5 hr
         self.experimentparams.post.wait = 0.0
         
         self.experimentlib = ExperimentLib.ExperimentLib(self.experimentparams, 

@@ -60,7 +60,7 @@
 3.  # Measure each checker to make sure it is 30mm, then tape or spray-mount the pattern to something flat.
 4.  # If necessary, which it probably isn't, unmount camera from rig to give calibration pattern plenty of room to move.
 5.  $ <ctrl> + <shift> + T        # To open a new terminal window tab.
-6.  $ rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.030 image:=/camera/image_raw camera:=/camera
+6.  $ rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.005 image:=/camera/image_raw camera:=/camera
 7.  # Wave checkerboard pattern in front of camera until all bars turn green and calibrate button activates
 8.  # Click <calibrate>  (will take several minutes)
 9.  # Click <commit>  (writes data to ~/.ros/camera_info/<guid>.yaml)

@@ -26,18 +26,12 @@ sudo apt-get install -y gobject-introspection
 sudo easy_install munkres
 
 
-# Get the PyPNG software (used for extracting .bag files to .fmf files).
-cd ~/src.git
-git clone https://github.com/drj11/pypng.git
-cd pypng
-sudo python setup.py install
-
-
 # Get the motmot software (used for saving .fmf files).
 cd ~/src.git
 git clone git://github.com/motmot/motmot.git
 cd motmot
 git submodule update --init
+cd FlyMovieFormat
 sudo python setup.py install
 
 

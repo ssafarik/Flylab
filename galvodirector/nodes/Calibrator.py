@@ -278,7 +278,7 @@ class GalvoCalibrator:
 
 
     def Main(self):
-        rosRate = rospy.Rate(0.5)#(0.1)
+        rosRate = rospy.Rate(0.5)
 
         msgTrackingCommand                    = TrackingCommand()
         msgTrackingCommand.command            = 'initialize'
@@ -310,9 +310,9 @@ class GalvoCalibrator:
             bUseRandomPoints = True
             if (bUseRandomPoints):
                 # Specify the location of a circle (in volts) where we'll choose the input points.
-                r = 3.5
-                cx = -0.25
-                cy = 3.5
+                r = 2.5#3.5
+                cx = -0.1#-0.25
+                cy = 3.5#3.5
                 
                 for i in range(10):
                     # Choose a random point in the circle.
