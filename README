@@ -69,6 +69,8 @@ $ roslaunch experiments nameofexperiment.launch
 
 Experiments
 ---------------------------
+Here is an overview, but see the file Flylab/readme_experiments.txt for more detail.  
+
 An experiment is a sequence of trials, and is defined by a set of parameters that you edit in an experiment file (for examples, see Flylab/experiments/nodes/*.py).  A given experiment can use or not use the available hardware (motors, led panels, galvos, etc), and the behavior of each piece of hardware can be specified in detail.  The parameters are quite flexible, and once you get familiar with them it should be straightforward to conduct nearly any experiment you desire.
 
 Each experiment consists of one or more trials, and the results of each trial are written to a log file (in .csv format).  The .csv file contains, at each timestep, the "arena state" that is the positions and velocities of all the objects (robots & flies) in the arena.
@@ -79,7 +81,7 @@ Internally an experiment runs as a state machine, which just means that it goes 
 
 During operation, you may view the state machine graph of the experiment with the following ROS command:  rosrun smach_viewer smach_viewer.py
 
-Experiment parameters are documented in the experiment.py files, and please refer to these files for examples.
+Experiment parameters are documented in the experiment.py files, and please refer to these files, and to Flylab/readme_experiments.txt for examples and more detail.
 
 
 
