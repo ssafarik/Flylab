@@ -837,8 +837,8 @@ class Fly:
             self.state.wings.right.angle = angleRight
 
             # HACK
-            self.state.pose.position.x = -4.1
-            self.state.pose.position.y = -4.0
+            #self.state.pose.position.x = -4.1
+            #self.state.pose.position.y = -4.0
             # HACK
 
             if 'Robot' not in self.name:
