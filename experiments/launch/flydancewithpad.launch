@@ -1,0 +1,22 @@
+<launch>
+	<!-- ========================================================== -->
+	<!-- Configuration of the FLYDANCE experiment.                 -->
+    <!--                                                            -->
+    <!-- Edit this file to contain the elements of the particular   -->
+    <!-- experiment.                                                -->
+    <!--                                                            -->
+    <!-- Launch this file to run the experiment, as in:             -->
+    <!-- roslaunch experiments flydance.launch                       -->
+    <!--                                                            -->
+	<!-- ========================================================== -->
+
+	<!-- ***  Core stuff  *** -->
+    <include file="$(find flycore)/launch/main.launch" />
+
+
+	<!-- ***  The Experiment  *** -->
+	<node pkg="experiments" type="Flydancewithpad.py" name="Experiment" required="true" />
+
+	
+  
+</launch>
