@@ -29,135 +29,209 @@ import cv2
 import motmot.FlyMovieFormat.FlyMovieFormat as FlyMovieFormat
 import numpy as np
 
-#sys.path.insert(0,'/opt/ros/fuerte/stacks/vision_opencv/cv_bridge/src') # There's probably a better way to find cv_bridge.
 import cv_bridge
 
 iImage = 0
 cvbridge = cv_bridge.CvBridge()
 fmf = None
+extImage = None
+relpathImages = None
 
 # Get the video filename parameter.
-filenameMov = None
-filenameFmf = None
-if (len(sys.argv)==4):
-    if ('.mov' in sys.argv[3]):
-        filenameMov = sys.argv[3]
-    elif ('.fmf' in sys.argv[3]):
-        filenameFmf = sys.argv[3]
-    else:
-        print('bagconverter: Third parameter must be the full path spec of the .mov or .fmf file to write.')
+fullpathnameextMov = None
+fullpathnameextFmf = None
 
 # Process the .bag file.    
 if (len(sys.argv)>=3):
-    # Get the first and second command parameters.
-    bag = rosbag.Bag(sys.argv[1])
-    topicToConvert = sys.argv[2]
+    fullpathnameextBag = os.path.realpath(sys.argv[1])
     
-    # Use the tail end of the topic as the image dir, e.g. 'camnode/image_raw' uses 'image_raw'
-    dirImages = topicToConvert.split(os.sep)[-1]
-    # Make sure dir exists.
-    try:
-        os.makedirs(dirImages)
-    except OSError:
-        pass
-        
+    # Open the .bag file.
+    bag = rosbag.Bag(fullpathnameextBag)
 
+    # Get the list of topics in the .bag file.
+    topicsBag_list = []    
+    for (i,c) in bag._connections.iteritems():
+        topicsBag_list.append(c.topic)
+
+
+    # Get the topic name the user wants, with some possible variants.
+    topicVariants_list = [        sys.argv[2],
+                                  sys.argv[2] + os.sep + 'compressed',  
+                         os.sep + sys.argv[2],  
+                         os.sep + sys.argv[2] + os.sep + 'compressed'
+                          ]
+    topicVariants_list.reverse()  
+        
+    # Try to find the requested topic, or a variant, in the .bag file.
+    topicRequested = None
+    while (topicRequested not in topicsBag_list) and (len(topicVariants_list)>0):
+        topicRequested = topicVariants_list.pop()
+
+    if (topicRequested in topicsBag_list):
+        topicRequested_parts = topicRequested.split(os.sep)
+        print ('Using topic=%s' % topicRequested)
+        
+        
+        # Get filename parts for the .bag file.
+        (fullpathBag, nameextBag) = os.path.split(fullpathnameextBag)
+        (nameBag, extBag) = os.path.splitext(nameextBag)
     
-    # Read all the messages in the bag file.    
-    for (topic, msg, t) in bag.read_messages(topicToConvert):
-        pixels = None
-        encoding = None
-        
-        # Handle compressed images.
-        if ('compressed' in topic):
-            if ('png' in msg.format):
-                ext = 'png'
-            elif ('jpeg' in msg.format):
-                ext = 'jpg'
-            else:
-                ext = 'xxx'
-
-            if ('png' in msg.format) or ('jpeg' in msg.format):
-                pngdata = np.array(msg.data, 'c').view(np.uint8)
-                pixels = cv2.imdecode(pngdata, flags=cv2.CV_LOAD_IMAGE_UNCHANGED)
-                bpp = pixels.itemsize * 8
-                format_from_bpp_dict = {8:'MONO8', 16:'MONO16', 24:'RGB8', 32:'ARGB8'}
-                format = format_from_bpp_dict[bpp]
-                
-            # Make a filename like 'image_raw/000123.png'
-            filename = '%s%s%06d.%s' % (dirImages, os.sep, iImage, ext)
-
-            # Save the image file.
-            file = open(filename,'w')
-            file.write(msg.data)
-            file.close()
-            print ('Wrote %s' % filename)
-
-            iImage += 1
-                
+    
+        # Get filename parts for the image files.
+        # Use the tail end of the topic as the image dir, 
+        # e.g. 'camnode/image_raw' uses 'image_raw'
+        # e.g. 'camnode/image_raw/compressed' also uses 'image_raw'
+        if (topicRequested_parts[-1]=='compressed'):
+            relpathImages = topicRequested_parts[-2]
         else:
-            # Handle uncompressed images. 
-            if msg.encoding=='mono8':
-                ext = 'png'
-                
-                # Make a filename like 'image_raw/000123.png'
-                filename = '%s%s%06d.%s' % (dirImages, os.sep, iImage, ext)
-    
-                matImage = cv.GetImage(cvbridge.imgmsg_to_cv(msg, 'passthrough'))
-                pixels = np.array(msg.data, 'c').view(np.uint8).reshape((msg.height, msg.width))
-                bpp = pixels.itemsize * 8
-                format = msg.encoding.upper() # BUG: This isn't quite right, as the ROS encodings don't all match those in FlyMovieFormat.py
-                
-                # Save the image file.
-                cv.SaveImage(filename, matImage)
-                print ('Wrote %s' % filename)
-
-                iImage += 1
-            else:
-                print ('Only image encoding==mono8 is supported.  This one has %s' % msg.encoding)
-
-                
-        if (filenameFmf is not None):
-            if (fmf is None):
-                fmf = FlyMovieFormat.FlyMovieSaver(filenameFmf, 
-                                                   version=3, 
-                                                   format=format, 
-                                                   bits_per_pixel=bpp)
-            
-            # Add the frame to the .fmf
-            if (pixels is not None):
-                fmf.add_frame(pixels, msg.header.stamp.to_sec())
-
-
-    # If requested, convert the image files to an .mov file, then delete the images.                
-    if (filenameMov is not None):
-        # Run avconv, and then remove all the image files.
-        cmdCreateVideoFile = 'avconv -y -r 60 -i %s/%%06d.%s -same_quant -r 60 %s && rm -rf %s && echo Finished.' % (dirImages, ext, filenameMov, dirImages)
-        print('Converting images to video using command:')
-        print (cmdCreateVideoFile)
-        try:
-            processAvconv = subprocess.Popen(cmdCreateVideoFile, shell=True)
-        except:
-            rospy.logerr('Exception running avconv to convert to .mov')
-
-
-    if (filenameFmf is not None) and (fmf is not None):
-        fmf.close()
-        print ('Wrote %s' % filenameFmf) 
+            relpathImages = topicRequested_parts[-1]
+        fullpathImages = '%s%s%s' % (fullpathBag, os.sep, relpathImages)
         
+    
+        # Get filename parts for the timestamps.csv file.
+        fullpathCsv = '%s%s%s' % (fullpathBag, os.sep, relpathImages)
+        nameCsv = 'timestamps' # '%s_timestamps' % nameBag
+        extCsv = 'csv'
+    
+    
+        # Get the filename parts of the .mov or .fmf file.  If location not specified, then put it with the images.
+        if (len(sys.argv)==4):
+            (pathVideo, nameextVideo) = os.path.split(sys.argv[3])
+            if (len(pathVideo)==0): # unspecified path.
+                fullpathnameextVideo = '%s%s%s' % (fullpathBag, os.sep, nameextVideo)   # Put it with the .bag file.
+            else:
+                fullpathnameextVideo = os.path.realpath(sys.argv[3])                    # Put it where specified.
+                
+            if ('.mov' in sys.argv[3]):
+                fullpathnameextMov = fullpathnameextVideo
+            elif ('.fmf' in sys.argv[3]):
+                fullpathnameextFmf = fullpathnameextVideo
+            else:
+                print('bagconverter: Third parameter must be the full path spec of the .mov or .fmf file to write.')
+    
+        fullpathnameextCsv = '%s%s%s.%s' % (fullpathCsv, os.sep, nameCsv, extCsv)
+    
+        
+        # Make sure dir exists.
+        try:
+            os.makedirs(fullpathImages)
+        except OSError:
+            pass
+            
+        # Create the timestamps.csv file
+        fidCsv = open(fullpathnameextCsv, 'w')
+        print('Saving timestamps to .csv file:  %s' % fullpathnameextCsv)
+    
+        # Write a header line to the .csv file.
+        #fidCsv.write('filename, timestamp\n')
+        
+        
+        
+        # Read all the messages in the bag file.    
+        for (topic, msg, t) in bag.read_messages(topicRequested):
+            pixels = None
+            encoding = None
+            
+            nameImage = '%08d' % iImage
+    
+            # Handle compressed images.
+            if ('compressed' in topic):
+                if ('png' in msg.format):
+                    extImage = 'png'
+                elif ('jpeg' in msg.format):
+                    extImage = 'jpg'
                     
-    if (iImage==0):
+    
+                if ('png' in msg.format) or ('jpeg' in msg.format):
+                    pngdata = np.array(msg.data, 'c').view(np.uint8)
+                    pixels = cv2.imdecode(pngdata, flags=cv2.CV_LOAD_IMAGE_UNCHANGED)
+                    bpp = pixels.itemsize * 8
+                    format_from_bpp_dict = {8:'MONO8', 16:'MONO16', 24:'RGB8', 32:'ARGB8'}
+                    format = format_from_bpp_dict[bpp]
+                    
+                # Make a filename like '/home/user/bagfiles/image_raw/000123.png'
+                fullpathnameextImage = '%s%s%s%s%s.%s' % (fullpathBag, os.sep, relpathImages, os.sep, nameImage, extImage)
+    
+                # Save the image file.
+                file = open(fullpathnameextImage,'w')
+                file.write(msg.data)
+                file.close()
+                print ('Wrote %s' % fullpathnameextImage)
+    
+                iImage += 1
+                    
+            else:
+                # Handle uncompressed images. 
+                if msg.encoding=='mono8':
+                    extImage = 'png'
+                    
+                    # Make a filename like '/home/user/bagfiles/image_raw/000123.png'
+                    fullpathnameextImage = '%s%s%s%s%s.%s' % (fullpathBag, os.sep, relpathImages, os.sep, nameImage, extImage)
+        
+                    matImage = cv.GetImage(cvbridge.imgmsg_to_cv(msg, 'passthrough'))
+                    pixels = np.array(msg.data, 'c').view(np.uint8).reshape((msg.height, msg.width))
+                    bpp = pixels.itemsize * 8
+                    format = msg.encoding.upper() # BUG: This isn't quite right, as the ROS encodings don't all match those in FlyMovieFormat.py
+                    
+                    # Save the image file.
+                    cv.SaveImage(fullpathnameextImage, matImage)
+                    print ('Wrote %s' % fullpathnameextImage)
+    
+                    iImage += 1
+                else:
+                    print ('Only image encoding==mono8 is supported.  This one has %s' % msg.encoding)
+    
+                    
+            if (fullpathnameextFmf is not None):
+                if (fmf is None):
+                    fmf = FlyMovieFormat.FlyMovieSaver(fullpathnameextFmf, 
+                                                       version=3, 
+                                                       format=format, 
+                                                       bits_per_pixel=bpp)
+                
+                # Add the frame to the .fmf
+                if (pixels is not None):
+                    fmf.add_frame(pixels, msg.header.stamp.to_sec())
+    
+            # Write the filename,timestamp info the the .csv file.
+            fidCsv.write('%s.%s, %0.9f\n' % (nameImage, extImage, msg.header.stamp.to_sec()))
+    
+    
+        # If requested, convert the image files to an .mov file, then delete the images.                
+        if (relpathImages is not None) and (extImage is not None) and (fullpathnameextMov is not None):
+            # Run avconv.
+            #cmdCreateVideoFile = 'avconv -y -r 60 -i %s/%%08d.%s -same_quant -r 60 %s && rm -rf %s && echo Finished.' % (fullpathImages, extImage, fullpathnameextMov, fullpathImages)
+            cmdCreateVideoFile = 'avconv -y -r 60 -i %s/%%08d.%s -same_quant -r 60 %s && echo Finished.' % (fullpathImages, extImage, fullpathnameextMov)
+            print('Converting images to video using command:')
+            print (cmdCreateVideoFile)
+            try:
+                processAvconv = subprocess.Popen(cmdCreateVideoFile, shell=True)
+            except:
+                rospy.logerr('Exception running avconv to convert to .mov')
+    
+    
+        if (fullpathnameextFmf is not None) and (fmf is not None):
+            fmf.close()
+            print ('Wrote %s' % fullpathnameextFmf) 
+            
+                        
+        fidCsv.close()
+        print('Wrote timestamps to .csv file:  %s' % fullpathnameextCsv)
+
+    
+    else:
         print('Please specify a valid image topic:  bagconverter filename.bag imagetopic [filename.mov]')
-        print('Topics in %s are:' % sys.argv[1])
+        print('Topics in %s are:' % fullpathnameextBag)
         for (i,c) in bag._connections.iteritems():
             print(c.topic)
+
             
 else:
-    print ('Usage:  bagconverter filename.bag imagetopic [filename.mov]')
+    print ('Usage:  bagconverter filename.bag imagetopic [filename.mov | filename.fmf]')
     print ('  Extracts the image files from a .bag file, and writes them to')
     print ('  disk in a subdirectory named from the imagetopic.')
     print ('  Can also then optionally convert those images to a .mov file.')
-    print ('  If the optional .mov file is specified, the images will be')
-    print ('  converted to a .mov file, and then images deleted.')
+    print ('  If the optional .mov or .fmf file is specified, the images will be')
+    print ('  converted to video.')
     
     
