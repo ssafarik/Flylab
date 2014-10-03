@@ -87,6 +87,7 @@ if (len(sys.argv)>=3):
         fullpathCsv = '%s%s%s' % (fullpathBag, os.sep, relpathImages)
         nameCsv = 'timestamps' # '%s_timestamps' % nameBag
         extCsv = 'csv'
+        fullpathnameextCsv = '%s%s%s.%s' % (fullpathCsv, os.sep, nameCsv, extCsv)
     
     
         # Get the filename parts of the .mov or .fmf file.  If location not specified, then put it with the .bag file.
@@ -102,11 +103,9 @@ if (len(sys.argv)>=3):
             elif ('.fmf' in sys.argv[3]):
                 fullpathnameextFmf = fullpathnameextVideo
             else:
-                print('bagconverter: Third parameter must be the full path spec of the .mov or .fmf file to write.')
+                print('bagconverter: Third parameter must be the filename of the .mov or .fmf file to write.')
     
-        fullpathnameextCsv = '%s%s%s.%s' % (fullpathCsv, os.sep, nameCsv, extCsv)
     
-        
         # Make sure dir exists.
         try:
             os.makedirs(fullpathImages)
@@ -126,7 +125,6 @@ if (len(sys.argv)>=3):
         iImage = 0
         for (topic, msg, t) in bag.read_messages(topicRequested):
             pixels = None
-            encoding = None
             
             nameImage = '%08d' % iImage
     
@@ -203,7 +201,7 @@ if (len(sys.argv)>=3):
             try:
                 processAvconv = subprocess.Popen(cmdCreateVideoFile, shell=True)
             except:
-                rospy.logerr('Exception running avconv to convert to .mov')
+                print('ERROR: Exception running avconv to convert to .mov')
     
     
         if (fullpathnameextFmf is not None) and (fmf is not None):
@@ -220,6 +218,8 @@ if (len(sys.argv)>=3):
         print('Topics in %s are:' % fullpathnameextBag)
         for (i,c) in bag._connections.iteritems():
             print(c.topic)
+            
+    bag.close()
 
             
 else:
