@@ -5,7 +5,7 @@
 # images to .png / .mov / .fmf files.
 #  
 # Specify the .bag file and the image topic on the command line, and
-# optionally the .mov filename to write as a movie file. 
+# optionally the .mov or .fmf filename to write as a video. 
 #
 #   rosrun save bagconverter.py <bagfile> <imagetopic>] [filename.mov | filename.fmf]
 #
@@ -21,31 +21,20 @@ import os
 import subprocess
 import sys
 
-import Image
 import rospy
 import rosbag
+import Image
 import cv
 import cv2
 import motmot.FlyMovieFormat.FlyMovieFormat as FlyMovieFormat
 import numpy as np
-
 import cv_bridge
 
-iImage = 0
-cvbridge = cv_bridge.CvBridge()
-fmf = None
-extImage = None
-relpathImages = None
-
-# Get the video filename parameter.
-fullpathnameextMov = None
-fullpathnameextFmf = None
 
 # Process the .bag file.    
 if (len(sys.argv)>=3):
-    fullpathnameextBag = os.path.realpath(sys.argv[1])
-    
     # Open the .bag file.
+    fullpathnameextBag = os.path.realpath(sys.argv[1])
     bag = rosbag.Bag(fullpathnameextBag)
 
     # Get the list of topics in the .bag file.
@@ -54,7 +43,7 @@ if (len(sys.argv)>=3):
         topicsBag_list.append(c.topic)
 
 
-    # Get the topic name the user wants, with some possible variants.
+    # Get the topic name the user wants, and some possible variants.
     topicVariants_list = [        sys.argv[2],
                                   sys.argv[2] + os.sep + 'compressed',  
                          os.sep + sys.argv[2],  
@@ -68,6 +57,12 @@ if (len(sys.argv)>=3):
         topicRequested = topicVariants_list.pop()
 
     if (topicRequested in topicsBag_list):
+        cvbridge = cv_bridge.CvBridge()
+        extImage = None
+        fullpathnameextMov = None
+        fullpathnameextFmf = None
+        fmf = None
+        
         topicRequested_parts = topicRequested.split(os.sep)
         print ('Using topic=%s' % topicRequested)
         
@@ -94,7 +89,7 @@ if (len(sys.argv)>=3):
         extCsv = 'csv'
     
     
-        # Get the filename parts of the .mov or .fmf file.  If location not specified, then put it with the images.
+        # Get the filename parts of the .mov or .fmf file.  If location not specified, then put it with the .bag file.
         if (len(sys.argv)==4):
             (pathVideo, nameextVideo) = os.path.split(sys.argv[3])
             if (len(pathVideo)==0): # unspecified path.
@@ -128,6 +123,7 @@ if (len(sys.argv)>=3):
         
         
         # Read all the messages in the bag file.    
+        iImage = 0
         for (topic, msg, t) in bag.read_messages(topicRequested):
             pixels = None
             encoding = None
@@ -168,13 +164,13 @@ if (len(sys.argv)>=3):
                     # Make a filename like '/home/user/bagfiles/image_raw/000123.png'
                     fullpathnameextImage = '%s%s%s%s%s.%s' % (fullpathBag, os.sep, relpathImages, os.sep, nameImage, extImage)
         
-                    matImage = cv.GetImage(cvbridge.imgmsg_to_cv(msg, 'passthrough'))
+                    image = cv.GetImage(cvbridge.imgmsg_to_cv(msg, 'passthrough'))
                     pixels = np.array(msg.data, 'c').view(np.uint8).reshape((msg.height, msg.width))
                     bpp = pixels.itemsize * 8
                     format = msg.encoding.upper() # BUG: This isn't quite right, as the ROS encodings don't all match those in FlyMovieFormat.py
                     
                     # Save the image file.
-                    cv.SaveImage(fullpathnameextImage, matImage)
+                    cv.SaveImage(fullpathnameextImage, image)
                     print ('Wrote %s' % fullpathnameextImage)
     
                     iImage += 1
@@ -198,7 +194,7 @@ if (len(sys.argv)>=3):
     
     
         # If requested, convert the image files to an .mov file, then delete the images.                
-        if (relpathImages is not None) and (extImage is not None) and (fullpathnameextMov is not None):
+        if (fullpathnameextMov is not None) and (extImage is not None):
             # Run avconv.
             #cmdCreateVideoFile = 'avconv -y -r 60 -i %s/%%08d.%s -same_quant -r 60 %s && rm -rf %s && echo Finished.' % (fullpathImages, extImage, fullpathnameextMov, fullpathImages)
             cmdCreateVideoFile = 'avconv -y -r 60 -i %s/%%08d.%s -same_quant -r 60 %s && echo Finished.' % (fullpathImages, extImage, fullpathnameextMov)
@@ -220,7 +216,7 @@ if (len(sys.argv)>=3):
 
     
     else:
-        print('Please specify a valid image topic:  bagconverter filename.bag imagetopic [filename.mov]')
+        print('Please specify a valid image topic:  bagconverter filename.bag imagetopic [filename.mov|filename.fmf]')
         print('Topics in %s are:' % fullpathnameextBag)
         for (i,c) in bag._connections.iteritems():
             print(c.topic)
