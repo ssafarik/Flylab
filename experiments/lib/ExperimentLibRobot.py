@@ -123,7 +123,6 @@ class Reset (smach.State):
                 ptTarget = np.array([self.target.pose.position.x,
                                     self.target.pose.position.y])                
                 r = np.linalg.norm(ptRobot-ptTarget)
-                #rospy.loginfo ('EL ResetHardware() ptTarget=%s, ptRobot=%s, r=%s' % (ptTarget, ptRobot, r))
                 
                 rospy.logwarn('Distance to home: %f, tolerance: %f' % (r, userdata.experimentparamsChoicesIn.home.tolerance))
                 if (r <= userdata.experimentparamsChoicesIn.home.tolerance):
@@ -203,7 +202,7 @@ class Action (smach.State):
     # GetAngleFrame()
     # Get the orientation angle of the given frameid in the Arena frame.
     #
-    def GetAngleFrame (self, arenastate, frameidChild):
+    def GetAngleFrame (self, frameidChild):
         try:
             stamp = self.tfrx.getLatestCommonTime('Arena', frameidChild)
             (trans,q) = self.tfrx.lookupTransform('Arena', frameidChild, stamp)
@@ -312,122 +311,123 @@ class Action (smach.State):
             
             
     def MoveRelative (self):            
-        self.ptTarget = None
+        ptTarget = None
         rv = 'aborted'
 
+        # Compute the speedMax.
+        if (self.paramsIn.robot.move.relative.typeSpeed=='constant'):
+            speedMax = self.paramsIn.robot.move.relative.speedMax
+        else:
+            # Choose a random speed in range [0,speed]                     
+            speedMax = self.paramsIn.robot.move.relative.speedMax * np.random.random() # Choose a random speed.
+
+        
+        # Compute the angleOffset (in the frameidOrigin).
+        if (self.paramsIn.robot.move.relative.typeAngleOffset=='constant'):
+            angleOffset = self.paramsIn.robot.move.relative.angleOffset
+        elif (self.paramsIn.robot.move.relative.typeAngleOffset=='random'):
+            angleOffset = self.paramsIn.robot.move.relative.angleOffset * np.random.random()
+        elif (self.paramsIn.robot.move.relative.angleType=='current'): # Use the robot's current angular position in the origin frame, rather than a given angle.
+            angleOffset = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOrigin, 'Robot')         
+        else:
+            rospy.logwarn ('EL, unknown robot.move.relative.typeAngleOffset: %s' % self.paramsIn.robot.move.relative.typeAngleOffset)
+            angleOffset = 0
+
+        
+        # Compute the angleVelocity (in the frameidOrigin).
+        if (self.paramsIn.robot.move.relative.typeAngleVelocity=='constant'):
+            angleVelocity = self.paramsIn.robot.move.relative.angleVelocity
+        elif (self.paramsIn.robot.move.relative.typeAngleVelocity=='random'):
+            angleVelocity = self.paramsIn.robot.move.relative.angleVelocity * np.random.random()
+        else:
+            rospy.logwarn ('EL, unknown robot.move.relative.typeAngleVelocity: %s' % self.paramsIn.robot.move.relative.typeAngleVelocity)
+            angleVelocity = 0
+
+        
+        # Compute the angleOscMag (in the frameidOrigin).
+        if (self.paramsIn.robot.move.relative.typeAngleOscMag=='constant'):
+            angleOscMag = self.paramsIn.robot.move.relative.angleOscMag
+        elif (self.paramsIn.robot.move.relative.typeAngleOscMag=='random'):
+            angleOscMag = self.paramsIn.robot.move.relative.angleOscMag * np.random.random()
+        else:
+            rospy.logwarn ('EL, unknown robot.move.relative.typeAngleOscMag: %s' % self.paramsIn.robot.move.relative.typeAngleOscMag)
+            angleOscMag = 0
+
+        
+        # Compute the angleOscFreq (in the frameidOrigin).
+        if (self.paramsIn.robot.move.relative.typeAngleOscFreq=='constant'):
+            angleOscFreq = self.paramsIn.robot.move.relative.angleOscFreq
+        elif (self.paramsIn.robot.move.relative.typeAngleOscFreq=='random'):
+            angleOscFreq = self.paramsIn.robot.move.relative.angleOscFreq * np.random.random()
+        else:
+            rospy.logwarn ('EL, unknown robot.move.relative.typeAngleOscFreq: %s' % self.paramsIn.robot.move.relative.typeAngleOscFreq)
+            angleOscFreq = 0
+            
         
         while not rospy.is_shutdown():
-            posRobot = self.arenastate.robot.pose.position # Assumed in the 'Arena' frame.
-            ptRobot = np.array([posRobot.x, posRobot.y])
+            t = rospy.Time.now().to_sec()
             
-            # Get a random speed once per move, non-random speed always.
-            angleSpeed = 0.0
-            if (self.paramsIn.robot.move.relative.speedType=='random'):
-                if (self.ptTarget is None):
-                    # Choose a random speed in range [-speed,+speed]                     
-                    speedTarget = self.paramsIn.robot.move.relative.speed * (2.0*np.random.random() - 1.0) # Choose a random speed, plus or minus.
-                    # Convert speed to +speed and angle.                     
-                    if speedTarget < 0:
-                        speedTarget = -speedTarget
-                        angleSpeed = np.pi
-            else:
-                speedTarget = self.paramsIn.robot.move.relative.speed
-
+            # If we need to update the target position.
+            if (ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
+                # Update the angleOffset based on the current robot position.
+                if (self.paramsIn.robot.move.relative.angleType=='current'): # Use the robot's current angular position in the origin frame, rather than a given angle.
+                    angleOffset = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOrigin, 'Robot')
             
-            
-            if (self.paramsIn.robot.move.relative.angleType=='random'):     
-                if (self.ptTarget is None):                                 # Get a random angle once per move.
-                    angleBase = 2.0*np.pi * np.random.random()
-                    angleRel = 0.0
-                # else we already computed the angle.
-                    
-            elif (self.paramsIn.robot.move.relative.angleType=='constant'):
-                if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
-                    angleBase = self.GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
-                    angleRel = self.paramsIn.robot.move.relative.angleOffset
+                # Angle of target in origin frame.
+                angleInOriginFrame = angleOffset + angleVelocity*t + angleOscMag * np.sin(2.0 * np.pi * angleOscFreq * t) 
 
-            elif (self.paramsIn.robot.move.relative.angleType=='current'):
-                if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
-                    angleBase = self.GetAngleFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginAngle)
-                    angleRel = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOriginAngle, 'Robot')
-                    
-            else:
-                rospy.logwarn ('EL, unknown robot.move.relative.angleType: %s' % self.paramsIn.robot.move.relative.angleType)
-                angleBase = None
-                angleRel = None  
-
-            # Oscillate the angle:  angleOsc = A * sin(2*pi * f * t) = A * sin(w * t)
-            angleOsc = self.paramsIn.robot.move.relative.angleOscMag * np.sin(2.0 * np.pi * self.paramsIn.robot.move.relative.angleOscFreq * rospy.Time.now().to_sec())
-                    
+                # Target point in Origin frame.
+                d = self.paramsIn.robot.move.relative.distance
+                stamp = self.tfrx.getLatestCommonTime('Arena', self.paramsIn.robot.move.relative.frameidOrigin)
+                ptsInOriginFrame = PointStamped(header=Header(frame_id=self.paramsIn.robot.move.relative.frameidOrigin, stamp=stamp),
+                                                point=Point(x = d*np.cos(angleInOriginFrame), 
+                                                            y = d*np.sin(angleInOriginFrame), 
+                                                            z = 0.0))
                 
-            if (angleBase is not None) and (angleRel is not None):
-                angleTarget = (angleBase + angleRel + angleSpeed + angleOsc) % (2.0*np.pi)
-            else:
-                angleTarget = None
-
-                                                   
-            # Move a distance relative to whose position?
-            #if self.paramsIn.robot.move.relative.frameidOriginPosition=='Fly1' and (len(self.arenastate.flies)>0):
-            #    posOrigin = posFly
-            #    doMove = True
-            #elif self.paramsIn.robot.move.relative.frameidOriginPosition=='Robot':
-            #    posOrigin = posRobot
-            #    doMove = True
-            #else:
-            #    posOrigin = Point(x=0, y=0, z=0) # Relative to the origin of the Arena frame
-            #    doMove = False
+                # Target point in Origin frame.
+                ptsInArenaFrame = self.tfrx.transformPoint('Arena', ptsInOriginFrame)
+                ptTarget = self.ClipXyToRadius(ptsInArenaFrame.point.x, ptsInArenaFrame.point.y, self.radiusMovement)
             
 
-            # If we need to calculate a target.
-            if (self.ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
-                doMove = True
-                # Compute target point in workspace (i.e. Arena) coordinates.
-                #ptOrigin = np.array([posOrigin.x, posOrigin.y])
-                ptOrigin = self.GetPositionFrame(self.arenastate, self.paramsIn.robot.move.relative.frameidOriginPosition)
-                if (ptOrigin is not None) and (angleTarget is not None):
-                    d = self.paramsIn.robot.move.relative.distance
-                    ptRelative = d * np.array([np.cos(angleTarget), np.sin(angleTarget)])
-                    ptTarget = ptOrigin[0:2] + ptRelative
-                    self.ptTarget = self.ClipXyToRadius(ptTarget[0], ptTarget[1], self.radiusMovement)
+            # Send the command.
+            self.target.header = self.arenastate.robot.header
+            self.target.pose.position.x = ptTarget[0]
+            self.target.pose.position.y = ptTarget[1]
+            #rospy.logwarn (ptTarget)
 
-                    # Send the command.
-                    self.target.header = self.arenastate.robot.header
-                    self.target.pose.position.x = self.ptTarget[0]
-                    self.target.pose.position.y = self.ptTarget[1]
-                    #rospy.logwarn (self.ptTarget)
-                    if (doMove):
-                        #rospy.logwarn((self.target.pose.position.x,self.target.pose.position.y))
-                        try:
-                            self.SetStageStateRef(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
-                                                                                        pose=self.target.pose,
-                                                                                        speed = speedTarget # Max allowed speed.
-                                                                                        )
-                                                                    )
-                                               )
-                        except rospy.ServiceException, e:
-                            stSrv = 'set_stage_state_ref'
-                            try:
-                                rospy.wait_for_service(stSrv)
-                                self.SetStageStateRef = rospy.ServiceProxy(stSrv, SrvFrameState, persistent=True)
-                            except rospy.ServiceException, e:
-                                rospy.logwarn ('EL FAILED to reconnect service %s(): %s' % (stSrv, e))
-                            else:
-                                rospy.logwarn ('EL Reconnected service %s()' % stSrv)
-                                
-                            self.ptTarget = None
-                        
+            #rospy.logwarn((self.target.pose.position.x,self.target.pose.position.y))
+            try:
+                self.SetStageStateRef(SrvFrameStateRequest(state=MsgFrameState(header=self.target.header, 
+                                                                               pose=self.target.pose,
+                                                                               speed = speedMax # Max allowed speed.
+                                                                               )
+                                                           )
+                                      )
+            except rospy.ServiceException, e:
+                stSrv = 'set_stage_state_ref'
+                try:
+                    rospy.wait_for_service(stSrv)
+                    self.SetStageStateRef = rospy.ServiceProxy(stSrv, SrvFrameState, persistent=True)
+                except rospy.ServiceException, e:
+                    rospy.logwarn ('EL FAILED to reconnect service %s(): %s' % (stSrv, e))
+                else:
+                    rospy.logwarn ('EL Reconnected service %s()' % stSrv)
+                    
+                ptTarget = None
+                    
 
 
                     
             # Check if we're there yet.
-            if self.ptTarget is not None:
-                r = np.linalg.norm(ptRobot-self.ptTarget)
+            ptRobot = np.array([self.arenastate.robot.pose.position.x, self.arenastate.robot.pose.position.y])
+            if (ptTarget is not None):
+                r = np.linalg.norm(ptRobot-ptTarget)
                 if (r <= self.paramsIn.robot.move.relative.tolerance):
                     rv = 'success'
                     break
 
             
-            if self.preempt_requested():
+            if (self.preempt_requested()):
                 rospy.loginfo('preempt requested: MoveRelative()')
                 self.service_preempt()
                 rv = 'preempt'
@@ -461,7 +461,7 @@ class Action (smach.State):
                 break
 
 
-        self.ptTarget = None
+        ptTarget = None
         
         return rv
 
