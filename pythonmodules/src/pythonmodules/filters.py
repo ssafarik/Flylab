@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('arena_tf')
 import rospy
-import numpy as N
+import numpy as np
 from pythonmodules import CircleFunctions
 
 import cv
@@ -111,10 +111,10 @@ class LowPassCircleFilter:
             if (z is not None) and (t is not None):
                 
                 # Unwrap big jumps
-                if (z - self.zf) > N.pi:
-                    self.zf += (2.0*N.pi)
-                if (z - self.zf) < -N.pi:
-                    self.zf -= (2.0*N.pi)
+                if (z - self.zf) > np.pi:
+                    self.zf += (2.0*np.pi)
+                if (z - self.zf) < -np.pi:
+                    self.zf -= (2.0*np.pi)
                     
                 dt = t - self.t
                 alpha = dt/(self.RC + dt)

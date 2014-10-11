@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
-import numpy as N
+import numpy as np
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
@@ -64,21 +64,22 @@ class ExperimentTestRobot():
 
         # .robot.move, .lasergalvos, and .triggerExit all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.trial.robot.enabled = True
-        self.experimentparams.trial.robot.move.mode = 'pattern'        
-        self.experimentparams.trial.robot.move.relative.tracking = [False]
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = ['Arena']
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = ['Arena']
-        self.experimentparams.trial.robot.move.relative.distance = [20]
-        self.experimentparams.trial.robot.move.relative.angleType = ['constant']
-        self.experimentparams.trial.robot.move.relative.angleOffset = [0]
-        self.experimentparams.trial.robot.move.relative.angleOscMag = [0] # Radians
-        self.experimentparams.trial.robot.move.relative.angleOscFreq = [0]   # Hz
-        self.experimentparams.trial.robot.move.relative.speed = [20]
-        self.experimentparams.trial.robot.move.relative.speedType = ['constant']
-        self.experimentparams.trial.robot.move.relative.tolerance = [-1.0] # i.e. never get there.
-        self.experimentparams.trial.robot.move.pattern.frameidPosition = ['Arena']               # 
-        self.experimentparams.trial.robot.move.pattern.frameidAngle = ['Arena']               # 
+        self.experimentparams.trial.robot.enabled                           = True
+        self.experimentparams.trial.robot.move.mode                         = 'pattern'        
+        self.experimentparams.trial.robot.move.relative.tracking            = [False]
+        self.experimentparams.trial.robot.move.relative.frameidOrigin       = ['Arena']
+        self.experimentparams.trial.robot.move.relative.distance            = [20]  # mm
+        self.experimentparams.trial.robot.move.relative.angleOffset         = [0]   # Angular offset to target point in given frame (radians).
+        self.experimentparams.trial.robot.move.relative.angleVelocity       = [0]  # 2pi*freq # Angular velocity of target point in given frame (radians per sec).
+        self.experimentparams.trial.robot.move.relative.angleOscMag         = [0]  # Oscillatory addition to angular velocity.
+        self.experimentparams.trial.robot.move.relative.angleOscFreq        = [0]  # Hz of the added oscillation.
+        self.experimentparams.trial.robot.move.relative.speedMax            = [20]  # Maximum allowed speed of travel (mm/sec).
+        self.experimentparams.trial.robot.move.relative.tolerance           = [-1]  # mm
+        self.experimentparams.trial.robot.move.relative.typeAngleOffset     = ['constant']  # 'constant' or 'random' (on range [0,2pi]) or 'current' (use current angle from frameidOrigin to robot)
+        self.experimentparams.trial.robot.move.relative.typeAngleVelocity   = ['constant']  # 'constant' or 'random' (on range [0,angleVelocity])
+        self.experimentparams.trial.robot.move.relative.typeAngleOscMag     = ['constant']  # 'constant' or 'random' (on range [0,angleOscMag])
+        self.experimentparams.trial.robot.move.relative.typeAngleOscFreq    = ['constant']  # 'constant' or 'random' (on range [0,angleOscFreq])
+        self.experimentparams.trial.robot.move.relative.typeSpeedMax        = ['constant']  # 'constant' or 'random' (on range [0,speedMax])
 
         if (False):
 # Four points step response.
@@ -111,8 +112,8 @@ class ExperimentTestRobot():
         self.experimentparams.post.trigger.speedRelMax       = 999.0
         self.experimentparams.post.trigger.distanceMin = 0.0
         self.experimentparams.post.trigger.distanceMax = 999.0
-        self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleMin =  0.0 * np.pi / 180.0
+        self.experimentparams.post.trigger.angleMax =180.0 * np.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0

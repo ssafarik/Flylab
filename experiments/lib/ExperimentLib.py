@@ -46,7 +46,9 @@ g_notify_list = ['savearenastate',
                  'transformserverarenacamera', 
                  'transformserverarenastage']
 
-# The time that the experiment started.
+# The time that the experiment started is t=0.  We use elapsed time rather than
+# absolute ROS time so that it only progresses when the experiment is running,
+# i.e. when the user pressed <Pause> in the FlylabGUI then elapsed time pauses too.
 g_timeExperimentElapsed = 0.0
 
 
@@ -297,7 +299,7 @@ class StartTrial (smach.State):
             experimentparamsTemp.pre.robot.move.relative.typeAngleVelocity      = self.Choose(experimentparamsChoices.pre.robot.move.relative.typeAngleVelocity)
             experimentparamsTemp.pre.robot.move.relative.typeAngleOscMag        = self.Choose(experimentparamsChoices.pre.robot.move.relative.typeAngleOscMag)
             experimentparamsTemp.pre.robot.move.relative.typeAngleOscFreq       = self.Choose(experimentparamsChoices.pre.robot.move.relative.typeAngleOscFreq)
-            experimentparamsTemp.pre.robot.move.relative.typeSpeed              = self.Choose(experimentparamsChoices.pre.robot.move.relative.typeSpeed)
+            experimentparamsTemp.pre.robot.move.relative.typeSpeedMax           = self.Choose(experimentparamsChoices.pre.robot.move.relative.typeSpeedMax)
             
             experimentparamsTemp.pre.robot.move.pattern.frameidPosition         = self.Choose(experimentparamsChoices.pre.robot.move.pattern.frameidPosition)
             experimentparamsTemp.pre.robot.move.pattern.frameidAngle            = self.Choose(experimentparamsChoices.pre.robot.move.pattern.frameidAngle)
@@ -364,7 +366,7 @@ class StartTrial (smach.State):
             experimentparamsTemp.trial.robot.move.relative.typeAngleVelocity    = self.Choose(experimentparamsChoices.trial.robot.move.relative.typeAngleVelocity)
             experimentparamsTemp.trial.robot.move.relative.typeAngleOscMag      = self.Choose(experimentparamsChoices.trial.robot.move.relative.typeAngleOscMag)
             experimentparamsTemp.trial.robot.move.relative.typeAngleOscFreq     = self.Choose(experimentparamsChoices.trial.robot.move.relative.typeAngleOscFreq)
-            experimentparamsTemp.trial.robot.move.relative.typeSpeed            = self.Choose(experimentparamsChoices.trial.robot.move.relative.typeSpeed)
+            experimentparamsTemp.trial.robot.move.relative.typeSpeedMax         = self.Choose(experimentparamsChoices.trial.robot.move.relative.typeSpeedMax)
             experimentparamsTemp.trial.robot.move.pattern.frameidPosition       = self.Choose(experimentparamsChoices.trial.robot.move.pattern.frameidPosition)
             experimentparamsTemp.trial.robot.move.pattern.frameidAngle          = self.Choose(experimentparamsChoices.trial.robot.move.pattern.frameidAngle)
             experimentparamsTemp.trial.robot.move.pattern.shape                 = self.Choose(experimentparamsChoices.trial.robot.move.pattern.shape)
@@ -463,7 +465,7 @@ class StartTrial (smach.State):
             experimentparams.pre.robot.move.relative.typeAngleVelocity      = (experimentparams.pre.robot.move.relative.typeAngleVelocity, experimentparamsTemp.pre.robot.move.relative.typeAngleVelocity)[experimentparamsTemp.pre.robot.move.relative.typeAngleVelocity is not None]
             experimentparams.pre.robot.move.relative.typeAngleOscMag        = (experimentparams.pre.robot.move.relative.typeAngleOscMag, experimentparamsTemp.pre.robot.move.relative.typeAngleOscMag)[experimentparamsTemp.pre.robot.move.relative.typeAngleOscMag is not None]
             experimentparams.pre.robot.move.relative.typeAngleOscFreq       = (experimentparams.pre.robot.move.relative.typeAngleOscFreq, experimentparamsTemp.pre.robot.move.relative.typeAngleOscFreq)[experimentparamsTemp.pre.robot.move.relative.typeAngleOscFreq is not None]
-            experimentparams.pre.robot.move.relative.typeSpeed              = (experimentparams.pre.robot.move.relative.typeSpeed, experimentparamsTemp.pre.robot.move.relative.typeSpeed)[experimentparamsTemp.pre.robot.move.relative.typeSpeed is not None]
+            experimentparams.pre.robot.move.relative.typeSpeedMax           = (experimentparams.pre.robot.move.relative.typeSpeedMax, experimentparamsTemp.pre.robot.move.relative.typeSpeedMax)[experimentparamsTemp.pre.robot.move.relative.typeSpeedMax is not None]
             experimentparams.pre.robot.move.pattern.frameidPosition         = (experimentparams.pre.robot.move.pattern.frameidPosition, experimentparamsTemp.pre.robot.move.pattern.frameidPosition)[experimentparamsTemp.pre.robot.move.pattern.frameidPosition is not None]
             experimentparams.pre.robot.move.pattern.frameidAngle            = (experimentparams.pre.robot.move.pattern.frameidAngle, experimentparamsTemp.pre.robot.move.pattern.frameidAngle)[experimentparamsTemp.pre.robot.move.pattern.frameidAngle is not None]
             experimentparams.pre.robot.move.pattern.shape                   = (experimentparams.pre.robot.move.pattern.shape, experimentparamsTemp.pre.robot.move.pattern.shape)[experimentparamsTemp.pre.robot.move.pattern.shape is not None]
@@ -516,20 +518,20 @@ class StartTrial (smach.State):
         experimentparams.trial.robot.enabled                                = (experimentparams.trial.robot.enabled, experimentparamsTemp.trial.robot.enabled)[experimentparamsTemp.trial.robot.enabled is not None]
         if (experimentparams.trial.robot.enabled):
             experimentparams.trial.robot.move.mode                          = (experimentparams.trial.robot.move.mode, experimentparamsTemp.trial.robot.move.mode)[experimentparamsTemp.trial.robot.move.mode is not None]
-            experimentparams.trial.robot.move.relative.tracking               = (experimentparams.trial.robot.move.relative.tracking, experimentparamsTemp.trial.robot.move.relative.tracking)[experimentparamsTemp.trial.robot.move.relative.tracking is not None]                   
-            experimentparams.trial.robot.move.relative.frameidOrigin          = (experimentparams.trial.robot.move.relative.frameidOrigin, experimentparamsTemp.trial.robot.move.relative.frameidOrigin)[experimentparamsTemp.trial.robot.move.relative.frameidOrigin is not None]
-            experimentparams.trial.robot.move.relative.distance               = (experimentparams.trial.robot.move.relative.distance, experimentparamsTemp.trial.robot.move.relative.distance)[experimentparamsTemp.trial.robot.move.relative.distance is not None]
-            experimentparams.trial.robot.move.relative.angleOffset            = (experimentparams.trial.robot.move.relative.angleOffset, experimentparamsTemp.trial.robot.move.relative.angleOffset)[experimentparamsTemp.trial.robot.move.relative.angleOffset is not None]
-            experimentparams.trial.robot.move.relative.angleVelocity          = (experimentparams.trial.robot.move.relative.angleVelocity, experimentparamsTemp.trial.robot.move.relative.angleVelocity)[experimentparamsTemp.trial.robot.move.relative.angleVelocity is not None]
-            experimentparams.trial.robot.move.relative.angleOscMag            = (experimentparams.trial.robot.move.relative.angleOscMag, experimentparamsTemp.trial.robot.move.relative.angleOscMag)[experimentparamsTemp.trial.robot.move.relative.angleOscMag is not None]
-            experimentparams.trial.robot.move.relative.angleOscFreq           = (experimentparams.trial.robot.move.relative.angleOscFreq, experimentparamsTemp.trial.robot.move.relative.angleOscFreq)[experimentparamsTemp.trial.robot.move.relative.angleOscFreq is not None]
-            experimentparams.trial.robot.move.relative.speedMax               = (experimentparams.trial.robot.move.relative.speedMax, experimentparamsTemp.trial.robot.move.relative.speedMax)[experimentparamsTemp.trial.robot.move.relative.speedMax is not None]
-            experimentparams.trial.robot.move.relative.tolerance              = (experimentparams.trial.robot.move.relative.tolerance, experimentparamsTemp.trial.robot.move.relative.tolerance)[experimentparamsTemp.trial.robot.move.relative.tolerance is not None]
-            experimentparams.trial.robot.move.relative.typeAngleOffset        = (experimentparams.trial.robot.move.relative.typeAngleOffset, experimentparamsTemp.trial.robot.move.relative.typeAngleOffset)[experimentparamsTemp.trial.robot.move.relative.typeAngleOffset is not None]
-            experimentparams.trial.robot.move.relative.typeAngleVelocity      = (experimentparams.trial.robot.move.relative.typeAngleVelocity, experimentparamsTemp.trial.robot.move.relative.typeAngleVelocity)[experimentparamsTemp.trial.robot.move.relative.typeAngleVelocity is not None]
-            experimentparams.trial.robot.move.relative.typeAngleOscMag        = (experimentparams.trial.robot.move.relative.typeAngleOscMag, experimentparamsTemp.trial.robot.move.relative.typeAngleOscMag)[experimentparamsTemp.trial.robot.move.relative.typeAngleOscMag is not None]
-            experimentparams.trial.robot.move.relative.typeAngleOscFreq       = (experimentparams.trial.robot.move.relative.typeAngleOscFreq, experimentparamsTemp.trial.robot.move.relative.typeAngleOscFreq)[experimentparamsTemp.trial.robot.move.relative.typeAngleOscFreq is not None]
-            experimentparams.trial.robot.move.relative.typeSpeed              = (experimentparams.trial.robot.move.relative.typeSpeed, experimentparamsTemp.trial.robot.move.relative.typeSpeed)[experimentparamsTemp.trial.robot.move.relative.typeSpeed is not None]
+            experimentparams.trial.robot.move.relative.tracking             = (experimentparams.trial.robot.move.relative.tracking, experimentparamsTemp.trial.robot.move.relative.tracking)[experimentparamsTemp.trial.robot.move.relative.tracking is not None]                   
+            experimentparams.trial.robot.move.relative.frameidOrigin        = (experimentparams.trial.robot.move.relative.frameidOrigin, experimentparamsTemp.trial.robot.move.relative.frameidOrigin)[experimentparamsTemp.trial.robot.move.relative.frameidOrigin is not None]
+            experimentparams.trial.robot.move.relative.distance             = (experimentparams.trial.robot.move.relative.distance, experimentparamsTemp.trial.robot.move.relative.distance)[experimentparamsTemp.trial.robot.move.relative.distance is not None]
+            experimentparams.trial.robot.move.relative.angleOffset          = (experimentparams.trial.robot.move.relative.angleOffset, experimentparamsTemp.trial.robot.move.relative.angleOffset)[experimentparamsTemp.trial.robot.move.relative.angleOffset is not None]
+            experimentparams.trial.robot.move.relative.angleVelocity        = (experimentparams.trial.robot.move.relative.angleVelocity, experimentparamsTemp.trial.robot.move.relative.angleVelocity)[experimentparamsTemp.trial.robot.move.relative.angleVelocity is not None]
+            experimentparams.trial.robot.move.relative.angleOscMag          = (experimentparams.trial.robot.move.relative.angleOscMag, experimentparamsTemp.trial.robot.move.relative.angleOscMag)[experimentparamsTemp.trial.robot.move.relative.angleOscMag is not None]
+            experimentparams.trial.robot.move.relative.angleOscFreq         = (experimentparams.trial.robot.move.relative.angleOscFreq, experimentparamsTemp.trial.robot.move.relative.angleOscFreq)[experimentparamsTemp.trial.robot.move.relative.angleOscFreq is not None]
+            experimentparams.trial.robot.move.relative.speedMax             = (experimentparams.trial.robot.move.relative.speedMax, experimentparamsTemp.trial.robot.move.relative.speedMax)[experimentparamsTemp.trial.robot.move.relative.speedMax is not None]
+            experimentparams.trial.robot.move.relative.tolerance            = (experimentparams.trial.robot.move.relative.tolerance, experimentparamsTemp.trial.robot.move.relative.tolerance)[experimentparamsTemp.trial.robot.move.relative.tolerance is not None]
+            experimentparams.trial.robot.move.relative.typeAngleOffset      = (experimentparams.trial.robot.move.relative.typeAngleOffset, experimentparamsTemp.trial.robot.move.relative.typeAngleOffset)[experimentparamsTemp.trial.robot.move.relative.typeAngleOffset is not None]
+            experimentparams.trial.robot.move.relative.typeAngleVelocity    = (experimentparams.trial.robot.move.relative.typeAngleVelocity, experimentparamsTemp.trial.robot.move.relative.typeAngleVelocity)[experimentparamsTemp.trial.robot.move.relative.typeAngleVelocity is not None]
+            experimentparams.trial.robot.move.relative.typeAngleOscMag      = (experimentparams.trial.robot.move.relative.typeAngleOscMag, experimentparamsTemp.trial.robot.move.relative.typeAngleOscMag)[experimentparamsTemp.trial.robot.move.relative.typeAngleOscMag is not None]
+            experimentparams.trial.robot.move.relative.typeAngleOscFreq     = (experimentparams.trial.robot.move.relative.typeAngleOscFreq, experimentparamsTemp.trial.robot.move.relative.typeAngleOscFreq)[experimentparamsTemp.trial.robot.move.relative.typeAngleOscFreq is not None]
+            experimentparams.trial.robot.move.relative.typeSpeedMax         = (experimentparams.trial.robot.move.relative.typeSpeedMax, experimentparamsTemp.trial.robot.move.relative.typeSpeedMax)[experimentparamsTemp.trial.robot.move.relative.typeSpeedMax is not None]
             experimentparams.trial.robot.move.pattern.frameidPosition       = (experimentparams.trial.robot.move.pattern.frameidPosition, experimentparamsTemp.trial.robot.move.pattern.frameidPosition)[experimentparamsTemp.trial.robot.move.pattern.frameidPosition is not None]
             experimentparams.trial.robot.move.pattern.frameidAngle          = (experimentparams.trial.robot.move.pattern.frameidAngle, experimentparamsTemp.trial.robot.move.pattern.frameidAngle)[experimentparamsTemp.trial.robot.move.pattern.frameidAngle is not None]
             experimentparams.trial.robot.move.pattern.shape                 = (experimentparams.trial.robot.move.pattern.shape, experimentparamsTemp.trial.robot.move.pattern.shape)[experimentparamsTemp.trial.robot.move.pattern.shape is not None]
@@ -586,8 +588,8 @@ class StartTrial (smach.State):
         experimentparams = self.GetChoice(experimentparamsChoices)
         
 
-        # Set the start time.
-        experimentparams.experiment.timeTrialStart = g_timeExperimentElapsed
+        # Set the start time of the trial.   # in "experiment time", i.e. t=0 is start of experiment.
+        experimentparams.experiment.timeTrialElapsed = 0.0 #g_timeExperimentElapsed
 
         # Increment the trial counter, and check for end.        
         experimentparams.experiment.trial = userdata.experimentparamsChoicesIn.experiment.trial+1
@@ -595,7 +597,7 @@ class StartTrial (smach.State):
             if (experimentparams.experiment.maxTrials < experimentparams.experiment.trial):
                 return rv
 
-        # Check for timeout.
+        # Check for experiment timeout.
         if (experimentparams.experiment.timeout != -1):
             if (experimentparams.experiment.timeout <= g_timeExperimentElapsed):
                 return rv
@@ -739,7 +741,8 @@ class TriggerOnStates (smach.State):
         
         smach.State.__init__(self, 
                              outcomes=['success','disabled','timeout','preempt','aborted'],
-                             input_keys=['experimentparamsIn'])
+                             input_keys=['experimentparamsIn'],
+                             output_keys=['experimentparamsOut'])
         rospy.on_shutdown(self.OnShutdown_callback)
         self.arenastate = None
         self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
@@ -839,6 +842,9 @@ class TriggerOnStates (smach.State):
 
 
 
+    # step_time_elapsed()
+    # Increment the elapsed time, adjusting for the pause/continue status of the experiment.
+    #
     def step_time_elapsed(self):
         global g_timeExperimentElapsed
         
@@ -849,7 +855,8 @@ class TriggerOnStates (smach.State):
             dt = rospy.Duration(0)
 
         self.timePrev = timeNow
-        self.timeElapsed = self.timeElapsed + dt
+        self.timeTriggerElapsed += dt
+        self.experimentparams.experiment.timeTrialElapsed += dt.to_sec()
         g_timeExperimentElapsed += dt.to_sec()
 
         
@@ -858,17 +865,18 @@ class TriggerOnStates (smach.State):
         rospy.loginfo('EL State TriggerOnStates(%s)' % (self.mode))
 
 
-        self.nRobots = userdata.experimentparamsIn.robotspec.nRobots
+        self.experimentparams = copy.deepcopy(userdata.experimentparamsIn)
+        self.nRobots = self.experimentparams.robotspec.nRobots
         
         if self.mode == 'pre':
-            trigger = userdata.experimentparamsIn.pre.trigger
+            trigger = self.experimentparams.pre.trigger
         else:
-            trigger = userdata.experimentparamsIn.post.trigger
+            trigger = self.experimentparams.post.trigger
 
         rv = 'disabled'
         if (trigger.enabled):
             self.timePrev = rospy.Time.now()
-            self.timeElapsed = rospy.Time(0)
+            self.timeTriggerElapsed = rospy.Time(0)
             
             self.isTriggered = False
             self.timeTriggered  = None
@@ -877,7 +885,7 @@ class TriggerOnStates (smach.State):
             while (self.arenastate is None):
                 self.step_time_elapsed()
                 if (trigger.timeout != -1):
-                    if ((self.timeElapsed.to_sec()) > trigger.timeout):
+                    if ((self.timeTriggerElapsed.to_sec()) > trigger.timeout):
                         return 'timeout'
                 #if self.preempt_requested():
                 #    self.service_preempt()
@@ -966,7 +974,7 @@ class TriggerOnStates (smach.State):
                     # Set the pending trigger start time.
                     if not self.isTriggered:
                         self.isTriggered = True
-                        self.timeTriggered = self.timeElapsed
+                        self.timeTriggered = self.timeTriggerElapsed
                 else:
                     # Cancel a pending trigger.
                     self.isTriggered = False
@@ -979,7 +987,7 @@ class TriggerOnStates (smach.State):
 
                 # If pending trigger has lasted longer than requested duration, then set trigger.
                 if (self.isTriggered):
-                    duration = self.timeElapsed.to_sec() - self.timeTriggered.to_sec()
+                    duration = self.timeTriggerElapsed.to_sec() - self.timeTriggered.to_sec()
                     
                     if (trigger.timeHold <= duration):
                         rv = 'success'
@@ -1000,13 +1008,13 @@ class TriggerOnStates (smach.State):
                 
                 # Check for trigger timeout.
                 if (trigger.timeout != -1):
-                    if (trigger.timeout < self.timeElapsed.to_sec()):
+                    if (trigger.timeout < self.timeTriggerElapsed.to_sec()):
                         rv = 'timeout'
                         break
 
                 # Check for experiment timeout.
-                if (userdata.experimentparamsIn.experiment.timeout != -1):
-                    if (userdata.experimentparamsIn.experiment.timeout <= g_timeExperimentElapsed):
+                if (self.experimentparams.experiment.timeout != -1):
+                    if (self.experimentparams.experiment.timeout <= g_timeExperimentElapsed):
                         rv = 'timeout'
                         break
                     
@@ -1021,6 +1029,7 @@ class TriggerOnStates (smach.State):
             self.TriggerServices.notify(False)
                 
         #rospy.loginfo ('EL Exiting TriggerOnStates()')
+        userdata.experimentparamsOut = self.experimentparams
         return rv
 # End class TriggerOnStates()
 
@@ -1034,7 +1043,8 @@ class TriggerOnTime (smach.State):
         self.mode = mode
         smach.State.__init__(self, 
                              outcomes=['success','aborted'],
-                             input_keys=['experimentparamsIn'])
+                             input_keys=['experimentparamsIn'],
+                             output_keys=['experimentparamsOut'])
 
         services_dict = {}
         for name in g_notify_list:
@@ -1065,43 +1075,47 @@ class TriggerOnTime (smach.State):
             dt = rospy.Duration(0)
 
         self.timePrev = timeNow
-        self.timeElapsed = self.timeElapsed + dt
+        self.timeTriggerElapsed += dt
+        self.experimentparams.experiment.timeTrialElapsed += dt.to_sec()
         g_timeExperimentElapsed += dt.to_sec()
 
 
         
         
     def execute(self, userdata):
+        self.experimentparams = copy.deepcopy(userdata.experimentparamsIn)
+        
         if self.mode=='pre1':
-            timeMax = userdata.experimentparamsIn.pre.wait1
+            timeout = self.experimentparams.pre.wait1
         elif self.mode=='pre2':
-            timeMax = userdata.experimentparamsIn.pre.wait2
+            timeout = self.experimentparams.pre.wait2
         elif self.mode=='post':
-            timeMax = userdata.experimentparamsIn.post.wait
+            timeout = self.experimentparams.post.wait
         else:
             rospy.logwarn ('TriggerOnTime mode must be one of: pre1, pre2, post.')
             
 
-        rospy.loginfo('EL State TriggerOnTime(%s, %s)' % (self.mode, timeMax))
+        rospy.loginfo('EL State TriggerOnTime(%s, %s)' % (self.mode, timeout))
 
         self.timePrev = rospy.Time.now()
-        self.timeElapsed = rospy.Time(0)
+        self.timeTriggerElapsed = rospy.Time(0)
             
         rv = 'success'
         while not rospy.is_shutdown():
             self.step_time_elapsed()
 
-            if (timeMax <= self.timeElapsed.to_sec()):
-                rv = 'success'
-                break
-
             if (self.commandExperiment=='exit_now'):
                 rv = 'aborted'
                 break
 
+            # Check for trigger timeout.
+            if (timeout <= self.timeTriggerElapsed.to_sec()):
+                rv = 'success'
+                break
+
             # Check for experiment timeout.
-            if (userdata.experimentparamsIn.experiment.timeout != -1):
-                if (userdata.experimentparamsIn.experiment.timeout <= g_timeExperimentElapsed):
+            if (self.experimentparams.experiment.timeout != -1):
+                if (self.experimentparams.experiment.timeout <= g_timeExperimentElapsed):
                     rv = 'timeout'
                     break
 
@@ -1116,6 +1130,8 @@ class TriggerOnTime (smach.State):
         #    rv = 'aborted'
 
         #rospy.loginfo ('EL Exiting TriggerOnTime()')
+        
+        userdata.experimentparamsOut = self.experimentparams
         return rv
 # End class TriggerOnTime()
 
@@ -1159,14 +1175,16 @@ class ExperimentLib():
 
         ################################################################################### Pre Qualifier:  wait -> trigger -> wait.
         self.smachPreQualifier = smach.StateMachine(outcomes = ['success','preempt','aborted'],
-                                                    input_keys = ['experimentparamsIn'])
+                                                    input_keys = ['experimentparamsIn'],
+                                                    output_keys = ['experimentparamsOut'])
         #self.smachPreQualifier.userdata.experimentparams = self.smachTop.userdata.experimentparams #experimentparams # Should get set in START_TRIAL.
         with self.smachPreQualifier:
             smach.StateMachine.add('PREWAIT1', 
                                    TriggerOnTime(mode='pre1', tfrx=self.tfrx),
                                    transitions={'success':'PRETRIGGER',   # Trigger service signal goes True.
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparamsIn'})
+                                   remapping={'experimentparamsIn':'experimentparamsIn',
+                                              'experimentparamsOut':'experimentparamsOut'})
 
 
             smach.StateMachine.add('PRETRIGGER', 
@@ -1176,14 +1194,16 @@ class ExperimentLib():
                                                 'timeout':'PREWAIT2',        # Trigger service signal goes True.
                                                 'preempt':'preempt',
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparamsIn'})
+                                   remapping={'experimentparamsIn':'experimentparamsIn',
+                                              'experimentparamsOut':'experimentparamsOut'})
 
 
             smach.StateMachine.add('PREWAIT2', 
                                    TriggerOnTime(mode='pre2', tfrx=self.tfrx),
                                    transitions={'success':'success',   # Trigger service signal goes True.
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparamsIn'})
+                                   remapping={'experimentparamsIn':'experimentparamsIn',
+                                              'experimentparamsOut':'experimentparamsOut'})
         
         
         # Create the 'Pre' concurrency state.  This is where the pre qualifier runs alongside the pre actions.
@@ -1192,15 +1212,18 @@ class ExperimentLib():
                                        default_outcome = 'aborted',
                                        child_termination_cb = self.AnyPreTerm_callback,
                                        outcome_cb = self.AllPreTerm_callback,
-                                       input_keys = ['experimentparamsIn'])
+                                       input_keys = ['experimentparamsIn'],
+                                       output_keys = ['experimentparamsOut'])
         with smachPre:
             smach.Concurrence.add('PREQUALIFIER', 
                                   self.smachPreQualifier,
-                                  remapping={'experimentparamsIn':'experimentparamsIn'})
+                                  remapping={'experimentparamsIn':'experimentparamsIn',
+                                             'experimentparamsOut':'experimentparamsOut'})
             for (name,classHardware) in self.actions_dict.iteritems():   # Add a state for each action class in the dict.
                 smach.Concurrence.add(name, 
                                       classHardware.Action (mode='pre', tfrx=self.tfrx),
-                                      remapping={'experimentparamsIn':'experimentparamsIn'})
+                                      remapping={'experimentparamsIn':'experimentparamsIn',
+                                                 'experimentparamsOut':'experimentparamsOut'})
 
         
         # Create the main 'Trial' concurrency state.
@@ -1209,15 +1232,18 @@ class ExperimentLib():
                                          default_outcome = 'aborted',
                                          child_termination_cb = self.AnyTrialTerm_callback,
                                          outcome_cb = self.AllTrialTerm_callback,
-                                         input_keys = ['experimentparamsIn'])
+                                         input_keys = ['experimentparamsIn'],
+                                         output_keys = ['experimentparamsOut'])
         with smachTrial:
             for (name,classHardware) in self.actions_dict.iteritems():   # Add a state for each action class in the dict.
                 smach.Concurrence.add(name, 
                                       classHardware.Action (mode='trial', tfrx=self.tfrx),
-                                      remapping={'experimentparamsIn':'experimentparamsIn'})
+                                      remapping={'experimentparamsIn':'experimentparamsIn',
+                                                 'experimentparamsOut':'experimentparamsOut'})
             smach.Concurrence.add('POSTTRIGGER', 
                                   TriggerOnStates(mode='post', tfrx=self.tfrx),
-                                  remapping={'experimentparamsIn':'experimentparamsIn'})
+                                  remapping={'experimentparamsIn':'experimentparamsIn',
+                                             'experimentparamsOut':'experimentparamsOut'})
 
 
         ##############################################
@@ -1282,8 +1308,8 @@ class ExperimentLib():
             smach.StateMachine.add('STARTTRIAL',                         
                                    StartTrial(),
                                    transitions={'continue':'PRE',         # Trigger service signal goes False.
-                                                'exit':'ENDEXPERIMENT',           # Trigger service signal goes False.
-                                                'aborted':'aborted'},       # Trigger service signal goes False.
+                                                'exit':'ENDEXPERIMENT',   # Trigger service signal goes False.
+                                                'aborted':'aborted'},     # Trigger service signal goes False.
                                    remapping={'experimentparamsChoicesIn':'experimentparamsChoices',
                                               'experimentparamsOut':'experimentparams'})
 
@@ -1309,7 +1335,8 @@ class ExperimentLib():
                                    transitions={'success':'POSTWAIT',
                                                 'disabled':'POSTWAIT',
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparams'})
+                                   remapping={'experimentparamsIn':'experimentparams',
+                                              'experimentparamsOut':'experimentparams'})
 
 
             ################################################################################### POSTWAIT -> (ENDTRIALCALLBACK or RESETHARDWARE)
@@ -1322,7 +1349,8 @@ class ExperimentLib():
                                    TriggerOnTime(mode='post', tfrx=self.tfrx),
                                    transitions={'success':stateAfterPostWait,
                                                 'aborted':'aborted'},
-                                   remapping={'experimentparamsIn':'experimentparams'})
+                                   remapping={'experimentparamsIn':'experimentparams',
+                                              'experimentparamsOut':'experimentparams'})
 
 
             ################################################################################### ENDTRIALCALLBACK -> ENDTRIAL
@@ -1381,8 +1409,7 @@ class ExperimentLib():
     # Gets called after all 'reset' states are terminated.
     # If any states aborted, then abort.
     def AllResetTerm_callback(self, outcome_map):
-        rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
-        #rospy.logwarn('actions_dict=%s' % repr(self.actions_dict))
+        #rospy.logwarn('AllResetTerm_callback(%s)' % repr(outcome_map))
         
         rv = 'success'
         for (name,classHardware) in self.actions_dict.iteritems():

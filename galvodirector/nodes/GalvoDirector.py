@@ -3,7 +3,7 @@ from __future__ import division
 import roslib; roslib.load_manifest('galvodirector')
 import rospy
 import copy
-import numpy as N
+import numpy as np
 import tf
 import threading
 

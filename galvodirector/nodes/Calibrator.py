@@ -3,7 +3,7 @@ from __future__ import division
 import roslib; roslib.load_manifest('galvodirector')
 import rospy
 import copy
-import numpy as N
+import numpy as np
 from scipy.optimize import leastsq
 import threading
 import matplotlib.pyplot as plt
@@ -261,8 +261,8 @@ class GalvoCalibrator:
                     x_list.append(output.x)
                     y_list.append(output.y)
                     
-                xMedian = N.median(x_list)
-                yMedian = N.median(y_list)
+                xMedian = np.median(x_list)
+                yMedian = np.median(y_list)
                 rv[input] = [Point(x=xMedian, y=yMedian, z=len(output_list)),]
             
         return rv
@@ -301,10 +301,10 @@ class GalvoCalibrator:
         rospy.logwarn ('Running.')
         
         # Initial conditions.
-        p = (N.array([0,0,0,0]),0)
-        q = (N.array([0,0,0,0]),0)
-        pi = (N.array([0,0,0,0]),0)
-        qi = (N.array([0,0,0,0]),0)
+        p = (np.array([0,0,0,0]),0)
+        q = (np.array([0,0,0,0]),0)
+        pi = (np.array([0,0,0,0]),0)
+        qi = (np.array([0,0,0,0]),0)
         while (not rospy.is_shutdown()) and ('exit' not in self.command):
             # Send all the input points.  The arenastate callback collects the output points into self.caldata.
             bUseRandomPoints = True
@@ -318,9 +318,9 @@ class GalvoCalibrator:
                     # Choose a random point in the circle.
                     x = 99
                     y = 99
-                    while (N.linalg.norm([x-cx,y-cy])>r):
-                        x = cx - r + 2*r*N.random.random()
-                        y = cy - r + 2*r*N.random.random()
+                    while (np.linalg.norm([x-cx,y-cy])>r):
+                        x = cx - r + 2*r*np.random.random()
+                        y = cy - r + 2*r*np.random.random()
                         
                     self.pointInput = Point(x=x, y=y)
                     
@@ -372,52 +372,52 @@ class GalvoCalibrator:
 
 
                 # Find forward least squares line for axis 1 (millimeters to volts).
-                xa = N.array(y1) # Millimeters
-                ya = N.array(x1) # to Volts
+                xa = np.array(y1) # Millimeters
+                ya = np.array(x1) # to Volts
                 p = leastsq(self.residuals, p[0], args=(ya, xa))
                 a = p[0]
     
                 # Find forward least squares line for axis 2 (millimeters to volts).
-                xb = N.array(y2) # Millimeters
-                yb = N.array(x2) # to Volts
+                xb = np.array(y2) # Millimeters
+                yb = np.array(x2) # to Volts
                 q = leastsq(self.residuals, q[0], args=(yb, xb))
                 b = q[0]
 
                 # Find inverse least squares line for axis 1 (volts to millimeters).
-                xai = N.array(x1) # Millimeters
-                yai = N.array(y1) # to Volts
+                xai = np.array(x1) # Millimeters
+                yai = np.array(y1) # to Volts
                 pi = leastsq(self.residuals, pi[0], args=(yai, xai))
                 ai = pi[0]
     
                 # Find inverse least squares line for axis 2 (volts to millimeters).
-                xbi = N.array(x2) # Millimeters
-                ybi = N.array(y2) # to Volts
+                xbi = np.array(x2) # Millimeters
+                ybi = np.array(y2) # to Volts
                 qi = leastsq(self.residuals, qi[0], args=(ybi, xbi))
                 bi = qi[0]
 
 
                 # Sort the points.
-                xy1=N.array([xa,ya]).T.tolist()
+                xy1=np.array([xa,ya]).T.tolist()
                 xy1.sort()
-                xy1s = N.array(xy1).T
+                xy1s = np.array(xy1).T
                 xa = xy1s[0]
                 ya = xy1s[1]
 
-                xy2=N.array([xb,yb]).T.tolist()
+                xy2=np.array([xb,yb]).T.tolist()
                 xy2.sort()
-                xy2s = N.array(xy2).T
+                xy2s = np.array(xy2).T
                 xb = xy2s[0]
                 yb = xy2s[1]
                 
-                xy1i=N.array([xai,yai]).T.tolist()
+                xy1i=np.array([xai,yai]).T.tolist()
                 xy1i.sort()
-                xy1si = N.array(xy1i).T
+                xy1si = np.array(xy1i).T
                 xai = xy1si[0]
                 yai = xy1si[1]
 
-                xy2i=N.array([xbi,ybi]).T.tolist()
+                xy2i=np.array([xbi,ybi]).T.tolist()
                 xy2i.sort()
-                xy2si = N.array(xy2i).T
+                xy2si = np.array(xy2i).T
                 xbi = xy2si[0]
                 ybi = xy2si[1]
                 

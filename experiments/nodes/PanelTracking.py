@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
-import numpy as N
+import numpy as np
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
@@ -72,8 +72,8 @@ class Experiment():
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
         self.experimentparams.pre.trigger.distanceMin =   0.0
         self.experimentparams.pre.trigger.distanceMax = 999.0
-        self.experimentparams.pre.trigger.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleMin =  0.0 * np.pi / 180.0
+        self.experimentparams.pre.trigger.angleMax =180.0 * np.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
         self.experimentparams.pre.trigger.angleTestBilateral = False
         self.experimentparams.pre.trigger.timeHold = 0.0
@@ -109,8 +109,8 @@ class Experiment():
         self.experimentparams.post.trigger.speedRelMax       = 999.0
         self.experimentparams.post.trigger.distanceMin = 999.0
         self.experimentparams.post.trigger.distanceMax = 111.0                  # i.e. NEVER
-        self.experimentparams.post.trigger.angleMin =  0.0000 * N.pi / 180.0
-        self.experimentparams.post.trigger.angleMax =359.9999 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleMin =  0.0000 * np.pi / 180.0
+        self.experimentparams.post.trigger.angleMax =359.9999 * np.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = False
         self.experimentparams.post.trigger.timeHold = 0.0
@@ -153,8 +153,8 @@ class Experiment():
     def EndTrial_callback(self, userdata):
         
         # Create a rotation matrix R for an angle of +90 or -90, chosen at random.
-        plusorminusone = (N.random.random()>=0.5) * 2 - 1       # -1 means +90 (CCW), +1 means -90 (CW).
-        R = N.array([[0,plusorminusone],[-plusorminusone,0]])
+        plusorminusone = (np.random.random()>=0.5) * 2 - 1       # -1 means +90 (CCW), +1 means -90 (CW).
+        R = np.array([[0,plusorminusone],[-plusorminusone,0]])
         
         
         # Rotate the pattern on the LED panels.
@@ -178,13 +178,13 @@ class Experiment():
                 if 'position' in statefilterLo_dict['pose']:
                     x = statefilterHi_dict['pose']['position']['x']
                     y = statefilterHi_dict['pose']['position']['y']
-                    pt = N.array([x,y])
-                    [xRotA,yRotA] = N.dot(R,pt)
+                    pt = np.array([x,y])
+                    [xRotA,yRotA] = np.dot(R,pt)
 
                     x = statefilterLo_dict['pose']['position']['x']
                     y = statefilterLo_dict['pose']['position']['y']
-                    pt = N.array([x,y])
-                    [xRotB,yRotB] = N.dot(R,pt)
+                    pt = np.array([x,y])
+                    [xRotB,yRotB] = np.dot(R,pt)
 
                     # Rotated hi/lo are now not necessarily in the same order.
                     statefilterHi_dict['pose']['position']['x'] = max(xRotA,xRotB)

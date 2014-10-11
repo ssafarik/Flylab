@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
-import numpy as N
+import numpy as np
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest
@@ -62,8 +62,8 @@ class Experiment():
         self.experimentparams.pre.trigger.speedRelMax = 999.0
         self.experimentparams.pre.trigger.distanceMin =   0.0
         self.experimentparams.pre.trigger.distanceMax = 999.0
-        self.experimentparams.pre.trigger.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleMin =  0.0 * np.pi / 180.0
+        self.experimentparams.pre.trigger.angleMax =180.0 * np.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
         self.experimentparams.pre.trigger.angleTestBilateral = True
         self.experimentparams.pre.trigger.timeHold = 0.0
@@ -97,8 +97,8 @@ class Experiment():
         self.experimentparams.post.trigger.speedRelMax = 999.0
         self.experimentparams.post.trigger.distanceMin = 999.0
         self.experimentparams.post.trigger.distanceMax = 888.0 # i.e. never
-        self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleMin =  0.0 * np.pi / 180.0
+        self.experimentparams.post.trigger.angleMax =180.0 * np.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0

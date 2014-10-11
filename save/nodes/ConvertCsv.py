@@ -4,16 +4,16 @@ import sys
 import os
 import glob
 import shutil
-import numpy as N
+import numpy as np
 
 
 ###############################################################################
 ## How to use this utility:
 ##
 ##   Step 1. Edit the following lines for your input and output directories, and version:  
-versionToWrite = 'latest'  # '2.2' or '2.6' or '2.7' or '2.8' or '2.81' or '2.82' or '2.83' or '2.84' or 'latest'
-dirIn   = '/home/ssafarik/FlylabData_oldversions'
-dirOut  = '/home/ssafarik/FlylabData_converted'
+versionToWrite = 'latest'  # '2.2' or '2.6' or '2.7' or '2.8' or '2.81' or '2.82' or '2.83' or '2.84' or '2.85' or 'latest'
+dirIn   = '/home/rancher/FlylabData_oldversions'
+dirOut  = '/home/rancher/FlylabData_converted'
 
 #whatToCopy = 'everything'           # Choose one of these two options.
 whatToCopy = 'csvonly'              # Choose one of these two options.
@@ -224,24 +224,24 @@ class ConvertCsv:
 
 
         #######################################################################
-        self.headerVersionFileTxt_V26 = 'versionFile\n'
-        self.templateVersionFile_V26 = '{versionFile:s}\n'
+        self.headerVersionFileTxt_V26   = 'versionFile\n'
+        self.templateVersionFile_V26    = '{versionFile:s}\n'
         
-        self.headerExperimentTxt_V26 =  self.headerExperimentTxt_V22
-        self.templateExperiment_V26 =  self.templateExperiment_V22
+        self.headerExperimentTxt_V26    = self.headerExperimentTxt_V22
+        self.templateExperiment_V26     = self.templateExperiment_V22
                                   
-        self.headerRobotSpecTxt_V26 =       self.headerRobotSpecTxt_V22
-        self.templateRobotSpec_V26 =       self.templateRobotSpec_V22
+        self.headerRobotSpecTxt_V26     = self.headerRobotSpecTxt_V22
+        self.templateRobotSpec_V26      = self.templateRobotSpec_V22
                                   
-        self.headerFlySpecTxt_V26 =       self.headerFlySpecTxt_V22
-        self.templateFlySpec_V26 =       self.templateFlySpec_V22
+        self.headerFlySpecTxt_V26       = self.headerFlySpecTxt_V22
+        self.templateFlySpec_V26        = self.templateFlySpec_V22
 
-        self.headerTrackingTxtA_V26 =   self.headerTrackingTxtA_V22
-        self.headerTrackingTxtB_V26 =   self.headerTrackingTxtB_V22
-        self.templateTrackingA_V26 =   self.templateTrackingA_V22
-        self.templateTrackingB_V26 =   self.templateTrackingB_V22
+        self.headerTrackingTxtA_V26     = self.headerTrackingTxtA_V22
+        self.headerTrackingTxtB_V26     = self.headerTrackingTxtB_V22
+        self.templateTrackingA_V26      = self.templateTrackingA_V22
+        self.templateTrackingB_V26      = self.templateTrackingB_V22
 
-        self.headerPreRobotTxt_V26 =     'preRobotEnabled, '\
+        self.headerPreRobotTxt_V26 =    'preRobotEnabled, '\
                                         'preRobotMovePatternShape, '\
                                         'preRobotMovePatternHzPattern, '\
                                         'preRobotMovePatternHzPoint, '\
@@ -303,7 +303,7 @@ class ConvertCsv:
                                         '{preLaserStatefilterCriteria:s}, '\
                                         '{preLaserTimeout:s}\n'
         
-        self.headerPreLEDPanelsTxt_V26 = 'preLEDPanelsEnabled, '\
+        self.headerPreLEDPanelsTxt_V26 ='preLEDPanelsEnabled, '\
                                         'preLEDPanelsCommand, '\
                                         'preLEDPanelsIdPattern, '\
                                         'preLEDPanelsFrameid, '\
@@ -320,10 +320,10 @@ class ConvertCsv:
                                         '{preLEDPanelsStatefilterCriteria:s}, '\
                                         '{preLEDPanelsTimeout:s}\n'
 
-        self.headerPreWait1Txt_V26 =     'preWait1\n'
+        self.headerPreWait1Txt_V26 =    'preWait1\n'
         self.templatePreWait1_V26 =     '{preWait1:s}\n'
         
-        self.headerPreTriggerTxt_V26 =   'preTriggerEnabled, '\
+        self.headerPreTriggerTxt_V26 =  'preTriggerEnabled, '\
                                         'preTriggerFrameidParent, '\
                                         'preTriggerFrameidChild, '\
                                         'preTriggerSpeedAbsParentMin, '\
@@ -359,9 +359,9 @@ class ConvertCsv:
                                         '{preTriggerTimeout:s}\n'
                                     
         self.headerPreWait2Txt_V26 =    'preWait2\n'
-        self.templatePreWait2_V26 =    '{preWait2:s}\n'
+        self.templatePreWait2_V26 =     '{preWait2:s}\n'
         
-        self.headerTrialRobotTxt_V26 =   'trialRobotEnabled, '\
+        self.headerTrialRobotTxt_V26 =  'trialRobotEnabled, '\
                                         'trialRobotMovePatternShape, '\
                                         'trialRobotMovePatternHzPattern, '\
                                         'trialRobotMovePatternHzPoint, '\
@@ -398,7 +398,7 @@ class ConvertCsv:
                                         '{trialRobotMoveRelTolerance:s}, '\
                                         '{trialRobotMoveTimeout:s}\n'
                                     
-        self.headerTrialLaserTxt_V26 =   'trialLaserEnabled, '\
+        self.headerTrialLaserTxt_V26 =  'trialLaserEnabled, '\
                                         'trialLaserPatternShape, '\
                                         'trialLaserPatternHzPattern, '\
                                         'trialLaserPatternHzPoint, '\
@@ -440,7 +440,7 @@ class ConvertCsv:
                                         '{trialLEDPanelsStatefilterCriteria:s}, '\
                                         '{trialLEDPanelsTimeout:s}\n'
         
-        self.headerPostTriggerTxt_V26 =  'postTriggerEnabled, '\
+        self.headerPostTriggerTxt_V26 = 'postTriggerEnabled, '\
                                         'postTriggerFrameidParent, '\
                                         'postTriggerFrameidChild, '\
                                         'postTriggerSpeedAbsParentMin, '\
@@ -475,7 +475,7 @@ class ConvertCsv:
                                         '{postTriggerTimeHold:s}, '\
                                         '{postTriggerTimeout:s}\n'
                                   
-        self.headerPostWaitTxt_V26 =     'postWait\n'
+        self.headerPostWaitTxt_V26 =    'postWait\n'
         self.templatePostWait_V26 =     '{postWait:s}\n'
 
 
@@ -537,19 +537,19 @@ class ConvertCsv:
         
         
         #######################################################################
-        self.headerVersionFileTxt_V28 = self.headerVersionFileTxt_V27
-        self.templateVersionFile_V28 = self.templateVersionFile_V27
-        self.headerExperimentTxt_V28 =  self.headerExperimentTxt_V27
-        self.templateExperiment_V28 =  self.templateExperiment_V27
-        self.headerRobotSpecTxt_V28 =       self.headerRobotSpecTxt_V27
-        self.templateRobotSpec_V28 =      self.templateRobotSpec_V27
-        self.headerFlySpecTxt_V28 =       self.headerFlySpecTxt_V27
-        self.templateFlySpec_V28 =       self.templateFlySpec_V27
-        self.headerTrackingTxtA_V28 =   self.headerTrackingTxtA_V27
-        self.headerTrackingTxtB_V28 =   self.headerTrackingTxtB_V27
-        self.templateTrackingA_V28 =   self.templateTrackingA_V27
-        self.templateTrackingB_V28 =   self.templateTrackingB_V27
-        self.headerPreRobotTxt_V28 =    'preRobotEnabled, '\
+        self.headerVersionFileTxt_V28   = self.headerVersionFileTxt_V27
+        self.templateVersionFile_V28    = self.templateVersionFile_V27
+        self.headerExperimentTxt_V28    = self.headerExperimentTxt_V27
+        self.templateExperiment_V28     = self.templateExperiment_V27
+        self.headerRobotSpecTxt_V28     = self.headerRobotSpecTxt_V27
+        self.templateRobotSpec_V28      = self.templateRobotSpec_V27
+        self.headerFlySpecTxt_V28       = self.headerFlySpecTxt_V27
+        self.templateFlySpec_V28        = self.templateFlySpec_V27
+        self.headerTrackingTxtA_V28     = self.headerTrackingTxtA_V27
+        self.headerTrackingTxtB_V28     = self.headerTrackingTxtB_V27
+        self.templateTrackingA_V28      = self.templateTrackingA_V27
+        self.templateTrackingB_V28      = self.templateTrackingB_V27
+        self.headerPreRobotTxt_V28    = 'preRobotEnabled, '\
                                         'preRobotMovePatternFramePosition, '\
                                         'preRobotMovePatternFrameAngle, '\
                                         'preRobotMovePatternShape, '\
@@ -734,7 +734,7 @@ class ConvertCsv:
         self.headerTrackingTxtB_V281   = self.headerTrackingTxtB_V28
         self.templateTrackingA_V281    = self.templateTrackingA_V28
         self.templateTrackingB_V281    = self.templateTrackingB_V28
-        self.headerPreRobotTxt_V281    = 'preRobotEnabled, '\
+        self.headerPreRobotTxt_V281   = 'preRobotEnabled, '\
                                         'preRobotMovePatternFramePosition, '\
                                         'preRobotMovePatternFrameAngle, '\
                                         'preRobotMovePatternShape, '\
@@ -789,7 +789,7 @@ class ConvertCsv:
                                         'preLaserStatefilterLo, '\
                                         'preLaserStatefilterHi, '\
                                         'preLaserStatefilterCriteria\n'
-        self.templatePreLaser_V281 =     '{preLaserEnabled:s}, '\
+        self.templatePreLaser_V281 =    '{preLaserEnabled:s}, '\
                                         '{preLaserPatternFramePosition:s}, '\
                                         '{preLaserPatternFrameAngle:s}, '\
                                         '{preLaserPatternShape:s}, '\
@@ -810,20 +810,20 @@ class ConvertCsv:
                                         'preLEDPanelsStatefilterLo, '\
                                         'preLEDPanelsStatefilterHi, '\
                                         'preLEDPanelsStatefilterCriteria\n'
-        self.templatePreLEDPanels_V281 = '{preLEDPanelsEnabled:s}, '\
+        self.templatePreLEDPanels_V281 ='{preLEDPanelsEnabled:s}, '\
                                         '{preLEDPanelsCommand:s}, '\
                                         '{preLEDPanelsIdPattern:s}, '\
                                         '{preLEDPanelsFrameid:s}, '\
                                         '{preLEDPanelsStatefilterLo:s}, '\
                                         '{preLEDPanelsStatefilterHi:s}, '\
                                         '{preLEDPanelsStatefilterCriteria:s}\n'
-        self.headerPreWait1Txt_V281 =    self.headerPreWait1Txt_V28
-        self.templatePreWait1_V281 =    self.templatePreWait1_V28
-        self.headerPreTriggerTxt_V281 =  self.headerPreTriggerTxt_V28
-        self.templatePreTrigger_V281 =  self.templatePreTrigger_V28
-        self.headerPreWait2Txt_V281 =    self.headerPreWait2Txt_V28
-        self.templatePreWait2_V281 =    self.templatePreWait2_V28
-        self.headerTrialRobotTxt_V281 =   'trialRobotEnabled, '\
+        self.headerPreWait1Txt_V281     = self.headerPreWait1Txt_V28
+        self.templatePreWait1_V281      = self.templatePreWait1_V28
+        self.headerPreTriggerTxt_V281   = self.headerPreTriggerTxt_V28
+        self.templatePreTrigger_V281    = self.templatePreTrigger_V28
+        self.headerPreWait2Txt_V281     = self.headerPreWait2Txt_V28
+        self.templatePreWait2_V281      = self.templatePreWait2_V28
+        self.headerTrialRobotTxt_V281 = 'trialRobotEnabled, '\
                                         'trialRobotMovePatternFramePosition, '\
                                         'trialRobotMovePatternFrameAngle, '\
                                         'trialRobotMovePatternShape, '\
@@ -843,7 +843,7 @@ class ConvertCsv:
                                         'trialRobotMoveRelSpeed, '\
                                         'trialRobotMoveRelSpeedType, '\
                                         'trialRobotMoveRelTolerance\n'
-        self.templateTrialRobot_V281 =   '{trialRobotEnabled:s}, '\
+        self.templateTrialRobot_V281 =  '{trialRobotEnabled:s}, '\
                                         '{trialRobotMovePatternFramePosition:s}, '\
                                         '{trialRobotMovePatternFrameAngle:s}, '\
                                         '{trialRobotMovePatternShape:s}, '\
@@ -864,7 +864,7 @@ class ConvertCsv:
                                         '{trialRobotMoveRelSpeedType:s}, '\
                                         '{trialRobotMoveRelTolerance:s}\n'
                                     
-        self.headerTrialLaserTxt_V281 =   'trialLaserEnabled, '\
+        self.headerTrialLaserTxt_V281 = 'trialLaserEnabled, '\
                                         'trialLaserPatternFramePosition, '\
                                         'trialLaserPatternFrameAngle, '\
                                         'trialLaserPatternShape, '\
@@ -878,7 +878,7 @@ class ConvertCsv:
                                         'trialLaserStatefilterLo, '\
                                         'trialLaserStatefilterHi, '\
                                         'trialLaserStatefilterCriteria\n'
-        self.templateTrialLaser_V281 =   '{trialLaserEnabled:s}, '\
+        self.templateTrialLaser_V281 =  '{trialLaserEnabled:s}, '\
                                         '{trialLaserPatternFramePosition:s}, '\
                                         '{trialLaserPatternFrameAngle:s}, '\
                                         '{trialLaserPatternShape:s}, '\
@@ -906,10 +906,10 @@ class ConvertCsv:
                                         '{trialLEDPanelsStatefilterLo:s}, '\
                                         '{trialLEDPanelsStatefilterHi:s}, '\
                                         '{trialLEDPanelsStatefilterCriteria:s}\n'
-        self.headerPostTriggerTxt_V281 = self.headerPostTriggerTxt_V28
-        self.templatePostTrigger_V281 = self.templatePostTrigger_V28
-        self.headerPostWaitTxt_V281 =    self.headerPostWaitTxt_V28
-        self.templatePostWait_V281 =    self.templatePostWait_V28
+        self.headerPostTriggerTxt_V281  = self.headerPostTriggerTxt_V28
+        self.templatePostTrigger_V281   = self.templatePostTrigger_V28
+        self.headerPostWaitTxt_V281     = self.headerPostWaitTxt_V28
+        self.templatePostWait_V281      = self.templatePostWait_V28
 
         
         # The state lines.
@@ -1080,27 +1080,27 @@ class ConvertCsv:
         self.headerPreRobotTxt_V283 =   self.headerPreRobotTxt_V282
         self.templatePreRobot_V283 =    self.templatePreRobot_V282
                                     
-        self.headerPreLaserTxt_V283 =   self.headerPreLaserTxt_V282
-        self.templatePreLaser_V283 =    self.templatePreLaser_V282
-        self.headerPreLEDPanelsTxt_V283 = self.headerPreLEDPanelsTxt_V282
-        self.templatePreLEDPanels_V283 = self.templatePreLEDPanels_V282
-        self.headerPreWait1Txt_V283 =   self.headerPreWait1Txt_V282
-        self.templatePreWait1_V283 =    self.templatePreWait1_V282
-        self.headerPreTriggerTxt_V283 = self.headerPreTriggerTxt_V282
-        self.templatePreTrigger_V283 =  self.templatePreTrigger_V282
-        self.headerPreWait2Txt_V283 =   self.headerPreWait2Txt_V282
-        self.templatePreWait2_V283 =    self.templatePreWait2_V282
-        self.headerTrialRobotTxt_V283 = self.headerTrialRobotTxt_V282
-        self.templateTrialRobot_V283 =  self.templateTrialRobot_V282
+        self.headerPreLaserTxt_V283         = self.headerPreLaserTxt_V282
+        self.templatePreLaser_V283          = self.templatePreLaser_V282
+        self.headerPreLEDPanelsTxt_V283     = self.headerPreLEDPanelsTxt_V282
+        self.templatePreLEDPanels_V283      = self.templatePreLEDPanels_V282
+        self.headerPreWait1Txt_V283         = self.headerPreWait1Txt_V282
+        self.templatePreWait1_V283          = self.templatePreWait1_V282
+        self.headerPreTriggerTxt_V283       = self.headerPreTriggerTxt_V282
+        self.templatePreTrigger_V283        = self.templatePreTrigger_V282
+        self.headerPreWait2Txt_V283         = self.headerPreWait2Txt_V282
+        self.templatePreWait2_V283          = self.templatePreWait2_V282
+        self.headerTrialRobotTxt_V283       = self.headerTrialRobotTxt_V282
+        self.templateTrialRobot_V283        = self.templateTrialRobot_V282
                                     
-        self.headerTrialLaserTxt_V283 =  self.headerTrialLaserTxt_V282
-        self.templateTrialLaser_V283 =   self.templateTrialLaser_V282
-        self.headerTrialLEDPanelsTxt_V283 = self.headerTrialLEDPanelsTxt_V282
-        self.templateTrialLEDPanels_V283 = self.templateTrialLEDPanels_V282
-        self.headerPostTriggerTxt_V283 = self.headerPostTriggerTxt_V282
-        self.templatePostTrigger_V283 = self.templatePostTrigger_V282
-        self.headerPostWaitTxt_V283 =    self.headerPostWaitTxt_V282
-        self.templatePostWait_V283 =    self.templatePostWait_V282
+        self.headerTrialLaserTxt_V283       = self.headerTrialLaserTxt_V282
+        self.templateTrialLaser_V283        = self.templateTrialLaser_V282
+        self.headerTrialLEDPanelsTxt_V283   = self.headerTrialLEDPanelsTxt_V282
+        self.templateTrialLEDPanels_V283    = self.templateTrialLEDPanels_V282
+        self.headerPostTriggerTxt_V283      = self.headerPostTriggerTxt_V282
+        self.templatePostTrigger_V283       = self.templatePostTrigger_V282
+        self.headerPostWaitTxt_V283         = self.headerPostWaitTxt_V282
+        self.templatePostWait_V283          = self.templatePostWait_V282
 
         
         # The state lines.
@@ -1110,6 +1110,7 @@ class ConvertCsv:
         self.templateStateLeft_V283      = self.templateStateLeft_V282
         self.templateStateRobot_V283     = self.templateStateRobot_V282
         self.templateStateFly_V283       = self.templateStateFly_V282
+        
         
 
         #######################################################################
@@ -1151,14 +1152,14 @@ class ConvertCsv:
         self.headerTrialRobotTxt_V284 = self.headerTrialRobotTxt_V283
         self.templateTrialRobot_V284 =  self.templateTrialRobot_V283
                                     
-        self.headerTrialLaserTxt_V284 =  self.headerTrialLaserTxt_V283
-        self.templateTrialLaser_V284 =   self.templateTrialLaser_V283
-        self.headerTrialLEDPanelsTxt_V284 = self.headerTrialLEDPanelsTxt_V283
-        self.templateTrialLEDPanels_V284 = self.templateTrialLEDPanels_V283
-        self.headerPostTriggerTxt_V284 = self.headerPostTriggerTxt_V283
-        self.templatePostTrigger_V284 = self.templatePostTrigger_V283
-        self.headerPostWaitTxt_V284 =    self.headerPostWaitTxt_V283
-        self.templatePostWait_V284 =    self.templatePostWait_V283
+        self.headerTrialLaserTxt_V284       = self.headerTrialLaserTxt_V283
+        self.templateTrialLaser_V284        = self.templateTrialLaser_V283
+        self.headerTrialLEDPanelsTxt_V284   = self.headerTrialLEDPanelsTxt_V283
+        self.templateTrialLEDPanels_V284    = self.templateTrialLEDPanels_V283
+        self.headerPostTriggerTxt_V284      = self.headerPostTriggerTxt_V283
+        self.templatePostTrigger_V284       = self.templatePostTrigger_V283
+        self.headerPostWaitTxt_V284         = self.headerPostWaitTxt_V283
+        self.templatePostWait_V284          = self.templatePostWait_V283
 
         
         # The state lines.
@@ -1168,6 +1169,153 @@ class ConvertCsv:
         self.templateStateLeft_V284      = self.templateStateLeft_V283
         self.templateStateRobot_V284     = self.templateStateRobot_V283
         self.templateStateFly_V284       = self.templateStateFly_V283
+
+        
+
+        #######################################################################
+        # version 2.85 changed structure of robot.move.relative
+        self.headerVersionFileTxt_V285 =self.headerVersionFileTxt_V284
+        self.templateVersionFile_V285 = self.templateVersionFile_V284
+        self.headerExperimentTxt_V285 = self.headerExperimentTxt_V284
+        self.templateExperiment_V285 =  self.templateExperiment_V284
+        self.headerRobotSpecTxt_V285 =  self.headerRobotSpecTxt_V284
+        self.templateRobotSpec_V285 =   self.templateRobotSpec_V284
+                                  
+        self.headerFlySpecTxt_V285 =    self.headerFlySpecTxt_V284
+        self.templateFlySpec_V285 =     self.templateFlySpec_V284
+        self.headerTrackingTxtA_V285 =  self.headerTrackingTxtA_V284
+        self.headerTrackingTxtB_V285 =  self.headerTrackingTxtB_V284
+        self.templateTrackingA_V285 =   self.templateTrackingA_V284
+        self.templateTrackingB_V285 =   self.templateTrackingB_V284
+        self.headerPreRobotTxt_V285 =   'preRobotEnabled, '\
+                                        'preRobotMovePatternFramePosition, '\
+                                        'preRobotMovePatternFrameAngle, '\
+                                        'preRobotMovePatternShape, '\
+                                        'preRobotMovePatternHzPattern, '\
+                                        'preRobotMovePatternHzPoint, '\
+                                        'preRobotMovePatternCount, '\
+                                        'preRobotMovePatternSizeX, '\
+                                        'preRobotMovePatternSizeY, '\
+                                        'preRobotMovePatternParam, '\
+                                        'preRobotMovePatternDirection, '\
+                                        'preRobotMoveRelTracking, '\
+                                        'preRobotMoveRelFrame, '\
+                                        'preRobotMoveRelDistance, '\
+                                        'preRobotMoveRelAngleOffset, '\
+                                        'preRobotMoveRelAngleVelocity, '\
+                                        'preRobotMoveRelAngleOscMag, '\
+                                        'preRobotMoveRelAngleOscFreq, '\
+                                        'preRobotMoveRelSpeedMax, '\
+                                        'preRobotMoveRelTolerance, '\
+                                        'preRobotMoveRelTypeAngleOffset, '\
+                                        'preRobotMoveRelTypeAngleVelocity, '\
+                                        'preRobotMoveRelTypeAngleOscMag, '\
+                                        'preRobotMoveRelTypeAngleOscFreq, '\
+                                        'preRobotMoveRelTypeSpeedMax\n'
+        self.templatePreRobot_V285    = '{preRobotEnabled:s}, '\
+                                        '{preRobotMovePatternFramePosition:s}, '\
+                                        '{preRobotMovePatternFrameAngle:s}, '\
+                                        '{preRobotMovePatternShape:s}, '\
+                                        '{preRobotMovePatternHzPattern:s}, '\
+                                        '{preRobotMovePatternHzPoint:s}, '\
+                                        '{preRobotMovePatternCount:s}, '\
+                                        '{preRobotMovePatternSizeX:s}, '\
+                                        '{preRobotMovePatternSizeY:s}, '\
+                                        '{preRobotMovePatternParam:s}, '\
+                                        '{preRobotMovePatternDirection:s}, '\
+                                        '{preRobotMoveRelTracking:s}, '\
+                                        '{preRobotMoveRelFrame:s}, '\
+                                        '{preRobotMoveRelDistance:s}, '\
+                                        '{preRobotMoveRelAngleOffset:s}, '\
+                                        '{preRobotMoveRelAngleVelocity:s}, '\
+                                        '{preRobotMoveRelAngleOscMag:s}, '\
+                                        '{preRobotMoveRelAngleOscFreq:s}, '\
+                                        '{preRobotMoveRelSpeedMax:s}, '\
+                                        '{preRobotMoveRelTolerance:s}, '\
+                                        '{preRobotMoveRelTypeAngleOffset:s}, '\
+                                        '{preRobotMoveRelTypeAngleVelocity:s}, '\
+                                        '{preRobotMoveRelTypeAngleOscMag:s}, '\
+                                        '{preRobotMoveRelTypeAngleOscFreq:s}, '\
+                                        '{preRobotMoveRelTypeSpeedMax:s}\n'
+                                        
+        self.headerPreLaserTxt_V285 =   self.headerPreLaserTxt_V284
+        self.templatePreLaser_V285 =    self.templatePreLaser_V284
+        self.headerPreLEDPanelsTxt_V285 = self.headerPreLEDPanelsTxt_V284
+        self.templatePreLEDPanels_V285 = self.templatePreLEDPanels_V284
+        self.headerPreWait1Txt_V285 =   self.headerPreWait1Txt_V284
+        self.templatePreWait1_V285 =    self.templatePreWait1_V284
+        self.headerPreTriggerTxt_V285 = self.headerPreTriggerTxt_V284
+        self.templatePreTrigger_V285 =  self.templatePreTrigger_V284
+        self.headerPreWait2Txt_V285 =   self.headerPreWait2Txt_V284
+        self.templatePreWait2_V285 =    self.templatePreWait2_V284
+        self.headerTrialRobotTxt_V285 = 'trialRobotEnabled, '\
+                                        'trialRobotMovePatternFramePosition, '\
+                                        'trialRobotMovePatternFrameAngle, '\
+                                        'trialRobotMovePatternShape, '\
+                                        'trialRobotMovePatternHzPattern, '\
+                                        'trialRobotMovePatternHzPoint, '\
+                                        'trialRobotMovePatternCount, '\
+                                        'trialRobotMovePatternSizeX, '\
+                                        'trialRobotMovePatternSizeY, '\
+                                        'trialRobotMovePatternParam, '\
+                                        'trialRobotMovePatternDirection, '\
+                                        'trialRobotMoveRelTracking, '\
+                                        'trialRobotMoveRelFrame, '\
+                                        'trialRobotMoveRelDistance, '\
+                                        'trialRobotMoveRelAngleOffset, '\
+                                        'trialRobotMoveRelAngleVelocity, '\
+                                        'trialRobotMoveRelAngleOscMag, '\
+                                        'trialRobotMoveRelAngleOscFreq, '\
+                                        'trialRobotMoveRelSpeedMax, '\
+                                        'trialRobotMoveRelTolerance, '\
+                                        'trialRobotMoveRelTypeAngleOffset, '\
+                                        'trialRobotMoveRelTypeAngleVelocity, '\
+                                        'trialRobotMoveRelTypeAngleOscMag, '\
+                                        'trialRobotMoveRelTypeAngleOscFreq, '\
+                                        'trialRobotMoveRelTypeSpeedMax\n'
+        self.templateTrialRobot_V285  = '{trialRobotEnabled:s}, '\
+                                        '{trialRobotMovePatternFramePosition:s}, '\
+                                        '{trialRobotMovePatternFrameAngle:s}, '\
+                                        '{trialRobotMovePatternShape:s}, '\
+                                        '{trialRobotMovePatternHzPattern:s}, '\
+                                        '{trialRobotMovePatternHzPoint:s}, '\
+                                        '{trialRobotMovePatternCount:s}, '\
+                                        '{trialRobotMovePatternSizeX:s}, '\
+                                        '{trialRobotMovePatternSizeY:s}, '\
+                                        '{trialRobotMovePatternParam:s}, '\
+                                        '{trialRobotMovePatternDirection:s}, '\
+                                        '{trialRobotMoveRelTracking:s}, '\
+                                        '{trialRobotMoveRelFrame:s}, '\
+                                        '{trialRobotMoveRelDistance:s}, '\
+                                        '{trialRobotMoveRelAngleOffset:s}, '\
+                                        '{trialRobotMoveRelAngleVelocity:s}, '\
+                                        '{trialRobotMoveRelAngleOscMag:s}, '\
+                                        '{trialRobotMoveRelAngleOscFreq:s}, '\
+                                        '{trialRobotMoveRelSpeedMax:s}, '\
+                                        '{trialRobotMoveRelTolerance:s}, '\
+                                        '{trialRobotMoveRelTypeAngleOffset:s}, '\
+                                        '{trialRobotMoveRelTypeAngleVelocity:s}, '\
+                                        '{trialRobotMoveRelTypeAngleOscMag:s}, '\
+                                        '{trialRobotMoveRelTypeAngleOscFreq:s}, '\
+                                        '{trialRobotMoveRelTypeSpeedMax:s}\n'
+                                    
+        self.headerTrialLaserTxt_V285 =  self.headerTrialLaserTxt_V284
+        self.templateTrialLaser_V285 =   self.templateTrialLaser_V284
+        self.headerTrialLEDPanelsTxt_V285 = self.headerTrialLEDPanelsTxt_V284
+        self.templateTrialLEDPanels_V285 = self.templateTrialLEDPanels_V284
+        self.headerPostTriggerTxt_V285 = self.headerPostTriggerTxt_V284
+        self.templatePostTrigger_V285  = self.templatePostTrigger_V284
+        self.headerPostWaitTxt_V285 =    self.headerPostWaitTxt_V284
+        self.templatePostWait_V285 =     self.templatePostWait_V284
+
+        
+        # The state lines.
+        self.stateLeftTxt_V285           = self.stateLeftTxt_V284
+        self.stateRobotTxt_V285          = self.stateRobotTxt_V284
+        self.stateFlyTxt_V285            = self.stateFlyTxt_V284
+        self.templateStateLeft_V285      = self.templateStateLeft_V284
+        self.templateStateRobot_V285     = self.templateStateRobot_V284
+        self.templateStateFly_V285       = self.templateStateFly_V284
         
 
         #######################################################################
@@ -1274,7 +1422,7 @@ class ConvertCsv:
                 nObjects = int(nFields/8)
             
             
-            nRobots = 1 # There's always a robot in the file.
+            nRobots = 1 # There are always columns for a robot in the file.
             nFlies = nObjects-nRobots
             
                         
@@ -1291,69 +1439,78 @@ class ConvertCsv:
 
 
     def SetDefaultHeader(self):
-            self.param_date_time                    = '0'
-            self.param_description                  = 'unspecified'
-            self.param_maxTrials                    = '0'
-            self.param_trial                        = '0'
+            self.param_date_time                        = '0'
+            self.param_description                      = 'unspecified'
+            self.param_maxTrials                        = '0'
+            self.param_trial                            = '0'
             
-            self.param_nRobots                      = '0'
-            self.param_widthRobot                   = '0'
-            self.param_heightRobot                  = '0'
-            self.param_isPresent                    = 'True'
-            self.param_visibleRobot                 = 'unspecified'
-            self.param_paintRobot                   = 'unspecified'
-            self.param_scentRobot                   = 'unspecified'
-            self.param_descriptionRobot             = 'unspecified'
+            self.param_nRobots                          = '0'
+            self.param_widthRobot                       = '0'
+            self.param_heightRobot                      = '0'
+            self.param_isPresent                        = 'True'
+            self.param_visibleRobot                     = 'unspecified'
+            self.param_paintRobot                       = 'unspecified'
+            self.param_scentRobot                       = 'unspecified'
+            self.param_descriptionRobot                 = 'unspecified'
 
-            self.param_nFlies                       = '0'
-            self.param_typeFlies                    = 'unspecified'
-            self.param_genderFlies                  = 'unspecified'
-            self.param_descriptionFlies             = 'unspecified'
+            self.param_nFlies                           = '0'
+            self.param_typeFlies                        = 'unspecified'
+            self.param_genderFlies                      = 'unspecified'
+            self.param_descriptionFlies                 = 'unspecified'
             
             self.param_trackingExclusionzoneEnabled     = 'False'
             self.param_trackingExclusionzoneX_list      = []
             self.param_trackingExclusionzoneY_list      = []
             self.param_trackingExclusionzoneRadius_list = []
 
-            self.param_preRobotEnabled                 = 'False'
-            self.param_preRobotMovePatternFramePosition= 'unspecified'
-            self.param_preRobotMovePatternFrameAngle   = 'unspecified'
-            self.param_preRobotMovePatternShape        = 'unspecified'
-            self.param_preRobotMovePatternHzPattern    = '0'
-            self.param_preRobotMovePatternHzPoint      = '0'
-            self.param_preRobotMovePatternCount        = '0'
-            self.param_preRobotMovePatternSizeX        = '0'
-            self.param_preRobotMovePatternSizeY        = '0'
-            self.param_preRobotMovePatternParam        = '0'
-            self.param_preRobotMovePatternDirection    = '0'
-            self.param_preRobotMoveRelTracking         = 'unspecified'
-            self.param_preRobotMoveRelOriginPosition   = 'unspecified'
-            self.param_preRobotMoveRelOriginAngle      = 'unspecified'
-            self.param_preRobotMoveRelDistance         = '0'
-            self.param_preRobotMoveRelAngleOffset      = '0'
-            self.param_preRobotMoveRelAngleType        = 'unspecified'
-            self.param_preRobotMoveRelAngleOscMag      = '0'
-            self.param_preRobotMoveRelAngleOscFreq     = '0'
-            self.param_preRobotMoveRelSpeed            = '0'
-            self.param_preRobotMoveRelSpeedType        = 'unspecified'
-            self.param_preRobotMoveRelTolerance        = '0'
-            self.param_preRobotMoveTimeout             = '-1'
+            self.param_preRobotEnabled                  = 'False'
+            self.param_preRobotMovePatternFramePosition = 'unspecified'
+            self.param_preRobotMovePatternFrameAngle    = 'unspecified'
+            self.param_preRobotMovePatternShape         = 'unspecified'
+            self.param_preRobotMovePatternHzPattern     = '0'
+            self.param_preRobotMovePatternHzPoint       = '0'
+            self.param_preRobotMovePatternCount         = '0'
+            self.param_preRobotMovePatternSizeX         = '0'
+            self.param_preRobotMovePatternSizeY         = '0'
+            self.param_preRobotMovePatternParam         = '0'
+            self.param_preRobotMovePatternDirection     = '0'
+            self.param_preRobotMoveRelTracking          = 'unspecified'
+            self.param_preRobotMoveRelOriginPosition    = 'unspecified'
+            self.param_preRobotMoveRelOriginAngle       = 'unspecified'
+            self.param_preRobotMoveRelDistance          = '0'
+            self.param_preRobotMoveRelAngleOffset       = '0'
+            self.param_preRobotMoveRelAngleType         = 'unspecified'
+            self.param_preRobotMoveRelAngleOscMag       = '0'
+            self.param_preRobotMoveRelAngleOscFreq      = '0'
+            self.param_preRobotMoveRelSpeed             = '0'
+            self.param_preRobotMoveRelSpeedType         = 'unspecified'
+            self.param_preRobotMoveRelTolerance         = '0'
+            self.param_preRobotMoveTimeout              = '-1'
+
+            self.param_preRobotMoveRelFrame             = 'unspecified'
+            self.param_preRobotMoveRelAngleVelocity     = '0'
+            self.param_preRobotMoveRelSpeedMax          = '0'
+            self.param_preRobotMoveRelTypeAngleOffset   = 'unspecified'
+            self.param_preRobotMoveRelTypeAngleVelocity = 'unspecified'
+            self.param_preRobotMoveRelTypeAngleOscMag   = 'unspecified'
+            self.param_preRobotMoveRelTypeAngleOscFreq  = 'unspecified'
+            self.param_preRobotMoveRelTypeSpeedMax      = 'unspecified'
     
-            self.param_preLaserEnabled                 = 'False'
-            self.param_preLaserPatternFramePosition    = 'unspecified'
-            self.param_preLaserPatternFrameAngle       = 'unspecified'
-            self.param_preLaserPatternShape            = 'unspecified'
-            self.param_preLaserPatternHzPattern        = '0'
-            self.param_preLaserPatternHzPoint          = '0'
-            self.param_preLaserPatternCount            = '0'
-            self.param_preLaserPatternSizeX            = '0'
-            self.param_preLaserPatternSizeY            = '0'
-            self.param_preLaserPatternParam            = '0'
-            self.param_preLaserPatternDirection        = '0'
-            self.param_preLaserStatefilterLo           = ''
-            self.param_preLaserStatefilterHi           = ''
-            self.param_preLaserStatefilterCriteria     = ''
-            self.param_preLaserTimeout                 = '-1'
+            self.param_preLaserEnabled                  = 'False'
+            self.param_preLaserPatternFramePosition     = 'unspecified'
+            self.param_preLaserPatternFrameAngle        = 'unspecified'
+            self.param_preLaserPatternShape             = 'unspecified'
+            self.param_preLaserPatternHzPattern         = '0'
+            self.param_preLaserPatternHzPoint           = '0'
+            self.param_preLaserPatternCount             = '0'
+            self.param_preLaserPatternSizeX             = '0'
+            self.param_preLaserPatternSizeY             = '0'
+            self.param_preLaserPatternParam             = '0'
+            self.param_preLaserPatternDirection         = '0'
+            self.param_preLaserStatefilterLo            = ''
+            self.param_preLaserStatefilterHi            = ''
+            self.param_preLaserStatefilterCriteria      = ''
+            self.param_preLaserTimeout                  = '-1'
         
             self.param_preLEDPanelsEnabled              = 'False'
             self.param_preLEDPanelsCommand              = 'unspecified'
@@ -1366,49 +1523,58 @@ class ConvertCsv:
 
             self.param_preWait1                         = '0.0'
             
-            self.param_preTriggerEnabled              = 'False'
-            self.param_preTriggerFrameidParent        = 'unspecified'
-            self.param_preTriggerFrameidChild         = 'unspecified'
-            self.param_preTriggerSpeedAbsParentMin    = '0'
-            self.param_preTriggerSpeedAbsParentMax    = '0'
-            self.param_preTriggerSpeedAbsChildMin     = '0'
-            self.param_preTriggerSpeedAbsChildMax     = '0'
-            self.param_preTriggerSpeedRelMin          = '0'
-            self.param_preTriggerSpeedRelMax          = '0'
-            self.param_preTriggerDistanceMin          = '0'
-            self.param_preTriggerDistanceMax          = '0'
-            self.param_preTriggerAngleMin             = '0'
-            self.param_preTriggerAngleMax             = '0'
-            self.param_preTriggerAngleTest            = 'unspecified'
-            self.param_preTriggerAngleTestBilateral   = 'unspecified'
-            self.param_preTriggerTimeHold             = '0'
-            self.param_preTriggerTimeout              = '-1'
+            self.param_preTriggerEnabled                = 'False'
+            self.param_preTriggerFrameidParent          = 'unspecified'
+            self.param_preTriggerFrameidChild           = 'unspecified'
+            self.param_preTriggerSpeedAbsParentMin      = '0'
+            self.param_preTriggerSpeedAbsParentMax      = '0'
+            self.param_preTriggerSpeedAbsChildMin       = '0'
+            self.param_preTriggerSpeedAbsChildMax       = '0'
+            self.param_preTriggerSpeedRelMin            = '0'
+            self.param_preTriggerSpeedRelMax            = '0'
+            self.param_preTriggerDistanceMin            = '0'
+            self.param_preTriggerDistanceMax            = '0'
+            self.param_preTriggerAngleMin               = '0'
+            self.param_preTriggerAngleMax               = '0'
+            self.param_preTriggerAngleTest              = 'unspecified'
+            self.param_preTriggerAngleTestBilateral     = 'unspecified'
+            self.param_preTriggerTimeHold               = '0'
+            self.param_preTriggerTimeout                = '-1'
 
-            self.param_preWait2                         = '0.0'
+            self.param_preWait2                           = '0.0'
 
-            self.param_trialRobotEnabled                = 'False'
-            self.param_trialRobotMovePatternFramePosition= 'unspecified'
-            self.param_trialRobotMovePatternFrameAngle  = 'unspecified'
-            self.param_trialRobotMovePatternShape       = 'unspecified'
-            self.param_trialRobotMovePatternHzPattern   = '0'
-            self.param_trialRobotMovePatternHzPoint     = '0'
-            self.param_trialRobotMovePatternCount       = '0'
-            self.param_trialRobotMovePatternSizeX       = '0'
-            self.param_trialRobotMovePatternSizeY       = '0'
-            self.param_trialRobotMovePatternParam       = '0'
-            self.param_trialRobotMovePatternDirection   = '0'
-            self.param_trialRobotMoveRelTracking        = 'unspecified'
-            self.param_trialRobotMoveRelOriginPosition  = 'unspecified'
-            self.param_trialRobotMoveRelOriginAngle     = 'unspecified'
-            self.param_trialRobotMoveRelDistance        = '0'
-            self.param_trialRobotMoveRelAngleOffset     = '0'
-            self.param_trialRobotMoveRelAngleType       = 'unspecified'
-            self.param_trialRobotMoveRelAngleOscMag     = '0'
-            self.param_trialRobotMoveRelAngleOscFreq    = '0'
-            self.param_trialRobotMoveRelSpeed           = '0'
-            self.param_trialRobotMoveRelSpeedType       = '0'
-            self.param_trialRobotMoveRelTolerance       = '0'
-            self.param_trialRobotMoveTimeout            = '-1'
+            self.param_trialRobotEnabled                  = 'False'
+            self.param_trialRobotMovePatternFramePosition = 'unspecified'
+            self.param_trialRobotMovePatternFrameAngle    = 'unspecified'
+            self.param_trialRobotMovePatternShape         = 'unspecified'
+            self.param_trialRobotMovePatternHzPattern     = '0'
+            self.param_trialRobotMovePatternHzPoint       = '0'
+            self.param_trialRobotMovePatternCount         = '0'
+            self.param_trialRobotMovePatternSizeX         = '0'
+            self.param_trialRobotMovePatternSizeY         = '0'
+            self.param_trialRobotMovePatternParam         = '0'
+            self.param_trialRobotMovePatternDirection     = '0'
+            self.param_trialRobotMoveRelTracking          = 'unspecified'
+            self.param_trialRobotMoveRelOriginPosition    = 'unspecified'
+            self.param_trialRobotMoveRelOriginAngle       = 'unspecified'
+            self.param_trialRobotMoveRelDistance          = '0'
+            self.param_trialRobotMoveRelAngleOffset       = '0'
+            self.param_trialRobotMoveRelAngleType         = 'unspecified'
+            self.param_trialRobotMoveRelAngleOscMag       = '0'
+            self.param_trialRobotMoveRelAngleOscFreq      = '0'
+            self.param_trialRobotMoveRelSpeed             = '0'
+            self.param_trialRobotMoveRelSpeedType         = 'unspecified'
+            self.param_trialRobotMoveRelTolerance         = '0'
+            self.param_trialRobotMoveTimeout              = '-1'
+
+            self.param_trialRobotMoveRelFrame             = 'unspecified'
+            self.param_trialRobotMoveRelAngleVelocity     = '0'
+            self.param_trialRobotMoveRelSpeedMax          = '0'
+            self.param_trialRobotMoveRelTypeAngleOffset   = 'unspecified'
+            self.param_trialRobotMoveRelTypeAngleVelocity = 'unspecified'
+            self.param_trialRobotMoveRelTypeAngleOscMag   = 'unspecified'
+            self.param_trialRobotMoveRelTypeAngleOscFreq  = 'unspecified'
+            self.param_trialRobotMoveRelTypeSpeedMax      = 'unspecified'
     
             self.param_trialLaserEnabled                = 'False'
             self.param_trialLaserPatternFramePosition   = 'unspecified'
@@ -1435,23 +1601,23 @@ class ConvertCsv:
             self.param_trialLEDPanelsStatefilterCriteria= ''
             self.param_trialLEDPanelsTimeout            = '-1'
 
-            self.param_postTriggerEnabled              = 'False'
-            self.param_postTriggerFrameidParent        = 'unspecified'
-            self.param_postTriggerFrameidChild         = 'unspecified'
-            self.param_postTriggerSpeedAbsParentMin    = '0'
-            self.param_postTriggerSpeedAbsParentMax    = '0'
-            self.param_postTriggerSpeedAbsChildMin     = '0'
-            self.param_postTriggerSpeedAbsChildMax     = '0'
-            self.param_postTriggerSpeedRelMin          = '0'
-            self.param_postTriggerSpeedRelMax          = '0'
-            self.param_postTriggerDistanceMin          = '0'
-            self.param_postTriggerDistanceMax          = '0'
-            self.param_postTriggerAngleMin             = '0'
-            self.param_postTriggerAngleMax             = '0'
-            self.param_postTriggerAngleTest            = 'unspecified'
-            self.param_postTriggerAngleTestBilateral   = 'unspecified'
-            self.param_postTriggerTimeHold             = '0'
-            self.param_postTriggerTimeout              = '-1'
+            self.param_postTriggerEnabled               = 'False'
+            self.param_postTriggerFrameidParent         = 'unspecified'
+            self.param_postTriggerFrameidChild          = 'unspecified'
+            self.param_postTriggerSpeedAbsParentMin     = '0'
+            self.param_postTriggerSpeedAbsParentMax     = '0'
+            self.param_postTriggerSpeedAbsChildMin      = '0'
+            self.param_postTriggerSpeedAbsChildMax      = '0'
+            self.param_postTriggerSpeedRelMin           = '0'
+            self.param_postTriggerSpeedRelMax           = '0'
+            self.param_postTriggerDistanceMin           = '0'
+            self.param_postTriggerDistanceMax           = '0'
+            self.param_postTriggerAngleMin              = '0'
+            self.param_postTriggerAngleMax              = '0'
+            self.param_postTriggerAngleTest             = 'unspecified'
+            self.param_postTriggerAngleTestBilateral    = 'unspecified'
+            self.param_postTriggerTimeHold              = '0'
+            self.param_postTriggerTimeout               = '-1'
 
             self.param_postWait                         = '0.0'
 
@@ -1473,55 +1639,55 @@ class ConvertCsv:
             
 
         if versionIn=='1.0': 
-            self.param_date_time                    = field_list[0]
-            self.param_description                  = field_list[1]
-            self.param_maxTrials                    = field_list[2]
-            self.param_trial                        = field_list[3]
+            self.param_date_time                     = field_list[0]
+            self.param_description                   = field_list[1]
+            self.param_maxTrials                     = field_list[2]
+            self.param_trial                         = field_list[3]
             
-            self.param_preWait1                     = field_list[4]
+            self.param_preWait1                      = field_list[4]
             
-            self.param_preTriggerDistanceMin        = field_list[5]
-            self.param_preTriggerDistanceMax        = field_list[6]
-            self.param_preTriggerSpeedRelMin        = field_list[7]
-            self.param_preTriggerSpeedRelMax        = field_list[8]
-            self.param_preTriggerAngleMin           = field_list[9]
-            self.param_preTriggerAngleMax           = field_list[10]
-            self.param_preTriggerAngleTest          = field_list[11]
-            self.param_preTriggerAngleTestBilateral = field_list[12]
-            self.param_preTriggerTimeHold           = field_list[13]
+            self.param_preTriggerDistanceMin         = field_list[5]
+            self.param_preTriggerDistanceMax         = field_list[6]
+            self.param_preTriggerSpeedRelMin         = field_list[7]
+            self.param_preTriggerSpeedRelMax         = field_list[8]
+            self.param_preTriggerAngleMin            = field_list[9]
+            self.param_preTriggerAngleMax            = field_list[10]
+            self.param_preTriggerAngleTest           = field_list[11]
+            self.param_preTriggerAngleTestBilateral  = field_list[12]
+            self.param_preTriggerTimeHold            = field_list[13]
 
-            self.param_postTriggerDistanceMin       = field_list[14]
-            self.param_postTriggerDistanceMax       = field_list[15]
-            self.param_postTriggerSpeedRelMin       = field_list[16]
-            self.param_postTriggerSpeedRelMax       = field_list[17]
-            self.param_postTriggerAngleMin          = field_list[18]
-            self.param_postTriggerAngleMax          = field_list[19]
-            self.param_postTriggerAngleTest         = field_list[20]
+            self.param_postTriggerDistanceMin        = field_list[14]
+            self.param_postTriggerDistanceMax        = field_list[15]
+            self.param_postTriggerSpeedRelMin        = field_list[16]
+            self.param_postTriggerSpeedRelMax        = field_list[17]
+            self.param_postTriggerAngleMin           = field_list[18]
+            self.param_postTriggerAngleMax           = field_list[19]
+            self.param_postTriggerAngleTest          = field_list[20]
             self.param_postTriggerAngleTestBilateral = field_list[21]
-            self.param_postTriggerTimeHold          = field_list[22]
+            self.param_postTriggerTimeHold           = field_list[22]
 
-            self.param_widthRobot                   = field_list[23]
-            self.param_heightRobot                  = field_list[24]
-            self.param_visibleRobot                 = field_list[25]
-            self.param_paintRobot                   = field_list[26]
-            self.param_scentRobot                   = field_list[27]
-            self.param_descriptionRobot             = self.param_visibleRobot + ';' + self.param_paintRobot + ';' + self.param_scentRobot
+            self.param_widthRobot                    = field_list[23]
+            self.param_heightRobot                   = field_list[24]
+            self.param_visibleRobot                  = field_list[25]
+            self.param_paintRobot                    = field_list[26]
+            self.param_scentRobot                    = field_list[27]
+            self.param_descriptionRobot              = self.param_visibleRobot + ';' + self.param_paintRobot + ';' + self.param_scentRobot
 
-            self.param_trialRobotMovePatternShape   = field_list[28]
+            self.param_trialRobotMovePatternShape    = field_list[28]
             self.param_trialRobotMovePatternHzPattern = field_list[29]
-            self.param_trialRobotMovePatternHzPoint = field_list[30]
-            self.param_trialRobotMovePatternCount   = field_list[31]
-            self.param_trialRobotMovePatternSizeX   = field_list[32]
-            self.param_trialRobotMovePatternSizeY   = field_list[33]
-            self.param_trialRobotMoveRelTracking    = field_list[34]
+            self.param_trialRobotMovePatternHzPoint  = field_list[30]
+            self.param_trialRobotMovePatternCount    = field_list[31]
+            self.param_trialRobotMovePatternSizeX    = field_list[32]
+            self.param_trialRobotMovePatternSizeY    = field_list[33]
+            self.param_trialRobotMoveRelTracking     = field_list[34]
             self.param_trialRobotMoveRelOriginPosition = field_list[35]
-            self.param_trialRobotMoveRelOriginAngle = field_list[36]
-            self.param_trialRobotMoveRelDistance    = field_list[37]
-            self.param_trialRobotMoveRelAngleOffset = field_list[38]
-            self.param_trialRobotMoveRelAngleType   = field_list[39]
-            self.param_trialRobotMoveRelSpeed       = field_list[40]
-            self.param_trialRobotMoveRelSpeedType   = field_list[41]
-            self.param_trialRobotMoveRelTolerance   = field_list[42]
+            self.param_trialRobotMoveRelOriginAngle  = field_list[36]
+            self.param_trialRobotMoveRelDistance     = field_list[37]
+            self.param_trialRobotMoveRelAngleOffset  = field_list[38]
+            self.param_trialRobotMoveRelAngleType    = field_list[39]
+            self.param_trialRobotMoveRelSpeed        = field_list[40]
+            self.param_trialRobotMoveRelSpeedType    = field_list[41]
+            self.param_trialRobotMoveRelTolerance    = field_list[42]
     
         
 
@@ -1832,7 +1998,7 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
-            if (versionIn in ['2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
+            if (versionIn in ['2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85']):
                 i = 0;
                 headerVersionTxt    = line[i]; i=i+1
                 headerVersion       = line[i]; i=i+1
@@ -1899,12 +2065,13 @@ class ConvertCsv:
                 blank               = line[i]; i=i+1
 
 
+
         ##################################################################
         # Put the fields from each line into their respective variables.
         ##################################################################
 
         ### Experiment Setup
-        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerExperiment)
             self.param_date_time                    = field_list[0]
             self.param_description                  = field_list[1]
@@ -1928,7 +2095,7 @@ class ConvertCsv:
             self.param_widthRobot                   = field_list[1]
             self.param_heightRobot                  = field_list[2]
             self.param_descriptionRobot             = field_list[3]
-        if (versionIn in ['2.84']):
+        if (versionIn in ['2.84', '2.85']):
             field_list = self.ListFromCsv(headerRobotSpec)
             self.param_nRobots                      = field_list[0]
             self.param_widthRobot                   = field_list[1]
@@ -1947,14 +2114,14 @@ class ConvertCsv:
             self.param_typeFlies                    = field_list[1]
             self.param_genderFlies                  = field_list[2]
             self.param_descriptionFlies             = self.param_typeFlies + ';' + self.param_genderFlies
-        if (versionIn in ['2.83', '2.84']):
+        if (versionIn in ['2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerFlySpec)
             self.param_nFlies                       = field_list[0]
             self.param_descriptionFlies             = field_list[1]
             
 
         ### Exclusion Zone.
-        if (versionIn in ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerTracking)
             self.param_trackingExclusionzoneEnabled     = field_list[0]
             if len(field_list)>1:
@@ -1968,7 +2135,7 @@ class ConvertCsv:
 
         
         ### Pre Wait1
-        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerPreWait1)
             self.param_preWait1                    = field_list[0]
 
@@ -2063,6 +2230,33 @@ class ConvertCsv:
             self.param_preRobotMoveRelSpeed            = field_list[19]
             self.param_preRobotMoveRelSpeedType        = field_list[20]
             self.param_preRobotMoveRelTolerance        = field_list[21]
+        if (versionIn in ['2.85']):
+            field_list = self.ListFromCsv(headerPreRobot)
+            self.param_preRobotEnabled                 = field_list[0]
+            self.param_preRobotMovePatternFramePosition= field_list[1]
+            self.param_preRobotMovePatternFrameAngle   = field_list[2]
+            self.param_preRobotMovePatternShape        = field_list[3]
+            self.param_preRobotMovePatternHzPattern    = field_list[4]
+            self.param_preRobotMovePatternHzPoint      = field_list[5]
+            self.param_preRobotMovePatternCount        = field_list[6]
+            self.param_preRobotMovePatternSizeX        = field_list[7]
+            self.param_preRobotMovePatternSizeY        = field_list[8]
+            self.param_preRobotMovePatternParam        = field_list[9]
+            self.param_preRobotMovePatternDirection    = field_list[10]
+            self.param_preRobotMoveRelTracking         = field_list[11]
+            self.param_preRobotMoveRelFrame            = field_list[12]
+            self.param_preRobotMoveRelDistance         = field_list[13]
+            self.param_preRobotMoveRelAngleOffset      = field_list[14]
+            self.param_preRobotMoveRelAngleVelocity    = field_list[15]
+            self.param_preRobotMoveRelAngleOscMag      = field_list[16]
+            self.param_preRobotMoveRelAngleOscFreq     = field_list[17]
+            self.param_preRobotMoveRelSpeedMax         = field_list[18]
+            self.param_preRobotMoveRelTolerance        = field_list[19]
+            self.param_preRobotMoveRelTypeAngleOffset  = field_list[20]
+            self.param_preRobotMoveRelTypeAngleVelocity= field_list[21]
+            self.param_preRobotMoveRelTypeAngleOscMag  = field_list[22]
+            self.param_preRobotMoveRelTypeAngleOscFreq = field_list[23]
+            self.param_preRobotMoveRelTypeSpeedMax     = field_list[24]
     
         
         ### Pre LEDPanels.
@@ -2076,7 +2270,7 @@ class ConvertCsv:
             self.param_preLEDPanelsStatefilterHi        = field_list[5]
             self.param_preLEDPanelsStatefilterCriteria  = field_list[6]
             self.param_preLEDPanelsTimeout              = field_list[7]
-        if (versionIn in ['2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerPreLEDPanels)
             self.param_preLEDPanelsEnabled              = field_list[0]
             self.param_preLEDPanelsCommand              = field_list[1]
@@ -2119,7 +2313,7 @@ class ConvertCsv:
             self.param_preLaserStatefilterHi           = field_list[12]
             self.param_preLaserStatefilterCriteria     = field_list[13]
             self.param_preLaserTimeout                 = field_list[14]
-        if (versionIn in ['2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerPreLaser)
             self.param_preLaserEnabled                 = field_list[0]
             self.param_preLaserPatternFramePosition    = field_list[1]
@@ -2155,7 +2349,7 @@ class ConvertCsv:
             self.param_preTriggerAngleTestBilateral   = field_list[12]
             self.param_preTriggerTimeHold             = field_list[13]
             self.param_preTriggerTimeout              = field_list[14]
-        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerPreTrigger)
             self.param_preTriggerEnabled              = field_list[0]
             self.param_preTriggerFrameidParent        = field_list[1]
@@ -2177,7 +2371,7 @@ class ConvertCsv:
 
 
         ### Pre Wait2.
-        if (versionIn in ['2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerPreWait2)
             self.param_preWait2                         = field_list[0]
 
@@ -2310,6 +2504,33 @@ class ConvertCsv:
             self.param_trialRobotMoveRelSpeedType        = field_list[20]
             self.param_trialRobotMoveRelTolerance        = field_list[21]
     
+        if (versionIn in ['2.85']):
+            field_list = self.ListFromCsv(headerTrialRobot)
+            self.param_trialRobotEnabled                 = field_list[0]
+            self.param_trialRobotMovePatternFramePosition= field_list[1]
+            self.param_trialRobotMovePatternFrameAngle   = field_list[2]
+            self.param_trialRobotMovePatternShape        = field_list[3]
+            self.param_trialRobotMovePatternHzPattern    = field_list[4]
+            self.param_trialRobotMovePatternHzPoint      = field_list[5]
+            self.param_trialRobotMovePatternCount        = field_list[6]
+            self.param_trialRobotMovePatternSizeX        = field_list[7]
+            self.param_trialRobotMovePatternSizeY        = field_list[8]
+            self.param_trialRobotMovePatternParam        = field_list[9]
+            self.param_trialRobotMovePatternDirection    = field_list[10]
+            self.param_trialRobotMoveRelTracking         = field_list[11]
+            self.param_trialRobotMoveRelFrame            = field_list[12]
+            self.param_trialRobotMoveRelDistance         = field_list[13]
+            self.param_trialRobotMoveRelAngleOffset      = field_list[14]
+            self.param_trialRobotMoveRelAngleVelocity    = field_list[15]
+            self.param_trialRobotMoveRelAngleOscMag      = field_list[16]
+            self.param_trialRobotMoveRelAngleOscFreq     = field_list[17]
+            self.param_trialRobotMoveRelSpeedMax         = field_list[18]
+            self.param_trialRobotMoveRelTolerance        = field_list[19]
+            self.param_trialRobotMoveRelTypeAngleOffset  = field_list[20]
+            self.param_trialRobotMoveRelTypeAngleVelocity= field_list[21]
+            self.param_trialRobotMoveRelTypeAngleOscMag  = field_list[22]
+            self.param_trialRobotMoveRelTypeAngleOscFreq = field_list[23]
+            self.param_trialRobotMoveRelTypeSpeedMax     = field_list[24]
         
         ### Trial LEDPanels.
         if (versionIn in ['2.3', '2.4', '2.5', '2.6', '2.7', '2.8']):
@@ -2322,7 +2543,7 @@ class ConvertCsv:
             self.param_trialLEDPanelsStatefilterHi        = field_list[5]
             self.param_trialLEDPanelsStatefilterCriteria  = field_list[6]
             self.param_trialLEDPanelsTimeout              = field_list[7]
-        if (versionIn in ['2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerTrialLEDPanels)
             self.param_trialLEDPanelsEnabled              = field_list[0]
             self.param_trialLEDPanelsCommand              = field_list[1]
@@ -2381,7 +2602,7 @@ class ConvertCsv:
             self.param_trialLaserStatefilterHi           = field_list[12]
             self.param_trialLaserStatefilterCriteria     = field_list[13]
             self.param_trialLaserTimeout                 = field_list[14]
-        if (versionIn in ['2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerTrialLaser)
             self.param_trialLaserEnabled                 = field_list[0]
             self.param_trialLaserPatternFramePosition    = field_list[1]
@@ -2417,7 +2638,7 @@ class ConvertCsv:
             self.param_postTriggerAngleTestBilateral   = field_list[12]
             self.param_postTriggerTimeHold             = field_list[13]
             self.param_postTriggerTimeout              = field_list[14]
-        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerPostTrigger)
             self.param_postTriggerEnabled              = field_list[0]
             self.param_postTriggerFrameidParent        = field_list[1]
@@ -2439,7 +2660,7 @@ class ConvertCsv:
 
 
         ### Post Wait.
-        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84']):
+        if (versionIn in ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85']):
             field_list = self.ListFromCsv(headerPostWait)
             self.param_postWait                     = field_list[0]
 
@@ -3137,6 +3358,7 @@ class ConvertCsv:
             fid.write(self.headerPostWaitTxt_V28)
             fid.write(headerPostWait_V28)
             fid.write('\n')
+    # End WriteHeader_V28()
             
 
     def WriteHeader_V281(self, filename):
@@ -3390,6 +3612,7 @@ class ConvertCsv:
             fid.write(self.headerPostWaitTxt_V281)
             fid.write(headerPostWait_V281)
             fid.write('\n')
+    # End WriteHeader_V281()
             
 
     def WriteHeader_V282(self, filename):
@@ -3647,6 +3870,7 @@ class ConvertCsv:
             fid.write(self.headerPostWaitTxt_V282)
             fid.write(headerPostWait_V282)
             fid.write('\n')
+    # End WriteHeader_V282()
             
 
     def WriteHeader_V283(self, filename):
@@ -3901,6 +4125,7 @@ class ConvertCsv:
             fid.write(self.headerPostWaitTxt_V283)
             fid.write(headerPostWait_V283)
             fid.write('\n')
+    # End WriteHeader_V283()
             
 
     def WriteHeader_V284(self, filename):
@@ -4156,6 +4381,270 @@ class ConvertCsv:
             fid.write(self.headerPostWaitTxt_V284)
             fid.write(headerPostWait_V284)
             fid.write('\n')
+
+    # End WriteHeader_V284()
+            
+
+    def WriteHeader_V285(self, filename):
+        headerVersionFile_V285 = self.templateVersionFile_V285.format(
+                                                versionFile                = '2.85',
+                                                ) 
+        headerExperiment_V285 = self.templateExperiment_V285.format(
+                                                date_time                  = self.param_date_time,
+                                                description                = self.param_description,
+                                                maxTrials                  = self.param_maxTrials,
+                                                trial                      = self.param_trial,
+                                                )
+        headerRobotSpec_V285 = self.templateRobotSpec_V285.format(
+                                                nRobots                    = self.param_nRobots,
+                                                widthRobot                 = self.param_widthRobot,
+                                                heightRobot                = self.param_heightRobot,
+                                                isPresent                  = self.param_isPresent,
+                                                descriptionRobot           = self.param_descriptionRobot,
+                                                )
+        headerFlySpec_V285 = self.templateFlySpec_V285.format(
+                                                nFlies                     = self.param_nFlies,
+                                                descriptionFlies           = self.param_descriptionFlies,
+                                                )
+
+        self.headerTrackingTxt_V285 = self.headerTrackingTxtA_V285
+        headerTracking_V285 = self.templateTrackingA_V285.format(
+                                                trackingExclusionzoneEnabled = self.param_trackingExclusionzoneEnabled
+                                                )
+        for i in range(len(self.param_trackingExclusionzoneX_list)):
+            self.headerTrackingTxt_V285 += self.headerTrackingTxtB_V285
+            headerTracking_V285 += self.templateTrackingB_V285.format(
+                                                trackingExclusionzoneX       = str(self.param_trackingExclusionzoneX_list[i]),
+                                                trackingExclusionzoneY       = str(self.param_trackingExclusionzoneY_list[i]),
+                                                trackingExclusionzoneRadius  = str(self.param_trackingExclusionzoneRadius_list[i]),
+                                                )
+        self.headerTrackingTxt_V285 += '\n'
+        headerTracking_V285 += '\n'
+
+        #######################################################################
+        headerPreRobot_V285 = self.templatePreRobot_V285.format(
+                                                preRobotEnabled                 = self.param_preRobotEnabled,
+                                                preRobotMovePatternFramePosition= self.param_preRobotMovePatternFramePosition,
+                                                preRobotMovePatternFrameAngle   = self.param_preRobotMovePatternFrameAngle,
+                                                preRobotMovePatternShape        = self.param_preRobotMovePatternShape,
+                                                preRobotMovePatternHzPattern    = self.param_preRobotMovePatternHzPattern,
+                                                preRobotMovePatternHzPoint      = self.param_preRobotMovePatternHzPoint,
+                                                preRobotMovePatternCount        = self.param_preRobotMovePatternCount,
+                                                preRobotMovePatternSizeX        = self.param_preRobotMovePatternSizeX,
+                                                preRobotMovePatternSizeY        = self.param_preRobotMovePatternSizeY,
+                                                preRobotMovePatternParam        = self.param_preRobotMovePatternParam,
+                                                preRobotMovePatternDirection    = self.param_preRobotMovePatternDirection,
+                                                preRobotMoveRelTracking         = self.param_preRobotMoveRelTracking,
+                                                preRobotMoveRelFrame            = self.param_preRobotMoveRelFrame,
+                                                preRobotMoveRelDistance         = self.param_preRobotMoveRelDistance,
+                                                preRobotMoveRelAngleOffset      = self.param_preRobotMoveRelAngleOffset,
+                                                preRobotMoveRelAngleVelocity    = self.param_preRobotMoveRelAngleVelocity,
+                                                preRobotMoveRelAngleOscMag      = self.param_preRobotMoveRelAngleOscMag,
+                                                preRobotMoveRelAngleOscFreq     = self.param_preRobotMoveRelAngleOscFreq,
+                                                preRobotMoveRelSpeedMax         = self.param_preRobotMoveRelSpeedMax,
+                                                preRobotMoveRelTolerance        = self.param_preRobotMoveRelTolerance,
+                                                preRobotMoveRelTypeAngleOffset  = self.param_preRobotMoveRelTypeAngleOffset,
+                                                preRobotMoveRelTypeAngleVelocity= self.param_preRobotMoveRelTypeAngleVelocity,
+                                                preRobotMoveRelTypeAngleOscMag  = self.param_preRobotMoveRelTypeAngleOscMag,
+                                                preRobotMoveRelTypeAngleOscFreq = self.param_preRobotMoveRelTypeAngleOscFreq,
+                                                preRobotMoveRelTypeSpeedMax     = self.param_preRobotMoveRelTypeSpeedMax,
+                                                )
+        headerPreLaser_V285 = self.templatePreLaser_V285.format(
+                                                preLaserEnabled               = self.param_preLaserEnabled,
+                                                preLaserPatternFramePosition  = self.param_preLaserPatternFramePosition,
+                                                preLaserPatternFrameAngle     = self.param_preLaserPatternFrameAngle,
+                                                preLaserPatternShape          = self.param_preLaserPatternShape,
+                                                preLaserPatternHzPattern      = self.param_preLaserPatternHzPattern,
+                                                preLaserPatternHzPoint        = self.param_preLaserPatternHzPoint,
+                                                preLaserPatternCount          = self.param_preLaserPatternCount,
+                                                preLaserPatternSizeX          = self.param_preLaserPatternSizeX,
+                                                preLaserPatternSizeY          = self.param_preLaserPatternSizeY,
+                                                preLaserPatternParam          = self.param_preLaserPatternParam,
+                                                preLaserPatternDirection      = self.param_preLaserPatternDirection,
+                                                preLaserStatefilterHi         = self.param_preLaserStatefilterHi,
+                                                preLaserStatefilterLo         = self.param_preLaserStatefilterLo,
+                                                preLaserStatefilterCriteria   = self.param_preLaserStatefilterCriteria,
+                                                )
+        headerPreLEDPanels_V285 = self.templatePreLEDPanels_V285.format(
+                                                preLEDPanelsEnabled             = self.param_preLEDPanelsEnabled,
+                                                preLEDPanelsCommand             = self.param_preLEDPanelsCommand,
+                                                preLEDPanelsIdPattern           = self.param_preLEDPanelsIdPattern,
+                                                preLEDPanelsFrameid             = self.param_preLEDPanelsFrameid,
+                                                preLEDPanelsStatefilterLo       = self.param_preLEDPanelsStatefilterLo,
+                                                preLEDPanelsStatefilterHi       = self.param_preLEDPanelsStatefilterHi,
+                                                preLEDPanelsStatefilterCriteria = self.param_preLEDPanelsStatefilterHi,
+                                                )
+        
+        #######################################################################
+        headerPreWait1_V285 = self.templatePreWait1_V285.format(
+                                                preWait1                     = self.param_preWait1,
+                                                )
+        headerPreTrigger_V285 = self.templatePreTrigger_V285.format(
+                                                preTriggerEnabled            = self.param_preTriggerEnabled,
+                                                preTriggerFrameidParent      = self.param_preTriggerFrameidParent,
+                                                preTriggerFrameidChild       = self.param_preTriggerFrameidChild,
+                                                preTriggerSpeedAbsParentMin  = self.param_preTriggerSpeedAbsParentMin,
+                                                preTriggerSpeedAbsParentMax  = self.param_preTriggerSpeedAbsParentMax,
+                                                preTriggerSpeedAbsChildMin   = self.param_preTriggerSpeedAbsChildMin,
+                                                preTriggerSpeedAbsChildMax   = self.param_preTriggerSpeedAbsChildMax,
+                                                preTriggerSpeedRelMin        = self.param_preTriggerSpeedRelMin,
+                                                preTriggerSpeedRelMax        = self.param_preTriggerSpeedRelMax,
+                                                preTriggerDistanceMin        = self.param_preTriggerDistanceMin,
+                                                preTriggerDistanceMax        = self.param_preTriggerDistanceMax,
+                                                preTriggerAngleMin           = self.param_preTriggerAngleMin,
+                                                preTriggerAngleMax           = self.param_preTriggerAngleMax,
+                                                preTriggerAngleTest          = self.param_preTriggerAngleTest,
+                                                preTriggerAngleTestBilateral = self.param_preTriggerAngleTestBilateral,
+                                                preTriggerTimeHold           = self.param_preTriggerTimeHold,
+                                                preTriggerTimeout            = self.param_preTriggerTimeout,
+                                                )
+        headerPreWait2_V285 = self.templatePreWait2_V285.format(
+                                                preWait2                     = self.param_preWait2,
+                                                )
+        #######################################################################
+        headerTrialRobot_V285 = self.templateTrialRobot_V285.format(
+                                                trialRobotEnabled                   = self.param_trialRobotEnabled,
+                                                trialRobotMovePatternFramePosition  = self.param_trialRobotMovePatternFramePosition,
+                                                trialRobotMovePatternFrameAngle     = self.param_trialRobotMovePatternFrameAngle,
+                                                trialRobotMovePatternShape          = self.param_trialRobotMovePatternShape,
+                                                trialRobotMovePatternHzPattern      = self.param_trialRobotMovePatternHzPattern,
+                                                trialRobotMovePatternHzPoint        = self.param_trialRobotMovePatternHzPoint,
+                                                trialRobotMovePatternCount          = self.param_trialRobotMovePatternCount,
+                                                trialRobotMovePatternSizeX          = self.param_trialRobotMovePatternSizeX,
+                                                trialRobotMovePatternSizeY          = self.param_trialRobotMovePatternSizeY,
+                                                trialRobotMovePatternParam          = self.param_trialRobotMovePatternParam,
+                                                trialRobotMovePatternDirection      = self.param_trialRobotMovePatternDirection,
+                                                trialRobotMoveRelTracking           = self.param_trialRobotMoveRelTracking,
+                                                trialRobotMoveRelFrame              = self.param_trialRobotMoveRelFrame,
+                                                trialRobotMoveRelDistance           = self.param_trialRobotMoveRelDistance,
+                                                trialRobotMoveRelAngleOffset        = self.param_trialRobotMoveRelAngleOffset,
+                                                trialRobotMoveRelAngleVelocity      = self.param_trialRobotMoveRelAngleVelocity,
+                                                trialRobotMoveRelAngleOscMag        = self.param_trialRobotMoveRelAngleOscMag,
+                                                trialRobotMoveRelAngleOscFreq       = self.param_trialRobotMoveRelAngleOscFreq,
+                                                trialRobotMoveRelSpeedMax           = self.param_trialRobotMoveRelSpeedMax,
+                                                trialRobotMoveRelTolerance          = self.param_trialRobotMoveRelTolerance,
+                                                trialRobotMoveRelTypeAngleOffset    = self.param_trialRobotMoveRelTypeAngleOffset,
+                                                trialRobotMoveRelTypeAngleVelocity  = self.param_trialRobotMoveRelTypeAngleVelocity,
+                                                trialRobotMoveRelTypeAngleOscMag    = self.param_trialRobotMoveRelTypeAngleOscMag,
+                                                trialRobotMoveRelTypeAngleOscFreq   = self.param_trialRobotMoveRelTypeAngleOscFreq,
+                                                trialRobotMoveRelTypeSpeedMax       = self.param_trialRobotMoveRelTypeSpeedMax,
+                                                )
+        
+        headerTrialLaser_V285 = self.templateTrialLaser_V285.format(
+                                                trialLaserEnabled               = self.param_trialLaserEnabled,
+                                                trialLaserPatternFramePosition  = self.param_trialLaserPatternFramePosition,
+                                                trialLaserPatternFrameAngle     = self.param_trialLaserPatternFrameAngle,
+                                                trialLaserPatternShape          = self.param_trialLaserPatternShape,
+                                                trialLaserPatternHzPattern      = self.param_trialLaserPatternHzPattern,
+                                                trialLaserPatternHzPoint        = self.param_trialLaserPatternHzPoint,
+                                                trialLaserPatternCount          = self.param_trialLaserPatternCount,
+                                                trialLaserPatternSizeX          = self.param_trialLaserPatternSizeX,
+                                                trialLaserPatternSizeY          = self.param_trialLaserPatternSizeY,
+                                                trialLaserPatternParam          = self.param_trialLaserPatternParam,
+                                                trialLaserPatternDirection      = self.param_trialLaserPatternDirection,
+                                                trialLaserStatefilterHi         = self.param_trialLaserStatefilterHi,
+                                                trialLaserStatefilterLo         = self.param_trialLaserStatefilterLo,
+                                                trialLaserStatefilterCriteria   = self.param_trialLaserStatefilterCriteria,
+                                                )
+        headerTrialLEDPanels_V285 = self.templateTrialLEDPanels_V285.format(
+                                                trialLEDPanelsEnabled           = self.param_trialLEDPanelsEnabled,
+                                                trialLEDPanelsCommand           = self.param_trialLEDPanelsCommand,
+                                                trialLEDPanelsIdPattern         = self.param_trialLEDPanelsIdPattern,
+                                                trialLEDPanelsFrameid           = self.param_trialLEDPanelsFrameid,
+                                                trialLEDPanelsStatefilterLo     = self.param_trialLEDPanelsStatefilterLo,
+                                                trialLEDPanelsStatefilterHi     = self.param_trialLEDPanelsStatefilterHi,
+                                                trialLEDPanelsStatefilterCriteria = self.param_trialLEDPanelsStatefilterHi,
+                                                )
+            
+        #######################################################################
+        headerPostTrigger_V285 = self.templatePostTrigger_V285.format(
+                                                postTriggerEnabled            = str(self.param_postTriggerEnabled),
+                                                postTriggerFrameidParent      = str(self.param_postTriggerFrameidParent),
+                                                postTriggerFrameidChild       = str(self.param_postTriggerFrameidChild),
+                                                postTriggerSpeedAbsParentMin  = str(self.param_postTriggerSpeedAbsParentMin),
+                                                postTriggerSpeedAbsParentMax  = str(self.param_postTriggerSpeedAbsParentMax),
+                                                postTriggerSpeedAbsChildMin   = str(self.param_postTriggerSpeedAbsChildMin),
+                                                postTriggerSpeedAbsChildMax   = str(self.param_postTriggerSpeedAbsChildMax),
+                                                postTriggerSpeedRelMin        = str(self.param_postTriggerSpeedRelMin),
+                                                postTriggerSpeedRelMax        = str(self.param_postTriggerSpeedRelMax),
+                                                postTriggerDistanceMin        = str(self.param_postTriggerDistanceMin),
+                                                postTriggerDistanceMax        = str(self.param_postTriggerDistanceMax),
+                                                postTriggerAngleMin           = str(self.param_postTriggerAngleMin),
+                                                postTriggerAngleMax           = str(self.param_postTriggerAngleMax),
+                                                postTriggerAngleTest          = str(self.param_postTriggerAngleTest),
+                                                postTriggerAngleTestBilateral = str(self.param_postTriggerAngleTestBilateral),
+                                                postTriggerTimeHold           = str(self.param_postTriggerTimeHold),
+                                                postTriggerTimeout            = str(self.param_postTriggerTimeout),
+                                                )
+        headerPostWait_V285 = self.templatePostWait_V285.format(
+                                                postWait                      = str(self.param_postWait),
+                                                )
+
+        with open(filename, 'w') as fid:
+            fid.write(self.headerVersionFileTxt_V285)
+            fid.write(headerVersionFile_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerExperimentTxt_V285)
+            fid.write(headerExperiment_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerRobotSpecTxt_V285)
+            fid.write(headerRobotSpec_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerFlySpecTxt_V285)
+            fid.write(headerFlySpec_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerTrackingTxt_V285)
+            fid.write(headerTracking_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerPreRobotTxt_V285)
+            fid.write(headerPreRobot_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerPreLaserTxt_V285)
+            fid.write(headerPreLaser_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerPreLEDPanelsTxt_V285)
+            fid.write(headerPreLEDPanels_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerPreWait1Txt_V285)
+            fid.write(headerPreWait1_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerPreTriggerTxt_V285)
+            fid.write(headerPreTrigger_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerPreWait2Txt_V285)
+            fid.write(headerPreWait2_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerTrialRobotTxt_V285)
+            fid.write(headerTrialRobot_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerTrialLaserTxt_V285)
+            fid.write(headerTrialLaser_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerTrialLEDPanelsTxt_V285)
+            fid.write(headerTrialLEDPanels_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerPostTriggerTxt_V285)
+            fid.write(headerPostTrigger_V285)
+            fid.write('\n')
+    
+            fid.write(self.headerPostWaitTxt_V285)
+            fid.write(headerPostWait_V285)
+            fid.write('\n')
+    # End WriteHeader_V285()
             
 
     # Write the state lines from any-version input file to a pre-2.6 version output file.
@@ -4365,8 +4854,8 @@ class ConvertCsv:
                                                                 vxRobot         = fieldsIn_list[iFieldIn+3],
                                                                 vyRobot         = fieldsIn_list[iFieldIn+4],
                                                                 vaRobot         = fieldsIn_list[iFieldIn+5],
-                                                                aRobotWingLeft  = '%5.3f' % N.pi,
-                                                                aRobotWingRight = '%5.3f' % N.pi,
+                                                                aRobotWingLeft  = '%5.3f' % np.pi,
+                                                                aRobotWingRight = '%5.3f' % np.pi,
                                                                 )
                         iFieldIn += 6
                         
@@ -4397,8 +4886,8 @@ class ConvertCsv:
                                                                 vxFly       = fieldsIn_list[iFieldIn+3],
                                                                 vyFly       = fieldsIn_list[iFieldIn+4],
                                                                 vaFly       = fieldsIn_list[iFieldIn+5],
-                                                                aFlyWingLeft  = '%5.3f' % N.pi,
-                                                                aFlyWingRight = '%5.3f' % N.pi,
+                                                                aFlyWingLeft  = '%5.3f' % np.pi,
+                                                                aFlyWingRight = '%5.3f' % np.pi,
                                                                 )
                             iFieldIn += 6
                         else:      # Use 'wing angle' values from file.
@@ -4441,6 +4930,10 @@ class ConvertCsv:
         self.WriteStateLines_V27(filenameIn, filenameOut)
 
 
+    def WriteStateLines_V285(self, filenameIn, filenameOut):
+        self.WriteStateLines_V27(filenameIn, filenameOut)
+
+
     # ConvertFile()
     # Convert a single file from one version to another.
     #
@@ -4479,16 +4972,20 @@ class ConvertCsv:
             self.WriteHeader_V283(filenameOut)
             self.WriteStateLines_V283(filenameIn, filenameOut)
         
-        elif (self.versionToWrite=='2.84') or (self.versionToWrite=='latest'):
+        elif (self.versionToWrite=='2.84'):
             self.WriteHeader_V284(filenameOut)
             self.WriteStateLines_V284(filenameIn, filenameOut)
+        
+        elif (self.versionToWrite=='2.85') or (self.versionToWrite=='latest'):
+            self.WriteHeader_V285(filenameOut)
+            self.WriteStateLines_V285(filenameIn, filenameOut)
         
 
     # Convert all the .csv files in the input directory to a given version in the output directory.
     #
     def ConvertDirToDir(self, dirInBase, dirOutBase):
         
-        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', 'latest']): 
+        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85', 'latest']): 
             dirsIn = glob.glob(dirInBase+'/*')
             for d in dirsIn:
                 dirLeaf = d.split('/')[-1]
@@ -4503,11 +5000,11 @@ class ConvertCsv:
                     self.ConvertFile(filenameIn, dirOut)
                         
         else:
-            print ('Only versions "2.2", "2.6", "2.7", "2.8", "2.81", "2.82", "2.83", "2.84", and "latest" are supported for writing.')
+            print ('Only versions "2.2", "2.6", "2.7", "2.8", "2.81", "2.82", "2.83", "2.84", "2.85", and "latest" are supported for writing.')
             
 
     def ConvertTree(self, dirIn, dirOut, whatToCopy):
-        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', 'latest']): 
+        if (self.versionToWrite in ['2.2', '2.6', '2.7', '2.8', '2.81', '2.82', '2.83', '2.84', '2.85', 'latest']): 
             if (dirIn != dirOut):
                 names = os.listdir(dirIn)
             
@@ -4551,7 +5048,7 @@ class ConvertCsv:
             else:
                 print "Source and Dest dirs must be different."
         else:
-            print ('Only versions "2.2", "2.6", "2.7", "2.8", "2.81", "2.82", "2.83", "2.84", and "latest" are supported for writing.')
+            print ('Only versions "2.2", "2.6", "2.7", "2.8", "2.81", "2.82", "2.83", "2.84", "2.85", and "latest" are supported for writing.')
             
         
 if __name__ == '__main__':

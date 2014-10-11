@@ -6,7 +6,7 @@ import rospy
 import cv
 import cv2
 import copy
-import numpy as N
+import numpy as np
 import os
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image, CameraInfo
@@ -67,7 +67,7 @@ class OriginateBackground:
 
     def Image_callback(self, image):
         try:
-            self.matImage = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
+            self.matImage = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, "passthrough")))
         except CvBridgeError, e:
             rospy.logwarn ('Exception converting ROS image to opencv:  %s' % e)
         

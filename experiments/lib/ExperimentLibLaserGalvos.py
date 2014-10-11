@@ -4,7 +4,7 @@ import roslib; roslib.load_manifest('experiments')
 import rospy
 import actionlib
 import copy
-import numpy as N
+import numpy as np
 import smach
 import tf
 
@@ -91,7 +91,8 @@ class Action (smach.State):
         
         smach.State.__init__(self, 
                              outcomes=['disabled','preempt','aborted'],
-                             input_keys=['experimentparamsIn'])
+                             input_keys=['experimentparamsIn'],
+                             output_keys=['experimentparamsOut'])
         
         self.mode = mode
         self.rosrate = rospy.Rate(rospy.get_param('experiment/looprate', 50))
@@ -125,13 +126,30 @@ class Action (smach.State):
         
     
         
-    def execute(self, userdata):
-        if self.mode == 'pre':
-            self.paramsIn = userdata.experimentparamsIn.pre
-        elif self.mode == 'trial':
-            self.paramsIn = userdata.experimentparamsIn.trial
+    # step_time_elapsed()
+    # Increment the elapsed time, adjusting for the pause/continue status of the experiment.
+    #
+    def step_time_elapsed(self):
+        timeNow = rospy.Time.now()
+        if (self.commandExperiment != 'pause_now'):
+            dt = timeNow - self.timePrev
         else:
-            rospy.logwarn('EL Galvos mode must be pre or trial.')
+            dt = rospy.Duration(0)
+
+        self.timePrev = timeNow
+        self.experimentparams.experiment.timeTrialElapsed += dt.to_sec()
+
+
+        
+    def execute(self, userdata):
+        self.experimentparams = copy.deepcopy(userdata.experimentparamsIn)
+        self.timePrev = rospy.Time.now()
+
+        if self.mode == 'pre':
+            self.paramsIn = self.experimentparams.pre
+        if self.mode == 'trial':
+            self.paramsIn = self.experimentparams.trial
+
 
         for pattern in self.paramsIn.lasergalvos.pattern_list:
             rospy.loginfo("EL State Lasergalvos(%s)" % pattern)
@@ -169,6 +187,8 @@ class Action (smach.State):
     
             # Move galvos until preempt or timeout.        
             while not rospy.is_shutdown():
+                self.step_time_elapsed()
+                
                 # If state is used to determine when pattern is shown.
                 if isStatefiltered:
                     # Check if any filterstates have changed.
@@ -240,7 +260,7 @@ class Action (smach.State):
 
                         # If we still need the speed, then get it from velocity.
                         if (speed is None) and (velocity is not None):
-                            speed = N.linalg.norm([velocity.linear.x, velocity.linear.y, velocity.linear.z])
+                            speed = np.linalg.norm([velocity.linear.x, velocity.linear.y, velocity.linear.z])
 
                                                         
                         # See if any of the states are in range of the filter.
@@ -291,6 +311,7 @@ class Action (smach.State):
                 if (self.commandExperiment=='pause_now'):
                     while (self.commandExperiment=='pause_now'):
                         rospy.sleep(0.5)
+                        self.timePrev = rospy.Time.now()
 
                 if (self.commandExperiment=='pause_after_trial'):
                     pass
@@ -315,6 +336,7 @@ class Action (smach.State):
         self.pubGalvoCommand.publish(commandGalvo)
         
                 
+        userdata.experimentparamsOut = self.experimentparams
         return rv
 # End class Action()
     

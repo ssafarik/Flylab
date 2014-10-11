@@ -163,7 +163,8 @@ class Action (smach.State):
         self.tfrx = tfrx
         smach.State.__init__(self, 
                              outcomes=['success','disabled','preempt','aborted'],
-                             input_keys=['experimentparamsIn'])
+                             input_keys=['experimentparamsIn'],
+                             output_keys=['experimentparamsOut'])
 
         self.mode = mode
         self.arenastate = None
@@ -199,22 +200,22 @@ class Action (smach.State):
         self.arenastate = arenastate
 
 
-    # GetAngleFrame()
-    # Get the orientation angle of the given frameid in the Arena frame.
-    #
-    def GetAngleFrame (self, frameidChild):
-        try:
-            stamp = self.tfrx.getLatestCommonTime('Arena', frameidChild)
-            (trans,q) = self.tfrx.lookupTransform('Arena', frameidChild, stamp)
-        except tf.Exception, e:
-            #rospy.logwarn('Exception in GetAngleFrame():  %s' % e)
-            angleOfChild = None
-        else:
-            rpy = tf.transformations.euler_from_quaternion(q)
-            angleOfChild = rpy[2] % (2.0 * np.pi)
-    
-            
-        return angleOfChild
+#     # GetAngleFrame()
+#     # Get the orientation angle of the given frameid in the Arena frame.
+#     #
+#     def GetAngleFrame (self, frameidChild):
+#         try:
+#             stamp = self.tfrx.getLatestCommonTime('Arena', frameidChild)
+#             (trans,q) = self.tfrx.lookupTransform('Arena', frameidChild, stamp)
+#         except tf.Exception, e:
+#             #rospy.logwarn('Exception in GetAngleFrame():  %s' % e)
+#             angleOfChild = None
+#         else:
+#             rpy = tf.transformations.euler_from_quaternion(q)
+#             angleOfChild = rpy[2] % (2.0 * np.pi)
+#     
+#             
+#         return angleOfChild
     
     
     # GetAngleFrameToFrame()
@@ -265,11 +266,29 @@ class Action (smach.State):
         return [xOut,yOut]
     
     
+    # step_time_elapsed()
+    # Increment the elapsed time, adjusting for the pause/continue status of the experiment.
+    #
+    def step_time_elapsed(self):
+        timeNow = rospy.Time.now()
+        if (self.commandExperiment != 'pause_now'):
+            dt = timeNow - self.timePrev
+        else:
+            dt = rospy.Duration(0)
+
+        self.timePrev = timeNow
+        self.experimentparams.experiment.timeTrialElapsed += dt.to_sec()
+
+
+        
     def execute(self, userdata):
+        self.experimentparams = copy.deepcopy(userdata.experimentparamsIn)
+        self.timePrev = rospy.Time.now()
+
         if self.mode == 'pre':
-            self.paramsIn = userdata.experimentparamsIn.pre
+            self.paramsIn = self.experimentparams.pre
         if self.mode == 'trial':
-            self.paramsIn = userdata.experimentparamsIn.trial
+            self.paramsIn = self.experimentparams.trial
 
         rospy.loginfo('EL State MoveRobot()')
 
@@ -307,6 +326,7 @@ class Action (smach.State):
             
                 
         #rospy.loginfo ('EL Exiting MoveRobot()')
+        userdata.experimentparamsOut = self.experimentparams
         return rv
             
             
@@ -315,7 +335,7 @@ class Action (smach.State):
         rv = 'aborted'
 
         # Compute the speedMax.
-        if (self.paramsIn.robot.move.relative.typeSpeed=='constant'):
+        if (self.paramsIn.robot.move.relative.typeSpeedMax=='constant'):
             speedMax = self.paramsIn.robot.move.relative.speedMax
         else:
             # Choose a random speed in range [0,speed]                     
@@ -327,7 +347,7 @@ class Action (smach.State):
             angleOffset = self.paramsIn.robot.move.relative.angleOffset
         elif (self.paramsIn.robot.move.relative.typeAngleOffset=='random'):
             angleOffset = self.paramsIn.robot.move.relative.angleOffset * np.random.random()
-        elif (self.paramsIn.robot.move.relative.angleType=='current'): # Use the robot's current angular position in the origin frame, rather than a given angle.
+        elif (self.paramsIn.robot.move.relative.typeAngleOffset=='current'): # Use the robot's current angular position in the origin frame, rather than a given angle.
             angleOffset = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOrigin, 'Robot')         
         else:
             rospy.logwarn ('EL, unknown robot.move.relative.typeAngleOffset: %s' % self.paramsIn.robot.move.relative.typeAngleOffset)
@@ -363,18 +383,20 @@ class Action (smach.State):
             rospy.logwarn ('EL, unknown robot.move.relative.typeAngleOscFreq: %s' % self.paramsIn.robot.move.relative.typeAngleOscFreq)
             angleOscFreq = 0
             
-        
+        t0 = self.experimentparams.experiment.timeTrialElapsed
+        angleInitial = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOrigin, 'target')
         while not rospy.is_shutdown():
-            t = rospy.Time.now().to_sec()
+            self.step_time_elapsed()
+            t = self.experimentparams.experiment.timeTrialElapsed - t0
             
             # If we need to update the target position.
             if (ptTarget is None) or (self.paramsIn.robot.move.relative.tracking):
                 # Update the angleOffset based on the current robot position.
-                if (self.paramsIn.robot.move.relative.angleType=='current'): # Use the robot's current angular position in the origin frame, rather than a given angle.
+                if (self.paramsIn.robot.move.relative.typeAngleOffset=='current'): # Use the robot's current angular position in the origin frame, rather than a given angle.
                     angleOffset = self.GetAngleFrameToFrame(self.paramsIn.robot.move.relative.frameidOrigin, 'Robot')
             
                 # Angle of target in origin frame.
-                angleInOriginFrame = angleOffset + angleVelocity*t + angleOscMag * np.sin(2.0 * np.pi * angleOscFreq * t) 
+                angleInOriginFrame = angleInitial + angleOffset + angleVelocity*t + angleOscMag * np.sin(2.0 * np.pi * angleOscFreq * t) 
 
                 # Target point in Origin frame.
                 d = self.paramsIn.robot.move.relative.distance
@@ -434,6 +456,7 @@ class Action (smach.State):
                 break
 
             
+            # Timeout is controlled by the pretrigger or the posttrigger.
             #if self.paramsIn.robot.move.timeout != -1:
             #    if (rospy.Time.now().to_sec() - self.timeStart.to_sec()) > self.paramsIn.robot.move.timeout:
             #        rv = 'timeout'
@@ -449,6 +472,7 @@ class Action (smach.State):
             if (self.commandExperiment=='pause_now'):
                 while (self.commandExperiment=='pause_now'):
                     rospy.sleep(0.5)
+                    self.timePrev = rospy.Time.now()
 
             if (self.commandExperiment=='pause_after_trial'):
                 pass
@@ -487,6 +511,8 @@ class Action (smach.State):
 
         rv = 'aborted'
         while not rospy.is_shutdown():
+            self.step_time_elapsed()
+            
             if self.preempt_requested():
                 rospy.loginfo('preempt requested: MovePattern()')
                 self.service_preempt()
@@ -500,6 +526,7 @@ class Action (smach.State):
             if (self.commandExperiment=='pause_now'):
                 while (self.commandExperiment=='pause_now'):
                     rospy.sleep(0.5)
+                    self.timePrev = rospy.Time.now()
 
             if (self.commandExperiment=='pause_after_trial'):
                 pass

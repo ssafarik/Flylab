@@ -3,7 +3,7 @@ from __future__ import division
 import roslib; roslib.load_manifest('fivebar')
 import rospy
 import copy
-import numpy as N
+import numpy as np
 import tf
 import threading
 from geometry_msgs.msg import Point, PointStamped, Pose, PoseStamped, Vector3, Vector3Stamped
@@ -86,16 +86,16 @@ class Fivebar:
         FUDGEQ1 = -0.15052268 # These are the angles that move down 20mm at center.
         FUDGEQ2 =  0.15052268
         
-        alpha = N.arctan(self.linkwidth/self.L1) # Smallest angle two links can collapse to.
-        r = N.sqrt(self.L1**2.0 + self.L3**2.0 - 2.0*self.L1*self.L3*N.cos(alpha)) # Distance from joint 1 to EE when most open.
-        beta = (N.pi - N.arcsin(self.L3*N.sin(alpha)/r)) % (2.0*N.pi) # Angle between link1 and EE when most open.
+        alpha = np.arctan(self.linkwidth/self.L1) # Smallest angle two links can collapse to.
+        r = np.sqrt(self.L1**2.0 + self.L3**2.0 - 2.0*self.L1*self.L3*np.cos(alpha)) # Distance from joint 1 to EE when most open.
+        beta = (np.pi - np.arcsin(self.L3*np.sin(alpha)/r)) % (2.0*np.pi) # Angle between link1 and EE when most open.
         
         # Joint angles CCW from East (i.e. "east" coordinates).
-        self.q1MinE    = (N.arccos((self.L0/2.0)/(self.L3+self.L1)) % (2.0*N.pi))
-        self.q1MaxE    = (N.arccos((self.L0/2.0)/r) + beta) % (2.0*N.pi)
+        self.q1MinE    = (np.arccos((self.L0/2.0)/(self.L3+self.L1)) % (2.0*np.pi))
+        self.q1MaxE    = (np.arccos((self.L0/2.0)/r) + beta) % (2.0*np.pi)
         self.q1CenterE = (self.q1MaxE+self.q1MinE)/2.0 + FUDGEQ1
-        self.q2MinE    = (N.pi - N.arccos((self.L0/2.0)/r) - beta) 
-        self.q2MaxE    = (N.pi - N.arccos((self.L0/2.0)/(self.L3+self.L1))) % (2.0*N.pi)
+        self.q2MinE    = (np.pi - np.arccos((self.L0/2.0)/r) - beta) 
+        self.q2MaxE    = (np.pi - np.arccos((self.L0/2.0)/(self.L3+self.L1))) % (2.0*np.pi)
         self.q2CenterE = (self.q2MaxE+self.q2MinE)/2.0 + FUDGEQ2
         
         # Joint angles from farthest reachable point to center of workspace (i.e. "index" coordinates)
@@ -110,9 +110,9 @@ class Fivebar:
         
         # Center of workspace (x,y)
         self.xCenter    = self.L0/2.0 + FUDGEX # Between motor shafts
-        TMPx            = N.cos(N.pi - self.q1CenterE) * self.L1 + self.L0/2.0
-        TMPy            = N.sin(N.pi - self.q1CenterE) * self.L1
-        self.yCenter    = N.sqrt(self.L3**2.0 - TMPx**2.0) + TMPy + FUDGEY
+        TMPx            = np.cos(np.pi - self.q1CenterE) * self.L1 + self.L0/2.0
+        TMPy            = np.sin(np.pi - self.q1CenterE) * self.L1
+        self.yCenter    = np.sqrt(self.L3**2.0 - TMPx**2.0) + TMPy + FUDGEY
         self.radiusReachable = 0.98*(self.L1+self.L3-r)/2.0 # Really it's about 90.5.  Limits in xy are at roughly (64,64), (-64,64), (-64,-64), (64,-64).
         self.radiusArena = rospy.get_param('arena/radius_inner', 25.4)
 
@@ -343,7 +343,7 @@ class Fivebar:
 
             
     def ClipPtMag (self, pt, magMax):
-        magPt = N.linalg.norm([pt.x, pt.y, pt.z])
+        magPt = np.linalg.norm([pt.x, pt.y, pt.z])
         if magPt > magMax:
             r = magMax / magPt
         else:
@@ -354,12 +354,12 @@ class Fivebar:
         
     # Clip the tool to the given limit.
     def ClipPtToRadius(self, pt, rLimit):
-        r = N.linalg.norm([pt.x, pt.y])
+        r = np.linalg.norm([pt.x, pt.y])
         
         if rLimit < r:
-            angle = N.arctan2(pt.y, pt.x)
-            ptOut = Point(x=rLimit * N.cos(angle),
-                          y=rLimit * N.sin(angle))
+            angle = np.arctan2(pt.y, pt.x)
+            ptOut = Point(x=rLimit * np.cos(angle),
+                          y=rLimit * np.sin(angle))
             bClipped = True
         else:
             ptOut = pt
@@ -370,13 +370,13 @@ class Fivebar:
                 
     # Clip the tool to the hardware limit.
     def ClipPtToReachable(self, pt):
-        r = N.sqrt(pt.x*pt.x + pt.y*pt.y)
-        rLimit = self.radiusReachable #N.min([self.radiusArena, self.radiusReachable])
+        r = np.sqrt(pt.x*pt.x + pt.y*pt.y)
+        rLimit = self.radiusReachable #np.min([self.radiusArena, self.radiusReachable])
         
         if rLimit < r:
-            angle = N.arctan2(pt.y, pt.x)
-            ptOut = Point(x = rLimit * N.cos(angle),
-                          y = rLimit * N.sin(angle))
+            angle = np.arctan2(pt.y, pt.x)
+            ptOut = Point(x = rLimit * np.cos(angle),
+                          y = rLimit * np.sin(angle))
             bClipped = True
         else:
             ptOut = pt
@@ -428,30 +428,30 @@ class Fivebar:
         angle2 = angle2 + self.q2CenterE
         
         # Set the crossover points at 0/2pi and pi/-pi
-        angle1 = ( angle1       % (2.0*N.pi))
-        angle2 = ((angle2+N.pi) % (2.0*N.pi)) - N.pi
+        angle1 = ( angle1       % (2.0*np.pi))
+        angle2 = ((angle2+np.pi) % (2.0*np.pi)) - np.pi
         
-        s1 = N.sin(angle1)
-        c1 = N.cos(angle1)
+        s1 = np.sin(angle1)
+        c1 = np.cos(angle1)
         
-        s2 = N.sin(angle2)
-        c2 = N.cos(angle2)
+        s2 = np.sin(angle2)
+        c2 = np.cos(angle2)
         
         j3x =       self.L1 * c1
         j3y =       self.L1 * s1
         j4x =  self.L0 + self.L2 * c2
         j4y =       self.L2 * s2
         cx = j4x - j3x
-        cy = N.abs(j3y-j4y)
+        cy = np.abs(j3y-j4y)
         Lc2 = cx*cx+cy*cy
-        Lc = N.sqrt(Lc2)
+        Lc = np.sqrt(Lc2)
 
         # Intersection of circles.
         a = (self.L3*self.L3-self.L4*self.L4+Lc*Lc)/(2.0*Lc)
-        h = N.sqrt(self.L3*self.L3-a*a)
-        j2 = N.array([self.L0,0.0])
-        j3 = N.array([j3x,j3y])
-        j4 = N.array([j4x,j4y])
+        h = np.sqrt(self.L3*self.L3-a*a)
+        j2 = np.array([self.L0,0.0])
+        j3 = np.array([j3x,j3y])
+        j4 = np.array([j4x,j4y])
         p2 = j3 + (a/Lc)*(j4-j3)
         xEa = p2[0]+(h/Lc)*(j4[1]-j3[1])
         xEb = p2[0]-(h/Lc)*(j4[1]-j3[1])
@@ -464,16 +464,16 @@ class Fivebar:
         else:
             jEx = xEb
             jEy = yEb
-        jE = N.array([jEx,jEy])
+        jE = np.array([jEx,jEy])
         
         # Now get the joint angles.
         v3E = jE-j3
         v31 = -j3
-        angle3 = N.arccos(N.dot(v3E,v31)/(N.linalg.norm(v3E)*N.linalg.norm(v31))) - N.pi
+        angle3 = np.arccos(np.dot(v3E,v31)/(np.linalg.norm(v3E)*np.linalg.norm(v31))) - np.pi
 
         v4E = jE-j4
         v42 = j2-j4
-        angle4 = N.pi - N.arccos(N.dot(v4E,v42)/(N.linalg.norm(v4E)*N.linalg.norm(v42))) 
+        angle4 = np.pi - np.arccos(np.dot(v4E,v42)/(np.linalg.norm(v4E)*np.linalg.norm(v42))) 
             
         
         x = jEx - self.xCenter
@@ -482,24 +482,24 @@ class Fivebar:
         
         # Put angles into the proper range for their limits.
         if self.q1MinE<0.0:
-            lo = -N.pi
-            hi =  N.pi
+            lo = -np.pi
+            hi =  np.pi
         else:
             lo = 0.0
-            hi = 2.0*N.pi
-        angle1 = ((angle1-lo)%(2.0*N.pi))+lo
+            hi = 2.0*np.pi
+        angle1 = ((angle1-lo)%(2.0*np.pi))+lo
 
         if self.q2MinE<0.0:
-            lo = -N.pi
-            hi =  N.pi
+            lo = -np.pi
+            hi =  np.pi
         else:
             lo = 0.0
-            hi = 2.0*N.pi
-        angle2 = ((angle2-lo)%(2.0*N.pi))+lo
+            hi = 2.0*np.pi
+        angle2 = ((angle2-lo)%(2.0*np.pi))+lo
         
 
-        angle1 = N.clip(angle1,self.q1MinE,self.q1MaxE)
-        angle2 = N.clip(angle2,self.q2MinE,self.q2MaxE)
+        angle1 = np.clip(angle1,self.q1MinE,self.q1MaxE)
+        angle2 = np.clip(angle2,self.q2MinE,self.q2MaxE)
 
         angle1 = angle1 - self.q1CenterE
         angle2 = angle2 - self.q2CenterE
@@ -524,8 +524,8 @@ class Fivebar:
         y = y + self.yCenter
         
         #rospy.logwarn('5B reachable: (x,y)=%s, norm0E=%s, norm2E=%s, self.L1+self.L3=%s, self.L2+self.L4=%s' % ([x,y], 
-        #                                                                 N.linalg.norm(N.array([x,y])), 
-        #                                                                 N.linalg.norm(N.array([x-self.L0,y])), 
+        #                                                                 np.linalg.norm(np.array([x,y])), 
+        #                                                                 np.linalg.norm(np.array([x-self.L0,y])), 
         #                                                                 self.L1+self.L3, 
         #                                                                 self.L2+self.L4))
         self.L0sq = self.L0*self.L0
@@ -562,51 +562,51 @@ class Fivebar:
         R = 0.5*(xsq-2.0*self.L0*x+self.L0sq-self.L4sq+ysq-self.L2sq)/self.L2/self.L4
                 
         q1 = [ \
-                N.arctan2((-x*(F+A)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
+                np.arctan2((-x*(F+A)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
                           (    F+A)/(ysq+xsq)/self.L1), \
-                N.arctan2((-x*(F-A)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
+                np.arctan2((-x*(F-A)/(ysq+xsq)+self.L1sq-self.L3sq+ysq+xsq)/self.L1/y, \
                           (    F-A)/(ysq+xsq)/self.L1) \
               ]
 
         q3 = [ \
-                N.arctan2((-2.0*y*x*self.L1sq+K*(F+A)/(ysq+xsq))/(-self.L3*self.L1*x*(F+A)/(ysq+xsq)+M), \
+                np.arctan2((-2.0*y*x*self.L1sq+K*(F+A)/(ysq+xsq))/(-self.L3*self.L1*x*(F+A)/(ysq+xsq)+M), \
                           1.0/2.0*(xsq-self.L3sq+ysq-self.L1sq)/self.L1/self.L3), \
-                N.arctan2((-2.0*y*x*self.L1sq+K*(F-A)/(ysq+xsq))/(-self.L3*self.L1*x*(F-A)/(ysq+xsq)+M), \
+                np.arctan2((-2.0*y*x*self.L1sq+K*(F-A)/(ysq+xsq))/(-self.L3*self.L1*x*(F-A)/(ysq+xsq)+M), \
                           1.0/2.0*(xsq-self.L3sq+ysq-self.L1sq)/self.L1/self.L3) \
               ]
 
         q2 = [ \
-                N.arctan2((Q+0.5*(-2.0*x+2.0*self.L0)*(C+B)/P)/self.L2/y, \
+                np.arctan2((Q+0.5*(-2.0*x+2.0*self.L0)*(C+B)/P)/self.L2/y, \
                           (C+B)/P/self.L2), \
-                N.arctan2((Q+0.5*(-2.0*x+2.0*self.L0)*(C-B)/P)/self.L2/y, \
+                np.arctan2((Q+0.5*(-2.0*x+2.0*self.L0)*(C-B)/P)/self.L2/y, \
                           (C-B)/P/self.L2) \
               ]
         
         q4 = [ \
-                N.arctan2((J+D*(C+B)/P)/(H+G*(C+B)/P), 
+                np.arctan2((J+D*(C+B)/P)/(H+G*(C+B)/P), 
                           R), \
-                N.arctan2((J+D*(C-B)/P)/(H+G*(C-B)/P), 
+                np.arctan2((J+D*(C-B)/P)/(H+G*(C-B)/P), 
                           R) \
               ]
 
         # Put angles into the proper 2pi range for their limits.
         if self.q1MinE<0.0:
-            lo = -N.pi
-            hi =  N.pi
+            lo = -np.pi
+            hi =  np.pi
         else:
             lo = 0.0
-            hi = 2.0*N.pi
-        q1[0] = ((q1[0]-lo)%(2.0*N.pi))+lo
-        q1[1] = ((q1[1]-lo)%(2.0*N.pi))+lo
+            hi = 2.0*np.pi
+        q1[0] = ((q1[0]-lo)%(2.0*np.pi))+lo
+        q1[1] = ((q1[1]-lo)%(2.0*np.pi))+lo
 
         if self.q2MinE<0.0:
-            lo = -N.pi
-            hi =  N.pi
+            lo = -np.pi
+            hi =  np.pi
         else:
             lo = 0.0
-            hi = 2.0*N.pi
-        q2[0] = ((q2[0]-lo)%(2.0*N.pi))+lo
-        q2[1] = ((q2[1]-lo)%(2.0*N.pi))+lo
+            hi = 2.0*np.pi
+        q2[0] = ((q2[0]-lo)%(2.0*np.pi))+lo
+        q2[1] = ((q2[1]-lo)%(2.0*np.pi))+lo
         
         
         # Select the proper configuration (it always seems to be k=1 and k=0, respectively)
@@ -615,10 +615,10 @@ class Fivebar:
         angle3 = 999.0
         angle4 = 999.0
         #for k in range(len(q1)):
-        #    rospy.logwarn('5B Q1: %s < %s < %s and pi < %s' % (self.q1MinE, q1[k], self.q1MaxE, q3[k] %(2.0*N.pi)))
+        #    rospy.logwarn('5B Q1: %s < %s < %s and pi < %s' % (self.q1MinE, q1[k], self.q1MaxE, q3[k] %(2.0*np.pi)))
         for k in range(len(q1)):
-            #if (self.q1MinE < q1[k] < self.q1MaxE) and (N.pi < (q3[k] %(2.0*N.pi))):
-            if (N.pi < (q3[k] %(2.0*N.pi))):
+            #if (self.q1MinE < q1[k] < self.q1MaxE) and (np.pi < (q3[k] %(2.0*np.pi))):
+            if (np.pi < (q3[k] %(2.0*np.pi))):
                 angle1 = q1[k]
                 angle3 = q3[k]
                 k1 = k
@@ -626,10 +626,10 @@ class Fivebar:
             
         
         #for k in range(len(q2)):
-        #    rospy.logwarn('5B Q2: %s < %s < %s and %s < pi' % (self.q2MinE, q2[k], self.q2MaxE, q4[k] %(2.0*N.pi)))
+        #    rospy.logwarn('5B Q2: %s < %s < %s and %s < pi' % (self.q2MinE, q2[k], self.q2MaxE, q4[k] %(2.0*np.pi)))
         for k in range(len(q2)):
-            #if (self.q2MinE < q2[k] < self.q2MaxE) and ((q4[k] %(2.0*N.pi)) < N.pi):
-            if ((q4[k] %(2.0*N.pi)) < N.pi):
+            #if (self.q2MinE < q2[k] < self.q2MaxE) and ((q4[k] %(2.0*np.pi)) < np.pi):
+            if ((q4[k] %(2.0*np.pi)) < np.pi):
                 angle2 = q2[k]
                 angle4 = q4[k]
                 k2 = k
@@ -638,8 +638,8 @@ class Fivebar:
         #if (angle1==999.0) or (angle2==999.0) or (angle3==999.0) or (angle4==999.0):
         #    rospy.logwarn('5B thetas=%s, x,y=%s' % ([angle1,angle2,angle3,angle4],[x0,y0]))
             
-        angle1 = N.clip(angle1,self.q1MinE,self.q1MaxE)
-        angle2 = N.clip(angle2,self.q2MinE,self.q2MaxE)
+        angle1 = np.clip(angle1,self.q1MinE,self.q1MaxE)
+        angle2 = np.clip(angle2,self.q2MinE,self.q2MaxE)
 
         angle1 = angle1 - self.q1CenterE
         angle2 = angle2 - self.q2CenterE
@@ -655,8 +655,8 @@ class Fivebar:
         t1 = angle1 + self.q1CenterE
         t2 = angle2 + self.q2CenterE
         
-        A = N.tan(t1/2.0)
-        B = N.tan(t2/2.0)
+        A = np.tan(t1/2.0)
+        B = np.tan(t2/2.0)
         C = (A**2/2.0 + 0.5)
         D = (B**2/2.0 + 0.5)
         E = A**2*B**2
@@ -668,7 +668,7 @@ class Fivebar:
         Z = (36.0*A - 36.0*B + 36.0*A*B**2 - 36.0*A**2*B - S/G - (5.0*A**2*P)/G + (7.0*B**2*P)/G + (27.0*E*P)/G + (16.0*A*B*P)/G)
         K = (22.0*A*C + 8.0*B*C + 54.0*A*B**2*C)
         L = (7.0*B**2 - 5.0*A**2 - 9.0*E + 16.0*A*B + 27.0)
-        F = N.arctan2(Z,L)
+        F = np.arctan2(Z,L)
         X = (5.0*(Z**2/L**2 + 1.0))
         M = (50.0*A*C - 8.0*B*C + 18.0*A*B**2*C)
         W = (K*J + M*H)
@@ -688,16 +688,16 @@ class Fivebar:
         AH = ((R*S)/G**2 - 18.0*B**2 - AA/G - 36.0*A**2*D + 72.0*A*B*D - AB/G + (7.0*B**2*AF)/G + (27.0*E*AF)/G + (16.0*A*B*AF)/G + (16.0*A*D*P)/G + (14.0*B*D*P)/G + (5.0*A**2*R*P)/G**2 - (7.0*B**2*R*P)/G**2 + (54.0*A**2*B*D*P)/G - (27.0*E*R*P)/G**2 - (16.0*A*B*R*P)/G**2 - 18.0)
         
         
-        j11= (2667.0*N.cos(t1)*N.sin(2.0*F))/10.0 - (889.0*N.sin(t1))/10.0 - (2667.0*N.cos(2.0*F)*N.sin(t1))/10.0 - (2667.0*N.cos(t1)*N.sin(2.0*F)*(AG/L + (Q*Z)/L**2))/X + (2667.0*N.cos(2*F)*N.sin(t1)*(AG/L + (Q*Z)/L**2))/X
-        j12=   (2667.0*N.cos(2.0*F)*N.sin(t1)*(AH/L - Y/L**2))/X - (2667.0*N.cos(t1)*N.sin(2.0*F)*(AH/L - Y/L**2))/X
-        j21= (889.0*N.cos(t1))/10.0 + (2667.0*N.cos(t1)*N.cos(2.0*F))/10.0 + (2667.0*N.sin(t1)*N.sin(2.0*F))/10.0 - (2667.0*N.cos(t1)*N.cos(2.0*F)*(AG/L + (Q*Z)/L**2))/X - (2667.0*N.sin(t1)*N.sin(2.0*F)*(AG/L + (Q*Z)/L**2))/X
-        j22= - (2667.0*N.cos(t1)*N.cos(2.0*F)*(AH/L - Y/L**2))/X - (2667.0*N.sin(t1)*N.sin(2*F)*(AH/L - Y/L**2))/X
+        j11= (2667.0*np.cos(t1)*np.sin(2.0*F))/10.0 - (889.0*np.sin(t1))/10.0 - (2667.0*np.cos(2.0*F)*np.sin(t1))/10.0 - (2667.0*np.cos(t1)*np.sin(2.0*F)*(AG/L + (Q*Z)/L**2))/X + (2667.0*np.cos(2*F)*np.sin(t1)*(AG/L + (Q*Z)/L**2))/X
+        j12=   (2667.0*np.cos(2.0*F)*np.sin(t1)*(AH/L - Y/L**2))/X - (2667.0*np.cos(t1)*np.sin(2.0*F)*(AH/L - Y/L**2))/X
+        j21= (889.0*np.cos(t1))/10.0 + (2667.0*np.cos(t1)*np.cos(2.0*F))/10.0 + (2667.0*np.sin(t1)*np.sin(2.0*F))/10.0 - (2667.0*np.cos(t1)*np.cos(2.0*F)*(AG/L + (Q*Z)/L**2))/X - (2667.0*np.sin(t1)*np.sin(2.0*F)*(AG/L + (Q*Z)/L**2))/X
+        j22= - (2667.0*np.cos(t1)*np.cos(2.0*F)*(AH/L - Y/L**2))/X - (2667.0*np.sin(t1)*np.sin(2*F)*(AH/L - Y/L**2))/X
     
-        return N.array([[j11,j12],[j21,j22]])
+        return np.array([[j11,j12],[j21,j22]])
 
 
     def JacobianInv (self, angle1, angle2):
-        return N.linalg.inv(self.JacobianFwd (angle1, angle2))
+        return np.linalg.inv(self.JacobianFwd (angle1, angle2))
 
         
     def GetXyFrom12 (self, angle1, angle2):
@@ -758,8 +758,8 @@ class Fivebar:
 
     # Create a vector with direction of ptDir, and magnitude of ptMag.
     def ScaleVecToMag (self, ptDir, ptMag):
-        magPtDir = N.linalg.norm([ptDir.x, ptDir.y, ptDir.z])
-        magPtMag = N.linalg.norm([ptMag.x, ptMag.y, ptMag.z])
+        magPtDir = np.linalg.norm([ptDir.x, ptDir.y, ptDir.z])
+        magPtMag = np.linalg.norm([ptMag.x, ptMag.y, ptMag.z])
         
         ptNew = Point (x=magPtMag / magPtDir * ptDir.x,
                        y=magPtMag / magPtDir * ptDir.y,
@@ -935,6 +935,15 @@ class Fivebar:
                                         state.header.frame_id  # parent
                                         )
 
+                # Send the target transform.                
+                if (self.stateRef is not None):
+                    self.tfbx.sendTransform((self.stateRef.pose.position.x, self.stateRef.pose.position.y, self.stateRef.pose.position.z),
+                                            (self.stateRef.pose.orientation.x, self.stateRef.pose.orientation.y, self.stateRef.pose.orientation.z, self.stateRef.pose.orientation.w),
+                                            state.header.stamp,
+                                            'target',  # child
+                                            self.stateRef.header.frame_id  # parent
+                                            )
+                
                 #rospy.logwarn ('H')
                 # Frame Target
                 if self.stateRef is not None:
@@ -1041,14 +1050,14 @@ class Fivebar:
                 self.stateDError.velocity.linear.z = self.statePError.velocity.linear.z - self.statePErrorPrev.velocity.linear.z
                 
                 
-#                 xRef = N.array([self.stateRef.pose.position.x, 
+#                 xRef = np.array([self.stateRef.pose.position.x, 
 #                                 self.stateRef.pose.position.y, 
 #                                 self.stateRef.pose.position.z,
 #                                 self.stateRef.velocity.linear.x, 
 #                                 self.stateRef.velocity.linear.y, 
 #                                 self.stateRef.velocity.linear.z])
 #                 
-#                 xVis = N.array([stateActuator.pose.position.x, 
+#                 xVis = np.array([stateActuator.pose.position.x, 
 #                                 stateActuator.pose.position.y, 
 #                                 stateActuator.pose.position.z,
 #                                 stateActuator.velocity.linear.x, 
@@ -1123,7 +1132,7 @@ class Fivebar:
                 
                 # Convert to motor coordinates.
                 jInv = self.JacobianInv(angle1Mech, angle2Mech)
-                (theta1Dot, theta2Dot) = jInv.dot(N.array([[xDot],[yDot]])) 
+                (theta1Dot, theta2Dot) = jInv.dot(np.array([[xDot],[yDot]])) 
                 
                 
                 # Display the velocity vector in rviz.
@@ -1207,15 +1216,15 @@ class Fivebar:
 
 
                     # Print the PID component values.
-                    magP = self.kP * N.linalg.norm([self.statePError.pose.position.x, self.statePError.pose.position.y])
-                    magI = self.kI * N.linalg.norm([self.stateIError.pose.position.x, self.stateIError.pose.position.y])
-                    magD = self.kD * N.linalg.norm([self.stateDError.pose.position.x, self.stateDError.pose.position.y])
-                    magPID = N.linalg.norm([self.statePID.pose.position.x, self.statePID.pose.position.y])
+                    magP = self.kP * np.linalg.norm([self.statePError.pose.position.x, self.statePError.pose.position.y])
+                    magI = self.kI * np.linalg.norm([self.stateIError.pose.position.x, self.stateIError.pose.position.y])
+                    magD = self.kD * np.linalg.norm([self.stateDError.pose.position.x, self.stateDError.pose.position.y])
+                    magPID = np.linalg.norm([self.statePID.pose.position.x, self.statePID.pose.position.y])
                     
-                    magPv = self.kPv * N.linalg.norm([self.statePError.velocity.linear.x, self.statePError.velocity.linear.y])
-                    magIv = self.kIv * N.linalg.norm([self.stateIError.velocity.linear.x, self.stateIError.velocity.linear.y])
-                    magDv = self.kDv * N.linalg.norm([self.stateDError.velocity.linear.x, self.stateDError.velocity.linear.y])
-                    magPIDv = N.linalg.norm([self.statePID.velocity.linear.x, self.statePID.velocity.linear.y])
+                    magPv = self.kPv * np.linalg.norm([self.statePError.velocity.linear.x, self.statePError.velocity.linear.y])
+                    magIv = self.kIv * np.linalg.norm([self.stateIError.velocity.linear.x, self.stateIError.velocity.linear.y])
+                    magDv = self.kDv * np.linalg.norm([self.stateDError.velocity.linear.x, self.stateDError.velocity.linear.y])
+                    magPIDv = np.linalg.norm([self.statePID.velocity.linear.x, self.statePID.velocity.linear.y])
                     
                     rospy.logwarn('[P,I,D]=[% 5.2f,% 5.2f,% 5.2f]=% 5.2f, [% 5.2f,% 5.2f,% 5.2f]=% 5.2f, v=% 5.2f, % 5.2f' % (magP,magI,magD, magPID, magPv,magIv,magDv, magPIDv, theta1Dot, theta2Dot))
 

@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
-import numpy as N
+import numpy as np
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
@@ -54,19 +54,22 @@ class Experiment():
         self.experimentparams.home.speed = 20
         self.experimentparams.home.tolerance = 2
 
-        self.experimentparams.pre.robot.enabled = True
-        self.experimentparams.pre.robot.move.mode = 'pattern'                       # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
-        self.experimentparams.pre.robot.move.relative.tracking = [True]               # True=update the target point continually.  False=the target point is set at the trigger time. 
-        self.experimentparams.pre.robot.move.relative.frameidOriginPosition = ['Fly01']
-        self.experimentparams.pre.robot.move.relative.frameidOriginAngle = ['Fly01']
-        self.experimentparams.pre.robot.move.relative.distance = [35]                 # Distance to the target point from the origin frame's position.
-        self.experimentparams.pre.robot.move.relative.angleType = ['random']          # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
-        self.experimentparams.pre.robot.move.relative.angleOffset = [0]                     # Angle to the target point from the origin frame's x-axis.
-        self.experimentparams.pre.robot.move.relative.angleOscMag = [0] # Radians
-        self.experimentparams.pre.robot.move.relative.angleOscFreq = [0]   # Hz
-        self.experimentparams.pre.robot.move.relative.speed = [20]                    # Speed at which to move the robot toward the target point. 
-        self.experimentparams.pre.robot.move.relative.speedType = ['constant']        # 'constant' or 'random'.  Use the given value, or a random frpre of it. 
-        self.experimentparams.pre.robot.move.relative.tolerance = [2]                 # When robot-to-target distance is within this tolerance, then the move is over.
+        self.experimentparams.pre.robot.enabled                           = True
+        self.experimentparams.pre.robot.move.mode                         = 'pattern'                       # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
+        self.experimentparams.pre.robot.move.relative.tracking            = [True]
+        self.experimentparams.pre.robot.move.relative.frameidOrigin       = ['Fly01Forecast']
+        self.experimentparams.pre.robot.move.relative.distance            = [35]  # mm
+        self.experimentparams.pre.robot.move.relative.angleOffset         = [0]   # Angular offset to target point in given frame (radians).
+        self.experimentparams.pre.robot.move.relative.angleVelocity       = [0]  # 2pi*freq # Angular velocity of target point in given frame (radians per sec).
+        self.experimentparams.pre.robot.move.relative.angleOscMag         = [0]  # Oscillatory addition to angular velocity.
+        self.experimentparams.pre.robot.move.relative.angleOscFreq        = [0]  # Hz of the added oscillation.
+        self.experimentparams.pre.robot.move.relative.speedMax            = [20]  # Maximum allowed speed of travel (mm/sec).
+        self.experimentparams.pre.robot.move.relative.tolerance           = [2]  # mm
+        self.experimentparams.pre.robot.move.relative.typeAngleOffset     = ['random']  # 'constant' or 'random' (on range [0,2pi]) or 'current' (use current angle from frameidOrigin to robot)
+        self.experimentparams.pre.robot.move.relative.typeAngleVelocity   = ['constant']  # 'constant' or 'random' (on range [0,angleVelocity])
+        self.experimentparams.pre.robot.move.relative.typeAngleOscMag     = ['constant']  # 'constant' or 'random' (on range [0,angleOscMag])
+        self.experimentparams.pre.robot.move.relative.typeAngleOscFreq    = ['constant']  # 'constant' or 'random' (on range [0,angleOscFreq])
+        self.experimentparams.pre.robot.move.relative.typeSpeedMax        = ['constant']  # 'constant' or 'random' (on range [0,speedMax])
         self.experimentparams.pre.robot.move.pattern.frameidPosition = ['Arena']               # 
         self.experimentparams.pre.robot.move.pattern.frameidAngle = ['Arena']               # 
         self.experimentparams.pre.robot.move.pattern.shape = ['circle']               # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'grid'
@@ -101,8 +104,8 @@ class Experiment():
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
         self.experimentparams.pre.trigger.distanceMin = 20.0               # Distance between child and parent frames.
         self.experimentparams.pre.trigger.distanceMax = 40.0
-        self.experimentparams.pre.trigger.angleMin = 00.0 * N.pi / 180.0   # Angle of the child frame from the perspective of the parent frame.
-        self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleMin = 00.0 * np.pi / 180.0   # Angle of the child frame from the perspective of the parent frame.
+        self.experimentparams.pre.trigger.angleMax =180.0 * np.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'          # 'inclusive' or 'exclusive' of the given angle range.
         self.experimentparams.pre.trigger.angleTestBilateral = True        # True=bilateral, False=unilateral.
         self.experimentparams.pre.trigger.timeHold = 0.1                   # How long the conditions must be continually met before the trigger happens.
@@ -112,20 +115,22 @@ class Experiment():
 
         # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.trial.robot.enabled = True
-        self.experimentparams.trial.robot.move.mode = 'relative'                        # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
-        self.experimentparams.trial.robot.move.relative.tracking = [True]                 # True=update the target point continually.  False=the target point is set at the trigger time. 
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = ['Fly01Forecast']
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = ['Fly01Forecast']
-        self.experimentparams.trial.robot.move.relative.distance = [6]                    # Distance to the target point from the origin frame's position.
-        self.experimentparams.trial.robot.move.relative.angleType = ['current']            # 'constant' or 'random'.  Use given angle always, or choose random angle once per move.
-        self.experimentparams.trial.robot.move.relative.angleOffset = [0]                       # Angle to the target point from the origin frame's x-axis.
-        self.experimentparams.trial.robot.move.relative.angleOscMag = [0] # Radians
-        self.experimentparams.trial.robot.move.relative.angleOscFreq = [0]   # Hz
-        self.experimentparams.trial.robot.move.relative.speed = [20]                      # Speed at which to move the robot toward the target point. 
-        self.experimentparams.trial.robot.move.relative.speedType = ['constant']          # 'constant' or 'random'.  Use the given value, or a random frtrial of it. 
-        self.experimentparams.trial.robot.move.relative.tolerance = [2]                   # When robot-to-target distance is within this tolerance, then the move is over.
-        
+        self.experimentparams.trial.robot.enabled                           = True
+        self.experimentparams.trial.robot.move.mode                         = 'relative' # 'relative' or 'pattern'.  Move relative to the given frame, or move in a preset pattern.
+        self.experimentparams.trial.robot.move.relative.tracking            = [True]
+        self.experimentparams.trial.robot.move.relative.frameidOrigin       = ['Fly01Forecast']
+        self.experimentparams.trial.robot.move.relative.distance            = [6]  # mm
+        self.experimentparams.trial.robot.move.relative.angleOffset         = [0]   # Angular offset to target point in given frame (radians).
+        self.experimentparams.trial.robot.move.relative.angleVelocity       = [0]  # 2pi*freq # Angular velocity of target point in given frame (radians per sec).
+        self.experimentparams.trial.robot.move.relative.angleOscMag         = [0]  # Oscillatory addition to angular velocity.
+        self.experimentparams.trial.robot.move.relative.angleOscFreq        = [0]  # Hz of the added oscillation.
+        self.experimentparams.trial.robot.move.relative.speedMax            = [20]  # Maximum allowed speed of travel (mm/sec).
+        self.experimentparams.trial.robot.move.relative.tolerance           = [2]  # mm
+        self.experimentparams.trial.robot.move.relative.typeAngleOffset     = ['current']  # 'constant' or 'random' (on range [0,2pi]) or 'current' (use current angle from frameidOrigin to robot)
+        self.experimentparams.trial.robot.move.relative.typeAngleVelocity   = ['constant']  # 'constant' or 'random' (on range [0,angleVelocity])
+        self.experimentparams.trial.robot.move.relative.typeAngleOscMag     = ['constant']  # 'constant' or 'random' (on range [0,angleOscMag])
+        self.experimentparams.trial.robot.move.relative.typeAngleOscFreq    = ['constant']  # 'constant' or 'random' (on range [0,angleOscFreq])
+        self.experimentparams.trial.robot.move.relative.typeSpeedMax        = ['constant']  # 'constant' or 'random' (on range [0,speedMax])
         
         self.experimentparams.trial.lasergalvos.enabled = False
         
@@ -149,8 +154,8 @@ class Experiment():
         self.experimentparams.post.trigger.speedRelMax       = 999.0
         self.experimentparams.post.trigger.distanceMin = 0.0              
         self.experimentparams.post.trigger.distanceMax = 999.0
-        self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0   
-        self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleMin =  0.0 * np.pi / 180.0   
+        self.experimentparams.post.trigger.angleMax =180.0 * np.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 1.0

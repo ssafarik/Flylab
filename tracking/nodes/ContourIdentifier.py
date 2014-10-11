@@ -5,7 +5,7 @@ import sys
 import copy
 import rospy
 import tf
-import numpy as N
+import numpy as np
 import threading
 from tracking.msg import ArenaState, Contourinfo, ContourinfoLists
 from arena_tf.srv import ArenaCameraConversion
@@ -297,7 +297,7 @@ class ContourIdentifier:
             contourinfolistsOut.imgRoi = []
             
             for iContour in range(len(contourinfolistsIn.x)):
-                if N.linalg.norm(N.array([contourinfolistsIn.x[iContour]-self.params['camera']['mask']['x'], 
+                if np.linalg.norm(np.array([contourinfolistsIn.x[iContour]-self.params['camera']['mask']['x'], 
                                           contourinfolistsIn.y[iContour]-self.params['camera']['mask']['y']])) <= self.params['camera']['mask']['radius']:
                     contourinfolistsOut.x.append(contourinfolistsIn.x[iContour])
                     contourinfolistsOut.y.append(contourinfolistsIn.y[iContour])
@@ -347,9 +347,9 @@ class ContourIdentifier:
     #
     def GetDistanceMatrix(self, xyObjects, xyContours):
         # The basic distance matrix.
-        d0 = N.subtract.outer(xyObjects[:,INDEX_X], xyContours[:,INDEX_X]) # nObjects-by-nContours matrix of x-distances between objects and contours.
-        d1 = N.subtract.outer(xyObjects[:,INDEX_Y], xyContours[:,INDEX_Y]) # nObjects-by-nContours matrix of y-distances between objects and contours.
-        d = N.hypot(d0, d1)                                                # nObjects-by-nContours matrix of 2-norm distances between objects and contours.
+        d0 = np.subtract.outer(xyObjects[:,INDEX_X], xyContours[:,INDEX_X]) # nObjects-by-nContours matrix of x-distances between objects and contours.
+        d1 = np.subtract.outer(xyObjects[:,INDEX_Y], xyContours[:,INDEX_Y]) # nObjects-by-nContours matrix of y-distances between objects and contours.
+        d = np.hypot(d0, d1)                                                # nObjects-by-nContours matrix of 2-norm distances between objects and contours.
         
         # Additional distance penalties.
         
@@ -364,34 +364,34 @@ class ContourIdentifier:
         bPenalizeKinematic = False    # True only seems to make it worse.
         if (bPenalizeKinematic):
             for m in range(len(xyObjects)):
-                if (N.isnan(xyObjects[m,INDEX_XKINEMATIC])):
+                if (np.isnan(xyObjects[m,INDEX_XKINEMATIC])):
                     xyObjects[m,INDEX_XKINEMATIC] = xyContours[m,X]
                     xyObjects[m,INDEX_YKINEMATIC] = xyContours[m,Y]
     
-            d0 = N.subtract.outer(xyObjects[:,INDEX_XKINEMATIC], xyContours[:,INDEX_X])
-            d1 = N.subtract.outer(xyObjects[:,INDEX_YKINEMATIC], xyContours[:,INDEX_Y])
-            dPenalty = N.hypot(d0, d1)
+            d0 = np.subtract.outer(xyObjects[:,INDEX_XKINEMATIC], xyContours[:,INDEX_X])
+            d1 = np.subtract.outer(xyObjects[:,INDEX_YKINEMATIC], xyContours[:,INDEX_Y])
+            dPenalty = np.hypot(d0, d1)
     
             d += dPenalty
             
         
         # Penalty for deviation of visual characteristics: area and ecc.
         gainArea = 0.0 #0.1 
-        aPenalty = gainArea * N.abs(N.subtract.outer(xyObjects[:,INDEX_AMEAN], xyContours[:,INDEX_AREA]))
+        aPenalty = gainArea * np.abs(np.subtract.outer(xyObjects[:,INDEX_AMEAN], xyContours[:,INDEX_AREA]))
 
         gainEcc = 0.0 #10.0
-        ePenalty = gainEcc * N.abs(N.subtract.outer(xyObjects[:,INDEX_EMEAN], xyContours[:,INDEX_ECC]))
+        ePenalty = gainEcc * np.abs(np.subtract.outer(xyObjects[:,INDEX_EMEAN], xyContours[:,INDEX_ECC]))
         d += (aPenalty + ePenalty)
             
 #             for m in range(len(xyObjects)):
 #                 for n in range(len(xyContours)):
 #                     try:
-#                         if (bMatchArea and not N.isnan(xyObjects[m,INDEX_AMEAN])):
-#                             areametric = gainArea * N.abs(xyContours[n,INDEX_AREA] - xyObjects[m,INDEX_AMEAN])
+#                         if (bMatchArea and not np.isnan(xyObjects[m,INDEX_AMEAN])):
+#                             areametric = gainArea * np.abs(xyContours[n,INDEX_AREA] - xyObjects[m,INDEX_AMEAN])
 #                             d[m,n] += areametric
 #                          
-#                         if (bMatchEcc and not N.isnan(xyObjects[m,INDEX_EMEAN])):
-#                             eccmetric = gainEcc * N.abs(xyContours[n,INDEX_ECC] - xyObjects[m,INDEX_EMEAN])# / N.max([xyContours[n,INDEX_ECC], xyObjects[m,INDEX_EMEAN]]) # Ranges 0 to 1.
+#                         if (bMatchEcc and not np.isnan(xyObjects[m,INDEX_EMEAN])):
+#                             eccmetric = gainEcc * np.abs(xyContours[n,INDEX_ECC] - xyObjects[m,INDEX_EMEAN])# / np.max([xyContours[n,INDEX_ECC], xyObjects[m,INDEX_EMEAN]]) # Ranges 0 to 1.
 #                             d[m,n] += eccmetric
 #                          
 #                          
@@ -426,7 +426,7 @@ class ContourIdentifier:
                     m = None
                 if m is not None:
                     #       w = m's highest ranked such woman who he has not proposed to yet
-                    d2 = list(N.array(d[m])+N.array(proposed[m]))
+                    d2 = list(np.array(d[m])+np.array(proposed[m]))
                     w = d2.index(min(d2))
                     #rospy.logwarn('m,w=%s'%[m,w])
                     #       if w is free
@@ -492,7 +492,7 @@ class ContourIdentifier:
     #
     def MapContoursFromObjects(self):
         # Make the list of objects (i.e. robots & flies).
-        xyObjects = N.zeros([self.nRobots+self.nFlies, 10])
+        xyObjects = np.zeros([self.nRobots+self.nFlies, 10])
         
         # At least as many contour slots as objects, with missing contours placed in a "pool" located far away (e.g. 55555,55555).
         if (self.bUseVisualServoing):
@@ -500,7 +500,7 @@ class ContourIdentifier:
         else:
             nContours = max(self.nRobots+self.nFlies, len(self.contourinfo_list)+self.nRobots) # Space for a fake contour to match with the robot.
             
-        xyContours = N.tile([55555.0, 55555.0, 1.0, 1.0], 
+        xyContours = np.tile([55555.0, 55555.0, 1.0, 1.0], 
                             (nContours,1)
                             )
 
@@ -509,8 +509,8 @@ class ContourIdentifier:
         
         # Put the contours into the contour list.
         for i in range(len(self.contourinfo_list)):
-            if (not N.isnan(self.contourinfo_list[i].x)):
-                xyContours[iContour,:] = N.array([self.contourinfo_list[i].x,
+            if (not np.isnan(self.contourinfo_list[i].x)):
+                xyContours[iContour,:] = np.array([self.contourinfo_list[i].x,
                                                   self.contourinfo_list[i].y,
                                                   self.contourinfo_list[i].area,
                                                   self.contourinfo_list[i].ecc])
@@ -529,10 +529,10 @@ class ContourIdentifier:
             else:
                 areaMin = 0.0
                 areaMean = 1.0
-                areaMax = N.inf
+                areaMax = np.inf
                 eccMin = 0.0
                 eccMean = 1.0
-                eccMax = N.inf
+                eccMax = np.inf
                 
                 
             # Get the kinematic position.
@@ -540,13 +540,13 @@ class ContourIdentifier:
                 xKinematic = self.stateKinematic.pose.position.x
                 yKinematic = self.stateKinematic.pose.position.y
             else:
-                xKinematic = N.nan
-                yKinematic = N.nan
+                xKinematic = np.nan
+                yKinematic = np.nan
                 
                 
             # Get the robot Kalman xy.
             if (iRobot<len(self.objects)) and (self.objects[iRobot].isVisible):
-                xyKalman = N.array([self.objects[iRobot].state.pose.position.x, # Position penalty    
+                xyKalman = np.array([self.objects[iRobot].state.pose.position.x, # Position penalty    
                                    self.objects[iRobot].state.pose.position.y,  # Position penalty
                                    areaMin,  eccMin,    # Additional penalties
                                    areaMean, eccMean,   # Additional penalties
@@ -559,7 +559,7 @@ class ContourIdentifier:
                 
             # Get the robot kinematic xy.
             if (self.stateKinematic is not None):
-                xyKinematic = N.array([self.stateKinematic.pose.position.x,     # Position penalty
+                xyKinematic = np.array([self.stateKinematic.pose.position.x,     # Position penalty
                                          self.stateKinematic.pose.position.y,   # Position penalty
                                          areaMin,  eccMin,  # Additional penalties
                                          areaMean, eccMean, # Additional penalties
@@ -573,11 +573,11 @@ class ContourIdentifier:
             # Decide which position to use for robot matching.
             if (xyKalman is not None) and (xyKinematic is not None):
                 # Don't let the fly walk away with the robot.
-                if (N.linalg.norm(xyKalman[0:2]-xyKinematic[0:2]) < self.params['tracking']['offsetEndEffectorMax']):
+                if (np.linalg.norm(xyKalman[0:2]-xyKinematic[0:2]) < self.params['tracking']['offsetEndEffectorMax']):
                     xyRobot = xyKalman
                 else:
                     xyRobot = xyKinematic
-                    #rospy.logwarn('Too far away: % 0.1f' % N.linalg.norm(xyKalman[0:2]-xyKinematic[0:2]))
+                    #rospy.logwarn('Too far away: % 0.1f' % np.linalg.norm(xyKalman[0:2]-xyKinematic[0:2]))
             else:
                 if (xyKalman is not None):
                     xyRobot = xyKalman
@@ -593,7 +593,7 @@ class ContourIdentifier:
                 
             # If not visual servoing, then make a fake contour exactly matching the robot.
             if (not self.bUseVisualServoing) and (xyKinematic is not None):
-                xyContours[iContour,:] = N.array([xyKinematic[INDEX_X],  # x
+                xyContours[iContour,:] = np.array([xyKinematic[INDEX_X],  # x
                                                   xyKinematic[INDEX_Y],  # y
                                                   xyKinematic[INDEX_AMEAN],  # area
                                                   xyKinematic[INDEX_EMEAN]]) # ecc
@@ -602,12 +602,12 @@ class ContourIdentifier:
         
         # Put flies into the objects list.    
         for iFly in self.iFly_list:
-            xyObjects[iFly,:] = N.array([self.objects[iFly].state.pose.position.x,
+            xyObjects[iFly,:] = np.array([self.objects[iFly].state.pose.position.x,
                                          self.objects[iFly].state.pose.position.y,
                                          self.objects[iFly].areaMin,  self.objects[iFly].eccMin,
                                          self.objects[iFly].areaMean, self.objects[iFly].eccMean,
                                          self.objects[iFly].areaMax,  self.objects[iFly].eccMax,
-                                         N.nan, N.nan]) # Kinematic positions.
+                                         np.nan, np.nan]) # Kinematic positions.
 
         
         # Match objects with contourinfo_list.
@@ -758,7 +758,7 @@ class ContourIdentifier:
                             if (self.enabledExclusionzone):
                                 # See if the contourinfo is in any of the exclusionzones.
                                 for k in range(len(self.pointExclusionzone_list)):
-                                    inExclusionzone = inExclusionzone or (N.linalg.norm([contourinfolists.x[i]-self.pointExclusionzone_list[k].x, 
+                                    inExclusionzone = inExclusionzone or (np.linalg.norm([contourinfolists.x[i]-self.pointExclusionzone_list[k].x, 
                                                                                          contourinfolists.y[i]-self.pointExclusionzone_list[k].y]) < self.radiusExclusionzone_list[k])
                                 
                             if (not inExclusionzone): 
@@ -766,7 +766,7 @@ class ContourIdentifier:
                                 contourinfo.header = contourinfolists.header
                                 contourinfo.x      = contourinfolists.x[i]
                                 contourinfo.y      = contourinfolists.y[i]
-                                if (not N.isnan(contourinfolists.angle[i])):
+                                if (not np.isnan(contourinfolists.angle[i])):
                                     contourinfo.angle = contourinfolists.angle[i]
                                 else:
                                     contourinfo.angle = self.contouranglePrev
@@ -803,7 +803,7 @@ class ContourIdentifier:
                                 elif (self.stateKinematic is not None):
                                     q = self.stateKinematic.pose.orientation
                                     rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                                    area = N.pi * (self.params['tracking']['robot']['width']/2)**2
+                                    area = np.pi * (self.params['tracking']['robot']['width']/2)**2
     
                                     # Make a 'fake' contourinfo from kinematics.    
                                     contourinfo = Contourinfo(header=self.stateKinematic.header,

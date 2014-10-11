@@ -5,7 +5,7 @@ import rospy
 import copy
 import cv
 import cv2
-import numpy as N
+import numpy as np
 import tf
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Point, Pose, PoseStamped
@@ -50,8 +50,8 @@ class CalibrateStageArena():
 
         self.eccVisual = 0
         self.areaVisual = 0
-        self.eccVisual_array = N.array([])
-        self.areaVisual_array = N.array([])
+        self.eccVisual_array = np.array([])
+        self.areaVisual_array = np.array([])
         self.eccVisualMin = 1000000000
         self.eccVisualMax = 0
         self.areaVisualMin = 1000000000
@@ -69,8 +69,8 @@ class CalibrateStageArena():
         self.checker_size = rospy.get_param('calibration/checker_size', 15)
         self.bRotateGrid = False
         
-        self.rvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
-        self.tvec      = N.zeros([1, 3], dtype=N.float32).squeeze()
+        self.rvec      = np.zeros([1, 3], dtype=np.float32).squeeze()
+        self.tvec      = np.zeros([1, 3], dtype=np.float32).squeeze()
 
         self.rvec[0] = rospy.get_param('/camera/arena_rvec_0')
         self.rvec[1] = rospy.get_param('/camera/arena_rvec_1')
@@ -137,8 +137,8 @@ class CalibrateStageArena():
     
     def CameraInfo_callback (self, msgCameraInfo):
         self.camerainfo = msgCameraInfo
-        self.K_rect = N.reshape(self.camerainfo.P,[3,4])[0:3,0:3] # camerainfo.K and camerainfo.D apply to image_raw; P w/ D=0 applies to image_rect.
-        self.D_rect = N.array([0.0, 0.0, 0.0, 0.0, 0.0])
+        self.K_rect = np.reshape(self.camerainfo.P,[3,4])[0:3,0:3] # camerainfo.K and camerainfo.D apply to image_raw; P w/ D=0 applies to image_rect.
+        self.D_rect = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
 
       
 
@@ -156,12 +156,12 @@ class CalibrateStageArena():
             t0 = rospy.Time.now().to_sec()
             if (self.initialized):
                 try:
-                    imgCamera = N.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
+                    imgCamera = np.uint8(cv.GetMat(self.cvbridge.imgmsg_to_cv(image, 'passthrough')))
                 except CvBridgeError, e:
                     rospy.logwarn('Exception CvBridgeError in image callback: %s' % e)
                 
                 if (self.imgOutput is None):
-                    self.imgOutput   = N.zeros([imgCamera.shape[0], imgCamera.shape[1], 3], dtype=N.uint8)
+                    self.imgOutput   = np.zeros([imgCamera.shape[0], imgCamera.shape[1], 3], dtype=np.uint8)
                 
                 self.imgOutput = cv2.cvtColor(imgCamera, cv.CV_GRAY2RGB)
                 xText = 25
@@ -190,16 +190,16 @@ class CalibrateStageArena():
                     
                     
                 if (self.initialized_endeffector):
-                    pointVisualNew    = N.array([[poseVisual.pose.position.x], [poseVisual.pose.position.y],  [0]])             # In Arena coordinates, from tracking.
-                    pointKinematicNew = N.array([[xKinematic],                 [yKinematic],                  [zKinematic]])    # In Stage coordinates, from kinematics.
+                    pointVisualNew    = np.array([[poseVisual.pose.position.x], [poseVisual.pose.position.y],  [0]])             # In Arena coordinates, from tracking.
+                    pointKinematicNew = np.array([[xKinematic],                 [yKinematic],                  [zKinematic]])    # In Stage coordinates, from kinematics.
                     
                     if (self.initialized_arrays):
                         pointKinematicPrev = self.pointKinematic_array[:,-1].reshape((3,1))
                         if self.distPointsCriteria < tf.transformations.vector_norm((pointKinematicNew - pointKinematicPrev)):
-                            self.pointVisual_array = N.append(self.pointVisual_array, pointVisualNew, axis=1)
-                            self.pointKinematic_array = N.append(self.pointKinematic_array, pointKinematicNew, axis=1)
-                            self.eccVisual_array = N.append(self.eccVisual_array,self.eccVisual)
-                            self.areaVisual_array = N.append(self.areaVisual_array,self.areaVisual)
+                            self.pointVisual_array = np.append(self.pointVisual_array, pointVisualNew, axis=1)
+                            self.pointKinematic_array = np.append(self.pointKinematic_array, pointKinematicNew, axis=1)
+                            self.eccVisual_array = np.append(self.eccVisual_array,self.eccVisual)
+                            self.areaVisual_array = np.append(self.areaVisual_array,self.areaVisual)
                     else:
                         self.pointVisual_array = pointVisualNew
                         self.pointKinematic_array = pointKinematicNew
@@ -244,8 +244,8 @@ class CalibrateStageArena():
                         position = tf.transformations.translation_from_matrix(T)
                         
                         # Eccentricity.
-                        eccMean = N.mean(self.eccVisual_array)
-                        eccStd  = N.std(self.eccVisual_array)
+                        eccMean = np.mean(self.eccVisual_array)
+                        eccStd  = np.std(self.eccVisual_array)
                         self.eccVisualMin = eccMean - 3*eccStd
                         if self.eccVisualMin < 0:
                             self.eccVisualMin = 0
@@ -253,8 +253,8 @@ class CalibrateStageArena():
                         # rospy.logwarn('eccMean = %s, eccStd = %s\n' % (eccMean, eccStd))
                         
                         # Area.
-                        areaMean = N.mean(self.areaVisual_array)
-                        areaStd  = N.std(self.areaVisual_array)
+                        areaMean = np.mean(self.areaVisual_array)
+                        areaStd  = np.std(self.areaVisual_array)
                         self.areaVisualMin = areaMean - 3*areaStd
                         if self.areaVisualMin < 0:
                             self.areaVisualMin = 0

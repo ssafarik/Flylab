@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
-import numpy as N
+import numpy as np
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
@@ -68,8 +68,8 @@ class ExperimentMoveAbsolute():
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
         self.experimentparams.pre.trigger.distanceMin = 0.0
         self.experimentparams.pre.trigger.distanceMax = 999.0
-        self.experimentparams.pre.trigger.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.pre.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleMin =  0.0 * np.pi / 180.0
+        self.experimentparams.pre.trigger.angleMax =180.0 * np.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
         self.experimentparams.pre.trigger.angleTestBilateral = True
         self.experimentparams.pre.trigger.timeHold = 0.0
@@ -80,19 +80,22 @@ class ExperimentMoveAbsolute():
 
         # .robot.move, .lasergalvos, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.trial.robot.enabled = True
-        self.experimentparams.trial.robot.move.mode = 'relative'
-        self.experimentparams.trial.robot.move.relative.tracking = [True]
-        self.experimentparams.trial.robot.move.relative.frameidOriginPosition = ['Arena']
-        self.experimentparams.trial.robot.move.relative.frameidOriginAngle = ['Arena']
-        self.experimentparams.trial.robot.move.relative.distance = [30.0]
-        self.experimentparams.trial.robot.move.relative.angleType = ['constant']
-        self.experimentparams.trial.robot.move.relative.angleOffset = [0.0]
-        self.experimentparams.trial.robot.move.relative.angleOscMag = [0] # Radians
-        self.experimentparams.trial.robot.move.relative.angleOscFreq = [0]   # Hz
-        self.experimentparams.trial.robot.move.relative.speed = [200]
-        self.experimentparams.trial.robot.move.relative.speedType = ['constant']
-        self.experimentparams.trial.robot.move.relative.tolerance = [2]
+        self.experimentparams.trial.robot.enabled                           = True
+        self.experimentparams.trial.robot.move.mode                         = 'relative'
+        self.experimentparams.trial.robot.move.relative.tracking            = [True]
+        self.experimentparams.trial.robot.move.relative.frameidOrigin       = ['Arena']
+        self.experimentparams.trial.robot.move.relative.distance            = [30]  # mm
+        self.experimentparams.trial.robot.move.relative.angleOffset         = [0]   # Angular offset to target point in given frame (radians).
+        self.experimentparams.trial.robot.move.relative.angleVelocity       = [0]  # 2pi*freq # Angular velocity of target point in given frame (radians per sec).
+        self.experimentparams.trial.robot.move.relative.angleOscMag         = [0]  # Oscillatory addition to angular velocity.
+        self.experimentparams.trial.robot.move.relative.angleOscFreq        = [0]  # Hz of the added oscillation.
+        self.experimentparams.trial.robot.move.relative.speedMax            = [200]  # Maximum allowed speed of travel (mm/sec).
+        self.experimentparams.trial.robot.move.relative.tolerance           = [2]  # mm
+        self.experimentparams.trial.robot.move.relative.typeAngleOffset     = ['constant']  # 'constant' or 'random' (on range [0,2pi]) or 'current' (use current angle from frameidOrigin to robot)
+        self.experimentparams.trial.robot.move.relative.typeAngleVelocity   = ['constant']  # 'constant' or 'random' (on range [0,angleVelocity])
+        self.experimentparams.trial.robot.move.relative.typeAngleOscMag     = ['constant']  # 'constant' or 'random' (on range [0,angleOscMag])
+        self.experimentparams.trial.robot.move.relative.typeAngleOscFreq    = ['constant']  # 'constant' or 'random' (on range [0,angleOscFreq])
+        self.experimentparams.trial.robot.move.relative.typeSpeedMax        = ['constant']  # 'constant' or 'random' (on range [0,speedMax])
         
 
         self.experimentparams.trial.lasergalvos.enabled = False
@@ -116,8 +119,8 @@ class ExperimentMoveAbsolute():
         self.experimentparams.post.trigger.speedRelMax       = 999.0
         self.experimentparams.post.trigger.distanceMin = 999.0
         self.experimentparams.post.trigger.distanceMax = 999.0
-        self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleMin =  0.0 * np.pi / 180.0
+        self.experimentparams.post.trigger.angleMax =180.0 * np.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 1.0

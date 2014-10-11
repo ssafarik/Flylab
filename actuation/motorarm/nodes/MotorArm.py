@@ -559,9 +559,18 @@ class MotorArm:
                                         'EndEffector',  # child
                                         'Stage'  # parent
                                         )
+
+
+                # Send the target transform.                
+                if (self.stateRef is not None):
+                    self.tfbx.sendTransform((self.stateRef.pose.position.x, self.stateRef.pose.position.y, self.stateRef.pose.position.z),
+                                            (self.stateRef.pose.orientation.x, self.stateRef.pose.orientation.y, self.stateRef.pose.orientation.z, self.stateRef.pose.orientation.w),
+                                            state.header.stamp,
+                                            'target',  # child
+                                            self.stateRef.header.frame_id  # parent
+                                            )
                 
-                
-                # Frame Target
+                # Publish a marker for the target.
                 if (self.stateRef is not None):
                     markerTarget = Marker(header=self.stateRef.header,
                                           ns='target',

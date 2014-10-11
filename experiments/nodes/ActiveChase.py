@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('experiments')
 import rospy
-import numpy as N
+import numpy as np
 import ExperimentLib
 from geometry_msgs.msg import Point, Twist
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsRequest, ExperimentParamsChoicesRequest
@@ -46,25 +46,29 @@ class Experiment():
         self.experimentparams.tracking.exclusionzones.point_list = [Point(x=0.0, y=0.0)]
         self.experimentparams.tracking.exclusionzones.radius_list = [0.0]
         
-        self.experimentparams.home.enabled                        = False
+        self.experimentparams.home.enabled                        = True#False
         self.experimentparams.home.x                              = rospy.get_param('motorarm/L1', 999)
         self.experimentparams.home.y                              = 0.0
         self.experimentparams.home.speed                          = 20
         self.experimentparams.home.tolerance                      = 2
         
-        self.experimentparams.pre.robot.enabled                         = True
-        self.experimentparams.pre.robot.move.mode                       = 'pattern' # 'pattern' or 'relative'
-        self.experimentparams.pre.robot.move.pattern.frameidPosition    = ['Arena'] 
-        self.experimentparams.pre.robot.move.pattern.frameidAngle       = ['Arena'] 
-        self.experimentparams.pre.robot.move.pattern.shape              = ['circle'] # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.pre.robot.move.pattern.hzPattern          = [1/40]
-        self.experimentparams.pre.robot.move.pattern.hzPoint            = [100]
-        self.experimentparams.pre.robot.move.pattern.count              = [-1]
-        self.experimentparams.pre.robot.move.pattern.size               = [Point(x=rospy.get_param('motorarm/L1', 999),
-                                                                                 y=0)]
-        self.experimentparams.pre.robot.move.pattern.param              = [0]
-        self.experimentparams.pre.robot.move.pattern.direction          = [1]
-        self.experimentparams.pre.robot.move.pattern.restart            = [False]
+        self.experimentparams.pre.robot.enabled                           = True
+        self.experimentparams.pre.robot.move.mode                         = 'relative' # 'pattern' or 'relative'
+        self.experimentparams.pre.robot.move.relative.tracking            = [True]
+        self.experimentparams.pre.robot.move.relative.frameidOrigin       = ['Arena']
+        self.experimentparams.pre.robot.move.relative.distance            = [rospy.get_param('motorarm/L1', 999)]  # mm
+        self.experimentparams.pre.robot.move.relative.angleOffset         = [0]   # Angular offset to target point in given frame (radians).
+        self.experimentparams.pre.robot.move.relative.angleVelocity       = [2*np.pi*1/40]  # 2pi*freq # Angular velocity of target point in given frame (radians per sec).
+        self.experimentparams.pre.robot.move.relative.angleOscMag         = [0]  # Oscillatory addition to angular velocity.
+        self.experimentparams.pre.robot.move.relative.angleOscFreq        = [0]  # Hz of the added oscillation.
+        self.experimentparams.pre.robot.move.relative.speedMax            = [999]  # Maximum allowed speed of travel (mm/sec).
+        self.experimentparams.pre.robot.move.relative.tolerance           = [-1]  # mm
+        self.experimentparams.pre.robot.move.relative.typeAngleOffset     = ['constant']  # 'constant' or 'random' (on range [0,2pi]) or 'current' (use current angle from frameidOrigin to robot)
+        self.experimentparams.pre.robot.move.relative.typeAngleVelocity   = ['constant']  # 'constant' or 'random' (on range [0,angleVelocity])
+        self.experimentparams.pre.robot.move.relative.typeAngleOscMag     = ['constant']  # 'constant' or 'random' (on range [0,angleOscMag])
+        self.experimentparams.pre.robot.move.relative.typeAngleOscFreq    = ['constant']  # 'constant' or 'random' (on range [0,angleOscFreq])
+        self.experimentparams.pre.robot.move.relative.typeSpeedMax        = ['constant']  # 'constant' or 'random' (on range [0,speedMax])
+
         
         self.experimentparams.pre.lasergalvos.enabled = False
         self.experimentparams.pre.ledpanels.enabled = False
@@ -80,8 +84,8 @@ class Experiment():
         self.experimentparams.pre.trigger.speedRelMax       = 999.0
         self.experimentparams.pre.trigger.distanceMin =   0.0
         self.experimentparams.pre.trigger.distanceMax =   7.0
-        self.experimentparams.pre.trigger.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.pre.trigger.angleMax = 60.0 * N.pi / 180.0
+        self.experimentparams.pre.trigger.angleMin =  0.0 * np.pi / 180.0
+        self.experimentparams.pre.trigger.angleMax = 60.0 * np.pi / 180.0
         self.experimentparams.pre.trigger.angleTest = 'inclusive'
         self.experimentparams.pre.trigger.angleTestBilateral = True
         self.experimentparams.pre.trigger.timeHold = 1.0
@@ -91,23 +95,25 @@ class Experiment():
 
         # .robot, .lasergalvos, .ledpanels, and .post.trigger all run concurrently.
         # The first one to finish preempts the others.
-        self.experimentparams.trial.robot.enabled                       = True
-        self.experimentparams.trial.robot.move.mode                     = 'pattern' # 'pattern' or 'relative'
-        self.experimentparams.trial.robot.move.pattern.frameidPosition  = ['Arena']
-        self.experimentparams.trial.robot.move.pattern.frameidAngle     = ['Arena'] 
-        self.experimentparams.trial.robot.move.pattern.shape            = ['circle'] # 'constant' or 'circle' or 'square' or 'flylogo' or 'spiral' or 'ramp'
-        self.experimentparams.trial.robot.move.pattern.hzPattern        = [1/80, 1/40, 1/20]
-        self.experimentparams.trial.robot.move.pattern.hzPoint          = [100]
-        self.experimentparams.trial.robot.move.pattern.count            = [-1]
-        self.experimentparams.trial.robot.move.pattern.size             = [Point(x=rospy.get_param('motorarm/L1', 999),
-                                                                                 y=0)]
-        self.experimentparams.trial.robot.move.pattern.param            = [0]
-        self.experimentparams.trial.robot.move.pattern.direction        = [1]
-        self.experimentparams.trial.robot.move.pattern.restart          = [False]  # False: Continue the new pattern from the old pattern's current location.
+        self.experimentparams.trial.robot.enabled                           = True
+        self.experimentparams.trial.robot.move.mode                         = 'relative' # 'pattern' or 'relative'
+        self.experimentparams.trial.robot.move.relative.tracking            = [True]
+        self.experimentparams.trial.robot.move.relative.frameidOrigin       = ['Arena']
+        self.experimentparams.trial.robot.move.relative.distance            = [rospy.get_param('motorarm/L1', 999)]  # mm
+        self.experimentparams.trial.robot.move.relative.angleOffset         = [0]   # Angular offset to target point in given frame (radians).
+        self.experimentparams.trial.robot.move.relative.angleVelocity       = [2*np.pi*1/80, 2*np.pi*1/40, 2*np.pi*1/20]  # 2pi*freq # Angular velocity of target point in given frame (radians per sec).
+        self.experimentparams.trial.robot.move.relative.angleOscMag         = [0]  # Oscillatory addition to angular velocity.
+        self.experimentparams.trial.robot.move.relative.angleOscFreq        = [0]  # Hz of the added oscillation.
+        self.experimentparams.trial.robot.move.relative.speedMax            = [999]  # Maximum allowed speed of travel (mm/sec).
+        self.experimentparams.trial.robot.move.relative.tolerance           = [-1]  # mm
+        self.experimentparams.trial.robot.move.relative.typeAngleOffset     = ['constant']  # 'constant' or 'random' (on range [0,2pi]) or 'current' (use current angle from frameidOrigin to robot)
+        self.experimentparams.trial.robot.move.relative.typeAngleVelocity   = ['constant']  # 'constant' or 'random' (on range [0,angleVelocity])
+        self.experimentparams.trial.robot.move.relative.typeAngleOscMag     = ['constant']  # 'constant' or 'random' (on range [0,angleOscMag])
+        self.experimentparams.trial.robot.move.relative.typeAngleOscFreq    = ['constant']  # 'constant' or 'random' (on range [0,angleOscFreq])
+        self.experimentparams.trial.robot.move.relative.typeSpeedMax        = ['constant']  # 'constant' or 'random' (on range [0,speedMax])
         
         self.experimentparams.trial.lasergalvos.enabled                 = False
 
-        
         self.experimentparams.trial.ledpanels.enabled                   = False
         self.experimentparams.trial.ledpanels.command                   = ['fixed']  # 'fixed', 'trackposition' (panel position follows fly position), or 'trackview' (panel position follows fly's viewpoint). 
         self.experimentparams.trial.ledpanels.idPattern                 = [1]
@@ -128,8 +134,8 @@ class Experiment():
         self.experimentparams.post.trigger.speedRelMax       = 999.0
         self.experimentparams.post.trigger.distanceMin =  15.0
         self.experimentparams.post.trigger.distanceMax = 999.0
-        self.experimentparams.post.trigger.angleMin =  0.0 * N.pi / 180.0
-        self.experimentparams.post.trigger.angleMax =180.0 * N.pi / 180.0
+        self.experimentparams.post.trigger.angleMin =  0.0 * np.pi / 180.0
+        self.experimentparams.post.trigger.angleMax =180.0 * np.pi / 180.0
         self.experimentparams.post.trigger.angleTest = 'inclusive'
         self.experimentparams.post.trigger.angleTestBilateral = True
         self.experimentparams.post.trigger.timeHold = 0.0

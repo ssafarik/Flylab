@@ -7,7 +7,7 @@ import tf
 import sys
 import time, os, subprocess
 import threading
-import numpy as N
+import numpy as np
 
 from sensor_msgs.msg import Image
 import cv

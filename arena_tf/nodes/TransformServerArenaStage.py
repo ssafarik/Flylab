@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('arena_tf')
 import rospy
-import numpy as N
+import numpy as np
 import tf
 from arena_tf.msg import CalibrationStage
 from geometry_msgs.msg import Point, Quaternion

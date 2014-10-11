@@ -4,7 +4,7 @@ import roslib; roslib.load_manifest('experiments')
 import rospy
 import actionlib
 import copy
-import numpy as N
+import numpy as np
 import smach
 import tf
 
@@ -98,7 +98,8 @@ class Action (smach.State):
         
         smach.State.__init__(self, 
                              outcomes=['disabled','preempt','aborted'],
-                             input_keys=['experimentparamsIn'])
+                             input_keys=['experimentparamsIn'],
+                             output_keys=['experimentparamsOut'])
         
         self.mode = mode
         
@@ -140,11 +141,30 @@ class Action (smach.State):
         
     
     
+    # step_time_elapsed()
+    # Increment the elapsed time, adjusting for the pause/continue status of the experiment.
+    #
+    def step_time_elapsed(self):
+        timeNow = rospy.Time.now()
+        if (self.commandExperiment != 'pause_now'):
+            dt = timeNow - self.timePrev
+        else:
+            dt = rospy.Duration(0)
+
+        self.timePrev = timeNow
+        self.experimentparams.experiment.timeTrialElapsed += dt.to_sec()
+
+
+        
     def execute(self, userdata):
+        self.experimentparams = copy.deepcopy(userdata.experimentparamsIn)
+        self.timePrev = rospy.Time.now()
+
         if self.mode == 'pre':
-            self.paramsIn = userdata.experimentparamsIn.pre
+            self.paramsIn = self.experimentparams.pre
         if self.mode == 'trial':
-            self.paramsIn = userdata.experimentparamsIn.trial
+            self.paramsIn = self.experimentparams.trial
+
 
         # Create the panels command.
         command = MsgPanelsCommand(command='all_off', arg1=0, arg2=0, arg3=0, arg4=0)
@@ -173,6 +193,8 @@ class Action (smach.State):
     
             # Loop sending commands to the panels, until preempt or timeout.        
             while not rospy.is_shutdown():
+                self.step_time_elapsed()
+                
                 # If possible, take the pose &/or velocity &/or speed from arenastate, else use transform via ROS.
                 pose = None
                 velocity = None     
@@ -231,7 +253,7 @@ class Action (smach.State):
 
                 # If we still need the speed, then get it from velocity.
                 if (speed is None) and (velocity is not None):
-                    speed = N.linalg.norm([velocity.linear.x, velocity.linear.y, velocity.linear.z])
+                    speed = np.linalg.norm([velocity.linear.x, velocity.linear.y, velocity.linear.z])
 
                                                     
                 # See if the state is in range of the filter.
@@ -270,9 +292,9 @@ class Action (smach.State):
                         bValidCommand = True
 
                     elif self.paramsIn.ledpanels.command == 'trackposition':
-                        angle = (2.0*N.pi) - N.arctan2(pose.position.y, pose.position.x) % (2.0*N.pi)
-                        if N.isfinite(angle):
-                            x = xmax * angle / (2.0*N.pi)
+                        angle = (2.0*np.pi) - np.arctan2(pose.position.y, pose.position.x) % (2.0*np.pi)
+                        if np.isfinite(angle):
+                            x = xmax * angle / (2.0*np.pi)
                             y = 0
                             command.command = 'set_position'
                             command.arg1 = int(x)
@@ -285,8 +307,8 @@ class Action (smach.State):
                         yp = pose.position.y
                         q = pose.orientation
                         rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                        theta = -rpy[2] % (2.0 * N.pi)
-                        tantheta = N.tan(theta)
+                        theta = -rpy[2] % (2.0 * np.pi)
+                        tantheta = np.tan(theta)
                         
                         # Points on the circle intersecting with the fly's axis.
                         x1=(1+tantheta**2)**(-1)*((-1)*yp*tantheta+xp*tantheta**2 + (-1)*(r**2+(-1)*yp**2+2*xp*yp*tantheta+r**2*tantheta**2+(-1)*xp**2*tantheta**2)**(1/2))
@@ -296,20 +318,20 @@ class Action (smach.State):
                         
                         
                         # Choose between the two intersection points by moving forward 1mm, and seeing which point we got closer to.
-                        r1 = N.linalg.norm([xp-x1, yp-y1]) # Fly to pt1 distance
-                        r2 = N.linalg.norm([xp-x2, yp-y2]) # Fly to pt2 distance
-                        xa = xp + 1 * N.cos(theta)         # Go one millimeter forward.
-                        ya = yp + 1 * N.sin(theta)
-                        r1a= N.linalg.norm([xa-x1, ya-y1]) # Fly+1mm to pt1 distance
+                        r1 = np.linalg.norm([xp-x1, yp-y1]) # Fly to pt1 distance
+                        r2 = np.linalg.norm([xp-x2, yp-y2]) # Fly to pt2 distance
+                        xa = xp + 1 * np.cos(theta)         # Go one millimeter forward.
+                        ya = yp + 1 * np.sin(theta)
+                        r1a= np.linalg.norm([xa-x1, ya-y1]) # Fly+1mm to pt1 distance
                         
                         # If we got closer to pt1 at xa, then use pt1, else use pt2 
                         if r1a < r1:
-                            angle = N.arctan2(y1,x1) % (2.0*N.pi)
+                            angle = np.arctan2(y1,x1) % (2.0*np.pi)
                         else:
-                            angle = N.arctan2(y2,x2) % (2.0*N.pi)
+                            angle = np.arctan2(y2,x2) % (2.0*np.pi)
                         
-                        if N.isfinite(angle):
-                            x = xmax * angle / (2.0*N.pi)
+                        if np.isfinite(angle):
+                            x = xmax * angle / (2.0*np.pi)
                             y = 0
                             
                             command.command = 'set_position'
@@ -341,6 +363,7 @@ class Action (smach.State):
                 if (self.commandExperiment=='pause_now'):
                     while (self.commandExperiment=='pause_now'):
                         rospy.sleep(0.5)
+                        self.timePrev = rospy.Time.now()
 
                 if (self.commandExperiment=='pause_after_trial'):
                     pass
@@ -362,6 +385,7 @@ class Action (smach.State):
         # end if self.paramsIn.ledpanels.enabled
                 
                 
+        userdata.experimentparamsOut = self.experimentparams
         return rv
 # End class Action()
 

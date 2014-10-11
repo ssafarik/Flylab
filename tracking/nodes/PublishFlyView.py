@@ -2,7 +2,7 @@
 from __future__ import division
 import roslib; roslib.load_manifest('tracking')
 import rospy
-import numpy as N
+import numpy as np
 import tf
 from tracking.msg import ArenaState
 from arena_tf.msg import InBounds, FlyView
@@ -49,8 +49,8 @@ class PublishFlyView:
 
             
             # Get and publish InBounds.
-            robot_dist = N.sqrt((robot_x - self.start_position_x)**2 + (robot_y - self.start_position_y)**2)
-            fly_dist = N.sqrt((fly_x - self.start_position_x)**2 + (fly_y - self.start_position_y)**2)
+            robot_dist = np.sqrt((robot_x - self.start_position_x)**2 + (robot_y - self.start_position_y)**2)
+            fly_dist = np.sqrt((fly_x - self.start_position_x)**2 + (fly_y - self.start_position_y)**2)
             self.in_bounds.bounds_radius = self.radiusArena
             if robot_dist < self.radiusArena:
                 self.in_bounds.robot_in_bounds = True
@@ -69,8 +69,8 @@ class PublishFlyView:
                 self.robot_origin_fly_frame = self.tfrx.transformPoint("Fly1", self.robot_origin)
                 self.fly_view.robot_position_x = rx = self.robot_origin_fly_frame.point.x
                 self.fly_view.robot_position_y = ry = self.robot_origin_fly_frame.point.y
-                self.fly_view.robot_angle = CircleFunctions.mod_angle(N.arctan2(ry,rx))
-                self.fly_view.robot_distance = N.sqrt(rx**2 + ry**2)
+                self.fly_view.robot_angle = CircleFunctions.mod_angle(np.arctan2(ry,rx))
+                self.fly_view.robot_distance = np.sqrt(rx**2 + ry**2)
                 self.pubFlyView.publish(self.fly_view)
             except (tf.Exception):
                 pass

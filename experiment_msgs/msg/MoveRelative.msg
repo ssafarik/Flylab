@@ -11,7 +11,7 @@ string      typeAngleOffset       # 'constant' or 'random' (on range [0,2pi]), o
 string      typeAngleVelocity     # 'constant' or 'random' (on range [0,angleVelocity])
 string      typeAngleOscMag       # 'constant' or 'random' (on range [0,angleOscMag])
 string      typeAngleOscFreq      # 'constant' or 'random' (on range [0,angleOscFreq])
-string      typeSpeed             # 'constant' or 'random' (on range [0,speedMax])
+string      typeSpeedMax          # 'constant' or 'random' (on range [0,speedMax])
 
 # angle =          a0 +           a1*t +          a2*sin(2*pi*f*t)
 # angle = angleOffset + anglePerTime*t + angleOscMag*sin(2*pi*angleOscFreq*t)

@@ -7,7 +7,7 @@ import tf
 import sys
 import time, os, subprocess
 import threading
-import numpy as N
+import numpy as np
 from std_msgs.msg import String
 from flycore.msg import MsgFrameState
 from experiment_srvs.srv import Trigger, ExperimentParams, ExperimentParamsChoices
@@ -59,8 +59,9 @@ class SaveCsv:
         self.format_type = "f"
 
         # 2.84 added robotspec.isPresent
+        # 2.85 changed structure of robot.move.relative
         #################################################################################
-        self.versionFile = '2.84'    # Increment this when the file format changes.
+        self.versionFile = '2.85'    # Increment this when the file format changes.
         #################################################################################
 
         
@@ -113,16 +114,20 @@ class SaveCsv:
                                     'preRobotMovePatternParam, '\
                                     'preRobotMovePatternDirection, '\
                                     'preRobotMoveRelTracking, '\
-                                    'preRobotMoveRelOriginPosition, '\
-                                    'preRobotMoveRelOriginAngle, '\
+                                    'preRobotMoveRelFrame, '\
                                     'preRobotMoveRelDistance, '\
                                     'preRobotMoveRelAngleOffset, '\
-                                    'preRobotMoveRelAngleType, '\
+                                    'preRobotMoveRelAngleVelocity, '\
                                     'preRobotMoveRelAngleOscMag, '\
                                     'preRobotMoveRelAngleOscFreq, '\
-                                    'preRobotMoveRelSpeed, '\
-                                    'preRobotMoveRelSpeedType, '\
-                                    'preRobotMoveRelTolerance\n'
+                                    'preRobotMoveRelSpeedMax, '\
+                                    'preRobotMoveRelTolerance, '\
+                                    'preRobotMoveRelTypeAngleOffset, '\
+                                    'preRobotMoveRelTypeAngleVelocity, '\
+                                    'preRobotMoveRelTypeAngleOscMag, '\
+                                    'preRobotMoveRelTypeAngleOscFreq, '\
+                                    'preRobotMoveRelTypeSpeedMax\n'
+
         self.templatePreRobot     = '{preRobotEnabled:s}, '\
                                     '{preRobotMovePatternFramePosition:s}, '\
                                     '{preRobotMovePatternFrameAngle:s}, '\
@@ -135,16 +140,19 @@ class SaveCsv:
                                     '{preRobotMovePatternParam:s}, '\
                                     '{preRobotMovePatternDirection:s}, '\
                                     '{preRobotMoveRelTracking:s}, '\
-                                    '{preRobotMoveRelOriginPosition:s}, '\
-                                    '{preRobotMoveRelOriginAngle:s}, '\
+                                    '{preRobotMoveRelFrame:s}, '\
                                     '{preRobotMoveRelDistance:s}, '\
                                     '{preRobotMoveRelAngleOffset:s}, '\
-                                    '{preRobotMoveRelAngleType:s}, '\
+                                    '{preRobotMoveRelAngleVelocity:s}, '\
                                     '{preRobotMoveRelAngleOscMag:s}, '\
                                     '{preRobotMoveRelAngleOscFreq:s}, '\
-                                    '{preRobotMoveRelSpeed:s}, '\
-                                    '{preRobotMoveRelSpeedType:s}, '\
-                                    '{preRobotMoveRelTolerance:s}\n'
+                                    '{preRobotMoveRelSpeedMax:s}, '\
+                                    '{preRobotMoveRelTolerance:s}, '\
+                                    '{preRobotMoveRelTypeAngleOffset:s}, '\
+                                    '{preRobotMoveRelTypeAngleVelocity:s}, '\
+                                    '{preRobotMoveRelTypeAngleOscMag:s}, '\
+                                    '{preRobotMoveRelTypeAngleOscFreq:s}, '\
+                                    '{preRobotMoveRelTypeSpeedMax:s}\n'
                                     
         self.headerPreLaserTxt    = 'preLaserEnabled, '\
                                     'preLaserPatternFramePosition, '\
@@ -245,16 +253,19 @@ class SaveCsv:
                                     'trialRobotMovePatternParam, '\
                                     'trialRobotMovePatternDirection, '\
                                     'trialRobotMoveRelTracking, '\
-                                    'trialRobotMoveRelOriginPosition, '\
-                                    'trialRobotMoveRelOriginAngle, '\
+                                    'trialRobotMoveRelFrame, '\
                                     'trialRobotMoveRelDistance, '\
                                     'trialRobotMoveRelAngleOffset, '\
-                                    'trialRobotMoveRelAngleType, '\
+                                    'trialRobotMoveRelAngleVelocity, '\
                                     'trialRobotMoveRelAngleOscMag, '\
                                     'trialRobotMoveRelAngleOscFreq, '\
-                                    'trialRobotMoveRelSpeed, '\
-                                    'trialRobotMoveRelSpeedType, '\
-                                    'trialRobotMoveRelTolerance\n'
+                                    'trialRobotMoveRelSpeedMax, '\
+                                    'trialRobotMoveRelTolerance, '\
+                                    'trialRobotMoveRelTypeAngleOffset, '\
+                                    'trialRobotMoveRelTypeAngleVelocity, '\
+                                    'trialRobotMoveRelTypeAngleOscMag, '\
+                                    'trialRobotMoveRelTypeAngleOscFreq, '\
+                                    'trialRobotMoveRelTypeSpeedMax\n'
         self.templateTrialRobot =   '{trialRobotEnabled:s}, '\
                                     '{trialRobotMovePatternFramePosition:s}, '\
                                     '{trialRobotMovePatternFrameAngle:s}, '\
@@ -267,16 +278,19 @@ class SaveCsv:
                                     '{trialRobotMovePatternParam:s}, '\
                                     '{trialRobotMovePatternDirection:s}, '\
                                     '{trialRobotMoveRelTracking:s}, '\
-                                    '{trialRobotMoveRelOriginPosition:s}, '\
-                                    '{trialRobotMoveRelOriginAngle:s}, '\
+                                    '{trialRobotMoveRelFrame:s}, '\
                                     '{trialRobotMoveRelDistance:s}, '\
                                     '{trialRobotMoveRelAngleOffset:s}, '\
-                                    '{trialRobotMoveRelAngleType:s}, '\
+                                    '{trialRobotMoveRelAngleVelocity:s}, '\
                                     '{trialRobotMoveRelAngleOscMag:s}, '\
                                     '{trialRobotMoveRelAngleOscFreq:s}, '\
-                                    '{trialRobotMoveRelSpeed:s}, '\
-                                    '{trialRobotMoveRelSpeedType:s}, '\
-                                    '{trialRobotMoveRelTolerance:s}\n'
+                                    '{trialRobotMoveRelSpeedMax:s}, '\
+                                    '{trialRobotMoveRelTolerance:s}, '\
+                                    '{trialRobotMoveRelTypeAngleOffset:s}, '\
+                                    '{trialRobotMoveRelTypeAngleVelocity:s}, '\
+                                    '{trialRobotMoveRelTypeAngleOscMag:s}, '\
+                                    '{trialRobotMoveRelTypeAngleOscFreq:s}, '\
+                                    '{trialRobotMoveRelTypeSpeedMax:s}\n'
                                     
         self.headerTrialLaserTxt =  'trialLaserEnabled, '\
                                     'trialLaserPatternFramePosition, '\
@@ -533,30 +547,33 @@ class SaveCsv:
 
         #######################################################################
         headerPreRobot = self.templatePreRobot.format(
-                                                preRobotEnabled               = str(experimentparamsReq.pre.robot.enabled),
+                                                preRobotEnabled                  = str(experimentparamsReq.pre.robot.enabled),
                                                 preRobotMovePatternFramePosition = str(experimentparamsReq.pre.robot.move.pattern.frameidPosition),
-                                                preRobotMovePatternFrameAngle = str(experimentparamsReq.pre.robot.move.pattern.frameidAngle),
-                                                preRobotMovePatternShape      = str(experimentparamsReq.pre.robot.move.pattern.shape),
-                                                preRobotMovePatternHzPattern  = str(experimentparamsReq.pre.robot.move.pattern.hzPattern),
-                                                preRobotMovePatternHzPoint    = str(experimentparamsReq.pre.robot.move.pattern.hzPoint),
-                                                preRobotMovePatternCount      = str(experimentparamsReq.pre.robot.move.pattern.count),
-                                                preRobotMovePatternSizeX      = str(experimentparamsReq.pre.robot.move.pattern.size.x),
-                                                preRobotMovePatternSizeY      = str(experimentparamsReq.pre.robot.move.pattern.size.y),
-                                                preRobotMovePatternParam      = str(experimentparamsReq.pre.robot.move.pattern.param),
-                                                preRobotMovePatternDirection  = str(experimentparamsReq.pre.robot.move.pattern.direction),
-                                                preRobotMoveRelTracking       = str(experimentparamsReq.pre.robot.move.relative.tracking),
-                                                preRobotMoveRelOriginPosition = str(experimentparamsReq.pre.robot.move.relative.frameidOriginPosition),
-                                                preRobotMoveRelOriginAngle    = str(experimentparamsReq.pre.robot.move.relative.frameidOriginAngle),
-                                                preRobotMoveRelDistance       = str(experimentparamsReq.pre.robot.move.relative.distance),
-                                                preRobotMoveRelAngleOffset    = str(experimentparamsReq.pre.robot.move.relative.angleOffset),
-                                                preRobotMoveRelAngleType      = str(experimentparamsReq.pre.robot.move.relative.angleType),
-                                                preRobotMoveRelAngleOscMag    = str(experimentparamsReq.pre.robot.move.relative.angleOscMag),
-                                                preRobotMoveRelAngleOscFreq   = str(experimentparamsReq.pre.robot.move.relative.angleOscFreq),
-                                                preRobotMoveRelSpeed          = str(experimentparamsReq.pre.robot.move.relative.speed),
-                                                preRobotMoveRelSpeedType      = str(experimentparamsReq.pre.robot.move.relative.speedType),
-                                                preRobotMoveRelTolerance      = str(experimentparamsReq.pre.robot.move.relative.tolerance),
+                                                preRobotMovePatternFrameAngle    = str(experimentparamsReq.pre.robot.move.pattern.frameidAngle),
+                                                preRobotMovePatternShape         = str(experimentparamsReq.pre.robot.move.pattern.shape),
+                                                preRobotMovePatternHzPattern     = str(experimentparamsReq.pre.robot.move.pattern.hzPattern),
+                                                preRobotMovePatternHzPoint       = str(experimentparamsReq.pre.robot.move.pattern.hzPoint),
+                                                preRobotMovePatternCount         = str(experimentparamsReq.pre.robot.move.pattern.count),
+                                                preRobotMovePatternSizeX         = str(experimentparamsReq.pre.robot.move.pattern.size.x),
+                                                preRobotMovePatternSizeY         = str(experimentparamsReq.pre.robot.move.pattern.size.y),
+                                                preRobotMovePatternParam         = str(experimentparamsReq.pre.robot.move.pattern.param),
+                                                preRobotMovePatternDirection     = str(experimentparamsReq.pre.robot.move.pattern.direction),
+                                                preRobotMoveRelTracking          = str(experimentparamsReq.pre.robot.move.relative.tracking),
+                                                preRobotMoveRelFrame             = str(experimentparamsReq.pre.robot.move.relative.frameidOrigin),
+                                                preRobotMoveRelDistance          = str(experimentparamsReq.pre.robot.move.relative.distance),
+                                                preRobotMoveRelAngleOffset       = str(experimentparamsReq.pre.robot.move.relative.angleOffset),
+                                                preRobotMoveRelAngleVelocity     = str(experimentparamsReq.pre.robot.move.relative.angleVelocity),
+                                                preRobotMoveRelAngleOscMag       = str(experimentparamsReq.pre.robot.move.relative.angleOscMag),
+                                                preRobotMoveRelAngleOscFreq      = str(experimentparamsReq.pre.robot.move.relative.angleOscFreq),
+                                                preRobotMoveRelSpeedMax          = str(experimentparamsReq.pre.robot.move.relative.speedMax),
+                                                preRobotMoveRelTolerance         = str(experimentparamsReq.pre.robot.move.relative.tolerance),
+                                                preRobotMoveRelTypeAngleOffset   = str(experimentparamsReq.pre.robot.move.relative.typeAngleOffset),
+                                                preRobotMoveRelTypeAngleVelocity = str(experimentparamsReq.pre.robot.move.relative.typeAngleVelocity),
+                                                preRobotMoveRelTypeAngleOscMag   = str(experimentparamsReq.pre.robot.move.relative.typeAngleOscMag),
+                                                preRobotMoveRelTypeAngleOscFreq  = str(experimentparamsReq.pre.robot.move.relative.typeAngleOscFreq),
+                                                preRobotMoveRelTypeSpeedMax      = str(experimentparamsReq.pre.robot.move.relative.typeSpeedMax),
                                                 )
-        
+
         #######################################################################
         if len(experimentparamsReq.pre.lasergalvos.pattern_list) > 0:
             patternFramePosition   = str(experimentparamsReq.pre.lasergalvos.pattern_list[0].frameidPosition)
@@ -649,28 +666,31 @@ class SaveCsv:
         
         #######################################################################
         headerTrialRobot = self.templateTrialRobot.format(
-                                                trialRobotEnabled               = str(experimentparamsReq.trial.robot.enabled),
+                                                trialRobotEnabled                  = str(experimentparamsReq.trial.robot.enabled),
                                                 trialRobotMovePatternFramePosition = str(experimentparamsReq.trial.robot.move.pattern.frameidPosition),
-                                                trialRobotMovePatternFrameAngle = str(experimentparamsReq.trial.robot.move.pattern.frameidAngle),
-                                                trialRobotMovePatternShape      = str(experimentparamsReq.trial.robot.move.pattern.shape),
-                                                trialRobotMovePatternHzPattern  = str(experimentparamsReq.trial.robot.move.pattern.hzPattern),
-                                                trialRobotMovePatternHzPoint    = str(experimentparamsReq.trial.robot.move.pattern.hzPoint),
-                                                trialRobotMovePatternCount      = str(experimentparamsReq.trial.robot.move.pattern.count),
-                                                trialRobotMovePatternSizeX      = str(experimentparamsReq.trial.robot.move.pattern.size.x),
-                                                trialRobotMovePatternSizeY      = str(experimentparamsReq.trial.robot.move.pattern.size.y),
-                                                trialRobotMovePatternParam      = str(experimentparamsReq.trial.robot.move.pattern.param),
-                                                trialRobotMovePatternDirection  = str(experimentparamsReq.trial.robot.move.pattern.direction),
-                                                trialRobotMoveRelTracking       = str(experimentparamsReq.trial.robot.move.relative.tracking),
-                                                trialRobotMoveRelOriginPosition = str(experimentparamsReq.trial.robot.move.relative.frameidOriginPosition),
-                                                trialRobotMoveRelOriginAngle    = str(experimentparamsReq.trial.robot.move.relative.frameidOriginAngle),
-                                                trialRobotMoveRelDistance       = str(experimentparamsReq.trial.robot.move.relative.distance),
-                                                trialRobotMoveRelAngleOffset    = str(experimentparamsReq.trial.robot.move.relative.angleOffset),
-                                                trialRobotMoveRelAngleType      = str(experimentparamsReq.trial.robot.move.relative.angleType),
-                                                trialRobotMoveRelAngleOscMag    = str(experimentparamsReq.trial.robot.move.relative.angleOscMag),
-                                                trialRobotMoveRelAngleOscFreq   = str(experimentparamsReq.trial.robot.move.relative.angleOscFreq),
-                                                trialRobotMoveRelSpeed          = str(experimentparamsReq.trial.robot.move.relative.speed),
-                                                trialRobotMoveRelSpeedType      = str(experimentparamsReq.trial.robot.move.relative.speedType),
-                                                trialRobotMoveRelTolerance      = str(experimentparamsReq.trial.robot.move.relative.tolerance),
+                                                trialRobotMovePatternFrameAngle    = str(experimentparamsReq.trial.robot.move.pattern.frameidAngle),
+                                                trialRobotMovePatternShape         = str(experimentparamsReq.trial.robot.move.pattern.shape),
+                                                trialRobotMovePatternHzPattern     = str(experimentparamsReq.trial.robot.move.pattern.hzPattern),
+                                                trialRobotMovePatternHzPoint       = str(experimentparamsReq.trial.robot.move.pattern.hzPoint),
+                                                trialRobotMovePatternCount         = str(experimentparamsReq.trial.robot.move.pattern.count),
+                                                trialRobotMovePatternSizeX         = str(experimentparamsReq.trial.robot.move.pattern.size.x),
+                                                trialRobotMovePatternSizeY         = str(experimentparamsReq.trial.robot.move.pattern.size.y),
+                                                trialRobotMovePatternParam         = str(experimentparamsReq.trial.robot.move.pattern.param),
+                                                trialRobotMovePatternDirection     = str(experimentparamsReq.trial.robot.move.pattern.direction),
+                                                trialRobotMoveRelTracking          = str(experimentparamsReq.trial.robot.move.relative.tracking),
+                                                trialRobotMoveRelFrame             = str(experimentparamsReq.trial.robot.move.relative.frameidOrigin),
+                                                trialRobotMoveRelDistance          = str(experimentparamsReq.trial.robot.move.relative.distance),
+                                                trialRobotMoveRelAngleOffset       = str(experimentparamsReq.trial.robot.move.relative.angleOffset),
+                                                trialRobotMoveRelAngleVelocity     = str(experimentparamsReq.trial.robot.move.relative.angleVelocity),
+                                                trialRobotMoveRelAngleOscMag       = str(experimentparamsReq.trial.robot.move.relative.angleOscMag),
+                                                trialRobotMoveRelAngleOscFreq      = str(experimentparamsReq.trial.robot.move.relative.angleOscFreq),
+                                                trialRobotMoveRelSpeedMax          = str(experimentparamsReq.trial.robot.move.relative.speedMax),
+                                                trialRobotMoveRelTolerance         = str(experimentparamsReq.trial.robot.move.relative.tolerance),
+                                                trialRobotMoveRelTypeAngleOffset   = str(experimentparamsReq.trial.robot.move.relative.typeAngleOffset),
+                                                trialRobotMoveRelTypeAngleVelocity = str(experimentparamsReq.trial.robot.move.relative.typeAngleVelocity),
+                                                trialRobotMoveRelTypeAngleOscMag   = str(experimentparamsReq.trial.robot.move.relative.typeAngleOscMag),
+                                                trialRobotMoveRelTypeAngleOscFreq  = str(experimentparamsReq.trial.robot.move.relative.typeAngleOscFreq),
+                                                trialRobotMoveRelTypeSpeedMax      = str(experimentparamsReq.trial.robot.move.relative.typeSpeedMax),
                                                 )
         
         #######################################################################
@@ -853,7 +873,7 @@ class SaveCsv:
             stateRobot = arenastate.robot
             q = stateRobot.pose.orientation
             rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-            angleRobot = rpy[2] % (2.0 * N.pi)
+            angleRobot = rpy[2] % (2.0 * np.pi)
 
 
             # Start putting the state row together.
@@ -894,7 +914,7 @@ class SaveCsv:
     
                 q = stateFly.pose.orientation
                 rpy = tf.transformations.euler_from_quaternion((q.x, q.y, q.z, q.w))
-                angleFly = rpy[2] % (2.0 * N.pi)
+                angleFly = rpy[2] % (2.0 * np.pi)
 
                 # Append the fly to the state row.            
                 stateFly = self.templateStateFly.format(
