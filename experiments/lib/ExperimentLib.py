@@ -84,132 +84,10 @@ class NotifyServices():
 
 #######################################################################################################
 #######################################################################################################
-class StartExperiment (smach.State):
-    def __init__(self):
-        smach.State.__init__(self, 
-                             outcomes=['success','aborted'],
-                             input_keys=['experimentparamsChoicesIn'],
-                             output_keys=['experimentparamsChoicesOut'])
-
-        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
-
-        services_dict = {}
-        for name in g_notify_list:
-            services_dict[name+'/init'] = None
-             
-        self.ExperimentStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParamsChoices) #ExperimentStartServices()
-        self.ExperimentStartServices.attach()
-
-        self.arenastate = None
-        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
-        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
-        
-        
-    def ArenaState_callback(self, arenastate):
-        self.arenastate = arenastate
-
-
-    def execute(self, userdata):
-        global g_timeExperimentElapsed
-        
-        experimentparamsChoices = userdata.experimentparamsChoicesIn
-        rospy.loginfo('EL State StartExperiment(%s)' % experimentparamsChoices)
-
-        experimentparamsChoices.experiment.trial = experimentparamsChoices.experiment.trial-1 
-        userdata.experimentparamsChoicesOut = experimentparamsChoices
-        g_timeExperimentElapsed = 0.0
-        
-        self.ExperimentStartServices.notify(experimentparamsChoices)
-
-        # Set up the tracking.    
-        userdata.experimentparamsChoicesOut = experimentparamsChoices
-        msgTrackingCommand                    = TrackingCommand()
-        msgTrackingCommand.command            = 'initialize'
-        msgTrackingCommand.exclusionzones     = experimentparamsChoices.tracking.exclusionzones
-        msgTrackingCommand.nRobots            = experimentparamsChoices.robotspec.nRobots
-        msgTrackingCommand.nFlies             = experimentparamsChoices.flyspec.nFlies
-        msgTrackingCommand.bUseVisualServoing = experimentparamsChoices.robotspec.isPresent
-        self.pubTrackingCommand.publish(msgTrackingCommand)
-        
-        # Wait for the Arenastate to get published.
-        while self.arenastate is None:
-            rospy.logwarn('Waiting for tracking to deliver an Arenastate.')
-            rospy.sleep(0.5)
-            
-        #rospy.loginfo ('EL Exiting StartExperiment()')
-        return 'success'
-# End class StartExperiment()
-
-
-
-#######################################################################################################
-#######################################################################################################
-class EndExperiment (smach.State):
-    def __init__(self):
-        smach.State.__init__(self, 
-                             outcomes=['success','aborted'],
-                             input_keys=['experimentparamsChoicesIn'],
-                             output_keys=['experimentparamsChoicesOut'])
-
-        services_dict = {}
-        for name in g_notify_list:
-            services_dict[name+'/wait_until_done'] = None
-            
-        self.ExperimentEndServices = NotifyServices(services_dict=services_dict, type=ExperimentParamsChoices) #ExperimentEndServices()
-        self.ExperimentEndServices.attach()
-        
-        
-
-    def execute(self, userdata):
-        experimentparamsChoices = userdata.experimentparamsChoicesIn
-        rospy.loginfo('EL State EndExperiment(%s)' % experimentparamsChoices)
-
-        userdata.experimentparamsChoicesOut = experimentparamsChoices
-        
-        self.ExperimentEndServices.notify(experimentparamsChoices)
-            
-        #rospy.loginfo ('EL Exiting EndExperiment()')
-        return 'success'
-# End class EndExperiment()
-
-
-
-#######################################################################################################
-#######################################################################################################
-# StartTrial() - Increments the trial number, untriggers, and calls the 
-#              new_trial service (which begins recording).
+# Chooser()
+# Make a fixed experimentparams choice from an experimentparamsChoices structure.
 #
-# Experiment may be paused & restarted via the commandlines:
-# rostopic pub -1 experiment/command std_msgs/String pause_now
-# rostopic pub -1 experiment/command std_msgs/String pause_after_trial 
-# rostopic pub -1 experiment/command std_msgs/String continue
-# rostopic pub -1 experiment/command std_msgs/String exit_now
-# rostopic pub -1 experiment/command std_msgs/String exit_after_trial
-#
-class StartTrial (smach.State):
-    def __init__(self):
-        smach.State.__init__(self, 
-                             outcomes=['continue','exit','aborted'],
-                             input_keys=['experimentparamsChoicesIn'],
-                             output_keys=['experimentparamsOut'])
-        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
-        
-        
-        services_dict = {}
-        for name in g_notify_list:
-            services_dict[name+'/trigger'] = None
-
-        self.TriggerServices = NotifyServices(services_dict=services_dict, type=Trigger)
-        self.TriggerServices.attach()
-        
-        services_dict = {}
-        for name in g_notify_list:
-            services_dict[name+'/trial_start'] = None
-
-        self.TrialStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParams)
-        self.TrialStartServices.attach()
-
-
+class Chooser(): 
     # Choose()
     # Return one random entry from the given list.
     #
@@ -579,13 +457,145 @@ class StartTrial (smach.State):
         experimentparams.post.wait                                          = (experimentparams.post.wait, experimentparamsTemp.post.wait)[experimentparamsTemp.post.wait is not None]
         
         return experimentparams
+    # End GetChoice()
+    
         
         
+
+
+#######################################################################################################
+#######################################################################################################
+class StartExperiment (smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+                             outcomes=['success','aborted'],
+                             input_keys=['experimentparamsChoicesIn'],
+                             output_keys=['experimentparamsChoicesOut'])
+
+        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
+
+        services_dict = {}
+        for name in g_notify_list:
+            services_dict[name+'/init'] = None
+             
+        self.ExperimentStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParamsChoices) #ExperimentStartServices()
+        self.ExperimentStartServices.attach()
+
+        self.arenastate = None
+        queue_size_arenastate = rospy.get_param('tracking/queue_size_arenastate', 1)
+        self.subArenaState = rospy.Subscriber('ArenaState', ArenaState, self.ArenaState_callback, queue_size=queue_size_arenastate)
+        
+        
+    def ArenaState_callback(self, arenastate):
+        self.arenastate = arenastate
+
+
+    def execute(self, userdata):
+        global g_timeExperimentElapsed
+        
+        experimentparamsChoices = userdata.experimentparamsChoicesIn
+        rospy.loginfo('EL State StartExperiment(%s)' % experimentparamsChoices)
+
+        experimentparamsChoices.experiment.trial = experimentparamsChoices.experiment.trial-1 
+        userdata.experimentparamsChoicesOut = experimentparamsChoices
+        g_timeExperimentElapsed = 0.0
+        
+        self.ExperimentStartServices.notify(experimentparamsChoices)
+
+        # Set up the tracking.    
+        userdata.experimentparamsChoicesOut = experimentparamsChoices
+        msgTrackingCommand                    = TrackingCommand()
+        msgTrackingCommand.command            = 'initialize'
+        msgTrackingCommand.exclusionzones     = experimentparamsChoices.tracking.exclusionzones
+        msgTrackingCommand.nRobots            = experimentparamsChoices.robotspec.nRobots
+        msgTrackingCommand.nFlies             = experimentparamsChoices.flyspec.nFlies
+        msgTrackingCommand.bUseVisualServoing = experimentparamsChoices.robotspec.isPresent
+        self.pubTrackingCommand.publish(msgTrackingCommand)
+        
+        # Wait for the Arenastate to get published.
+        while self.arenastate is None:
+            rospy.logwarn('Waiting for tracking to deliver an Arenastate.')
+            rospy.sleep(0.5)
+            
+        #rospy.loginfo ('EL Exiting StartExperiment()')
+        return 'success'
+# End class StartExperiment()
+
+
+
+#######################################################################################################
+#######################################################################################################
+class EndExperiment (smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+                             outcomes=['success','aborted'],
+                             input_keys=['experimentparamsChoicesIn'],
+                             output_keys=['experimentparamsChoicesOut'])
+
+        services_dict = {}
+        for name in g_notify_list:
+            services_dict[name+'/wait_until_done'] = None
+            
+        self.ExperimentEndServices = NotifyServices(services_dict=services_dict, type=ExperimentParamsChoices) #ExperimentEndServices()
+        self.ExperimentEndServices.attach()
+        
+        
+
+    def execute(self, userdata):
+        experimentparamsChoices = userdata.experimentparamsChoicesIn
+        rospy.loginfo('EL State EndExperiment(%s)' % experimentparamsChoices)
+
+        userdata.experimentparamsChoicesOut = experimentparamsChoices
+        
+        self.ExperimentEndServices.notify(experimentparamsChoices)
+            
+        #rospy.loginfo ('EL Exiting EndExperiment()')
+        return 'success'
+# End class EndExperiment()
+
+
+
+#######################################################################################################
+#######################################################################################################
+# StartTrial() - Increments the trial number, untriggers, and calls the 
+#              new_trial service (which begins recording).
+#
+# Experiment may be paused & restarted via the commandlines:
+# rostopic pub -1 experiment/command std_msgs/String pause_now
+# rostopic pub -1 experiment/command std_msgs/String pause_after_trial 
+# rostopic pub -1 experiment/command std_msgs/String continue
+# rostopic pub -1 experiment/command std_msgs/String exit_now
+# rostopic pub -1 experiment/command std_msgs/String exit_after_trial
+#
+class StartTrial (smach.State):
+    def __init__(self):
+        smach.State.__init__(self, 
+                             outcomes=['continue','exit','aborted'],
+                             input_keys=['experimentparamsChoicesIn'],
+                             output_keys=['experimentparamsOut'])
+        self.pubTrackingCommand = rospy.Publisher('tracking/command', TrackingCommand, latch=True)
+        
+        
+        services_dict = {}
+        for name in g_notify_list:
+            services_dict[name+'/trigger'] = None
+
+        self.TriggerServices = NotifyServices(services_dict=services_dict, type=Trigger)
+        self.TriggerServices.attach()
+        
+        services_dict = {}
+        for name in g_notify_list:
+            services_dict[name+'/trial_start'] = None
+
+        self.TrialStartServices = NotifyServices(services_dict=services_dict, type=ExperimentParams)
+        self.TrialStartServices.attach()
+
+
     def execute(self, userdata):
         rv = 'exit'
         now = rospy.Time.now().to_sec()
         experimentparamsChoices = userdata.experimentparamsChoicesIn
-        experimentparams = self.GetChoice(experimentparamsChoices)
+        experimentparams = Chooser().GetChoice(experimentparamsChoices)
         
 
         # Set the start time of the trial.   # in "experiment time", i.e. t=0 is start of experiment.

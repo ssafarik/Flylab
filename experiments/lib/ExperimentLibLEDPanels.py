@@ -14,6 +14,7 @@ from flycore.msg import MsgFrameState, TrackingCommand
 from ledpanels.msg import MsgPanelsCommand
 from tracking.msg import ArenaState
 from visualization_msgs.msg import Marker
+import ExperimentLib
 
 import ExperimentLibStatefilter
 
@@ -59,6 +60,11 @@ class Reset (smach.State):
     # Init the LEDPanels to either off, or to the pretrial state, depending on what's requested.
     def execute(self, userdata):
         rospy.loginfo("EL State ResetLEDPanels()")
+        self.timePrev = rospy.Time.now()
+        self.experimentparamsChoices = copy.deepcopy(userdata.experimentparamsChoicesIn)
+        #self.paramsIn = 
+
+
 
         rv = 'disabled'
         if (userdata.experimentparamsChoicesIn.pre.ledpanels.enabled):
@@ -66,13 +72,20 @@ class Reset (smach.State):
             msgPanelsCommand = MsgPanelsCommand(command='stop')
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
 
+
+            # Choose one of the choices.
+            experimentparams = ExperimentLib.Chooser().GetChoice(userdata.experimentparamsChoicesIn)
+            paramsIn = experimentparams.pre 
+            
+            
+            # Publish the LED commands.
             msgPanelsCommand = MsgPanelsCommand(command='set_pattern_id', 
-                                                arg1=userdata.experimentparamsChoicesIn.pre.ledpanels.idPattern)
+                                                arg1=paramsIn.ledpanels.idPattern)
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
 
             msgPanelsCommand = MsgPanelsCommand(command='set_position', 
-                                                arg1=userdata.experimentparamsChoicesIn.pre.ledpanels.origin.x, 
-                                                arg2=userdata.experimentparamsChoicesIn.pre.ledpanels.origin.y)  # Set (x,y) position for the experiment.
+                                                arg1=paramsIn.ledpanels.origin.x, 
+                                                arg2=paramsIn.ledpanels.origin.y)  # Set (x,y) position for the experiment.
             self.pubLEDPanelsCommand.publish (msgPanelsCommand)
         else:
             msgPanelsCommand = MsgPanelsCommand(command='all_off')
